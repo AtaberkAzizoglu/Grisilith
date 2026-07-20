@@ -19,7 +19,7 @@ class Player(
     private val movementDirection = Vector2()
 
     private val size = 48f
-    private val speed = 260f
+    private var speed = 260f
 
     private val collisionBounds = Rectangle()
 
@@ -44,6 +44,23 @@ class Player(
 
             return collisionBounds
         }
+
+    fun increaseMaximumHealth(amount: Int) {
+        health.increaseMaximumHealth(
+            amount = amount,
+            healAddedHealth = true
+        )
+    }
+
+    fun increaseMovementSpeed(
+        percentageIncrease: Float
+    ) {
+        if (percentageIncrease <= 0f) {
+            return
+        }
+
+        speed *= 1f + percentageIncrease
+    }
 
     fun update(delta: Float) {
         if (health.isDead) {

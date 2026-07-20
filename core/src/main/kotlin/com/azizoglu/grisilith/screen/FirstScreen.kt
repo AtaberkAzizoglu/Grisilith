@@ -27,6 +27,11 @@ import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.stage.StageType
 import com.azizoglu.grisilith.economy.GoldCoinPickup
 import com.azizoglu.grisilith.economy.SessionWallet
+import com.azizoglu.grisilith.statistics.StatCard
+import com.azizoglu.grisilith.statistics.StatCardGenerator
+import com.azizoglu.grisilith.statistics.StatUpgradeType
+import kotlin.div
+import kotlin.times
 
 class FirstScreen : ScreenAdapter() {
 
@@ -97,6 +102,10 @@ class FirstScreen : ScreenAdapter() {
     private val goldCoinPickups =
         mutableListOf<GoldCoinPickup>()
 
+    private var isChoosingStatCard = false
+
+    private var pendingStatCards = emptyList<StatCard>()
+
     override fun show() {
         viewport.apply()
 
@@ -114,13 +123,15 @@ class FirstScreen : ScreenAdapter() {
 
         val gameplayStopped =
             player.health.isDead ||
-                stageController.isRunComplete
+                stageController.isRunComplete ||
+                isChoosingStatCard
 
         val gameDelta =
             if (gameplayStopped) {
                 0f
             } else {
-                gameTimeController.calculateGameDelta(delta)
+                gameTimeController
+                    .calculateGameDelta(delta)
             }
 
         if (
@@ -134,6 +145,12 @@ class FirstScreen : ScreenAdapter() {
     }
 
     private fun handleGameControls() {
+
+        if (isChoosingStatCard) {
+            handleStatCardSelection()
+            return
+        }
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
             gameTimeController.togglePause()
         }
@@ -276,12 +293,14 @@ class FirstScreen : ScreenAdapter() {
     }
 
     private fun completeCurrentStage() {
-        stageController.completeCurrentStage()
-
         enemyManager.clearAll()
         projectiles.clear()
         goldCoinPickups.clear()
-        enemySpawner.resetTimer()
+
+        pendingStatCards =
+            StatCardGenerator.generateCards()
+
+        isChoosingStatCard = true
     }
 
     private fun renderGame() {
@@ -636,6 +655,10 @@ class FirstScreen : ScreenAdapter() {
 
         }
 
+        if (isChoosingStatCard) {
+            renderStatCardSelection()
+        }
+
         hudBatch.end()
     }
 
@@ -696,8 +719,118 @@ class FirstScreen : ScreenAdapter() {
             return false
         }
 
+        if (
+            stageController.currentStageType ==
+            StageType.FINAL_BOSS
+        ) {
+            enemyManager.clearAll()
+            projectiles.clear()
+            goldCoinPickups.clear()
+
+            stageController.completeCurrentStage()
+            return true
+        }
+
         completeCurrentStage()
         return true
+    }
+
+    private fun handleStatCardSelection() {
+        when {
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.NUM_1
+            ) -> selectStatCard(0)
+
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.NUM_2
+            ) -> selectStatCard(1)
+
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.NUM_3
+            ) -> selectStatCard(2)
+        }
+    }
+
+    private fun selectStatCard(
+        cardIndex: Int
+    ) {
+        val selectedCard =
+            pendingStatCards.getOrNull(cardIndex)
+                ?: return
+
+        applyStatCard(selectedCard)
+
+        pendingStatCards = emptyList()
+        isChoosingStatCard = false
+
+        stageController.completeCurrentStage()
+        enemySpawner.resetTimer()
+    }
+
+    private fun applyStatCard(
+        card: StatCard
+    ) {
+        when (card.type) {
+            StatUpgradeType.MAX_HEALTH -> {
+                player.increaseMaximumHealth(
+                    amount = 15
+                )
+            }
+
+            StatUpgradeType.MOVEMENT_SPEED -> {
+                player.increaseMovementSpeed(
+                    percentageIncrease = 0.08f
+                )
+            }
+
+            StatUpgradeType.ATTACK_SPEED -> {
+                autoWeapon.increaseAttackSpeed(
+                    percentageIncrease = 0.10f
+                )
+            }
+        }
+    }
+
+    private fun renderStatCardSelection() {
+        val startX =
+            camera.position.x -
+                CAMERA_WIDTH / 2f +
+                220f
+
+        val titleY =
+            camera.position.y +
+                180f
+
+        hudFont.draw(
+            hudBatch,
+            "CHOOSE A STAT CARD",
+            startX,
+            titleY
+        )
+
+        pendingStatCards.forEachIndexed {
+                index,
+                card ->
+
+            val cardY =
+                titleY -
+                    70f -
+                    index * 100f
+
+            hudFont.draw(
+                hudBatch,
+                "${index + 1} - ${card.title}",
+                startX,
+                cardY
+            )
+
+            hudFont.draw(
+                hudBatch,
+                card.description,
+                startX + 25f,
+                cardY - 30f
+            )
+        }
     }
 
 }

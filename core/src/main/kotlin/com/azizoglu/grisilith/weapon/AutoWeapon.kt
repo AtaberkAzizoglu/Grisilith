@@ -4,8 +4,11 @@ import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.player.Player
 
 class AutoWeapon(
-    private val attacksPerSecond: Float
+    attacksPerSecond: Float
 ) {
+    private var attacksPerSecond =
+        attacksPerSecond
+
     private var attackTimer = 0f
 
     init {
@@ -22,15 +25,17 @@ class AutoWeapon(
     ) {
         attackTimer += delta
 
-        val attackInterval = 1f / attacksPerSecond
+        val attackInterval =
+            1f / attacksPerSecond
 
         while (attackTimer >= attackInterval) {
             attackTimer -= attackInterval
 
-            val target = enemyManager.nearestEnemy(
-                x = player.centerX,
-                y = player.centerY
-            ) ?: continue
+            val target =
+                enemyManager.nearestEnemy(
+                    x = player.centerX,
+                    y = player.centerY
+                ) ?: continue
 
             projectiles.add(
                 Projectile(
@@ -41,5 +46,16 @@ class AutoWeapon(
                 )
             )
         }
+    }
+
+    fun increaseAttackSpeed(
+        percentageIncrease: Float
+    ) {
+        if (percentageIncrease <= 0f) {
+            return
+        }
+
+        attacksPerSecond *=
+            1f + percentageIncrease
     }
 }
