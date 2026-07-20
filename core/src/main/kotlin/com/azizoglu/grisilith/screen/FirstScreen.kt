@@ -32,6 +32,10 @@ import com.azizoglu.grisilith.statistics.StatCardGenerator
 import com.azizoglu.grisilith.statistics.StatUpgradeType
 import kotlin.div
 import kotlin.times
+import com.azizoglu.grisilith.economy.MarketOffer
+import com.azizoglu.grisilith.economy.MarketOfferGenerator
+import com.azizoglu.grisilith.economy.MarketProductType
+import com.azizoglu.grisilith.economy.MarketRerollPriceCalculator
 
 class FirstScreen : ScreenAdapter() {
 
@@ -89,9 +93,18 @@ class FirstScreen : ScreenAdapter() {
         attacksPerSecond = 2f
     )
 
+    private var isMarketOpen = false
+
+    private var shouldOpenMarketAfterCard = false
+
+    private var marketOffers =
+        emptyList<MarketOffer>()
+
+    private var marketRerollsUsed = 0
+
     private val stageController = StageController(
-        normalStageDurationSeconds = 30f,
-        miniBossStageDurationSeconds = 45f,
+        normalStageDurationSeconds = 10f,
+        miniBossStageDurationSeconds = 10f,
         finalBossStageDurationSeconds = 60f,
         maximumStage = 20
     )
@@ -124,7 +137,8 @@ class FirstScreen : ScreenAdapter() {
         val gameplayStopped =
             player.health.isDead ||
                 stageController.isRunComplete ||
-                isChoosingStatCard
+                isChoosingStatCard ||
+                isMarketOpen
 
         val gameDelta =
             if (gameplayStopped) {
@@ -145,6 +159,10 @@ class FirstScreen : ScreenAdapter() {
     }
 
     private fun handleGameControls() {
+        if (isMarketOpen) {
+            handleMarketControls()
+            return
+        }
 
         if (isChoosingStatCard) {
             handleStatCardSelection()
@@ -293,6 +311,10 @@ class FirstScreen : ScreenAdapter() {
     }
 
     private fun completeCurrentStage() {
+        shouldOpenMarketAfterCard =
+            stageController.currentStageType ==
+                StageType.MINI_BOSS
+
         enemyManager.clearAll()
         projectiles.clear()
         goldCoinPickups.clear()
@@ -655,11 +677,97 @@ class FirstScreen : ScreenAdapter() {
 
         }
 
-        if (isChoosingStatCard) {
-            renderStatCardSelection()
+        when {
+            isMarketOpen -> {
+                renderMarket()
+            }
+
+            isChoosingStatCard -> {
+                renderStatCardSelection()
+            }
         }
 
         hudBatch.end()
+    }
+
+    private fun renderMarket() {
+        val startX =
+            camera.position.x -
+                CAMERA_WIDTH / 2f +
+                220f
+
+        val titleY =
+            camera.position.y +
+                220f
+
+        hudFont.draw(
+            hudBatch,
+            "MINI BOSS MARKET",
+            startX,
+            titleY
+        )
+
+        hudFont.draw(
+            hudBatch,
+            "Gold: ${sessionWallet.goldCoins}",
+            startX,
+            titleY - 35f
+        )
+
+        marketOffers.forEachIndexed {
+                index,
+                offer ->
+
+            val offerY =
+                titleY -
+                    95f -
+                    index * 105f
+
+            hudFont.draw(
+                hudBatch,
+                "${index + 1} - " +
+                    "${offer.title} Lv.${offer.productLevel}",
+                startX,
+                offerY
+            )
+
+            hudFont.draw(
+                hudBatch,
+                offer.description,
+                startX + 25f,
+                offerY - 28f
+            )
+
+            hudFont.draw(
+                hudBatch,
+                "Price: ${offer.price} Gold",
+                startX + 25f,
+                offerY - 56f
+            )
+        }
+
+        val rerollPrice =
+            MarketRerollPriceCalculator
+                .calculatePrice(
+                    currentStage =
+                        stageController.currentStage,
+                    rerollsUsedInCurrentMarket =
+                        marketRerollsUsed
+                )
+
+        hudFont.draw(
+            hudBatch,
+            "R - Reroll ($rerollPrice Gold)",
+            startX,
+            titleY - 430f
+        )
+
+        hudFont.draw(
+            hudBatch,
+            "ENTER - Continue",
+            startX,
+            titleY - 465f
+        )
     }
 
     private fun formatGameTime(): String {
@@ -764,7 +872,135 @@ class FirstScreen : ScreenAdapter() {
         isChoosingStatCard = false
 
         stageController.completeCurrentStage()
+
+        if (shouldOpenMarketAfterCard) {
+            shouldOpenMarketAfterCard = false
+            openMarket()
+        } else {
+            enemySpawner.resetTimer()
+        }
+    }
+
+    private fun openMarket() {
+        isMarketOpen = true
+        marketRerollsUsed = 0
+
+        marketOffers =
+            MarketOfferGenerator.generateOffers(
+                currentStage =
+                    stageController.currentStage
+            )
+    }
+
+    private fun closeMarket() {
+        isMarketOpen = false
+        marketOffers = emptyList()
+        marketRerollsUsed = 0
+
         enemySpawner.resetTimer()
+    }
+
+    private fun handleMarketControls() {
+        when {
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.NUM_1
+            ) -> purchaseMarketOffer(0)
+
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.NUM_2
+            ) -> purchaseMarketOffer(1)
+
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.NUM_3
+            ) -> purchaseMarketOffer(2)
+
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.R
+            ) -> rerollMarket()
+
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.ENTER
+            ) -> closeMarket()
+        }
+    }
+
+    private fun purchaseMarketOffer(
+        offerIndex: Int
+    ) {
+        val offer =
+            marketOffers.getOrNull(offerIndex)
+                ?: return
+
+        val purchaseSuccessful =
+            sessionWallet.spendGold(
+                amount = offer.price
+            )
+
+        if (!purchaseSuccessful) {
+            return
+        }
+
+        applyMarketOffer(offer)
+
+        marketOffers =
+            marketOffers.toMutableList().apply {
+                removeAt(offerIndex)
+            }
+    }
+
+    private fun applyMarketOffer(
+        offer: MarketOffer
+    ) {
+        when (offer.productType) {
+            MarketProductType.WEAPON -> {
+                autoWeapon.increaseAttackSpeed(
+                    percentageIncrease =
+                        0.10f * offer.productLevel
+                )
+            }
+
+            MarketProductType.SKILL -> {
+                player.increaseMaximumHealth(
+                    amount =
+                        15 * offer.productLevel
+                )
+            }
+
+            MarketProductType.ITEM -> {
+                player.increaseMovementSpeed(
+                    percentageIncrease =
+                        0.08f * offer.productLevel
+                )
+            }
+        }
+    }
+
+    private fun rerollMarket() {
+        val rerollPrice =
+            MarketRerollPriceCalculator
+                .calculatePrice(
+                    currentStage =
+                        stageController.currentStage,
+                    rerollsUsedInCurrentMarket =
+                        marketRerollsUsed
+                )
+
+        val rerollSuccessful =
+            sessionWallet.spendGold(
+                amount = rerollPrice
+            )
+
+        if (!rerollSuccessful) {
+            return
+        }
+
+        marketRerollsUsed++
+
+        marketOffers =
+            MarketOfferGenerator.generateOffers(
+                currentStage =
+                    stageController.currentStage
+            )
     }
 
     private fun applyStatCard(
