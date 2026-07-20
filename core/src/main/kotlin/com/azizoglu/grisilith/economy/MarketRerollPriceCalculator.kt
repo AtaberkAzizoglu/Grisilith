@@ -12,21 +12,27 @@ object MarketRerollPriceCalculator {
         currentStage: Int,
         rerollsUsedInCurrentMarket: Int
     ): Int {
+        val safeRerollCount =
+            rerollsUsedInCurrentMarket.coerceAtLeast(0)
+
+        if (safeRerollCount == 0) {
+            return 0
+        }
+
         val safeStage =
             currentStage.coerceAtLeast(1)
-
-        val safeRerollCount =
-            rerollsUsedInCurrentMarket
-                .coerceAtLeast(0)
 
         val stageMultiplier =
             1f +
                 (safeStage - 1) *
                 STAGE_GROWTH
 
+        val paidRerollIndex =
+            safeRerollCount - 1
+
         val rerollMultiplier =
             1f +
-                safeRerollCount *
+                paidRerollIndex *
                 REROLL_GROWTH
 
         return (

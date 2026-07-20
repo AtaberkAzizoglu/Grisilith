@@ -4,7 +4,8 @@ import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.player.Player
 
 class AutoWeapon(
-    attacksPerSecond: Float
+    attacksPerSecond: Float,
+    val displayName: String
 ) {
     private var attacksPerSecond =
         attacksPerSecond
@@ -42,7 +43,8 @@ class AutoWeapon(
                     startX = player.centerX,
                     startY = player.centerY,
                     targetX = target.centerX,
-                    targetY = target.centerY
+                    targetY = target.centerY,
+                    sourceWeaponName = displayName
                 )
             )
         }

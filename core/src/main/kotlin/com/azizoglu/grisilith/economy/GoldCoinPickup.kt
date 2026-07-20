@@ -66,6 +66,16 @@ class GoldCoinPickup(
         }
     }
 
+    fun collectImmediately(
+        onCollected: (Float) -> Unit
+    ) {
+        if (isCollected) {
+            return
+        }
+
+        isCollected = true
+        onCollected(value)
+    }
     fun render(shapeRenderer: ShapeRenderer) {
         if (isCollected) {
             return
@@ -79,6 +89,8 @@ class GoldCoinPickup(
             size / 2f
         )
     }
+
+
 
     private val centerX: Float
         get() = position.x + size / 2f

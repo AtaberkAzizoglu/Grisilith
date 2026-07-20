@@ -10,7 +10,8 @@ class Projectile(
     startX: Float,
     startY: Float,
     targetX: Float,
-    targetY: Float
+    targetY: Float,
+    val sourceWeaponName: String
 ) {
     private val position = Vector2(
         startX,

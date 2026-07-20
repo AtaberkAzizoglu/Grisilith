@@ -5,23 +5,26 @@ import kotlin.random.Random
 object MarketOfferGenerator {
 
     fun generateOffers(
-        currentStage: Int
+        currentStage: Int,
+        offerCount: Int = 3
     ): List<MarketOffer> {
-        return MarketProductType.entries
-            .shuffled()
-            .take(3)
-            .map { productType ->
-                createOffer(
-                    productType = productType,
-                    currentStage = currentStage
-                )
-            }
+        if (offerCount <= 0) {
+            return emptyList()
+        }
+
+        return List(offerCount) {
+            createRandomOffer(
+                currentStage = currentStage
+            )
+        }
     }
 
-    private fun createOffer(
-        productType: MarketProductType,
+    private fun createRandomOffer(
         currentStage: Int
     ): MarketOffer {
+        val productType =
+            MarketProductType.entries.random()
+
         val maximumLevel =
             when {
                 currentStage >= 30 -> 5

@@ -16,8 +16,6 @@ import com.azizoglu.grisilith.statistics.RunStatistics
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import kotlin.collections.minusAssign
-import kotlin.div
 import com.azizoglu.grisilith.util.GameTimeController
 import com.badlogic.gdx.Input
 import com.azizoglu.grisilith.stage.StageController
@@ -30,25 +28,40 @@ import com.azizoglu.grisilith.economy.SessionWallet
 import com.azizoglu.grisilith.statistics.StatCard
 import com.azizoglu.grisilith.statistics.StatCardGenerator
 import com.azizoglu.grisilith.statistics.StatUpgradeType
-import kotlin.div
-import kotlin.times
 import com.azizoglu.grisilith.economy.MarketOffer
 import com.azizoglu.grisilith.economy.MarketOfferGenerator
 import com.azizoglu.grisilith.economy.MarketProductType
 import com.azizoglu.grisilith.economy.MarketRerollPriceCalculator
+import com.azizoglu.grisilith.economy.MarketSlot
+import com.azizoglu.grisilith.economy.StageGoldRewardCalculator
+import com.azizoglu.grisilith.GrisilithGame
+import com.azizoglu.grisilith.config.GameDifficulty
+import com.azizoglu.grisilith.config.GameMap
+import com.azizoglu.grisilith.map.MapObstacle
+import com.azizoglu.grisilith.map.MapObstacleGenerator
 
-class FirstScreen : ScreenAdapter() {
+class FirstScreen(
+    private val game: GrisilithGame,
+    private val difficulty: GameDifficulty,
+    private val gameMap: GameMap
+) : ScreenAdapter() {
 
     companion object {
         private const val CAMERA_WIDTH = 1280f
         private const val CAMERA_HEIGHT = 720f
-
-        private const val WORLD_WIDTH = 2200f
-        private const val WORLD_HEIGHT = 1400f
     }
 
-    private val shapeRenderer = ShapeRenderer()
-    private val camera = OrthographicCamera()
+    private val worldWidth =
+        gameMap.worldWidth
+
+    private val worldHeight =
+        gameMap.worldHeight
+
+    private val shapeRenderer =
+        ShapeRenderer()
+
+    private val camera =
+        OrthographicCamera()
 
     private val viewport = FitViewport(
         CAMERA_WIDTH,
@@ -57,11 +70,18 @@ class FirstScreen : ScreenAdapter() {
     )
 
     private val player = Player(
-        startX = WORLD_WIDTH / 2f,
-        startY = WORLD_HEIGHT / 2f,
-        worldWidth = WORLD_WIDTH,
-        worldHeight = WORLD_HEIGHT
+        startX = worldWidth / 2f,
+        startY = worldHeight / 2f,
+        worldWidth = worldWidth,
+        worldHeight = worldHeight
     )
+
+    private val mapObstacles: List<MapObstacle> =
+        MapObstacleGenerator.generate(
+            gameMap = gameMap,
+            playerStartX = player.centerX,
+            playerStartY = player.centerY
+        )
 
     private val projectiles = mutableListOf<Projectile>()
 
@@ -75,8 +95,8 @@ class FirstScreen : ScreenAdapter() {
     private val enemyManager = EnemyManager().apply {
         spawn(
             Enemy(
-                startX = WORLD_WIDTH / 2f + 300f,
-                startY = WORLD_HEIGHT / 2f,
+                startX = worldWidth / 2f + 300f,
+                startY = worldHeight / 2f,
                 stats = EnemyScaling.normalEnemyStats(
                     stage = 1
                 )
@@ -85,20 +105,26 @@ class FirstScreen : ScreenAdapter() {
     }
 
     private val enemySpawner = EnemySpawner(
-        worldWidth = WORLD_WIDTH,
-        worldHeight = WORLD_HEIGHT
+        worldWidth = worldWidth,
+        worldHeight = worldHeight
     )
 
     private val autoWeapon = AutoWeapon(
-        attacksPerSecond = 2f
+        attacksPerSecond = 2f,
+        displayName = "Starter Auto Weapon"
     )
+
+    private var isRunSummaryOpen = false
 
     private var isMarketOpen = false
 
     private var shouldOpenMarketAfterCard = false
 
-    private var marketOffers =
-        emptyList<MarketOffer>()
+    private var marketSlots =
+        emptyList<MarketSlot>()
+
+    private var lockedSlotsForNextMarket =
+        emptyList<MarketSlot>()
 
     private var marketRerollsUsed = 0
 
@@ -106,8 +132,10 @@ class FirstScreen : ScreenAdapter() {
         normalStageDurationSeconds = 10f,
         miniBossStageDurationSeconds = 10f,
         finalBossStageDurationSeconds = 60f,
-        maximumStage = 20
+        maximumStage = difficulty.maximumStage
     )
+
+
 
     private val sessionWallet =
         SessionWallet()
@@ -134,11 +162,19 @@ class FirstScreen : ScreenAdapter() {
     override fun render(delta: Float) {
         handleGameControls()
 
+        if (
+            player.health.isDead ||
+            stageController.isRunComplete
+        ) {
+            isRunSummaryOpen = true
+        }
+
         val gameplayStopped =
             player.health.isDead ||
                 stageController.isRunComplete ||
                 isChoosingStatCard ||
-                isMarketOpen
+                isMarketOpen ||
+                isRunSummaryOpen
 
         val gameDelta =
             if (gameplayStopped) {
@@ -159,6 +195,11 @@ class FirstScreen : ScreenAdapter() {
     }
 
     private fun handleGameControls() {
+        if (isRunSummaryOpen) {
+            handleRunSummaryControls()
+            return
+        }
+
         if (isMarketOpen) {
             handleMarketControls()
             return
@@ -190,6 +231,59 @@ class FirstScreen : ScreenAdapter() {
         }
     }
 
+    private fun handleRunSummaryControls() {
+        if (
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.R
+            )
+        ) {
+            game.startRun(
+                difficulty = difficulty,
+                gameMap = gameMap
+            )
+            return
+        }
+
+        if (
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.ENTER
+            )
+        ) {
+            game.showMainMenu()
+        }
+    }
+
+    private fun collectAllGoldPickups() {
+        goldCoinPickups.forEach { pickup ->
+            pickup.collectImmediately { collectedGold ->
+                sessionWallet.addGold(collectedGold)
+
+                runStatistics.recordGoldCollected(
+                    collectedGold
+                )
+            }
+        }
+
+        goldCoinPickups.clear()
+    }
+
+    private fun grantStageCompletionGold(
+        completedStage: Int,
+        completedStageType: StageType
+    ) {
+        val reward =
+            StageGoldRewardCalculator.rewardFor(
+                completedStage = completedStage,
+                stageType = completedStageType
+            )
+
+        sessionWallet.addGold(reward)
+
+        runStatistics.recordGoldCollected(
+            reward
+        )
+    }
+
     private fun updateGame(delta: Float) {
         if (player.health.isDead) {
             return
@@ -207,6 +301,12 @@ class FirstScreen : ScreenAdapter() {
 
         player.update(delta)
 
+        mapObstacles.forEach { obstacle ->
+            player.resolveObstacleCollision(
+                obstacle.bounds
+            )
+        }
+
         enemyManager.resolvePlayerCollisions { enemyBounds ->
             player.resolveCollision(enemyBounds)
         }
@@ -216,10 +316,15 @@ class FirstScreen : ScreenAdapter() {
             targetX = player.centerX,
             targetY = player.centerY,
             targetBounds = player.bounds,
-            worldWidth = WORLD_WIDTH,
-            worldHeight = WORLD_HEIGHT
+            worldWidth = worldWidth,
+            worldHeight = worldHeight
         ) { damage ->
-            player.takeDamage(damage)
+            val appliedDamage =
+                player.takeDamage(damage)
+
+            runStatistics.recordDamageTaken(
+                appliedDamage
+            )
         }
 
         if (!player.health.isDead) {
@@ -234,14 +339,19 @@ class FirstScreen : ScreenAdapter() {
         projectiles.forEach { projectile ->
             projectile.update(
                 delta = delta,
-                worldWidth = WORLD_WIDTH,
-                worldHeight = WORLD_HEIGHT
+                worldWidth = worldWidth,
+                worldHeight = worldHeight
             )
 
             projectile.checkCollision(
                 enemies = enemyManager.allEnemies,
-                onDamageDealt =
-                    runStatistics::recordDamageDealt
+                onDamageDealt = { appliedDamage ->
+                    runStatistics.recordDamageDealt(
+                        amount = appliedDamage,
+                        weaponName =
+                            projectile.sourceWeaponName
+                    )
+                }
             ) { killedEnemy ->
                 runStatistics.recordEnemyKilled()
 
@@ -266,6 +376,9 @@ class FirstScreen : ScreenAdapter() {
                 targetY = player.centerY
             ) { collectedGold ->
                 sessionWallet.addGold(collectedGold)
+                runStatistics.recordGoldCollected(
+                    collectedGold
+                )
             }
         }
 
@@ -311,13 +424,25 @@ class FirstScreen : ScreenAdapter() {
     }
 
     private fun completeCurrentStage() {
+        val completedStage =
+            stageController.currentStage
+
+        val completedStageType =
+            stageController.currentStageType
+
         shouldOpenMarketAfterCard =
-            stageController.currentStageType ==
+            completedStageType ==
                 StageType.MINI_BOSS
+
+        collectAllGoldPickups()
+
+        grantStageCompletionGold(
+            completedStage = completedStage,
+            completedStageType = completedStageType
+        )
 
         enemyManager.clearAll()
         projectiles.clear()
-        goldCoinPickups.clear()
 
         pendingStatCards =
             StatCardGenerator.generateCards()
@@ -347,6 +472,10 @@ class FirstScreen : ScreenAdapter() {
             ShapeRenderer.ShapeType.Filled
         )
 
+        mapObstacles.forEach { obstacle ->
+            obstacle.render(shapeRenderer)
+        }
+
         player.render(shapeRenderer)
         enemyManager.render(shapeRenderer)
 
@@ -373,13 +502,13 @@ class FirstScreen : ScreenAdapter() {
             halfCameraWidth
 
         val maximumCameraX =
-            WORLD_WIDTH - halfCameraWidth
+            worldWidth - halfCameraWidth
 
         val minimumCameraY =
             halfCameraHeight
 
         val maximumCameraY =
-            WORLD_HEIGHT - halfCameraHeight
+            worldHeight - halfCameraHeight
 
         camera.position.x =
             player.centerX.coerceIn(
@@ -405,12 +534,12 @@ class FirstScreen : ScreenAdapter() {
 
         var x = 0f
 
-        while (x <= WORLD_WIDTH) {
+        while (x <= worldWidth) {
             shapeRenderer.line(
                 x,
                 0f,
                 x,
-                WORLD_HEIGHT
+                worldHeight
             )
 
             x += gridSize
@@ -418,11 +547,11 @@ class FirstScreen : ScreenAdapter() {
 
         var y = 0f
 
-        while (y <= WORLD_HEIGHT) {
+        while (y <= worldHeight) {
             shapeRenderer.line(
                 0f,
                 y,
-                WORLD_WIDTH,
+                worldWidth,
                 y
             )
 
@@ -440,8 +569,8 @@ class FirstScreen : ScreenAdapter() {
         shapeRenderer.rect(
             0f,
             0f,
-            WORLD_WIDTH,
-            WORLD_HEIGHT
+            worldWidth,
+            worldHeight
         )
 
         shapeRenderer.end()
@@ -629,6 +758,28 @@ class FirstScreen : ScreenAdapter() {
             topY
         )
 
+        topY -= 28f
+
+        val currentStageReward =
+            StageGoldRewardCalculator.rewardFor(
+                completedStage =
+                    stageController.currentStage,
+                stageType =
+                    stageController.currentStageType
+            )
+
+        hudFont.draw(
+            hudBatch,
+            "Stage Reward: " +
+                String.format(
+                    java.util.Locale.US,
+                    "%.1f Gold",
+                    currentStageReward
+                ),
+            leftX,
+            topY
+        )
+
         if (gameTimeController.isPaused) {
             hudFont.draw(
                 hudBatch,
@@ -678,6 +829,10 @@ class FirstScreen : ScreenAdapter() {
         }
 
         when {
+            isRunSummaryOpen -> {
+                renderRunSummary()
+            }
+
             isMarketOpen -> {
                 renderMarket()
             }
@@ -688,6 +843,170 @@ class FirstScreen : ScreenAdapter() {
         }
 
         hudBatch.end()
+    }
+
+    private fun renderRunSummary() {
+        val startX =
+            camera.position.x -
+                CAMERA_WIDTH / 2f +
+                270f
+
+        var currentY =
+            camera.position.y +
+                CAMERA_HEIGHT / 2f -
+                90f
+
+        val resultText =
+            if (stageController.isRunComplete) {
+                "RUN SUCCESSFUL"
+            } else {
+                "RUN FAILED"
+            }
+
+        hudFont.draw(
+            hudBatch,
+            resultText,
+            startX,
+            currentY
+        )
+
+        currentY -= 45f
+
+        hudFont.draw(
+            hudBatch,
+            "Difficulty: ${difficulty.displayName}",
+            startX,
+            currentY
+        )
+
+        currentY -= 32f
+
+        hudFont.draw(
+            hudBatch,
+            "Map: ${gameMap.displayName}",
+            startX,
+            currentY
+        )
+
+        currentY -= 32f
+
+        hudFont.draw(
+            hudBatch,
+            "Stage Reached: ${displayedStage()}",
+            startX,
+            currentY
+        )
+
+        currentY -= 32f
+
+        hudFont.draw(
+            hudBatch,
+            "Run Time: ${formatGameTime()}",
+            startX,
+            currentY
+        )
+
+        currentY -= 32f
+
+        hudFont.draw(
+            hudBatch,
+            "Enemies Killed: " +
+                "${runStatistics.totalEnemiesKilled}",
+            startX,
+            currentY
+        )
+
+        currentY -= 32f
+
+        hudFont.draw(
+            hudBatch,
+            "Total Damage Dealt: " +
+                "${runStatistics.totalDamageDealt}",
+            startX,
+            currentY
+        )
+
+        currentY -= 32f
+
+        hudFont.draw(
+            hudBatch,
+            "Damage Taken: " +
+                "${runStatistics.totalDamageTaken}",
+            startX,
+            currentY
+        )
+
+        currentY -= 32f
+
+        hudFont.draw(
+            hudBatch,
+            "Gold Earned: " +
+                String.format(
+                    java.util.Locale.US,
+                    "%.1f",
+                    runStatistics.totalGoldCollected
+                ),
+            startX,
+            currentY
+        )
+
+        currentY -= 50f
+
+        hudFont.draw(
+            hudBatch,
+            "WEAPON DAMAGE",
+            startX,
+            currentY
+        )
+
+        currentY -= 35f
+
+        val weaponEntries =
+            runStatistics.weaponDamageStatistics
+                .entries
+                .sortedByDescending { entry ->
+                    entry.value
+                }
+
+        if (weaponEntries.isEmpty()) {
+            hudFont.draw(
+                hudBatch,
+                "No weapon damage recorded.",
+                startX + 20f,
+                currentY
+            )
+
+            currentY -= 30f
+        } else {
+            weaponEntries.forEach { entry ->
+                hudFont.draw(
+                    hudBatch,
+                    "${entry.key}: ${entry.value}",
+                    startX + 20f,
+                    currentY
+                )
+
+                currentY -= 30f
+            }
+        }
+
+        currentY -= 25f
+
+        hudFont.draw(
+            hudBatch,
+            "R - Restart Run",
+            startX,
+            currentY
+        )
+
+        currentY -= 32f
+
+        hudFont.draw(
+            hudBatch,
+            "ENTER - Return to Main Menu",
+            startX,
+            currentY
+        )
     }
 
     private fun renderMarket() {
@@ -714,36 +1033,66 @@ class FirstScreen : ScreenAdapter() {
             titleY - 35f
         )
 
-        marketOffers.forEachIndexed {
-                index,
-                offer ->
-
-            val offerY =
+        marketSlots.forEachIndexed { index, slot ->
+            val slotY =
                 titleY -
                     95f -
                     index * 105f
 
-            hudFont.draw(
-                hudBatch,
-                "${index + 1} - " +
-                    "${offer.title} Lv.${offer.productLevel}",
-                startX,
-                offerY
-            )
+            val offer = slot.offer
 
-            hudFont.draw(
-                hudBatch,
-                offer.description,
-                startX + 25f,
-                offerY - 28f
-            )
+            when {
+                slot.isSold -> {
+                    hudFont.draw(
+                        hudBatch,
+                        "${index + 1} - SOLD",
+                        startX,
+                        slotY
+                    )
+                }
 
-            hudFont.draw(
-                hudBatch,
-                "Price: ${offer.price} Gold",
-                startX + 25f,
-                offerY - 56f
-            )
+                offer == null -> {
+                    hudFont.draw(
+                        hudBatch,
+                        "${index + 1} - EMPTY",
+                        startX,
+                        slotY
+                    )
+                }
+
+                else -> {
+                    val lockText =
+                        if (slot.isLocked) {
+                            " [LOCKED]"
+                        } else {
+                            ""
+                        }
+
+                    hudFont.draw(
+                        hudBatch,
+                        "${index + 1} - " +
+                            "${offer.title} " +
+                            "Lv.${offer.productLevel}" +
+                            lockText,
+                        startX,
+                        slotY
+                    )
+
+                    hudFont.draw(
+                        hudBatch,
+                        offer.description,
+                        startX + 25f,
+                        slotY - 28f
+                    )
+
+                    hudFont.draw(
+                        hudBatch,
+                        "Price: ${offer.price} Gold",
+                        startX + 25f,
+                        slotY - 56f
+                    )
+                }
+            }
         }
 
         val rerollPrice =
@@ -757,16 +1106,23 @@ class FirstScreen : ScreenAdapter() {
 
         hudFont.draw(
             hudBatch,
+            "Q / W / E - Lock / Unlock",
+            startX,
+            titleY - 420f
+        )
+
+        hudFont.draw(
+            hudBatch,
             "R - Reroll ($rerollPrice Gold)",
             startX,
-            titleY - 430f
+            titleY - 450f
         )
 
         hudFont.draw(
             hudBatch,
             "ENTER - Continue",
             startX,
-            titleY - 465f
+            titleY - 480f
         )
     }
 
@@ -810,10 +1166,6 @@ class FirstScreen : ScreenAdapter() {
                     EnemyType.FINAL_BOSS
             }
 
-        /*
-         * Boss henüz spawn olmadıysa aşamayı
-         * yanlışlıkla tamamlamıyoruz.
-         */
         if (!enemySpawner.hasSpawnedBoss) {
             return false
         }
@@ -831,15 +1183,29 @@ class FirstScreen : ScreenAdapter() {
             stageController.currentStageType ==
             StageType.FINAL_BOSS
         ) {
+            val completedStage =
+                stageController.currentStage
+
+            val completedStageType =
+                stageController.currentStageType
+
+            collectAllGoldPickups()
+
+            grantStageCompletionGold(
+                completedStage = completedStage,
+                completedStageType = completedStageType
+            )
+
             enemyManager.clearAll()
             projectiles.clear()
-            goldCoinPickups.clear()
 
             stageController.completeCurrentStage()
+
             return true
         }
 
         completeCurrentStage()
+
         return true
     }
 
@@ -885,16 +1251,56 @@ class FirstScreen : ScreenAdapter() {
         isMarketOpen = true
         marketRerollsUsed = 0
 
-        marketOffers =
+        val carriedLockedSlots =
+            lockedSlotsForNextMarket
+                .take(3)
+                .map { slot ->
+                    MarketSlot(
+                        offer = slot.offer,
+                        isLocked = true,
+                        isSold = false
+                    )
+                }
+
+        val missingSlotCount =
+            3 - carriedLockedSlots.size
+
+        val newSlots =
             MarketOfferGenerator.generateOffers(
                 currentStage =
-                    stageController.currentStage
-            )
+                    stageController.currentStage,
+                offerCount = missingSlotCount
+            ).map { offer ->
+                MarketSlot(
+                    offer = offer
+                )
+            }
+
+        marketSlots =
+            carriedLockedSlots + newSlots
+
+        lockedSlotsForNextMarket =
+            emptyList()
     }
 
     private fun closeMarket() {
+        lockedSlotsForNextMarket =
+            marketSlots
+                .filter { slot ->
+                    slot.isLocked &&
+                        !slot.isSold &&
+                        slot.offer != null
+                }
+                .map { slot ->
+                    MarketSlot(
+                        offer = slot.offer,
+                        isLocked = true,
+                        isSold = false
+                    )
+                }
+
         isMarketOpen = false
-        marketOffers = emptyList()
+        marketSlots = emptyList()
         marketRerollsUsed = 0
 
         enemySpawner.resetTimer()
@@ -915,6 +1321,18 @@ class FirstScreen : ScreenAdapter() {
             ) -> purchaseMarketOffer(2)
 
             Gdx.input.isKeyJustPressed(
+                Input.Keys.Q
+            ) -> toggleMarketOfferLock(0)
+
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.W
+            ) -> toggleMarketOfferLock(1)
+
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.E
+            ) -> toggleMarketOfferLock(2)
+
+            Gdx.input.isKeyJustPressed(
                 Input.Keys.R
             ) -> rerollMarket()
 
@@ -924,11 +1342,42 @@ class FirstScreen : ScreenAdapter() {
         }
     }
 
-    private fun purchaseMarketOffer(
-        offerIndex: Int
+    private fun toggleMarketOfferLock(
+        slotIndex: Int
     ) {
+        val slot =
+            marketSlots.getOrNull(slotIndex)
+                ?: return
+
+        if (
+            slot.isSold ||
+            slot.offer == null
+        ) {
+            return
+        }
+
+        marketSlots =
+            marketSlots.toMutableList().apply {
+                this[slotIndex] =
+                    slot.copy(
+                        isLocked = !slot.isLocked
+                    )
+            }
+    }
+
+    private fun purchaseMarketOffer(
+        slotIndex: Int
+    ) {
+        val slot =
+            marketSlots.getOrNull(slotIndex)
+                ?: return
+
+        if (slot.isSold) {
+            return
+        }
+
         val offer =
-            marketOffers.getOrNull(offerIndex)
+            slot.offer
                 ?: return
 
         val purchaseSuccessful =
@@ -942,9 +1391,13 @@ class FirstScreen : ScreenAdapter() {
 
         applyMarketOffer(offer)
 
-        marketOffers =
-            marketOffers.toMutableList().apply {
-                removeAt(offerIndex)
+        marketSlots =
+            marketSlots.toMutableList().apply {
+                this[slotIndex] =
+                    slot.copy(
+                        isLocked = false,
+                        isSold = true
+                    )
             }
     }
 
@@ -985,22 +1438,36 @@ class FirstScreen : ScreenAdapter() {
                         marketRerollsUsed
                 )
 
-        val rerollSuccessful =
-            sessionWallet.spendGold(
-                amount = rerollPrice
-            )
+        if (rerollPrice > 0) {
+            val rerollSuccessful =
+                sessionWallet.spendGold(
+                    amount = rerollPrice
+                )
 
-        if (!rerollSuccessful) {
-            return
+            if (!rerollSuccessful) {
+                return
+            }
         }
 
         marketRerollsUsed++
 
-        marketOffers =
-            MarketOfferGenerator.generateOffers(
-                currentStage =
-                    stageController.currentStage
-            )
+        marketSlots =
+            marketSlots.map { slot ->
+                if (slot.isLocked) {
+                    slot
+                } else {
+                    MarketSlot(
+                        offer =
+                            MarketOfferGenerator
+                                .generateOffers(
+                                    currentStage =
+                                        stageController.currentStage,
+                                    offerCount = 1
+                                )
+                                .first()
+                    )
+                }
+            }
     }
 
     private fun applyStatCard(
@@ -1068,6 +1535,7 @@ class FirstScreen : ScreenAdapter() {
             )
         }
     }
+
 
 }
 
