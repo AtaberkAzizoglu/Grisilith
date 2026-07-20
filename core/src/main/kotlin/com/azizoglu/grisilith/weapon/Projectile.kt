@@ -11,7 +11,10 @@ class Projectile(
     startY: Float,
     targetX: Float,
     targetY: Float,
-    val sourceWeaponName: String
+    val sourceWeaponName: String,
+    private val damage: Int,
+    val isCriticalHit: Boolean,
+    maximumTargets: Int
 ) {
     private val position = Vector2(
         startX,
@@ -27,7 +30,12 @@ class Projectile(
 
     private val size = 14f
     private val speed = 700f
-    private val damage = 10
+
+    private var remainingTargets =
+        maximumTargets.coerceAtLeast(1)
+
+    private val hitEnemies =
+        mutableSetOf<Enemy>()
 
     var isActive: Boolean = true
         private set
@@ -76,22 +84,37 @@ class Projectile(
         for (enemy in enemies) {
             if (
                 enemy.isDead ||
-                !collisionBounds.overlaps(enemy.bounds)
+                enemy in hitEnemies ||
+                !collisionBounds.overlaps(
+                    enemy.bounds
+                )
             ) {
                 continue
             }
 
-            val wasAliveBeforeHit = !enemy.isDead
+            hitEnemies.add(enemy)
+
+            val wasAliveBeforeHit =
+                !enemy.isDead
+
             val appliedDamage =
                 enemy.takeDamage(damage)
 
             onDamageDealt(appliedDamage)
 
-            if (wasAliveBeforeHit && enemy.isDead) {
+            if (
+                wasAliveBeforeHit &&
+                enemy.isDead
+            ) {
                 onEnemyKilled(enemy)
             }
 
-            isActive = false
+            remainingTargets--
+
+            if (remainingTargets <= 0) {
+                isActive = false
+            }
+
             return
         }
     }

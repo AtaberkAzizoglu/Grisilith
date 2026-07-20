@@ -1,5 +1,7 @@
 package com.azizoglu.grisilith.statistics
 
+import kotlin.math.roundToInt
+
 class PlayerStats(
     initialBaseScores: Map<StatType, Int> =
         defaultBaseScores()
@@ -136,11 +138,6 @@ class PlayerStats(
         }
     }
 
-    /*
-     * Geçici oynanış formülleri.
-     * Denge matematiğini ileride ayrı calculator
-     * sınıflarına taşıyacağız.
-     */
 
     fun calculatedMaximumHealth(): Int {
         val score =
@@ -171,5 +168,192 @@ class PlayerStats(
         return (
             1f + (score - 10) * 0.05f
             ).coerceAtLeast(0.20f)
+    }
+
+    fun armorDamageMultiplier(): Float {
+        val armorScore =
+            totalScore(
+                StatType.ARMOR_CLASS
+            )
+
+        val damageReduction =
+            armorScore.toFloat() /
+                (armorScore + 50f)
+
+        return (
+            1f - damageReduction
+            ).coerceIn(
+                0.25f,
+                1f
+            )
+    }
+
+    fun hpRegenerationPerSecond(): Float {
+        val score =
+            totalScore(
+                StatType.HP_REGENERATION
+            )
+
+        return (
+            score - 10
+            )
+            .coerceAtLeast(0) *
+            0.20f
+    }
+
+    fun lifeStealChance(): Float {
+        val score =
+            totalScore(
+                StatType.LIFE_STEAL
+            )
+
+        return (
+            score - 10
+            )
+            .coerceAtLeast(0) *
+            0.015f
+    }
+
+    fun lightWeaponPowerScore(): Int {
+        val strength =
+            totalScore(
+                StatType.STRENGTH
+            )
+
+        val dexterity =
+            totalScore(
+                StatType.DEXTERITY
+            )
+
+        return maxOf(
+            strength,
+            dexterity
+        )
+    }
+
+    fun starterWeaponDamage(): Int {
+        val powerScore =
+            lightWeaponPowerScore()
+
+        val multiplier =
+            1f +
+                (powerScore - 10) *
+                0.08f
+
+        return (
+            20f * multiplier
+            )
+            .roundToInt()
+            .coerceAtLeast(1)
+    }
+
+    fun criticalHitChance(): Float {
+        val score =
+            totalScore(
+                StatType.CRIT_RATE
+            )
+
+        return (
+            0.05f +
+                (score - 10) *
+                0.02f
+            )
+            .coerceIn(
+                0f,
+                0.95f
+            )
+    }
+
+    fun criticalDamageMultiplier(): Float {
+        val score =
+            totalScore(
+                StatType.CRIT_DAMAGE
+            )
+
+        return (
+            1.50f +
+                (score - 10) *
+                0.05f
+            )
+            .coerceAtLeast(1f)
+    }
+
+    fun enemyCountMultiplier(): Float {
+        val score =
+            totalScore(
+                StatType.ENEMY_COUNT
+            )
+
+        return (
+            1f +
+                (score - 10) *
+                0.05f
+            )
+            .coerceAtLeast(0.25f)
+    }
+
+    fun magicPowerMultiplier(): Float {
+        val score =
+            totalScore(
+                StatType.WISDOM
+            )
+
+        return (
+            1f +
+                (score - 10) *
+                0.08f
+            )
+            .coerceAtLeast(0.20f)
+    }
+
+    fun spellCooldownMultiplier(): Float {
+        val score =
+            totalScore(
+                StatType.COOLDOWN
+            )
+
+        return (
+            1f -
+                (score - 10) *
+                0.03f
+            )
+            .coerceIn(
+                0.25f,
+                2f
+            )
+    }
+
+    fun luckScore(): Int {
+        return totalScore(
+            StatType.LUCK
+        )
+    }
+
+    fun harvestGoldMultiplier(): Float {
+        val score =
+            totalScore(
+                StatType.HARVEST
+            )
+
+        return (
+            1f +
+                (score - 10) *
+                0.04f
+            )
+            .coerceAtLeast(0.20f)
+    }
+
+    fun projectileTargetCount(): Int {
+        val score =
+            totalScore(
+                StatType.PIERCING
+            )
+
+        val additionalTargets =
+            (score - 10)
+                .coerceAtLeast(0) /
+                5
+
+        return 1 + additionalTargets
     }
 }

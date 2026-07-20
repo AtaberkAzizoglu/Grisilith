@@ -24,7 +24,8 @@ class EnemySpawner(
         camera: OrthographicCamera,
         enemyManager: EnemyManager,
         currentStage: Int,
-        stageType: StageType
+        stageType: StageType,
+        enemyCountMultiplier: Float
     ) {
         spawnBossIfRequired(
             camera = camera,
@@ -38,7 +39,9 @@ class EnemySpawner(
             camera = camera,
             enemyManager = enemyManager,
             currentStage = currentStage,
-            stageType = stageType
+            stageType = stageType,
+            enemyCountMultiplier =
+                enemyCountMultiplier
         )
     }
 
@@ -90,7 +93,8 @@ class EnemySpawner(
         camera: OrthographicCamera,
         enemyManager: EnemyManager,
         currentStage: Int,
-        stageType: StageType
+        stageType: StageType,
+        enemyCountMultiplier: Float
     ) {
         val baseSettings =
             EnemySpawnScaling.settingsForStage(
@@ -100,13 +104,6 @@ class EnemySpawner(
         val isBossStage =
             stageType != StageType.NORMAL
 
-        /*
-         * %50 spawn hızı:
-         * Spawn aralığını iki katına çıkarıyoruz.
-         *
-         * %50 düşman sınırı:
-         * Maksimum sayıyı yarıya indiriyoruz.
-         */
         val spawnInterval =
             if (isBossStage) {
                 baseSettings.spawnInterval * 2f
@@ -117,7 +114,9 @@ class EnemySpawner(
         val maximumEnemyCount =
             EnemySpawnScaling.maximumEnemyCountForStage(
                 stage = currentStage,
-                isBossStage = isBossStage
+                isBossStage = isBossStage,
+                enemyCountMultiplier =
+                    enemyCountMultiplier
             )
 
         if (

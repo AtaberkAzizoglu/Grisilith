@@ -48,19 +48,27 @@ object EnemySpawnScaling {
 
     fun maximumEnemyCountForStage(
         stage: Int,
-        isBossStage: Boolean
+        isBossStage: Boolean,
+        enemyCountMultiplier: Float = 1f
     ): Int {
         val baseMaximum =
             settingsForStage(stage)
                 .maximumEnemyCount
 
-        return if (isBossStage) {
-            (baseMaximum * 0.5f)
-                .toInt()
-                .coerceAtLeast(1)
-        } else {
-            baseMaximum
-        }
+        val stageTypeMultiplier =
+            if (isBossStage) {
+                0.5f
+            } else {
+                1f
+            }
+
+        return (
+            baseMaximum *
+                stageTypeMultiplier *
+                enemyCountMultiplier
+            )
+            .toInt()
+            .coerceAtLeast(1)
     }
 
 }

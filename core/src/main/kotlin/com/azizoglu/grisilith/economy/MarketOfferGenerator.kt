@@ -6,7 +6,8 @@ object MarketOfferGenerator {
 
     fun generateOffers(
         currentStage: Int,
-        offerCount: Int = 3
+        offerCount: Int = 3,
+        luckScore: Int = 10
     ): List<MarketOffer> {
         if (offerCount <= 0) {
             return emptyList()
@@ -14,30 +15,28 @@ object MarketOfferGenerator {
 
         return List(offerCount) {
             createRandomOffer(
-                currentStage = currentStage
+                currentStage = currentStage,
+                luckScore = luckScore
             )
         }
     }
 
     private fun createRandomOffer(
-        currentStage: Int
+        currentStage: Int,
+        luckScore: Int
     ): MarketOffer {
         val productType =
             MarketProductType.entries.random()
 
         val maximumLevel =
-            when {
-                currentStage >= 30 -> 5
-                currentStage >= 20 -> 4
-                currentStage >= 10 -> 3
-                currentStage >= 5 -> 2
-                else -> 1
-            }
+            maximumLevelForStage(
+                currentStage
+            )
 
         val productLevel =
-            Random.nextInt(
-                from = 1,
-                until = maximumLevel + 1
+            rollProductLevel(
+                maximumLevel = maximumLevel,
+                luckScore = luckScore
             )
 
         val price =
@@ -54,7 +53,7 @@ object MarketOfferGenerator {
                     productLevel = productLevel,
                     title = "Weapon Upgrade",
                     description =
-                        "+${10 * productLevel}% Attack Speed",
+                        "+$productLevel Attack Speed score",
                     price = price
                 )
             }
@@ -65,7 +64,7 @@ object MarketOfferGenerator {
                     productLevel = productLevel,
                     title = "Skill Upgrade",
                     description =
-                        "+${15 * productLevel} Max Health",
+                        "+$productLevel Max HP score",
                     price = price
                 )
             }
@@ -76,10 +75,75 @@ object MarketOfferGenerator {
                     productLevel = productLevel,
                     title = "Item Upgrade",
                     description =
-                        "+${8 * productLevel}% Movement Speed",
+                        "+$productLevel Movement Speed score",
                     price = price
                 )
             }
         }
+    }
+
+    private fun maximumLevelForStage(
+        currentStage: Int
+    ): Int {
+        return when {
+            currentStage >= 30 -> 5
+            currentStage >= 20 -> 4
+            currentStage >= 10 -> 3
+            currentStage >= 5 -> 2
+            else -> 1
+        }
+    }
+
+    private fun rollProductLevel(
+        maximumLevel: Int,
+        luckScore: Int
+    ): Int {
+        if (maximumLevel <= 1) {
+            return 1
+        }
+
+        val safeLuck =
+            luckScore.coerceIn(
+                1,
+                30
+            )
+
+        /*
+         * Luck yükseldikçe rastgele sonuç
+         * maksimum seviyeye doğru kayar.
+         */
+        val luckPower =
+            1f +
+                (safeLuck - 10)
+                    .coerceAtLeast(0) *
+                0.06f
+
+        val randomValue =
+            Random.nextFloat()
+
+        val luckAdjustedValue =
+            randomValue.pow(
+                1f / luckPower
+            )
+
+        return (
+            1f +
+                luckAdjustedValue *
+                maximumLevel
+            )
+            .toInt()
+            .coerceIn(
+                1,
+                maximumLevel
+            )
+    }
+
+    private fun Float.pow(
+        exponent: Float
+    ): Float {
+        return Math.pow(
+            toDouble(),
+            exponent.toDouble()
+        ).toFloat()
     }
 }

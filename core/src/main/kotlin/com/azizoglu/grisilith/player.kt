@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.MathUtils
+import kotlin.math.roundToInt
 
 class Player(
     startX: Float,
@@ -30,6 +32,8 @@ class Player(
 
     private val collisionBounds =
         Rectangle()
+
+    private var accumulatedRegeneration = 0f
 
     val health =
         HealthComponent(
@@ -60,6 +64,8 @@ class Player(
             return
         }
 
+        updateHealthRegeneration(delta)
+
         previousPosition.set(position)
 
         readMovementInput()
@@ -75,6 +81,45 @@ class Player(
         }
 
         keepInsideWorld()
+    }
+
+    private fun updateHealthRegeneration(
+        delta: Float
+    ) {
+        if (
+            delta <= 0f ||
+            health.currentHealth >=
+            health.maximumHealth
+        ) {
+            return
+        }
+
+        val regenerationPerSecond =
+            stats.hpRegenerationPerSecond()
+
+        if (regenerationPerSecond <= 0f) {
+            return
+        }
+
+        accumulatedRegeneration +=
+            regenerationPerSecond * delta
+
+        val wholeHealthPoints =
+            accumulatedRegeneration.toInt()
+
+        if (wholeHealthPoints <= 0) {
+            return
+        }
+
+        val healedAmount =
+            health.heal(
+                wholeHealthPoints
+            )
+
+        if (healedAmount > 0) {
+            accumulatedRegeneration -=
+                healedAmount.toFloat()
+        }
     }
 
     fun addRunStatBonus(
@@ -191,7 +236,52 @@ class Player(
     }
 
     fun takeDamage(amount: Int): Int {
-        return health.takeDamage(amount)
+        if (amount <= 0) {
+            return 0
+        }
+
+        val reducedDamage =
+            (
+                amount *
+                    stats.armorDamageMultiplier()
+                )
+                .roundToInt()
+                .coerceAtLeast(1)
+
+        return health.takeDamage(
+            reducedDamage
+        )
+    }
+
+    fun tryLifeSteal(
+        appliedDamage: Int
+    ) {
+        if (
+            appliedDamage <= 0 ||
+            health.isDead ||
+            health.currentHealth >=
+            health.maximumHealth
+        ) {
+            return
+        }
+
+        val lifeStealChance =
+            stats.lifeStealChance()
+                .coerceIn(
+                    0f,
+                    1f
+                )
+
+        if (
+            lifeStealChance <= 0f ||
+            !MathUtils.randomBoolean(
+                lifeStealChance
+            )
+        ) {
+            return
+        }
+
+        health.heal(1)
     }
 
     fun render(

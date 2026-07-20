@@ -358,15 +358,23 @@ class FirstScreen(
                         weaponName =
                             projectile.sourceWeaponName
                     )
+
+                    player.tryLifeSteal(
+                        appliedDamage = appliedDamage
+                    )
                 }
             ) { killedEnemy ->
                 runStatistics.recordEnemyKilled()
+
+                val harvestedGoldReward =
+                    killedEnemy.goldReward *
+                        playerStats.harvestGoldMultiplier()
 
                 goldCoinPickups.add(
                     GoldCoinPickup(
                         startX = killedEnemy.centerX,
                         startY = killedEnemy.centerY,
-                        value = killedEnemy.goldReward
+                        value = harvestedGoldReward
                     )
                 )
             }
@@ -412,7 +420,9 @@ class FirstScreen(
             currentStage =
                 stageController.currentStage,
             stageType =
-                stageController.currentStageType
+                stageController.currentStageType,
+            enemyCountMultiplier =
+                playerStats.enemyCountMultiplier()
         )
     }
 
@@ -660,6 +670,42 @@ class FirstScreen(
 
         hudFont.draw(
             hudBatch,
+            "Armor Class Score: " +
+                playerStats.totalScore(
+                    StatType.ARMOR_CLASS
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        hudFont.draw(
+            hudBatch,
+            "HP Regeneration Score: " +
+                playerStats.totalScore(
+                    StatType.HP_REGENERATION
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        hudFont.draw(
+            hudBatch,
+            "Life Steal Score: " +
+                playerStats.totalScore(
+                    StatType.LIFE_STEAL
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        hudFont.draw(
+            hudBatch,
             "Movement Speed Score: " +
                 playerStats.totalScore(
                     StatType.MOVEMENT_SPEED
@@ -694,6 +740,66 @@ class FirstScreen(
 
         hudFont.draw(
             hudBatch,
+            "Strength Score: " +
+                playerStats.totalScore(
+                    StatType.STRENGTH
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        hudFont.draw(
+            hudBatch,
+            "Dexterity Score: " +
+                playerStats.totalScore(
+                    StatType.DEXTERITY
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        hudFont.draw(
+            hudBatch,
+            "Crit Rate Score: " +
+                playerStats.totalScore(
+                    StatType.CRIT_RATE
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        hudFont.draw(
+            hudBatch,
+            "Crit Damage Score: " +
+                playerStats.totalScore(
+                    StatType.CRIT_DAMAGE
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        hudFont.draw(
+            hudBatch,
+            "Enemy Count Score: " +
+                playerStats.totalScore(
+                    StatType.ENEMY_COUNT
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        hudFont.draw(
+            hudBatch,
             "Gold Coin: ${sessionWallet.goldCoins}",
             leftX,
             topY
@@ -708,7 +814,9 @@ class FirstScreen(
         val currentEnemyLimit =
             EnemySpawnScaling.maximumEnemyCountForStage(
                 stage = stageController.currentStage,
-                isBossStage = isBossStage
+                isBossStage = isBossStage,
+                enemyCountMultiplier =
+                    playerStats.enemyCountMultiplier()
             )
 
         hudFont.draw(
@@ -1312,7 +1420,9 @@ class FirstScreen(
             MarketOfferGenerator.generateOffers(
                 currentStage =
                     stageController.currentStage,
-                offerCount = missingSlotCount
+                offerCount = missingSlotCount,
+                luckScore =
+                    playerStats.luckScore()
             ).map { offer ->
                 MarketSlot(
                     offer = offer

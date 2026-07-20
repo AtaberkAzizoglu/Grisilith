@@ -3,24 +3,102 @@ package com.azizoglu.grisilith.statistics
 object StatCardGenerator {
 
     fun generateCards(): List<StatCard> {
-        return listOf(
-            StatCard(
-                type = StatUpgradeType.MAX_HEALTH,
-                title = "Max Health",
-                description = "+1 Max HP score"
-            ),
+        val cardPool =
+            listOf(
+                createCard(
+                    StatUpgradeType.MAX_HEALTH,
+                    "Max Health"
+                ),
 
-            StatCard(
-                type = StatUpgradeType.MOVEMENT_SPEED,
-                title = "Movement Speed",
-                description = "+1 Movement Speed score"
-            ),
+                createCard(
+                    StatUpgradeType.ARMOR_CLASS,
+                    "Armor Class"
+                ),
 
-            StatCard(
-                type = StatUpgradeType.ATTACK_SPEED,
-                title = "Attack Speed",
-                description = "+1 Attack Speed score"
+                createCard(
+                    StatUpgradeType.STRENGTH,
+                    "Strength"
+                ),
+
+                createCard(
+                    StatUpgradeType.DEXTERITY,
+                    "Dexterity"
+                ),
+
+                createCard(
+                    StatUpgradeType.WISDOM,
+                    "Wisdom"
+                ),
+
+                createCard(
+                    StatUpgradeType.COOLDOWN,
+                    "Cooldown"
+                ),
+
+                createCard(
+                    StatUpgradeType.ATTACK_SPEED,
+                    "Attack Speed"
+                ),
+
+                createCard(
+                    StatUpgradeType.CRIT_RATE,
+                    "Crit Rate"
+                ),
+
+                createCard(
+                    StatUpgradeType.CRIT_DAMAGE,
+                    "Crit Damage"
+                ),
+
+                createCard(
+                    StatUpgradeType.MOVEMENT_SPEED,
+                    "Movement Speed"
+                ),
+
+                createCard(
+                    StatUpgradeType.LUCK,
+                    "Luck"
+                ),
+
+                createCard(
+                    StatUpgradeType.HARVEST,
+                    "Harvest"
+                ),
+
+                createCard(
+                    StatUpgradeType.PIERCING,
+                    "Piercing"
+                ),
+
+                createCard(
+                    StatUpgradeType.ENEMY_COUNT,
+                    "Enemy Count"
+                ),
+
+                createCard(
+                    StatUpgradeType.HP_REGENERATION,
+                    "HP Regeneration"
+                ),
+
+                createCard(
+                    StatUpgradeType.LIFE_STEAL,
+                    "Life Steal"
+                )
             )
-        ).shuffled()
+
+        return cardPool
+            .shuffled()
+            .take(3)
+    }
+
+    private fun createCard(
+        type: StatUpgradeType,
+        title: String
+    ): StatCard {
+        return StatCard(
+            type = type,
+            title = title,
+            description = "+1 $title score"
+        )
     }
 }
