@@ -1,0 +1,116 @@
+package com.azizoglu.grisilith.enemy
+
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Rectangle
+
+class EnemyManager {
+
+    private val enemies = mutableListOf<Enemy>()
+
+    val allEnemies: List<Enemy>
+        get() = enemies
+
+    val enemyCount: Int
+        get() = enemies.size
+
+    fun spawn(enemy: Enemy) {
+        enemies.add(enemy)
+    }
+
+    fun update(
+        delta: Float,
+        targetX: Float,
+        targetY: Float,
+        targetBounds: Rectangle,
+        worldWidth: Float,
+        worldHeight: Float,
+        onPlayerDamaged: (Int) -> Unit
+    ) {
+        enemies.forEach { enemy ->
+            enemy.update(
+                delta = delta,
+                targetX = targetX,
+                targetY = targetY,
+                targetBounds = targetBounds,
+                onContactDamage = onPlayerDamaged
+            )
+        }
+
+        resolveEnemySeparation()
+
+        enemies.forEach { enemy ->
+            enemy.keepInsideWorld(
+                worldWidth = worldWidth,
+                worldHeight = worldHeight
+            )
+        }
+    }
+
+    private fun resolveEnemySeparation() {
+        /*
+         * Her düşman çiftini yalnızca bir kez kontrol eder.
+         */
+        for (firstIndex in 0 until enemies.size) {
+            val firstEnemy = enemies[firstIndex]
+
+            for (
+            secondIndex in firstIndex + 1
+                until enemies.size
+            ) {
+                val secondEnemy =
+                    enemies[secondIndex]
+
+                firstEnemy.separateFrom(
+                    secondEnemy
+                )
+            }
+        }
+    }
+
+    fun resolvePlayerCollisions(
+        resolveCollision: (Rectangle) -> Boolean
+    ) {
+        enemies.forEach { enemy ->
+            if (!enemy.isDead) {
+                resolveCollision(enemy.bounds)
+            }
+        }
+    }
+
+    fun nearestEnemy(
+        x: Float,
+        y: Float
+    ): Enemy? {
+        return enemies
+            .asSequence()
+            .filterNot { enemy ->
+                enemy.isDead
+            }
+            .minByOrNull { enemy ->
+                val differenceX =
+                    enemy.centerX - x
+
+                val differenceY =
+                    enemy.centerY - y
+
+                differenceX * differenceX +
+                    differenceY * differenceY
+            }
+    }
+
+    fun removeDeadEnemies() {
+        enemies.removeAll { enemy ->
+            enemy.isDead
+        }
+    }
+
+    fun clearAll() {
+        enemies.clear()
+    }
+
+    fun render(shapeRenderer: ShapeRenderer) {
+        enemies.forEach { enemy ->
+            enemy.render(shapeRenderer)
+        }
+    }
+}
