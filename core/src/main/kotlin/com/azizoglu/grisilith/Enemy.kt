@@ -36,6 +36,9 @@ class Enemy(
     val isDead: Boolean
         get() = health.isDead
 
+    val type: EnemyType
+        get() = stats.type
+
     val centerX: Float
         get() = position.x + size / 2f
 
@@ -53,6 +56,9 @@ class Enemy(
 
             return collisionBounds
         }
+
+    val goldReward: Float
+        get() = stats.goldReward
 
     fun update(
         delta: Float,

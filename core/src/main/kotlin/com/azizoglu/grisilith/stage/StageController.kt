@@ -39,12 +39,14 @@ class StageController(
             currentStageDuration - elapsedStageTime
             ).coerceAtLeast(0f)
 
-    val isFinalStage: Boolean
-        get() = currentStage == maximumStage
-
     val isRunComplete: Boolean
         get() = currentStage > maximumStage
 
+    /**
+     * Yalnızca normal aşama süre dolduğunda true döndürür.
+     *
+     * Boss aşamaları süre dolunca otomatik tamamlanmaz.
+     */
     fun update(delta: Float): Boolean {
         if (isRunComplete) {
             return false
@@ -56,10 +58,21 @@ class StageController(
             return false
         }
 
-        elapsedStageTime -= currentStageDuration
-        currentStage++
+        return when (currentStageType) {
+            StageType.NORMAL,
+            StageType.MINI_BOSS -> true
 
-        return true
+            StageType.FINAL_BOSS -> false
+        }
+    }
+
+    fun completeCurrentStage() {
+        if (isRunComplete) {
+            return
+        }
+
+        currentStage++
+        elapsedStageTime = 0f
     }
 
     private fun determineStageType(

@@ -45,4 +45,22 @@ object EnemySpawnScaling {
             uniqueSpawnChance = uniqueSpawnChance
         )
     }
+
+    fun maximumEnemyCountForStage(
+        stage: Int,
+        isBossStage: Boolean
+    ): Int {
+        val baseMaximum =
+            settingsForStage(stage)
+                .maximumEnemyCount
+
+        return if (isBossStage) {
+            (baseMaximum * 0.5f)
+                .toInt()
+                .coerceAtLeast(1)
+        } else {
+            baseMaximum
+        }
+    }
+
 }

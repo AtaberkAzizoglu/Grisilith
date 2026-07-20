@@ -5,5 +5,6 @@ data class EnemyStats(
     val maximumHealth: Int,
     val contactDamage: Int,
     val movementSpeed: Float,
-    val size: Float
+    val size: Float,
+    val goldReward: Float
 )

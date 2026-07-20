@@ -3,7 +3,6 @@ package com.azizoglu.grisilith.enemy
 import com.azizoglu.grisilith.stage.StageType
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.math.MathUtils
-import kotlin.math.roundToInt
 
 class EnemySpawner(
     private val worldWidth: Float,
@@ -11,6 +10,9 @@ class EnemySpawner(
 ) {
     private var spawnTimer = 0f
     private var bossSpawned = false
+
+    val hasSpawnedBoss: Boolean
+        get() = bossSpawned
 
     init {
         require(worldWidth > 0f)
@@ -113,16 +115,10 @@ class EnemySpawner(
             }
 
         val maximumEnemyCount =
-            if (isBossStage) {
-                (
-                    baseSettings.maximumEnemyCount *
-                        0.5f
-                    )
-                    .roundToInt()
-                    .coerceAtLeast(1)
-            } else {
-                baseSettings.maximumEnemyCount
-            }
+            EnemySpawnScaling.maximumEnemyCountForStage(
+                stage = currentStage,
+                isBossStage = isBossStage
+            )
 
         if (
             enemyManager.enemyCount >=

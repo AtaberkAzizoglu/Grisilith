@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.enemy
 
 import kotlin.math.floor
 import kotlin.math.roundToInt
+import com.azizoglu.grisilith.economy.GoldRewardScaling
 
 object EnemyScaling {
 
@@ -17,7 +18,11 @@ object EnemyScaling {
             maximumHealth = scaledStats.maximumHealth,
             contactDamage = scaledStats.contactDamage,
             movementSpeed = scaledStats.movementSpeed,
-            size = 44f
+            size = 44f,
+            goldReward = GoldRewardScaling.rewardFor(
+                enemyType = EnemyType.NORMAL,
+                stage = stage
+            )
         )
     }
 
@@ -39,7 +44,12 @@ object EnemyScaling {
             movementSpeed =
                 scaledStats.movementSpeed * 1.10f,
 
-            size = 72f
+            size = 72f,
+
+            goldReward = GoldRewardScaling.rewardFor(
+                enemyType = EnemyType.UNIQUE,
+                stage = stage
+            )
         )
     }
 
@@ -61,7 +71,12 @@ object EnemyScaling {
             movementSpeed =
                 scaledStats.movementSpeed * 0.85f,
 
-            size = 128f
+            size = 128f,
+
+            goldReward = GoldRewardScaling.rewardFor(
+                enemyType = EnemyType.MINI_BOSS,
+                stage = stage
+            )
         )
     }
 
@@ -83,7 +98,12 @@ object EnemyScaling {
             movementSpeed =
                 scaledStats.movementSpeed * 0.72f,
 
-            size = 200f
+            size = 200f,
+
+            goldReward = GoldRewardScaling.rewardFor(
+                enemyType = EnemyType.FINAL_BOSS,
+                stage = stage
+            )
         )
     }
 

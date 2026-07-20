@@ -59,7 +59,7 @@ class Projectile(
     fun checkCollision(
         enemies: List<Enemy>,
         onDamageDealt: (Int) -> Unit,
-        onEnemyKilled: () -> Unit
+        onEnemyKilled: (Enemy) -> Unit
     ) {
         if (!isActive) {
             return
@@ -81,12 +81,13 @@ class Projectile(
             }
 
             val wasAliveBeforeHit = !enemy.isDead
-            val appliedDamage = enemy.takeDamage(damage)
+            val appliedDamage =
+                enemy.takeDamage(damage)
 
             onDamageDealt(appliedDamage)
 
             if (wasAliveBeforeHit && enemy.isDead) {
-                onEnemyKilled()
+                onEnemyKilled(enemy)
             }
 
             isActive = false

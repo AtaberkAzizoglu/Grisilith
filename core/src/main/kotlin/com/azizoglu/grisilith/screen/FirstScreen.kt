@@ -23,6 +23,10 @@ import com.badlogic.gdx.Input
 import com.azizoglu.grisilith.stage.StageController
 import com.azizoglu.grisilith.enemy.EnemyScaling
 import com.azizoglu.grisilith.enemy.EnemySpawnScaling
+import com.azizoglu.grisilith.enemy.EnemyType
+import com.azizoglu.grisilith.stage.StageType
+import com.azizoglu.grisilith.economy.GoldCoinPickup
+import com.azizoglu.grisilith.economy.SessionWallet
 
 class FirstScreen : ScreenAdapter() {
 
@@ -87,6 +91,12 @@ class FirstScreen : ScreenAdapter() {
         maximumStage = 20
     )
 
+    private val sessionWallet =
+        SessionWallet()
+
+    private val goldCoinPickups =
+        mutableListOf<GoldCoinPickup>()
+
     override fun show() {
         viewport.apply()
 
@@ -150,9 +160,13 @@ class FirstScreen : ScreenAdapter() {
             return
         }
 
-        updateStage(delta)
+        val stageChanged =
+            updateStage(delta)
 
-        if (stageController.isRunComplete) {
+        if (
+            stageChanged ||
+            stageController.isRunComplete
+        ) {
             return
         }
 
@@ -191,16 +205,48 @@ class FirstScreen : ScreenAdapter() {
 
             projectile.checkCollision(
                 enemies = enemyManager.allEnemies,
-                onDamageDealt = runStatistics::recordDamageDealt,
-                onEnemyKilled = runStatistics::recordEnemyKilled
-            )
+                onDamageDealt =
+                    runStatistics::recordDamageDealt
+            ) { killedEnemy ->
+                runStatistics.recordEnemyKilled()
+
+                goldCoinPickups.add(
+                    GoldCoinPickup(
+                        startX = killedEnemy.centerX,
+                        startY = killedEnemy.centerY,
+                        value = killedEnemy.goldReward
+                    )
+                )
+            }
         }
 
         projectiles.removeAll { projectile ->
             !projectile.isActive
         }
 
+        goldCoinPickups.forEach { pickup ->
+            pickup.update(
+                delta = delta,
+                targetX = player.centerX,
+                targetY = player.centerY
+            ) { collectedGold ->
+                sessionWallet.addGold(collectedGold)
+            }
+        }
+
+        goldCoinPickups.removeAll { pickup ->
+            pickup.isCollected
+        }
+
         enemyManager.removeDeadEnemies()
+
+        /*
+         * Mermiyle boss bu frame içinde öldüyse
+         * aşamayı hemen tamamlar.
+         */
+        if (completeBossStageIfDefeated()) {
+            return
+        }
 
         updateCamera()
 
@@ -208,21 +254,33 @@ class FirstScreen : ScreenAdapter() {
             delta = delta,
             camera = camera,
             enemyManager = enemyManager,
-            currentStage = stageController.currentStage,
-            stageType = stageController.currentStageType
+            currentStage =
+                stageController.currentStage,
+            stageType =
+                stageController.currentStageType
         )
     }
 
-    private fun updateStage(delta: Float) {
-        val stageCompleted =
+    private fun updateStage(
+        delta: Float
+    ): Boolean {
+        val normalStageTimeCompleted =
             stageController.update(delta)
 
-        if (!stageCompleted) {
-            return
+        if (!normalStageTimeCompleted) {
+            return false
         }
+
+        completeCurrentStage()
+        return true
+    }
+
+    private fun completeCurrentStage() {
+        stageController.completeCurrentStage()
 
         enemyManager.clearAll()
         projectiles.clear()
+        goldCoinPickups.clear()
         enemySpawner.resetTimer()
     }
 
@@ -250,6 +308,10 @@ class FirstScreen : ScreenAdapter() {
 
         player.render(shapeRenderer)
         enemyManager.render(shapeRenderer)
+
+        goldCoinPickups.forEach { pickup ->
+            pickup.render(shapeRenderer)
+        }
 
         projectiles.forEach { projectile ->
             projectile.render(shapeRenderer)
@@ -419,7 +481,27 @@ class FirstScreen : ScreenAdapter() {
 
         hudFont.draw(
             hudBatch,
-            "Active Enemies: ${enemyManager.enemyCount}",
+            "Gold Coin: ${sessionWallet.goldCoins}",
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        val isBossStage =
+            stageController.currentStageType !=
+                StageType.NORMAL
+
+        val currentEnemyLimit =
+            EnemySpawnScaling.maximumEnemyCountForStage(
+                stage = stageController.currentStage,
+                isBossStage = isBossStage
+            )
+
+        hudFont.draw(
+            hudBatch,
+            "Active Enemies: " +
+                "${enemyManager.enemyCount} / $currentEnemyLimit",
             leftX,
             topY
         )
@@ -428,15 +510,6 @@ class FirstScreen : ScreenAdapter() {
             EnemySpawnScaling.settingsForStage(
                 stage = stageController.currentStage
             )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Enemy Limit: ${spawnSettings.maximumEnemyCount}",
-            leftX,
-            topY
-        )
 
         topY -= 28f
 
@@ -593,7 +666,39 @@ class FirstScreen : ScreenAdapter() {
             stageController.remainingStageTime
         ).toInt()
     }
+    private fun completeBossStageIfDefeated(): Boolean {
+        val requiredBossType =
+            when (stageController.currentStageType) {
+                StageType.NORMAL ->
+                    return false
 
+                StageType.MINI_BOSS ->
+                    EnemyType.MINI_BOSS
+
+                StageType.FINAL_BOSS ->
+                    EnemyType.FINAL_BOSS
+            }
+
+        /*
+         * Boss henüz spawn olmadıysa aşamayı
+         * yanlışlıkla tamamlamıyoruz.
+         */
+        if (!enemySpawner.hasSpawnedBoss) {
+            return false
+        }
+
+        val bossIsStillAlive =
+            enemyManager.hasLivingEnemyOfType(
+                requiredBossType
+            )
+
+        if (bossIsStillAlive) {
+            return false
+        }
+
+        completeCurrentStage()
+        return true
+    }
 
 }
 

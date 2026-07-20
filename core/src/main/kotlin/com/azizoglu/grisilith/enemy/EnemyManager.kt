@@ -77,6 +77,15 @@ class EnemyManager {
         }
     }
 
+    fun hasLivingEnemyOfType(
+        enemyType: EnemyType
+    ): Boolean {
+        return enemies.any { enemy ->
+            !enemy.isDead &&
+                enemy.type == enemyType
+        }
+    }
+
     fun nearestEnemy(
         x: Float,
         y: Float
