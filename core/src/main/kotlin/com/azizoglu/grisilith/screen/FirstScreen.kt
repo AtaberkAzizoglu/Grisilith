@@ -1615,7 +1615,9 @@ class FirstScreen(
                                 .generateOffers(
                                     currentStage =
                                         stageController.currentStage,
-                                    offerCount = 1
+                                    offerCount = 1,
+                                    luckScore =
+                                        playerStats.luckScore()
                                 )
                                 .first()
                     )
