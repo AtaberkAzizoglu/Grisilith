@@ -39,6 +39,8 @@ import com.azizoglu.grisilith.config.GameDifficulty
 import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.map.MapObstacleGenerator
+import com.azizoglu.grisilith.statistics.PlayerStats
+import com.azizoglu.grisilith.statistics.StatType
 
 class FirstScreen(
     private val game: GrisilithGame,
@@ -69,11 +71,15 @@ class FirstScreen(
         camera
     )
 
+    private val playerStats =
+        PlayerStats()
+
     private val player = Player(
         startX = worldWidth / 2f,
         startY = worldHeight / 2f,
         worldWidth = worldWidth,
-        worldHeight = worldHeight
+        worldHeight = worldHeight,
+        stats = playerStats
     )
 
     private val mapObstacles: List<MapObstacle> =
@@ -110,8 +116,9 @@ class FirstScreen(
     )
 
     private val autoWeapon = AutoWeapon(
-        attacksPerSecond = 2f,
-        displayName = "Starter Auto Weapon"
+        baseAttacksPerSecond = 2f,
+        displayName = "Starter Auto Weapon",
+        playerStats = playerStats
     )
 
     private var isRunSummaryOpen = false
@@ -633,6 +640,42 @@ class FirstScreen(
         hudFont.draw(
             hudBatch,
             "Stage Time: ${remainingStageSeconds()}",
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        hudFont.draw(
+            hudBatch,
+            "Max HP Score: " +
+                playerStats.totalScore(
+                    StatType.MAX_HP
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        hudFont.draw(
+            hudBatch,
+            "Movement Speed Score: " +
+                playerStats.totalScore(
+                    StatType.MOVEMENT_SPEED
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        hudFont.draw(
+            hudBatch,
+            "Attack Speed Score: " +
+                playerStats.totalScore(
+                    StatType.ATTACK_SPEED
+                ),
             leftX,
             topY
         )
@@ -1406,23 +1449,23 @@ class FirstScreen(
     ) {
         when (offer.productType) {
             MarketProductType.WEAPON -> {
-                autoWeapon.increaseAttackSpeed(
-                    percentageIncrease =
-                        0.10f * offer.productLevel
+                player.addRunStatBonus(
+                    statType = StatType.ATTACK_SPEED,
+                    amount = offer.productLevel
                 )
             }
 
             MarketProductType.SKILL -> {
-                player.increaseMaximumHealth(
-                    amount =
-                        15 * offer.productLevel
+                player.addRunStatBonus(
+                    statType = StatType.MAX_HP,
+                    amount = offer.productLevel
                 )
             }
 
             MarketProductType.ITEM -> {
-                player.increaseMovementSpeed(
-                    percentageIncrease =
-                        0.08f * offer.productLevel
+                player.addRunStatBonus(
+                    statType = StatType.MOVEMENT_SPEED,
+                    amount = offer.productLevel
                 )
             }
         }
@@ -1473,25 +1516,10 @@ class FirstScreen(
     private fun applyStatCard(
         card: StatCard
     ) {
-        when (card.type) {
-            StatUpgradeType.MAX_HEALTH -> {
-                player.increaseMaximumHealth(
-                    amount = 15
-                )
-            }
-
-            StatUpgradeType.MOVEMENT_SPEED -> {
-                player.increaseMovementSpeed(
-                    percentageIncrease = 0.08f
-                )
-            }
-
-            StatUpgradeType.ATTACK_SPEED -> {
-                autoWeapon.increaseAttackSpeed(
-                    percentageIncrease = 0.10f
-                )
-            }
-        }
+        player.addRunStatBonus(
+            statType = card.type.statType,
+            amount = 1
+        )
     }
 
     private fun renderStatCardSelection() {

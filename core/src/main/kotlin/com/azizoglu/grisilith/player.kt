@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.player
 
 import com.azizoglu.grisilith.combat.HealthComponent
+import com.azizoglu.grisilith.statistics.PlayerStats
+import com.azizoglu.grisilith.statistics.StatType
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
@@ -12,7 +14,8 @@ class Player(
     startX: Float,
     startY: Float,
     private val worldWidth: Float,
-    private val worldHeight: Float
+    private val worldHeight: Float,
+    val stats: PlayerStats
 ) {
     private val position =
         Vector2(startX, startY)
@@ -24,14 +27,14 @@ class Player(
         Vector2()
 
     private val size = 48f
-    private var speed = 260f
 
     private val collisionBounds =
         Rectangle()
 
     val health =
         HealthComponent(
-            maximumHealth = 100
+            maximumHealth =
+                stats.calculatedMaximumHealth()
         )
 
     val centerX: Float
@@ -66,11 +69,45 @@ class Player(
 
             position.mulAdd(
                 movementDirection,
-                speed * delta
+                stats.calculatedMovementSpeed() *
+                    delta
             )
         }
 
         keepInsideWorld()
+    }
+
+    fun addRunStatBonus(
+        statType: StatType,
+        amount: Int
+    ): Int {
+        val previousMaximumHealth =
+            stats.calculatedMaximumHealth()
+
+        val appliedIncrease =
+            stats.addRunBonus(
+                statType = statType,
+                amount = amount
+            )
+
+        if (
+            statType == StatType.MAX_HP &&
+            appliedIncrease > 0
+        ) {
+            val newMaximumHealth =
+                stats.calculatedMaximumHealth()
+
+            val healthIncrease =
+                newMaximumHealth -
+                    previousMaximumHealth
+
+            health.increaseMaximumHealth(
+                amount = healthIncrease,
+                healAddedHealth = true
+            )
+        }
+
+        return appliedIncrease
     }
 
     fun resolveCollision(
@@ -155,24 +192,6 @@ class Player(
 
     fun takeDamage(amount: Int): Int {
         return health.takeDamage(amount)
-    }
-
-    fun increaseMaximumHealth(amount: Int) {
-        health.increaseMaximumHealth(
-            amount = amount,
-            healAddedHealth = true
-        )
-    }
-
-    fun increaseMovementSpeed(
-        percentageIncrease: Float
-    ) {
-        if (percentageIncrease <= 0f) {
-            return
-        }
-
-        speed *=
-            1f + percentageIncrease
     }
 
     fun render(

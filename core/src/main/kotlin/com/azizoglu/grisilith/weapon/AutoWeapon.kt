@@ -2,18 +2,17 @@ package com.azizoglu.grisilith.weapon
 
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.player.Player
+import com.azizoglu.grisilith.statistics.PlayerStats
 
 class AutoWeapon(
-    attacksPerSecond: Float,
-    val displayName: String
+    private val baseAttacksPerSecond: Float,
+    val displayName: String,
+    private val playerStats: PlayerStats
 ) {
-    private var attacksPerSecond =
-        attacksPerSecond
-
     private var attackTimer = 0f
 
     init {
-        require(attacksPerSecond > 0f) {
+        require(baseAttacksPerSecond > 0f) {
             "Attacks per second must be greater than zero."
         }
     }
@@ -26,8 +25,12 @@ class AutoWeapon(
     ) {
         attackTimer += delta
 
+        val currentAttacksPerSecond =
+            baseAttacksPerSecond *
+                playerStats.attackSpeedMultiplier()
+
         val attackInterval =
-            1f / attacksPerSecond
+            1f / currentAttacksPerSecond
 
         while (attackTimer >= attackInterval) {
             attackTimer -= attackInterval
@@ -48,16 +51,5 @@ class AutoWeapon(
                 )
             )
         }
-    }
-
-    fun increaseAttackSpeed(
-        percentageIncrease: Float
-    ) {
-        if (percentageIncrease <= 0f) {
-            return
-        }
-
-        attacksPerSecond *=
-            1f + percentageIncrease
     }
 }

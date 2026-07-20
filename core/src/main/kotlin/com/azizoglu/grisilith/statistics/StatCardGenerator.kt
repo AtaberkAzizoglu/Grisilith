@@ -7,17 +7,19 @@ object StatCardGenerator {
             StatCard(
                 type = StatUpgradeType.MAX_HEALTH,
                 title = "Max Health",
-                description = "+15 maximum health"
+                description = "+1 Max HP score"
             ),
+
             StatCard(
                 type = StatUpgradeType.MOVEMENT_SPEED,
                 title = "Movement Speed",
-                description = "+8% movement speed"
+                description = "+1 Movement Speed score"
             ),
+
             StatCard(
                 type = StatUpgradeType.ATTACK_SPEED,
                 title = "Attack Speed",
-                description = "+10% attack speed"
+                description = "+1 Attack Speed score"
             )
         ).shuffled()
     }
