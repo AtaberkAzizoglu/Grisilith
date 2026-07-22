@@ -6,6 +6,7 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
+import com.azizoglu.grisilith.content.DamageType
 
 class ProjectileWeaponAttackExecutor(
     private val damageCalculator:
@@ -69,13 +70,6 @@ class ProjectileWeaponAttackExecutor(
         targetX: Float,
         targetY: Float
     ) {
-        /*
-         * Her oluşturulan projectile için
-         * hasar ve kritik vuruş ayrı hesaplanır.
-         *
-         * Bir saldırı iki projectile üretirse
-         * birisi critical, diğeri normal olabilir.
-         */
         val damageResult =
             damageCalculator.calculate(
                 weapon = context.weapon
@@ -106,6 +100,35 @@ class ProjectileWeaponAttackExecutor(
                 )
                 .coerceAtLeast(1)
 
+        val selectedDamageType =
+            selectDamageType(
+                damageTypes =
+                    definition.damageTypes,
+                randomSelection =
+                    definition
+                        .randomDamageTypePerAttack
+            )
+
+        val effectiveRange =
+            (
+                definition.baseRange *
+                    rarityStats.rangeMultiplier
+                )
+                .coerceAtLeast(1f)
+
+        val effectiveProjectileSpeed =
+            definition
+                .baseProjectileSpeed
+                .coerceAtLeast(1f)
+
+        val effectiveKnockback =
+            (
+                definition.baseKnockback *
+                    rarityStats
+                        .knockbackMultiplier
+                )
+                .coerceAtLeast(0f)
+
         context.projectiles.add(
             Projectile(
                 startX =
@@ -130,8 +153,39 @@ class ProjectileWeaponAttackExecutor(
                     damageResult.isCriticalHit,
 
                 maximumTargets =
-                    maximumTargets
+                    maximumTargets,
+
+                projectileSpeed =
+                    effectiveProjectileSpeed,
+
+                maximumTravelDistance =
+                    effectiveRange,
+
+                damageType =
+                    selectedDamageType,
+
+                knockback =
+                    effectiveKnockback
             )
         )
     }
+
+    private fun selectDamageType(
+        damageTypes: Set<DamageType>,
+        randomSelection: Boolean
+    ): DamageType {
+        if (damageTypes.isEmpty()) {
+            return DamageType.NONE
+        }
+
+        if (
+            randomSelection &&
+            damageTypes.size > 1
+        ) {
+            return damageTypes.random()
+        }
+
+        return damageTypes.first()
+    }
+
 }

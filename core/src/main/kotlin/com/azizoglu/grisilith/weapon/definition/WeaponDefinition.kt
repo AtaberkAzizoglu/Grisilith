@@ -106,6 +106,10 @@ data class WeaponDefinition(
     val slotCost: Int
         get() = 1
 
+    val usesHasteForNormalAttack: Boolean
+        get() =
+            ContentTag.SPELL_FOCUS in tags
+
     val startingRarity:
         ContentRarity
         get() = ContentRarity.COMMON

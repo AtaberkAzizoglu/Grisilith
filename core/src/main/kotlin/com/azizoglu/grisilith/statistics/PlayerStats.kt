@@ -170,6 +170,32 @@ class PlayerStats(
             ).coerceAtLeast(0.20f)
     }
 
+    fun hasteAttackSpeedMultiplier(): Float {
+        val score =
+            totalScore(
+                StatType.HASTE
+            )
+
+        /*
+         * Yalnızca Spell Focus normal saldırıları:
+         * Staff, Wand ve The Book.
+         *
+         * Haste 10 = x1.00
+         * Her puan ±%5 saldırı hızı.
+         *
+         * Haste 0  = x0.50
+         * Haste 10 = x1.00
+         * Haste 20 = x1.50
+         * Haste 30 = x2.00
+         */
+        return (
+            1f +
+                (score - 10) *
+                0.05f
+            )
+            .coerceAtLeast(0.20f)
+    }
+
     fun armorDamageMultiplier(): Float {
         val armorScore =
             totalScore(

@@ -7,6 +7,7 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
 import com.badlogic.gdx.math.Vector2
 import com.azizoglu.grisilith.statistics.PlayerStats
+import com.azizoglu.grisilith.content.DamageType
 
 class DaggerAttackExecutor(
     private val damageCalculator:
@@ -131,10 +132,6 @@ class DaggerAttackExecutor(
         targetX: Float,
         targetY: Float
     ) {
-        /*
-         * Projectile oluşturulurken bu atış için
-         * hasar ve crit ayrı hesaplanır.
-         */
         val damageResult =
             damageCalculator.calculate(
                 weapon = context.weapon
@@ -165,22 +162,65 @@ class DaggerAttackExecutor(
                 )
                 .coerceAtLeast(1)
 
+        val throwRange =
+            (
+                (
+                    definition.secondaryRange
+                        ?: definition.baseRange
+                    ) *
+                    rarityStats.rangeMultiplier
+                )
+                .coerceAtLeast(1f)
+
+        val damageType =
+            definition.damageTypes
+                .firstOrNull()
+                ?: DamageType.NONE
+
         context.projectiles.add(
             Projectile(
                 startX =
                     context.player.centerX,
+
                 startY =
                     context.player.centerY,
-                targetX = targetX,
-                targetY = targetY,
+
+                targetX =
+                    targetX,
+
+                targetY =
+                    targetY,
+
                 sourceWeaponName =
                     context.weapon.displayName,
+
                 damage =
                     damageResult.damage,
+
                 isCriticalHit =
                     damageResult.isCriticalHit,
+
                 maximumTargets =
-                    maximumTargets
+                    maximumTargets,
+
+                projectileSpeed =
+                    definition
+                        .baseProjectileSpeed
+                        .coerceAtLeast(1f),
+
+                maximumTravelDistance =
+                    throwRange,
+
+                damageType =
+                    damageType,
+
+                knockback =
+                    (
+                        definition.baseKnockback *
+                            rarityStats
+                                .knockbackMultiplier
+                        )
+                        .coerceAtLeast(0f)
             )
         )
     }

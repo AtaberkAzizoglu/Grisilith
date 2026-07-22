@@ -255,7 +255,14 @@ class FirstScreen(
         weaponInventory.addWeapon(
             WeaponInstance(
                 definition =
-                    DefaultWeapons.wand
+                    DefaultWeapons.theBook
+            )
+        )
+
+        weaponInventory.addWeapon(
+            WeaponInstance(
+                definition =
+                    DefaultWeapons.staff
             )
         )
 
@@ -1015,4 +1022,5 @@ class FirstScreen(
     }
 
 }
+
 

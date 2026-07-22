@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.weapon
 
+import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -11,28 +12,65 @@ class Projectile(
     startY: Float,
     targetX: Float,
     targetY: Float,
+
     val sourceWeaponName: String,
+
     private val damage: Int,
+
     val isCriticalHit: Boolean,
-    maximumTargets: Int
+
+    maximumTargets: Int,
+
+    projectileSpeed: Float,
+
+    maximumTravelDistance: Float,
+
+    val damageType: DamageType,
+
+    /*
+     * Bu committe veri olarak taşınıyor.
+     * Gerçek itme davranışı sonraki adımda
+     * Enemy hareket sistemine bağlanacak.
+     */
+    val knockback: Float = 0f
 ) {
-    private val position = Vector2(
-        startX,
-        startY
-    )
 
-    private val direction = Vector2(
-        targetX - startX,
-        targetY - startY
-    ).nor()
+    private val position =
+        Vector2(
+            startX,
+            startY
+        )
 
-    private val collisionBounds = Rectangle()
+    private val velocity =
+        Vector2(
+            targetX - startX,
+            targetY - startY
+        )
 
-    private val size = 14f
-    private val speed = 700f
+    private val size =
+        if (isCriticalHit) {
+            15f
+        } else {
+            11f
+        }
+
+    private val collisionBounds =
+        Rectangle()
+
+    private val safeProjectileSpeed =
+        projectileSpeed
+            .coerceAtLeast(1f)
+
+    private val safeMaximumTravelDistance =
+        maximumTravelDistance
+            .coerceAtLeast(1f)
+
+    private var travelledDistance =
+        0f
 
     private var remainingTargets =
-        maximumTargets.coerceAtLeast(1)
+        maximumTargets
+            .coerceAtLeast(1)
 
     private val hitEnemies =
         mutableSetOf<Enemy>()
@@ -40,27 +78,65 @@ class Projectile(
     var isActive: Boolean = true
         private set
 
+    init {
+        if (velocity.isZero) {
+            velocity.set(
+                1f,
+                0f
+            )
+        }
+
+        velocity
+            .nor()
+            .scl(
+                safeProjectileSpeed
+            )
+    }
+
     fun update(
         delta: Float,
         worldWidth: Float,
         worldHeight: Float
     ) {
-        if (!isActive) {
+        if (
+            !isActive ||
+            delta <= 0f
+        ) {
             return
         }
 
-        position.mulAdd(
-            direction,
-            speed * delta
+        val movementX =
+            velocity.x * delta
+
+        val movementY =
+            velocity.y * delta
+
+        position.add(
+            movementX,
+            movementY
         )
 
-        val isOutsideWorld =
-            position.x < -size ||
-                position.y < -size ||
+        travelledDistance +=
+            Vector2.len(
+                movementX,
+                movementY
+            )
+
+        if (
+            travelledDistance >=
+            safeMaximumTravelDistance
+        ) {
+            isActive = false
+            return
+        }
+
+        val outsideWorld =
+            position.x + size < 0f ||
+                position.y + size < 0f ||
                 position.x > worldWidth ||
                 position.y > worldHeight
 
-        if (isOutsideWorld) {
+        if (outsideWorld) {
             isActive = false
         }
     }
@@ -98,9 +174,15 @@ class Projectile(
                 !enemy.isDead
 
             val appliedDamage =
-                enemy.takeDamage(damage)
+                enemy.takeDamage(
+                    damage
+                )
 
-            onDamageDealt(appliedDamage)
+            if (appliedDamage > 0) {
+                onDamageDealt(
+                    appliedDamage
+                )
+            }
 
             if (
                 wasAliveBeforeHit &&
@@ -115,16 +197,24 @@ class Projectile(
                 isActive = false
             }
 
+            /*
+             * Bir frame içinde yalnızca bir yeni
+             * düşmana çarpar. Piercing varsa sonraki
+             * frame diğer düşmanlara devam edebilir.
+             */
             return
         }
     }
 
-    fun render(shapeRenderer: ShapeRenderer) {
+    fun render(
+        shapeRenderer: ShapeRenderer
+    ) {
         if (!isActive) {
             return
         }
 
-        shapeRenderer.color = Color.YELLOW
+        shapeRenderer.color =
+            projectileColor()
 
         shapeRenderer.rect(
             position.x,
@@ -132,5 +222,52 @@ class Projectile(
             size,
             size
         )
+    }
+
+    private fun projectileColor(): Color {
+        if (isCriticalHit) {
+            return Color.GOLD
+        }
+
+        return when (damageType) {
+            DamageType.NONE ->
+                Color.LIGHT_GRAY
+
+            DamageType.SLASHING ->
+                Color.WHITE
+
+            DamageType.PIERCING ->
+                Color.LIGHT_GRAY
+
+            DamageType.BLUDGEONING ->
+                Color.BROWN
+
+            DamageType.AIR ->
+                Color.CYAN
+
+            DamageType.WATER ->
+                Color.BLUE
+
+            DamageType.FIRE ->
+                Color.ORANGE
+
+            DamageType.EARTH ->
+                Color.BROWN
+
+            DamageType.POISON ->
+                Color.GREEN
+
+            DamageType.ACID ->
+                Color.LIME
+
+            DamageType.LIGHTNING ->
+                Color.YELLOW
+
+            DamageType.NECROTIC ->
+                Color.PURPLE
+
+            DamageType.COLD ->
+                Color.SKY
+        }
     }
 }

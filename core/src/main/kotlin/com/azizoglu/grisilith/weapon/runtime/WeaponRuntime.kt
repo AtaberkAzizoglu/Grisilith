@@ -74,12 +74,23 @@ class WeaponRuntime(
                 weapon.rarity
             )
 
+        val normalAttackSpeedMultiplier =
+            if (
+                definition
+                    .usesHasteForNormalAttack
+            ) {
+                playerStats
+                    .hasteAttackSpeedMultiplier()
+            } else {
+                playerStats
+                    .attackSpeedMultiplier()
+            }
+
         return (
             definition.baseAttacksPerSecond *
                 rarityStats
                     .attackSpeedMultiplier *
-                playerStats
-                    .attackSpeedMultiplier()
+                normalAttackSpeedMultiplier
             )
             .coerceAtLeast(0.01f)
     }
