@@ -3,11 +3,9 @@ package com.azizoglu.grisilith.screen
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.player.Player
-import com.azizoglu.grisilith.weapon.AutoWeapon
 import com.azizoglu.grisilith.weapon.Projectile
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
-import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.utils.viewport.FitViewport
@@ -19,14 +17,10 @@ import com.azizoglu.grisilith.util.GameTimeController
 import com.badlogic.gdx.Input
 import com.azizoglu.grisilith.stage.StageController
 import com.azizoglu.grisilith.enemy.EnemyScaling
-import com.azizoglu.grisilith.enemy.EnemySpawnScaling
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.stage.StageType
 import com.azizoglu.grisilith.economy.GoldCoinPickup
 import com.azizoglu.grisilith.economy.SessionWallet
-import com.azizoglu.grisilith.statistics.StatCard
-import com.azizoglu.grisilith.statistics.StatCardGenerator
-import com.azizoglu.grisilith.statistics.StatUpgradeType
 import com.azizoglu.grisilith.economy.MarketOffer
 import com.azizoglu.grisilith.economy.MarketOfferGenerator
 import com.azizoglu.grisilith.economy.MarketProductType
@@ -47,8 +41,9 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
 import com.azizoglu.grisilith.screen.render.HudRenderer
 import com.azizoglu.grisilith.screen.render.MarketRenderer
 import com.azizoglu.grisilith.screen.render.RunSummaryRenderer
-import com.azizoglu.grisilith.screen.render.WorldRenderer
 import com.azizoglu.grisilith.screen.controller.StatCardController
+import com.azizoglu.grisilith.screen.render.WorldRenderer
+import com.azizoglu.grisilith.weapon.runtime.WeaponRuntimeManager
 
 
 class FirstScreen(
@@ -73,19 +68,25 @@ class FirstScreen(
     private val shapeRenderer =
         ShapeRenderer()
 
-    private val worldRenderer =
-        WorldRenderer(
-            shapeRenderer
-        )
-
     private val camera =
         OrthographicCamera()
 
-    private val viewport = FitViewport(
-        CAMERA_WIDTH,
-        CAMERA_HEIGHT,
-        camera
-    )
+    private val worldRenderer =
+        WorldRenderer(
+            shapeRenderer = shapeRenderer,
+            camera = camera,
+            worldWidth = worldWidth,
+            worldHeight = worldHeight
+        )
+
+    private val viewport =
+        FitViewport(
+            CAMERA_WIDTH,
+            CAMERA_HEIGHT,
+            camera
+        )
+
+
 
     private val playerStats =
         PlayerStats(
@@ -95,6 +96,12 @@ class FirstScreen(
 
     private val weaponInventory =
         WeaponInventory()
+
+    private val weaponRuntimeManager =
+        WeaponRuntimeManager(
+            inventory = weaponInventory,
+            playerStats = playerStats
+        )
 
     private val player = Player(
         startX = worldWidth / 2f,
@@ -135,12 +142,6 @@ class FirstScreen(
     private val enemySpawner = EnemySpawner(
         worldWidth = worldWidth,
         worldHeight = worldHeight
-    )
-
-    private val autoWeapon = AutoWeapon(
-        baseAttacksPerSecond = 2f,
-        displayName = "Starter Auto Weapon",
-        playerStats = playerStats
     )
 
     private var isRunSummaryOpen = false
@@ -426,11 +427,32 @@ class FirstScreen(
         }
 
         if (!player.health.isDead) {
-            autoWeapon.update(
+            weaponRuntimeManager.update(
                 delta = delta,
                 player = player,
                 enemyManager = enemyManager,
-                projectiles = projectiles
+                projectiles = projectiles,
+                onDamageDealt = {
+                        appliedDamage,
+                        weaponName ->
+
+                    runStatistics.recordDamageDealt(
+                        amount = appliedDamage,
+                        weaponName = weaponName
+                    )
+
+                    player.tryLifeSteal(
+                        appliedDamage =
+                            appliedDamage
+                    )
+                },
+                onEnemyKilled = {
+                        killedEnemy ->
+
+                    handleEnemyKilled(
+                        killedEnemy
+                    )
+                }
             )
         }
 
@@ -455,18 +477,8 @@ class FirstScreen(
                     )
                 }
             ) { killedEnemy ->
-                runStatistics.recordEnemyKilled()
-
-                val harvestedGoldReward =
-                    killedEnemy.goldReward *
-                        playerStats.harvestGoldMultiplier()
-
-                goldCoinPickups.add(
-                    GoldCoinPickup(
-                        startX = killedEnemy.centerX,
-                        startY = killedEnemy.centerY,
-                        value = harvestedGoldReward
-                    )
+                handleEnemyKilled(
+                    killedEnemy
                 )
             }
         }
@@ -517,6 +529,28 @@ class FirstScreen(
         )
     }
 
+    private fun handleEnemyKilled(
+        killedEnemy: Enemy
+    ) {
+        runStatistics.recordEnemyKilled()
+
+        val harvestedGoldReward =
+            killedEnemy.goldReward *
+                playerStats
+                    .harvestGoldMultiplier()
+
+        goldCoinPickups.add(
+            GoldCoinPickup(
+                startX =
+                    killedEnemy.centerX,
+                startY =
+                    killedEnemy.centerY,
+                value =
+                    harvestedGoldReward
+            )
+        )
+    }
+
     private fun updateStage(
         delta: Float
     ): Boolean {
@@ -548,6 +582,7 @@ class FirstScreen(
 
         enemyManager.clearAll()
         projectiles.clear()
+        weaponRuntimeManager.resetAllTimers()
 
         statCardController.beginSelection(
             shouldOpenMarketAfterSelection =
@@ -557,41 +592,14 @@ class FirstScreen(
     }
 
     private fun renderGame() {
-        Gdx.gl.glClearColor(
-            0.05f,
-            0.05f,
-            0.08f,
-            1f
+        worldRenderer.render(
+            mapObstacles = mapObstacles,
+            player = player,
+            enemyManager = enemyManager,
+            goldCoinPickups =
+                goldCoinPickups,
+            projectiles = projectiles
         )
-
-        Gdx.gl.glClear(
-            GL20.GL_COLOR_BUFFER_BIT
-        )
-
-        shapeRenderer.projectionMatrix =
-            camera.combined
-
-        renderGrid()
-        renderWorldBorder()
-
-        worldRenderer.begin()
-
-        mapObstacles.forEach { obstacle ->
-            obstacle.render(shapeRenderer)
-        }
-
-        player.render(shapeRenderer)
-        enemyManager.render(shapeRenderer)
-
-        goldCoinPickups.forEach { pickup ->
-            pickup.render(shapeRenderer)
-        }
-
-        projectiles.forEach { projectile ->
-            projectile.render(shapeRenderer)
-        }
-
-        worldRenderer.end()
 
         hudRenderer.render(
             displayedStage =
@@ -660,57 +668,6 @@ class FirstScreen(
             )
 
         camera.update()
-    }
-
-    private fun renderGrid() {
-        val gridSize = 100f
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Line
-        )
-
-        var x = 0f
-
-        while (x <= worldWidth) {
-            shapeRenderer.line(
-                x,
-                0f,
-                x,
-                worldHeight
-            )
-
-            x += gridSize
-        }
-
-        var y = 0f
-
-        while (y <= worldHeight) {
-            shapeRenderer.line(
-                0f,
-                y,
-                worldWidth,
-                y
-            )
-
-            y += gridSize
-        }
-
-        shapeRenderer.end()
-    }
-
-    private fun renderWorldBorder() {
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Line
-        )
-
-        shapeRenderer.rect(
-            0f,
-            0f,
-            worldWidth,
-            worldHeight
-        )
-
-        shapeRenderer.end()
     }
 
     override fun resize(
@@ -806,6 +763,7 @@ class FirstScreen(
 
             enemyManager.clearAll()
             projectiles.clear()
+            weaponRuntimeManager.resetAllTimers()
 
             stageController.completeCurrentStage()
 
