@@ -1,0 +1,220 @@
+package com.azizoglu.grisilith.character
+
+import com.azizoglu.grisilith.content.ContentId
+import com.azizoglu.grisilith.content.ContentUnlockState
+import com.azizoglu.grisilith.statistics.StatType
+
+object DefaultCharacters {
+
+    val knight =
+        CharacterDefinition(
+            id =
+                ContentId("CHR_KNIGHT"),
+
+            displayName =
+                "Sir Imbert \"the Yellow Knight\"",
+
+            description =
+                "A durable melee warrior with high damage and poor mobility.",
+
+            minionDescription =
+                "Small armored weapon bearers.",
+
+            baseStats =
+                createStats(
+                    maxHp = 12,
+                    armorClass = 13,
+                    strength = 12,
+                    dexterity = 7,
+                    wisdom = 4,
+                    haste = 2,
+                    attackSpeed = 9,
+                    critRate = 8,
+                    critDamage = 7,
+                    movementSpeed = 5,
+                    luck = 4,
+                    harvest = 5,
+                    elementalDamage = 3,
+                    mightOfNature = 1,
+                    shepherd = 2,
+                    piercing = 10,
+                    enemyCount = 5,
+                    hpRegeneration = 0,
+                    lifeSteal = 1
+                ),
+
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
+    val ranger =
+        CharacterDefinition(
+            id =
+                ContentId("CHR_RANGER"),
+
+            displayName =
+                "Rousey Browne",
+
+            description =
+                "A fast ranged fighter with high Dexterity and critical damage.",
+
+            minionDescription =
+                "Small hooded weapon bearers wearing dark cloaks.",
+
+            baseStats =
+                createStats(
+                    maxHp = 9,
+                    armorClass = 7,
+                    strength = 3,
+                    dexterity = 15,
+                    wisdom = 2,
+                    haste = 0,
+                    attackSpeed = 12,
+                    critRate = 10,
+                    critDamage = 11,
+                    movementSpeed = 9,
+                    luck = 5,
+                    harvest = 9,
+                    elementalDamage = 0,
+                    mightOfNature = 1,
+                    shepherd = 2,
+                    piercing = 11,
+                    enemyCount = 4,
+                    hpRegeneration = 0,
+                    lifeSteal = 0
+                ),
+
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
+    val lavenaVol =
+        CharacterDefinition(
+            id =
+                ContentId("CHR_LAVENA_VOL"),
+
+            displayName =
+                "Lavena Vol \"One of Five\"",
+
+            description =
+                "A spell-focused caster whose weapons float beside her.",
+
+            minionDescription =
+                "No minions. Equipped weapons float around the character.",
+
+            baseStats =
+                createStats(
+                    maxHp = 7,
+                    armorClass = 5,
+                    strength = 2,
+                    dexterity = 5,
+                    wisdom = 14,
+                    haste = 11,
+                    attackSpeed = 5,
+                    critRate = 3,
+                    critDamage = 1,
+                    movementSpeed = 9,
+                    luck = 8,
+                    harvest = 6,
+                    elementalDamage = 10,
+                    mightOfNature = 10,
+                    shepherd = 10,
+                    piercing = 0,
+                    enemyCount = 2,
+                    hpRegeneration = 2,
+                    lifeSteal = 0
+                ),
+
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
+    val all:
+        List<CharacterDefinition> =
+        listOf(
+            knight,
+            ranger,
+            lavenaVol
+        )
+
+    private fun createStats(
+        maxHp: Int,
+        armorClass: Int,
+        strength: Int,
+        dexterity: Int,
+        wisdom: Int,
+        haste: Int,
+        attackSpeed: Int,
+        critRate: Int,
+        critDamage: Int,
+        movementSpeed: Int,
+        luck: Int,
+        harvest: Int,
+        elementalDamage: Int,
+        mightOfNature: Int,
+        shepherd: Int,
+        piercing: Int,
+        enemyCount: Int,
+        hpRegeneration: Int,
+        lifeSteal: Int
+    ): Map<StatType, Int> {
+        return mapOf(
+            StatType.MAX_HP to
+                maxHp,
+
+            StatType.ARMOR_CLASS to
+                armorClass,
+
+            StatType.STRENGTH to
+                strength,
+
+            StatType.DEXTERITY to
+                dexterity,
+
+            StatType.WISDOM to
+                wisdom,
+
+            StatType.HASTE to
+                haste,
+
+            StatType.ATTACK_SPEED to
+                attackSpeed,
+
+            StatType.CRIT_RATE to
+                critRate,
+
+            StatType.CRIT_DAMAGE to
+                critDamage,
+
+            StatType.MOVEMENT_SPEED to
+                movementSpeed,
+
+            StatType.LUCK to
+                luck,
+
+            StatType.HARVEST to
+                harvest,
+
+            StatType.ELEMENTAL_DAMAGE to
+                elementalDamage,
+
+            StatType.MIGHT_OF_NATURE to
+                mightOfNature,
+
+            StatType.SHEPHERD to
+                shepherd,
+
+            StatType.PIERCING to
+                piercing,
+
+            StatType.ENEMY_COUNT to
+                enemyCount,
+
+            StatType.HP_REGENERATION to
+                hpRegeneration,
+
+            StatType.LIFE_STEAL to
+                lifeSteal
+        )
+    }
+}

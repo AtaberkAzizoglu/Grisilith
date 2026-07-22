@@ -1,0 +1,71 @@
+package com.azizoglu.grisilith.content
+
+enum class DamageType(
+    val displayName: String,
+    val canCriticallyHit: Boolean
+) {
+    NONE(
+        displayName = "None",
+        canCriticallyHit = false
+    ),
+
+    SLASHING(
+        displayName = "Slashing",
+        canCriticallyHit = true
+    ),
+
+    PIERCING(
+        displayName = "Piercing",
+        canCriticallyHit = true
+    ),
+
+    BLUDGEONING(
+        displayName = "Bludgeoning",
+        canCriticallyHit = true
+    ),
+
+    AIR(
+        displayName = "Air",
+        canCriticallyHit = false
+    ),
+
+    WATER(
+        displayName = "Water",
+        canCriticallyHit = false
+    ),
+
+    FIRE(
+        displayName = "Fire",
+        canCriticallyHit = false
+    ),
+
+    EARTH(
+        displayName = "Earth",
+        canCriticallyHit = false
+    ),
+
+    POISON(
+        displayName = "Poison",
+        canCriticallyHit = false
+    ),
+
+    ACID(
+        displayName = "Acid",
+        canCriticallyHit = false
+    ),
+
+    LIGHTNING(
+        displayName = "Lightning",
+        canCriticallyHit = false
+    ),
+
+    NECROTIC(
+        displayName = "Necrotic",
+        canCriticallyHit = false
+    ),
+
+    COLD(
+        displayName = "Cold",
+        canCriticallyHit = false
+    )
+}

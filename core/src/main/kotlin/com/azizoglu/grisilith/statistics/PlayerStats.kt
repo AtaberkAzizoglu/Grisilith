@@ -7,7 +7,7 @@ class PlayerStats(
         defaultBaseScores()
 ) {
     companion object {
-        const val MINIMUM_SCORE = 1
+        const val MINIMUM_SCORE = 0
         const val PRE_RUN_MAXIMUM_SCORE = 20
         const val RUN_MAXIMUM_SCORE = 30
 

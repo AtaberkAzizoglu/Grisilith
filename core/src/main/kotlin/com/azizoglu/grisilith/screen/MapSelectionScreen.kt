@@ -67,7 +67,7 @@ class MapSelectionScreen(
             Gdx.input.isKeyJustPressed(
                 Input.Keys.NUM_1
             ) -> {
-                game.startRun(
+                game.showCharacterSelection(
                     difficulty = difficulty,
                     gameMap = GameMap.ROAD_TO_HOME
                 )
@@ -82,10 +82,9 @@ class MapSelectionScreen(
                     GameMap.TROUBLE_AT_HOME
                         .isInitiallyUnlocked
                 ) {
-                    game.startRun(
+                    game.showCharacterSelection(
                         difficulty = difficulty,
-                        gameMap =
-                            GameMap.TROUBLE_AT_HOME
+                        gameMap = GameMap.TROUBLE_AT_HOME
                     )
 
                     return true
@@ -100,11 +99,10 @@ class MapSelectionScreen(
                         .FOLLOWING_THE_DUNGEON_DELVER
                         .isInitiallyUnlocked
                 ) {
-                    game.startRun(
+                    game.showCharacterSelection(
                         difficulty = difficulty,
                         gameMap =
-                            GameMap
-                                .FOLLOWING_THE_DUNGEON_DELVER
+                            GameMap.FOLLOWING_THE_DUNGEON_DELVER
                     )
 
                     return true

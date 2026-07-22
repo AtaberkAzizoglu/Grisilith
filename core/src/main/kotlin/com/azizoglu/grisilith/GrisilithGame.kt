@@ -9,6 +9,8 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.screen.MapSelectionScreen
+import com.azizoglu.grisilith.character.CharacterDefinition
+import com.azizoglu.grisilith.screen.CharacterSelectionScreen
 
 class GrisilithGame : Game() {
 
@@ -28,15 +30,30 @@ class GrisilithGame : Game() {
         )
     }
 
-    fun startRun(
+    fun showCharacterSelection(
         difficulty: GameDifficulty,
         gameMap: GameMap
+    ) {
+        changeScreen(
+            CharacterSelectionScreen(
+                game = this,
+                difficulty = difficulty,
+                gameMap = gameMap
+            )
+        )
+    }
+
+    fun startRun(
+        difficulty: GameDifficulty,
+        gameMap: GameMap,
+        character: CharacterDefinition
     ) {
         changeScreen(
             FirstScreen(
                 game = this,
                 difficulty = difficulty,
-                gameMap = gameMap
+                gameMap = gameMap,
+                selectedCharacter = character
             )
         )
     }

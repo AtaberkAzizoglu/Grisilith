@@ -1,0 +1,53 @@
+package com.azizoglu.grisilith.character
+
+import com.azizoglu.grisilith.content.ContentCategory
+import com.azizoglu.grisilith.content.ContentDefinition
+import com.azizoglu.grisilith.content.ContentId
+import com.azizoglu.grisilith.content.ContentTag
+import com.azizoglu.grisilith.content.ContentUnlockState
+import com.azizoglu.grisilith.statistics.StatType
+
+data class CharacterDefinition(
+    override val id: ContentId,
+    override val displayName: String,
+    override val description: String,
+    val minionDescription: String,
+    val baseStats: Map<StatType, Int>,
+    override val initialUnlockState:
+    ContentUnlockState =
+        ContentUnlockState.UNLOCKED
+) : ContentDefinition {
+
+    override val category:
+        ContentCategory =
+        ContentCategory.CHARACTER
+
+    override val tags:
+        Set<ContentTag> =
+        emptySet()
+
+    init {
+        require(displayName.isNotBlank()) {
+            "Character name cannot be blank."
+        }
+
+        StatType.entries.forEach { statType ->
+            require(statType in baseStats) {
+                "Missing base stat $statType for $id."
+            }
+
+            val value =
+                baseStats.getValue(statType)
+
+            require(value in 0..20) {
+                "Base stat $statType must be between 0 and 20 for $id."
+            }
+        }
+    }
+
+    fun baseStat(
+        statType: StatType
+    ): Int {
+        return baseStats.getValue(statType)
+    }
+}

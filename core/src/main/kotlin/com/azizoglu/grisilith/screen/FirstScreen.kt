@@ -41,11 +41,14 @@ import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.map.MapObstacleGenerator
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.character.CharacterDefinition
 
 class FirstScreen(
     private val game: GrisilithGame,
     private val difficulty: GameDifficulty,
-    private val gameMap: GameMap
+    private val gameMap: GameMap,
+    private val selectedCharacter:
+    CharacterDefinition
 ) : ScreenAdapter() {
 
     companion object {
@@ -72,7 +75,10 @@ class FirstScreen(
     )
 
     private val playerStats =
-        PlayerStats()
+        PlayerStats(
+            initialBaseScores =
+                selectedCharacter.baseStats
+        )
 
     private val player = Player(
         startX = worldWidth / 2f,
@@ -246,7 +252,8 @@ class FirstScreen(
         ) {
             game.startRun(
                 difficulty = difficulty,
-                gameMap = gameMap
+                gameMap = gameMap,
+                character = selectedCharacter
             )
             return
         }
@@ -658,78 +665,6 @@ class FirstScreen(
 
         hudFont.draw(
             hudBatch,
-            "Max HP Score: " +
-                playerStats.totalScore(
-                    StatType.MAX_HP
-                ),
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Armor Class Score: " +
-                playerStats.totalScore(
-                    StatType.ARMOR_CLASS
-                ),
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "HP Regeneration Score: " +
-                playerStats.totalScore(
-                    StatType.HP_REGENERATION
-                ),
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Life Steal Score: " +
-                playerStats.totalScore(
-                    StatType.LIFE_STEAL
-                ),
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Movement Speed Score: " +
-                playerStats.totalScore(
-                    StatType.MOVEMENT_SPEED
-                ),
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Attack Speed Score: " +
-                playerStats.totalScore(
-                    StatType.ATTACK_SPEED
-                ),
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
             "HP: ${player.health.currentHealth}" +
                 " / ${player.health.maximumHealth}",
             leftX,
@@ -755,42 +690,6 @@ class FirstScreen(
             "Dexterity Score: " +
                 playerStats.totalScore(
                     StatType.DEXTERITY
-                ),
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Crit Rate Score: " +
-                playerStats.totalScore(
-                    StatType.CRIT_RATE
-                ),
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Crit Damage Score: " +
-                playerStats.totalScore(
-                    StatType.CRIT_DAMAGE
-                ),
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Enemy Count Score: " +
-                playerStats.totalScore(
-                    StatType.ENEMY_COUNT
                 ),
             leftX,
             topY
@@ -899,6 +798,7 @@ class FirstScreen(
             leftX,
             topY
         )
+
 
         topY -= 28f
 
@@ -1044,6 +944,16 @@ class FirstScreen(
         hudFont.draw(
             hudBatch,
             "Stage Reached: ${displayedStage()}",
+            startX,
+            currentY
+        )
+
+        currentY -= 32f
+
+        hudFont.draw(
+            hudBatch,
+            "Character: " +
+                selectedCharacter.displayName,
             startX,
             currentY
         )
