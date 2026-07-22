@@ -47,6 +47,9 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
 import com.azizoglu.grisilith.screen.render.HudRenderer
 import com.azizoglu.grisilith.screen.render.MarketRenderer
 import com.azizoglu.grisilith.screen.render.RunSummaryRenderer
+import com.azizoglu.grisilith.screen.render.WorldRenderer
+import com.azizoglu.grisilith.screen.controller.StatCardController
+
 
 class FirstScreen(
     private val game: GrisilithGame,
@@ -69,6 +72,11 @@ class FirstScreen(
 
     private val shapeRenderer =
         ShapeRenderer()
+
+    private val worldRenderer =
+        WorldRenderer(
+            shapeRenderer
+        )
 
     private val camera =
         OrthographicCamera()
@@ -139,8 +147,6 @@ class FirstScreen(
 
     private var isMarketOpen = false
 
-    private var shouldOpenMarketAfterCard = false
-
     private var marketSlots =
         emptyList<MarketSlot>()
 
@@ -157,16 +163,12 @@ class FirstScreen(
     )
 
 
-
     private val sessionWallet =
         SessionWallet()
 
     private val goldCoinPickups =
         mutableListOf<GoldCoinPickup>()
 
-    private var isChoosingStatCard = false
-
-    private var pendingStatCards = emptyList<StatCard>()
 
     private val hudRenderer =
         HudRenderer(
@@ -216,6 +218,23 @@ class FirstScreen(
                 stageController
         )
 
+    private val statCardController =
+        StatCardController(
+            player = player,
+            stageController =
+                stageController,
+            enemySpawner =
+                enemySpawner,
+            camera = camera,
+            cameraWidth =
+                CAMERA_WIDTH,
+            batch = hudBatch,
+            font = hudFont,
+            onOpenMarket = {
+                openMarket()
+            }
+        )
+
     override fun show() {
         viewport.apply()
 
@@ -250,7 +269,7 @@ class FirstScreen(
         val gameplayStopped =
             player.health.isDead ||
                 stageController.isRunComplete ||
-                isChoosingStatCard ||
+                statCardController.isOpen ||
                 isMarketOpen ||
                 isRunSummaryOpen
 
@@ -283,8 +302,8 @@ class FirstScreen(
             return
         }
 
-        if (isChoosingStatCard) {
-            handleStatCardSelection()
+        if (statCardController.isOpen) {
+            statCardController.handleInput()
             return
         }
 
@@ -519,24 +538,22 @@ class FirstScreen(
         val completedStageType =
             stageController.currentStageType
 
-        shouldOpenMarketAfterCard =
-            completedStageType ==
-                StageType.MINI_BOSS
-
         collectAllGoldPickups()
 
         grantStageCompletionGold(
             completedStage = completedStage,
-            completedStageType = completedStageType
+            completedStageType =
+                completedStageType
         )
 
         enemyManager.clearAll()
         projectiles.clear()
 
-        pendingStatCards =
-            StatCardGenerator.generateCards()
-
-        isChoosingStatCard = true
+        statCardController.beginSelection(
+            shouldOpenMarketAfterSelection =
+                completedStageType ==
+                    StageType.MINI_BOSS
+        )
     }
 
     private fun renderGame() {
@@ -557,9 +574,7 @@ class FirstScreen(
         renderGrid()
         renderWorldBorder()
 
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
+        worldRenderer.begin()
 
         mapObstacles.forEach { obstacle ->
             obstacle.render(shapeRenderer)
@@ -576,7 +591,8 @@ class FirstScreen(
             projectile.render(shapeRenderer)
         }
 
-        shapeRenderer.end()
+        worldRenderer.end()
+
         hudRenderer.render(
             displayedStage =
                 displayedStage(),
@@ -589,7 +605,7 @@ class FirstScreen(
             isMarketOpen =
                 isMarketOpen,
             isChoosingStatCard =
-                isChoosingStatCard,
+                statCardController.isOpen,
             renderRunSummary = {
                 runSummaryRenderer.render(
                     displayedStage =
@@ -607,7 +623,7 @@ class FirstScreen(
                 )
             },
             renderStatCardSelection = {
-                renderStatCardSelection()
+                statCardController.render()
             }
         )
     }
@@ -799,44 +815,6 @@ class FirstScreen(
         completeCurrentStage()
 
         return true
-    }
-
-    private fun handleStatCardSelection() {
-        when {
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_1
-            ) -> selectStatCard(0)
-
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_2
-            ) -> selectStatCard(1)
-
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_3
-            ) -> selectStatCard(2)
-        }
-    }
-
-    private fun selectStatCard(
-        cardIndex: Int
-    ) {
-        val selectedCard =
-            pendingStatCards.getOrNull(cardIndex)
-                ?: return
-
-        applyStatCard(selectedCard)
-
-        pendingStatCards = emptyList()
-        isChoosingStatCard = false
-
-        stageController.completeCurrentStage()
-
-        if (shouldOpenMarketAfterCard) {
-            shouldOpenMarketAfterCard = false
-            openMarket()
-        } else {
-            enemySpawner.resetTimer()
-        }
     }
 
     private fun openMarket() {
@@ -1065,58 +1043,6 @@ class FirstScreen(
                 }
             }
     }
-
-    private fun applyStatCard(
-        card: StatCard
-    ) {
-        player.addRunStatBonus(
-            statType = card.type.statType,
-            amount = 1
-        )
-    }
-
-    private fun renderStatCardSelection() {
-        val startX =
-            camera.position.x -
-                CAMERA_WIDTH / 2f +
-                220f
-
-        val titleY =
-            camera.position.y +
-                180f
-
-        hudFont.draw(
-            hudBatch,
-            "CHOOSE A STAT CARD",
-            startX,
-            titleY
-        )
-
-        pendingStatCards.forEachIndexed {
-                index,
-                card ->
-
-            val cardY =
-                titleY -
-                    70f -
-                    index * 100f
-
-            hudFont.draw(
-                hudBatch,
-                "${index + 1} - ${card.title}",
-                startX,
-                cardY
-            )
-
-            hudFont.draw(
-                hudBatch,
-                card.description,
-                startX + 25f,
-                cardY - 30f
-            )
-        }
-    }
-
 
 }
 
