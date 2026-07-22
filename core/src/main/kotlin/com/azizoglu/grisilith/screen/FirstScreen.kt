@@ -246,11 +246,23 @@ class FirstScreen(
         )
 
         weaponInventory.addWeapon(
-
             WeaponInstance(
-
                 definition =
-                    DefaultWeapons.shortsword
+                    DefaultWeapons.staff
+            )
+        )
+
+        weaponInventory.addWeapon(
+            WeaponInstance(
+                definition =
+                    DefaultWeapons.wand
+            )
+        )
+
+        weaponInventory.addWeapon(
+            WeaponInstance(
+                definition =
+                    DefaultWeapons.theBook
             )
         )
 

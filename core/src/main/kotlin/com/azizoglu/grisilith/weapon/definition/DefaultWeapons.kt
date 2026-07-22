@@ -274,7 +274,7 @@ object DefaultWeapons {
             baseDamage = 13,
             baseAttacksPerSecond = 3.2f,
             baseRange = 90f,
-            secondaryRange = 850f,
+            secondaryRange = 480f,
             baseProjectileSpeed = 780f,
             baseKnockback = 0f,
 
