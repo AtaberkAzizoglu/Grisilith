@@ -8,7 +8,7 @@ enum class StatType(
     STRENGTH("Strength"),
     DEXTERITY("Dexterity"),
     WISDOM("Wisdom"),
-    COOLDOWN("Cooldown"),
+    HASTE("Haste"),
     ATTACK_SPEED("Attack Speed"),
     CRIT_RATE("Crit Rate"),
     CRIT_DAMAGE("Crit Damage"),

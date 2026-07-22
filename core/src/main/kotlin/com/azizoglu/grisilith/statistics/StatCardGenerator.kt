@@ -31,8 +31,8 @@ object StatCardGenerator {
                 ),
 
                 createCard(
-                    StatUpgradeType.COOLDOWN,
-                    "Cooldown"
+                    StatUpgradeType.HASTE,
+                    "Haste"
                 ),
 
                 createCard(

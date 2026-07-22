@@ -23,8 +23,8 @@ enum class StatUpgradeType(
         StatType.WISDOM
     ),
 
-    COOLDOWN(
-        StatType.COOLDOWN
+    HASTE(
+        StatType.HASTE
     ),
 
     ATTACK_SPEED(

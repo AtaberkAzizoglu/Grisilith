@@ -306,10 +306,10 @@ class PlayerStats(
             .coerceAtLeast(0.20f)
     }
 
-    fun spellCooldownMultiplier(): Float {
+    fun hasteCooldownMultiplier(): Float {
         val score =
             totalScore(
-                StatType.COOLDOWN
+                StatType.HASTE
             )
 
         return (

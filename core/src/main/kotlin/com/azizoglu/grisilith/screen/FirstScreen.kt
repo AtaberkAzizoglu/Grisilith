@@ -136,10 +136,10 @@ class FirstScreen(
     private var marketRerollsUsed = 0
 
     private val stageController = StageController(
-        normalStageDurationSeconds = 10f,
-        miniBossStageDurationSeconds = 10f,
+        normalStageDurationSeconds = 30f,
+        miniBossStageDurationSeconds = 45f,
         finalBossStageDurationSeconds = 60f,
-        maximumStage = difficulty.maximumStage
+        maximumStage = 20
     )
 
 
