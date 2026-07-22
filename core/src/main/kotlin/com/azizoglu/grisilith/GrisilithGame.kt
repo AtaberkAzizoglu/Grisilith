@@ -11,10 +11,18 @@ import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.screen.MapSelectionScreen
 import com.azizoglu.grisilith.character.CharacterDefinition
 import com.azizoglu.grisilith.screen.CharacterSelectionScreen
+import com.azizoglu.grisilith.content.DefaultContentRegistry
 
 class GrisilithGame : Game() {
 
     override fun create() {
+        /*
+         * Registry ilk kez burada oluşturulur.
+         * Duplicate ID veya geçersiz bir tanım varsa
+         * oyun geliştirme aşamasında hemen hata verir.
+         */
+        DefaultContentRegistry.instance
+
         showMainMenu()
     }
 

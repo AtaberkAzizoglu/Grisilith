@@ -13,7 +13,6 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.azizoglu.grisilith.enemy.EnemySpawner
 import com.azizoglu.grisilith.statistics.RunStatistics
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.azizoglu.grisilith.util.GameTimeController
@@ -42,6 +41,12 @@ import com.azizoglu.grisilith.map.MapObstacleGenerator
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.character.CharacterDefinition
+import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
+import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
+import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
+import com.azizoglu.grisilith.screen.render.HudRenderer
+import com.azizoglu.grisilith.screen.render.MarketRenderer
+import com.azizoglu.grisilith.screen.render.RunSummaryRenderer
 
 class FirstScreen(
     private val game: GrisilithGame,
@@ -79,6 +84,9 @@ class FirstScreen(
             initialBaseScores =
                 selectedCharacter.baseStats
         )
+
+    private val weaponInventory =
+        WeaponInventory()
 
     private val player = Player(
         startX = worldWidth / 2f,
@@ -160,6 +168,54 @@ class FirstScreen(
 
     private var pendingStatCards = emptyList<StatCard>()
 
+    private val hudRenderer =
+        HudRenderer(
+            camera = camera,
+            cameraWidth = CAMERA_WIDTH,
+            cameraHeight = CAMERA_HEIGHT,
+            batch = hudBatch,
+            font = hudFont,
+            player = player,
+            playerStats = playerStats,
+            stageController = stageController,
+            sessionWallet = sessionWallet,
+            enemyManager = enemyManager,
+            runStatistics = runStatistics,
+            gameTimeController =
+                gameTimeController,
+            weaponInventory =
+                weaponInventory
+        )
+
+    private val runSummaryRenderer =
+        RunSummaryRenderer(
+            camera = camera,
+            cameraWidth = CAMERA_WIDTH,
+            cameraHeight = CAMERA_HEIGHT,
+            batch = hudBatch,
+            font = hudFont,
+            difficulty = difficulty,
+            gameMap = gameMap,
+            selectedCharacter =
+                selectedCharacter,
+            stageController =
+                stageController,
+            runStatistics =
+                runStatistics
+        )
+
+    private val marketRenderer =
+        MarketRenderer(
+            camera = camera,
+            cameraWidth = CAMERA_WIDTH,
+            batch = hudBatch,
+            font = hudFont,
+            sessionWallet =
+                sessionWallet,
+            stageController =
+                stageController
+        )
+
     override fun show() {
         viewport.apply()
 
@@ -167,6 +223,15 @@ class FirstScreen(
             player.centerX,
             player.centerY,
             0f
+        )
+
+        weaponInventory.addWeapon(
+
+            WeaponInstance(
+
+                definition =
+                    DefaultWeapons.shortsword
+            )
         )
 
         camera.update()
@@ -512,7 +577,39 @@ class FirstScreen(
         }
 
         shapeRenderer.end()
-        renderHud()
+        hudRenderer.render(
+            displayedStage =
+                displayedStage(),
+            remainingStageSeconds =
+                remainingStageSeconds(),
+            formattedGameTime =
+                formatGameTime(),
+            isRunSummaryOpen =
+                isRunSummaryOpen,
+            isMarketOpen =
+                isMarketOpen,
+            isChoosingStatCard =
+                isChoosingStatCard,
+            renderRunSummary = {
+                runSummaryRenderer.render(
+                    displayedStage =
+                        displayedStage(),
+                    formattedGameTime =
+                        formatGameTime()
+                )
+            },
+            renderMarket = {
+                marketRenderer.render(
+                    marketSlots =
+                        marketSlots,
+                    marketRerollsUsed =
+                        marketRerollsUsed
+                )
+            },
+            renderStatCardSelection = {
+                renderStatCardSelection()
+            }
+        )
     }
 
     private fun updateCamera() {
@@ -619,572 +716,6 @@ class FirstScreen(
         shapeRenderer.dispose()
         hudBatch.dispose()
         hudFont.dispose()
-    }
-
-    private fun renderHud() {
-        hudBatch.projectionMatrix =
-            viewport.camera.combined
-
-        hudBatch.begin()
-
-        hudFont.color = Color.WHITE
-
-        val leftX =
-            camera.position.x - CAMERA_WIDTH / 2f + 20f
-
-        var topY =
-            camera.position.y + CAMERA_HEIGHT / 2f - 20f
-
-        hudFont.draw(
-            hudBatch,
-            "Stage: ${displayedStage()} / " +
-                "${stageController.maximumStage}",
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Stage Type: ${stageController.currentStageType}",
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Stage Time: ${remainingStageSeconds()}",
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "HP: ${player.health.currentHealth}" +
-                " / ${player.health.maximumHealth}",
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Strength Score: " +
-                playerStats.totalScore(
-                    StatType.STRENGTH
-                ),
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Dexterity Score: " +
-                playerStats.totalScore(
-                    StatType.DEXTERITY
-                ),
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Gold Coin: ${sessionWallet.goldCoins}",
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        val isBossStage =
-            stageController.currentStageType !=
-                StageType.NORMAL
-
-        val currentEnemyLimit =
-            EnemySpawnScaling.maximumEnemyCountForStage(
-                stage = stageController.currentStage,
-                isBossStage = isBossStage,
-                enemyCountMultiplier =
-                    playerStats.enemyCountMultiplier()
-            )
-
-        hudFont.draw(
-            hudBatch,
-            "Active Enemies: " +
-                "${enemyManager.enemyCount} / $currentEnemyLimit",
-            leftX,
-            topY
-        )
-
-        val spawnSettings =
-            EnemySpawnScaling.settingsForStage(
-                stage = stageController.currentStage
-            )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Spawn Interval: " +
-                String.format(
-                    java.util.Locale.US,
-                    "%.2f",
-                    spawnSettings.spawnInterval
-                ) +
-                "s",
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        val uniqueChancePercentage =
-            spawnSettings.uniqueSpawnChance * 100f
-
-        hudFont.draw(
-            hudBatch,
-            "Unique Chance: " +
-                String.format(
-                    java.util.Locale.US,
-                    "%.1f%%",
-                    uniqueChancePercentage
-                ),
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Kills: ${runStatistics.totalEnemiesKilled}",
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Damage: ${runStatistics.totalDamageDealt}",
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "FPS: ${Gdx.graphics.framesPerSecond}",
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Game Time: ${formatGameTime()}",
-            leftX,
-            topY
-        )
-
-
-        topY -= 28f
-
-        hudFont.draw(
-            hudBatch,
-            "Game Speed: ${gameTimeController.gameSpeed}x",
-            leftX,
-            topY
-        )
-
-        topY -= 28f
-
-        val currentStageReward =
-            StageGoldRewardCalculator.rewardFor(
-                completedStage =
-                    stageController.currentStage,
-                stageType =
-                    stageController.currentStageType
-            )
-
-        hudFont.draw(
-            hudBatch,
-            "Stage Reward: " +
-                String.format(
-                    java.util.Locale.US,
-                    "%.1f Gold",
-                    currentStageReward
-                ),
-            leftX,
-            topY
-        )
-
-        if (gameTimeController.isPaused) {
-            hudFont.draw(
-                hudBatch,
-                "PAUSED",
-                camera.position.x - 35f,
-                camera.position.y
-            )
-        }
-
-        if (stageController.isRunComplete) {
-            hudFont.draw(
-                hudBatch,
-                "RUN COMPLETE",
-                camera.position.x - 55f,
-                camera.position.y + 40f
-            )
-
-            when {
-                player.health.isDead -> {
-                    hudFont.draw(
-                        hudBatch,
-                        "DEFEATED",
-                        camera.position.x - 45f,
-                        camera.position.y + 40f
-                    )
-                }
-
-                stageController.isRunComplete -> {
-                    hudFont.draw(
-                        hudBatch,
-                        "RUN COMPLETE",
-                        camera.position.x - 55f,
-                        camera.position.y + 40f
-                    )
-                }
-
-                gameTimeController.isPaused -> {
-                    hudFont.draw(
-                        hudBatch,
-                        "PAUSED",
-                        camera.position.x - 35f,
-                        camera.position.y
-                    )
-                }
-            }
-
-        }
-
-        when {
-            isRunSummaryOpen -> {
-                renderRunSummary()
-            }
-
-            isMarketOpen -> {
-                renderMarket()
-            }
-
-            isChoosingStatCard -> {
-                renderStatCardSelection()
-            }
-        }
-
-        hudBatch.end()
-    }
-
-    private fun renderRunSummary() {
-        val startX =
-            camera.position.x -
-                CAMERA_WIDTH / 2f +
-                270f
-
-        var currentY =
-            camera.position.y +
-                CAMERA_HEIGHT / 2f -
-                90f
-
-        val resultText =
-            if (stageController.isRunComplete) {
-                "RUN SUCCESSFUL"
-            } else {
-                "RUN FAILED"
-            }
-
-        hudFont.draw(
-            hudBatch,
-            resultText,
-            startX,
-            currentY
-        )
-
-        currentY -= 45f
-
-        hudFont.draw(
-            hudBatch,
-            "Difficulty: ${difficulty.displayName}",
-            startX,
-            currentY
-        )
-
-        currentY -= 32f
-
-        hudFont.draw(
-            hudBatch,
-            "Map: ${gameMap.displayName}",
-            startX,
-            currentY
-        )
-
-        currentY -= 32f
-
-        hudFont.draw(
-            hudBatch,
-            "Stage Reached: ${displayedStage()}",
-            startX,
-            currentY
-        )
-
-        currentY -= 32f
-
-        hudFont.draw(
-            hudBatch,
-            "Character: " +
-                selectedCharacter.displayName,
-            startX,
-            currentY
-        )
-
-        currentY -= 32f
-
-        hudFont.draw(
-            hudBatch,
-            "Run Time: ${formatGameTime()}",
-            startX,
-            currentY
-        )
-
-        currentY -= 32f
-
-        hudFont.draw(
-            hudBatch,
-            "Enemies Killed: " +
-                "${runStatistics.totalEnemiesKilled}",
-            startX,
-            currentY
-        )
-
-        currentY -= 32f
-
-        hudFont.draw(
-            hudBatch,
-            "Total Damage Dealt: " +
-                "${runStatistics.totalDamageDealt}",
-            startX,
-            currentY
-        )
-
-        currentY -= 32f
-
-        hudFont.draw(
-            hudBatch,
-            "Damage Taken: " +
-                "${runStatistics.totalDamageTaken}",
-            startX,
-            currentY
-        )
-
-        currentY -= 32f
-
-        hudFont.draw(
-            hudBatch,
-            "Gold Earned: " +
-                String.format(
-                    java.util.Locale.US,
-                    "%.1f",
-                    runStatistics.totalGoldCollected
-                ),
-            startX,
-            currentY
-        )
-
-        currentY -= 50f
-
-        hudFont.draw(
-            hudBatch,
-            "WEAPON DAMAGE",
-            startX,
-            currentY
-        )
-
-        currentY -= 35f
-
-        val weaponEntries =
-            runStatistics.weaponDamageStatistics
-                .entries
-                .sortedByDescending { entry ->
-                    entry.value
-                }
-
-        if (weaponEntries.isEmpty()) {
-            hudFont.draw(
-                hudBatch,
-                "No weapon damage recorded.",
-                startX + 20f,
-                currentY
-            )
-
-            currentY -= 30f
-        } else {
-            weaponEntries.forEach { entry ->
-                hudFont.draw(
-                    hudBatch,
-                    "${entry.key}: ${entry.value}",
-                    startX + 20f,
-                    currentY
-                )
-
-                currentY -= 30f
-            }
-        }
-
-        currentY -= 25f
-
-        hudFont.draw(
-            hudBatch,
-            "R - Restart Run",
-            startX,
-            currentY
-        )
-
-        currentY -= 32f
-
-        hudFont.draw(
-            hudBatch,
-            "ENTER - Return to Main Menu",
-            startX,
-            currentY
-        )
-    }
-
-    private fun renderMarket() {
-        val startX =
-            camera.position.x -
-                CAMERA_WIDTH / 2f +
-                220f
-
-        val titleY =
-            camera.position.y +
-                220f
-
-        hudFont.draw(
-            hudBatch,
-            "MINI BOSS MARKET",
-            startX,
-            titleY
-        )
-
-        hudFont.draw(
-            hudBatch,
-            "Gold: ${sessionWallet.goldCoins}",
-            startX,
-            titleY - 35f
-        )
-
-        marketSlots.forEachIndexed { index, slot ->
-            val slotY =
-                titleY -
-                    95f -
-                    index * 105f
-
-            val offer = slot.offer
-
-            when {
-                slot.isSold -> {
-                    hudFont.draw(
-                        hudBatch,
-                        "${index + 1} - SOLD",
-                        startX,
-                        slotY
-                    )
-                }
-
-                offer == null -> {
-                    hudFont.draw(
-                        hudBatch,
-                        "${index + 1} - EMPTY",
-                        startX,
-                        slotY
-                    )
-                }
-
-                else -> {
-                    val lockText =
-                        if (slot.isLocked) {
-                            " [LOCKED]"
-                        } else {
-                            ""
-                        }
-
-                    hudFont.draw(
-                        hudBatch,
-                        "${index + 1} - " +
-                            "${offer.title} " +
-                            "Lv.${offer.productLevel}" +
-                            lockText,
-                        startX,
-                        slotY
-                    )
-
-                    hudFont.draw(
-                        hudBatch,
-                        offer.description,
-                        startX + 25f,
-                        slotY - 28f
-                    )
-
-                    hudFont.draw(
-                        hudBatch,
-                        "Price: ${offer.price} Gold",
-                        startX + 25f,
-                        slotY - 56f
-                    )
-                }
-            }
-        }
-
-        val rerollPrice =
-            MarketRerollPriceCalculator
-                .calculatePrice(
-                    currentStage =
-                        stageController.currentStage,
-                    rerollsUsedInCurrentMarket =
-                        marketRerollsUsed
-                )
-
-        hudFont.draw(
-            hudBatch,
-            "Q / W / E - Lock / Unlock",
-            startX,
-            titleY - 420f
-        )
-
-        hudFont.draw(
-            hudBatch,
-            "R - Reroll ($rerollPrice Gold)",
-            startX,
-            titleY - 450f
-        )
-
-        hudFont.draw(
-            hudBatch,
-            "ENTER - Continue",
-            startX,
-            titleY - 480f
-        )
     }
 
     private fun formatGameTime(): String {
