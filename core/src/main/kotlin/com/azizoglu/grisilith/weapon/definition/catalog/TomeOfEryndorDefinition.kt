@@ -41,7 +41,7 @@ object TomeOfEryndorDefinition {
 
             attackPattern =
                 WeaponAttackPattern
-                    .STRAIGHT_PROJECTILE,
+                    .TOME_PROJECTILE_OR_BEAM,
 
             normalAttackSpeedStat =
                 StatType.HASTE,

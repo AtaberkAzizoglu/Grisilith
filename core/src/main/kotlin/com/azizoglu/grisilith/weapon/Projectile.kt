@@ -77,6 +77,10 @@ class Projectile(
         maximumTargets
             .coerceAtLeast(1)
 
+
+    private val queuedRicochetTargets =
+        mutableListOf<Enemy>()
+
     private val hitEnemies =
         mutableSetOf<Enemy>()
 
@@ -231,27 +235,40 @@ class Projectile(
             successfulHitCount++
             remainingTargets--
 
+            /*
+ * Sekme hedefleri yalnızca ilk isabet
+ * gerçekleştiği anda belirlenir.
+ */
             if (
-                remainingRicochets > 0 &&
+                successfulHitCount == 1 &&
+                remainingRicochets > 0
+            ) {
+                queueRicochetTargets(
+                    fromEnemy = enemy,
+                    enemies = enemies,
+                    maximumTargetCount =
+                        remainingRicochets
+                )
+
+                /*
+                 * Hedef seçimi tamamlandıktan sonra
+                 * tekrar çevrede arama yapılmaması için
+                 * bu değer sıfırlanır.
+                 */
+                remainingRicochets = 0
+            }
+
+            /*
+             * Önceden kaydedilmiş sıradaki hedefe geçer.
+             */
+            if (
+                queuedRicochetTargets.isNotEmpty() &&
                 remainingTargets > 0
             ) {
-                val ricochetTarget =
-                    findNearestRicochetTarget(
-                        fromEnemy = enemy,
-                        enemies = enemies
-                    )
+                val redirected =
+                    redirectToNextQueuedTarget()
 
-                if (ricochetTarget != null) {
-                    redirectToward(
-                        targetX =
-                            ricochetTarget.centerX,
-
-                        targetY =
-                            ricochetTarget.centerY
-                    )
-
-                    remainingRicochets--
-
+                if (redirected) {
                     travelledDistance = 0f
 
                     currentMaximumTravelDistance =
@@ -260,8 +277,16 @@ class Projectile(
 
                     return
                 }
+            }
 
-                remainingRicochets = 0
+            /*
+             * Bu projectile sekmeli bir saldırıysa fakat
+             * kaydedilmiş başka hedef kalmadıysa yok olur.
+             */
+            if (
+                ricochetRange > 0f &&
+                successfulHitCount >= 1
+            ) {
                 isActive = false
                 return
             }
@@ -286,39 +311,90 @@ class Projectile(
         }
     }
 
-    private fun findNearestRicochetTarget(
+    private fun queueRicochetTargets(
         fromEnemy: Enemy,
-        enemies: List<Enemy>
-    ): Enemy? {
-        if (ricochetRange <= 0f) {
-            return null
+        enemies: List<Enemy>,
+        maximumTargetCount: Int
+    ) {
+        queuedRicochetTargets.clear()
+
+        if (
+            ricochetRange <= 0f ||
+            maximumTargetCount <= 0
+        ) {
+            return
         }
 
-        return enemies
-            .asSequence()
-            .filter { enemy ->
-                !enemy.isDead &&
-                    enemy !== fromEnemy &&
-                    enemy !in hitEnemies
+        val maximumDistanceSquared =
+            ricochetRange *
+                ricochetRange
+
+        val selectedTargets =
+            enemies
+                .asSequence()
+                .filter { candidate ->
+                    !candidate.isDead &&
+                        candidate !== fromEnemy &&
+                        candidate !in hitEnemies
+                }
+                .map { candidate ->
+                    candidate to
+                        Vector2.dst2(
+                            fromEnemy.centerX,
+                            fromEnemy.centerY,
+                            candidate.centerX,
+                            candidate.centerY
+                        )
+                }
+                .filter { (_, distanceSquared) ->
+                    distanceSquared <=
+                        maximumDistanceSquared
+                }
+                .sortedBy { (_, distanceSquared) ->
+                    distanceSquared
+                }
+                .take(
+                    maximumTargetCount
+                )
+                .map { (candidate, _) ->
+                    candidate
+                }
+                .toList()
+
+        queuedRicochetTargets.addAll(
+            selectedTargets
+        )
+    }
+
+    private fun redirectToNextQueuedTarget():
+        Boolean {
+
+        while (
+            queuedRicochetTargets.isNotEmpty()
+        ) {
+            val nextTarget =
+                queuedRicochetTargets
+                    .removeAt(0)
+
+            if (
+                nextTarget.isDead ||
+                nextTarget in hitEnemies
+            ) {
+                continue
             }
-            .map { enemy ->
-                enemy to
-                    Vector2.dst2(
-                        fromEnemy.centerX,
-                        fromEnemy.centerY,
-                        enemy.centerX,
-                        enemy.centerY
-                    )
-            }
-            .filter { (_, distanceSquared) ->
-                distanceSquared <=
-                    ricochetRange *
-                    ricochetRange
-            }
-            .minByOrNull { (_, distanceSquared) ->
-                distanceSquared
-            }
-            ?.first
+
+            redirectToward(
+                targetX =
+                    nextTarget.centerX,
+
+                targetY =
+                    nextTarget.centerY
+            )
+
+            return true
+        }
+
+        return false
     }
 
     private fun redirectToward(

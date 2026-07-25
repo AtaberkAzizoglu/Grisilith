@@ -8,6 +8,7 @@ import com.azizoglu.grisilith.weapon.runtime.executor.LongswordAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.executor.ProjectileWeaponAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.executor.ShieldAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.executor.ShortswordAttackExecutor
+import com.azizoglu.grisilith.weapon.runtime.executor.TomeOfEryndorAttackExecutor
 
 class WeaponAttackExecutorFactory(
     playerStats: PlayerStats
@@ -84,6 +85,18 @@ class WeaponAttackExecutorFactory(
                 playerStats
         )
 
+    private val tomeOfEryndorExecutor =
+        TomeOfEryndorAttackExecutor(
+            damageCalculator =
+                damageCalculator,
+
+            targetSelector =
+                targetSelector,
+
+            projectileExecutor =
+                projectileExecutor
+        )
+
     fun executorFor(
         attackPattern: WeaponAttackPattern
     ): WeaponAttackExecutor? {
@@ -131,6 +144,11 @@ class WeaponAttackExecutorFactory(
             WeaponAttackPattern
                 .TARGET_AREA_CIRCLE -> {
                 null
+            }
+
+            WeaponAttackPattern
+                .TOME_PROJECTILE_OR_BEAM -> {
+                tomeOfEryndorExecutor
             }
 
             WeaponAttackPattern.NONE -> {

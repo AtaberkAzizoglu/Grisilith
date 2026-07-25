@@ -256,7 +256,8 @@ class FirstScreen(
         weaponInventory.addWeapon(
             WeaponInstance(
                 definition =
-                    DefaultWeapons.dagger,
+                    DefaultWeapons.orbOfSky,
+
                 level = 3
             )
         )

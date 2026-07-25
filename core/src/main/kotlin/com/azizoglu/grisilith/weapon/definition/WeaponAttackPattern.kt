@@ -9,5 +9,6 @@ enum class WeaponAttackPattern {
     MELEE_OR_THROW,
     STRAIGHT_PROJECTILE,
     PIERCING_PROJECTILE,
+    TOME_PROJECTILE_OR_BEAM,
     NONE
 }
