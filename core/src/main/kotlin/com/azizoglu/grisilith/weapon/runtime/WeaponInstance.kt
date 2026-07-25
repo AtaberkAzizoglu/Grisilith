@@ -16,6 +16,13 @@ class WeaponInstance(
     val runtimeId: String =
         UUID.randomUUID().toString()
 
+    /*
+     * Her WeaponInstance kendi saldırı sayacını
+     * bağımsız olarak tutar.
+     */
+    private var normalAttackCount =
+        0
+
     var level: Int =
         level
         private set
@@ -54,6 +61,10 @@ class WeaponInstance(
             currentLevelStats
                 .weaponAbilityUnlocked
 
+    val completedNormalAttackCount: Int
+        get() =
+            normalAttackCount
+
     fun canLevelUp(): Boolean {
         return !isMaximumLevel
     }
@@ -73,9 +84,22 @@ class WeaponInstance(
         require(
             newLevel in
                 MINIMUM_LEVEL..MAXIMUM_LEVEL
-        )
+        ) {
+            "Weapon level must be between " +
+                "$MINIMUM_LEVEL and $MAXIMUM_LEVEL."
+        }
 
         level = newLevel
+    }
+
+    fun registerNormalAttack(): Int {
+        normalAttackCount++
+
+        return normalAttackCount
+    }
+
+    fun resetNormalAttackCount() {
+        normalAttackCount = 0
     }
 
     override fun equals(

@@ -64,17 +64,6 @@ object LongbowDefinition {
                         level4Damage = 1.25f,
                         level5Damage = 1.25f,
 
-                        /*
-                         * Lv.3 saldırısı hedefe
-                         * çarptıktan sonra bir düşmana
-                         * seker. additionalTargets bunu
-                         * şimdilik mekanik işareti olarak
-                         * tutuyor.
-                         */
-                        level3AdditionalTargets = 1,
-                        level4AdditionalTargets = 1,
-                        level5AdditionalTargets = 1,
-
                         level2Modifiers =
                             listOf(
                                 WeaponModifierFactory

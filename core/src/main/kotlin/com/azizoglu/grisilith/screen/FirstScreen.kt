@@ -46,6 +46,8 @@ import com.azizoglu.grisilith.screen.render.WorldRenderer
 import com.azizoglu.grisilith.weapon.runtime.WeaponRuntimeManager
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventoryResult
 import com.badlogic.gdx.graphics.Color
+import com.azizoglu.grisilith.combat.debug.CombatDebugRenderer
+import com.azizoglu.grisilith.combat.debug.CombatDebugVisualManager
 
 
 class FirstScreen(
@@ -79,6 +81,12 @@ class FirstScreen(
             camera = camera,
             worldWidth = worldWidth,
             worldHeight = worldHeight
+        )
+
+    private val combatDebugRenderer =
+        CombatDebugRenderer(
+            shapeRenderer = shapeRenderer,
+            camera = camera
         )
 
     private val viewport =
@@ -248,28 +256,8 @@ class FirstScreen(
         weaponInventory.addWeapon(
             WeaponInstance(
                 definition =
-                    DefaultWeapons.orbOfSky
-            )
-        )
-
-        weaponInventory.addWeapon(
-            WeaponInstance(
-                definition =
-                    DefaultWeapons.totemOfDarkClouds
-            )
-        )
-
-        weaponInventory.addWeapon(
-            WeaponInstance(
-                definition =
-                    DefaultWeapons.amuletOfTrollKing
-            )
-        )
-
-        weaponInventory.addWeapon(
-            WeaponInstance(
-                definition =
-                    DefaultWeapons.enchantedChalkDust
+                    DefaultWeapons.dagger,
+                level = 3
             )
         )
 
@@ -406,6 +394,10 @@ class FirstScreen(
         if (player.health.isDead) {
             return
         }
+
+        CombatDebugVisualManager.update(
+            delta
+        )
 
         val stageChanged =
             updateStage(delta)
@@ -602,6 +594,7 @@ class FirstScreen(
         enemyManager.clearAll()
         projectiles.clear()
         weaponRuntimeManager.resetAllTimers()
+        CombatDebugVisualManager.clear()
 
         statCardController.beginSelection(
             shouldOpenMarketAfterSelection =
@@ -619,6 +612,8 @@ class FirstScreen(
                 goldCoinPickups,
             projectiles = projectiles
         )
+
+        combatDebugRenderer.render()
 
         hudRenderer.render(
             displayedStage =
@@ -783,6 +778,7 @@ class FirstScreen(
             enemyManager.clearAll()
             projectiles.clear()
             weaponRuntimeManager.resetAllTimers()
+            CombatDebugVisualManager.clear()
 
             stageController.completeCurrentStage()
 

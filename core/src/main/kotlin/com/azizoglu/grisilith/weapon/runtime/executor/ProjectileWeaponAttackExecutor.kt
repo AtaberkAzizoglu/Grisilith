@@ -1,12 +1,12 @@
 package com.azizoglu.grisilith.weapon.runtime.executor
 
+import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
-import com.azizoglu.grisilith.content.DamageType
 
 class ProjectileWeaponAttackExecutor(
     private val damageCalculator:
@@ -18,6 +18,23 @@ class ProjectileWeaponAttackExecutor(
     private val playerStats:
     PlayerStats
 ) : WeaponAttackExecutor {
+
+    companion object {
+        private const val LONGBOW_ID =
+            "WPN_LONGBOW"
+
+        private const val CROSSBOW_ID =
+            "WPN_CROSSBOW"
+
+        private const val LONGBOW_RICOCHET_RANGE =
+            360f
+
+        private const val CROSSBOW_NORMAL_POST_HIT_RANGE =
+            170f
+
+        private const val CROSSBOW_UPGRADED_POST_HIT_RANGE =
+            310f
+    }
 
     override fun execute(
         context: WeaponAttackContext
@@ -79,6 +96,9 @@ class ProjectileWeaponAttackExecutor(
         val levelStats =
             context.weapon.currentLevelStats
 
+        val weaponId =
+            definition.id.value
+
         val statAdditionalTargets =
             (
                 playerStats
@@ -87,11 +107,27 @@ class ProjectileWeaponAttackExecutor(
                 )
                 .coerceAtLeast(0)
 
+        val isUpgradedLongbow =
+            weaponId == LONGBOW_ID &&
+                context.weapon
+                    .hasBasicAttackUpgrade
+
+        val isCrossbow =
+            weaponId == CROSSBOW_ID
+
+        val weaponSpecificAdditionalTargets =
+            if (isUpgradedLongbow) {
+                1
+            } else {
+                0
+            }
+
         val maximumTargets =
             (
                 definition.baseMaximumTargets +
                     levelStats.additionalTargets +
-                    statAdditionalTargets
+                    statAdditionalTargets +
+                    weaponSpecificAdditionalTargets
                 )
                 .coerceAtLeast(1)
 
@@ -99,6 +135,7 @@ class ProjectileWeaponAttackExecutor(
             selectDamageType(
                 damageTypes =
                     definition.damageTypes,
+
                 randomSelection =
                     definition
                         .randomDamageTypePerAttack
@@ -122,6 +159,51 @@ class ProjectileWeaponAttackExecutor(
                     levelStats.knockbackMultiplier
                 )
                 .coerceAtLeast(0f)
+
+        val secondaryHitDamageMultiplier =
+            when {
+                isCrossbow &&
+                    context.weapon
+                        .hasBasicAttackUpgrade -> {
+                    1f
+                }
+
+                isCrossbow -> {
+                    0.5f
+                }
+
+                else -> {
+                    1f
+                }
+            }
+
+        val ricochetCount =
+            if (isUpgradedLongbow) {
+                1
+            } else {
+                0
+            }
+
+        val ricochetRange =
+            if (isUpgradedLongbow) {
+                LONGBOW_RICOCHET_RANGE
+            } else {
+                0f
+            }
+
+        val postFirstHitTravelDistance =
+            if (isCrossbow) {
+                if (
+                    context.weapon
+                        .hasBasicAttackUpgrade
+                ) {
+                    CROSSBOW_UPGRADED_POST_HIT_RANGE
+                } else {
+                    CROSSBOW_NORMAL_POST_HIT_RANGE
+                }
+            } else {
+                null
+            }
 
         context.projectiles.add(
             Projectile(
@@ -159,7 +241,19 @@ class ProjectileWeaponAttackExecutor(
                     selectedDamageType,
 
                 knockback =
-                    effectiveKnockback
+                    effectiveKnockback,
+
+                damageMultiplierAfterFirstHit =
+                    secondaryHitDamageMultiplier,
+
+                ricochetCount =
+                    ricochetCount,
+
+                ricochetRange =
+                    ricochetRange,
+
+                travelDistanceAfterFirstHit =
+                    postFirstHitTravelDistance
             )
         )
     }
@@ -181,5 +275,4 @@ class ProjectileWeaponAttackExecutor(
 
         return damageTypes.first()
     }
-
 }

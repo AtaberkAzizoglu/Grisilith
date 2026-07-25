@@ -27,12 +27,17 @@ class Projectile(
 
     val damageType: DamageType,
 
-    /*
-     * Bu committe veri olarak taşınıyor.
-     * Gerçek itme davranışı sonraki adımda
-     * Enemy hareket sistemine bağlanacak.
-     */
-    val knockback: Float = 0f
+    val knockback: Float = 0f,
+
+    private val damageMultiplierAfterFirstHit:
+    Float = 1f,
+
+    ricochetCount: Int = 0,
+
+    private val ricochetRange: Float = 0f,
+
+    private val travelDistanceAfterFirstHit:
+    Float? = null
 ) {
 
     private val position =
@@ -74,6 +79,15 @@ class Projectile(
 
     private val hitEnemies =
         mutableSetOf<Enemy>()
+
+    private var successfulHitCount =
+        0
+
+    private var remainingRicochets =
+        ricochetCount.coerceAtLeast(0)
+
+    private var currentMaximumTravelDistance =
+        safeMaximumTravelDistance
 
     var isActive: Boolean = true
         private set
@@ -124,7 +138,7 @@ class Projectile(
 
         if (
             travelledDistance >=
-            safeMaximumTravelDistance
+            currentMaximumTravelDistance
         ) {
             isActive = false
             return
@@ -173,14 +187,37 @@ class Projectile(
             val wasAliveBeforeHit =
                 !enemy.isDead
 
+            val hitDamage =
+                if (successfulHitCount == 0) {
+                    damage
+                } else {
+                    (
+                        damage *
+                            damageMultiplierAfterFirstHit
+                        )
+                        .toInt()
+                        .coerceAtLeast(1)
+                }
+
             val appliedDamage =
                 enemy.takeDamage(
-                    damage
+                    hitDamage
                 )
 
             if (appliedDamage > 0) {
                 onDamageDealt(
                     appliedDamage
+                )
+
+                enemy.applyKnockback(
+                    directionX =
+                        velocity.x,
+
+                    directionY =
+                        velocity.y,
+
+                    strength =
+                        knockback
                 )
             }
 
@@ -191,19 +228,120 @@ class Projectile(
                 onEnemyKilled(enemy)
             }
 
+            successfulHitCount++
             remainingTargets--
+
+            if (
+                remainingRicochets > 0 &&
+                remainingTargets > 0
+            ) {
+                val ricochetTarget =
+                    findNearestRicochetTarget(
+                        fromEnemy = enemy,
+                        enemies = enemies
+                    )
+
+                if (ricochetTarget != null) {
+                    redirectToward(
+                        targetX =
+                            ricochetTarget.centerX,
+
+                        targetY =
+                            ricochetTarget.centerY
+                    )
+
+                    remainingRicochets--
+
+                    travelledDistance = 0f
+
+                    currentMaximumTravelDistance =
+                        ricochetRange
+                            .coerceAtLeast(1f)
+
+                    return
+                }
+
+                remainingRicochets = 0
+                isActive = false
+                return
+            }
+
+            if (
+                successfulHitCount == 1 &&
+                travelDistanceAfterFirstHit != null &&
+                remainingTargets > 0
+            ) {
+                travelledDistance = 0f
+
+                currentMaximumTravelDistance =
+                    travelDistanceAfterFirstHit
+                        .coerceAtLeast(1f)
+            }
 
             if (remainingTargets <= 0) {
                 isActive = false
             }
 
-            /*
-             * Bir frame içinde yalnızca bir yeni
-             * düşmana çarpar. Piercing varsa sonraki
-             * frame diğer düşmanlara devam edebilir.
-             */
             return
         }
+    }
+
+    private fun findNearestRicochetTarget(
+        fromEnemy: Enemy,
+        enemies: List<Enemy>
+    ): Enemy? {
+        if (ricochetRange <= 0f) {
+            return null
+        }
+
+        return enemies
+            .asSequence()
+            .filter { enemy ->
+                !enemy.isDead &&
+                    enemy !== fromEnemy &&
+                    enemy !in hitEnemies
+            }
+            .map { enemy ->
+                enemy to
+                    Vector2.dst2(
+                        fromEnemy.centerX,
+                        fromEnemy.centerY,
+                        enemy.centerX,
+                        enemy.centerY
+                    )
+            }
+            .filter { (_, distanceSquared) ->
+                distanceSquared <=
+                    ricochetRange *
+                    ricochetRange
+            }
+            .minByOrNull { (_, distanceSquared) ->
+                distanceSquared
+            }
+            ?.first
+    }
+
+    private fun redirectToward(
+        targetX: Float,
+        targetY: Float
+    ) {
+        velocity.set(
+            targetX - position.x,
+            targetY - position.y
+        )
+
+        if (velocity.isZero) {
+            velocity.set(
+                1f,
+                0f
+            )
+        }
+
+        velocity
+            .nor()
+            .scl(
+                safeProjectileSpeed
+            )
     }
 
     fun render(

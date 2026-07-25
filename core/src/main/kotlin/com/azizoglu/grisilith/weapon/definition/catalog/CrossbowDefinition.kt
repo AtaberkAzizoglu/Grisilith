@@ -45,12 +45,6 @@ object CrossbowDefinition {
             baseProjectileSpeed = 850f,
             baseKnockback = 20f,
 
-            /*
-             * Common Crossbow ilk hedeften sonra
-             * bir hedefe daha vurabilir.
-             */
-            baseMaximumTargets = 2,
-
             damageScaling =
                 mapOf(
                     StatType.STRENGTH to 1f,

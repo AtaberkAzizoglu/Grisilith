@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.weapon.runtime.executor
 
+import com.azizoglu.grisilith.combat.debug.CombatDebugVisualManager
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
@@ -15,6 +16,11 @@ class LanceAttackExecutor(
     WeaponTargetSelector
 ) : WeaponAttackExecutor {
 
+    companion object {
+        private const val UPGRADED_WIDTH_MULTIPLIER =
+            1.35f
+    }
+
     override fun execute(
         context: WeaponAttackContext
     ) {
@@ -24,13 +30,12 @@ class LanceAttackExecutor(
         val levelStats =
             context.weapon.currentLevelStats
 
-
         val effectiveRange =
             (
                 definition.baseRange *
                     levelStats.rangeMultiplier
                 )
-                .coerceAtLeast(0f)
+                .coerceAtLeast(1f)
 
         val primaryTarget =
             targetSelector.selectTarget(
@@ -47,25 +52,72 @@ class LanceAttackExecutor(
                     effectiveRange
             ) ?: return
 
-        val effectiveAreaRadius =
+        val direction =
+            Vector2(
+                primaryTarget.centerX -
+                    context.player.centerX,
+
+                primaryTarget.centerY -
+                    context.player.centerY
+            )
+
+        if (direction.isZero) {
+            return
+        }
+
+        direction.nor()
+
+        val startX =
+            context.player.centerX
+
+        val startY =
+            context.player.centerY
+
+        val endX =
+            startX +
+                direction.x *
+                effectiveRange
+
+        val endY =
+            startY +
+                direction.y *
+                effectiveRange
+
+        val halfWidth =
             (
                 definition.areaRadius *
-                    levelStats.rangeMultiplier
+                    if (
+                        context.weapon
+                            .hasBasicAttackUpgrade
+                    ) {
+                        UPGRADED_WIDTH_MULTIPLIER
+                    } else {
+                        1f
+                    }
                 )
                 .coerceAtLeast(1f)
+
+        CombatDebugVisualManager.addLine(
+            startX = startX,
+            startY = startY,
+            endX = endX,
+            endY = endY,
+            upgraded =
+                context.weapon
+                    .hasBasicAttackUpgrade
+        )
 
         val targets =
             context.enemyManager
                 .allEnemies
                 .filter { enemy ->
-                    isInsideTargetArea(
+                    isInsideAttackLine(
                         enemy = enemy,
-                        targetCenterX =
-                            primaryTarget.centerX,
-                        targetCenterY =
-                            primaryTarget.centerY,
-                        areaRadius =
-                            effectiveAreaRadius
+                        startX = startX,
+                        startY = startY,
+                        endX = endX,
+                        endY = endY,
+                        halfWidth = halfWidth
                     )
                 }
 
@@ -79,24 +131,95 @@ class LanceAttackExecutor(
         }
     }
 
-    private fun isInsideTargetArea(
+    private fun isInsideAttackLine(
         enemy: Enemy,
-        targetCenterX: Float,
-        targetCenterY: Float,
-        areaRadius: Float
+        startX: Float,
+        startY: Float,
+        endX: Float,
+        endY: Float,
+        halfWidth: Float
     ): Boolean {
         if (enemy.isDead) {
             return false
         }
 
         val distance =
-            Vector2.dst(
-                targetCenterX,
-                targetCenterY,
-                enemy.centerX,
-                enemy.centerY
+            distanceFromPointToSegment(
+                pointX = enemy.centerX,
+                pointY = enemy.centerY,
+                startX = startX,
+                startY = startY,
+                endX = endX,
+                endY = endY
             )
 
-        return distance <= areaRadius
+        return distance <=
+            halfWidth +
+            enemy.bounds.width / 2f
+    }
+
+    private fun distanceFromPointToSegment(
+        pointX: Float,
+        pointY: Float,
+        startX: Float,
+        startY: Float,
+        endX: Float,
+        endY: Float
+    ): Float {
+        val segmentX =
+            endX - startX
+
+        val segmentY =
+            endY - startY
+
+        val segmentLengthSquared =
+            segmentX * segmentX +
+                segmentY * segmentY
+
+        if (
+            segmentLengthSquared <=
+            0.0001f
+        ) {
+            return Vector2.dst(
+                pointX,
+                pointY,
+                startX,
+                startY
+            )
+        }
+
+        val projection =
+            (
+                (
+                    pointX - startX
+                    ) * segmentX +
+                    (
+                        pointY - startY
+                        ) * segmentY
+                ) /
+                segmentLengthSquared
+
+        val clampedProjection =
+            projection.coerceIn(
+                0f,
+                1f
+            )
+
+        val closestX =
+            startX +
+                segmentX *
+                clampedProjection
+
+        val closestY =
+            startY +
+                segmentY *
+                clampedProjection
+
+        return Vector2.dst(
+            pointX,
+            pointY,
+            closestX,
+            closestY
+        )
     }
 }

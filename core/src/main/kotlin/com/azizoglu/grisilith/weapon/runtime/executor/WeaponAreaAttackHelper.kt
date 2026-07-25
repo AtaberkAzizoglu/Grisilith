@@ -9,15 +9,21 @@ object WeaponAreaAttackHelper {
     fun damageEnemy(
         enemy: Enemy,
         context: WeaponAttackContext,
-        damageCalculator: WeaponDamageCalculator
+        damageCalculator:
+        WeaponDamageCalculator
     ) {
         if (enemy.isDead) {
             return
         }
 
+        val definition =
+            context.weapon.definition
+
+        val levelStats =
+            context.weapon.currentLevelStats
+
         /*
-         * Her enemy isabeti için hasar ve crit
-         * tamamen bağımsız hesaplanır.
+         * Her hedef için crit ayrı hesaplanır.
          */
         val damageResult =
             damageCalculator.calculate(
@@ -37,13 +43,33 @@ object WeaponAreaAttackHelper {
                 appliedDamage,
                 context.weapon.displayName
             )
+
+            /*
+             * Alan saldırılarında her düşman,
+             * oyuncudan kendisine doğru itilir.
+             */
+            enemy.applyKnockback(
+                directionX =
+                    enemy.centerX -
+                        context.player.centerX,
+
+                directionY =
+                    enemy.centerY -
+                        context.player.centerY,
+
+                strength =
+                    definition.baseKnockback *
+                        levelStats.knockbackMultiplier
+            )
         }
 
         if (
             wasAliveBeforeAttack &&
             enemy.isDead
         ) {
-            context.onEnemyKilled(enemy)
+            context.onEnemyKilled(
+                enemy
+            )
         }
     }
 }

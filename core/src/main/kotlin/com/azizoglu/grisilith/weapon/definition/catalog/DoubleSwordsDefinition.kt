@@ -43,7 +43,7 @@ object DoubleSwordsDefinition {
             baseAttacksPerSecond = 2.8f,
             baseRange = 125f,
             baseProjectileSpeed = 0f,
-            baseKnockback = 12f,
+            baseKnockback = 7f,
 
             areaAngleDegrees = 18f,
             areaRadius = 48f,

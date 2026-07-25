@@ -6,6 +6,7 @@ import com.azizoglu.grisilith.weapon.runtime.executor.DaggerAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.executor.LanceAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.executor.LongswordAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.executor.ProjectileWeaponAttackExecutor
+import com.azizoglu.grisilith.weapon.runtime.executor.ShieldAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.executor.ShortswordAttackExecutor
 
 class WeaponAttackExecutorFactory(
@@ -47,6 +48,18 @@ class WeaponAttackExecutorFactory(
                 targetSelector
         )
 
+    private val shieldExecutor =
+        ShieldAttackExecutor(
+            damageCalculator =
+                damageCalculator,
+
+            targetSelector =
+                targetSelector,
+
+            playerStats =
+                playerStats
+        )
+
     private val daggerExecutor =
         DaggerAttackExecutor(
             damageCalculator =
@@ -86,8 +99,13 @@ class WeaponAttackExecutorFactory(
             }
 
             WeaponAttackPattern
-                .TARGET_AREA_CIRCLE -> {
+                .LONG_PIERCING_LINE -> {
                 lanceExecutor
+            }
+
+            WeaponAttackPattern
+                .SHIELD_CONE -> {
+                shieldExecutor
             }
 
             WeaponAttackPattern
@@ -101,6 +119,18 @@ class WeaponAttackExecutorFactory(
             WeaponAttackPattern
                 .PIERCING_PROJECTILE -> {
                 projectileExecutor
+            }
+
+            /*
+             * Artık herhangi bir güncel silah
+             * kullanmıyorsa null dönebilir.
+             *
+             * Daha sonra başka alan saldırıları
+             * için tekrar kullanılabilir.
+             */
+            WeaponAttackPattern
+                .TARGET_AREA_CIRCLE -> {
+                null
             }
 
             WeaponAttackPattern.NONE -> {

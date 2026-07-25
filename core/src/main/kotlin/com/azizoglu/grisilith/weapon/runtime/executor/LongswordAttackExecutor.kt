@@ -7,6 +7,7 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
+import com.azizoglu.grisilith.combat.debug.CombatDebugVisualManager
 
 class LongswordAttackExecutor(
     private val damageCalculator:
@@ -62,12 +63,46 @@ class LongswordAttackExecutor(
 
         attackDirection.nor()
 
+        val effectiveConeAngle =
+            if (
+                context.weapon
+                    .hasBasicAttackUpgrade
+            ) {
+                30f
+            } else {
+                definition.areaAngleDegrees
+            }
+
         val halfConeAngle =
             (
-                definition.areaAngleDegrees /
+                effectiveConeAngle /
                     2f
                 )
                 .coerceAtLeast(0f)
+
+        CombatDebugVisualManager.addCone(
+            originX =
+                context.player.centerX,
+
+            originY =
+                context.player.centerY,
+
+            directionX =
+                attackDirection.x,
+
+            directionY =
+                attackDirection.y,
+
+            range =
+                effectiveRange,
+
+            angleDegrees =
+                effectiveConeAngle,
+
+            upgraded =
+                context.weapon
+                    .hasBasicAttackUpgrade
+        )
 
         val targets =
             context.enemyManager

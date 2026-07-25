@@ -18,6 +18,29 @@ class Enemy(
     private val previousPosition = Vector2(startX, startY)
     private val movementDirection = Vector2()
 
+    private val knockbackVelocity =
+        Vector2()
+
+    private var knockbackTimeRemaining =
+        0f
+
+    private val isBeingKnockedBack: Boolean
+        get() =
+            knockbackTimeRemaining > 0f &&
+                !knockbackVelocity.isZero
+
+    private var knockbackResistance =
+        when (stats.type) {
+
+            EnemyType.NORMAL -> 1f
+
+            EnemyType.UNIQUE -> 0.80f
+
+            EnemyType.MINI_BOSS -> 0.35f
+
+            EnemyType.FINAL_BOSS -> 0.15f
+        }
+
     private val size = stats.size
 
     private val collisionBounds = Rectangle()
@@ -73,18 +96,65 @@ class Enemy(
 
         previousPosition.set(position)
 
-        movementDirection.set(
-            targetX - centerX,
-            targetY - centerY
-        )
-
-        if (!movementDirection.isZero) {
-            movementDirection.nor()
-
+        if (isBeingKnockedBack) {
+            /*
+             * Knockback aktifken düşman oyuncuya doğru
+             * ilerlemez. Yalnızca darbenin yönünde gider.
+             */
             position.mulAdd(
-                movementDirection,
-                stats.movementSpeed * delta
+                knockbackVelocity,
+                delta
             )
+
+            knockbackTimeRemaining =
+                (
+                    knockbackTimeRemaining -
+                        delta
+                    )
+                    .coerceAtLeast(0f)
+
+            /*
+             * Frame rate'ten bağımsız yavaşlama.
+             * Yaklaşık 1200 px/s² kuvvet kaybeder.
+             */
+            val currentSpeed =
+                knockbackVelocity.len()
+
+            if (currentSpeed > 0f) {
+                val newSpeed =
+                    (
+                        currentSpeed -
+                            1200f * delta
+                        )
+                        .coerceAtLeast(0f)
+
+                if (newSpeed <= 1f) {
+                    knockbackVelocity.setZero()
+                    knockbackTimeRemaining = 0f
+                } else {
+                    knockbackVelocity.setLength(
+                        newSpeed
+                    )
+                }
+            }
+        } else {
+            /*
+             * Knockback bittikten sonra normal takip
+             * hareketine geri döner.
+             */
+            movementDirection.set(
+                targetX - centerX,
+                targetY - centerY
+            )
+
+            if (!movementDirection.isZero) {
+                movementDirection.nor()
+
+                position.mulAdd(
+                    movementDirection,
+                    stats.movementSpeed * delta
+                )
+            }
         }
 
         val isTouchingPlayer =
@@ -92,6 +162,19 @@ class Enemy(
 
         if (isTouchingPlayer) {
             position.set(previousPosition)
+        }
+
+        if (isTouchingPlayer) {
+            position.set(
+                previousPosition
+            )
+
+            /*
+             * Oyuncuya doğru knockback oluşmuşsa
+             * temas noktasında titremeyi engeller.
+             */
+            knockbackVelocity.setZero()
+            knockbackTimeRemaining = 0f
         }
 
         contactDamageTimer.update(
@@ -179,6 +262,50 @@ class Enemy(
 
     fun takeDamage(amount: Int): Int {
         return health.takeDamage(amount)
+    }
+
+    fun applyKnockback(
+        directionX: Float,
+        directionY: Float,
+        strength: Float
+    ) {
+        if (
+            isDead ||
+            strength <= 0f
+        ) {
+            return
+        }
+
+        val direction =
+            Vector2(
+                directionX,
+                directionY
+            )
+
+        if (direction.isZero) {
+            return
+        }
+
+        direction.nor()
+
+        val impulseSpeed =
+            strength *
+                12f *
+                knockbackResistance
+
+        /*
+         * Eski hızın üzerine eklemek yerine
+         * bu vuruşun kuvvetini doğrudan uygular.
+         *
+         * Böylece hızlı veya eş zamanlı darbeler
+         * knockback'i 5–10 katına çıkarmaz.
+         */
+        knockbackVelocity
+            .set(direction)
+            .scl(impulseSpeed)
+            .limit(900f)
+
+        knockbackTimeRemaining = 0.18f
     }
 
     fun render(shapeRenderer: ShapeRenderer) {

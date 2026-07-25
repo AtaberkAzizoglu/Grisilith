@@ -206,6 +206,30 @@ class HudRenderer(
 
         font.draw(
             batch,
+            "Weapon STR Bonus: " +
+                playerStats.weaponBonus(
+                    StatType.STRENGTH
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        font.draw(
+            batch,
+            "Weapon AS Bonus: " +
+                playerStats.weaponBonus(
+                    StatType.ATTACK_SPEED
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        font.draw(
+            batch,
             "Dexterity: " +
                 playerStats.totalScore(
                     StatType.DEXTERITY

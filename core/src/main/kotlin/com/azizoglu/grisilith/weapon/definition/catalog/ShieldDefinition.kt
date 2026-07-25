@@ -37,8 +37,7 @@ object ShieldDefinition {
                 ),
 
             attackPattern =
-                WeaponAttackPattern
-                    .FORWARD_CONE,
+                WeaponAttackPattern.SHIELD_CONE,
 
             baseDamage = 10,
             baseAttacksPerSecond = 0.85f,
@@ -51,7 +50,7 @@ object ShieldDefinition {
 
             damageScaling =
                 mapOf(
-                    StatType.ARMOR_CLASS to 0.80f
+                    StatType.ARMOR_CLASS to 0.45f
                 ),
 
             passiveStatModifiers =

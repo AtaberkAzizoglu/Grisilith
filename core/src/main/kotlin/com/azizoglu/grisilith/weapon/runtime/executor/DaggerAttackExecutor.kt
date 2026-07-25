@@ -1,13 +1,14 @@
 package com.azizoglu.grisilith.weapon.runtime.executor
 
+import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
 import com.badlogic.gdx.math.Vector2
-import com.azizoglu.grisilith.statistics.PlayerStats
-import com.azizoglu.grisilith.content.DamageType
 
 class DaggerAttackExecutor(
     private val damageCalculator:
@@ -29,11 +30,6 @@ class DaggerAttackExecutor(
         val levelStats =
             context.weapon.currentLevelStats
 
-        /*
-         * Dagger'ın uzak saldırı menzili.
-         * secondaryRange tanımlı değilse
-         * normal menzil kullanılır.
-         */
         val effectiveThrowRange =
             (
                 (
@@ -48,13 +44,82 @@ class DaggerAttackExecutor(
             targetSelector.selectTarget(
                 targetingType =
                     definition.targetingType,
+
                 player =
                     context.player,
+
                 enemyManager =
                     context.enemyManager,
+
                 maximumRange =
                     effectiveThrowRange
             ) ?: return
+
+        val attackNumber =
+            context.weapon
+                .registerNormalAttack()
+
+        val shouldRepeatAttack =
+            context.weapon
+                .hasBasicAttackUpgrade &&
+                attackNumber % 3 == 0
+
+        /*
+         * Üçüncü saldırıda ilk bıçak hafifçe
+         * sola yönelir. Normal saldırıda açı 0.
+         */
+        executeAttackAgainstTarget(
+            context = context,
+            target = target,
+            throwAngleOffsetDegrees =
+                if (shouldRepeatAttack) {
+                    -4f
+                } else {
+                    0f
+                }
+        )
+
+        if (shouldRepeatAttack) {
+            /*
+             * İlk saldırı hedefi öldürmüş olabilir.
+             * İkinci saldırı için yeniden geçerli
+             * bir hedef seçilir.
+             */
+            val secondTarget =
+                targetSelector.selectTarget(
+                    targetingType =
+                        definition.targetingType,
+
+                    player =
+                        context.player,
+
+                    enemyManager =
+                        context.enemyManager,
+
+                    maximumRange =
+                        effectiveThrowRange
+                )
+
+            if (secondTarget != null) {
+                executeAttackAgainstTarget(
+                    context = context,
+                    target = secondTarget,
+                    throwAngleOffsetDegrees = 4f
+                )
+            }
+        }
+    }
+
+    private fun executeAttackAgainstTarget(
+        context: WeaponAttackContext,
+        target: Enemy,
+        throwAngleOffsetDegrees: Float = 0f
+    ) {
+        val definition =
+            context.weapon.definition
+
+        val levelStats =
+            context.weapon.currentLevelStats
 
         val targetDistance =
             Vector2.dst(
@@ -83,24 +148,31 @@ class DaggerAttackExecutor(
             executeThrowAttack(
                 context = context,
                 targetX = target.centerX,
-                targetY = target.centerY
+                targetY = target.centerY,
+                angleOffsetDegrees =
+                    throwAngleOffsetDegrees
             )
         }
     }
 
     private fun executeMeleeAttack(
         context: WeaponAttackContext,
-        target:
-        com.azizoglu.grisilith.enemy.Enemy
+        target: Enemy
     ) {
-        /*
-         * Yakın saldırının crit kontrolü
-         * bu isabet için bağımsız yapılır.
-         */
+        if (target.isDead) {
+            return
+        }
+
         val damageResult =
             damageCalculator.calculate(
                 weapon = context.weapon
             )
+
+        val definition =
+            context.weapon.definition
+
+        val levelStats =
+            context.weapon.currentLevelStats
 
         val wasAliveBeforeAttack =
             !target.isDead
@@ -115,20 +187,37 @@ class DaggerAttackExecutor(
                 appliedDamage,
                 context.weapon.displayName
             )
+
+            target.applyKnockback(
+                directionX =
+                    target.centerX -
+                        context.player.centerX,
+
+                directionY =
+                    target.centerY -
+                        context.player.centerY,
+
+                strength =
+                    definition.baseKnockback *
+                        levelStats.knockbackMultiplier
+            )
         }
 
         if (
             wasAliveBeforeAttack &&
             target.isDead
         ) {
-            context.onEnemyKilled(target)
+            context.onEnemyKilled(
+                target
+            )
         }
     }
 
     private fun executeThrowAttack(
         context: WeaponAttackContext,
         targetX: Float,
-        targetY: Float
+        targetY: Float,
+        angleOffsetDegrees: Float = 0f
     ) {
         val damageResult =
             damageCalculator.calculate(
@@ -167,6 +256,45 @@ class DaggerAttackExecutor(
                 )
                 .coerceAtLeast(1f)
 
+        /*
+         * Oyuncudan hedefe olan yön.
+         * Üçüncü saldırının iki bıçağında
+         * küçük açı farkı uygulanabilir.
+         */
+        val throwDirection =
+            Vector2(
+                targetX -
+                    context.player.centerX,
+
+                targetY -
+                    context.player.centerY
+            )
+
+        if (throwDirection.isZero) {
+            return
+        }
+
+        throwDirection
+            .nor()
+            .rotateDeg(
+                angleOffsetDegrees
+            )
+
+        /*
+         * Projectile hedef koordinatı menzilin
+         * sonuna yerleştirilir. Böylece küçük açı
+         * farkı projectile yönüne yansır.
+         */
+        val adjustedTargetX =
+            context.player.centerX +
+                throwDirection.x *
+                throwRange
+
+        val adjustedTargetY =
+            context.player.centerY +
+                throwDirection.y *
+                throwRange
+
         val damageType =
             definition.damageTypes
                 .firstOrNull()
@@ -181,10 +309,10 @@ class DaggerAttackExecutor(
                     context.player.centerY,
 
                 targetX =
-                    targetX,
+                    adjustedTargetX,
 
                 targetY =
-                    targetY,
+                    adjustedTargetY,
 
                 sourceWeaponName =
                     context.weapon.displayName,

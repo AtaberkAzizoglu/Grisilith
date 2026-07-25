@@ -41,8 +41,7 @@ object LanceDefinition {
              * özel pattern ile değiştirilecek.
              */
             attackPattern =
-                WeaponAttackPattern
-                    .TARGET_AREA_CIRCLE,
+                WeaponAttackPattern.LONG_PIERCING_LINE,
 
             baseDamage = 44,
             baseAttacksPerSecond = 1f,
@@ -50,7 +49,7 @@ object LanceDefinition {
             baseProjectileSpeed = 0f,
             baseKnockback = 38f,
 
-            areaRadius = 75f,
+            areaRadius = 32f,
 
             damageScaling =
                 mapOf(

@@ -51,7 +51,7 @@ object EnchantedChalkDustDefinition {
             baseAttacksPerSecond = 1.55f,
             baseRange = 670f,
             baseProjectileSpeed = 730f,
-            baseKnockback = 4f,
+            baseKnockback = 3f,
 
             baseProjectileCount = 1,
             baseMaximumTargets = 1,
