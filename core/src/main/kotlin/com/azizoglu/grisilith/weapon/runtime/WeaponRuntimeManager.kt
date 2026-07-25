@@ -24,6 +24,12 @@ class WeaponRuntimeManager(
             playerStats = playerStats
         )
 
+    private val statBonusSynchronizer =
+        WeaponStatBonusSynchronizer(
+            inventory = inventory,
+            playerStats = playerStats
+        )
+
     fun update(
         delta: Float,
         player: Player,
@@ -36,6 +42,9 @@ class WeaponRuntimeManager(
         onEnemyKilled: (Enemy) -> Unit
     ) {
         synchronizeWithInventory()
+
+        statBonusSynchronizer
+            .synchronize()
 
         runtimesByWeapon.values
             .forEach { runtime ->
@@ -98,6 +107,14 @@ class WeaponRuntimeManager(
             .forEach { runtime ->
                 runtime.resetTimer()
             }
+    }
+
+    fun refreshWeaponStatBonuses() {
+        statBonusSynchronizer
+            .invalidate()
+
+        statBonusSynchronizer
+            .synchronize()
     }
 
     val activeRuntimeCount: Int
