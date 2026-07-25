@@ -3,7 +3,6 @@ package com.azizoglu.grisilith.weapon.definition
 import com.azizoglu.grisilith.content.ContentCategory
 import com.azizoglu.grisilith.content.ContentDefinition
 import com.azizoglu.grisilith.content.ContentId
-import com.azizoglu.grisilith.content.ContentRarity
 import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.content.ContentUnlockState
 import com.azizoglu.grisilith.content.DamageType
@@ -20,9 +19,8 @@ data class WeaponDefinition(
     val damageTypes: Set<DamageType>,
 
     /*
-     * Wand ve The Book gibi silahlarda
-     * her saldırıda listedeki hasar
-     * türlerinden biri seçilir.
+     * Steam Wand, Tome of Eryndor vb.
+     * saldırı başına farklı damage type seçebilir.
      */
     val randomDamageTypePerAttack: Boolean = false,
 
@@ -32,8 +30,12 @@ data class WeaponDefinition(
 
     val attackPattern: WeaponAttackPattern,
 
+    val normalAttackSpeedStat:
+    StatType =
+        StatType.ATTACK_SPEED,
+
     /*
-     * Common rarity taban değerleri.
+     * Level 1 taban değerleri.
      */
     val baseDamage: Int,
     val baseAttacksPerSecond: Float,
@@ -46,73 +48,57 @@ data class WeaponDefinition(
     /*
      * İlk hedef dahildir.
      * 1 = yalnızca ilk hedef.
-     * 2 = ilk hedef ve bir ek hedef.
      */
     val baseMaximumTargets: Int = 1,
 
-    /*
-     * Cone gibi saldırılar için.
-     */
     val areaAngleDegrees: Float = 0f,
-
-    /*
-     * Dairesel ve benzeri alan saldırıları için.
-     */
     val areaRadius: Float = 0f,
 
     /*
-     * Dagger gibi iki farklı menzile
-     * sahip silahlar için.
+     * Dagger gibi melee ve ranged menzili
+     * ayrı olan silahlar için.
      */
     val secondaryRange: Float? = null,
 
-    /*
-     * Örnek:
-     * Strength -> 1.0
-     * Crit Damage -> 0.25
-     */
     val damageScaling:
     Map<StatType, Float>,
 
     /*
-     * Silaha sahip olmanın verdiği
-     * sürekli stat bonusları.
+     * Silah envanterde bulunduğu sürece
+     * sürekli verilen taban bonuslar.
      */
     val passiveStatModifiers:
     List<StatModifier> =
         emptyList(),
 
-    val rarityStats:
-    Map<ContentRarity, WeaponRarityStats>,
+    /*
+     * 1–5 arasındaki bütün level değerleri.
+     */
+    val levelStats:
+    Map<Int, WeaponLevelStats>,
 
-    val isUpgradeable: Boolean = true,
-
-    val marketCanOfferHigherRarity:
-    Boolean =
-        true,
+    /*
+     * Enchanted Chalk Dust gibi yalnızca
+     * tek kopyası bulunabilen içerikler.
+     */
+    val maximumInventoryCopies: Int? = null,
 
     override val initialUnlockState:
-    ContentUnlockState
+    ContentUnlockState =
+        ContentUnlockState.UNLOCKED
 ) : ContentDefinition {
 
     override val category:
         ContentCategory =
         ContentCategory.WEAPON
 
-    /*
-     * Kullanıcının kesinleştirdiği kural:
-     * bütün silahlar bir normal slot kullanır.
-     */
     val slotCost: Int
         get() = 1
 
-    val usesHasteForNormalAttack: Boolean
-        get() =
-            ContentTag.SPELL_FOCUS in tags
-
-    val startingRarity:
-        ContentRarity
-        get() = ContentRarity.COMMON
+    /*
+     * Yalnızca Spell Focus / Spell Weapon
+     * normal saldırıları Haste kullanır.
+     */
 
     init {
         require(displayName.isNotBlank())
@@ -148,14 +134,35 @@ data class WeaponDefinition(
             }
         }
 
-        if (isUpgradeable) {
-            ContentRarity.entries.forEach { rarity ->
-                require(rarity in rarityStats) {
-                    "Missing $rarity stats for weapon $id."
-                }
+        (1..5).forEach { level ->
+            require(level in levelStats) {
+                "Missing level $level stats for weapon $id."
             }
-        } else {
-            require(ContentRarity.COMMON in rarityStats)
+
+            require(
+                levelStats.getValue(level).level ==
+                    level
+            ) {
+                "Weapon level key and definition level do not match for $id."
+            }
+        }
+
+        require(
+            levelStats.getValue(3)
+                .basicAttackUpgraded
+        ) {
+            "Weapon $id must unlock its basic attack upgrade at level 3."
+        }
+
+        require(
+            levelStats.getValue(5)
+                .weaponAbilityUnlocked
+        ) {
+            "Weapon $id must unlock its ability at level 5."
+        }
+
+        maximumInventoryCopies?.let { maximumCopies ->
+            require(maximumCopies > 0)
         }
 
         damageScaling.forEach {
@@ -168,15 +175,14 @@ data class WeaponDefinition(
         }
     }
 
-    fun statsFor(
-        rarity: ContentRarity
-    ): WeaponRarityStats {
-        if (!isUpgradeable) {
-            return rarityStats.getValue(
-                ContentRarity.COMMON
-            )
-        }
+    fun statsForLevel(
+        level: Int
+    ): WeaponLevelStats {
+        val safeLevel =
+            level.coerceIn(1, 5)
 
-        return rarityStats.getValue(rarity)
+        return levelStats.getValue(
+            safeLevel
+        )
     }
 }

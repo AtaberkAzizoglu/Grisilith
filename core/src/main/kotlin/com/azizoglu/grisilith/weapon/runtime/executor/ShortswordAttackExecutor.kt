@@ -18,15 +18,13 @@ class ShortswordAttackExecutor(
         val definition =
             context.weapon.definition
 
-        val rarityStats =
-            definition.statsFor(
-                context.weapon.rarity
-            )
+        val levelStats =
+            context.weapon.currentLevelStats
 
         val effectiveRange =
             (
                 definition.baseRange *
-                    rarityStats.rangeMultiplier
+                    levelStats.rangeMultiplier
                 )
                 .coerceAtLeast(0f)
 

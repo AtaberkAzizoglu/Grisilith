@@ -25,15 +25,13 @@ class ProjectileWeaponAttackExecutor(
         val definition =
             context.weapon.definition
 
-        val rarityStats =
-            definition.statsFor(
-                context.weapon.rarity
-            )
+        val levelStats =
+            context.weapon.currentLevelStats
 
         val effectiveRange =
             (
                 definition.baseRange *
-                    rarityStats.rangeMultiplier
+                    levelStats.rangeMultiplier
                 )
                 .coerceAtLeast(0f)
 
@@ -78,10 +76,8 @@ class ProjectileWeaponAttackExecutor(
         val definition =
             context.weapon.definition
 
-        val rarityStats =
-            definition.statsFor(
-                context.weapon.rarity
-            )
+        val levelStats =
+            context.weapon.currentLevelStats
 
         val statAdditionalTargets =
             (
@@ -94,8 +90,7 @@ class ProjectileWeaponAttackExecutor(
         val maximumTargets =
             (
                 definition.baseMaximumTargets +
-                    rarityStats
-                        .additionalPiercingTargets +
+                    levelStats.additionalTargets +
                     statAdditionalTargets
                 )
                 .coerceAtLeast(1)
@@ -112,7 +107,7 @@ class ProjectileWeaponAttackExecutor(
         val effectiveRange =
             (
                 definition.baseRange *
-                    rarityStats.rangeMultiplier
+                    levelStats.rangeMultiplier
                 )
                 .coerceAtLeast(1f)
 
@@ -124,8 +119,7 @@ class ProjectileWeaponAttackExecutor(
         val effectiveKnockback =
             (
                 definition.baseKnockback *
-                    rarityStats
-                        .knockbackMultiplier
+                    levelStats.knockbackMultiplier
                 )
                 .coerceAtLeast(0f)
 

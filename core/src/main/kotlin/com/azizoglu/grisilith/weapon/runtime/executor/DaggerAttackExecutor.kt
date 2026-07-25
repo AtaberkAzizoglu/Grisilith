@@ -26,10 +26,8 @@ class DaggerAttackExecutor(
         val definition =
             context.weapon.definition
 
-        val rarityStats =
-            definition.statsFor(
-                context.weapon.rarity
-            )
+        val levelStats =
+            context.weapon.currentLevelStats
 
         /*
          * Dagger'ın uzak saldırı menzili.
@@ -42,7 +40,7 @@ class DaggerAttackExecutor(
                     definition.secondaryRange
                         ?: definition.baseRange
                     ) *
-                    rarityStats.rangeMultiplier
+                    levelStats.rangeMultiplier
                 )
                 .coerceAtLeast(0f)
 
@@ -69,7 +67,7 @@ class DaggerAttackExecutor(
         val effectiveMeleeRange =
             (
                 definition.baseRange *
-                    rarityStats.rangeMultiplier
+                    levelStats.rangeMultiplier
                 )
                 .coerceAtLeast(0f)
 
@@ -140,10 +138,8 @@ class DaggerAttackExecutor(
         val definition =
             context.weapon.definition
 
-        val rarityStats =
-            definition.statsFor(
-                context.weapon.rarity
-            )
+        val levelStats =
+            context.weapon.currentLevelStats
 
         val statAdditionalTargets =
             (
@@ -156,8 +152,7 @@ class DaggerAttackExecutor(
         val maximumTargets =
             (
                 definition.baseMaximumTargets +
-                    rarityStats
-                        .additionalPiercingTargets +
+                    levelStats.additionalTargets +
                     statAdditionalTargets
                 )
                 .coerceAtLeast(1)
@@ -168,7 +163,7 @@ class DaggerAttackExecutor(
                     definition.secondaryRange
                         ?: definition.baseRange
                     ) *
-                    rarityStats.rangeMultiplier
+                    levelStats.rangeMultiplier
                 )
                 .coerceAtLeast(1f)
 
@@ -217,8 +212,7 @@ class DaggerAttackExecutor(
                 knockback =
                     (
                         definition.baseKnockback *
-                            rarityStats
-                                .knockbackMultiplier
+                            levelStats.knockbackMultiplier
                         )
                         .coerceAtLeast(0f)
             )

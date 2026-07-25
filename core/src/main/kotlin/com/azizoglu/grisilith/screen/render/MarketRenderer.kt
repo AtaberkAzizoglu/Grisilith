@@ -30,6 +30,19 @@ class MarketRenderer(
             camera.position.y +
                 220f
 
+        /*
+         * Kontrol yazılarında kullanılacağı için
+         * loop başlamadan önce hesaplanır.
+         */
+        val rerollPrice =
+            MarketRerollPriceCalculator
+                .calculatePrice(
+                    currentStage =
+                        stageController.currentStage,
+                    rerollsUsedInCurrentMarket =
+                        marketRerollsUsed
+                )
+
         font.draw(
             batch,
             "MINI BOSS MARKET",
@@ -50,8 +63,8 @@ class MarketRenderer(
 
             val slotY =
                 titleY -
-                    95f -
-                    index * 105f
+                    90f -
+                    index * 95f
 
             val offer =
                 slot.offer
@@ -86,9 +99,7 @@ class MarketRenderer(
                     font.draw(
                         batch,
                         "${index + 1} - " +
-                            "${offer.title} " +
-                            "Lv.${offer.productLevel}" +
-                            lockText,
+                            "${offer.title}$lockText",
                         startX,
                         slotY
                     )
@@ -96,53 +107,50 @@ class MarketRenderer(
                     font.draw(
                         batch,
                         offer.description,
-                        startX + 25f,
-                        slotY - 28f
+                        startX + 20f,
+                        slotY - 27f
                     )
 
                     font.draw(
                         batch,
                         "Price: ${offer.price} Gold",
-                        startX + 25f,
-                        slotY - 56f
+                        startX + 20f,
+                        slotY - 54f
                     )
                 }
             }
         }
 
-        val rerollPrice =
-            MarketRerollPriceCalculator
-                .calculatePrice(
-                    currentStage =
-                        stageController.currentStage,
-                    rerollsUsedInCurrentMarket =
-                        marketRerollsUsed
-                )
-
         /*
-         * Şimdilik market üç slotlu olduğu için
-         * mevcut klavye kontrollerini koruyoruz.
-         * Gerçek market aşamasında dört karta geçecek.
+         * Kontrol yazıları kart loop'unun dışında
+         * yalnızca bir defa çizilir.
          */
         font.draw(
             batch,
-            "Q / W / E - Lock / Unlock",
+            "1 / 2 / 3 / 4 - Buy",
             startX,
-            titleY - 420f
+            titleY - 500f
+        )
+
+        font.draw(
+            batch,
+            "Q / W / E / T - Lock or Unlock",
+            startX,
+            titleY - 530f
         )
 
         font.draw(
             batch,
             "R - Reroll ($rerollPrice Gold)",
             startX,
-            titleY - 450f
+            titleY - 560f
         )
 
         font.draw(
             batch,
-            "ENTER - Continue",
+            "ENTER - Return to Fight",
             startX,
-            titleY - 480f
+            titleY - 590f
         )
     }
 }

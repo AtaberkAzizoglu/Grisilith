@@ -1,149 +1,184 @@
 package com.azizoglu.grisilith.economy
 
-import kotlin.random.Random
+import com.azizoglu.grisilith.content.ContentUnlockState
+import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
+import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
+import com.azizoglu.grisilith.statistics.StatType
 
 object MarketOfferGenerator {
 
     fun generateOffers(
         currentStage: Int,
-        offerCount: Int = 3,
+        offerCount: Int = 4,
         luckScore: Int = 10
     ): List<MarketOffer> {
         if (offerCount <= 0) {
             return emptyList()
         }
 
-        return List(offerCount) {
-            createRandomOffer(
+        /*
+         * Luck şimdilik rarity olmadığı için
+         * Weapon seviyesini değiştirmiyor.
+         *
+         * Parametreyi sonraki market kalite ve
+         * Item sistemi için koruyoruz.
+         */
+        val safeLuckScore =
+            luckScore.coerceIn(
+                0,
+                50
+            )
+
+        val availableWeapons =
+            DefaultWeapons.all
+                .filter { weapon ->
+                    weapon.initialUnlockState ==
+                        ContentUnlockState.UNLOCKED
+                }
+
+        if (availableWeapons.isEmpty()) {
+            return emptyList()
+        }
+
+        /*
+         * Önce farklı silahlar göstermeye çalışır.
+         * Katalog kart sayısından küçükse kalan
+         * kartlarda tekrar çıkmasına izin verir.
+         */
+        val selectedWeapons =
+            selectWeapons(
+                availableWeapons =
+                    availableWeapons,
+                offerCount =
+                    offerCount
+            )
+
+        return selectedWeapons.map { weapon ->
+            createWeaponOffer(
+                weapon = weapon,
                 currentStage = currentStage,
-                luckScore = luckScore
+                luckScore = safeLuckScore
             )
         }
     }
 
-    private fun createRandomOffer(
+    private fun selectWeapons(
+        availableWeapons:
+        List<WeaponDefinition>,
+        offerCount: Int
+    ): List<WeaponDefinition> {
+        if (
+            availableWeapons.size >=
+            offerCount
+        ) {
+            return availableWeapons
+                .shuffled()
+                .take(offerCount)
+        }
+
+        val result =
+            availableWeapons
+                .shuffled()
+                .toMutableList()
+
+        while (result.size < offerCount) {
+            result.add(
+                availableWeapons.random()
+            )
+        }
+
+        return result
+    }
+
+    private fun createWeaponOffer(
+        weapon: WeaponDefinition,
         currentStage: Int,
         luckScore: Int
     ): MarketOffer {
-        val productType =
-            MarketProductType.entries.random()
-
-        val maximumLevel =
-            maximumLevelForStage(
-                currentStage
-            )
-
-        val productLevel =
-            rollProductLevel(
-                maximumLevel = maximumLevel,
-                luckScore = luckScore
-            )
+        /*
+         * Silah kopyaları şimdilik daima Lv.1.
+         *
+         * Aynı silahlar envanterde ayrı tutulabilir
+         * veya drag-and-merge ile birleştirilebilir.
+         */
+        val productLevel = 1
 
         val price =
-            MarketPriceCalculator.calculatePrice(
-                productType = productType,
-                productLevel = productLevel,
-                currentStage = currentStage
-            )
-
-        return when (productType) {
-            MarketProductType.WEAPON -> {
-                MarketOffer(
-                    productType = productType,
-                    productLevel = productLevel,
-                    title = "Weapon Upgrade",
-                    description =
-                        "+$productLevel Attack Speed score",
-                    price = price
+            MarketPriceCalculator
+                .calculatePrice(
+                    productType =
+                        MarketProductType.WEAPON,
+                    productLevel =
+                        productLevel,
+                    currentStage =
+                        currentStage
                 )
-            }
 
-            MarketProductType.SKILL -> {
-                MarketOffer(
-                    productType = productType,
-                    productLevel = productLevel,
-                    title = "Skill Upgrade",
-                    description =
-                        "+$productLevel Max HP score",
-                    price = price
-                )
-            }
+        return MarketOffer(
+            productType =
+                MarketProductType.WEAPON,
 
-            MarketProductType.ITEM -> {
-                MarketOffer(
-                    productType = productType,
-                    productLevel = productLevel,
-                    title = "Item Upgrade",
-                    description =
-                        "+$productLevel Movement Speed score",
-                    price = price
-                )
-            }
-        }
+            productLevel =
+                productLevel,
+
+            title =
+                weapon.displayName,
+
+            description =
+                buildWeaponDescription(
+                    weapon
+                ),
+
+            price =
+                price,
+
+            weaponDefinition =
+                weapon
+        )
     }
 
-    private fun maximumLevelForStage(
-        currentStage: Int
-    ): Int {
-        return when {
-            currentStage >= 30 -> 5
-            currentStage >= 20 -> 4
-            currentStage >= 10 -> 3
-            currentStage >= 5 -> 2
-            else -> 1
-        }
-    }
+    private fun buildWeaponDescription(
+        weapon: WeaponDefinition
+    ): String {
+        val tagText =
+            when {
+                weapon.normalAttackSpeedStat ==
+                    StatType.HASTE->
+                    "Spell Focus"
 
-    private fun rollProductLevel(
-        maximumLevel: Int,
-        luckScore: Int
-    ): Int {
-        if (maximumLevel <= 1) {
-            return 1
-        }
 
-        val safeLuck =
-            luckScore.coerceIn(
-                1,
-                30
-            )
-
-        /*
-         * Luck yükseldikçe rastgele sonuç
-         * maksimum seviyeye doğru kayar.
-         */
-        val luckPower =
-            1f +
-                (safeLuck - 10)
-                    .coerceAtLeast(0) *
-                0.06f
-
-        val randomValue =
-            Random.nextFloat()
-
-        val luckAdjustedValue =
-            randomValue.pow(
-                1f / luckPower
-            )
+                else ->
+                    weapon.tags
+                        .firstOrNull()
+                        ?.name
+                        ?.replace(
+                            "_",
+                            " "
+                        )
+                        ?.lowercase()
+                        ?.replaceFirstChar {
+                                character ->
+                            character.uppercase()
+                        }
+                        ?: "Weapon"
+            }
 
         return (
-            1f +
-                luckAdjustedValue *
-                maximumLevel
-            )
-            .toInt()
-            .coerceIn(
-                1,
-                maximumLevel
+            "Lv.1 $tagText | " +
+                "Damage: ${weapon.baseDamage} | " +
+                "Speed: ${formatAttackSpeed(
+                    weapon.baseAttacksPerSecond
+                )}"
             )
     }
 
-    private fun Float.pow(
-        exponent: Float
-    ): Float {
-        return Math.pow(
-            toDouble(),
-            exponent.toDouble()
-        ).toFloat()
+    private fun formatAttackSpeed(
+        value: Float
+    ): String {
+        return String.format(
+            java.util.Locale.US,
+            "%.2f",
+            value
+        )
     }
 }

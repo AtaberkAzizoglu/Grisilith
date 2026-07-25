@@ -15,10 +15,8 @@ class WeaponDamageCalculator(
         val definition =
             weapon.definition
 
-        val rarityStats =
-            definition.statsFor(
-                weapon.rarity
-            )
+        val levelStats =
+            weapon.currentLevelStats
 
         val baseDamage =
             definition.baseDamage.toFloat()
@@ -30,9 +28,8 @@ class WeaponDamageCalculator(
 
         val damageBeforeCritical =
             baseDamage *
-                rarityStats.damageMultiplier *
+                levelStats.damageMultiplier *
                 scalingMultiplier
-
         val canCriticallyHit =
             definition.damageTypes.any {
                     damageType ->

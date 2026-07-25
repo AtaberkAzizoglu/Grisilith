@@ -1,44 +1,32 @@
 package com.azizoglu.grisilith.weapon.runtime
 
-import com.azizoglu.grisilith.content.ContentRarity
 import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 import java.util.UUID
 
 class WeaponInstance(
     val definition: WeaponDefinition,
-    rarity: ContentRarity =
-        ContentRarity.COMMON,
     level: Int = 1
 ) {
 
-    /*
-     * Aynı silahın iki ayrı kopyasını ayırmak için
-     * run içinde benzersiz runtime ID'si.
-     *
-     * Bu save ID'si değildir.
-     */
+    companion object {
+        const val MINIMUM_LEVEL = 1
+        const val MAXIMUM_LEVEL = 5
+    }
+
     val runtimeId: String =
         UUID.randomUUID().toString()
-
-    var rarity: ContentRarity =
-        rarity
-        private set
 
     var level: Int =
         level
         private set
 
     init {
-        require(level in 1..4) {
-            "Weapon level must be between 1 and 4."
-        }
-
-        if (!definition.isUpgradeable) {
-            require(
-                rarity == ContentRarity.COMMON
-            ) {
-                "Non-upgradeable weapons must remain Common."
-            }
+        require(
+            level in
+                MINIMUM_LEVEL..MAXIMUM_LEVEL
+        ) {
+            "Weapon level must be between " +
+                "$MINIMUM_LEVEL and $MAXIMUM_LEVEL."
         }
     }
 
@@ -46,38 +34,48 @@ class WeaponInstance(
         get() =
             definition.displayName
 
-    fun canLevelUp(): Boolean {
-        return (
-            definition.isUpgradeable &&
-                level < 4
+    val currentLevelStats
+        get() =
+            definition.statsForLevel(
+                level
             )
+
+    val isMaximumLevel: Boolean
+        get() =
+            level >= MAXIMUM_LEVEL
+
+    val hasBasicAttackUpgrade: Boolean
+        get() =
+            currentLevelStats
+                .basicAttackUpgraded
+
+    val hasWeaponAbility: Boolean
+        get() =
+            currentLevelStats
+                .weaponAbilityUnlocked
+
+    fun canLevelUp(): Boolean {
+        return !isMaximumLevel
     }
 
-    fun canIncreaseRarity(): Boolean {
-        return (
-            definition.isUpgradeable &&
-                !rarity.isMaximumRarity
-            )
+    fun increaseLevel(): Boolean {
+        if (!canLevelUp()) {
+            return false
+        }
+
+        level++
+        return true
     }
 
     fun setLevel(
         newLevel: Int
     ) {
-        require(newLevel in 1..4)
+        require(
+            newLevel in
+                MINIMUM_LEVEL..MAXIMUM_LEVEL
+        )
 
         level = newLevel
-    }
-
-    fun setRarity(
-        newRarity: ContentRarity
-    ) {
-        require(
-            definition.isUpgradeable
-        ) {
-            "${definition.displayName} cannot increase rarity."
-        }
-
-        rarity = newRarity
     }
 
     override fun equals(

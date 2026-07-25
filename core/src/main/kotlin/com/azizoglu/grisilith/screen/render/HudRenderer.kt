@@ -218,6 +218,30 @@ class HudRenderer(
 
         font.draw(
             batch,
+            "Haste: " +
+                playerStats.totalScore(
+                    StatType.HASTE
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        font.draw(
+            batch,
+            "Attack Speed: " +
+                playerStats.totalScore(
+                    StatType.ATTACK_SPEED
+                ),
+            leftX,
+            topY
+        )
+
+        topY -= 28f
+
+        font.draw(
+            batch,
             "Game Time: $formattedGameTime",
             leftX,
             topY
@@ -238,7 +262,7 @@ class HudRenderer(
         val startX =
             camera.position.x +
                 cameraWidth / 2f -
-                260f
+                285f
 
         var currentY =
             camera.position.y +
@@ -250,7 +274,9 @@ class HudRenderer(
 
         font.draw(
             batch,
-            "WEAPONS",
+            "WEAPONS " +
+                "(${weaponInventory.equippedWeaponCount}/" +
+                "${WeaponInventory.WEAPON_SLOT_COUNT})",
             startX,
             currentY
         )
@@ -269,7 +295,7 @@ class HudRenderer(
                     } else {
                         "${slot.index + 1}: " +
                             "${weapon.displayName} " +
-                            "[${weapon.rarity.displayName}]"
+                            "[Lv.${weapon.level}]"
                     }
 
                 font.draw(
@@ -281,30 +307,6 @@ class HudRenderer(
 
                 currentY -= 26f
             }
-
-        currentY -= 8f
-
-        font.draw(
-            batch,
-            secondarySlotText(),
-            startX,
-            currentY
-        )
-    }
-
-    private fun secondarySlotText(): String {
-        val weapon =
-            weaponInventory
-                .secondarySlot
-                .weapon
-
-        return if (weapon == null) {
-            "Secondary: Empty"
-        } else {
-            "Secondary: " +
-                "${weapon.displayName} " +
-                "[${weapon.rarity.displayName}]"
-        }
     }
 
     private fun renderCentralStatus() {

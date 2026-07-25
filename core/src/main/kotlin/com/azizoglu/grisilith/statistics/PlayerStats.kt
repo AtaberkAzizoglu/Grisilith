@@ -8,8 +8,8 @@ class PlayerStats(
 ) {
     companion object {
         const val MINIMUM_SCORE = 0
-        const val PRE_RUN_MAXIMUM_SCORE = 20
-        const val RUN_MAXIMUM_SCORE = 30
+        const val PRE_RUN_MAXIMUM_SCORE = 25
+        const val RUN_MAXIMUM_SCORE = 50
 
         private fun defaultBaseScores(): Map<StatType, Int> {
             return StatType.entries.associateWith {
@@ -330,23 +330,6 @@ class PlayerStats(
                 0.08f
             )
             .coerceAtLeast(0.20f)
-    }
-
-    fun hasteCooldownMultiplier(): Float {
-        val score =
-            totalScore(
-                StatType.HASTE
-            )
-
-        return (
-            1f -
-                (score - 10) *
-                0.03f
-            )
-            .coerceIn(
-                0.25f,
-                2f
-            )
     }
 
     fun luckScore(): Int {

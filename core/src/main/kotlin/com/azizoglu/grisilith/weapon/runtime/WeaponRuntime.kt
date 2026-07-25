@@ -6,6 +6,7 @@ import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.definition.WeaponAttackPattern
+import com.azizoglu.grisilith.statistics.StatType
 
 class WeaponRuntime(
     val weapon: WeaponInstance,
@@ -69,28 +70,37 @@ class WeaponRuntime(
         val definition =
             weapon.definition
 
-        val rarityStats =
-            definition.statsFor(
-                weapon.rarity
-            )
+        val levelStats =
+            weapon.currentLevelStats
 
-        val normalAttackSpeedMultiplier =
-            if (
-                definition
-                    .usesHasteForNormalAttack
+        val characterAttackSpeedMultiplier =
+            when (
+                definition.normalAttackSpeedStat
             ) {
-                playerStats
-                    .hasteAttackSpeedMultiplier()
-            } else {
-                playerStats
-                    .attackSpeedMultiplier()
+                StatType.HASTE -> {
+                    playerStats
+                        .hasteAttackSpeedMultiplier()
+                }
+
+                StatType.ATTACK_SPEED -> {
+                    playerStats
+                        .attackSpeedMultiplier()
+                }
+
+                else -> {
+                    /*
+                     * Normal saldırı hızında kullanılmasına
+                     * izin vermediğimiz statlar için güvenli
+                     * varsayılan değer.
+                     */
+                    1f
+                }
             }
 
         return (
             definition.baseAttacksPerSecond *
-                rarityStats
-                    .attackSpeedMultiplier *
-                normalAttackSpeedMultiplier
+                levelStats.attackSpeedMultiplier *
+                characterAttackSpeedMultiplier
             )
             .coerceAtLeast(0.01f)
     }
