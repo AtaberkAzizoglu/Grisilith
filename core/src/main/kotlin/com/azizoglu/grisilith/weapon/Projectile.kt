@@ -37,7 +37,10 @@ class Projectile(
     private val ricochetRange: Float = 0f,
 
     private val travelDistanceAfterFirstHit:
-    Float? = null
+    Float? = null,
+
+    private val ignoresEnemyCollisions:
+    Boolean = false
 ) {
 
     private val position =
@@ -164,7 +167,10 @@ class Projectile(
         onDamageDealt: (Int) -> Unit,
         onEnemyKilled: (Enemy) -> Unit
     ) {
-        if (!isActive) {
+        if (
+            !isActive ||
+            ignoresEnemyCollisions
+        ) {
             return
         }
 
@@ -423,7 +429,10 @@ class Projectile(
     fun render(
         shapeRenderer: ShapeRenderer
     ) {
-        if (!isActive) {
+        if (
+            !isActive ||
+            ignoresEnemyCollisions
+        ) {
             return
         }
 

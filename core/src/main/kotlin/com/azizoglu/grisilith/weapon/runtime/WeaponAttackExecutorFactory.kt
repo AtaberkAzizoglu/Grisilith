@@ -9,6 +9,7 @@ import com.azizoglu.grisilith.weapon.runtime.executor.ProjectileWeaponAttackExec
 import com.azizoglu.grisilith.weapon.runtime.executor.ShieldAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.executor.ShortswordAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.executor.TomeOfEryndorAttackExecutor
+import com.azizoglu.grisilith.weapon.runtime.executor.TotemOfDarkCloudsAttackExecutor
 
 class WeaponAttackExecutorFactory(
     playerStats: PlayerStats
@@ -97,6 +98,18 @@ class WeaponAttackExecutorFactory(
                 projectileExecutor
         )
 
+    private val totemOfDarkCloudsExecutor =
+        TotemOfDarkCloudsAttackExecutor(
+            damageCalculator =
+                damageCalculator,
+
+            targetSelector =
+                targetSelector,
+
+            projectileExecutor =
+                projectileExecutor
+        )
+
     fun executorFor(
         attackPattern: WeaponAttackPattern
     ): WeaponAttackExecutor? {
@@ -142,13 +155,18 @@ class WeaponAttackExecutorFactory(
              * için tekrar kullanılabilir.
              */
             WeaponAttackPattern
-                .TARGET_AREA_CIRCLE -> {
-                null
+                .TOME_PROJECTILE_OR_BEAM -> {
+                tomeOfEryndorExecutor
             }
 
             WeaponAttackPattern
-                .TOME_PROJECTILE_OR_BEAM -> {
-                tomeOfEryndorExecutor
+                .TOTEM_PROJECTILE_OR_DRAIN -> {
+                totemOfDarkCloudsExecutor
+            }
+
+            WeaponAttackPattern
+                .TARGET_AREA_CIRCLE -> {
+                null
             }
 
             WeaponAttackPattern.NONE -> {

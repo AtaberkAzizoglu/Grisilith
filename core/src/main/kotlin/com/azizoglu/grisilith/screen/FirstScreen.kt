@@ -256,7 +256,7 @@ class FirstScreen(
         weaponInventory.addWeapon(
             WeaponInstance(
                 definition =
-                    DefaultWeapons.orbOfSky,
+                    DefaultWeapons.totemOfDarkClouds,
 
                 level = 3
             )

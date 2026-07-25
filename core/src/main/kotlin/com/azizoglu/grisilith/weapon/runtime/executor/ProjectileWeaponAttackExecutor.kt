@@ -64,6 +64,9 @@ class ProjectileWeaponAttackExecutor(
          */
         private const val STEAM_WAND_FAN_DAMAGE_MULTIPLIER =
             0.24f
+
+        private const val TOTEM_OF_DARK_CLOUDS_ID =
+            "WPN_TOTEM_OF_DARK_CLOUDS"
     }
 
     override fun execute(
@@ -268,6 +271,15 @@ class ProjectileWeaponAttackExecutor(
                 context.weapon
                     .hasBasicAttackUpgrade
 
+        val isTotemOfDarkClouds =
+            weaponId ==
+                TOTEM_OF_DARK_CLOUDS_ID
+
+        val isUpgradedTotemOfDarkClouds =
+            isTotemOfDarkClouds &&
+                context.weapon
+                    .hasBasicAttackUpgrade
+
         /*
          * Orb Lv.3 sonrasında yalnızca Lightning
          * kullanır. Lv.1–2 hâlâ Air veya Lightning
@@ -281,6 +293,10 @@ class ProjectileWeaponAttackExecutor(
 
                 isUpgradedOrbOfSky -> {
                     DamageType.LIGHTNING
+                }
+
+                isUpgradedTotemOfDarkClouds -> {
+                    DamageType.NECROTIC
                 }
 
                 else -> {
@@ -304,6 +320,11 @@ class ProjectileWeaponAttackExecutor(
                 selectedDamageType ==
                 DamageType.LIGHTNING
 
+        val isTotemLightningAttack =
+            isTotemOfDarkClouds &&
+                selectedDamageType ==
+                DamageType.LIGHTNING
+
         val statAdditionalTargets =
             (
                 playerStats
@@ -319,17 +340,14 @@ class ProjectileWeaponAttackExecutor(
         val weaponSpecificAdditionalTargets =
             when {
                 isUpgradedOrbOfSky -> {
-                    /*
-                     * İlk hedef + 4 sekme hedefi.
-                     */
                     4
                 }
 
                 isOrbLightningAttack -> {
-                    /*
-                     * Lv.1–2:
-                     * İlk hedef + 1 sekme hedefi.
-                     */
+                    1
+                }
+
+                isTotemLightningAttack -> {
                     1
                 }
 
@@ -390,6 +408,10 @@ class ProjectileWeaponAttackExecutor(
                     ORB_CHAIN_DAMAGE_MULTIPLIER
                 }
 
+                isTotemLightningAttack -> {
+                    0.50f
+                }
+
                 isCrossbow &&
                     context.weapon
                         .hasBasicAttackUpgrade -> {
@@ -415,6 +437,10 @@ class ProjectileWeaponAttackExecutor(
                     1
                 }
 
+                isTotemLightningAttack -> {
+                    1
+                }
+
                 isUpgradedLongbow -> {
                     1
                 }
@@ -428,6 +454,10 @@ class ProjectileWeaponAttackExecutor(
             when {
                 isOrbLightningAttack -> {
                     ORB_LIGHTNING_CHAIN_RANGE
+                }
+
+                isTotemLightningAttack -> {
+                    280f
                 }
 
                 isUpgradedLongbow -> {

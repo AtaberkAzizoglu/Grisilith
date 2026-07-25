@@ -41,7 +41,7 @@ object TotemOfDarkCloudsDefinition {
 
             attackPattern =
                 WeaponAttackPattern
-                    .STRAIGHT_PROJECTILE,
+                    .TOTEM_PROJECTILE_OR_DRAIN,
 
             normalAttackSpeedStat =
                 StatType.HASTE,
