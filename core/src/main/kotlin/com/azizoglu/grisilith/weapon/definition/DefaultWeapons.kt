@@ -10,6 +10,11 @@ import com.azizoglu.grisilith.weapon.definition.catalog.LongswordDefinition
 import com.azizoglu.grisilith.weapon.definition.catalog.ShieldDefinition
 import com.azizoglu.grisilith.weapon.definition.catalog.SteamWandDefinition
 import com.azizoglu.grisilith.weapon.definition.catalog.TomeOfEryndorDefinition
+import com.azizoglu.grisilith.weapon.definition.catalog.AmuletOfTrollKingDefinition
+import com.azizoglu.grisilith.weapon.definition.catalog.EnchantedChalkDustDefinition
+import com.azizoglu.grisilith.weapon.definition.catalog.OrbOfSkyDefinition
+import com.azizoglu.grisilith.weapon.definition.catalog.TotemOfDarkCloudsDefinition
+
 
 object DefaultWeapons {
 
@@ -69,6 +74,18 @@ object DefaultWeapons {
     val theBook =
         tomeOfEryndor
 
+    val orbOfSky =
+        OrbOfSkyDefinition.definition
+
+    val totemOfDarkClouds =
+        TotemOfDarkCloudsDefinition.definition
+
+    val amuletOfTrollKing =
+        AmuletOfTrollKingDefinition.definition
+
+    val enchantedChalkDust =
+        EnchantedChalkDustDefinition.definition
+
     val all:
         List<WeaponDefinition> =
         listOf(
@@ -81,7 +98,11 @@ object DefaultWeapons {
             crossbow,
             ivyStaff,
             steamWand,
-            tomeOfEryndor
+            tomeOfEryndor,
+            orbOfSky,
+            totemOfDarkClouds,
+            amuletOfTrollKing,
+            enchantedChalkDust
         )
 
     fun findById(

@@ -248,7 +248,28 @@ class FirstScreen(
         weaponInventory.addWeapon(
             WeaponInstance(
                 definition =
-                    DefaultWeapons.staff
+                    DefaultWeapons.orbOfSky
+            )
+        )
+
+        weaponInventory.addWeapon(
+            WeaponInstance(
+                definition =
+                    DefaultWeapons.totemOfDarkClouds
+            )
+        )
+
+        weaponInventory.addWeapon(
+            WeaponInstance(
+                definition =
+                    DefaultWeapons.amuletOfTrollKing
+            )
+        )
+
+        weaponInventory.addWeapon(
+            WeaponInstance(
+                definition =
+                    DefaultWeapons.enchantedChalkDust
             )
         )
 
