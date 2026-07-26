@@ -8,6 +8,7 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
 import com.badlogic.gdx.math.Vector2
 import kotlin.math.roundToInt
+import com.azizoglu.grisilith.combat.debug.CombatDebugVisualManager
 
 class TotemOfDarkCloudsAttackExecutor(
     private val damageCalculator:
@@ -33,7 +34,7 @@ class TotemOfDarkCloudsAttackExecutor(
          * projectile hızı.
          */
         private const val RETURN_PROJECTILE_SPEED =
-            500f
+            10f
 
         private const val RETURN_PROJECTILE_SIZE =
             11f
@@ -186,6 +187,15 @@ class TotemOfDarkCloudsAttackExecutor(
 
         val playerY =
             context.player.centerY
+
+        CombatDebugVisualManager.addLine(
+            startX = startX,
+            startY = startY,
+            endX = playerX,
+            endY = playerY,
+            upgraded = true,
+            durationSeconds = 0.30f
+        )
 
         val travelDistance =
             Vector2.dst(

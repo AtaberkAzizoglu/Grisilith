@@ -40,7 +40,9 @@ class Projectile(
     Float? = null,
 
     private val ignoresEnemyCollisions:
-    Boolean = false
+    Boolean = false,
+
+    wallBounceCount: Int = 0
 ) {
 
     private val position =
@@ -75,6 +77,9 @@ class Projectile(
 
     private var travelledDistance =
         0f
+
+    private var remainingWallBounces =
+        wallBounceCount.coerceAtLeast(0)
 
     private var remainingTargets =
         maximumTargets
@@ -151,15 +156,81 @@ class Projectile(
             return
         }
 
-        val outsideWorld =
-            position.x + size < 0f ||
-                position.y + size < 0f ||
-                position.x > worldWidth ||
-                position.y > worldHeight
+        resolveWorldBoundaryCollision(
+            worldWidth = worldWidth,
+            worldHeight = worldHeight
+        )
+    }
 
-        if (outsideWorld) {
-            isActive = false
+    private fun resolveWorldBoundaryCollision(
+        worldWidth: Float,
+        worldHeight: Float
+    ) {
+        if (!isActive) {
+            return
         }
+
+        var collidedHorizontally =
+            false
+
+        var collidedVertically =
+            false
+
+        if (position.x < 0f) {
+            position.x = 0f
+            collidedHorizontally = true
+        }
+
+        if (
+            position.x + size >
+            worldWidth
+        ) {
+            position.x =
+                worldWidth - size
+
+            collidedHorizontally = true
+        }
+
+        if (position.y < 0f) {
+            position.y = 0f
+            collidedVertically = true
+        }
+
+        if (
+            position.y + size >
+            worldHeight
+        ) {
+            position.y =
+                worldHeight - size
+
+            collidedVertically = true
+        }
+
+        if (
+            !collidedHorizontally &&
+            !collidedVertically
+        ) {
+            return
+        }
+
+        if (remainingWallBounces <= 0) {
+            isActive = false
+            return
+        }
+
+        if (collidedHorizontally) {
+            velocity.x =
+                -velocity.x
+        }
+
+        if (collidedVertically) {
+            velocity.y =
+                -velocity.y
+        }
+
+        remainingWallBounces--
+
+        travelledDistance = 0f
     }
 
     fun checkCollision(

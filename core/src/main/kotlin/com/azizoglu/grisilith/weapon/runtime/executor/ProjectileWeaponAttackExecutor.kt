@@ -67,6 +67,24 @@ class ProjectileWeaponAttackExecutor(
 
         private const val TOTEM_OF_DARK_CLOUDS_ID =
             "WPN_TOTEM_OF_DARK_CLOUDS"
+
+        private const val ENCHANTED_CHALK_DUST_ID =
+            "WPN_ENCHANTED_CHALK_DUST"
+
+        private const val CHALK_DUST_PROJECTILE_COUNT =
+            3
+
+        private const val CHALK_DUST_ANGLE_STEP =
+            10f
+
+        private const val CHALK_DUST_DAMAGE_MULTIPLIER =
+            0.45f
+
+        private const val CHALK_DUST_WALL_BOUNCES =
+            2
+
+        private const val CHALK_DUST_RANGE_MULTIPLIER =
+            3f
     }
 
     override fun execute(
@@ -110,6 +128,23 @@ class ProjectileWeaponAttackExecutor(
 
         if (isUpgradedSteamWand) {
             executeUpgradedSteamWandAttack(
+                context = context,
+                targetX = target.centerX,
+                targetY = target.centerY,
+                effectiveRange = effectiveRange
+            )
+
+            return
+        }
+
+        val isUpgradedChalkDust =
+            weaponId ==
+                ENCHANTED_CHALK_DUST_ID &&
+                context.weapon
+                    .hasBasicAttackUpgrade
+
+        if (isUpgradedChalkDust) {
+            executeUpgradedChalkDustAttack(
                 context = context,
                 targetX = target.centerX,
                 targetY = target.centerY,
@@ -230,13 +265,104 @@ class ProjectileWeaponAttackExecutor(
         }
     }
 
+    private fun executeUpgradedChalkDustAttack(
+        context: WeaponAttackContext,
+        targetX: Float,
+        targetY: Float,
+        effectiveRange: Float
+    ) {
+        val baseDirection =
+            Vector2(
+                targetX -
+                    context.player.centerX,
+
+                targetY -
+                    context.player.centerY
+            )
+
+        if (baseDirection.isZero) {
+            baseDirection.set(
+                1f,
+                0f
+            )
+        }
+
+        baseDirection.nor()
+
+        val middleIndex =
+            CHALK_DUST_PROJECTILE_COUNT /
+                2
+
+        repeat(
+            CHALK_DUST_PROJECTILE_COUNT
+        ) { projectileIndex ->
+
+            /*
+             * Üç projectile için:
+             *
+             * index 0 → -10°
+             * index 1 →   0°
+             * index 2 → +10°
+             */
+            val indexOffset =
+                projectileIndex -
+                    middleIndex
+
+            val angleOffset =
+                indexOffset *
+                    CHALK_DUST_ANGLE_STEP
+
+            val projectileDirection =
+                Vector2(
+                    baseDirection
+                )
+                    .rotateDeg(
+                        angleOffset
+                    )
+
+            val adjustedTargetX =
+                context.player.centerX +
+                    projectileDirection.x *
+                    effectiveRange
+
+            val adjustedTargetY =
+                context.player.centerY +
+                    projectileDirection.y *
+                    effectiveRange
+
+            createProjectile(
+                context = context,
+
+                targetX =
+                    adjustedTargetX,
+
+                targetY =
+                    adjustedTargetY,
+
+                damageMultiplier =
+                    CHALK_DUST_DAMAGE_MULTIPLIER,
+
+                forcedDamageType =
+                    DamageType.AIR,
+
+                wallBounceCount =
+                    CHALK_DUST_WALL_BOUNCES,
+
+                travelRangeMultiplier =
+                    CHALK_DUST_RANGE_MULTIPLIER
+            )
+        }
+    }
+
     private fun createProjectile(
         context: WeaponAttackContext,
         targetX: Float,
         targetY: Float,
         damageMultiplier: Float = 1f,
         forcedDamageType:
-        DamageType? = null
+        DamageType? = null,
+        wallBounceCount: Int = 0,
+        travelRangeMultiplier: Float = 1f
     ) {
         /*
          * Her projectile’ın crit hesabı bağımsızdır.
@@ -274,6 +400,10 @@ class ProjectileWeaponAttackExecutor(
         val isTotemOfDarkClouds =
             weaponId ==
                 TOTEM_OF_DARK_CLOUDS_ID
+
+        val isEnchantedChalkDust =
+            weaponId ==
+                ENCHANTED_CHALK_DUST_ID
 
         val isUpgradedTotemOfDarkClouds =
             isTotemOfDarkClouds &&
@@ -361,18 +491,23 @@ class ProjectileWeaponAttackExecutor(
             }
 
         val maximumTargets =
-            (
-                definition.baseMaximumTargets +
-                    levelStats.additionalTargets +
-                    statAdditionalTargets +
-                    weaponSpecificAdditionalTargets
-                )
-                .coerceAtLeast(1)
+            if (isEnchantedChalkDust) {
+                1
+            } else {
+                (
+                    definition.baseMaximumTargets +
+                        levelStats.additionalTargets +
+                        statAdditionalTargets +
+                        weaponSpecificAdditionalTargets
+                    )
+                    .coerceAtLeast(1)
+            }
 
         val effectiveRange =
             (
                 definition.baseRange *
-                    levelStats.rangeMultiplier
+                    levelStats.rangeMultiplier *
+                    travelRangeMultiplier
                 )
                 .coerceAtLeast(1f)
 
@@ -539,7 +674,10 @@ class ProjectileWeaponAttackExecutor(
                     ricochetRange,
 
                 travelDistanceAfterFirstHit =
-                    postFirstHitTravelDistance
+                    postFirstHitTravelDistance,
+
+                wallBounceCount =
+                    wallBounceCount
             )
         )
     }
