@@ -7,8 +7,66 @@ import com.azizoglu.grisilith.item.definition.ItemDefinition
 import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
 import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
+import com.azizoglu.grisilith.character.CharacterDefinition
+import com.azizoglu.grisilith.character.CharacterWeaponPreference
+import com.azizoglu.grisilith.item.definition.ItemRarity
+import kotlin.random.Random
 
 object MarketOfferGenerator {
+
+    /*
+ * Ana market kategorileri Luck'tan etkilenmez.
+ */
+    private const val WEAPON_PRODUCT_CHANCE =
+        0.35f
+
+    private const val ITEM_PRODUCT_CHANCE =
+        0.35f
+
+    /*
+     * Kalan %30 Stat'tır.
+     */
+    private const val STAT_PRODUCT_CHANCE =
+        0.30f
+
+    private const val MAXIMUM_LUCK =
+        50
+
+    /*
+     * 50 Luck'ta tercih edilen Weapon grubu:
+     * %33,33 → %42
+     */
+    private const val PREFERRED_GROUP_CHANCE_AT_MAX_LUCK =
+        0.42f
+
+    /*
+     * Sahip olunan her farklı Weapon için:
+     * Her Luck başına doğrudan +%0,1 puan.
+     *
+     * 50 Luck → +%5 puan.
+     */
+    private const val OWNED_WEAPON_CHANCE_PER_LUCK =
+        0.001f
+
+    /*
+     * Tercih edilen Stat:
+     * 0 Luck  → ×1,00
+     * 50 Luck → ×1,50
+     */
+    private const val PREFERRED_STAT_WEIGHT_PER_LUCK =
+        0.01f
+
+    /*
+     * Item rarity bonusu:
+     *
+     * 50 Luck:
+     * Uncommon  ×1,05
+     * Rare      ×1,10
+     * Legendary ×1,15
+     * Artifact  ×1,20
+     */
+    private const val ITEM_RARITY_WEIGHT_PER_LUCK =
+        0.001f
 
     private enum class WeaponMarketGroup {
         MELEE,
@@ -19,7 +77,18 @@ object MarketOfferGenerator {
     fun generateOffers(
         currentStage: Int,
         offerCount: Int = 4,
-        luckScore: Int = 10
+        luckScore: Int = 10,
+
+        selectedCharacter:
+        CharacterDefinition,
+
+        /*
+         * Yalnızca benzersiz Weapon ID'leri gelir.
+         * Level ve kopya sayısı hesaba katılmaz.
+         */
+        ownedWeaponIds:
+        Set<String> =
+            emptySet()
     ): List<MarketOffer> {
         if (offerCount <= 0) {
             return emptyList()
@@ -28,68 +97,127 @@ object MarketOfferGenerator {
         val safeStage =
             currentStage.coerceAtLeast(1)
 
-        /*
-         * Henüz ağırlık hesabına bağlanmadı.
-         * Sonraki Luck commit'i için korunuyor.
-         */
-        luckScore.coerceIn(
-            0,
-            50
-        )
+        val safeLuck =
+            luckScore.coerceIn(
+                0,
+                MAXIMUM_LUCK
+            )
 
         return List(
             offerCount
         ) {
             generateSingleOffer(
                 currentStage =
-                    safeStage
+                    safeStage,
+
+                luckScore =
+                    safeLuck,
+
+                selectedCharacter =
+                    selectedCharacter,
+
+                ownedWeaponIds =
+                    ownedWeaponIds
             )
         }
     }
 
     private fun generateSingleOffer(
-        currentStage: Int
+        currentStage: Int,
+        luckScore: Int,
+        selectedCharacter:
+        CharacterDefinition,
+        ownedWeaponIds:
+        Set<String>
     ): MarketOffer {
+        val productRoll =
+            Random.nextFloat()
+
         /*
-         * entries.random() ile üç kategori
-         * eşit ihtimalle seçilir.
+         * Luck bu ilk seçimi değiştirmez:
+         *
+         * 0.00–0.35 → Weapon
+         * 0.35–0.70 → Item
+         * 0.70–1.00 → Stat
          */
-        return when (
-            MarketProductType.entries.random()
-        ) {
-            MarketProductType.WEAPON -> {
+        return when {
+            productRoll <
+                WEAPON_PRODUCT_CHANCE -> {
+
                 createRandomWeaponOffer(
                     currentStage =
-                        currentStage
+                        currentStage,
+
+                    luckScore =
+                        luckScore,
+
+                    preferredGroup =
+                        selectedCharacter
+                            .preferredMarketWeaponGroup,
+
+                    ownedWeaponIds =
+                        ownedWeaponIds
                 )
                     ?: createRandomStatOffer(
                         currentStage =
-                            currentStage
+                            currentStage,
+
+                        luckScore =
+                            luckScore,
+
+                        preferredStats =
+                            selectedCharacter
+                                .preferredMarketStats
                     )
             }
 
-            MarketProductType.ITEM -> {
+            productRoll <
+                WEAPON_PRODUCT_CHANCE +
+                ITEM_PRODUCT_CHANCE -> {
+
                 createRandomItemOffer(
                     currentStage =
-                        currentStage
+                        currentStage,
+
+                    luckScore =
+                        luckScore
                 )
                     ?: createRandomStatOffer(
                         currentStage =
-                            currentStage
+                            currentStage,
+
+                        luckScore =
+                            luckScore,
+
+                        preferredStats =
+                            selectedCharacter
+                                .preferredMarketStats
                     )
             }
 
-            MarketProductType.STAT -> {
+            else -> {
                 createRandomStatOffer(
                     currentStage =
-                        currentStage
+                        currentStage,
+
+                    luckScore =
+                        luckScore,
+
+                    preferredStats =
+                        selectedCharacter
+                            .preferredMarketStats
                 )
             }
         }
     }
 
     private fun createRandomWeaponOffer(
-        currentStage: Int
+        currentStage: Int,
+        luckScore: Int,
+        preferredGroup:
+        CharacterWeaponPreference?,
+        ownedWeaponIds:
+        Set<String>
     ): MarketOffer? {
         val availableWeapons =
             DefaultWeapons.all
@@ -102,31 +230,49 @@ object MarketOfferGenerator {
             return null
         }
 
-        /*
-         * Önce Weapon ana grubu eşit ihtimalle
-         * seçilir.
-         */
         val selectedGroup =
-            WeaponMarketGroup.entries
-                .random()
+            selectWeaponMarketGroup(
+                luckScore =
+                    luckScore,
+
+                preferredGroup =
+                    preferredGroup
+            )
 
         val groupedWeapons =
             availableWeapons.filter { weapon ->
                 belongsToWeaponGroup(
-                    weapon = weapon,
-                    group = selectedGroup
+                    weapon =
+                        weapon,
+
+                    group =
+                        selectedGroup
                 )
             }
 
-        /*
-         * Seçilen grup boşsa tüm açık Weapon'lar
-         * arasından fallback yapılır.
-         */
         val selectedWeapon =
             if (groupedWeapons.isNotEmpty()) {
-                groupedWeapons.random()
+                selectWeaponWithOwnedBonus(
+                    availableWeapons =
+                        groupedWeapons,
+
+                    ownedWeaponIds =
+                        ownedWeaponIds,
+
+                    luckScore =
+                        luckScore
+                )
             } else {
-                availableWeapons.random()
+                selectWeaponWithOwnedBonus(
+                    availableWeapons =
+                        availableWeapons,
+
+                    ownedWeaponIds =
+                        ownedWeaponIds,
+
+                    luckScore =
+                        luckScore
+                )
             }
 
         return createWeaponOffer(
@@ -137,6 +283,192 @@ object MarketOfferGenerator {
                 currentStage
         )
     }
+
+    private fun selectWeaponMarketGroup(
+        luckScore: Int,
+        preferredGroup:
+        CharacterWeaponPreference?
+    ): WeaponMarketGroup {
+        val groups =
+            WeaponMarketGroup.entries
+
+        if (preferredGroup == null) {
+            return groups.random()
+        }
+
+        val preferredMarketGroup =
+            when (preferredGroup) {
+                CharacterWeaponPreference.MELEE ->
+                    WeaponMarketGroup.MELEE
+
+                CharacterWeaponPreference.RANGED ->
+                    WeaponMarketGroup.RANGED
+
+                CharacterWeaponPreference.SPELL_FOCUS ->
+                    WeaponMarketGroup.SPELL_FOCUS
+            }
+
+        val safeLuck =
+            luckScore.coerceIn(
+                0,
+                MAXIMUM_LUCK
+            )
+
+        val baseGroupChance =
+            1f / groups.size
+
+        val luckProgress =
+            safeLuck.toFloat() /
+                MAXIMUM_LUCK.toFloat()
+
+        val preferredChance =
+            baseGroupChance +
+                (
+                    PREFERRED_GROUP_CHANCE_AT_MAX_LUCK -
+                        baseGroupChance
+                    ) *
+                luckProgress
+
+        val otherGroupChance =
+            (
+                1f -
+                    preferredChance
+                ) /
+                (
+                    groups.size -
+                        1
+                    )
+
+        val weightedGroups =
+            groups.map { group ->
+                group to
+                    if (
+                        group ==
+                        preferredMarketGroup
+                    ) {
+                        preferredChance
+                    } else {
+                        otherGroupChance
+                    }
+            }
+
+        return selectWeighted(
+            weightedValues =
+                weightedGroups
+        )
+    }
+    private fun selectWeaponWithOwnedBonus(
+        availableWeapons:
+        List<WeaponDefinition>,
+
+        ownedWeaponIds:
+        Set<String>,
+
+        luckScore:
+        Int
+    ): WeaponDefinition {
+        require(
+            availableWeapons.isNotEmpty()
+        )
+
+        if (
+            availableWeapons.size ==
+            1
+        ) {
+            return availableWeapons.first()
+        }
+
+        val safeLuck =
+            luckScore.coerceIn(
+                0,
+                MAXIMUM_LUCK
+            )
+
+        val ownedWeapons =
+            availableWeapons.filter { weapon ->
+                weapon.id.value in
+                    ownedWeaponIds
+            }
+
+        val unownedWeapons =
+            availableWeapons.filterNot { weapon ->
+                weapon.id.value in
+                    ownedWeaponIds
+            }
+
+        /*
+         * Grupta sahip olunan Weapon yoksa veya
+         * grubun tamamına sahipsek ayrım yapılamaz.
+         */
+        if (
+            ownedWeapons.isEmpty() ||
+            unownedWeapons.isEmpty() ||
+            safeLuck <= 0
+        ) {
+            return availableWeapons.random()
+        }
+
+        val baseChance =
+            1f /
+                availableWeapons.size
+
+        val requestedBonusPerOwnedWeapon =
+            safeLuck *
+                OWNED_WEAPON_CHANCE_PER_LUCK
+
+        /*
+         * Unowned tarafın ihtimali sıfırın altına
+         * düşmemeli. Bu nedenle toplam bonus,
+         * unowned Weapon'ların toplam taban payıyla
+         * sınırlanır.
+         */
+        val maximumTotalBonus =
+            baseChance *
+                unownedWeapons.size
+
+        val requestedTotalBonus =
+            requestedBonusPerOwnedWeapon *
+                ownedWeapons.size
+
+        val appliedTotalBonus =
+            requestedTotalBonus.coerceAtMost(
+                maximumTotalBonus
+            )
+
+        val appliedBonusPerOwnedWeapon =
+            appliedTotalBonus /
+                ownedWeapons.size
+
+        val deductionPerUnownedWeapon =
+            appliedTotalBonus /
+                unownedWeapons.size
+
+        val weightedWeapons =
+            availableWeapons.map { weapon ->
+                val chance =
+                    if (
+                        weapon.id.value in
+                        ownedWeaponIds
+                    ) {
+                        baseChance +
+                            appliedBonusPerOwnedWeapon
+                    } else {
+                        baseChance -
+                            deductionPerUnownedWeapon
+                    }
+
+                weapon to
+                    chance.coerceAtLeast(
+                        0f
+                    )
+            }
+
+        return selectWeighted(
+            weightedValues =
+                weightedWeapons
+        )
+    }
+
 
     private fun belongsToWeaponGroup(
         weapon: WeaponDefinition,
@@ -207,7 +539,8 @@ object MarketOfferGenerator {
     }
 
     private fun createRandomItemOffer(
-        currentStage: Int
+        currentStage: Int,
+        luckScore: Int
     ): MarketOffer? {
         val availableItems =
             DefaultItems.all
@@ -222,7 +555,11 @@ object MarketOfferGenerator {
 
         val selectedItem =
             selectItemByRarityWeight(
-                availableItems
+                availableItems =
+                    availableItems,
+
+                luckScore =
+                    luckScore
             )
 
         val productLevel = 1
@@ -270,35 +607,57 @@ object MarketOfferGenerator {
 
     private fun selectItemByRarityWeight(
         availableItems:
-        List<ItemDefinition>
+        List<ItemDefinition>,
+
+        luckScore:
+        Int
     ): ItemDefinition {
-        val totalWeight =
-            availableItems.sumOf { item ->
-                item.rarity
-                    .marketWeight
-                    .toDouble()
+        val safeLuck =
+            luckScore.coerceIn(
+                0,
+                MAXIMUM_LUCK
+            )
+
+        val weightedItems =
+            availableItems.map { item ->
+                val rarityTier =
+                    when (item.rarity) {
+                        ItemRarity.COMMON ->
+                            0
+
+                        ItemRarity.UNCOMMON ->
+                            1
+
+                        ItemRarity.RARE ->
+                            2
+
+                        ItemRarity.LEGENDARY ->
+                            3
+
+                        ItemRarity.ARTIFACT ->
+                            4
+                    }
+
+                val luckMultiplier =
+                    1f +
+                        safeLuck *
+                        ITEM_RARITY_WEIGHT_PER_LUCK *
+                        rarityTier
+
+                item to
+                    (
+                        item.rarity.marketWeight *
+                            luckMultiplier
+                        )
+                        .coerceAtLeast(
+                            0.001f
+                        )
             }
-                .toFloat()
 
-        if (totalWeight <= 0f) {
-            return availableItems.random()
-        }
-
-        var randomValue =
-            kotlin.random.Random
-                .nextFloat() *
-                totalWeight
-
-        availableItems.forEach { item ->
-            randomValue -=
-                item.rarity.marketWeight
-
-            if (randomValue <= 0f) {
-                return item
-            }
-        }
-
-        return availableItems.last()
+        return selectWeighted(
+            weightedValues =
+                weightedItems
+        )
     }
 
     private fun itemBasePrice(
@@ -348,10 +707,40 @@ object MarketOfferGenerator {
     }
 
     private fun createRandomStatOffer(
-        currentStage: Int
+        currentStage: Int,
+        luckScore: Int,
+        preferredStats:
+        Set<StatType>
     ): MarketOffer {
+        val safeLuck =
+            luckScore.coerceIn(
+                0,
+                MAXIMUM_LUCK
+            )
+
+        val preferredWeight =
+            1f +
+                safeLuck *
+                PREFERRED_STAT_WEIGHT_PER_LUCK
+
+        val weightedStats =
+            StatType.entries.map { statType ->
+                statType to
+                    if (
+                        statType in
+                        preferredStats
+                    ) {
+                        preferredWeight
+                    } else {
+                        1f
+                    }
+            }
+
         val selectedStat =
-            StatType.entries.random()
+            selectWeighted(
+                weightedValues =
+                    weightedStats
+            )
 
         /*
          * Şimdilik bütün market stat kartları
@@ -401,39 +790,142 @@ object MarketOfferGenerator {
     }
 
     private fun buildWeaponDescription(
-        weapon: WeaponDefinition
+        weapon:
+        WeaponDefinition
     ): String {
-        val tagText =
-            when {
-                weapon.normalAttackSpeedStat ==
-                    StatType.HASTE -> {
-                    "Spell Focus"
+        val typeText =
+            weaponTypeText(
+                weapon
+            )
+
+        val orderedScaling =
+            weapon.orderedDamageScaling()
+
+        val primaryScalingText =
+            orderedScaling
+                .firstOrNull()
+                ?.first
+                ?.displayName
+                ?: "None"
+
+        val secondaryScalingText =
+            orderedScaling
+                .drop(1)
+                .joinToString(
+                    separator = ", "
+                ) { scaling ->
+                    scaling.first.displayName
                 }
 
-                ContentTag.MELEE_WEAPON in
-                    weapon.tags -> {
-                    "Melee Weapon"
-                }
+        return buildString {
+            append(
+                "Lv.1 $typeText"
+            )
 
-                ContentTag.RANGED_WEAPON in
-                    weapon.tags -> {
-                    "Ranged Weapon"
-                }
+            append(
+                " | Main: $primaryScalingText"
+            )
 
-                else -> {
-                    "Weapon"
-                }
+            if (
+                secondaryScalingText
+                    .isNotBlank()
+            ) {
+                append(
+                    " | Secondary: " +
+                        secondaryScalingText
+                )
+            }
+        }
+    }
+
+    private fun weaponTypeText(
+        weapon:
+        WeaponDefinition
+    ): String {
+        return when {
+            ContentTag.SPELL_FOCUS in
+                weapon.tags -> {
+                "Spell Focus"
             }
 
-        return (
-            "Lv.1 $tagText | " +
-                "Damage: ${weapon.baseDamage} | " +
-                "Speed: ${
-                    formatAttackSpeed(
-                        weapon.baseAttacksPerSecond
-                    )
-                }"
-            )
+            ContentTag.MELEE_WEAPON in
+                weapon.tags -> {
+                "Melee Weapon"
+            }
+
+            ContentTag.RANGED_WEAPON in
+                weapon.tags -> {
+                "Ranged Weapon"
+            }
+
+            /*
+             * Eski tanımlarda SPELL_FOCUS etiketi
+             * bulunmuyorsa Haste üzerinden güvenli
+             * fallback yapılır.
+             */
+            weapon.normalAttackSpeedStat ==
+                StatType.HASTE -> {
+                "Spell Focus"
+            }
+
+            else -> {
+                "Weapon"
+            }
+        }
+    }
+
+    private fun <T> selectWeighted(
+        weightedValues:
+        List<Pair<T, Float>>
+    ): T {
+        require(
+            weightedValues.isNotEmpty()
+        )
+
+        val safeWeightedValues =
+            weightedValues.map {
+                    weightedValue ->
+
+                weightedValue.first to
+                    weightedValue.second
+                        .coerceAtLeast(
+                            0f
+                        )
+            }
+
+        val totalWeight =
+            safeWeightedValues.sumOf {
+                    weightedValue ->
+
+                weightedValue.second
+                    .toDouble()
+            }
+                .toFloat()
+
+        if (totalWeight <= 0f) {
+            return safeWeightedValues
+                .random()
+                .first
+        }
+
+        var randomValue =
+            Random.nextFloat() *
+                totalWeight
+
+        safeWeightedValues.forEach {
+                weightedValue ->
+
+            randomValue -=
+                weightedValue.second
+
+            if (randomValue <= 0f) {
+                return weightedValue.first
+            }
+        }
+
+        return safeWeightedValues
+            .last()
+            .first
     }
 
     private fun formatAttackSpeed(

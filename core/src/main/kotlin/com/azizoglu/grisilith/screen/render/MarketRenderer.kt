@@ -28,6 +28,7 @@ import com.azizoglu.grisilith.item.definition.ItemDefinition
 import java.util.Locale
 import kotlin.math.roundToInt
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
+import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 
 class MarketRenderer(
     private val camera:
@@ -699,22 +700,36 @@ class MarketRenderer(
             0.78f
         )
 
-        font.color =
-            Color.LIGHT_GRAY
+        if (
+            offer.productType ==
+            MarketProductType.WEAPON &&
+            offer.weaponDefinition != null
+        ) {
+            renderMarketWeaponInformation(
+                weaponDefinition =
+                    offer.weaponDefinition,
 
-        font.draw(
-            batch,
-            offer.description,
-            cardRectangle.x +
-                TEXT_PADDING,
-            cardRectangle.y +
-                cardRectangle.height -
-                67f,
-            cardRectangle.width -
-                TEXT_PADDING * 2f,
-            Align.left,
-            true
-        )
+                cardRectangle =
+                    cardRectangle
+            )
+        } else {
+            font.color =
+                Color.LIGHT_GRAY
+
+            font.draw(
+                batch,
+                offer.description,
+                cardRectangle.x +
+                    TEXT_PADDING,
+                cardRectangle.y +
+                    cardRectangle.height -
+                    67f,
+                cardRectangle.width -
+                    TEXT_PADDING * 2f,
+                Align.left,
+                true
+            )
+        }
 
         font.data.setScale(
             oldScaleX,
@@ -732,6 +747,133 @@ class MarketRenderer(
             cardRectangle.y +
                 48f
         )
+    }
+
+    private fun renderMarketWeaponInformation(
+        weaponDefinition:
+        WeaponDefinition,
+
+        cardRectangle:
+        Rectangle
+    ) {
+        val startX =
+            cardRectangle.x +
+                TEXT_PADDING
+
+        var currentY =
+            cardRectangle.y +
+                cardRectangle.height -
+                67f
+
+        font.color =
+            Color.LIGHT_GRAY
+
+        font.draw(
+            batch,
+            "Type: " +
+                weaponTypeText(
+                    weaponDefinition
+                ),
+            startX,
+            currentY
+        )
+
+        currentY -=
+            20f
+
+        val orderedScaling =
+            weaponDefinition
+                .orderedDamageScaling()
+
+        val primaryScaling =
+            orderedScaling
+                .firstOrNull()
+
+        /*
+         * Ana scaling Gold renkte ve ilk sırada.
+         */
+        if (primaryScaling != null) {
+            font.color =
+                Color.GOLD
+
+            font.draw(
+                batch,
+                "Main Scaling: " +
+                    primaryScaling
+                        .first
+                        .displayName,
+                startX,
+                currentY
+            )
+
+            currentY -=
+                20f
+        }
+
+        val secondaryScaling =
+            orderedScaling
+                .drop(1)
+
+        if (secondaryScaling.isNotEmpty()) {
+            font.color =
+                Color.LIGHT_GRAY
+
+            font.draw(
+                batch,
+                "Secondary: " +
+                    secondaryScaling
+                        .joinToString(
+                            separator = ", "
+                        ) { scaling ->
+                            scaling
+                                .first
+                                .displayName
+                        },
+                startX,
+                currentY,
+                cardRectangle.width -
+                    TEXT_PADDING * 2f,
+                Align.left,
+                true
+            )
+        }
+    }
+
+    private fun weaponTypeText(
+        definition:
+        WeaponDefinition
+    ): String {
+        return when {
+            com.azizoglu.grisilith
+                .content.ContentTag
+                .SPELL_FOCUS in
+                definition.tags -> {
+                "Spell Focus"
+            }
+
+            com.azizoglu.grisilith
+                .content.ContentTag
+                .MELEE_WEAPON in
+                definition.tags -> {
+                "Melee Weapon"
+            }
+
+            com.azizoglu.grisilith
+                .content.ContentTag
+                .RANGED_WEAPON in
+                definition.tags -> {
+                "Ranged Weapon"
+            }
+
+            definition.normalAttackSpeedStat ==
+                StatType.HASTE -> {
+                "Spell Focus"
+            }
+
+            else -> {
+                "Weapon"
+            }
+        }
     }
 
     private fun renderWeaponInventory(
@@ -1586,6 +1728,18 @@ class MarketRenderer(
                 49f
         )
 
+        val orderedDamageScaling =
+            definition
+                .orderedDamageScaling()
+
+        val primaryDamageScaling =
+            orderedDamageScaling
+                .firstOrNull()
+
+        val secondaryDamageScaling =
+            orderedDamageScaling
+                .drop(1)
+
         val statsText =
             buildString {
                 appendLine(
@@ -1649,17 +1803,91 @@ class MarketRenderer(
                 )
             }
 
+        val informationX =
+            layout.weaponDetailPanel.x +
+                20f
+
+        var informationY =
+            layout.weaponDetailPanel.y +
+                layout.weaponDetailPanel.height -
+                80f
+
+        /*
+         * Weapon Type.
+         */
+        font.color =
+            Color.LIGHT_GRAY
+
+        font.draw(
+            batch,
+            "Weapon Type: " +
+                weaponTypeText(
+                    definition
+                ),
+            informationX,
+            informationY
+        )
+
+        informationY -=
+            23f
+
+        /*
+         * Ana scaling her zaman ilk sırada ve Gold.
+         */
+        if (primaryDamageScaling != null) {
+            font.color =
+                Color.GOLD
+
+            font.draw(
+                batch,
+                "Main Damage Scaling: " +
+                    primaryDamageScaling
+                        .first
+                        .displayName,
+                informationX,
+                informationY
+            )
+
+            informationY -=
+                23f
+        }
+
+        /*
+         * İkincil scaling veya scaling'ler.
+         */
+        if (secondaryDamageScaling.isNotEmpty()) {
+            font.color =
+                Color.LIGHT_GRAY
+
+            font.draw(
+                batch,
+                "Secondary Scaling: " +
+                    secondaryDamageScaling
+                        .joinToString(
+                            separator = ", "
+                        ) { scaling ->
+                            scaling
+                                .first
+                                .displayName
+                        },
+                informationX,
+                informationY,
+                230f,
+                Align.left,
+                true
+            )
+
+            informationY -=
+                23f
+        }
         font.color =
             Color.LIGHT_GRAY
 
         font.draw(
             batch,
             statsText,
-            layout.weaponDetailPanel.x +
-                20f,
-            layout.weaponDetailPanel.y +
-                layout.weaponDetailPanel.height -
-                80f,
+            informationX,
+            informationY,
             230f,
             Align.left,
             true

@@ -59,7 +59,11 @@ import com.azizoglu.grisilith.chest.ChestDropSegmentTracker
 import com.azizoglu.grisilith.chest.ChestDropSource
 import com.azizoglu.grisilith.chest.ChestPickupManager
 import com.azizoglu.grisilith.chest.ChestRewardQueue
+import com.azizoglu.grisilith.chest.ChestRewardRoll
 import com.azizoglu.grisilith.chest.ChestRewardRoller
+import com.azizoglu.grisilith.chest.ChestRewardType
+import com.azizoglu.grisilith.screen.controller.ChestRewardController
+import com.azizoglu.grisilith.statistics.StatType
 
 
 class FirstScreen(
@@ -329,6 +333,48 @@ class FirstScreen(
             }
         )
 
+    private val chestRewardController =
+        ChestRewardController(
+            rewardQueue =
+                chestRewardQueue,
+
+            camera =
+                camera,
+
+            cameraWidth =
+                CAMERA_WIDTH,
+
+            cameraHeight =
+                CAMERA_HEIGHT,
+
+            viewport =
+                viewport,
+
+            batch =
+                hudBatch,
+
+            font =
+                hudFont,
+
+            onApplyReward = {
+                    reward ->
+
+                applyChestReward(
+                    reward
+                )
+            },
+
+            onAllRewardsCollected = {
+                    shouldOpenMarketAfterStatSelection ->
+
+                statCardController
+                    .beginSelection(
+                        shouldOpenMarketAfterSelection =
+                            shouldOpenMarketAfterStatSelection
+                    )
+            }
+        )
+
     override fun show() {
         viewport.apply()
 
@@ -340,17 +386,11 @@ class FirstScreen(
 
         weaponInventory.addWeapon(
             WeaponInstance(
-                definition = DefaultWeapons.orbOfSky,
-                level = 4
+                definition = DefaultWeapons.lance,
+                level = 2
             )
         )
 
-        weaponInventory.addWeapon(
-            WeaponInstance(
-                definition = DefaultWeapons.amuletOfTrollKing,
-                level = 4
-            )
-        )
 
         itemInventory.addItem(
             ItemInstance(
@@ -393,6 +433,7 @@ class FirstScreen(
         val gameplayStopped =
             player.health.isDead ||
                 stageController.isRunComplete ||
+                chestRewardController.isOpen ||
                 statCardController.isOpen ||
                 isMarketOpen ||
                 isRunSummaryOpen
@@ -427,6 +468,15 @@ class FirstScreen(
             handleMarketControls(
                 delta
             )
+
+            return
+        }
+
+        if (
+            chestRewardController.isOpen
+        ) {
+            chestRewardController
+                .handleInput()
 
             return
         }
@@ -636,15 +686,49 @@ class FirstScreen(
             playerBounds =
                 player.bounds
         ) {
-            val reward =
+            val availableStats =
+                StatType.entries
+                    .filter { statType ->
+                        playerStats.totalScore(
+                            statType
+                        ) <
+                            PlayerStats
+                                .RUN_MAXIMUM_SCORE
+                    }
+
+            val availableItems =
+                DefaultItems.all
+                    .filter { definition ->
+                        val maximumCopies =
+                            definition
+                                .maximumInventoryCopies
+                                ?: definition
+                                    .rarity
+                                    .maximumInventoryCopies
+
+                        maximumCopies == null ||
+                            itemInventory
+                                .countByDefinitionId(
+                                    definition.id
+                                ) <
+                            maximumCopies
+                    }
+
+            val choiceSet =
                 ChestRewardRoller
-                    .rollReward(
+                    .rollChoiceSet(
                         luckScore =
-                            playerStats.luckScore()
+                            playerStats.luckScore(),
+
+                        availableStatTypes =
+                            availableStats,
+
+                        availableItemDefinitions =
+                            availableItems
                     )
 
-            chestRewardQueue.addReward(
-                reward
+            chestRewardQueue.addChoiceSet(
+                choiceSet
             )
         }
 
@@ -695,6 +779,70 @@ class FirstScreen(
         tryDropChestFromEnemy(
             killedEnemy
         )
+    }
+
+    private fun applyChestReward(
+        reward:
+        ChestRewardRoll
+    ) {
+        when (reward.rewardType) {
+            ChestRewardType.STAT -> {
+                val statType =
+                    reward.statType
+                        ?: return
+
+                val appliedAmount =
+                    player.addRunStatBonus(
+                        statType =
+                            statType,
+
+                        amount =
+                            reward.statAmount
+                    )
+
+                if (
+                    appliedAmount > 0 &&
+                    statType ==
+                    StatType.MAX_HP
+                ) {
+                    player
+                        .synchronizeMaximumHealthWithStats(
+                            healAddedHealth =
+                                true
+                        )
+                }
+            }
+
+            ChestRewardType.ITEM -> {
+                val itemDefinition =
+                    reward.itemDefinition
+                        ?: return
+
+                val result =
+                    itemInventory.addItem(
+                        ItemInstance(
+                            definition =
+                                itemDefinition
+                        )
+                    )
+
+                if (
+                    result !=
+                    ItemInventoryResult.ADDED
+                ) {
+                    return
+                }
+
+                itemStatSynchronizer
+                    .synchronize()
+
+                player
+                    .synchronizeMaximumHealthWithStats(
+                        healAddedHealth =
+                            true
+                    )
+            }
+        }
     }
 
     private fun tryDropChestFromEnemy(
@@ -809,8 +957,8 @@ class FirstScreen(
                 .resetForNewBossInterval()
         }
 
-        statCardController.beginSelection(
-            shouldOpenMarketAfterSelection =
+        chestRewardController.begin(
+            shouldOpenMarketAfterStatSelection =
                 completedStageType ==
                     StageType.MINI_BOSS
         )
@@ -848,6 +996,8 @@ class FirstScreen(
                 isRunSummaryOpen,
             isMarketOpen =
                 isMarketOpen,
+            isShowingChestReward =
+                chestRewardController.isOpen,
             isChoosingStatCard =
                 statCardController.isOpen,
             renderRunSummary = {
@@ -873,6 +1023,11 @@ class FirstScreen(
                         marketInteractionState
                 )
             },
+
+            renderChestReward = {
+                chestRewardController.render()
+            },
+
             renderStatCardSelection = {
                 statCardController.render()
             }
@@ -1037,6 +1192,26 @@ class FirstScreen(
         return true
     }
 
+    private fun ownedWeaponDefinitionIds():
+        Set<String> {
+
+        return (
+            0 until
+                WeaponInventory
+                    .WEAPON_SLOT_COUNT
+            )
+            .mapNotNull { slotIndex ->
+                weaponInventory
+                    .weaponAt(
+                        slotIndex
+                    )
+                    ?.definition
+                    ?.id
+                    ?.value
+            }
+            .toSet()
+    }
+
     private fun openMarket() {
         isMarketOpen = true
         marketRerollsUsed = 0
@@ -1073,6 +1248,7 @@ class FirstScreen(
          * Yalnızca boş pozisyonlar için yeni
          * teklifler üretilir.
          */
+
         val generatedOffers =
             MarketOfferGenerator
                 .generateOffers(
@@ -1083,7 +1259,13 @@ class FirstScreen(
                         missingSlotCount,
 
                     luckScore =
-                        playerStats.luckScore()
+                        playerStats.luckScore(),
+
+                    selectedCharacter =
+                        selectedCharacter,
+
+                    ownedWeaponIds =
+                        ownedWeaponDefinitionIds()
                 )
 
         var generatedOfferIndex =
@@ -2399,7 +2581,13 @@ class FirstScreen(
                         rerolledSlotCount,
 
                     luckScore =
-                        playerStats.luckScore()
+                        playerStats.luckScore(),
+
+                    selectedCharacter =
+                        selectedCharacter,
+
+                    ownedWeaponIds =
+                        ownedWeaponDefinitionIds()
                 )
 
         var newOfferIndex =

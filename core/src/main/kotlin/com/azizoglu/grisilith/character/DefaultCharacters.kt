@@ -43,6 +43,18 @@ object DefaultCharacters {
                     lifeSteal = 1
                 ),
 
+            preferredMarketStats =
+                setOf(
+                    StatType.STRENGTH,
+                    StatType.ATTACK_SPEED,
+                    StatType.PIERCING,
+                    StatType.ARMOR_CLASS,
+                    StatType.MAX_HP
+                ),
+
+            preferredMarketWeaponGroup =
+                CharacterWeaponPreference.MELEE,
+
             initialUnlockState =
                 ContentUnlockState.UNLOCKED
         )
@@ -84,6 +96,18 @@ object DefaultCharacters {
                     lifeSteal = 0
                 ),
 
+            preferredMarketStats =
+                setOf(
+                    StatType.DEXTERITY,
+                    StatType.ATTACK_SPEED,
+                    StatType.CRIT_RATE,
+                    StatType.CRIT_DAMAGE,
+                    StatType.MOVEMENT_SPEED
+                ),
+
+            preferredMarketWeaponGroup =
+                CharacterWeaponPreference.RANGED,
+
             initialUnlockState =
                 ContentUnlockState.UNLOCKED
         )
@@ -124,6 +148,18 @@ object DefaultCharacters {
                     hpRegeneration = 2,
                     lifeSteal = 0
                 ),
+
+            preferredMarketStats =
+                setOf(
+                    StatType.WISDOM,
+                    StatType.HASTE,
+                    StatType.ELEMENTAL_DAMAGE,
+                    StatType.MIGHT_OF_NATURE,
+                    StatType.SHEPHERD
+                ),
+
+            preferredMarketWeaponGroup =
+                CharacterWeaponPreference.SPELL_FOCUS,
 
             initialUnlockState =
                 ContentUnlockState.UNLOCKED

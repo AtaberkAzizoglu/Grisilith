@@ -38,9 +38,11 @@ class HudRenderer(
         formattedGameTime: String,
         isRunSummaryOpen: Boolean,
         isMarketOpen: Boolean,
+        isShowingChestReward: Boolean,
         isChoosingStatCard: Boolean,
         renderRunSummary: () -> Unit,
         renderMarket: () -> Unit,
+        renderChestReward: () -> Unit,
         renderStatCardSelection: () -> Unit
     ) {
         batch.projectionMatrix =
@@ -66,14 +68,25 @@ class HudRenderer(
         renderOpenScreenLayer(
             isRunSummaryOpen =
                 isRunSummaryOpen,
+
             isMarketOpen =
                 isMarketOpen,
+
+            isShowingChestReward =
+                isShowingChestReward,
+
             isChoosingStatCard =
                 isChoosingStatCard,
+
             renderRunSummary =
                 renderRunSummary,
+
             renderMarket =
                 renderMarket,
+
+            renderChestReward =
+                renderChestReward,
+
             renderStatCardSelection =
                 renderStatCardSelection
         )
@@ -365,12 +378,29 @@ class HudRenderer(
     }
 
     private fun renderOpenScreenLayer(
-        isRunSummaryOpen: Boolean,
-        isMarketOpen: Boolean,
-        isChoosingStatCard: Boolean,
-        renderRunSummary: () -> Unit,
-        renderMarket: () -> Unit,
-        renderStatCardSelection: () -> Unit
+        isRunSummaryOpen:
+        Boolean,
+
+        isMarketOpen:
+        Boolean,
+
+        isShowingChestReward:
+        Boolean,
+
+        isChoosingStatCard:
+        Boolean,
+
+        renderRunSummary:
+            () -> Unit,
+
+        renderMarket:
+            () -> Unit,
+
+        renderChestReward:
+            () -> Unit,
+
+        renderStatCardSelection:
+            () -> Unit
     ) {
         when {
             isRunSummaryOpen -> {
@@ -379,6 +409,10 @@ class HudRenderer(
 
             isMarketOpen -> {
                 renderMarket()
+            }
+
+            isShowingChestReward -> {
+                renderChestReward()
             }
 
             isChoosingStatCard -> {

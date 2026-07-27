@@ -63,6 +63,19 @@ data class WeaponDefinition(
     val damageScaling:
     Map<StatType, Float>,
 
+
+    /*
+ * Silahın ana hasar çarpanını açıkça belirtir.
+ *
+ * null bırakılırsa damageScaling içindeki
+ * en yüksek katsayılı Stat otomatik seçilir.
+ *
+ * Eşit katsayılarda Map içindeki ilk Stat
+ * ana çarpan kabul edilir.
+ */
+    val primaryDamageScalingStat:
+    StatType? = null,
+
     /*
      * Silah envanterde bulunduğu sürece
      * sürekli verilen taban bonuslar.
@@ -94,6 +107,66 @@ data class WeaponDefinition(
 
     val slotCost: Int
         get() = 1
+
+    /*
+ * Açıkça atanmış ana Stat varsa onu,
+ * yoksa en yüksek katsayılı Stat'ı döndürür.
+ */
+    val resolvedPrimaryDamageScalingStat:
+        StatType?
+        get() =
+            primaryDamageScalingStat
+                ?: damageScaling
+                    .maxByOrNull { entry ->
+                        entry.value
+                    }
+                    ?.key
+
+    /*
+     * Ana çarpan ilk sırada, diğerleri ardından
+     * azalan katsayı sırasıyla döner.
+     */
+    fun orderedDamageScaling():
+        List<Pair<StatType, Float>> {
+
+        val primaryStat =
+            resolvedPrimaryDamageScalingStat
+
+        if (primaryStat == null) {
+            return emptyList()
+        }
+
+        val primaryEntry =
+            damageScaling[primaryStat]
+                ?.let { multiplier ->
+                    primaryStat to multiplier
+                }
+
+        val secondaryEntries =
+            damageScaling
+                .filterKeys { statType ->
+                    statType != primaryStat
+                }
+                .entries
+                .sortedByDescending { entry ->
+                    entry.value
+                }
+                .map { entry ->
+                    entry.key to entry.value
+                }
+
+        return buildList {
+            if (primaryEntry != null) {
+                add(
+                    primaryEntry
+                )
+            }
+
+            addAll(
+                secondaryEntries
+            )
+        }
+    }
 
     /*
      * Yalnızca Spell Focus / Spell Weapon
@@ -173,6 +246,18 @@ data class WeaponDefinition(
                 "Negative scaling is not allowed: $statType"
             }
         }
+
+        primaryDamageScalingStat
+            ?.let { primaryStat ->
+
+                require(
+                    primaryStat in damageScaling
+                ) {
+                    "Primary damage scaling Stat " +
+                        "$primaryStat must exist in " +
+                        "damageScaling for weapon $id."
+                }
+            }
     }
 
     fun statsForLevel(

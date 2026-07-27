@@ -1,61 +1,69 @@
 package com.azizoglu.grisilith.chest
 
+/*
+ * Stage sırasında toplanmış sandıkların
+ * üçlü ödül seçeneklerini saklar.
+ */
 class ChestRewardQueue {
 
-    private val pendingRewards =
-        mutableListOf<ChestRewardRoll>()
+    private val pendingChoiceSets =
+        mutableListOf<ChestRewardChoiceSet>()
 
+    /*
+     * Bekleyen sandık sayısıdır.
+     * Toplam ödül seçeneği sayısı değildir.
+     */
     val rewardCount: Int
         get() =
-            pendingRewards.size
+            pendingChoiceSets.size
 
     val isEmpty: Boolean
         get() =
-            pendingRewards.isEmpty()
+            pendingChoiceSets.isEmpty()
 
     val isNotEmpty: Boolean
         get() =
-            pendingRewards.isNotEmpty()
+            pendingChoiceSets.isNotEmpty()
 
-    fun addReward(
-        reward:
-        ChestRewardRoll
+    fun addChoiceSet(
+        choiceSet:
+        ChestRewardChoiceSet
     ) {
-        pendingRewards.add(
-            reward
+        pendingChoiceSets.add(
+            choiceSet
         )
     }
 
     fun peekFirst():
-        ChestRewardRoll? {
+        ChestRewardChoiceSet? {
 
-        return pendingRewards
+        return pendingChoiceSets
             .firstOrNull()
     }
 
     fun removeFirst():
-        ChestRewardRoll? {
+        ChestRewardChoiceSet? {
 
         if (
-            pendingRewards.isEmpty()
+            pendingChoiceSets.isEmpty()
         ) {
             return null
         }
 
-        return pendingRewards
+        return pendingChoiceSets
             .removeAt(
                 0
             )
     }
 
-    fun allRewards():
-        List<ChestRewardRoll> {
+    fun allChoiceSets():
+        List<ChestRewardChoiceSet> {
 
-        return pendingRewards
+        return pendingChoiceSets
             .toList()
     }
 
     fun clear() {
-        pendingRewards.clear()
+        pendingChoiceSets.clear()
     }
 }

@@ -13,6 +13,15 @@ data class CharacterDefinition(
     override val description: String,
     val minionDescription: String,
     val baseStats: Map<StatType, Int>,
+
+    val preferredMarketStats:
+    Set<StatType> =
+        emptySet(),
+
+    val preferredMarketWeaponGroup:
+    CharacterWeaponPreference? =
+        null,
+
     override val initialUnlockState:
     ContentUnlockState =
         ContentUnlockState.UNLOCKED
@@ -43,6 +52,12 @@ data class CharacterDefinition(
                 "Base stat $statType must be between 0 and 20 for $id."
             }
         }
+
+        require(
+            preferredMarketStats.all { statType ->
+                statType in StatType.entries
+            }
+        )
     }
 
     fun baseStat(
