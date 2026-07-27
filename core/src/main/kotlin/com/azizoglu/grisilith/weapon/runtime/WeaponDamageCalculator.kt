@@ -18,18 +18,12 @@ class WeaponDamageCalculator(
         val levelStats =
             weapon.currentLevelStats
 
-        val baseDamage =
-            definition.baseDamage.toFloat()
-
-        val scalingMultiplier =
-            calculateStatScaling(
-                weapon = weapon
-            )
-
         val damageBeforeCritical =
-            baseDamage *
-                levelStats.damageMultiplier *
-                scalingMultiplier
+            calculateNonCriticalDamage(
+                weapon
+            )
+                .toFloat()
+
         val canCriticallyHit =
             definition.damageTypes.any {
                     damageType ->
@@ -112,5 +106,28 @@ class WeaponDamageCalculator(
             1f + bonusMultiplier
             )
             .coerceAtLeast(0.20f)
+    }
+
+    fun calculateNonCriticalDamage(
+        weapon: WeaponInstance
+    ): Int {
+        val definition =
+            weapon.definition
+
+        val levelStats =
+            weapon.currentLevelStats
+
+        val scalingMultiplier =
+            calculateStatScaling(
+                weapon = weapon
+            )
+
+        return (
+            definition.baseDamage *
+                levelStats.damageMultiplier *
+                scalingMultiplier
+            )
+            .roundToInt()
+            .coerceAtLeast(1)
     }
 }

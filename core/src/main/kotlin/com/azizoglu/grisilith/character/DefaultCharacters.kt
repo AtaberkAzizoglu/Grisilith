@@ -15,7 +15,7 @@ object DefaultCharacters {
                 "Sir Imbert \"the Yellow Knight\"",
 
             description =
-                "A durable melee warrior with high damage and poor mobility.",
+                "The magic-phobic yellow knight will not stop until he and his comrades are the only ones left on the world who practice magic.",
 
             minionDescription =
                 "Small armored weapon bearers.",
@@ -56,7 +56,7 @@ object DefaultCharacters {
                 "Rousey Browne",
 
             description =
-                "A fast ranged fighter with high Dexterity and critical damage.",
+                "When she died, the gods did not accept it and decided that the revenge she deserved was the revenge of the gods as well. She will continue to be among us, suffering until she finishes his work.",
 
             minionDescription =
                 "Small hooded weapon bearers wearing dark cloaks.",
@@ -97,7 +97,7 @@ object DefaultCharacters {
                 "Lavena Vol \"One of Five\"",
 
             description =
-                "A spell-focused caster whose weapons float beside her.",
+                "One of the greatest wizard of the time specialized in forbidden spells for the approaching danger. Now the approaching danger is her.",
 
             minionDescription =
                 "No minions. Equipped weapons float around the character.",

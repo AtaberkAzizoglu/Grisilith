@@ -30,6 +30,9 @@ class PlayerStats(
     private val weaponBonuses =
         mutableMapOf<StatType, Int>()
 
+    private val itemBonuses =
+        mutableMapOf<StatType, Int>()
+
     init {
         StatType.entries.forEach { statType ->
             val initialValue =
@@ -43,6 +46,7 @@ class PlayerStats(
 
             gearBonuses[statType] = 0
             weaponBonuses[statType] = 0
+            itemBonuses[statType] = 0
             runBonuses[statType] = 0
         }
     }
@@ -66,6 +70,13 @@ class PlayerStats(
             ?: 0
     }
 
+    fun itemBonus(
+        statType: StatType
+    ): Int {
+        return itemBonuses[statType]
+            ?: 0
+    }
+
     fun runBonus(
         statType: StatType
     ): Int {
@@ -79,6 +90,7 @@ class PlayerStats(
             baseScore(statType) +
                 gearBonus(statType) +
                 weaponBonus(statType) +
+                itemBonus(statType) +
                 runBonus(statType)
             )
             .coerceIn(
@@ -143,9 +155,25 @@ class PlayerStats(
         }
     }
 
+    fun setItemBonuses(
+        bonuses: Map<StatType, Int>
+    ) {
+        StatType.entries.forEach { statType ->
+            itemBonuses[statType] =
+                bonuses[statType]
+                    ?: 0
+        }
+    }
+
     fun clearWeaponBonuses() {
         StatType.entries.forEach { statType ->
             weaponBonuses[statType] = 0
+        }
+    }
+
+    fun clearItemBonuses() {
+        StatType.entries.forEach { statType ->
+            itemBonuses[statType] = 0
         }
     }
 

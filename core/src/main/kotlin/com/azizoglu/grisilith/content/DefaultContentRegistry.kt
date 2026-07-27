@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.content
 
 import com.azizoglu.grisilith.character.DefaultCharacters
+import com.azizoglu.grisilith.item.definition.DefaultItems
 import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
 
 object DefaultContentRegistry {
@@ -14,6 +15,10 @@ object DefaultContentRegistry {
 
             registerAll(
                 DefaultWeapons.all
+            )
+
+            registerAll(
+                DefaultItems.all
             )
         }
 }

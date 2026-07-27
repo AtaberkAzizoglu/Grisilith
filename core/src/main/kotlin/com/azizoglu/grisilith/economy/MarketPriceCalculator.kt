@@ -44,9 +44,14 @@ object MarketPriceCalculator {
         productType: MarketProductType
     ): Int {
         return when (productType) {
-            MarketProductType.WEAPON -> 18
-            MarketProductType.SKILL -> 16
-            MarketProductType.ITEM -> 12
+            MarketProductType.WEAPON ->
+                18
+
+            MarketProductType.ITEM ->
+                12
+
+            MarketProductType.STAT ->
+                14
         }
     }
 
@@ -54,11 +59,17 @@ object MarketPriceCalculator {
         productType: MarketProductType,
         productLevel: Int
     ): Float {
-        val growthPerLevel = when (productType) {
-            MarketProductType.WEAPON -> 1.55f
-            MarketProductType.SKILL -> 1.65f
-            MarketProductType.ITEM -> 1.45f
-        }
+        val growthPerLevel =
+            when (productType) {
+                MarketProductType.WEAPON ->
+                    1.55f
+
+                MarketProductType.ITEM ->
+                    1.45f
+
+                MarketProductType.STAT ->
+                    1.50f
+            }
 
         return growthPerLevel.pow(
             productLevel - 1

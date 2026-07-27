@@ -155,6 +155,28 @@ class Player(
         return appliedIncrease
     }
 
+    fun synchronizeMaximumHealthWithStats(
+        healAddedHealth: Boolean = true
+    ) {
+        val calculatedMaximumHealth =
+            stats.calculatedMaximumHealth()
+
+        if (
+            health.maximumHealth ==
+            calculatedMaximumHealth
+        ) {
+            return
+        }
+
+        health.setMaximumHealth(
+            newMaximumHealth =
+                calculatedMaximumHealth,
+
+            healAddedHealth =
+                healAddedHealth
+        )
+    }
+
     fun resolveCollision(
         otherBounds: Rectangle
     ): Boolean {
