@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.screen.render
 
 import com.azizoglu.grisilith.economy.GoldCoinPickup
+import com.azizoglu.grisilith.chest.ChestPickupManager
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.player.Player
@@ -22,11 +23,23 @@ class WorldRenderer(
     }
 
     fun render(
-        mapObstacles: List<MapObstacle>,
-        player: Player,
-        enemyManager: EnemyManager,
-        goldCoinPickups: List<GoldCoinPickup>,
-        projectiles: List<Projectile>
+        mapObstacles:
+        List<MapObstacle>,
+
+        player:
+        Player,
+
+        enemyManager:
+        EnemyManager,
+
+        goldCoinPickups:
+        List<GoldCoinPickup>,
+
+        chestPickupManager:
+        ChestPickupManager,
+
+        projectiles:
+        List<Projectile>
     ) {
         clearScreen()
 
@@ -53,6 +66,10 @@ class WorldRenderer(
         goldCoinPickups.forEach { pickup ->
             pickup.render(shapeRenderer)
         }
+
+        chestPickupManager.render(
+            shapeRenderer
+        )
 
         projectiles.forEach { projectile ->
             projectile.render(shapeRenderer)

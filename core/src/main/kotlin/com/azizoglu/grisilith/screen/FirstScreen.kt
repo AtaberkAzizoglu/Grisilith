@@ -54,6 +54,12 @@ import com.azizoglu.grisilith.screen.market.MarketInteractionState
 import com.azizoglu.grisilith.economy.WeaponSalePriceCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponStatBonusSynchronizer
 import com.badlogic.gdx.InputProcessor
+import com.azizoglu.grisilith.chest.ChestDropCalculator
+import com.azizoglu.grisilith.chest.ChestDropSegmentTracker
+import com.azizoglu.grisilith.chest.ChestDropSource
+import com.azizoglu.grisilith.chest.ChestPickupManager
+import com.azizoglu.grisilith.chest.ChestRewardQueue
+import com.azizoglu.grisilith.chest.ChestRewardRoller
 
 
 class FirstScreen(
@@ -206,6 +212,15 @@ class FirstScreen(
 
     private val goldCoinPickups =
         mutableListOf<GoldCoinPickup>()
+
+    private val chestPickupManager =
+        ChestPickupManager()
+
+    private val chestRewardQueue =
+        ChestRewardQueue()
+
+    private val chestDropSegmentTracker =
+        ChestDropSegmentTracker()
 
 
     private val hudRenderer =
@@ -617,12 +632,24 @@ class FirstScreen(
             pickup.isCollected
         }
 
+        chestPickupManager.update(
+            playerBounds =
+                player.bounds
+        ) {
+            val reward =
+                ChestRewardRoller
+                    .rollReward(
+                        luckScore =
+                            playerStats.luckScore()
+                    )
+
+            chestRewardQueue.addReward(
+                reward
+            )
+        }
+
         enemyManager.removeDeadEnemies()
 
-        /*
-         * Mermiyle boss bu frame içinde öldüyse
-         * aşamayı hemen tamamlar.
-         */
         if (completeBossStageIfDefeated()) {
             return
         }
@@ -656,12 +683,85 @@ class FirstScreen(
             GoldCoinPickup(
                 startX =
                     killedEnemy.centerX,
+
                 startY =
                     killedEnemy.centerY,
+
                 value =
                     harvestedGoldReward
             )
         )
+
+        tryDropChestFromEnemy(
+            killedEnemy
+        )
+    }
+
+    private fun tryDropChestFromEnemy(
+        killedEnemy: Enemy
+    ) {
+        val dropSource =
+            chestDropSourceFor(
+                killedEnemy.type
+            )
+
+        val segmentMultiplier =
+            chestDropSegmentTracker
+                .currentDropChanceMultiplier()
+
+        val shouldDropChest =
+            ChestDropCalculator
+                .shouldDropChest(
+                    source =
+                        dropSource,
+
+                    luckScore =
+                        playerStats.luckScore(),
+
+                    segmentChanceMultiplier =
+                        segmentMultiplier
+                )
+
+        if (!shouldDropChest) {
+            return
+        }
+
+        chestPickupManager.spawn(
+            worldX =
+                killedEnemy.centerX,
+
+            worldY =
+                killedEnemy.centerY
+        )
+
+        chestDropSegmentTracker
+            .recordDroppedChest()
+    }
+
+    private fun chestDropSourceFor(
+        enemyType: EnemyType
+    ): ChestDropSource {
+        return when (enemyType) {
+            EnemyType.NORMAL -> {
+                ChestDropSource
+                    .NORMAL_ENEMY
+            }
+
+            EnemyType.UNIQUE -> {
+                ChestDropSource
+                    .UNIQUE_ENEMY
+            }
+
+            EnemyType.MINI_BOSS -> {
+                ChestDropSource
+                    .MINI_BOSS
+            }
+
+            EnemyType.FINAL_BOSS -> {
+                ChestDropSource
+                    .FINAL_BOSS
+            }
+        }
     }
 
     private fun updateStage(
@@ -698,6 +798,17 @@ class FirstScreen(
         synchronizeWeaponInventoryEffects()
         weaponRuntimeManager.resetAllTimers()
 
+        chestPickupManager
+            .clearUncollectedChests()
+
+        if (
+            completedStageType ==
+            StageType.MINI_BOSS
+        ) {
+            chestDropSegmentTracker
+                .resetForNewBossInterval()
+        }
+
         statCardController.beginSelection(
             shouldOpenMarketAfterSelection =
                 completedStageType ==
@@ -707,12 +818,23 @@ class FirstScreen(
 
     private fun renderGame() {
         worldRenderer.render(
-            mapObstacles = mapObstacles,
-            player = player,
-            enemyManager = enemyManager,
+            mapObstacles =
+                mapObstacles,
+
+            player =
+                player,
+
+            enemyManager =
+                enemyManager,
+
             goldCoinPickups =
                 goldCoinPickups,
-            projectiles = projectiles
+
+            chestPickupManager =
+                chestPickupManager,
+
+            projectiles =
+                projectiles
         )
 
         hudRenderer.render(
@@ -891,9 +1013,15 @@ class FirstScreen(
             collectAllGoldPickups()
 
             grantStageCompletionGold(
-                completedStage = completedStage,
-                completedStageType = completedStageType
+                completedStage =
+                    completedStage,
+
+                completedStageType =
+                    completedStageType
             )
+
+            chestPickupManager
+                .clearUncollectedChests()
 
             enemyManager.clearAll()
             projectiles.clear()
