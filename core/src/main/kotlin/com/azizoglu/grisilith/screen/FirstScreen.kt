@@ -33,9 +33,7 @@ import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.map.MapObstacleGenerator
 import com.azizoglu.grisilith.statistics.PlayerStats
-import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.character.CharacterDefinition
-import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
 import com.azizoglu.grisilith.screen.render.HudRenderer
@@ -45,7 +43,17 @@ import com.azizoglu.grisilith.screen.controller.StatCardController
 import com.azizoglu.grisilith.screen.render.WorldRenderer
 import com.azizoglu.grisilith.weapon.runtime.WeaponRuntimeManager
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventoryResult
-import com.badlogic.gdx.graphics.Color
+import com.azizoglu.grisilith.item.runtime.ItemInventory
+import com.azizoglu.grisilith.item.runtime.ItemStatBonusSynchronizer
+import com.azizoglu.grisilith.item.definition.DefaultItems
+import com.azizoglu.grisilith.item.runtime.ItemInstance
+import com.azizoglu.grisilith.item.runtime.ItemInventoryResult
+import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
+import com.azizoglu.grisilith.screen.market.MarketInputController
+import com.azizoglu.grisilith.screen.market.MarketInteractionState
+import com.azizoglu.grisilith.economy.WeaponSalePriceCalculator
+import com.azizoglu.grisilith.weapon.runtime.WeaponStatBonusSynchronizer
+import com.badlogic.gdx.InputProcessor
 
 
 class FirstScreen(
@@ -97,10 +105,13 @@ class FirstScreen(
     private val weaponInventory =
         WeaponInventory()
 
-    private val weaponRuntimeManager =
-        WeaponRuntimeManager(
-            inventory = weaponInventory,
-            playerStats = playerStats
+    private val weaponStatBonusSynchronizer =
+        WeaponStatBonusSynchronizer(
+            inventory =
+                weaponInventory,
+
+            playerStats =
+                playerStats
         )
 
     private val player = Player(
@@ -110,6 +121,24 @@ class FirstScreen(
         worldHeight = worldHeight,
         stats = playerStats
     )
+
+    private val itemInventory =
+        ItemInventory()
+
+    private val itemStatSynchronizer =
+        ItemStatBonusSynchronizer(
+            inventory =
+                itemInventory,
+
+            playerStats =
+                playerStats
+        )
+
+    private val weaponRuntimeManager =
+        WeaponRuntimeManager(
+            inventory = weaponInventory,
+            playerStats = playerStats
+        )
 
     private val mapObstacles: List<MapObstacle> =
         MapObstacleGenerator.generate(
@@ -151,10 +180,18 @@ class FirstScreen(
     private var marketSlots =
         emptyList<MarketSlot>()
 
-    private var lockedSlotsForNextMarket =
-        emptyList<MarketSlot>()
+    private var lockedSlotsForNextMarket:
+        List<MarketSlot?> =
+        List(4) {
+            null
+        }
 
     private var marketRerollsUsed = 0
+
+    private var itemScrollOffset = 0
+
+    private var previousInputProcessor:
+        InputProcessor? = null
 
     private val stageController = StageController(
         normalStageDurationSeconds = 30f,
@@ -207,16 +244,57 @@ class FirstScreen(
                 runStatistics
         )
 
+    private val marketInteractionState =
+        MarketInteractionState()
+
     private val marketRenderer =
         MarketRenderer(
-            camera = camera,
-            cameraWidth = CAMERA_WIDTH,
-            batch = hudBatch,
-            font = hudFont,
+            camera =
+                camera,
+
+            cameraWidth =
+                CAMERA_WIDTH,
+
+            cameraHeight =
+                CAMERA_HEIGHT,
+
+            batch =
+                hudBatch,
+
+            font =
+                hudFont,
+
             sessionWallet =
                 sessionWallet,
+
             stageController =
-                stageController
+                stageController,
+
+            selectedCharacter =
+                selectedCharacter,
+
+            playerStats =
+                playerStats,
+
+            weaponInventory =
+                weaponInventory,
+
+            itemInventory =
+                itemInventory
+        )
+
+    private val marketInputController =
+        MarketInputController(
+            viewport =
+                viewport,
+
+            layoutProvider = {
+                marketRenderer
+                    .currentLayout()
+            },
+
+            interactionState =
+                marketInteractionState
         )
 
     private val statCardController =
@@ -245,11 +323,50 @@ class FirstScreen(
             0f
         )
 
+        weaponInventory.addWeapon(
+            WeaponInstance(
+                definition = DefaultWeapons.orbOfSky,
+                level = 4
+            )
+        )
+
+        weaponInventory.addWeapon(
+            WeaponInstance(
+                definition = DefaultWeapons.amuletOfTrollKing,
+                level = 4
+            )
+        )
+
+        itemInventory.addItem(
+            ItemInstance(
+                definition =
+                    DefaultItems.gladiatorsLocket
+            )
+        )
+
+        itemInventory.addItem(
+            ItemInstance(
+                definition =
+                    DefaultItems.gladiatorsLocket
+            )
+        )
+
+        itemInventory.addItem(
+            ItemInstance(
+                definition =
+                    DefaultItems.luckyDice
+            )
+        )
+
         camera.update()
     }
 
-    override fun render(delta: Float) {
-        handleGameControls()
+    override fun render(
+        delta: Float
+    ) {
+        handleGameControls(
+            delta
+        )
 
         if (
             player.health.isDead ||
@@ -283,14 +400,19 @@ class FirstScreen(
         renderGame()
     }
 
-    private fun handleGameControls() {
+    private fun handleGameControls(
+        delta: Float
+    ) {
         if (isRunSummaryOpen) {
             handleRunSummaryControls()
             return
         }
 
         if (isMarketOpen) {
-            handleMarketControls()
+            handleMarketControls(
+                delta
+            )
+
             return
         }
 
@@ -573,6 +695,7 @@ class FirstScreen(
 
         enemyManager.clearAll()
         projectiles.clear()
+        synchronizeWeaponInventoryEffects()
         weaponRuntimeManager.resetAllTimers()
 
         statCardController.beginSelection(
@@ -617,8 +740,15 @@ class FirstScreen(
                 marketRenderer.render(
                     marketSlots =
                         marketSlots,
+
                     marketRerollsUsed =
-                        marketRerollsUsed
+                        marketRerollsUsed,
+
+                    itemScrollOffset =
+                        itemScrollOffset,
+
+                    interactionState =
+                        marketInteractionState
                 )
             },
             renderStatCardSelection = {
@@ -677,6 +807,19 @@ class FirstScreen(
     }
 
     override fun dispose() {
+
+        if (
+            Gdx.input.inputProcessor ===
+            marketInputController
+        ) {
+            Gdx.input.inputProcessor =
+                previousInputProcessor
+        }
+
+        previousInputProcessor = null
+
+        marketRenderer.dispose()
+
         shapeRenderer.dispose()
         hudBatch.dispose()
         hudFont.dispose()
@@ -769,25 +912,40 @@ class FirstScreen(
     private fun openMarket() {
         isMarketOpen = true
         marketRerollsUsed = 0
+        itemScrollOffset = 0
 
-        val marketSlotCount = 4
+        marketInputController.reset()
 
-        val carriedLockedSlots =
-            lockedSlotsForNextMarket
-                .take(marketSlotCount)
-                .map { slot ->
-                    MarketSlot(
-                        offer = slot.offer,
-                        isLocked = true,
-                        isSold = false
-                    )
+        previousInputProcessor =
+            Gdx.input.inputProcessor
+
+        Gdx.input.inputProcessor =
+            marketInputController
+
+        val marketSlotCount =
+            4
+
+        /*
+         * Önce korunmayan slotların kaç tane
+         * olduğunu hesaplıyoruz.
+         */
+        val missingSlotCount =
+            (
+                0 until marketSlotCount
+                )
+                .count { slotIndex ->
+                    lockedSlotsForNextMarket
+                        .getOrNull(
+                            slotIndex
+                        ) ==
+                        null
                 }
 
-        val missingSlotCount =
-            marketSlotCount -
-                carriedLockedSlots.size
-
-        val newSlots =
+        /*
+         * Yalnızca boş pozisyonlar için yeni
+         * teklifler üretilir.
+         */
+        val generatedOffers =
             MarketOfferGenerator
                 .generateOffers(
                     currentStage =
@@ -799,105 +957,952 @@ class FirstScreen(
                     luckScore =
                         playerStats.luckScore()
                 )
-                .map { offer ->
-                    MarketSlot(
-                        offer = offer
-                    )
-                }
+
+        var generatedOfferIndex =
+            0
 
         marketSlots =
-            carriedLockedSlots +
-                newSlots
+            List(
+                marketSlotCount
+            ) { slotIndex ->
 
+                val carriedLockedSlot =
+                    lockedSlotsForNextMarket
+                        .getOrNull(
+                            slotIndex
+                        )
+
+                if (
+                    carriedLockedSlot !=
+                    null
+                ) {
+                    /*
+                     * Kilitli kart aynı slot indeksinde
+                     * tutulur.
+                     */
+                    MarketSlot(
+                        offer =
+                            carriedLockedSlot.offer,
+
+                        isLocked =
+                            true,
+
+                        isSold =
+                            false
+                    )
+                } else {
+                    /*
+                     * Kilitli olmayan pozisyona sıradaki
+                     * yeni teklif yerleştirilir.
+                     */
+                    val generatedOffer =
+                        generatedOffers
+                            .getOrNull(
+                                generatedOfferIndex
+                            )
+
+                    generatedOfferIndex++
+
+                    MarketSlot(
+                        offer =
+                            generatedOffer,
+
+                        isLocked =
+                            false,
+
+                        isSold =
+                            false
+                    )
+                }
+            }
+
+        /*
+         * Taşınan kilitli teklifler yeni markete
+         * aktarıldı. Bir sonraki kapanışta yeniden
+         * kaydedilecekler.
+         */
         lockedSlotsForNextMarket =
-            emptyList()
+            List(
+                marketSlotCount
+            ) {
+                null
+            }
     }
 
     private fun closeMarket() {
+        val marketSlotCount =
+            4
+
+        /*
+         * Her pozisyon ayrı ayrı kaydedilir.
+         *
+         * Böylece örneğin 3. slotta kilitlenen kart,
+         * sonraki markette yine 3. slotta kalır.
+         */
         lockedSlotsForNextMarket =
-            marketSlots
-                .filter { slot ->
-                    slot.isLocked &&
-                        !slot.isSold &&
-                        slot.offer != null
-                }
-                .map { slot ->
-                    MarketSlot(
-                        offer = slot.offer,
-                        isLocked = true,
-                        isSold = false
+            List(
+                marketSlotCount
+            ) { slotIndex ->
+
+                val slot =
+                    marketSlots.getOrNull(
+                        slotIndex
                     )
+
+                if (
+                    slot != null &&
+                    slot.isLocked &&
+                    !slot.isSold &&
+                    slot.offer != null
+                ) {
+                    MarketSlot(
+                        offer =
+                            slot.offer,
+
+                        isLocked =
+                            true,
+
+                        isSold =
+                            false
+                    )
+                } else {
+                    null
                 }
+            }
+
+        if (
+            Gdx.input.inputProcessor ===
+            marketInputController
+        ) {
+            Gdx.input.inputProcessor =
+                previousInputProcessor
+        }
+
+        previousInputProcessor =
+            null
+
+        marketInputController.reset()
 
         isMarketOpen = false
-        marketSlots = emptyList()
+
+        marketSlots =
+            emptyList()
+
         marketRerollsUsed = 0
+        itemScrollOffset = 0
 
         enemySpawner.resetTimer()
     }
 
-    private fun handleMarketControls() {
-        when {
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_1
-            ) -> {
-                purchaseMarketOffer(0)
+    private fun handleWeaponDrop(
+        sourceSlotIndex: Int,
+        targetSlotIndex: Int?,
+        droppedOnSellArea: Boolean
+    ) {
+
+        val sourceWeapon =
+            weaponInventory.weaponAt(
+                sourceSlotIndex
+            ) ?: return
+
+        if (droppedOnSellArea) {
+            requestWeaponSale(
+                sourceSlotIndex =
+                    sourceSlotIndex
+            )
+
+            return
+        }
+
+        if (targetSlotIndex == null) {
+            return
+        }
+
+        if (
+            sourceSlotIndex ==
+            targetSlotIndex
+        ) {
+            return
+        }
+
+        val targetWeapon =
+            weaponInventory.weaponAt(
+                targetSlotIndex
+            )
+
+        /*
+         * Boş slota bırakma:
+         * Move işlemi swapSlots ile gerçekleşir.
+         */
+        if (targetWeapon == null) {
+            weaponInventory.swapSlots(
+                sourceSlotIndex,
+                targetSlotIndex
+            )
+
+            weaponRuntimeManager
+                .resetAllTimers()
+
+            return
+        }
+
+        val sameWeapon =
+            sourceWeapon.definition.id ==
+                targetWeapon.definition.id
+
+        /*
+         * Farklı Weapon:
+         * Slotlar yer değiştirir.
+         */
+        if (!sameWeapon) {
+            weaponInventory.swapSlots(
+                sourceSlotIndex,
+                targetSlotIndex
+            )
+
+            weaponRuntimeManager
+                .resetAllTimers()
+
+            return
+        }
+
+        /*
+         * Hedef Lv.5 ise yükseltilemez.
+         */
+        if (
+            targetWeapon.level >=
+            WeaponInstance.MAXIMUM_LEVEL
+        ) {
+            return
+        }
+
+        /*
+ * Yüksek seviyeli Weapon korunur.
+ * Düşük seviyeli Weapon tüketilir.
+ *
+ * Seviyeler eşitse hedef korunur,
+ * kaynak tüketilir.
+ */
+        val survivingWeapon =
+            if (
+                sourceWeapon.level >
+                targetWeapon.level
+            ) {
+                sourceWeapon
+            } else {
+                targetWeapon
             }
 
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_2
-            ) -> {
-                purchaseMarketOffer(1)
+        val consumedWeapon =
+            if (
+                survivingWeapon === sourceWeapon
+            ) {
+                targetWeapon
+            } else {
+                sourceWeapon
             }
 
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_3
-            ) -> {
-                purchaseMarketOffer(2)
+        val resultLevel =
+            (
+                survivingWeapon.level +
+                    1
+                )
+                .coerceAtMost(
+                    WeaponInstance.MAXIMUM_LEVEL
+                )
+
+        /*
+         * Tüketilecek Weapon Lv.1 ise doğrudan merge.
+         * Lv.2+ değerli bir Weapon kaybedilecekse
+         * kullanıcıdan onay alınır.
+         */
+        if (
+            consumedWeapon.level ==
+            WeaponInstance.MINIMUM_LEVEL
+        ) {
+            performWeaponMerge(
+                sourceSlotIndex =
+                    sourceSlotIndex,
+
+                targetSlotIndex =
+                    targetSlotIndex
+            )
+
+            return
+        }
+
+        marketInteractionState
+            .openMergeConfirmation(
+                MarketInteractionState
+                    .PendingWeaponMerge(
+                        sourceSlotIndex =
+                            sourceSlotIndex,
+
+                        targetSlotIndex =
+                            targetSlotIndex,
+
+                        sourceWeaponName =
+                            sourceWeapon.displayName,
+
+                        /*
+                         * Popup'taki sourceWeaponLevel alanı
+                         * artık tüketilecek Weapon seviyesidir.
+                         */
+                        sourceWeaponLevel =
+                            consumedWeapon.level,
+
+                        /*
+                         * Bu alan korunan Weapon seviyesini
+                         * temsil eder.
+                         */
+                        targetWeaponLevel =
+                            survivingWeapon.level,
+
+                        resultWeaponLevel =
+                            resultLevel
+                    )
+            )
+    }
+
+    private fun requestWeaponSale(
+        sourceSlotIndex: Int
+    ) {
+        val weapon =
+            weaponInventory.weaponAt(
+                sourceSlotIndex
+            ) ?: return
+
+        val salePrice =
+            WeaponSalePriceCalculator
+                .calculateSalePrice(
+                    weaponLevel =
+                        weapon.level,
+
+                    currentStage =
+                        stageController.currentStage
+                )
+
+        /*
+         * Lv.1 Weapon doğrudan satılır.
+         */
+        if (
+            weapon.level ==
+            WeaponInstance.MINIMUM_LEVEL
+        ) {
+            performWeaponSale(
+                sourceSlotIndex =
+                    sourceSlotIndex,
+
+                salePrice =
+                    salePrice
+            )
+
+            return
+        }
+
+        /*
+         * Lv.2–5 Weapon için onay gerekir.
+         */
+        marketInteractionState
+            .openSaleConfirmation(
+                MarketInteractionState
+                    .PendingWeaponSale(
+                        sourceSlotIndex =
+                            sourceSlotIndex,
+
+                        weaponName =
+                            weapon.displayName,
+
+                        weaponLevel =
+                            weapon.level,
+
+                        salePrice =
+                            salePrice
+                    )
+            )
+    }
+
+    private fun confirmPendingWeaponSale() {
+        val pendingSale =
+            marketInteractionState
+                .pendingWeaponSale
+                ?: return
+
+        performWeaponSale(
+            sourceSlotIndex =
+                pendingSale.sourceSlotIndex,
+
+            salePrice =
+                pendingSale.salePrice
+        )
+
+        marketInteractionState
+            .closeSaleConfirmation()
+    }
+
+    private fun performWeaponSale(
+        sourceSlotIndex: Int,
+        salePrice: Int
+    ) {
+        val removedWeapon =
+            weaponInventory
+                .removeWeaponFromSlot(
+                    sourceSlotIndex
+                )
+                ?: return
+
+        sessionWallet.addGold(
+            salePrice.toFloat()
+        )
+
+        synchronizeWeaponInventoryEffects()
+
+        weaponRuntimeManager
+            .resetAllTimers()
+
+        if (
+            marketInteractionState
+                .detailedWeaponSlotIndex ==
+            sourceSlotIndex
+        ) {
+            marketInteractionState
+                .detailedWeaponSlotIndex =
+                null
+        }
+    }
+
+    private fun synchronizeWeaponInventoryEffects() {
+        weaponStatBonusSynchronizer
+            .invalidate()
+
+        weaponStatBonusSynchronizer
+            .synchronize()
+
+        player
+            .synchronizeMaximumHealthWithStats(
+                healAddedHealth = false
+            )
+    }
+
+    private fun confirmPendingWeaponMerge() {
+        val pendingMerge =
+            marketInteractionState
+                .pendingWeaponMerge
+                ?: return
+
+        performWeaponMerge(
+            sourceSlotIndex =
+                pendingMerge.sourceSlotIndex,
+
+            targetSlotIndex =
+                pendingMerge.targetSlotIndex
+        )
+
+        marketInteractionState
+            .closeMergeConfirmation()
+    }
+
+    private fun performWeaponMerge(
+        sourceSlotIndex: Int,
+        targetSlotIndex: Int
+    ) {
+        val result =
+            weaponInventory.mergeSlots(
+                sourceSlotIndex =
+                    sourceSlotIndex,
+
+                targetSlotIndex =
+                    targetSlotIndex
+            )
+
+        if (
+            result ==
+            WeaponInventoryResult.MERGED
+        ) {
+            synchronizeWeaponInventoryEffects()
+
+            weaponRuntimeManager
+                .resetAllTimers()
+        }
+    }
+
+    private fun handleMarketControls(
+        delta: Float
+    ) {
+
+        marketInteractionState.update(
+            delta
+        )
+
+        marketInputController
+            .handleInput(
+                delta =
+                    delta,
+
+                onPurchaseOffer = {
+                        slotIndex ->
+
+                    purchaseMarketOffer(
+                        slotIndex
+                    )
+                },
+
+                onMarketOfferDropped = {
+                        offerIndex,
+                        targetWeaponSlotIndex,
+                        droppedOnItemPanel,
+                        droppedOnStatsPanel ->
+
+                    handleMarketOfferDrop(
+                        offerIndex =
+                            offerIndex,
+
+                        targetWeaponSlotIndex =
+                            targetWeaponSlotIndex,
+
+                        droppedOnItemPanel =
+                            droppedOnItemPanel,
+
+                        droppedOnStatsPanel =
+                            droppedOnStatsPanel
+                    )
+                },
+
+                onToggleOfferLock = {
+                        slotIndex ->
+
+                    toggleMarketOfferLock(
+                        slotIndex
+                    )
+                },
+
+                onReturnToGame = {
+                    closeMarket()
+                },
+
+                onReroll = {
+                    rerollMarket()
+                },
+
+                canDragWeapon = {
+                        slotIndex ->
+
+                    weaponInventory
+                        .weaponAt(
+                            slotIndex
+                        ) != null
+                },
+
+                onWeaponClicked = {
+                        slotIndex ->
+
+                    marketInteractionState
+                        .showWeaponDetails(
+                            slotIndex
+                        )
+                },
+
+                onItemClicked = {
+                        visibleRowIndex ->
+
+                    openItemDetailsByVisibleRow(
+                        visibleRowIndex
+                    )
+                },
+
+                onItemScroll = {
+                        scrollSteps ->
+
+                    scrollMarketItems(
+                        requestedSteps =
+                            scrollSteps
+                    )
+                },
+
+                onTamgaClicked = {
+                    marketInteractionState
+                        .showTamgaDetails()
+                },
+
+                onCloseDetailModal = {
+                    marketInteractionState
+                        .closeDetailModal()
+                },
+
+                onWeaponDropped = {
+                        sourceSlotIndex,
+                        targetSlotIndex,
+                        droppedOnSellArea ->
+
+                    handleWeaponDrop(
+                        sourceSlotIndex =
+                            sourceSlotIndex,
+
+                        targetSlotIndex =
+                            targetSlotIndex,
+
+                        droppedOnSellArea =
+                            droppedOnSellArea
+                    )
+                },
+
+                onConfirmMerge = {
+                    confirmPendingWeaponMerge()
+                },
+
+                onCancelMerge = {
+                    marketInteractionState
+                        .closeMergeConfirmation()
+                },
+
+                onConfirmSale = {
+                    confirmPendingWeaponSale()
+                },
+
+                onCancelSale = {
+                    marketInteractionState
+                        .closeSaleConfirmation()
+                }
+            )
+    }
+
+    private fun showMarketFailure(
+        message: String,
+        offerIndex: Int? = null
+    ) {
+        marketInteractionState
+            .showFailureFeedback(
+                message =
+                    message,
+
+                offerIndex =
+                    offerIndex
+            )
+    }
+
+    private fun scrollMarketItems(
+        requestedSteps: Int
+    ) {
+        if (requestedSteps == 0) {
+            return
+        }
+
+        val groupedItemCount =
+            itemInventory
+                .allItems()
+                .distinctBy { item ->
+                    item.definition.id
+                }
+                .size
+
+        val layout =
+            marketRenderer
+                .currentLayout()
+
+        val maximumVisibleRows =
+            (
+                (
+                    layout.itemPanel.height -
+                        48f
+                    ) / 24f
+                )
+                .toInt()
+                .coerceAtLeast(1)
+
+        val maximumOffset =
+            (
+                groupedItemCount -
+                    maximumVisibleRows
+                )
+                .coerceAtLeast(0)
+
+        itemScrollOffset =
+            (
+                itemScrollOffset +
+                    requestedSteps
+                )
+                .coerceIn(
+                    0,
+                    maximumOffset
+                )
+    }
+
+    private fun openItemDetailsByVisibleRow(
+        visibleRowIndex: Int
+    ) {
+        /*
+         * Renderer ile aynı sıra:
+         * İlk görülen kopyanın sırası korunur,
+         * aynı Item'lar tek satırda gruplanır.
+         */
+        val groupedDefinitions =
+            itemInventory
+                .allItems()
+                .distinctBy { item ->
+                    item.definition.id
+                }
+
+        val actualItemIndex =
+            itemScrollOffset +
+                visibleRowIndex
+
+        val itemDefinition =
+            groupedDefinitions
+                .getOrNull(
+                    actualItemIndex
+                )
+                ?.definition
+                ?: return
+
+        marketInteractionState
+            .showItemDetails(
+                itemDefinition.id.value
+            )
+    }
+
+    private fun handleMarketOfferDrop(
+        offerIndex: Int,
+        targetWeaponSlotIndex: Int?,
+        droppedOnItemPanel: Boolean,
+        droppedOnStatsPanel: Boolean
+    ) {
+        val marketSlot =
+            marketSlots.getOrNull(
+                offerIndex
+            ) ?: return
+
+        if (
+            marketSlot.isSold ||
+            marketSlot.offer == null
+        ) {
+            return
+        }
+
+        val offer =
+            marketSlot.offer
+                ?: return
+
+        when (offer.productType) {
+            MarketProductType.ITEM -> {
+
+                if (!droppedOnItemPanel) {
+                    showMarketFailure(
+                        message =
+                            "DROP ITEM ON ITEMS",
+
+                        offerIndex =
+                            offerIndex
+                    )
+
+                    return
+                }
+
+                purchaseMarketOffer(
+                    offerIndex
+                )
             }
 
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_4
-            ) -> {
-                purchaseMarketOffer(3)
+            MarketProductType.WEAPON -> {
+                /*
+                 * Weapon belirli bir Weapon slotuna
+                 * bırakılmalıdır.
+                 */
+                val targetSlotIndex =
+                    targetWeaponSlotIndex
+                        ?: run {
+                            showMarketFailure(
+                                message =
+                                    "DROP ON EMPTY OR MATCHING SLOT",
+
+                                offerIndex =
+                                    offerIndex
+                            )
+
+                            return
+                        }
+
+                purchaseWeaponOfferIntoSlot(
+                    offerIndex =
+                        offerIndex,
+
+                    targetSlotIndex =
+                        targetSlotIndex
+                )
             }
 
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.Q
-            ) -> {
-                toggleMarketOfferLock(0)
-            }
+            MarketProductType.STAT -> {
+                if (!droppedOnStatsPanel) {
+                    showMarketFailure(
+                        message =
+                            "DROP STAT ON STATS",
 
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.W
-            ) -> {
-                toggleMarketOfferLock(1)
-            }
+                        offerIndex =
+                            offerIndex
+                    )
 
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.E
-            ) -> {
-                toggleMarketOfferLock(2)
-            }
+                    return
+                }
 
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.T
-            ) -> {
-                toggleMarketOfferLock(3)
-            }
-
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.R
-            ) -> {
-                rerollMarket()
-            }
-
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.ENTER
-            ) -> {
-                closeMarket()
+                purchaseMarketOffer(
+                    offerIndex
+                )
             }
         }
+    }
+
+    private fun purchaseWeaponOfferIntoSlot(
+        offerIndex: Int,
+        targetSlotIndex: Int
+    ) {
+        val marketSlot =
+            marketSlots.getOrNull(
+                offerIndex
+            ) ?: return
+
+        if (marketSlot.isSold) {
+            return
+        }
+
+        val offer =
+            marketSlot.offer
+                ?: return
+
+        if (
+            offer.productType !=
+            MarketProductType.WEAPON
+        ) {
+            return
+        }
+
+        val weaponDefinition =
+            offer.weaponDefinition
+                ?: return
+
+        if (
+            sessionWallet.goldCoins <
+            offer.price
+        ) {
+            showMarketFailure(
+                message =
+                    "NOT ENOUGH GOLD COIN",
+
+                offerIndex =
+                    offerIndex
+            )
+
+            return
+        }
+
+        val newWeapon =
+            WeaponInstance(
+                definition =
+                    weaponDefinition,
+
+                level =
+                    offer.productLevel
+                        .coerceIn(
+                            WeaponInstance.MINIMUM_LEVEL,
+                            WeaponInstance.MAXIMUM_LEVEL
+                        )
+            )
+
+        val inventoryResult =
+            weaponInventory
+                .addPurchasedWeaponToSlot(
+                    weapon =
+                        newWeapon,
+
+                    targetSlotIndex =
+                        targetSlotIndex
+                )
+
+        val purchaseSucceeded =
+            when (inventoryResult) {
+                WeaponInventoryResult
+                    .ADDED_TO_EMPTY_SLOT,
+
+                WeaponInventoryResult
+                    .MERGED,
+
+                WeaponInventoryResult
+                    .UNIQUE_WEAPON_LEVELLED_UP -> {
+                    true
+                }
+
+                WeaponInventoryResult
+                    .INVENTORY_FULL,
+
+                WeaponInventoryResult
+                    .INCOMPATIBLE_WEAPONS,
+
+                WeaponInventoryResult
+                    .MAXIMUM_LEVEL_REACHED,
+
+                WeaponInventoryResult
+                    .INVALID_SLOT -> {
+                    false
+                }
+            }
+
+        if (!purchaseSucceeded) {
+            val failureMessage =
+                when (
+                    inventoryResult
+                ) {
+                    WeaponInventoryResult
+                        .INCOMPATIBLE_WEAPONS -> {
+                        "DROP ON EMPTY OR MATCHING SLOT"
+                    }
+
+                    WeaponInventoryResult
+                        .MAXIMUM_LEVEL_REACHED -> {
+                        "WEAPON IS ALREADY LEVEL V"
+                    }
+
+                    WeaponInventoryResult
+                        .INVENTORY_FULL -> {
+                        "WEAPON INVENTORY FULL"
+                    }
+
+                    else -> {
+                        "PURCHASE UNAVAILABLE"
+                    }
+                }
+
+            showMarketFailure(
+                message =
+                    failureMessage,
+
+                offerIndex =
+                    offerIndex
+            )
+
+            return
+        }
+
+        val paymentSuccessful =
+            sessionWallet.spendGold(
+                amount =
+                    offer.price
+            )
+
+        if (!paymentSuccessful) {
+            return
+        }
+
+        weaponRuntimeManager
+            .resetAllTimers()
+
+        marketSlots =
+            marketSlots
+                .toMutableList()
+                .apply {
+                    this[offerIndex] =
+                        marketSlot.copy(
+                            isLocked = false,
+                            isSold = true
+                        )
+                }
     }
 
     private fun toggleMarketOfferLock(
@@ -946,6 +1951,14 @@ class FirstScreen(
             sessionWallet.goldCoins <
             offer.price
         ) {
+            showMarketFailure(
+                message =
+                    "NOT ENOUGH GOLD COIN",
+
+                offerIndex =
+                    slotIndex
+            )
+
             return
         }
 
@@ -954,13 +1967,28 @@ class FirstScreen(
                 offer
             )
 
-        /*
-         * Envanter dolu, geçersiz teklif veya
-         * maksimum seviyedeki özel silah gibi
-         * durumlarda satın alma gerçekleşmez.
-         */
         if (!offerApplied) {
+            showMarketFailure(
+                message =
+                    purchaseFailureMessage(
+                        offer
+                    ),
+
+                offerIndex =
+                    slotIndex
+            )
+
             return
+        }
+
+        if (
+            offer.productType ==
+            MarketProductType.WEAPON
+        ) {
+            synchronizeWeaponInventoryEffects()
+
+            weaponRuntimeManager
+                .resetAllTimers()
         }
 
         val paymentSuccessful =
@@ -988,23 +2016,94 @@ class FirstScreen(
                 }
     }
 
+    private fun purchaseFailureMessage(
+        offer: MarketOffer
+    ): String {
+        return when (
+            offer.productType
+        ) {
+            MarketProductType.ITEM -> {
+                "ITEM LIMIT REACHED"
+            }
+
+            MarketProductType.STAT -> {
+                "STAT IS ALREADY AT MAXIMUM"
+            }
+
+            MarketProductType.WEAPON -> {
+                val weaponDefinition =
+                    offer.weaponDefinition
+                        ?: return "PURCHASE UNAVAILABLE"
+
+                val equippedWeapons =
+                    (
+                        0 until
+                            WeaponInventory
+                                .WEAPON_SLOT_COUNT
+                        )
+                        .mapNotNull { slotIndex ->
+                            weaponInventory
+                                .weaponAt(
+                                    slotIndex
+                                )
+                        }
+
+                val matchingWeapons =
+                    equippedWeapons.filter {
+                            weapon ->
+
+                        weapon.definition.id ==
+                            weaponDefinition.id
+                    }
+
+                when {
+                    matchingWeapons.isNotEmpty() &&
+                        matchingWeapons.all {
+                                weapon ->
+
+                            weapon.level >=
+                                WeaponInstance
+                                    .MAXIMUM_LEVEL
+                        } -> {
+                        "WEAPON IS ALREADY LEVEL V"
+                    }
+
+                    equippedWeapons.size >=
+                        WeaponInventory
+                            .WEAPON_SLOT_COUNT -> {
+                        "WEAPON INVENTORY FULL"
+                    }
+
+                    else -> {
+                        "PURCHASE UNAVAILABLE"
+                    }
+                }
+            }
+        }
+    }
+
     private fun applyMarketOffer(
         offer: MarketOffer
     ): Boolean {
-        return when (offer.productType) {
+        return when (
+            offer.productType
+        ) {
             MarketProductType.WEAPON -> {
                 purchaseWeaponOffer(
                     offer
                 )
             }
 
-            /*
-             * Skill kaldırıldı.
-             * Item sistemi henüz hazırlanmadı.
-             */
-            MarketProductType.SKILL,
             MarketProductType.ITEM -> {
-                false
+                purchaseItemOffer(
+                    offer
+                )
+            }
+
+            MarketProductType.STAT -> {
+                purchaseStatOffer(
+                    offer
+                )
             }
         }
     }
@@ -1046,11 +2145,6 @@ class FirstScreen(
                 true
             }
 
-            /*
-             * Market satın alımı drag-and-merge
-             * işlemi yapmaz. Bu sonuç burada normalde
-             * oluşmaz ama exhaustive when için kalır.
-             */
             WeaponInventoryResult.MERGED -> {
                 true
             }
@@ -1071,6 +2165,65 @@ class FirstScreen(
         }
     }
 
+    private fun purchaseItemOffer(
+        offer: MarketOffer
+    ): Boolean {
+        val itemDefinition =
+            offer.itemDefinition
+                ?: return false
+
+        val result =
+            itemInventory.addItem(
+                ItemInstance(
+                    definition =
+                        itemDefinition
+                )
+            )
+
+        if (
+            result !=
+            ItemInventoryResult.ADDED
+        ) {
+            return false
+        }
+
+        itemStatSynchronizer.synchronize()
+
+
+        player
+            .synchronizeMaximumHealthWithStats(
+                healAddedHealth = true
+            )
+
+        return true
+    }
+
+    private fun purchaseStatOffer(
+        offer: MarketOffer
+    ): Boolean {
+        val statType =
+            offer.statType
+                ?: return false
+
+        val statAmount =
+            offer.statAmount
+
+        if (statAmount <= 0) {
+            return false
+        }
+
+        val appliedAmount =
+            player.addRunStatBonus(
+                statType =
+                    statType,
+
+                amount =
+                    statAmount
+            )
+
+        return appliedAmount > 0
+    }
+
     private fun rerollMarket() {
         val rerollPrice =
             MarketRerollPriceCalculator
@@ -1088,40 +2241,72 @@ class FirstScreen(
                 )
 
             if (!rerollSuccessful) {
+                showMarketFailure(
+                    message =
+                        "NOT ENOUGH GOLD COIN",
+
+                    offerIndex =
+                        null
+                )
+
                 return
             }
         }
 
         marketRerollsUsed++
 
+        val rerolledSlotCount =
+            marketSlots.count { slot ->
+                !slot.isLocked ||
+                    slot.isSold
+            }
+
+        val newOffers =
+            MarketOfferGenerator
+                .generateOffers(
+                    currentStage =
+                        stageController.currentStage,
+
+                    offerCount =
+                        rerolledSlotCount,
+
+                    luckScore =
+                        playerStats.luckScore()
+                )
+
+        var newOfferIndex =
+            0
+
         marketSlots =
             marketSlots.map { slot ->
 
                 /*
-                 * Yalnızca kilitli ve henüz
-                 * satın alınmamış kart korunur.
+                 * Kilitli ve satın alınmamış kart aynı
+                 * pozisyonda, aynı teklifle korunur.
                  */
                 if (
                     slot.isLocked &&
-                    !slot.isSold
+                    !slot.isSold &&
+                    slot.offer != null
                 ) {
                     slot
                 } else {
                     val newOffer =
-                        MarketOfferGenerator
-                            .generateOffers(
-                                currentStage =
-                                    stageController.currentStage,
-                                offerCount = 1,
-                                luckScore =
-                                    playerStats.luckScore()
-                            )
-                            .firstOrNull()
+                        newOffers.getOrNull(
+                            newOfferIndex
+                        )
+
+                    newOfferIndex++
 
                     MarketSlot(
-                        offer = newOffer,
-                        isLocked = false,
-                        isSold = false
+                        offer =
+                            newOffer,
+
+                        isLocked =
+                            false,
+
+                        isSold =
+                            false
                     )
                 }
             }

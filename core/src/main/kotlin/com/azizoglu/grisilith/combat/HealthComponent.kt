@@ -72,4 +72,47 @@ class HealthComponent(
                     .coerceAtMost(maximumHealth)
         }
     }
+
+    fun setMaximumHealth(
+        newMaximumHealth: Int,
+        healAddedHealth: Boolean = true
+    ) {
+        if (newMaximumHealth <= 0) {
+            return
+        }
+
+        val previousMaximumHealth =
+            maximumHealth
+
+        val maximumHealthDifference =
+            newMaximumHealth -
+                previousMaximumHealth
+
+        maximumHealth =
+            newMaximumHealth
+
+        when {
+
+            maximumHealthDifference > 0 &&
+                healAddedHealth &&
+                !isDead -> {
+
+                currentHealth =
+                    (
+                        currentHealth +
+                            maximumHealthDifference
+                        )
+                        .coerceAtMost(
+                            maximumHealth
+                        )
+            }
+
+            maximumHealthDifference < 0 -> {
+                currentHealth =
+                    currentHealth.coerceAtMost(
+                        maximumHealth
+                    )
+            }
+        }
+    }
 }

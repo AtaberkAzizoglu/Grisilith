@@ -27,6 +27,7 @@ enum class ContentTag {
     /*
      * Items
      */
+    PASSIVE_ITEM,
     MAGICAL_ITEM,
 
     /*

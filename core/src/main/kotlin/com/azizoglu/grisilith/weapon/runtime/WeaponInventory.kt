@@ -51,10 +51,7 @@ class WeaponInventory {
                 .ADDED_TO_EMPTY_SLOT
     }
 
-    /*
-     * Market veya sandıktan gelen WeaponInstance
-     * için merkezi ekleme kuralı.
-     */
+
     fun addPurchasedWeapon(
         weapon: WeaponInstance
     ): WeaponInventoryResult {
@@ -71,14 +68,151 @@ class WeaponInventory {
             weaponSlots.firstOrNull { slot ->
                 slot.isEmpty
             }
-                ?: return WeaponInventoryResult
-                    .INVENTORY_FULL
 
-        emptySlot.weapon =
-            weapon
+        if (emptySlot != null) {
+            emptySlot.weapon =
+                weapon
+
+            return WeaponInventoryResult
+                .ADDED_TO_EMPTY_SLOT
+        }
+
+
+        val firstUpgradeableMatchingSlot =
+            weaponSlots.firstOrNull { slot ->
+                val existingWeapon =
+                    slot.weapon
+
+                existingWeapon != null &&
+                    existingWeapon.definition.id ==
+                    weapon.definition.id &&
+                    existingWeapon.level <
+                    WeaponInstance.MAXIMUM_LEVEL
+            }
+
+        if (
+            firstUpgradeableMatchingSlot != null
+        ) {
+            val existingWeapon =
+                firstUpgradeableMatchingSlot.weapon
+                    ?: return WeaponInventoryResult
+                        .INVALID_SLOT
+
+            if (
+                !existingWeapon.increaseLevel()
+            ) {
+                return WeaponInventoryResult
+                    .MAXIMUM_LEVEL_REACHED
+            }
+
+            return WeaponInventoryResult
+                .MERGED
+        }
+
+
+        val hasMatchingWeapon =
+            weaponSlots.any { slot ->
+                slot.weapon
+                    ?.definition
+                    ?.id ==
+                    weapon.definition.id
+            }
+
+        if (hasMatchingWeapon) {
+            return WeaponInventoryResult
+                .MAXIMUM_LEVEL_REACHED
+        }
+
 
         return WeaponInventoryResult
-            .ADDED_TO_EMPTY_SLOT
+            .INVENTORY_FULL
+    }
+
+    /*
+ * Market kartından sürüklenen Weapon'ı
+ * belirli bir slota satın alır.
+ *
+ * Boş hedef:
+ * → Yeni Weapon o slota yerleşir.
+ *
+ * Aynı Weapon:
+ * → Hedef yalnızca +1 level alır.
+ *
+ * Farklı Weapon:
+ * → Satın alma başarısız olur.
+ */
+    fun addPurchasedWeaponToSlot(
+        weapon: WeaponInstance,
+        targetSlotIndex: Int
+    ): WeaponInventoryResult {
+        val targetSlot =
+            weaponSlots.getOrNull(
+                targetSlotIndex
+            )
+                ?: return WeaponInventoryResult
+                    .INVALID_SLOT
+
+        val targetWeapon =
+            targetSlot.weapon
+
+        /*
+         * Boş slota doğrudan yerleştir.
+         */
+        if (targetWeapon == null) {
+            /*
+             * Tek kopya kuralı bulunan Weapon zaten
+             * envanterdeyse ikinci kopya oluşturma.
+             */
+            if (
+                weapon.definition.id ==
+                ENCHANTED_CHALK_DUST_ID
+            ) {
+                val existingWeapon =
+                    firstWeaponById(
+                        weapon.definition.id
+                    )
+
+                if (existingWeapon != null) {
+                    if (
+                        !existingWeapon.increaseLevel()
+                    ) {
+                        return WeaponInventoryResult
+                            .MAXIMUM_LEVEL_REACHED
+                    }
+
+                    return WeaponInventoryResult
+                        .UNIQUE_WEAPON_LEVELLED_UP
+                }
+            }
+
+            targetSlot.weapon =
+                weapon
+
+            return WeaponInventoryResult
+                .ADDED_TO_EMPTY_SLOT
+        }
+
+        /*
+         * Dolu hedef yalnızca aynı Weapon ise
+         * satın alma yoluyla level atlayabilir.
+         */
+        val sameWeapon =
+            targetWeapon.definition.id ==
+                weapon.definition.id
+
+        if (!sameWeapon) {
+            return WeaponInventoryResult
+                .INCOMPATIBLE_WEAPONS
+        }
+
+        if (
+            !targetWeapon.increaseLevel()
+        ) {
+            return WeaponInventoryResult
+                .MAXIMUM_LEVEL_REACHED
+        }
+
+        return WeaponInventoryResult.MERGED
     }
 
     private fun addEnchantedChalkDust(
@@ -131,16 +265,7 @@ class WeaponInventory {
             .ADDED_TO_EMPTY_SLOT
     }
 
-    /*
-     * Drag-and-drop ile iki slotu birleştirir.
-     *
-     * İlk güvenli kural:
-     * - Aynı WeaponDefinition
-     * - Aynı level
-     * - Hedef Lv.5 değil
-     *
-     * Kaynak silah tüketilir, hedef bir level artar.
-     */
+
     fun mergeSlots(
         sourceSlotIndex: Int,
         targetSlotIndex: Int
@@ -181,34 +306,50 @@ class WeaponInventory {
             sourceWeapon.definition.id ==
                 targetWeapon.definition.id
 
-        val sameLevel =
-            sourceWeapon.level ==
-                targetWeapon.level
-
-        if (
-            !sameWeapon ||
-            !sameLevel
-        ) {
+        if (!sameWeapon) {
             return WeaponInventoryResult
                 .INCOMPATIBLE_WEAPONS
         }
 
+
+        val survivingSlot =
+            when {
+                sourceWeapon.level >
+                    targetWeapon.level -> {
+                    sourceSlot
+                }
+
+                else -> {
+                    targetSlot
+                }
+            }
+
+        val consumedSlot =
+            if (
+                survivingSlot === sourceSlot
+            ) {
+                targetSlot
+            } else {
+                sourceSlot
+            }
+
+        val survivingWeapon =
+            survivingSlot.weapon
+                ?: return WeaponInventoryResult
+                    .INVALID_SLOT
+
         if (
-            !targetWeapon.increaseLevel()
+            !survivingWeapon.increaseLevel()
         ) {
             return WeaponInventoryResult
                 .MAXIMUM_LEVEL_REACHED
         }
 
-        sourceSlot.clear()
+        consumedSlot.clear()
 
         return WeaponInventoryResult.MERGED
     }
 
-    /*
-     * İki silahın yerini değiştirir.
-     * Boş slota sürükleme de bu metotla çalışır.
-     */
     fun swapSlots(
         firstSlotIndex: Int,
         secondSlotIndex: Int
