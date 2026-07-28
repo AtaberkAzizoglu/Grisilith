@@ -145,6 +145,30 @@ class PlayerStats(
         return newTotal - previousTotal
     }
 
+    /*
+ * Preset Gear'larından gelen bütün bonusları
+ * tek seferde yeniler.
+ *
+ * Şimdilik yalnızca Armor kullanır.
+ * Daha sonra Armor Tamga da bu hesaplamaya
+ * dahil edilecektir.
+ */
+    fun setGearBonuses(
+        bonuses:
+        Map<StatType, Int>
+    ) {
+        StatType.entries
+            .forEach { statType ->
+
+                gearBonuses[
+                    statType
+                ] =
+                    bonuses[
+                        statType
+                    ] ?: 0
+            }
+    }
+
     fun setWeaponBonuses(
         bonuses: Map<StatType, Int>
     ) {
@@ -163,6 +187,16 @@ class PlayerStats(
                 bonuses[statType]
                     ?: 0
         }
+    }
+
+    fun clearGearBonuses() {
+        StatType.entries
+            .forEach { statType ->
+                gearBonuses[
+                    statType
+                ] =
+                    0
+            }
     }
 
     fun clearWeaponBonuses() {

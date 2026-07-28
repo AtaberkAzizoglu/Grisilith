@@ -16,6 +16,8 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.azizoglu.grisilith.settings.GameSettings
 import com.azizoglu.grisilith.screen.SettingsScreen
+import com.azizoglu.grisilith.preset.PresetRepository
+import com.azizoglu.grisilith.screen.preset.PresetManagerScreen
 
 class GrisilithGame : Game() {
 
@@ -26,6 +28,8 @@ class GrisilithGame : Game() {
         DefaultContentRegistry.instance
 
         GameSettings.load()
+
+        PresetRepository.load()
 
         showMainMenu()
     }
@@ -135,15 +139,66 @@ class GrisilithGame : Game() {
 
     fun showPresetMenu() {
         changeScreen(
+            PresetManagerScreen(
+                game =
+                    this
+            )
+        )
+    }
+
+    fun showCreatePreset() {
+        changeScreen(
             PlaceholderMenuScreen(
                 title =
-                    "MAKE YOUR PRESET",
+                    "CREATE PRESET",
 
                 description =
-                    "Choose your Character and starting Gears before beginning a run.",
+                    "The Create Preset editor will be implemented in the next step.",
 
                 onBack = {
-                    showPlayMenu()
+                    showPresetMenu()
+                }
+            )
+        )
+    }
+
+    fun showEditPreset(
+        presetId:
+        String
+    ) {
+        changeScreen(
+            PlaceholderMenuScreen(
+                title =
+                    "EDIT PRESET",
+
+                description =
+                    "Preset ID:\n$presetId\n\n" +
+                        "The editor will open this Preset in the next step.",
+
+                onBack = {
+                    showPresetMenu()
+                }
+            )
+        )
+    }
+
+    fun showPresetDifficultySelection(
+        presetId:
+        String
+    ) {
+        changeScreen(
+            PlaceholderMenuScreen(
+                title =
+                    "PRESET READY",
+
+                description =
+                    "Selected Preset:\n$presetId\n\n" +
+                        "Difficulty selection will be connected " +
+                        "after the Create Preset editor and " +
+                        "Preset run loader are completed.",
+
+                onBack = {
+                    showPresetMenu()
                 }
             )
         )
