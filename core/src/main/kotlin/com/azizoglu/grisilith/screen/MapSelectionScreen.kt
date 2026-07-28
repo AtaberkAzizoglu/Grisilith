@@ -1,10 +1,10 @@
 package com.azizoglu.grisilith.screen
 
 import com.azizoglu.grisilith.GrisilithGame
-import com.azizoglu.grisilith.config.GameDifficulty
 import com.azizoglu.grisilith.config.GameMap
+import com.azizoglu.grisilith.screen.components.MenuButton
+import com.azizoglu.grisilith.screen.components.MenuPointer
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
@@ -14,13 +14,16 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.viewport.FitViewport
 
 class MapSelectionScreen(
-    private val game: GrisilithGame,
-    private val difficulty: GameDifficulty
+    private val game:
+    GrisilithGame
 ) : ScreenAdapter() {
 
     companion object {
-        private const val VIEWPORT_WIDTH = 1280f
-        private const val VIEWPORT_HEIGHT = 720f
+        private const val VIEWPORT_WIDTH =
+            1280f
+
+        private const val VIEWPORT_HEIGHT =
+            720f
     }
 
     private val camera =
@@ -39,6 +42,76 @@ class MapSelectionScreen(
     private val font =
         BitmapFont()
 
+    private val pointer =
+        MenuPointer(
+            viewport
+        )
+
+    private val mapButtons =
+        GameMap.entries
+            .mapIndexed {
+                    index,
+                    gameMap ->
+
+                MenuButton(
+                    text =
+                        if (
+                            gameMap
+                                .isInitiallyUnlocked
+                        ) {
+                            gameMap.displayName
+                        } else {
+                            "${gameMap.displayName} — LOCKED"
+                        },
+
+                    x =
+                        390f,
+
+                    y =
+                        435f -
+                            index * 110f,
+
+                    width =
+                        500f,
+
+                    height =
+                        80f,
+
+                    isEnabled =
+                        gameMap
+                            .isInitiallyUnlocked
+                ) {
+                    game.showCharacterSelection(
+                        gameMap =
+                            gameMap
+                    )
+                }
+            }
+
+    private val backButton =
+        MenuButton(
+            text =
+                "BACK",
+
+            x =
+                490f,
+
+            y =
+                75f,
+
+            width =
+                300f,
+
+            height =
+                65f
+        ) {
+            game.showPlayMenu()
+        }
+
+    private val buttons =
+        mapButtons +
+            backButton
+
     override fun show() {
         viewport.apply()
 
@@ -49,78 +122,34 @@ class MapSelectionScreen(
         )
 
         camera.update()
+
+        pointer.reset()
     }
 
-    override fun render(delta: Float) {
-        val screenChanged =
-            handleInput()
+    override fun render(
+        delta:
+        Float
+    ) {
+        pointer.update()
 
-        if (screenChanged) {
-            return
-        }
+        buttons.forEach { button ->
+            val screenChanged =
+                button.update(
+                    pointerPosition =
+                        pointer.position,
 
-        renderScreen()
-    }
+                    pointerJustPressed =
+                        pointer.justPressed,
 
-    private fun handleInput(): Boolean {
-        when {
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_1
-            ) -> {
-                game.showCharacterSelection(
-                    difficulty = difficulty,
-                    gameMap = GameMap.ROAD_TO_HOME
+                    pointerJustReleased =
+                        pointer.justReleased
                 )
 
-                return true
-            }
-
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_2
-            ) -> {
-                if (
-                    GameMap.TROUBLE_AT_HOME
-                        .isInitiallyUnlocked
-                ) {
-                    game.showCharacterSelection(
-                        difficulty = difficulty,
-                        gameMap = GameMap.TROUBLE_AT_HOME
-                    )
-
-                    return true
-                }
-            }
-
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_3
-            ) -> {
-                if (
-                    GameMap
-                        .FOLLOWING_THE_DUNGEON_DELVER
-                        .isInitiallyUnlocked
-                ) {
-                    game.showCharacterSelection(
-                        difficulty = difficulty,
-                        gameMap =
-                            GameMap.FOLLOWING_THE_DUNGEON_DELVER
-                    )
-
-                    return true
-                }
-            }
-
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.ESCAPE
-            ) -> {
-                game.showDifficultySelection()
-                return true
+            if (screenChanged) {
+                return
             }
         }
 
-        return false
-    }
-
-    private fun renderScreen() {
         Gdx.gl.glClearColor(
             0.035f,
             0.025f,
@@ -137,112 +166,68 @@ class MapSelectionScreen(
 
         batch.begin()
 
-        font.color = Color.WHITE
+        val oldScaleX =
+            font.data.scaleX
+
+        val oldScaleY =
+            font.data.scaleY
+
+        font.data.setScale(
+            2f
+        )
+
+        font.color =
+            Color.WHITE
 
         font.draw(
             batch,
             "SELECT MAP",
-            580f,
-            560f
+            0f,
+            625f,
+            VIEWPORT_WIDTH,
+            1,
+            false
         )
 
-        font.color = Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            "Difficulty: ${difficulty.displayName}",
-            545f,
-            520f
+        font.data.setScale(
+            1f
         )
 
-        renderMapOption(
-            number = 1,
-            gameMap = GameMap.ROAD_TO_HOME,
-            y = 430f
+        font.data.setScale(
+            oldScaleX,
+            oldScaleY
         )
 
-        renderMapOption(
-            number = 2,
-            gameMap = GameMap.TROUBLE_AT_HOME,
-            y = 310f
-        )
+        buttons.forEach { button ->
+            button.render(
+                batch =
+                    batch,
 
-        renderMapOption(
-            number = 3,
-            gameMap =
-                GameMap.FOLLOWING_THE_DUNGEON_DELVER,
-            y = 190f
-        )
+                font =
+                    font,
 
-        font.color = Color.GRAY
+                pointerPosition =
+                    pointer.position,
 
-        font.draw(
-            batch,
-            "ESC - Back",
-            585f,
-            80f
-        )
+                pointerHeld =
+                    pointer.isHeld
+            )
+        }
 
         batch.end()
     }
 
-    private fun renderMapOption(
-        number: Int,
-        gameMap: GameMap,
-        y: Float
-    ) {
-        val unlocked =
-            gameMap.isInitiallyUnlocked
-
-        font.color =
-            if (unlocked) {
-                Color.WHITE
-            } else {
-                Color.DARK_GRAY
-            }
-
-        val lockText =
-            if (unlocked) {
-                ""
-            } else {
-                " [LOCKED]"
-            }
-
-        font.draw(
-            batch,
-            "$number - ${gameMap.displayName}$lockText",
-            445f,
-            y
-        )
-
-        font.color =
-            if (unlocked) {
-                Color.LIGHT_GRAY
-            } else {
-                Color.DARK_GRAY
-            }
-
-        font.draw(
-            batch,
-            gameMap.description,
-            470f,
-            y - 30f
-        )
-
-        font.draw(
-            batch,
-            "${gameMap.worldWidth.toInt()} x " +
-                "${gameMap.worldHeight.toInt()}",
-            470f,
-            y - 58f
-        )
-    }
-
     override fun resize(
-        width: Int,
-        height: Int
+        width:
+        Int,
+
+        height:
+        Int
     ) {
-        if (width <= 0 || height <= 0) {
+        if (
+            width <= 0 ||
+            height <= 0
+        ) {
             return
         }
 

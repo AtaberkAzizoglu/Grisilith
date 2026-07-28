@@ -1,8 +1,9 @@
 package com.azizoglu.grisilith.screen
 
 import com.azizoglu.grisilith.GrisilithGame
+import com.azizoglu.grisilith.screen.components.MenuButton
+import com.azizoglu.grisilith.screen.components.MenuPointer
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
@@ -12,12 +13,16 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.viewport.FitViewport
 
 class MainMenuScreen(
-    private val game: GrisilithGame
+    private val game:
+    GrisilithGame
 ) : ScreenAdapter() {
 
     companion object {
-        private const val VIEWPORT_WIDTH = 1280f
-        private const val VIEWPORT_HEIGHT = 720f
+        private const val VIEWPORT_WIDTH =
+            1280f
+
+        private const val VIEWPORT_HEIGHT =
+            720f
     }
 
     private val camera =
@@ -36,6 +41,109 @@ class MainMenuScreen(
     private val font =
         BitmapFont()
 
+    private val pointer =
+        MenuPointer(
+            viewport
+        )
+
+    private val buttons =
+        listOf(
+            MenuButton(
+                text =
+                    "PLAY",
+
+                x =
+                    440f,
+
+                y =
+                    455f,
+
+                width =
+                    400f,
+
+                height =
+                    65f
+            ) {
+                game.showPlayMenu()
+            },
+
+            MenuButton(
+                text =
+                    "COLLECTION",
+
+                x =
+                    440f,
+
+                y =
+                    370f,
+
+                width =
+                    400f,
+
+                height =
+                    65f
+            ) {
+                game.showCollection()
+            },
+
+            MenuButton(
+                text =
+                    "MERCHANT FROM HALATHA",
+
+                x =
+                    440f,
+
+                y =
+                    285f,
+
+                width =
+                    400f,
+
+                height =
+                    65f
+            ) {
+                game.showMerchant()
+            },
+
+            MenuButton(
+                text =
+                    "HIGH SCORES",
+
+                x =
+                    440f,
+
+                y =
+                    200f,
+
+                width =
+                    400f,
+
+                height =
+                    65f
+            ) {
+                game.showHighScores()
+            },
+
+            MenuButton(
+                text =
+                    "SETTINGS",
+
+                x =
+                    440f,
+
+                y =
+                    115f,
+
+                width =
+                    400f,
+
+                height =
+                    65f
+            ) {
+                game.showSettings()
+            }
+        )
+
     override fun show() {
         viewport.apply()
 
@@ -46,41 +154,34 @@ class MainMenuScreen(
         )
 
         camera.update()
+
+        pointer.reset()
     }
 
-    override fun render(delta: Float) {
-        val screenChanged = handleInput()
+    override fun render(
+        delta:
+        Float
+    ) {
+        pointer.update()
 
-        if (screenChanged) {
-            return
+        buttons.forEach { button ->
+            val screenChanged =
+                button.update(
+                    pointerPosition =
+                        pointer.position,
+
+                    pointerJustPressed =
+                        pointer.justPressed,
+
+                    pointerJustReleased =
+                        pointer.justReleased
+                )
+
+            if (screenChanged) {
+                return
+            }
         }
 
-        renderMenu()
-    }
-
-    private fun handleInput(): Boolean {
-        if (
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_1
-            )
-        ) {
-            game.showDifficultySelection()
-            return true
-        }
-
-        if (
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_2
-            )
-        ) {
-            // Save sistemi henüz yok.
-            return false
-        }
-
-        return false
-    }
-
-    private fun renderMenu() {
         Gdx.gl.glClearColor(
             0.035f,
             0.025f,
@@ -97,62 +198,81 @@ class MainMenuScreen(
 
         batch.begin()
 
-        font.color = Color.WHITE
+        val oldScaleX =
+            font.data.scaleX
+
+        val oldScaleY =
+            font.data.scaleY
+
+        font.data.setScale(
+            2.5f
+        )
+
+        font.color =
+            Color.WHITE
 
         font.draw(
             batch,
             "GRISILITH",
+            0f,
+            630f,
+            VIEWPORT_WIDTH,
+            1,
+            false
+        )
+
+        font.data.setScale(
+            0.9f
+        )
+
+        font.color =
+            Color.GRAY
+
+        font.draw(
+            batch,
+            "Desktop Prototype",
+            0f,
             570f,
-            500f
+            VIEWPORT_WIDTH,
+            1,
+            false
         )
 
-        font.draw(
-            batch,
-            "1 - NEW GAME",
-            550f,
-            390f
+        font.data.setScale(
+            oldScaleX,
+            oldScaleY
         )
 
-        font.color = Color.GRAY
+        buttons.forEach { button ->
+            button.render(
+                batch =
+                    batch,
 
-        font.draw(
-            batch,
-            "2 - LOAD GAME (NO SAVE)",
-            510f,
-            340f
-        )
+                font =
+                    font,
 
-        font.color = Color.LIGHT_GRAY
+                pointerPosition =
+                    pointer.position,
 
-        font.draw(
-            batch,
-            "Desktop Prototype Controls",
-            520f,
-            210f
-        )
-
-        font.draw(
-            batch,
-            "Move: WASD / Arrow Keys",
-            520f,
-            175f
-        )
-
-        font.draw(
-            batch,
-            "Pause: Space",
-            520f,
-            140f
-        )
+                pointerHeld =
+                    pointer.isHeld
+            )
+        }
 
         batch.end()
     }
 
     override fun resize(
-        width: Int,
-        height: Int
+        width:
+        Int,
+
+        height:
+        Int
     ) {
-        if (width <= 0 || height <= 0) {
+        if (
+            width <= 0 ||
+            height <= 0
+        ) {
             return
         }
 

@@ -2,8 +2,9 @@ package com.azizoglu.grisilith.screen
 
 import com.azizoglu.grisilith.GrisilithGame
 import com.azizoglu.grisilith.config.GameDifficulty
+import com.azizoglu.grisilith.screen.components.MenuButton
+import com.azizoglu.grisilith.screen.components.MenuPointer
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
@@ -11,14 +12,26 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.azizoglu.grisilith.character.CharacterDefinition
+import com.azizoglu.grisilith.config.GameMap
 
 class DifficultySelectionScreen(
-    private val game: GrisilithGame
+    private val game:
+    GrisilithGame,
+
+    private val gameMap:
+    GameMap,
+
+    private val selectedCharacter:
+    CharacterDefinition
 ) : ScreenAdapter() {
 
     companion object {
-        private const val VIEWPORT_WIDTH = 1280f
-        private const val VIEWPORT_HEIGHT = 720f
+        private const val VIEWPORT_WIDTH =
+            1280f
+
+        private const val VIEWPORT_HEIGHT =
+            720f
     }
 
     private val camera =
@@ -37,6 +50,120 @@ class DifficultySelectionScreen(
     private val font =
         BitmapFont()
 
+    private val pointer =
+        MenuPointer(
+            viewport
+        )
+
+    private val buttons =
+        listOf(
+            MenuButton(
+                text =
+                    "EASY — 20 STAGES",
+
+                x =
+                    440f,
+
+                y =
+                    400f,
+
+                width =
+                    400f,
+
+                height =
+                    75f
+            ) {
+                game.startRun(
+                    difficulty =
+                        GameDifficulty.EASY,
+
+                    gameMap =
+                        gameMap,
+
+                    character =
+                        selectedCharacter
+                )
+            },
+
+            MenuButton(
+                text =
+                    "NORMAL — 30 STAGES",
+
+                x =
+                    440f,
+
+                y =
+                    295f,
+
+                width =
+                    400f,
+
+                height =
+                    75f
+            ) {
+                game.startRun(
+                    difficulty =
+                        GameDifficulty.NORMAL,
+
+                    gameMap =
+                        gameMap,
+
+                    character =
+                        selectedCharacter
+                )
+            },
+
+            MenuButton(
+                text =
+                    "HARD — 40 STAGES",
+
+                x =
+                    440f,
+
+                y =
+                    190f,
+
+                width =
+                    400f,
+
+                height =
+                    75f
+            ) {
+                game.startRun(
+                    difficulty =
+                        GameDifficulty.HARD,
+
+                    gameMap =
+                        gameMap,
+
+                    character =
+                        selectedCharacter
+                )
+            },
+
+            MenuButton(
+                text =
+                    "BACK",
+
+                x =
+                    490f,
+
+                y =
+                    95f,
+
+                width =
+                    300f,
+
+                height =
+                    65f
+            ) {
+                game.showCharacterSelection(
+                    gameMap =
+                        gameMap
+                )
+            }
+        )
+
     override fun show() {
         viewport.apply()
 
@@ -47,63 +174,34 @@ class DifficultySelectionScreen(
         )
 
         camera.update()
+
+        pointer.reset()
     }
 
-    override fun render(delta: Float) {
-        val screenChanged =
-            handleInput()
+    override fun render(
+        delta:
+        Float
+    ) {
+        pointer.update()
 
-        if (screenChanged) {
-            return
-        }
+        buttons.forEach { button ->
+            val screenChanged =
+                button.update(
+                    pointerPosition =
+                        pointer.position,
 
-        renderScreen()
-    }
+                    pointerJustPressed =
+                        pointer.justPressed,
 
-    private fun handleInput(): Boolean {
-        when {
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_1
-            ) -> {
-                game.showMapSelection(
-                    GameDifficulty.EASY
+                    pointerJustReleased =
+                        pointer.justReleased
                 )
 
-                return true
-            }
-
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_2
-            ) -> {
-                game.showMapSelection(
-                    GameDifficulty.NORMAL
-                )
-
-                return true
-            }
-
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_3
-            ) -> {
-                game.showMapSelection(
-                    GameDifficulty.HARD
-                )
-
-                return true
-            }
-
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.ESCAPE
-            ) -> {
-                game.showMainMenu()
-                return true
+            if (screenChanged) {
+                return
             }
         }
 
-        return false
-    }
-
-    private fun renderScreen() {
         Gdx.gl.glClearColor(
             0.035f,
             0.025f,
@@ -120,91 +218,110 @@ class DifficultySelectionScreen(
 
         batch.begin()
 
-        font.color = Color.WHITE
+        val oldScaleX =
+            font.data.scaleX
+
+        val oldScaleY =
+            font.data.scaleY
+
+        font.data.setScale(
+            2f
+        )
+
+        font.color =
+            Color.WHITE
 
         font.draw(
             batch,
             "SELECT DIFFICULTY",
-            545f,
-            520f
+            0f,
+            620f,
+            VIEWPORT_WIDTH,
+            1,
+            false
+        )
+
+        font.data.setScale(
+            0.95f
+        )
+
+        font.color =
+            Color.LIGHT_GRAY
+
+        font.draw(
+            batch,
+            "Character: " +
+                selectedCharacter.displayName,
+            0f,
+            565f,
+            VIEWPORT_WIDTH,
+            1,
+            false
         )
 
         font.draw(
             batch,
-            "1 - EASY",
-            570f,
-            410f
+            "Map: " +
+                gameMap.displayName,
+            0f,
+            535f,
+            VIEWPORT_WIDTH,
+            1,
+            false
         )
 
-        font.color = Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            "20 Stages",
-            590f,
-            380f
+        font.data.setScale(
+            0.85f
         )
 
-        font.color = Color.WHITE
-
-        font.draw(
-            batch,
-            "2 - NORMAL",
-            570f,
-            320f
-        )
-
-        font.color = Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            "30 Stages",
-            590f,
-            290f
-        )
-
-        font.color = Color.WHITE
-
-        font.draw(
-            batch,
-            "3 - HARD",
-            570f,
-            230f
-        )
-
-        font.color = Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            "40 Stages",
-            590f,
-            200f
-        )
-
-        font.color = Color.GRAY
+        font.color =
+            Color.GRAY
 
         font.draw(
             batch,
             "Difficulty changes run length, not enemy scaling.",
-            460f,
-            125f
+            0f,
+            500f,
+            VIEWPORT_WIDTH,
+            1,
+            false
         )
 
-        font.draw(
-            batch,
-            "ESC - Back",
-            585f,
-            80f
+        font.data.setScale(
+            oldScaleX,
+            oldScaleY
         )
+
+        buttons.forEach { button ->
+            button.render(
+                batch =
+                    batch,
+
+                font =
+                    font,
+
+                pointerPosition =
+                    pointer.position,
+
+                pointerHeld =
+                    pointer.isHeld
+            )
+        }
 
         batch.end()
     }
 
     override fun resize(
-        width: Int,
-        height: Int
+        width:
+        Int,
+
+        height:
+        Int
     ) {
-        if (width <= 0 || height <= 0) {
+        if (
+            width <= 0 ||
+            height <= 0
+        ) {
             return
         }
 

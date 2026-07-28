@@ -3,11 +3,9 @@ package com.azizoglu.grisilith.screen
 import com.azizoglu.grisilith.GrisilithGame
 import com.azizoglu.grisilith.character.CharacterDefinition
 import com.azizoglu.grisilith.character.DefaultCharacters
-import com.azizoglu.grisilith.config.GameDifficulty
 import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.statistics.StatType
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
@@ -15,11 +13,15 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.azizoglu.grisilith.screen.components.MenuButton
+import com.azizoglu.grisilith.screen.components.MenuPointer
 
 class CharacterSelectionScreen(
-    private val game: GrisilithGame,
-    private val difficulty: GameDifficulty,
-    private val gameMap: GameMap
+    private val game:
+    GrisilithGame,
+
+    private val gameMap:
+    GameMap
 ) : ScreenAdapter() {
 
     companion object {
@@ -49,6 +51,64 @@ class CharacterSelectionScreen(
     private val characters =
         DefaultCharacters.all
 
+    private val pointer =
+        MenuPointer(
+            viewport
+        )
+
+    private val characterButtons =
+        characters.mapIndexed {
+                index,
+                character ->
+
+            MenuButton(
+                text =
+                    "PLAY AS " +
+                        character.displayName,
+
+                x =
+                    60f +
+                        index * 405f,
+
+                y =
+                    75f,
+
+                width =
+                    350f,
+
+                height =
+                    65f
+            ) {
+                startCharacter(
+                    index
+                )
+            }
+        }
+
+    private val backButton =
+        MenuButton(
+            text =
+                "BACK",
+
+            x =
+                490f,
+
+            y =
+                10f,
+
+            width =
+                300f,
+
+            height =
+                50f
+        ) {
+            game.showMapSelection()
+        }
+
+    private val buttons =
+        characterButtons +
+            backButton
+
     override fun show() {
         viewport.apply()
 
@@ -59,67 +119,54 @@ class CharacterSelectionScreen(
         )
 
         camera.update()
+        pointer.reset()
     }
 
-    override fun render(delta: Float) {
-        val screenChanged =
-            handleInput()
+    override fun render(
+        delta:
+        Float
+    ) {
+        pointer.update()
 
-        if (screenChanged) {
-            return
+        buttons.forEach { button ->
+            val screenChanged =
+                button.update(
+                    pointerPosition =
+                        pointer.position,
+
+                    pointerJustPressed =
+                        pointer.justPressed,
+
+                    pointerJustReleased =
+                        pointer.justReleased
+                )
+
+            if (screenChanged) {
+                return
+            }
         }
 
         renderScreen()
     }
 
-    private fun handleInput(): Boolean {
-        when {
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_1
-            ) -> {
-                startCharacter(0)
-                return true
-            }
 
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_2
-            ) -> {
-                startCharacter(1)
-                return true
-            }
-
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.NUM_3
-            ) -> {
-                startCharacter(2)
-                return true
-            }
-
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.ESCAPE
-            ) -> {
-                game.showMapSelection(
-                    difficulty
-                )
-
-                return true
-            }
-        }
-
-        return false
-    }
 
     private fun startCharacter(
-        index: Int
+        index:
+        Int
     ) {
         val character =
-            characters.getOrNull(index)
+            characters.getOrNull(
+                index
+            )
                 ?: return
 
-        game.startRun(
-            difficulty = difficulty,
-            gameMap = gameMap,
-            character = character
+        game.showDifficultySelection(
+            gameMap =
+                gameMap,
+
+            character =
+                character
         )
     }
 
@@ -155,16 +202,12 @@ class CharacterSelectionScreen(
 
         font.draw(
             batch,
-            "Difficulty: ${difficulty.displayName}",
-            475f,
-            625f
-        )
-
-        font.draw(
-            batch,
             "Map: ${gameMap.displayName}",
-            700f,
-            625f
+            0f,
+            625f,
+            VIEWPORT_WIDTH,
+            1,
+            false
         )
 
         characters.forEachIndexed {
@@ -183,15 +226,21 @@ class CharacterSelectionScreen(
             )
         }
 
-        font.color =
-            Color.GRAY
+        buttons.forEach { button ->
+            button.render(
+                batch =
+                    batch,
 
-        font.draw(
-            batch,
-            "ESC - Back",
-            585f,
-            45f
-        )
+                font =
+                    font,
+
+                pointerPosition =
+                    pointer.position,
+
+                pointerHeld =
+                    pointer.isHeld
+            )
+        }
 
         batch.end()
     }
@@ -210,7 +259,7 @@ class CharacterSelectionScreen(
 
         font.draw(
             batch,
-            "$number - ${character.displayName}",
+            character.displayName,
             startX,
             currentY
         )

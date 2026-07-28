@@ -1,25 +1,25 @@
 package com.azizoglu.grisilith
 
+import com.azizoglu.grisilith.character.CharacterDefinition
 import com.azizoglu.grisilith.config.GameDifficulty
+import com.azizoglu.grisilith.config.GameMap
+import com.azizoglu.grisilith.content.DefaultContentRegistry
+import com.azizoglu.grisilith.screen.CharacterSelectionScreen
 import com.azizoglu.grisilith.screen.DifficultySelectionScreen
 import com.azizoglu.grisilith.screen.FirstScreen
 import com.azizoglu.grisilith.screen.MainMenuScreen
+import com.azizoglu.grisilith.screen.MapSelectionScreen
+import com.azizoglu.grisilith.screen.PlaceholderMenuScreen
+import com.azizoglu.grisilith.screen.PlayMenuScreen
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
-import com.azizoglu.grisilith.config.GameMap
-import com.azizoglu.grisilith.screen.MapSelectionScreen
-import com.azizoglu.grisilith.character.CharacterDefinition
-import com.azizoglu.grisilith.screen.CharacterSelectionScreen
-import com.azizoglu.grisilith.content.DefaultContentRegistry
 
 class GrisilithGame : Game() {
 
     override fun create() {
         /*
          * Registry ilk kez burada oluşturulur.
-         * Duplicate ID veya geçersiz bir tanım varsa
-         * oyun geliştirme aşamasında hemen hata verir.
          */
         DefaultContentRegistry.instance
 
@@ -28,61 +28,197 @@ class GrisilithGame : Game() {
 
     fun showMainMenu() {
         changeScreen(
-            MainMenuScreen(this)
+            MainMenuScreen(
+                this
+            )
         )
     }
 
-    fun showDifficultySelection() {
+    fun showPlayMenu() {
         changeScreen(
-            DifficultySelectionScreen(this)
+            PlayMenuScreen(
+                this
+            )
+        )
+    }
+
+    fun showDifficultySelection(
+        gameMap:
+        GameMap,
+
+        character:
+        CharacterDefinition
+    ) {
+        changeScreen(
+            DifficultySelectionScreen(
+                game =
+                    this,
+
+                gameMap =
+                    gameMap,
+
+                selectedCharacter =
+                    character
+            )
+        )
+    }
+
+    fun showMapSelection() {
+        changeScreen(
+            MapSelectionScreen(
+                game = this
+            )
         )
     }
 
     fun showCharacterSelection(
-        difficulty: GameDifficulty,
-        gameMap: GameMap
+        gameMap:
+        GameMap
     ) {
         changeScreen(
             CharacterSelectionScreen(
-                game = this,
-                difficulty = difficulty,
-                gameMap = gameMap
+                game =
+                    this,
+
+                gameMap =
+                    gameMap
             )
         )
     }
 
     fun startRun(
-        difficulty: GameDifficulty,
-        gameMap: GameMap,
-        character: CharacterDefinition
+        difficulty:
+        GameDifficulty,
+
+        gameMap:
+        GameMap,
+
+        character:
+        CharacterDefinition
     ) {
         changeScreen(
             FirstScreen(
-                game = this,
-                difficulty = difficulty,
-                gameMap = gameMap,
-                selectedCharacter = character
+                game =
+                    this,
+
+                difficulty =
+                    difficulty,
+
+                gameMap =
+                    gameMap,
+
+                selectedCharacter =
+                    character
             )
         )
     }
 
-    fun showMapSelection(
-        difficulty: GameDifficulty
-    ) {
+    fun showLoadGame() {
         changeScreen(
-            MapSelectionScreen(
-                game = this,
-                difficulty = difficulty
+            PlaceholderMenuScreen(
+                title =
+                    "LOAD GAME",
+
+                description =
+                    "Save and Load systems will be added later.",
+
+                onBack = {
+                    showPlayMenu()
+                }
+            )
+        )
+    }
+
+    fun showPresetMenu() {
+        changeScreen(
+            PlaceholderMenuScreen(
+                title =
+                    "MAKE YOUR PRESET",
+
+                description =
+                    "Choose your Character and starting Gears before beginning a run.",
+
+                onBack = {
+                    showPlayMenu()
+                }
+            )
+        )
+    }
+
+    fun showCollection() {
+        changeScreen(
+            PlaceholderMenuScreen(
+                title =
+                    "COLLECTION",
+
+                description =
+                    "Characters, Weapons, Armors, Items and Tamgas will be displayed here.",
+
+                onBack = {
+                    showMainMenu()
+                }
+            )
+        )
+    }
+
+    fun showMerchant() {
+        changeScreen(
+            PlaceholderMenuScreen(
+                title =
+                    "MERCHANT FROM HALATHA",
+
+                description =
+                    "Characters, Gears, Tamgas and Cosmetics will be unlocked here with Grisilith Coin.",
+
+                onBack = {
+                    showMainMenu()
+                }
+            )
+        )
+    }
+
+    fun showHighScores() {
+        changeScreen(
+            PlaceholderMenuScreen(
+                title =
+                    "HIGH SCORES",
+
+                description =
+                    "Run results and score overviews will be displayed here.",
+
+                onBack = {
+                    showMainMenu()
+                }
+            )
+        )
+    }
+
+    fun showSettings() {
+        changeScreen(
+            PlaceholderMenuScreen(
+                title =
+                    "SETTINGS",
+
+                description =
+                    "The functional Settings screen will be implemented in the next phase.",
+
+                onBack = {
+                    showMainMenu()
+                }
             )
         )
     }
 
     private fun changeScreen(
-        newScreen: Screen
+        newScreen:
+        Screen
     ) {
-        val oldScreen = screen
+        val oldScreen =
+            screen
 
-        setScreen(newScreen)
+        setScreen(
+            newScreen
+        )
 
         if (
             oldScreen != null &&
@@ -99,4 +235,3 @@ class GrisilithGame : Game() {
         super.dispose()
     }
 }
-
