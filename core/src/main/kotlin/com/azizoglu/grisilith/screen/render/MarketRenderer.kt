@@ -1803,6 +1803,21 @@ class MarketRenderer(
                 )
             }
 
+        /*
+    * Sol taraftaki bilgi sayısı arttığı için bu
+    * bölüm normal HUD fontundan biraz daha küçük
+    * çizilir.
+    */
+        val oldInformationScaleX =
+            font.data.scaleX
+
+        val oldInformationScaleY =
+            font.data.scaleY
+
+        font.data.setScale(
+            0.76f
+        )
+
         val informationX =
             layout.weaponDetailPanel.x +
                 20f
@@ -1810,11 +1825,14 @@ class MarketRenderer(
         var informationY =
             layout.weaponDetailPanel.y +
                 layout.weaponDetailPanel.height -
-                80f
+                78f
 
         /*
-         * Weapon Type.
+         * Küçültülmüş font için kontrollü satır aralığı.
          */
+        val informationLineSpacing =
+            18f
+
         font.color =
             Color.LIGHT_GRAY
 
@@ -1829,10 +1847,11 @@ class MarketRenderer(
         )
 
         informationY -=
-            23f
+            informationLineSpacing
 
         /*
-         * Ana scaling her zaman ilk sırada ve Gold.
+         * Ana damage scaling her zaman ilk sırada
+         * ve Gold renkte görünür.
          */
         if (primaryDamageScaling != null) {
             font.color =
@@ -1849,11 +1868,11 @@ class MarketRenderer(
             )
 
             informationY -=
-                23f
+                informationLineSpacing
         }
 
         /*
-         * İkincil scaling veya scaling'ler.
+         * Varsa ikincil damage scaling değerleri.
          */
         if (secondaryDamageScaling.isNotEmpty()) {
             font.color =
@@ -1878,8 +1897,13 @@ class MarketRenderer(
             )
 
             informationY -=
-                23f
+                informationLineSpacing
         }
+
+        /*
+         * Kalan istatistikler scaling satırlarının
+         * hemen altından devam eder.
+         */
         font.color =
             Color.LIGHT_GRAY
 
@@ -1891,6 +1915,15 @@ class MarketRenderer(
             230f,
             Align.left,
             true
+        )
+
+        /*
+         * Sonraki açıklamalar ve kapatma yazısı normal
+         * font boyutuyla çizilmeye devam etsin.
+         */
+        font.data.setScale(
+            oldInformationScaleX,
+            oldInformationScaleY
         )
 
         font.color =
@@ -1913,13 +1946,28 @@ class MarketRenderer(
         font.color =
             Color.GRAY
 
+        val oldCloseTextScaleX =
+            font.data.scaleX
+
+        val oldCloseTextScaleY =
+            font.data.scaleY
+
+        font.data.setScale(
+            0.72f
+        )
+
         font.draw(
             batch,
             "Click outside to close.",
             layout.weaponDetailPanel.x +
                 20f,
             layout.weaponDetailPanel.y +
-                22f
+                16f
+        )
+
+        font.data.setScale(
+            oldCloseTextScaleX,
+            oldCloseTextScaleY
         )
     }
 
