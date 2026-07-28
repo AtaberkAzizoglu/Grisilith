@@ -64,6 +64,10 @@ import com.azizoglu.grisilith.chest.ChestRewardRoller
 import com.azizoglu.grisilith.chest.ChestRewardType
 import com.azizoglu.grisilith.screen.controller.ChestRewardController
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.screen.pause.PauseAction
+import com.azizoglu.grisilith.screen.pause.PauseInputController
+import com.azizoglu.grisilith.screen.pause.PauseInteractionState
+import com.azizoglu.grisilith.screen.render.PauseRenderer
 
 
 class FirstScreen(
@@ -186,6 +190,12 @@ class FirstScreen(
     private var isRunSummaryOpen = false
 
     private var isMarketOpen = false
+
+    private var isPauseMenuOpen =
+        false
+
+    private var hasInitializedRun =
+        false
 
     private var marketSlots =
         emptyList<MarketSlot>()
@@ -316,6 +326,68 @@ class FirstScreen(
                 marketInteractionState
         )
 
+    private val pauseInteractionState =
+        PauseInteractionState()
+
+    private val pauseRenderer =
+        PauseRenderer(
+            camera =
+                camera,
+
+            cameraWidth =
+                CAMERA_WIDTH,
+
+            cameraHeight =
+                CAMERA_HEIGHT,
+
+            batch =
+                hudBatch,
+
+            font =
+                hudFont,
+
+            selectedCharacter =
+                selectedCharacter,
+
+            playerStats =
+                playerStats,
+
+            weaponInventory =
+                weaponInventory,
+
+            itemInventory =
+                itemInventory
+        )
+
+    private val pauseInputController =
+        PauseInputController(
+            viewport =
+                viewport,
+
+            layoutProvider = {
+                pauseRenderer
+                    .currentLayout()
+            },
+
+            interactionState =
+                pauseInteractionState,
+
+            weaponExistsAt = {
+                    slotIndex ->
+
+                weaponInventory
+                    .weaponAt(
+                        slotIndex
+                    ) !=
+                    null
+            },
+
+            groupedItemCountProvider = {
+                pauseRenderer
+                    .groupedItemCount()
+            }
+        )
+
     private val statCardController =
         StatCardController(
             player = player,
@@ -384,34 +456,41 @@ class FirstScreen(
             0f
         )
 
-        weaponInventory.addWeapon(
-            WeaponInstance(
-                definition = DefaultWeapons.lance,
-                level = 2
-            )
-        )
+        if (!hasInitializedRun) {
+            hasInitializedRun =
+                true
 
+            weaponInventory.addWeapon(
+                WeaponInstance(
+                    definition =
+                        DefaultWeapons.lance,
 
-        itemInventory.addItem(
-            ItemInstance(
-                definition =
-                    DefaultItems.gladiatorsLocket
+                    level =
+                        2
+                )
             )
-        )
 
-        itemInventory.addItem(
-            ItemInstance(
-                definition =
-                    DefaultItems.gladiatorsLocket
+            itemInventory.addItem(
+                ItemInstance(
+                    definition =
+                        DefaultItems.gladiatorsLocket
+                )
             )
-        )
 
-        itemInventory.addItem(
-            ItemInstance(
-                definition =
-                    DefaultItems.luckyDice
+            itemInventory.addItem(
+                ItemInstance(
+                    definition =
+                        DefaultItems.gladiatorsLocket
+                )
             )
-        )
+
+            itemInventory.addItem(
+                ItemInstance(
+                    definition =
+                        DefaultItems.luckyDice
+                )
+            )
+        }
 
         camera.update()
     }
@@ -436,6 +515,7 @@ class FirstScreen(
                 chestRewardController.isOpen ||
                 statCardController.isOpen ||
                 isMarketOpen ||
+                isPauseMenuOpen ||
                 isRunSummaryOpen
 
         val gameDelta =
@@ -464,6 +544,11 @@ class FirstScreen(
             return
         }
 
+        if (isPauseMenuOpen) {
+            handlePauseControls()
+            return
+        }
+
         if (isMarketOpen) {
             handleMarketControls(
                 delta
@@ -486,8 +571,10 @@ class FirstScreen(
             return
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
-            gameTimeController.togglePause()
+        if (
+            Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            openPauseMenu()
+            return
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
@@ -504,6 +591,78 @@ class FirstScreen(
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) {
             gameTimeController.setGameSpeed(3f)
+        }
+    }
+
+    private fun openPauseMenu() {
+        isPauseMenuOpen =
+            true
+
+        pauseInputController.reset()
+    }
+
+    private fun closePauseMenu() {
+        isPauseMenuOpen =
+            false
+
+        pauseInputController.reset()
+    }
+
+    private fun handlePauseControls() {
+
+        if (
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.ESCAPE
+            )
+        ) {
+            if (
+                pauseInteractionState
+                    .isAnyModalOpen
+            ) {
+                pauseInteractionState
+                    .closeAllModals()
+            } else {
+                closePauseMenu()
+            }
+
+            return
+        }
+
+        val pauseAction =
+            pauseInputController.update()
+
+        when (pauseAction) {
+            PauseAction.RETURN_TO_GAME -> {
+                closePauseMenu()
+            }
+
+            PauseAction.RESTART -> {
+
+                game.startRun(
+                    difficulty =
+                        difficulty,
+
+                    gameMap =
+                        gameMap,
+
+                    character =
+                        selectedCharacter
+                )
+            }
+
+            PauseAction.OPEN_SETTINGS -> {
+                game.showSettingsFromPausedRun(
+                    pausedRun =
+                        this
+                )
+            }
+
+            PauseAction.QUIT_GAME -> {
+                game.showMainMenu()
+            }
+
+            null -> {
+            }
         }
     }
 
@@ -1032,6 +1191,21 @@ class FirstScreen(
                 statCardController.render()
             }
         )
+
+        if (isPauseMenuOpen) {
+            hudBatch.projectionMatrix =
+                camera.combined
+
+            hudBatch.begin()
+
+            pauseRenderer.render(
+                interactionState =
+                    pauseInteractionState
+            )
+
+            hudBatch.end()
+        }
+
     }
 
     private fun updateCamera() {
@@ -1096,6 +1270,7 @@ class FirstScreen(
         previousInputProcessor = null
 
         marketRenderer.dispose()
+        pauseRenderer.dispose()
 
         shapeRenderer.dispose()
         hudBatch.dispose()

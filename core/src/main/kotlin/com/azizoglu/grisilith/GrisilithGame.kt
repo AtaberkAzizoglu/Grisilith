@@ -14,6 +14,8 @@ import com.azizoglu.grisilith.screen.PlayMenuScreen
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
+import com.azizoglu.grisilith.settings.GameSettings
+import com.azizoglu.grisilith.screen.SettingsScreen
 
 class GrisilithGame : Game() {
 
@@ -22,6 +24,8 @@ class GrisilithGame : Game() {
          * Registry ilk kez burada oluşturulur.
          */
         DefaultContentRegistry.instance
+
+        GameSettings.load()
 
         showMainMenu()
     }
@@ -195,18 +199,66 @@ class GrisilithGame : Game() {
 
     fun showSettings() {
         changeScreen(
-            PlaceholderMenuScreen(
-                title =
-                    "SETTINGS",
-
-                description =
-                    "The functional Settings screen will be implemented in the next phase.",
+            SettingsScreen(
+                game =
+                    this,
 
                 onBack = {
                     showMainMenu()
                 }
             )
         )
+    }
+
+    /*
+ * Pause ekranından Settings'e geçerken aktif
+ * run dispose edilmez.
+ */
+    fun showSettingsFromPausedRun(
+        pausedRun:
+        FirstScreen
+    ) {
+        val settingsScreen =
+            SettingsScreen(
+                game =
+                    this,
+
+                onBack = {
+                    returnToPausedRun(
+                        pausedRun
+                    )
+                }
+            )
+
+        /*
+         * changeScreen kullanılmıyor; çünkü
+         * pausedRun korunmalı.
+         */
+        setScreen(
+            settingsScreen
+        )
+    }
+
+    private fun returnToPausedRun(
+        pausedRun:
+        FirstScreen
+    ) {
+        val settingsScreen =
+            screen
+
+        setScreen(
+            pausedRun
+        )
+
+        if (
+            settingsScreen != null &&
+            settingsScreen !==
+            pausedRun
+        ) {
+            Gdx.app.postRunnable {
+                settingsScreen.dispose()
+            }
+        }
     }
 
     private fun changeScreen(
