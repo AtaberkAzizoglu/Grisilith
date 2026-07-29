@@ -19,6 +19,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.Align
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.azizoglu.grisilith.armor.definition.ArmorDefinition
 import com.azizoglu.grisilith.armor.definition.DefaultArmors
@@ -40,6 +41,13 @@ import com.azizoglu.grisilith.content.DefaultContentRegistry
 import com.azizoglu.grisilith.preset.PresetRepository
 import com.azizoglu.grisilith.preset.PresetRepositoryResult
 import com.azizoglu.grisilith.preset.RunPreset
+import com.azizoglu.grisilith.tamga.definition.DefaultTamgas
+import com.azizoglu.grisilith.tamga.definition.TamgaActivationType
+import com.azizoglu.grisilith.tamga.definition.TamgaCompatibility
+import com.azizoglu.grisilith.tamga.definition.TamgaCompatibilityResult
+import com.azizoglu.grisilith.tamga.definition.TamgaDefinition
+import com.azizoglu.grisilith.tamga.definition.TamgaPresetSlot
+import com.azizoglu.grisilith.tamga.definition.TamgaSlotType
 
 class CreatePresetScreen(
     private val game:
@@ -66,20 +74,24 @@ class CreatePresetScreen(
         private const val EQUIPMENT_DRAG_THRESHOLD =
             8f
 
-        private const val WEAPON_VISIBLE_CARD_COUNT =
-            4
-
-        private const val ARMOR_VISIBLE_CARD_COUNT =
-            3
-
         private const val LIST_DRAG_THRESHOLD =
             5f
 
-        private const val LIST_DRAG_SCROLL_STEP =
-            26f
+        private const val LIST_ROW_HEIGHT =
+            34f
 
-        private const val ITEM_VISIBLE_CARD_COUNT =
-            4
+        private const val LIST_ROW_GAP =
+            5f
+
+        private const val LIST_ROW_PITCH =
+            LIST_ROW_HEIGHT +
+                LIST_ROW_GAP
+
+        private const val MOUSE_WHEEL_SCROLL_PIXELS =
+            34f
+
+        private const val LIST_BUTTON_SCROLL_PIXELS =
+            LIST_ROW_PITCH * 2f
     }
 
     private val camera =
@@ -120,6 +132,9 @@ class CreatePresetScreen(
 
     private val items =
         DefaultItems.all
+
+    private val tamgas =
+        DefaultTamgas.all
 
     private val backButton =
         MenuButton(
@@ -273,13 +288,16 @@ class CreatePresetScreen(
         )
 
     private var weaponScrollOffset =
-        0
+        0f
 
     private var armorScrollOffset =
-        0
+        0f
 
     private var itemScrollOffset =
-        0
+        0f
+
+    private var tamgaScrollOffset =
+        0f
 
     private var previousInputProcessor:
         InputProcessor? = null
@@ -334,13 +352,16 @@ class CreatePresetScreen(
             }
 
         weaponScrollOffset =
-            0
+            0f
 
         armorScrollOffset =
-            0
+            0f
 
         itemScrollOffset =
-            0
+            0f
+
+        tamgaScrollOffset =
+            0f
 
         clearListGesture()
 
@@ -358,10 +379,6 @@ class CreatePresetScreen(
                     Float
                 ): Boolean {
 
-                    /*
- * Scroll eventi render frame'inden bağımsız
- * geldiği için fare konumunu burada yeniliyoruz.
- */
                     pointer.updatePosition()
 
                     if (
@@ -373,12 +390,14 @@ class CreatePresetScreen(
                         return true
                     }
 
-                    val amount =
-                        if (amountY > 0f) {
-                            1
-                        } else {
-                            -1
-                        }
+                    /*
+                     * Önceki sürümde tekerlek yönü ters
+                     * hissediyordu. Bu nedenle amountY
+                     * işaretini burada ters çeviriyoruz.
+                     */
+                    val pixelAmount =
+                        -amountY *
+                            MOUSE_WHEEL_SCROLL_PIXELS
 
                     return when {
                         weaponListArea()
@@ -386,7 +405,7 @@ class CreatePresetScreen(
                                 pointer.position
                             ) -> {
                             scrollWeapons(
-                                amount
+                                pixelAmount
                             )
 
                             true
@@ -397,7 +416,7 @@ class CreatePresetScreen(
                                 pointer.position
                             ) -> {
                             scrollArmors(
-                                amount
+                                pixelAmount
                             )
 
                             true
@@ -408,7 +427,18 @@ class CreatePresetScreen(
                                 pointer.position
                             ) -> {
                             scrollItems(
-                                amount
+                                pixelAmount
+                            )
+
+                            true
+                        }
+
+                        tamgaListArea()
+                            .contains(
+                                pointer.position
+                            ) -> {
+                            scrollTamgas(
+                                pixelAmount
                             )
 
                             true
@@ -539,6 +569,36 @@ class CreatePresetScreen(
             return
         }
 
+        selectedWeaponTamga()
+            ?.let { tamga ->
+                if (
+                    weaponTamgaSlot.contains(
+                        pointer.position
+                    )
+                ) {
+                    interactionState.inspectTamga(
+                        tamga.id
+                    )
+
+                    return
+                }
+            }
+
+        selectedArmorTamga()
+            ?.let { tamga ->
+                if (
+                    armorTamgaSlot.contains(
+                        pointer.position
+                    )
+                ) {
+                    interactionState.inspectTamga(
+                        tamga.id
+                    )
+
+                    return
+                }
+            }
+
         if (
             editStatsButtonRectangle.contains(
                 pointer.position
@@ -573,9 +633,6 @@ class CreatePresetScreen(
 
                 previousListGestureY =
                     pointer.position.y
-
-                accumulatedListGestureY =
-                    0f
 
                 return true
             }
@@ -614,12 +671,6 @@ class CreatePresetScreen(
                         LIST_DRAG_THRESHOLD
                     )
             ) {
-                /*
-                 * Dikey hareket baskınsa liste kaydırılır.
-                 *
-                 * Böylece kartın tam üstünden de yukarı veya
-                 * aşağı sürükleyerek liste kaydırılabilir.
-                 */
                 if (
                     absoluteY >=
                     absoluteX
@@ -632,10 +683,6 @@ class CreatePresetScreen(
                     gesture.equipmentType !=
                     null
                 ) {
-                    /*
-                     * Yatay veya çapraz hareket baskınsa
-                     * ekipman sürükleme başlar.
-                     */
                     val dragStarted =
                         beginGestureEquipmentDrag(
                             gesture
@@ -650,70 +697,36 @@ class CreatePresetScreen(
                                 .SCROLLING
                         }
                 } else {
-                    /*
-                     * Boş alana basıldıysa yalnızca
-                     * liste kaydırma mümkündür.
-                     */
                     listGestureMode =
                         CreatePresetListGestureMode.SCROLLING
                 }
             }
 
-            when (listGestureMode) {
-                CreatePresetListGestureMode.SCROLLING -> {
-                    val currentY =
-                        pointer.position.y
+            if (
+                listGestureMode ==
+                CreatePresetListGestureMode.SCROLLING
+            ) {
+                val currentY =
+                    pointer.position.y
 
-                    accumulatedListGestureY +=
-                        currentY -
-                            previousListGestureY
+                /*
+                 * Liste, fareyle tutulmuş fiziksel bir
+                 * yüzey gibi imleci takip eder.
+                 */
+                val pixelMovement =
+                    currentY -
+                        previousListGestureY
 
-                    while (
-                        accumulatedListGestureY <=
-                        -LIST_DRAG_SCROLL_STEP
-                    ) {
-                        scrollListSection(
-                            section =
-                                gesture.section,
+                scrollListSection(
+                    section =
+                        gesture.section,
 
-                            amount =
-                                1
-                        )
+                    amount =
+                        pixelMovement
+                )
 
-                        accumulatedListGestureY +=
-                            LIST_DRAG_SCROLL_STEP
-                    }
-
-                    while (
-                        accumulatedListGestureY >=
-                        LIST_DRAG_SCROLL_STEP
-                    ) {
-                        scrollListSection(
-                            section =
-                                gesture.section,
-
-                            amount =
-                                -1
-                        )
-
-                        accumulatedListGestureY -=
-                            LIST_DRAG_SCROLL_STEP
-                    }
-
-                    previousListGestureY =
-                        currentY
-                }
-
-                CreatePresetListGestureMode
-                    .EQUIPMENT_DRAGGING -> {
-                    /*
-                     * Sürüklenen kartın görsel önizlemesi
-                     * mevcut render kodu tarafından çizilir.
-                     */
-                }
-
-                else -> {
-                }
+                previousListGestureY =
+                    currentY
             }
 
             return true
@@ -722,10 +735,6 @@ class CreatePresetScreen(
         if (pointer.justReleased) {
             when (listGestureMode) {
                 CreatePresetListGestureMode.PENDING -> {
-                    /*
-                     * Hareket edilmeden bırakıldıysa
-                     * normal kısa tıklama sayılır.
-                     */
                     openGestureContentDetail(
                         gesture
                     )
@@ -736,8 +745,7 @@ class CreatePresetScreen(
                     finishEquipmentDrag()
                 }
 
-                CreatePresetListGestureMode.SCROLLING,
-                CreatePresetListGestureMode.NONE -> {
+                else -> {
                 }
             }
 
@@ -851,6 +859,39 @@ class CreatePresetScreen(
             )
         }
 
+        val tamgaIndex =
+            tamgaCardRectangles()
+                .indexOfFirst { rectangle ->
+                    rectangle.contains(
+                        pointer.position
+                    )
+                }
+                .takeIf { index ->
+                    index >= 0
+                }
+
+        if (
+            tamgaListArea()
+                .contains(
+                    pointer.position
+                )
+        ) {
+            return CreatePresetListGesture(
+                section =
+                    CreatePresetListSection.TAMGAS,
+
+                visibleContentIndex =
+                    tamgaIndex,
+
+                equipmentType =
+                    if (tamgaIndex != null) {
+                        CreatePresetEquipmentType.TAMGA
+                    } else {
+                        null
+                    }
+            )
+        }
+
         return null
     }
 
@@ -871,6 +912,29 @@ class CreatePresetScreen(
                 ?: return false
 
         when (gesture.equipmentType) {
+
+            CreatePresetEquipmentType.TAMGA -> {
+                val tamga =
+                    visibleTamgas()
+                        .getOrNull(
+                            index
+                        )
+                        ?: return false
+
+                if (
+                    tamga.initialUnlockState !=
+                    ContentUnlockState.UNLOCKED
+                ) {
+                    return false
+                }
+
+                interactionState.beginTamgaDrag(
+                    tamga.id
+                )
+
+                return true
+            }
+
             CreatePresetEquipmentType.WEAPON -> {
                 val weapon =
                     visibleWeapons()
@@ -955,6 +1019,20 @@ class CreatePresetScreen(
                 ?: return
 
         when (gesture.equipmentType) {
+
+            CreatePresetEquipmentType.TAMGA -> {
+                val tamga =
+                    visibleTamgas()
+                        .getOrNull(
+                            index
+                        )
+                        ?: return
+
+                interactionState.inspectTamga(
+                    tamga.id
+                )
+            }
+
             CreatePresetEquipmentType.WEAPON -> {
                 val weapon =
                     visibleWeapons()
@@ -1007,7 +1085,7 @@ class CreatePresetScreen(
         CreatePresetListSection,
 
         amount:
-        Int
+        Float
     ) {
         when (section) {
             CreatePresetListSection.WEAPONS -> {
@@ -1024,6 +1102,12 @@ class CreatePresetScreen(
 
             CreatePresetListSection.ITEMS -> {
                 scrollItems(
+                    amount
+                )
+            }
+
+            CreatePresetListSection.TAMGAS -> {
+                scrollTamgas(
                     amount
                 )
             }
@@ -1048,6 +1132,13 @@ class CreatePresetScreen(
                 ?: return
 
         when (draggedContent.type) {
+
+            CreatePresetEquipmentType.TAMGA -> {
+                finishTamgaDrag(
+                    draggedContent.contentId
+                )
+            }
+
             CreatePresetEquipmentType.WEAPON -> {
                 if (
                     weaponSlot.contains(
@@ -1056,6 +1147,8 @@ class CreatePresetScreen(
                 ) {
                     interactionState
                         .finishDragOnWeaponSlot()
+
+                    validateSelectedTamgasAfterEquipmentChange()
                 } else {
                     interactionState
                         .cancelDrag()
@@ -1070,6 +1163,8 @@ class CreatePresetScreen(
                 ) {
                     interactionState
                         .finishDragOnArmorSlot()
+
+                    validateSelectedTamgasAfterEquipmentChange()
                 } else {
                     interactionState
                         .cancelDrag()
@@ -1090,6 +1185,167 @@ class CreatePresetScreen(
                 }
             }
         }
+    }
+
+    private fun finishTamgaDrag(
+        tamgaId:
+        com.azizoglu.grisilith.content.ContentId
+    ) {
+        val tamga =
+            tamgas.firstOrNull { definition ->
+                definition.id ==
+                    tamgaId
+            }
+
+        if (
+            tamga == null
+        ) {
+            interactionState.cancelDrag()
+            return
+        }
+
+        val targetSlot =
+            when {
+                weaponTamgaSlot.contains(
+                    pointer.position
+                ) -> {
+                    TamgaPresetSlot
+                        .WEAPON_TAMGA_SLOT
+                }
+
+                armorTamgaSlot.contains(
+                    pointer.position
+                ) -> {
+                    TamgaPresetSlot
+                        .ARMOR_TAMGA_SLOT
+                }
+
+                else -> {
+                    interactionState.cancelDrag()
+                    return
+                }
+            }
+
+        when (
+            TamgaCompatibility.check(
+                tamga =
+                    tamga,
+
+                targetSlot =
+                    targetSlot,
+
+                selectedWeapon =
+                    selectedWeapon(),
+
+                selectedArmor =
+                    selectedArmor()
+            )
+        ) {
+            TamgaCompatibilityResult.Compatible -> {
+                interactionState.finishTamgaDrag(
+                    targetSlot =
+                        targetSlot,
+
+                    tamga =
+                        tamga
+                )
+            }
+
+            is TamgaCompatibilityResult.Incompatible -> {
+                interactionState.cancelDrag()
+            }
+        }
+    }
+
+    private fun isTamgaSlotValidDropTarget(
+        targetSlot:
+        TamgaPresetSlot
+    ): Boolean {
+
+        val dragged =
+            interactionState
+                .draggedContent
+                ?: return false
+
+        if (
+            dragged.type !=
+            CreatePresetEquipmentType.TAMGA
+        ) {
+            return false
+        }
+
+        val tamga =
+            tamgas.firstOrNull { definition ->
+                definition.id ==
+                    dragged.contentId
+            }
+                ?: return false
+
+        return TamgaCompatibility.isCompatible(
+            tamga =
+                tamga,
+
+            targetSlot =
+                targetSlot,
+
+            selectedWeapon =
+                selectedWeapon(),
+
+            selectedArmor =
+                selectedArmor()
+        )
+    }
+
+    private fun validateSelectedTamgasAfterEquipmentChange() {
+        selectedWeaponTamga()
+            ?.let { tamga ->
+                val compatible =
+                    TamgaCompatibility.isCompatible(
+                        tamga =
+                            tamga,
+
+                        targetSlot =
+                            TamgaPresetSlot
+                                .WEAPON_TAMGA_SLOT,
+
+                        selectedWeapon =
+                            selectedWeapon(),
+
+                        selectedArmor =
+                            selectedArmor()
+                    )
+
+                if (
+                    !compatible
+                ) {
+                    interactionState.clearWeaponTamga()
+                }
+            }
+
+        selectedArmorTamga()
+            ?.let { tamga ->
+                val compatible =
+                    TamgaCompatibility.isCompatible(
+                        tamga =
+                            tamga,
+
+                        targetSlot =
+                            TamgaPresetSlot
+                                .ARMOR_TAMGA_SLOT,
+
+                        selectedWeapon =
+                            selectedWeapon(),
+
+                        selectedArmor =
+                            selectedArmor()
+                    )
+
+                if (
+                    !compatible
+                ) {
+                    interactionState.clearArmorTamga()
+                }
+            }
     }
 
     private fun handleModalInput() {
@@ -1239,6 +1495,22 @@ class CreatePresetScreen(
 
         if (
             interactionState
+                .isTamgaDetailOpen
+        ) {
+            if (
+                !modalRectangle()
+                    .contains(
+                        pointer.position
+                    )
+            ) {
+                interactionState.closeModals()
+            }
+
+            return
+        }
+
+        if (
+            interactionState
                 .isEquipmentDetailOpen
         ) {
             if (
@@ -1377,12 +1649,12 @@ class CreatePresetScreen(
                     itemId,
 
                 weaponTamgaId =
-                    existingPreset
-                        ?.weaponTamgaId,
+                    interactionState
+                        .selectedWeaponTamgaId,
 
                 armorTamgaId =
-                    existingPreset
-                        ?.armorTamgaId,
+                    interactionState
+                        .selectedArmorTamgaId,
 
                 statPointBudget =
                     interactionState
@@ -1542,12 +1814,6 @@ class CreatePresetScreen(
         List<WeaponDefinition> {
 
         return filteredWeapons()
-            .drop(
-                weaponScrollOffset
-            )
-            .take(
-                WEAPON_VISIBLE_CARD_COUNT
-            )
     }
 
     private fun filteredArmors():
@@ -1564,12 +1830,6 @@ class CreatePresetScreen(
         List<ArmorDefinition> {
 
         return filteredArmors()
-            .drop(
-                armorScrollOffset
-            )
-            .take(
-                ARMOR_VISIBLE_CARD_COUNT
-            )
     }
 
     private fun filteredItems():
@@ -1586,58 +1846,151 @@ class CreatePresetScreen(
         List<ItemDefinition> {
 
         return filteredItems()
-            .drop(
-                itemScrollOffset
-            )
-            .take(
-                ITEM_VISIBLE_CARD_COUNT
-            )
     }
 
-    private fun maximumItemScrollOffset(): Int {
-        val size = filteredItems().size
-        return if (size <= ITEM_VISIBLE_CARD_COUNT) 0
-        else ((size - 1) / ITEM_VISIBLE_CARD_COUNT) * ITEM_VISIBLE_CARD_COUNT
+    private fun filteredTamgas():
+        List<TamgaDefinition> {
+
+        return tamgas.filter { tamga ->
+            interactionState.showLockedContent ||
+                tamga.initialUnlockState ==
+                ContentUnlockState.UNLOCKED
+        }
+    }
+
+    private fun visibleTamgas():
+        List<TamgaDefinition> {
+
+        return filteredTamgas()
+    }
+
+    private fun maximumTamgaScrollOffset():
+        Float {
+
+        return maximumListScrollOffset(
+            tamgaListArea(),
+            filteredTamgas().size
+        )
+    }
+
+    private fun scrollTamgas(
+        amount:
+        Float
+    ) {
+        tamgaScrollOffset =
+            (
+                tamgaScrollOffset +
+                    amount
+                )
+                .coerceIn(
+                    0f,
+                    maximumTamgaScrollOffset()
+                )
+    }
+
+    private fun maximumItemScrollOffset():
+        Float {
+
+        return maximumListScrollOffset(
+            itemListArea(),
+            filteredItems().size
+        )
     }
 
 
     private fun scrollItems(
-        amount: Int
+        amount:
+        Float
     ) {
-        itemScrollOffset = (itemScrollOffset + amount * ITEM_VISIBLE_CARD_COUNT)
-            .coerceIn(0, maximumItemScrollOffset())
+        itemScrollOffset =
+            (
+                itemScrollOffset +
+                    amount
+                )
+                .coerceIn(
+                    0f,
+                    maximumItemScrollOffset()
+                )
     }
 
 
-    private fun maximumWeaponScrollOffset(): Int {
-        val size = filteredWeapons().size
-        return if (size <= WEAPON_VISIBLE_CARD_COUNT) 0
-        else ((size - 1) / WEAPON_VISIBLE_CARD_COUNT) * WEAPON_VISIBLE_CARD_COUNT
+    private fun maximumWeaponScrollOffset():
+        Float {
+
+        return maximumListScrollOffset(
+            weaponListArea(),
+            filteredWeapons().size
+        )
     }
 
 
-    private fun maximumArmorScrollOffset(): Int {
-        val size = filteredArmors().size
-        return if (size <= ARMOR_VISIBLE_CARD_COUNT) 0
-        else ((size - 1) / ARMOR_VISIBLE_CARD_COUNT) * ARMOR_VISIBLE_CARD_COUNT
+    private fun maximumArmorScrollOffset():
+        Float {
+
+        return maximumListScrollOffset(
+            armorListArea(),
+            filteredArmors().size
+        )
     }
 
 
     private fun scrollWeapons(
-        amount: Int
+        amount:
+        Float
     ) {
-        weaponScrollOffset = (weaponScrollOffset + amount * WEAPON_VISIBLE_CARD_COUNT)
-            .coerceIn(0, maximumWeaponScrollOffset())
+        weaponScrollOffset =
+            (
+                weaponScrollOffset +
+                    amount
+                )
+                .coerceIn(
+                    0f,
+                    maximumWeaponScrollOffset()
+                )
     }
 
 
     private fun scrollArmors(
-        amount: Int
+        amount:
+        Float
     ) {
-        armorScrollOffset = (armorScrollOffset + amount * ARMOR_VISIBLE_CARD_COUNT)
-            .coerceIn(0, maximumArmorScrollOffset())
+        armorScrollOffset =
+            (
+                armorScrollOffset +
+                    amount
+                )
+                .coerceIn(
+                    0f,
+                    maximumArmorScrollOffset()
+                )
     }
 
+
+    private fun maximumListScrollOffset(
+        area:
+        Rectangle,
+
+        itemCount:
+        Int
+    ): Float {
+
+        if (itemCount <= 0) {
+            return 0f
+        }
+
+        val contentHeight =
+            itemCount *
+                LIST_ROW_PITCH -
+                LIST_ROW_GAP
+
+        return (
+            contentHeight -
+                area.height
+            )
+            .coerceAtLeast(
+                0f
+            )
+    }
 
     private fun visibleCharacters():
         List<CharacterDefinition> {
@@ -1696,6 +2049,48 @@ class CreatePresetScreen(
         return items.firstOrNull { item ->
             item.id ==
                 selectedId
+        }
+    }
+
+    private fun selectedWeaponTamga():
+        TamgaDefinition? {
+
+        val selectedId =
+            interactionState
+                .selectedWeaponTamgaId
+                ?: return null
+
+        return tamgas.firstOrNull { tamga ->
+            tamga.id ==
+                selectedId
+        }
+    }
+
+    private fun selectedArmorTamga():
+        TamgaDefinition? {
+
+        val selectedId =
+            interactionState
+                .selectedArmorTamgaId
+                ?: return null
+
+        return tamgas.firstOrNull { tamga ->
+            tamga.id ==
+                selectedId
+        }
+    }
+
+    private fun inspectedTamga():
+        TamgaDefinition? {
+
+        val inspectedId =
+            interactionState
+                .inspectedTamgaId
+                ?: return null
+
+        return tamgas.firstOrNull { tamga ->
+            tamga.id ==
+                inspectedId
         }
     }
 
@@ -1847,6 +2242,16 @@ class CreatePresetScreen(
 
         val displayName =
             when (dragged.type) {
+
+                CreatePresetEquipmentType.TAMGA -> {
+                    tamgas
+                        .firstOrNull { tamga ->
+                            tamga.id ==
+                                dragged.contentId
+                        }
+                        ?.displayName
+                }
+
                 CreatePresetEquipmentType.WEAPON -> {
                     weapons
                         .firstOrNull { weapon ->
@@ -2000,50 +2405,126 @@ class CreatePresetScreen(
     }
 
 
-    private fun weaponCardRectangles(): List<Rectangle> {
-        val area = weaponListArea()
-        val rowHeight = 38f
-        val gap = 6f
-        return List(WEAPON_VISIBLE_CARD_COUNT) { index ->
+    private fun weaponCardRectangles():
+        List<Rectangle> {
+
+        return listRowRectangles(
+            area =
+                weaponListArea(),
+
+            itemCount =
+                filteredWeapons().size,
+
+            scrollOffset =
+                weaponScrollOffset
+        )
+    }
+
+
+    private fun armorCardRectangles():
+        List<Rectangle> {
+
+        return listRowRectangles(
+            area =
+                armorListArea(),
+
+            itemCount =
+                filteredArmors().size,
+
+            scrollOffset =
+                armorScrollOffset
+        )
+    }
+
+
+    private fun tamgaListArea(): Rectangle {
+        val panel =
+            tamgaPanel()
+
+        return Rectangle(
+            panel.x + 8f,
+            panel.y + 35f,
+            panel.width - 16f,
+            panel.height - 76f
+        )
+    }
+
+    private fun itemCardRectangles():
+        List<Rectangle> {
+
+        return listRowRectangles(
+            area =
+                itemListArea(),
+
+            itemCount =
+                filteredItems().size,
+
+            scrollOffset =
+                itemScrollOffset
+        )
+    }
+
+
+    private fun tamgaCardRectangles():
+        List<Rectangle> {
+
+        return listRowRectangles(
+            area =
+                tamgaListArea(),
+
+            itemCount =
+                filteredTamgas().size,
+
+            scrollOffset =
+                tamgaScrollOffset
+        )
+    }
+
+    private fun listRowRectangles(
+        area:
+        Rectangle,
+
+        itemCount:
+        Int,
+
+        scrollOffset:
+        Float
+    ): List<Rectangle> {
+
+        return List(
+            itemCount
+        ) { index ->
             Rectangle(
-                area.x + 4f,
-                area.y + area.height - rowHeight - index * (rowHeight + gap),
-                area.width - 8f,
-                rowHeight
+                area.x +
+                    4f,
+
+                area.y +
+                    area.height -
+                    LIST_ROW_HEIGHT -
+                    index *
+                    LIST_ROW_PITCH +
+                    scrollOffset,
+
+                area.width -
+                    8f,
+
+                LIST_ROW_HEIGHT
             )
         }
     }
 
+    private fun Rectangle.intersectsVertically(
+        area:
+        Rectangle
+    ): Boolean {
 
-    private fun armorCardRectangles(): List<Rectangle> {
-        val area = armorListArea()
-        val rowHeight = 47f
-        val gap = 6f
-        return List(ARMOR_VISIBLE_CARD_COUNT) { index ->
-            Rectangle(
-                area.x + 4f,
-                area.y + area.height - rowHeight - index * (rowHeight + gap),
-                area.width - 8f,
-                rowHeight
-            )
-        }
+        return y <
+            area.y +
+            area.height &&
+            y +
+            height >
+            area.y
     }
-
-
-    private fun itemCardRectangles(): List<Rectangle> {
-        val area = itemListArea()
-        val rowHeight = 38f
-        val gap = 6f
-        return List(ITEM_VISIBLE_CARD_COUNT) { index ->
-            Rectangle(
-                area.x + 4f,
-                area.y + area.height - rowHeight - index * (rowHeight + gap),
-                area.width - 8f,
-                rowHeight
-            )
-        }
-    }
-
 
     private fun renderLinearListRow(
         rectangle:
@@ -2099,9 +2580,9 @@ class CreatePresetScreen(
                 rectangle.x +
                     6f,
                 rectangle.y +
-                    6f,
-                40f,
-                40f
+                    4f,
+                26f,
+                26f
             )
 
         drawPanel(
@@ -2141,7 +2622,7 @@ class CreatePresetScreen(
                 },
 
             scale =
-                0.45f
+                0.38f
         )
 
         font.color =
@@ -2163,11 +2644,11 @@ class CreatePresetScreen(
                 "$title — LOCKED"
             },
             rectangle.x +
-                56f,
+                40f,
             rectangle.y +
-                34f,
+                23f,
             rectangle.width -
-                66f,
+                50f,
             Align.left,
             false
         )
@@ -2183,11 +2664,11 @@ class CreatePresetScreen(
             batch,
             subtitle,
             rectangle.x +
-                56f,
+                40f,
             rectangle.y +
-                15f,
+                9f,
             rectangle.width -
-                66f,
+                50f,
             Align.left,
             false
         )
@@ -2198,21 +2679,94 @@ class CreatePresetScreen(
     }
 
     private fun renderListHeader(
-        title: String,
-        panel: Rectangle,
-        offset: Int,
-        visibleCount: Int,
-        totalCount: Int,
-        section: CreatePresetListSection
+        title:
+        String,
+
+        panel:
+        Rectangle,
+
+        scrollOffset:
+        Float,
+
+        totalCount:
+        Int,
+
+        section:
+        CreatePresetListSection
     ) {
-        drawSectionTitle(title, panel.x + 8f, panel.y + panel.height - 16f, panel.width - 90f)
-        val up = listUpButton(section)
-        val down = listDownButton(section)
-        drawPanel(up, Color(0.08f, 0.16f, 0.25f, 1f))
-        drawPanel(down, Color(0.08f, 0.16f, 0.25f, 1f))
-        drawCenteredText("▲", up, Color.WHITE, 0.7f)
-        drawCenteredText("▼", down, Color.WHITE, 0.7f)
-        renderListPosition(offset, visibleCount, totalCount, panel.x + 14f, panel.y + 14f)
+        drawSectionTitle(
+            title,
+            panel.x +
+                8f,
+            panel.y +
+                panel.height -
+                16f,
+            panel.width -
+                90f
+        )
+
+        val up =
+            listUpButton(
+                section
+            )
+
+        val down =
+            listDownButton(
+                section
+            )
+
+        drawPanel(
+            up,
+            Color(
+                0.08f,
+                0.16f,
+                0.25f,
+                1f
+            )
+        )
+
+        drawPanel(
+            down,
+            Color(
+                0.08f,
+                0.16f,
+                0.25f,
+                1f
+            )
+        )
+
+        drawCenteredText(
+            "▲",
+            up,
+            Color.WHITE,
+            0.7f
+        )
+
+        drawCenteredText(
+            "▼",
+            down,
+            Color.WHITE,
+            0.7f
+        )
+
+        renderListPosition(
+            scrollOffset =
+                scrollOffset,
+
+            totalCount =
+                totalCount,
+
+            section =
+                section,
+
+            x =
+                panel.x +
+                    14f,
+
+            y =
+                panel.y +
+                    14f
+        )
     }
 
     private fun listUpButton(section: CreatePresetListSection): Rectangle {
@@ -2220,6 +2774,7 @@ class CreatePresetScreen(
             CreatePresetListSection.WEAPONS -> weaponPanel()
             CreatePresetListSection.ARMORS -> armorPanel()
             CreatePresetListSection.ITEMS -> itemPanel()
+            CreatePresetListSection.TAMGAS -> tamgaPanel()
         }
         return Rectangle(panel.x + panel.width - 70f, panel.y + panel.height - 34f, 28f, 24f)
     }
@@ -2233,45 +2788,224 @@ class CreatePresetScreen(
         if (!pointer.justReleased) return false
         for (section in CreatePresetListSection.values()) {
             if (listUpButton(section).contains(pointer.position)) {
-                scrollListSection(section, -1)
+                scrollListSection(section, -LIST_BUTTON_SCROLL_PIXELS)
                 return true
             }
             if (listDownButton(section).contains(pointer.position)) {
-                scrollListSection(section, 1)
+                scrollListSection(section, LIST_BUTTON_SCROLL_PIXELS)
                 return true
             }
         }
         return false
     }
 
+    private inline fun renderClippedList(
+        area:
+        Rectangle,
+
+        renderContent:
+            () -> Unit
+    ) {
+        val scissors =
+            Rectangle()
+
+        ScissorStack.calculateScissors(
+            camera,
+            batch.transformMatrix,
+            area,
+            scissors
+        )
+
+        batch.flush()
+
+        if (
+            ScissorStack.pushScissors(
+                scissors
+            )
+        ) {
+            renderContent()
+
+            batch.flush()
+
+            ScissorStack.popScissors()
+        }
+    }
+
     private fun renderLeftPanel() {
-        renderListHeader("WEAPONS", weaponPanel(), weaponScrollOffset, visibleWeapons().size, filteredWeapons().size, CreatePresetListSection.WEAPONS)
-        visibleWeapons().forEachIndexed { index, weapon ->
-            val rectangle = weaponCardRectangles().getOrNull(index) ?: return@forEachIndexed
-            renderLinearListRow(
-                rectangle, weapon.displayName, weaponTypeText(weapon),
-                weapon.initialUnlockState == ContentUnlockState.UNLOCKED,
-                weapon.id == interactionState.selectedWeaponId,
-                Color(0.07f, 0.27f, 0.12f, 1f)
-            )
+        renderListHeader(
+            title =
+                "WEAPONS",
+
+            panel =
+                weaponPanel(),
+
+            scrollOffset =
+                weaponScrollOffset,
+
+            totalCount =
+                filteredWeapons().size,
+
+            section =
+                CreatePresetListSection.WEAPONS
+        )
+
+        renderClippedList(
+            area =
+                weaponListArea()
+        ) {
+            val definitions =
+                filteredWeapons()
+
+            weaponCardRectangles()
+                .forEachIndexed {
+                        index,
+                        rectangle ->
+
+                    if (
+                        !rectangle.intersectsVertically(
+                            weaponListArea()
+                        )
+                    ) {
+                        return@forEachIndexed
+                    }
+
+                    val weapon =
+                        definitions
+                            .getOrNull(
+                                index
+                            )
+                            ?: return@forEachIndexed
+
+                    renderLinearListRow(
+                        rectangle =
+                            rectangle,
+
+                        title =
+                            weapon.displayName,
+
+                        subtitle =
+                            weaponTypeText(
+                                weapon
+                            ),
+
+                        unlocked =
+                            weapon.initialUnlockState ==
+                                ContentUnlockState.UNLOCKED,
+
+                        selected =
+                            weapon.id ==
+                                interactionState
+                                    .selectedWeaponId,
+
+                        normalFillColor =
+                            Color(
+                                0.07f,
+                                0.27f,
+                                0.12f,
+                                1f
+                            )
+                    )
+                }
         }
 
-        renderListHeader("ARMORS", armorPanel(), armorScrollOffset, visibleArmors().size, filteredArmors().size, CreatePresetListSection.ARMORS)
-        visibleArmors().forEachIndexed { index, armor ->
-            val rectangle = armorCardRectangles().getOrNull(index) ?: return@forEachIndexed
-            renderLinearListRow(
-                rectangle, armor.displayName, "Armor",
-                armor.initialUnlockState == ContentUnlockState.UNLOCKED,
-                armor.id == interactionState.selectedArmorId,
-                Color(0.16f, 0.19f, 0.23f, 1f)
-            )
+        renderListHeader(
+            title =
+                "ARMORS",
+
+            panel =
+                armorPanel(),
+
+            scrollOffset =
+                armorScrollOffset,
+
+            totalCount =
+                filteredArmors().size,
+
+            section =
+                CreatePresetListSection.ARMORS
+        )
+
+        renderClippedList(
+            area =
+                armorListArea()
+        ) {
+            val definitions =
+                filteredArmors()
+
+            armorCardRectangles()
+                .forEachIndexed {
+                        index,
+                        rectangle ->
+
+                    if (
+                        !rectangle.intersectsVertically(
+                            armorListArea()
+                        )
+                    ) {
+                        return@forEachIndexed
+                    }
+
+                    val armor =
+                        definitions
+                            .getOrNull(
+                                index
+                            )
+                            ?: return@forEachIndexed
+
+                    renderLinearListRow(
+                        rectangle =
+                            rectangle,
+
+                        title =
+                            armor.displayName,
+
+                        subtitle =
+                            "Armor",
+
+                        unlocked =
+                            armor.initialUnlockState ==
+                                ContentUnlockState.UNLOCKED,
+
+                        selected =
+                            armor.id ==
+                                interactionState
+                                    .selectedArmorId,
+
+                        normalFillColor =
+                            Color(
+                                0.16f,
+                                0.19f,
+                                0.23f,
+                                1f
+                            )
+                    )
+                }
         }
 
-        if (!interactionState.hasCharacterSelected) {
-            font.color = Color.GOLD
-            font.data.setScale(0.62f)
-            font.draw(batch, "Choose a Character before equipping.", leftPanel.x, 62f, leftPanel.width, Align.center, false)
-            font.data.setScale(1f)
+        if (
+            !interactionState
+                .hasCharacterSelected
+        ) {
+            font.color =
+                Color.GOLD
+
+            font.data.setScale(
+                0.62f
+            )
+
+            font.draw(
+                batch,
+                "Choose a Character before equipping.",
+                leftPanel.x,
+                62f,
+                leftPanel.width,
+                Align.center,
+                false
+            )
+
+            font.data.setScale(
+                1f
+            )
         }
     }
 
@@ -2299,12 +3033,22 @@ class CreatePresetScreen(
                     CreatePresetEquipmentType.WEAPON
         )
 
-        renderEquipmentSlot(
+        renderSelectedEquipmentSlot(
             rectangle =
                 weaponTamgaSlot,
 
-            title =
-                "WEAPON\nTAMGA"
+            emptyTitle =
+                "WEAPON\nTAMGA",
+
+            selectedName =
+                selectedWeaponTamga()
+                    ?.displayName,
+
+            isValidDropTarget =
+                isTamgaSlotValidDropTarget(
+                    TamgaPresetSlot
+                        .WEAPON_TAMGA_SLOT
+                )
         )
 
         renderSelectedEquipmentSlot(
@@ -2325,12 +3069,22 @@ class CreatePresetScreen(
                     CreatePresetEquipmentType.ARMOR
         )
 
-        renderEquipmentSlot(
+        renderSelectedEquipmentSlot(
             rectangle =
                 armorTamgaSlot,
 
-            title =
-                "ARMOR\nTAMGA"
+            emptyTitle =
+                "ARMOR\nTAMGA",
+
+            selectedName =
+                selectedArmorTamga()
+                    ?.displayName,
+
+            isValidDropTarget =
+                isTamgaSlotValidDropTarget(
+                    TamgaPresetSlot
+                        .ARMOR_TAMGA_SLOT
+                )
         )
 
         renderSelectedEquipmentSlot(
@@ -2560,14 +3314,14 @@ class CreatePresetScreen(
     }
 
     private fun renderListPosition(
-        currentOffset:
-        Int,
-
-        visibleCount:
-        Int,
+        scrollOffset:
+        Float,
 
         totalCount:
         Int,
+
+        section:
+        CreatePresetListSection,
 
         x:
         Float,
@@ -2586,14 +3340,45 @@ class CreatePresetScreen(
             0.55f
         )
 
-        val first =
-            currentOffset +
-                1
+        val area =
+            when (section) {
+                CreatePresetListSection.WEAPONS ->
+                    weaponListArea()
 
-        val last =
+                CreatePresetListSection.ARMORS ->
+                    armorListArea()
+
+                CreatePresetListSection.ITEMS ->
+                    itemListArea()
+
+                CreatePresetListSection.TAMGAS ->
+                    tamgaListArea()
+            }
+
+        val firstVisible =
             (
-                currentOffset +
-                    visibleCount
+                scrollOffset /
+                    LIST_ROW_PITCH
+                )
+                .toInt()
+                .coerceIn(
+                    0,
+                    totalCount -
+                        1
+                )
+
+        val visibleCapacity =
+            (
+                area.height /
+                    LIST_ROW_PITCH
+                )
+                .toInt() +
+                2
+
+        val lastVisible =
+            (
+                firstVisible +
+                    visibleCapacity
                 )
                 .coerceAtMost(
                     totalCount
@@ -2601,7 +3386,7 @@ class CreatePresetScreen(
 
         font.draw(
             batch,
-            "$first–$last / $totalCount",
+            "${firstVisible + 1}–$lastVisible / $totalCount",
             x,
             y
         )
@@ -2612,23 +3397,161 @@ class CreatePresetScreen(
     }
 
     private fun renderRightPanel() {
-        renderListHeader("ITEMS", itemPanel(), itemScrollOffset, visibleItems().size, filteredItems().size, CreatePresetListSection.ITEMS)
-        visibleItems().forEachIndexed { index, item ->
-            val rectangle = itemCardRectangles().getOrNull(index) ?: return@forEachIndexed
-            renderLinearListRow(
-                rectangle, item.displayName, "${item.rarity.displayName} Item",
-                item.initialUnlockState == ContentUnlockState.UNLOCKED,
-                item.id == interactionState.selectedItemId,
-                Color(0.24f, 0.08f, 0.10f, 1f)
-            )
+        renderListHeader(
+            title =
+                "ITEMS",
+
+            panel =
+                itemPanel(),
+
+            scrollOffset =
+                itemScrollOffset,
+
+            totalCount =
+                filteredItems().size,
+
+            section =
+                CreatePresetListSection.ITEMS
+        )
+
+        renderClippedList(
+            area =
+                itemListArea()
+        ) {
+            val definitions =
+                filteredItems()
+
+            itemCardRectangles()
+                .forEachIndexed {
+                        index,
+                        rectangle ->
+
+                    if (
+                        !rectangle.intersectsVertically(
+                            itemListArea()
+                        )
+                    ) {
+                        return@forEachIndexed
+                    }
+
+                    val item =
+                        definitions
+                            .getOrNull(
+                                index
+                            )
+                            ?: return@forEachIndexed
+
+                    renderLinearListRow(
+                        rectangle =
+                            rectangle,
+
+                        title =
+                            item.displayName,
+
+                        subtitle =
+                            "${item.rarity.displayName} Item",
+
+                        unlocked =
+                            item.initialUnlockState ==
+                                ContentUnlockState.UNLOCKED,
+
+                        selected =
+                            item.id ==
+                                interactionState
+                                    .selectedItemId,
+
+                        normalFillColor =
+                            Color(
+                                0.24f,
+                                0.08f,
+                                0.10f,
+                                1f
+                            )
+                    )
+                }
         }
 
-        val panel = tamgaPanel()
-        drawSectionTitle("TAMGAS", panel.x, panel.y + panel.height - 16f, panel.width)
-        font.color = Color.GRAY
-        font.data.setScale(0.72f)
-        font.draw(batch, "Tamga selection will be connected next.", panel.x + 18f, panel.y + 112f, panel.width - 36f, Align.center, true)
-        font.data.setScale(1f)
+        renderListHeader(
+            title =
+                "TAMGAS",
+
+            panel =
+                tamgaPanel(),
+
+            scrollOffset =
+                tamgaScrollOffset,
+
+            totalCount =
+                filteredTamgas().size,
+
+            section =
+                CreatePresetListSection.TAMGAS
+        )
+
+        renderClippedList(
+            area =
+                tamgaListArea()
+        ) {
+            val definitions =
+                filteredTamgas()
+
+            tamgaCardRectangles()
+                .forEachIndexed {
+                        index,
+                        rectangle ->
+
+                    if (
+                        !rectangle.intersectsVertically(
+                            tamgaListArea()
+                        )
+                    ) {
+                        return@forEachIndexed
+                    }
+
+                    val tamga =
+                        definitions
+                            .getOrNull(
+                                index
+                            )
+                            ?: return@forEachIndexed
+
+                    val selected =
+                        tamga.id ==
+                            interactionState
+                                .selectedWeaponTamgaId ||
+                            tamga.id ==
+                            interactionState
+                                .selectedArmorTamgaId
+
+                    renderLinearListRow(
+                        rectangle =
+                            rectangle,
+
+                        title =
+                            tamga.displayName,
+
+                        subtitle =
+                            tamgaListSubtitle(
+                                tamga
+                            ),
+
+                        unlocked =
+                            tamga.initialUnlockState ==
+                                ContentUnlockState.UNLOCKED,
+
+                        selected =
+                            selected,
+
+                        normalFillColor =
+                            Color(
+                                0.13f,
+                                0.11f,
+                                0.31f,
+                                1f
+                            )
+                    )
+                }
+        }
     }
 
 
@@ -2858,6 +3781,11 @@ class CreatePresetScreen(
             }
 
             interactionState
+                .isTamgaDetailOpen -> {
+                renderTamgaDetail()
+            }
+
+            interactionState
                 .isEquipmentDetailOpen -> {
                 renderEquipmentDetail()
             }
@@ -3017,6 +3945,272 @@ class CreatePresetScreen(
         )
     }
 
+    private fun renderTamgaDetail() {
+        val tamga =
+            inspectedTamga()
+                ?: return
+
+        drawPanel(
+            rectangle =
+                modalRectangle(),
+
+            fillColor =
+                Color(
+                    0.07f,
+                    0.08f,
+                    0.18f,
+                    1f
+                )
+        )
+
+        font.data.setScale(
+            1.25f
+        )
+
+        font.color =
+            Color.WHITE
+
+        font.draw(
+            batch,
+            tamga.displayName,
+            modalRectangle().x +
+                24f,
+            modalRectangle().y +
+                modalRectangle().height -
+                28f
+        )
+
+        font.data.setScale(
+            0.82f
+        )
+
+        font.color =
+            Color.GOLD
+
+        font.draw(
+            batch,
+            tamgaDetailSubtitle(
+                tamga
+            ),
+            modalRectangle().x +
+                24f,
+            modalRectangle().y +
+                modalRectangle().height -
+                65f
+        )
+
+        font.color =
+            Color.LIGHT_GRAY
+
+        font.draw(
+            batch,
+            tamga.description,
+            modalRectangle().x +
+                24f,
+            modalRectangle().y +
+                modalRectangle().height -
+                105f,
+            modalRectangle().width -
+                48f,
+            Align.left,
+            true
+        )
+
+        font.color =
+            Color.WHITE
+
+        font.draw(
+            batch,
+            tamgaDetailStatText(
+                tamga
+            ),
+            modalRectangle().x +
+                24f,
+            modalRectangle().y +
+                155f,
+            modalRectangle().width -
+                48f,
+            Align.left,
+            true
+        )
+
+        renderModalCloseHint()
+    }
+
+    private fun tamgaListSubtitle(
+        tamga:
+        TamgaDefinition
+    ): String {
+
+        val slotText =
+            when (tamga.slotType) {
+                TamgaSlotType.WEAPON ->
+                    "Weapon"
+
+                TamgaSlotType.ARMOR ->
+                    "Armor"
+
+                TamgaSlotType.GENERAL ->
+                    "General"
+            }
+
+        val activationText =
+            when (tamga.activationType) {
+                TamgaActivationType.ACTIVE ->
+                    "Active"
+
+                TamgaActivationType.PASSIVE ->
+                    "Passive"
+            }
+
+        return "$slotText Tamga • $activationText"
+    }
+
+    private fun tamgaDetailSubtitle(
+        tamga:
+        TamgaDefinition
+    ): String {
+
+        return tamgaListSubtitle(
+            tamga
+        )
+    }
+
+    private fun tamgaDetailStatText(
+        tamga:
+        TamgaDefinition
+    ): String {
+
+        return buildString {
+            appendLine(
+                "Compatible Slot: " +
+                    when (tamga.slotType) {
+                        TamgaSlotType.WEAPON ->
+                            "Weapon Tamga"
+
+                        TamgaSlotType.ARMOR ->
+                            "Armor Tamga"
+
+                        TamgaSlotType.GENERAL ->
+                            "Weapon or Armor Tamga"
+                    }
+            )
+
+            if (
+                tamga.requiredWeaponTags
+                    .isNotEmpty()
+            ) {
+                appendLine(
+                    "Required Weapon: " +
+                        tamga.requiredWeaponTags
+                            .joinToString {
+                                contentTagDisplayName(
+                                    it
+                                )
+                            }
+                )
+            }
+
+            if (
+                tamga.requiredArmorTags
+                    .isNotEmpty()
+            ) {
+                appendLine(
+                    "Required Armor: " +
+                        tamga.requiredArmorTags
+                            .joinToString {
+                                contentTagDisplayName(
+                                    it
+                                )
+                            }
+                )
+            }
+
+            if (
+                tamga.interactableStats
+                    .isNotEmpty()
+            ) {
+                appendLine(
+                    "Interactable Stats: " +
+                        tamga.interactableStats
+                            .joinToString {
+                                it.displayName
+                            }
+                )
+            }
+
+            if (
+                tamga.statModifiers
+                    .isNotEmpty()
+            ) {
+                appendLine()
+                appendLine(
+                    "Stat Modifiers:"
+                )
+
+                tamga.statModifiers
+                    .forEach { modifier ->
+                        appendLine(
+                            modifier.statType.displayName +
+                                ": " +
+                                signedValue(
+                                    modifier.amount
+                                )
+                        )
+                    }
+            }
+        }
+            .trim()
+            .ifBlank {
+                "No direct Stat modifiers."
+            }
+    }
+
+    private fun contentTagDisplayName(
+        tag:
+        ContentTag
+    ): String {
+
+        return tag.name
+            .lowercase(
+                Locale.US
+            )
+            .split(
+                "_"
+            )
+            .joinToString(
+                " "
+            ) { word ->
+                word.replaceFirstChar {
+                    it.uppercase(
+                        Locale.US
+                    )
+                }
+            }
+    }
+
+    private fun renderModalCloseHint() {
+        font.color =
+            Color.GRAY
+
+        font.data.setScale(
+            0.70f
+        )
+
+        font.draw(
+            batch,
+            "Click outside to close.",
+            modalRectangle().x +
+                24f,
+            modalRectangle().y +
+                22f
+        )
+
+        font.data.setScale(
+            1f
+        )
+    }
+
     private fun renderEquipmentDetail() {
         val inspected =
             interactionState
@@ -3156,6 +4350,16 @@ class CreatePresetScreen(
                         )
                     }
             }
+
+            CreatePresetEquipmentType.TAMGA -> {
+                title = "Tamga"
+
+                description =
+                    "Tamga system is not implemented yet."
+
+                statText = ""
+            }
+
         }
 
         drawPanel(
@@ -4742,7 +5946,9 @@ class CreatePresetScreen(
 
         ARMORS,
 
-        ITEMS
+        ITEMS,
+
+        TAMGAS
     }
 
     private enum class CreatePresetListGestureMode {

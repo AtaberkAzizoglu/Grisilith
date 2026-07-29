@@ -4,267 +4,702 @@ import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.preset.PresetStatAllocation
 import com.azizoglu.grisilith.preset.RunPreset
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.tamga.definition.TamgaDefinition
+import com.azizoglu.grisilith.tamga.definition.TamgaPresetSlot
 
 class CreatePresetInteractionState {
 
-    var selectedCharacterId: ContentId? = null
+    var selectedCharacterId:
+        ContentId? =
+        null
         private set
 
-    var selectedWeaponId: ContentId? = null
+    var selectedWeaponId:
+        ContentId? =
+        null
         private set
 
-    var selectedArmorId: ContentId? = null
+    var selectedArmorId:
+        ContentId? =
+        null
         private set
 
-    var selectedItemId: ContentId? = null
+    var selectedItemId:
+        ContentId? =
+        null
         private set
 
-    var statAllocation: PresetStatAllocation =
+    var selectedWeaponTamgaId:
+        ContentId? =
+        null
+        private set
+
+    var selectedArmorTamgaId:
+        ContentId? =
+        null
+        private set
+
+    var statAllocation:
+        PresetStatAllocation =
         PresetStatAllocation()
         private set
 
-    var statPointBudget: Int = 10
+    var statPointBudget:
+        Int =
+        10
         private set
 
-    var isCharacterPickerOpen: Boolean = false
+    var isCharacterPickerOpen:
+        Boolean =
+        false
         private set
 
-    var inspectedCharacterId: ContentId? = null
+    var inspectedCharacterId:
+        ContentId? =
+        null
         private set
 
-    var inspectedEquipment: CreatePresetInspectedEquipment? = null
+    var inspectedEquipment:
+        CreatePresetInspectedEquipment? =
+        null
         private set
 
-    var inspectedStatType: StatType? = null
+    var inspectedTamgaId:
+        ContentId? =
+        null
         private set
 
-    var draggedContent: CreatePresetDraggedContent? = null
+    var inspectedStatType:
+        StatType? =
+        null
         private set
 
-    var showLockedContent: Boolean = false
+    var draggedContent:
+        CreatePresetDraggedContent? =
+        null
         private set
 
-    var confirmationType: CreatePresetConfirmationType? = null
+    var showLockedContent:
+        Boolean =
+        false
+        private set
+
+    var confirmationType:
+        CreatePresetConfirmationType? =
+        null
         private set
 
     val isCharacterDetailOpen: Boolean
-        get() = inspectedCharacterId != null
+        get() =
+            inspectedCharacterId != null
 
     val isEquipmentDetailOpen: Boolean
-        get() = inspectedEquipment != null
+        get() =
+            inspectedEquipment != null
+
+    val isTamgaDetailOpen: Boolean
+        get() =
+            inspectedTamgaId != null
 
     val isStatEditorOpen: Boolean
-        get() = confirmationType == CreatePresetConfirmationType.EDIT_STATS
+        get() =
+            confirmationType ==
+                CreatePresetConfirmationType
+                    .EDIT_STATS
 
     val isConfirmationOpen: Boolean
-        get() = confirmationType == CreatePresetConfirmationType.DISCARD_AND_GO_BACK ||
-            confirmationType == CreatePresetConfirmationType.SAVE_PRESET
+        get() =
+            confirmationType ==
+                CreatePresetConfirmationType
+                    .DISCARD_AND_GO_BACK ||
+                confirmationType ==
+                CreatePresetConfirmationType
+                    .SAVE_PRESET
 
     val isAnyModalOpen: Boolean
-        get() = isCharacterPickerOpen ||
-            isCharacterDetailOpen ||
-            isEquipmentDetailOpen ||
-            inspectedStatType != null ||
-            confirmationType != null
+        get() =
+            isCharacterPickerOpen ||
+                isCharacterDetailOpen ||
+                isEquipmentDetailOpen ||
+                isTamgaDetailOpen ||
+                inspectedStatType != null ||
+                confirmationType != null
 
     val hasCharacterSelected: Boolean
-        get() = selectedCharacterId != null
+        get() =
+            selectedCharacterId != null
 
     val hasUnsavedChanges: Boolean
-        get() = selectedCharacterId != null ||
-            selectedWeaponId != null ||
-            selectedArmorId != null ||
-            selectedItemId != null ||
-            statAllocation.spentPointCount > 0
+        get() =
+            selectedCharacterId != null ||
+                selectedWeaponId != null ||
+                selectedArmorId != null ||
+                selectedItemId != null ||
+                selectedWeaponTamgaId != null ||
+                selectedArmorTamgaId != null ||
+                statAllocation.spentPointCount >
+                0
 
+    /*
+     * Tamga slotları isteğe bağlıdır.
+     */
     val isCompleteWithoutTamga: Boolean
-        get() = selectedCharacterId != null &&
-            selectedWeaponId != null &&
-            selectedArmorId != null &&
-            selectedItemId != null
+        get() =
+            selectedCharacterId != null &&
+                selectedWeaponId != null &&
+                selectedArmorId != null &&
+                selectedItemId != null
 
     val remainingStatPoints: Int
-        get() = (statPointBudget - statAllocation.spentPointCount).coerceAtLeast(0)
+        get() =
+            (
+                statPointBudget -
+                    statAllocation
+                        .spentPointCount
+                )
+                .coerceAtLeast(
+                    0
+                )
 
-    fun loadFromPreset(preset: RunPreset) {
+    fun loadFromPreset(
+        preset:
+        RunPreset
+    ) {
         reset()
-        selectedCharacterId = preset.characterId
-        selectedWeaponId = preset.weaponId
-        selectedArmorId = preset.armorId
-        selectedItemId = preset.itemId
-        statAllocation = preset.statAllocation
-        statPointBudget = preset.statPointBudget
+
+        selectedCharacterId =
+            preset.characterId
+
+        selectedWeaponId =
+            preset.weaponId
+
+        selectedArmorId =
+            preset.armorId
+
+        selectedItemId =
+            preset.itemId
+
+        selectedWeaponTamgaId =
+            preset.weaponTamgaId
+
+        selectedArmorTamgaId =
+            preset.armorTamgaId
+
+        statAllocation =
+            preset.statAllocation
+
+        statPointBudget =
+            preset.statPointBudget
     }
 
     fun openCharacterPicker() {
         closeModals()
-        isCharacterPickerOpen = true
+
+        isCharacterPickerOpen =
+            true
     }
 
-    fun inspectCharacter(characterId: ContentId) {
+    fun inspectCharacter(
+        characterId:
+        ContentId
+    ) {
         closeModals()
-        inspectedCharacterId = characterId
+
+        inspectedCharacterId =
+            characterId
     }
 
     fun chooseInspectedCharacter() {
-        val inspectedId = inspectedCharacterId ?: return
-        val changed = selectedCharacterId != inspectedId
-        selectedCharacterId = inspectedId
-        inspectedCharacterId = null
-        isCharacterPickerOpen = false
-        if (changed) {
-            statAllocation = PresetStatAllocation()
+        val inspectedId =
+            inspectedCharacterId
+                ?: return
+
+        val changed =
+            selectedCharacterId !=
+                inspectedId
+
+        selectedCharacterId =
+            inspectedId
+
+        inspectedCharacterId =
+            null
+
+        isCharacterPickerOpen =
+            false
+
+        if (
+            changed
+        ) {
+            statAllocation =
+                PresetStatAllocation()
         }
     }
 
-    fun inspectWeapon(weaponId: ContentId) {
+    fun inspectWeapon(
+        weaponId:
+        ContentId
+    ) {
         closeModals()
-        inspectedEquipment = CreatePresetInspectedEquipment(
-            contentId = weaponId,
-            type = CreatePresetEquipmentType.WEAPON
-        )
+
+        inspectedEquipment =
+            CreatePresetInspectedEquipment(
+                contentId =
+                    weaponId,
+
+                type =
+                    CreatePresetEquipmentType
+                        .WEAPON
+            )
     }
 
-    fun inspectArmor(armorId: ContentId) {
+    fun inspectArmor(
+        armorId:
+        ContentId
+    ) {
         closeModals()
-        inspectedEquipment = CreatePresetInspectedEquipment(
-            contentId = armorId,
-            type = CreatePresetEquipmentType.ARMOR
-        )
+
+        inspectedEquipment =
+            CreatePresetInspectedEquipment(
+                contentId =
+                    armorId,
+
+                type =
+                    CreatePresetEquipmentType
+                        .ARMOR
+            )
     }
 
-    fun inspectItem(itemId: ContentId) {
+    fun inspectItem(
+        itemId:
+        ContentId
+    ) {
         closeModals()
-        inspectedEquipment = CreatePresetInspectedEquipment(
-            contentId = itemId,
-            type = CreatePresetEquipmentType.ITEM
-        )
+
+        inspectedEquipment =
+            CreatePresetInspectedEquipment(
+                contentId =
+                    itemId,
+
+                type =
+                    CreatePresetEquipmentType
+                        .ITEM
+            )
     }
 
-    fun inspectStat(statType: StatType) {
-        inspectedStatType = statType
+    fun inspectTamga(
+        tamgaId:
+        ContentId
+    ) {
+        closeModals()
+
+        inspectedTamgaId =
+            tamgaId
+    }
+
+    fun inspectStat(
+        statType:
+        StatType
+    ) {
+        inspectedStatType =
+            statType
     }
 
     fun closeStatDescription() {
-        inspectedStatType = null
+        inspectedStatType =
+            null
     }
 
     fun openStatEditor() {
-        if (!hasCharacterSelected) return
+        if (
+            !hasCharacterSelected
+        ) {
+            return
+        }
+
         closeModals()
-        confirmationType = CreatePresetConfirmationType.EDIT_STATS
+
+        confirmationType =
+            CreatePresetConfirmationType
+                .EDIT_STATS
     }
 
-    fun increaseStat(statType: StatType, characterBaseScore: Int) {
-        statAllocation = statAllocation.increase(
-            statType = statType,
-            characterBaseScore = characterBaseScore,
-            pointBudget = statPointBudget
-        )
+    fun increaseStat(
+        statType:
+        StatType,
+
+        characterBaseScore:
+        Int
+    ) {
+        statAllocation =
+            statAllocation.increase(
+                statType =
+                    statType,
+
+                characterBaseScore =
+                    characterBaseScore,
+
+                pointBudget =
+                    statPointBudget
+            )
     }
 
-    fun decreaseStat(statType: StatType) {
-        statAllocation = statAllocation.decrease(statType)
+    fun decreaseStat(
+        statType:
+        StatType
+    ) {
+        statAllocation =
+            statAllocation.decrease(
+                statType
+            )
     }
 
-    fun beginWeaponDrag(weaponId: ContentId) {
-        if (!hasCharacterSelected) return
+    fun beginWeaponDrag(
+        weaponId:
+        ContentId
+    ) {
+        if (
+            !hasCharacterSelected
+        ) {
+            return
+        }
+
         closeModals()
-        draggedContent = CreatePresetDraggedContent(weaponId, CreatePresetEquipmentType.WEAPON)
+
+        draggedContent =
+            CreatePresetDraggedContent(
+                contentId =
+                    weaponId,
+
+                type =
+                    CreatePresetEquipmentType
+                        .WEAPON
+            )
     }
 
-    fun beginArmorDrag(armorId: ContentId) {
-        if (!hasCharacterSelected) return
+    fun beginArmorDrag(
+        armorId:
+        ContentId
+    ) {
+        if (
+            !hasCharacterSelected
+        ) {
+            return
+        }
+
         closeModals()
-        draggedContent = CreatePresetDraggedContent(armorId, CreatePresetEquipmentType.ARMOR)
+
+        draggedContent =
+            CreatePresetDraggedContent(
+                contentId =
+                    armorId,
+
+                type =
+                    CreatePresetEquipmentType
+                        .ARMOR
+            )
     }
 
-    fun beginItemDrag(itemId: ContentId) {
-        if (!hasCharacterSelected) return
+    fun beginItemDrag(
+        itemId:
+        ContentId
+    ) {
+        if (
+            !hasCharacterSelected
+        ) {
+            return
+        }
+
         closeModals()
-        draggedContent = CreatePresetDraggedContent(itemId, CreatePresetEquipmentType.ITEM)
+
+        draggedContent =
+            CreatePresetDraggedContent(
+                contentId =
+                    itemId,
+
+                type =
+                    CreatePresetEquipmentType
+                        .ITEM
+            )
+    }
+
+    fun beginTamgaDrag(
+        tamgaId:
+        ContentId
+    ) {
+        if (
+            !hasCharacterSelected
+        ) {
+            return
+        }
+
+        closeModals()
+
+        draggedContent =
+            CreatePresetDraggedContent(
+                contentId =
+                    tamgaId,
+
+                type =
+                    CreatePresetEquipmentType
+                        .TAMGA
+            )
     }
 
     fun finishDragOnWeaponSlot() {
-        val dragged = draggedContent ?: return
-        if (dragged.type == CreatePresetEquipmentType.WEAPON) {
-            selectedWeaponId = dragged.contentId
+        val dragged =
+            draggedContent
+                ?: return
+
+        if (
+            dragged.type ==
+            CreatePresetEquipmentType
+                .WEAPON
+        ) {
+            selectedWeaponId =
+                dragged.contentId
         }
+
         cancelDrag()
     }
 
     fun finishDragOnArmorSlot() {
-        val dragged = draggedContent ?: return
-        if (dragged.type == CreatePresetEquipmentType.ARMOR) {
-            selectedArmorId = dragged.contentId
+        val dragged =
+            draggedContent
+                ?: return
+
+        if (
+            dragged.type ==
+            CreatePresetEquipmentType
+                .ARMOR
+        ) {
+            selectedArmorId =
+                dragged.contentId
         }
+
         cancelDrag()
     }
 
     fun finishDragOnItemSlot() {
-        val dragged = draggedContent ?: return
-        if (dragged.type == CreatePresetEquipmentType.ITEM) {
-            selectedItemId = dragged.contentId
+        val dragged =
+            draggedContent
+                ?: return
+
+        if (
+            dragged.type ==
+            CreatePresetEquipmentType
+                .ITEM
+        ) {
+            selectedItemId =
+                dragged.contentId
         }
+
         cancelDrag()
     }
 
+    /*
+     * Tamga uyumluluğu ekran tarafından,
+     * TamgaCompatibility kullanılarak kontrol edilir.
+     *
+     * State yalnızca geçerli seçimi kaydeder.
+     */
+    fun finishTamgaDrag(
+        targetSlot:
+        TamgaPresetSlot,
+
+        tamga:
+        TamgaDefinition
+    ) {
+        val dragged =
+            draggedContent
+                ?: return
+
+        if (
+            dragged.type !=
+            CreatePresetEquipmentType
+                .TAMGA ||
+            dragged.contentId !=
+            tamga.id
+        ) {
+            cancelDrag()
+            return
+        }
+
+        when (targetSlot) {
+            TamgaPresetSlot
+                .WEAPON_TAMGA_SLOT -> {
+
+                if (
+                    tamga.canUseWeaponSlot
+                ) {
+                    selectedWeaponTamgaId =
+                        tamga.id
+
+                    if (
+                        selectedArmorTamgaId ==
+                        tamga.id
+                    ) {
+                        selectedArmorTamgaId =
+                            null
+                    }
+                }
+            }
+
+            TamgaPresetSlot
+                .ARMOR_TAMGA_SLOT -> {
+
+                if (
+                    tamga.canUseArmorSlot
+                ) {
+                    selectedArmorTamgaId =
+                        tamga.id
+
+                    if (
+                        selectedWeaponTamgaId ==
+                        tamga.id
+                    ) {
+                        selectedWeaponTamgaId =
+                            null
+                    }
+                }
+            }
+        }
+
+        cancelDrag()
+    }
+
+    fun clearWeaponTamga() {
+        selectedWeaponTamgaId =
+            null
+    }
+
+    fun clearArmorTamga() {
+        selectedArmorTamgaId =
+            null
+    }
+
     fun cancelDrag() {
-        draggedContent = null
+        draggedContent =
+            null
     }
 
     fun toggleLockedContentVisibility() {
-        showLockedContent = !showLockedContent
+        showLockedContent =
+            !showLockedContent
     }
 
-    fun openConfirmation(type: CreatePresetConfirmationType) {
+    fun openConfirmation(
+        type:
+        CreatePresetConfirmationType
+    ) {
         closeModals()
-        confirmationType = type
+
+        confirmationType =
+            type
     }
 
     fun closeModals() {
-        isCharacterPickerOpen = false
-        inspectedCharacterId = null
-        inspectedEquipment = null
-        inspectedStatType = null
-        confirmationType = null
+        isCharacterPickerOpen =
+            false
+
+        inspectedCharacterId =
+            null
+
+        inspectedEquipment =
+            null
+
+        inspectedTamgaId =
+            null
+
+        inspectedStatType =
+            null
+
+        confirmationType =
+            null
     }
 
     fun reset() {
-        selectedCharacterId = null
-        selectedWeaponId = null
-        selectedArmorId = null
-        selectedItemId = null
-        statAllocation = PresetStatAllocation()
-        statPointBudget = 10
-        isCharacterPickerOpen = false
-        inspectedCharacterId = null
-        inspectedEquipment = null
-        inspectedStatType = null
-        draggedContent = null
-        confirmationType = null
-        showLockedContent = false
+        selectedCharacterId =
+            null
+
+        selectedWeaponId =
+            null
+
+        selectedArmorId =
+            null
+
+        selectedItemId =
+            null
+
+        selectedWeaponTamgaId =
+            null
+
+        selectedArmorTamgaId =
+            null
+
+        statAllocation =
+            PresetStatAllocation()
+
+        statPointBudget =
+            10
+
+        isCharacterPickerOpen =
+            false
+
+        inspectedCharacterId =
+            null
+
+        inspectedEquipment =
+            null
+
+        inspectedTamgaId =
+            null
+
+        inspectedStatType =
+            null
+
+        draggedContent =
+            null
+
+        confirmationType =
+            null
+
+        showLockedContent =
+            false
     }
 }
 
 data class CreatePresetDraggedContent(
-    val contentId: ContentId,
-    val type: CreatePresetEquipmentType
+    val contentId:
+    ContentId,
+
+    val type:
+    CreatePresetEquipmentType
 )
 
 data class CreatePresetInspectedEquipment(
-    val contentId: ContentId,
-    val type: CreatePresetEquipmentType
+    val contentId:
+    ContentId,
+
+    val type:
+    CreatePresetEquipmentType
 )
 
 enum class CreatePresetEquipmentType {
+
     WEAPON,
+
     ARMOR,
-    ITEM
+
+    ITEM,
+
+    TAMGA
 }
 
 enum class CreatePresetConfirmationType {
+
     DISCARD_AND_GO_BACK,
+
     SAVE_PRESET,
+
     EDIT_STATS
 }

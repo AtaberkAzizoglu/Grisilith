@@ -8,5 +8,7 @@ enum class ContentCategory {
 
     ARMOR,
 
-    ITEM
+    ITEM,
+
+    TAMGA
 }

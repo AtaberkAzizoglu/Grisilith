@@ -360,7 +360,7 @@ class MarketRenderer(
 
         drawCenteredText(
             text =
-                "NEXT STAGE: $nextStage",
+                "NEXT STAGE: ($nextStage -1)",
 
             rectangle =
                 layout.stagePanel,

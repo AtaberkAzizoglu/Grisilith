@@ -5,6 +5,10 @@ import com.azizoglu.grisilith.character.CharacterDefinition
 import com.azizoglu.grisilith.content.ContentRegistry
 import com.azizoglu.grisilith.item.definition.ItemDefinition
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.tamga.definition.TamgaCompatibility
+import com.azizoglu.grisilith.tamga.definition.TamgaCompatibilityResult
+import com.azizoglu.grisilith.tamga.definition.TamgaDefinition
+import com.azizoglu.grisilith.tamga.definition.TamgaPresetSlot
 import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 
 object PresetValidator {
@@ -16,6 +20,7 @@ object PresetValidator {
         contentRegistry:
         ContentRegistry
     ): PresetValidationResult {
+
         if (
             preset.presetName
                 .isBlank()
@@ -73,9 +78,9 @@ object PresetValidator {
                 )
 
         /*
-         * Değişkenler bilinçli olarak resolve edilir.
-         * Böylece yanlış kategorideki bir Content ID
-         * Preset'e kaydedilemez.
+         * Yanlış kategoride bir Content ID'nin
+         * Preset'e kaydedilmesini engellemek için
+         * bütün ana ekipmanlar resolve edilir.
          */
         @Suppress("UNUSED_VARIABLE")
         val resolvedEquipment =
@@ -115,7 +120,9 @@ object PresetValidator {
                         statType
                     )
 
-            if (bonus < 0) {
+            if (
+                bonus < 0
+            ) {
                 return invalid(
                     "${statType.displayName} has a negative Preset bonus."
                 )
@@ -143,24 +150,148 @@ object PresetValidator {
             }
         }
 
+        val weaponTamgaValidation =
+            validateTamgaSlot(
+                tamgaId =
+                    preset.weaponTamgaId,
+
+                targetSlot =
+                    TamgaPresetSlot
+                        .WEAPON_TAMGA_SLOT,
+
+                weapon =
+                    weapon,
+
+                armor =
+                    armor,
+
+                contentRegistry =
+                    contentRegistry
+            )
+
+        if (
+            weaponTamgaValidation is
+                PresetValidationResult.Invalid
+        ) {
+            return weaponTamgaValidation
+        }
+
+        val armorTamgaValidation =
+            validateTamgaSlot(
+                tamgaId =
+                    preset.armorTamgaId,
+
+                targetSlot =
+                    TamgaPresetSlot
+                        .ARMOR_TAMGA_SLOT,
+
+                weapon =
+                    weapon,
+
+                armor =
+                    armor,
+
+                contentRegistry =
+                    contentRegistry
+            )
+
+        if (
+            armorTamgaValidation is
+                PresetValidationResult.Invalid
+        ) {
+            return armorTamgaValidation
+        }
+
         /*
-         * Tamga sistemi hazır olduğunda burada:
+         * Aynı Tamga'nın iki slota birden
+         * takılmasına izin vermiyoruz.
          *
-         * - Weapon Tamga ID doğrulaması
-         * - Armor Tamga ID doğrulaması
-         * - Weapon/Tamga uyumluluğu
-         * - Armor/Tamga uyumluluğu
-         *
-         * eklenecek.
+         * General Tamga iki slot türüyle de uyumludur
+         * fakat aynı Preset içinde tek kopya kullanılır.
          */
+        if (
+            preset.weaponTamgaId != null &&
+            preset.weaponTamgaId ==
+            preset.armorTamgaId
+        ) {
+            return invalid(
+                "The same Tamga cannot be equipped in both slots."
+            )
+        }
 
         return PresetValidationResult.Valid
+    }
+
+    private fun validateTamgaSlot(
+        tamgaId:
+        com.azizoglu.grisilith.content.ContentId?,
+
+        targetSlot:
+        TamgaPresetSlot,
+
+        weapon:
+        WeaponDefinition,
+
+        armor:
+        ArmorDefinition,
+
+        contentRegistry:
+        ContentRegistry
+    ): PresetValidationResult {
+
+        /*
+         * Tamga slotları zorunlu değildir.
+         */
+        if (
+            tamgaId == null
+        ) {
+            return PresetValidationResult.Valid
+        }
+
+        val tamga =
+            contentRegistry.findById(
+                tamgaId
+            ) as?
+                TamgaDefinition
+                ?: return invalid(
+                    "The selected Tamga does not exist."
+                )
+
+        return when (
+            val compatibility =
+                TamgaCompatibility.check(
+                    tamga =
+                        tamga,
+
+                    targetSlot =
+                        targetSlot,
+
+                    selectedWeapon =
+                        weapon,
+
+                    selectedArmor =
+                        armor
+                )
+        ) {
+            TamgaCompatibilityResult
+                .Compatible -> {
+                PresetValidationResult.Valid
+            }
+
+            is TamgaCompatibilityResult
+            .Incompatible -> {
+                invalid(
+                    compatibility.message
+                )
+            }
+        }
     }
 
     private fun invalid(
         message:
         String
     ): PresetValidationResult.Invalid {
+
         return PresetValidationResult
             .Invalid(
                 message =

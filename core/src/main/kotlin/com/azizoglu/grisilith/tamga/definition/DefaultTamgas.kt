@@ -1,0 +1,241 @@
+package com.azizoglu.grisilith.tamga.definition
+
+import com.azizoglu.grisilith.content.ContentId
+import com.azizoglu.grisilith.content.ContentTag
+import com.azizoglu.grisilith.content.ContentUnlockState
+import com.azizoglu.grisilith.statistics.StatType
+
+object DefaultTamgas {
+
+    val charger =
+        TamgaDefinition(
+            id =
+                ContentId(
+                    "TMG_CHARGER"
+                ),
+
+            displayName =
+                "Charger",
+
+            description =
+                "Activate to gradually increase Movement Speed, " +
+                    "starting with a small bonus and building toward " +
+                    "a powerful charge. Shortly after reaching maximum " +
+                    "speed, the charge ends, immediately stops the player, " +
+                    "and damages and knocks back nearby enemies. Sharp turns " +
+                    "become harder while charging. Completely stopping or " +
+                    "colliding with an obstacle interrupts the skill and " +
+                    "starts its cooldown.",
+
+            slotType =
+                TamgaSlotType.GENERAL,
+
+            activationType =
+                TamgaActivationType.ACTIVE,
+
+            effectId =
+                TamgaEffectId.CHARGER,
+
+            interactableStats =
+                setOf(
+                    StatType.MOVEMENT_SPEED,
+                    StatType.ELEMENTAL_DAMAGE
+                ),
+
+            additionalTags =
+                setOf(
+                    ContentTag.SPECIAL,
+                    ContentTag.GLYPH_MOTION,
+                    ContentTag.FIRE_DAMAGE
+                ),
+
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
+    val heightInsecurity =
+        TamgaDefinition(
+            id =
+                ContentId(
+                    "TMG_HEIGHT_INSECURITY"
+                ),
+
+            displayName =
+                "Height Insecurity",
+
+            description =
+                "Deal additional damage to creatures larger than the " +
+                    "player, including Unique enemies, Mini Bosses and " +
+                    "Final Bosses. The damage bonus begins at 5% and " +
+                    "increases by another 5% for every 10 stages reached.",
+
+            slotType =
+                TamgaSlotType.GENERAL,
+
+            activationType =
+                TamgaActivationType.PASSIVE,
+
+            effectId =
+                TamgaEffectId.HEIGHT_INSECURITY,
+
+            interactableStats =
+                emptySet(),
+
+            additionalTags =
+                setOf(
+                    ContentTag.SPECIAL
+                ),
+
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
+    val mountedCombatant =
+        TamgaDefinition(
+            id =
+                ContentId(
+                    "TMG_MOUNTED_COMBATANT"
+                ),
+
+            displayName =
+                "Mounted Combatant",
+
+            description =
+                "Activate to summon a mount for 15 seconds. While mounted, " +
+                    "Weapon Range, Max HP and Movement Speed increase, while " +
+                    "Harvest decreases. The strength of these changes grows " +
+                    "for every 5 stages reached. This Tamga has a 120-second " +
+                    "cooldown.",
+
+            slotType =
+                TamgaSlotType.GENERAL,
+
+            activationType =
+                TamgaActivationType.ACTIVE,
+
+            effectId =
+                TamgaEffectId.MOUNTED_COMBATANT,
+
+            interactableStats =
+                setOf(
+                    StatType.MAX_HP,
+                    StatType.MOVEMENT_SPEED,
+                    StatType.HARVEST
+                ),
+
+            additionalTags =
+                setOf(
+                    ContentTag.SPECIAL,
+                    ContentTag.GLYPH_MOTION
+                ),
+
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
+    val holyLights =
+        TamgaDefinition(
+            id =
+                ContentId(
+                    "TMG_HOLY_LIGHTS"
+                ),
+
+            displayName =
+                "Holy Lights",
+
+            description =
+                "Creates a permanent aura centered on the player. Its " +
+                    "behavior is determined by the highest value among " +
+                    "Armor Class, Wisdom and Life Steal. Armor Class creates " +
+                    "a defensive light that deals low damage and slightly " +
+                    "increases Armor Class. Wisdom creates a stronger damaging " +
+                    "aura. Life Steal creates a low-damage aura whose hits can " +
+                    "trigger Life Steal. The selected Stat gains a stage-based " +
+                    "bonus beginning at +1 and increasing every 5 stages.",
+
+            slotType =
+                TamgaSlotType.ARMOR,
+
+            activationType =
+                TamgaActivationType.PASSIVE,
+
+            effectId =
+                TamgaEffectId.HOLY_LIGHTS,
+
+            interactableStats =
+                setOf(
+                    StatType.ARMOR_CLASS,
+                    StatType.WISDOM,
+                    StatType.LIFE_STEAL
+                ),
+
+            additionalTags =
+                setOf(
+                    ContentTag.AURA,
+                    ContentTag.SPECIAL
+                ),
+
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
+    val arcaneAura =
+        TamgaDefinition(
+            id =
+                ContentId(
+                    "TMG_ARCANE_AURA"
+                ),
+
+            displayName =
+                "Arcane Aura",
+
+            description =
+                "Creates a permanent damaging aura centered on the player. " +
+                    "Its damage type and appearance are determined by the " +
+                    "highest value among Shepherd, Elemental Damage and " +
+                    "Might of Nature. Shepherd produces a dark-green Nature " +
+                    "aura, Elemental Damage produces a blue Water aura, and " +
+                    "Might of Nature produces a purple Necrotic aura. Damage " +
+                    "slowly increases as stages advance.",
+
+            slotType =
+                TamgaSlotType.ARMOR,
+
+            activationType =
+                TamgaActivationType.PASSIVE,
+
+            effectId =
+                TamgaEffectId.ARCANE_AURA,
+
+            /*
+             * Kaynak listede Interactable Stats "-"
+             * olduğu için burada boş bırakıyoruz.
+             *
+             * Statlar yalnızca davranış seçimi için
+             * runtime tarafından okunacak.
+             */
+            interactableStats =
+                emptySet(),
+
+            additionalTags =
+                setOf(
+                    ContentTag.AURA,
+                    ContentTag.SPECIAL,
+                    ContentTag.WATER_DAMAGE,
+                    ContentTag.NECROTIC_DAMAGE
+                ),
+
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
+    val all:
+        List<TamgaDefinition> =
+        listOf(
+            charger,
+            heightInsecurity,
+            mountedCombatant,
+            holyLights,
+            arcaneAura
+        )
+}

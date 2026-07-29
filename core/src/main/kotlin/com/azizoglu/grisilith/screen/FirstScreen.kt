@@ -463,33 +463,33 @@ class FirstScreen(
             weaponInventory.addWeapon(
                 WeaponInstance(
                     definition =
-                        DefaultWeapons.lance,
+                        DefaultWeapons.longbow,
 
                     level =
                         2
                 )
             )
 
-            itemInventory.addItem(
-                ItemInstance(
+            weaponInventory.addWeapon(
+                WeaponInstance(
                     definition =
-                        DefaultItems.gladiatorsLocket
+                        DefaultWeapons.longbow,
+
+                    level =
+                        2
                 )
             )
 
-            itemInventory.addItem(
-                ItemInstance(
+            weaponInventory.addWeapon(
+                WeaponInstance(
                     definition =
-                        DefaultItems.gladiatorsLocket
+                        DefaultWeapons.longbow,
+
+                    level =
+                        2
                 )
             )
 
-            itemInventory.addItem(
-                ItemInstance(
-                    definition =
-                        DefaultItems.luckyDice
-                )
-            )
         }
 
         camera.update()
