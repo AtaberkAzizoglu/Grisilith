@@ -207,13 +207,6 @@ object DefaultTamgas {
             effectId =
                 TamgaEffectId.ARCANE_AURA,
 
-            /*
-             * Kaynak listede Interactable Stats "-"
-             * olduğu için burada boş bırakıyoruz.
-             *
-             * Statlar yalnızca davranış seçimi için
-             * runtime tarafından okunacak.
-             */
             interactableStats =
                 emptySet(),
 
@@ -229,6 +222,98 @@ object DefaultTamgas {
                 ContentUnlockState.UNLOCKED
         )
 
+    val flameBlades =
+        TamgaDefinition(
+            id =
+                ContentId(
+                    "TMG_FLAME_BLADES"
+                ),
+
+            displayName =
+                "Flame Blades",
+
+            description =
+                "Melee attacks made by the Weapon in the first Weapon slot " +
+                    "apply Burned to every enemy they damage. Burned enemies " +
+                    "also receive additional Fire damage whenever they are " +
+                    "damaged by any equipped Weapon. The additional damage is " +
+                    "equal to 5 plus 110% of Elemental Damage.",
+
+            slotType =
+                TamgaSlotType.WEAPON,
+
+            activationType =
+                TamgaActivationType.PASSIVE,
+
+            effectId =
+                TamgaEffectId.FLAME_BLADES,
+
+            interactableStats =
+                setOf(
+                    StatType.ELEMENTAL_DAMAGE
+                ),
+
+            requiredWeaponTags =
+                setOf(
+                    ContentTag.MELEE_WEAPON
+                ),
+
+            additionalTags =
+                setOf(
+                    ContentTag.SPECIAL,
+                    ContentTag.FIRE_DAMAGE
+                ),
+
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
+    val quickShot =
+        TamgaDefinition(
+            id =
+                ContentId(
+                    "TMG_QUICK_SHOT"
+                ),
+
+            displayName =
+                "Quick Shot",
+
+            description =
+                "Whenever the ranged Weapon in the first Weapon slot " +
+                    "performs an attack, gain +1 Attack Speed. The bonus " +
+                    "stacks up to 3 times at first, increases to 4 stacks " +
+                    "at Stage 11, and reaches its maximum of 5 stacks at " +
+                    "Stage 21. All stacks are lost if the first Weapon slot " +
+                    "does not attack for 1 second.",
+
+            slotType =
+                TamgaSlotType.WEAPON,
+
+            activationType =
+                TamgaActivationType.PASSIVE,
+
+            effectId =
+                TamgaEffectId.QUICK_SHOT,
+
+            interactableStats =
+                setOf(
+                    StatType.ATTACK_SPEED
+                ),
+
+            requiredWeaponTags =
+                setOf(
+                    ContentTag.RANGED_WEAPON
+                ),
+
+            additionalTags =
+                setOf(
+                    ContentTag.SPECIAL
+                ),
+
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
     val all:
         List<TamgaDefinition> =
         listOf(
@@ -236,6 +321,8 @@ object DefaultTamgas {
             heightInsecurity,
             mountedCombatant,
             holyLights,
-            arcaneAura
+            arcaneAura,
+            flameBlades,
+            quickShot
         )
 }

@@ -8,6 +8,7 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
 import com.badlogic.gdx.math.Vector2
 import kotlin.math.roundToInt
 import com.azizoglu.grisilith.combat.debug.CombatDebugVisualManager
+import com.azizoglu.grisilith.content.DamageType
 
 class ShortswordAttackExecutor(
     private val damageCalculator:
@@ -466,6 +467,21 @@ class ShortswordAttackExecutor(
                 enemy
             )
         }
+
+        context.reportWeaponHit(
+            enemy = enemy,
+            appliedDamage =
+                appliedDamage,
+            damageType =
+                context.weapon
+                    .definition
+                    .damageTypes
+                    .firstOrNull { type ->
+                        type !=
+                            DamageType.NONE
+                    }
+                    ?: DamageType.NONE
+        )
     }
 
     private fun addDebugLine(

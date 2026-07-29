@@ -166,6 +166,21 @@ class TotemOfDarkCloudsAttackExecutor(
             )
         }
 
+        context.reportWeaponHit(
+            enemy = target,
+            appliedDamage =
+                appliedDamage,
+            damageType =
+                context.weapon
+                    .definition
+                    .damageTypes
+                    .firstOrNull { type ->
+                        type !=
+                            DamageType.NONE
+                    }
+                    ?: DamageType.NONE
+        )
+
         /*
          * Hedef ölse bile saldırı anındaki
          * merkezinden görsel projectile çıkar.

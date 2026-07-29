@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.weapon.runtime.executor
 
+import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
@@ -22,13 +23,19 @@ object WeaponAreaAttackHelper {
         val levelStats =
             context.weapon.currentLevelStats
 
-        /*
-         * Her hedef için crit ayrı hesaplanır.
-         */
         val damageResult =
             damageCalculator.calculate(
-                weapon = context.weapon
+                weapon =
+                    context.weapon
             )
+
+        val damageType =
+            definition.damageTypes
+                .firstOrNull { type ->
+                    type !=
+                        DamageType.NONE
+                }
+                ?: DamageType.NONE
 
         val wasAliveBeforeAttack =
             !enemy.isDead
@@ -44,10 +51,6 @@ object WeaponAreaAttackHelper {
                 context.weapon.displayName
             )
 
-            /*
-             * Alan saldırılarında her düşman,
-             * oyuncudan kendisine doğru itilir.
-             */
             enemy.applyKnockback(
                 directionX =
                     enemy.centerX -
@@ -59,10 +62,17 @@ object WeaponAreaAttackHelper {
 
                 strength =
                     definition.baseKnockback *
-                        levelStats.knockbackMultiplier
+                        levelStats
+                            .knockbackMultiplier
             )
         }
 
+        /*
+         * Önce base Weapon ölümünü bildiriyoruz.
+         *
+         * Böylece Flame Blades bonus hasarı ayrıca
+         * öldürürse aynı Enemy iki kez bildirilmez.
+         */
         if (
             wasAliveBeforeAttack &&
             enemy.isDead
@@ -71,5 +81,13 @@ object WeaponAreaAttackHelper {
                 enemy
             )
         }
+
+        context.reportWeaponHit(
+            enemy = enemy,
+            appliedDamage =
+                appliedDamage,
+            damageType =
+                damageType
+        )
     }
 }

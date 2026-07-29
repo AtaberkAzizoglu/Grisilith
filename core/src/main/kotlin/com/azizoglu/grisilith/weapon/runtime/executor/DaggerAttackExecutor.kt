@@ -211,6 +211,21 @@ class DaggerAttackExecutor(
                 target
             )
         }
+
+        context.reportWeaponHit(
+            enemy = target,
+            appliedDamage =
+                appliedDamage,
+            damageType =
+                context.weapon
+                    .definition
+                    .damageTypes
+                    .firstOrNull { type ->
+                        type !=
+                            DamageType.NONE
+                    }
+                    ?: DamageType.NONE
+        )
     }
 
     private fun executeThrowAttack(
@@ -316,6 +331,12 @@ class DaggerAttackExecutor(
 
                 sourceWeaponName =
                     context.weapon.displayName,
+
+                sourceWeapon =
+                    context.weapon,
+
+                sourceWeaponSlotIndex =
+                    context.weaponSlotIndex,
 
                 damage =
                     damageResult.damage,

@@ -4,13 +4,18 @@ import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.statistics.PlayerStats
+import com.azizoglu.grisilith.tamga.runtime.TamgaRuntimeManager
 import com.azizoglu.grisilith.weapon.Projectile
 
 class WeaponRuntimeManager(
     private val inventory:
     WeaponInventory,
+
     private val playerStats:
-    PlayerStats
+    PlayerStats,
+
+    private val tamgaRuntimeManager:
+    TamgaRuntimeManager
 ) {
 
     private val runtimesByWeapon =
@@ -46,11 +51,31 @@ class WeaponRuntimeManager(
         statBonusSynchronizer
             .synchronize()
 
-        runtimesByWeapon.values
-            .forEach { runtime ->
+        /*
+         * Runtime'ları map sırasıyla değil gerçek
+         * inventory slot sırasıyla güncelliyoruz.
+         *
+         * Quick Shot açısından slot 0, oyuncuya
+         * gösterilen 1. Weapon slotudur.
+         */
+        inventory.weaponSlots
+            .forEachIndexed {
+                    slotIndex,
+                    slot ->
+
+                val weapon =
+                    slot.weapon
+                        ?: return@forEachIndexed
+
+                val runtime =
+                    runtimesByWeapon[
+                        weapon
+                    ]
+                        ?: return@forEachIndexed
 
                 runtime.update(
                     delta = delta,
+                    slotIndex = slotIndex,
                     player = player,
                     enemyManager =
                         enemyManager,
@@ -68,10 +93,6 @@ class WeaponRuntimeManager(
         val equippedWeapons =
             inventory.allWeapons()
 
-        /*
-         * Envanterden çıkarılmış silahların
-         * runtime'larını kaldırır.
-         */
         runtimesByWeapon.keys
             .toList()
             .filter { weapon ->
@@ -83,20 +104,21 @@ class WeaponRuntimeManager(
                 )
             }
 
-        /*
-         * Yeni takılan her silah için ayrı
-         * runtime ve ayrı timer oluşturur.
-         */
         equippedWeapons
             .forEach { weapon ->
 
                 runtimesByWeapon
-                    .getOrPut(weapon) {
+                    .getOrPut(
+                        weapon
+                    ) {
                         WeaponRuntime(
                             weapon = weapon,
-                            playerStats = playerStats,
+                            playerStats =
+                                playerStats,
                             executorFactory =
-                                executorFactory
+                                executorFactory,
+                            tamgaRuntimeManager =
+                                tamgaRuntimeManager
                         )
                     }
             }
@@ -118,5 +140,6 @@ class WeaponRuntimeManager(
     }
 
     val activeRuntimeCount: Int
-        get() = runtimesByWeapon.size
+        get() =
+            runtimesByWeapon.size
 }

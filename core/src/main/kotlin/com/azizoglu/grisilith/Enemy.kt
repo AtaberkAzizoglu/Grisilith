@@ -8,6 +8,8 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import kotlin.math.sqrt
+import com.azizoglu.grisilith.combat.condition.ConditionContainer
+import com.azizoglu.grisilith.content.ConditionType
 
 class Enemy(
     startX: Float,
@@ -53,6 +55,15 @@ class Enemy(
         maximumHealth = stats.maximumHealth
     )
 
+    val conditions =
+        ConditionContainer()
+
+    val isBurned: Boolean
+        get() =
+            conditions.contains(
+                ConditionType.BURNED
+            )
+
     val contactDamage: Int
         get() = stats.contactDamage
 
@@ -91,8 +102,13 @@ class Enemy(
         onContactDamage: (Int) -> Unit
     ) {
         if (isDead) {
+            conditions.clear()
             return
         }
+
+        conditions.update(
+            delta = delta
+        )
 
         previousPosition.set(position)
 
@@ -264,6 +280,39 @@ class Enemy(
         return health.takeDamage(amount)
     }
 
+    fun applyCondition(
+        conditionType: ConditionType,
+        durationSeconds: Float? = null
+    ) {
+        if (isDead) {
+            return
+        }
+
+        conditions.apply(
+            type = conditionType,
+            durationSeconds =
+                durationSeconds
+        )
+    }
+
+    fun hasCondition(
+        conditionType: ConditionType
+    ): Boolean {
+
+        return conditions.contains(
+            conditionType
+        )
+    }
+
+    fun removeCondition(
+        conditionType: ConditionType
+    ): Boolean {
+
+        return conditions.remove(
+            conditionType
+        )
+    }
+
     fun applyKnockback(
         directionX: Float,
         directionY: Float,
@@ -334,7 +383,69 @@ class Enemy(
             size
         )
 
-        renderHealthBar(shapeRenderer)
+        if (isBurned) {
+            renderBurnedEffect(
+                shapeRenderer = shapeRenderer
+            )
+        }
+
+        renderHealthBar(
+            shapeRenderer = shapeRenderer
+        )
+    }
+
+    private fun renderBurnedEffect(
+        shapeRenderer: ShapeRenderer
+    ) {
+        val borderThickness =
+            3f
+
+        shapeRenderer.color =
+            Color.ORANGE
+
+        /*
+         * Alt kenar
+         */
+        shapeRenderer.rect(
+            position.x,
+            position.y,
+            size,
+            borderThickness
+        )
+
+        /*
+         * Üst kenar
+         */
+        shapeRenderer.rect(
+            position.x,
+            position.y +
+                size -
+                borderThickness,
+            size,
+            borderThickness
+        )
+
+        /*
+         * Sol kenar
+         */
+        shapeRenderer.rect(
+            position.x,
+            position.y,
+            borderThickness,
+            size
+        )
+
+        /*
+         * Sağ kenar
+         */
+        shapeRenderer.rect(
+            position.x +
+                size -
+                borderThickness,
+            position.y,
+            borderThickness,
+            size
+        )
     }
 
     private fun renderHealthBar(

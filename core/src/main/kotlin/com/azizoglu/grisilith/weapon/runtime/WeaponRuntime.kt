@@ -4,15 +4,18 @@ import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.statistics.PlayerStats
+import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.tamga.runtime.TamgaRuntimeManager
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.definition.WeaponAttackPattern
-import com.azizoglu.grisilith.statistics.StatType
 
 class WeaponRuntime(
     val weapon: WeaponInstance,
     private val playerStats: PlayerStats,
     private val executorFactory:
-    WeaponAttackExecutorFactory
+    WeaponAttackExecutorFactory,
+    private val tamgaRuntimeManager:
+    TamgaRuntimeManager
 ) {
 
     private val attackTimer =
@@ -20,6 +23,7 @@ class WeaponRuntime(
 
     fun update(
         delta: Float,
+        slotIndex: Int,
         player: Player,
         enemyManager: EnemyManager,
         projectiles: MutableList<Projectile>,
@@ -42,31 +46,81 @@ class WeaponRuntime(
         val executor =
             executorFactory.executorFor(
                 definition.attackPattern
-            ) ?: return
+            )
+                ?: return
 
         attackTimer.update(
             delta = delta,
+
             attacksPerSecond =
                 calculateAttacksPerSecond()
         ) {
+            val attacksBeforeExecution =
+                weapon.completedNormalAttackCount
+
             executor.execute(
                 WeaponAttackContext(
                     weapon = weapon,
+
+                    weaponSlotIndex =
+                        slotIndex,
+
                     player = player,
+
                     enemyManager =
                         enemyManager,
+
                     projectiles =
                         projectiles,
+
                     onDamageDealt =
                         onDamageDealt,
+
                     onEnemyKilled =
-                        onEnemyKilled
+                        onEnemyKilled,
+
+                    onWeaponHit = {
+                            hitEvent ->
+
+                        tamgaRuntimeManager
+                            .onWeaponHit(
+                                event =
+                                    hitEvent,
+
+                                onDamageDealt =
+                                    onDamageDealt,
+
+                                onEnemyKilled =
+                                    onEnemyKilled
+                            )
+                    }
                 )
             )
+
+            val attacksAfterExecution =
+                weapon.completedNormalAttackCount
+
+            /*
+             * Executor hedef bulamadıysa normal saldırı
+             * sayacı değişmez. Böylece Quick Shot boş
+             * saldırı timer'larından stack kazanmaz.
+             */
+            if (
+                attacksAfterExecution >
+                attacksBeforeExecution
+            ) {
+                tamgaRuntimeManager
+                    .onWeaponAttack(
+                        slotIndex = slotIndex,
+                        weapon = weapon
+                    )
+            }
         }
     }
 
-    private fun calculateAttacksPerSecond(): Float {
+    private fun calculateAttacksPerSecond():
+        Float {
+
         val definition =
             weapon.definition
 
@@ -84,15 +138,12 @@ class WeaponRuntime(
 
                 StatType.ATTACK_SPEED -> {
                     playerStats
-                        .attackSpeedMultiplier()
+                        .attackSpeedMultiplier() *
+                        tamgaRuntimeManager
+                            .attackSpeedMultiplier()
                 }
 
                 else -> {
-                    /*
-                     * Normal saldırı hızında kullanılmasına
-                     * izin vermediğimiz statlar için güvenli
-                     * varsayılan değer.
-                     */
                     1f
                 }
             }
@@ -102,7 +153,9 @@ class WeaponRuntime(
                 levelStats.attackSpeedMultiplier *
                 characterAttackSpeedMultiplier
             )
-            .coerceAtLeast(0.01f)
+            .coerceAtLeast(
+                0.01f
+            )
     }
 
     fun resetTimer() {

@@ -70,6 +70,7 @@ import com.azizoglu.grisilith.screen.pause.PauseInteractionState
 import com.azizoglu.grisilith.screen.render.PauseRenderer
 import com.azizoglu.grisilith.preset.ResolvedPresetContent
 import com.azizoglu.grisilith.armor.runtime.EquippedArmor
+import com.azizoglu.grisilith.tamga.runtime.TamgaRuntimeManager
 
 
 class FirstScreen(
@@ -172,10 +173,42 @@ class FirstScreen(
                 playerStats
         )
 
+    private val stageController =
+        StageController(
+            normalStageDurationSeconds = 30f,
+            miniBossStageDurationSeconds = 45f,
+            finalBossStageDurationSeconds = 60f,
+            maximumStage = 20
+        )
+
+
+    private val tamgaRuntimeManager =
+        TamgaRuntimeManager(
+            weaponInventory =
+                weaponInventory,
+
+            playerStats =
+                playerStats,
+
+            weaponTamga =
+                selectedPreset
+                    ?.weaponTamga,
+
+            currentStageProvider = {
+                stageController.currentStage
+            }
+        )
+
     private val weaponRuntimeManager =
         WeaponRuntimeManager(
-            inventory = weaponInventory,
-            playerStats = playerStats
+            inventory =
+                weaponInventory,
+
+            playerStats =
+                playerStats,
+
+            tamgaRuntimeManager =
+                tamgaRuntimeManager
         )
 
     private val mapObstacles: List<MapObstacle> =
@@ -236,14 +269,6 @@ class FirstScreen(
 
     private var previousInputProcessor:
         InputProcessor? = null
-
-    private val stageController = StageController(
-        normalStageDurationSeconds = 30f,
-        miniBossStageDurationSeconds = 45f,
-        finalBossStageDurationSeconds = 60f,
-        maximumStage = 20
-    )
-
 
     private val sessionWallet =
         SessionWallet()
@@ -549,6 +574,8 @@ class FirstScreen(
                     true
             )
 
+        tamgaRuntimeManager.reset()
+
         weaponRuntimeManager
             .resetAllTimers()
     }
@@ -842,6 +869,10 @@ class FirstScreen(
             )
         }
 
+        tamgaRuntimeManager.update(
+            delta = delta
+        )
+
         if (!player.health.isDead) {
             weaponRuntimeManager.update(
                 delta = delta,
@@ -880,23 +911,69 @@ class FirstScreen(
             )
 
             projectile.checkCollision(
-                enemies = enemyManager.allEnemies,
-                onDamageDealt = { appliedDamage ->
+                enemies =
+                    enemyManager.allEnemies,
+
+                onDamageDealt = {
+                        appliedDamage ->
+
                     runStatistics.recordDamageDealt(
-                        amount = appliedDamage,
+                        amount =
+                            appliedDamage,
+
                         weaponName =
                             projectile.sourceWeaponName
                     )
 
                     player.tryLifeSteal(
-                        appliedDamage = appliedDamage
+                        appliedDamage =
+                            appliedDamage
+                    )
+                },
+
+                onEnemyKilled = {
+                        killedEnemy ->
+
+                    handleEnemyKilled(
+                        killedEnemy
+                    )
+                },
+
+                onWeaponHit = {
+                        hitEvent ->
+
+                    tamgaRuntimeManager.onWeaponHit(
+                        event =
+                            hitEvent,
+
+                        onDamageDealt = {
+                                bonusDamage,
+                                weaponName ->
+
+                            runStatistics.recordDamageDealt(
+                                amount =
+                                    bonusDamage,
+
+                                weaponName =
+                                    weaponName
+                            )
+
+                            player.tryLifeSteal(
+                                appliedDamage =
+                                    bonusDamage
+                            )
+                        },
+
+                        onEnemyKilled = {
+                                killedEnemy ->
+
+                            handleEnemyKilled(
+                                killedEnemy
+                            )
+                        }
                     )
                 }
-            ) { killedEnemy ->
-                handleEnemyKilled(
-                    killedEnemy
-                )
-            }
+            )
         }
 
         projectiles.removeAll { projectile ->

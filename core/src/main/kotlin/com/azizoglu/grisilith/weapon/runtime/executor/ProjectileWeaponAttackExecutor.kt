@@ -643,6 +643,12 @@ class ProjectileWeaponAttackExecutor(
                 sourceWeaponName =
                     context.weapon.displayName,
 
+                sourceWeapon =
+                    context.weapon,
+
+                sourceWeaponSlotIndex =
+                    context.weaponSlotIndex,
+
                 damage =
                     finalDamage,
 

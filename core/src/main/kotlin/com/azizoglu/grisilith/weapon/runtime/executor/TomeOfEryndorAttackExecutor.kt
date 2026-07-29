@@ -8,6 +8,7 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
 import com.badlogic.gdx.math.Vector2
 import kotlin.math.roundToInt
+import com.azizoglu.grisilith.content.DamageType
 
 class TomeOfEryndorAttackExecutor(
     private val damageCalculator:
@@ -314,11 +315,20 @@ class TomeOfEryndorAttackExecutor(
             )
         }
 
-        /*
-         * Burned Condition daha sonra burada
-         * veya merkezi hit-event sisteminde
-         * uygulanacak.
-         */
+        context.reportWeaponHit(
+            enemy = enemy,
+            appliedDamage =
+                appliedDamage,
+            damageType =
+                context.weapon
+                    .definition
+                    .damageTypes
+                    .firstOrNull { type ->
+                        type !=
+                            DamageType.NONE
+                    }
+                    ?: DamageType.NONE
+        )
     }
 
     private fun distanceFromPointToSegment(

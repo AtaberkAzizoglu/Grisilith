@@ -3,8 +3,8 @@ package com.azizoglu.grisilith.tamga.definition
 /*
  * Her özel Tamga davranışının sabit kimliği.
  *
- * İleride Tamga runtime sistemi bu kimliğe göre
- * doğru executor veya controller oluşturacak.
+ * Runtime sistemi bu kimliğe göre doğru
+ * Tamga davranışını etkinleştirir.
  */
 enum class TamgaEffectId {
 
@@ -16,5 +16,9 @@ enum class TamgaEffectId {
 
     HOLY_LIGHTS,
 
-    ARCANE_AURA
+    ARCANE_AURA,
+
+    FLAME_BLADES,
+
+    QUICK_SHOT
 }

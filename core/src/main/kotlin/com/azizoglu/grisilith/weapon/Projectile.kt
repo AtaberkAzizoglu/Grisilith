@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.azizoglu.grisilith.weapon.runtime.WeaponHitEvent
+import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 
 class Projectile(
     startX: Float,
@@ -14,6 +16,12 @@ class Projectile(
     targetY: Float,
 
     val sourceWeaponName: String,
+
+    val sourceWeapon:
+    WeaponInstance? = null,
+
+    val sourceWeaponSlotIndex:
+    Int = -1,
 
     private val damage: Int,
 
@@ -236,7 +244,8 @@ class Projectile(
     fun checkCollision(
         enemies: List<Enemy>,
         onDamageDealt: (Int) -> Unit,
-        onEnemyKilled: (Enemy) -> Unit
+        onEnemyKilled: (Enemy) -> Unit,
+        onWeaponHit: (WeaponHitEvent) -> Unit
     ) {
         if (
             !isActive ||
@@ -307,6 +316,37 @@ class Projectile(
                 enemy.isDead
             ) {
                 onEnemyKilled(enemy)
+            }
+
+            val hitSourceWeapon =
+                sourceWeapon
+
+            if (
+                appliedDamage > 0 &&
+                hitSourceWeapon != null &&
+                sourceWeaponSlotIndex >= 0
+            ) {
+                onWeaponHit(
+                    WeaponHitEvent(
+                        weapon =
+                            hitSourceWeapon,
+
+                        weaponSlotIndex =
+                            sourceWeaponSlotIndex,
+
+                        enemy =
+                            enemy,
+
+                        appliedDamage =
+                            appliedDamage,
+
+                        damageType =
+                            damageType,
+
+                        isProjectile =
+                            true
+                    )
+                )
             }
 
             successfulHitCount++
