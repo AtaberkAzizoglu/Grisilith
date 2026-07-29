@@ -177,9 +177,16 @@ class DaggerAttackExecutor(
         val wasAliveBeforeAttack =
             !target.isDead
 
+        val finalDamage =
+            context.modifiedDamageAgainst(
+                enemy = target,
+                baseDamage =
+                    damageResult.damage
+            )
+
         val appliedDamage =
             target.takeDamage(
-                damageResult.damage
+                finalDamage
             )
 
         if (appliedDamage > 0) {

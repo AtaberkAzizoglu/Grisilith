@@ -181,9 +181,16 @@ class ShieldAttackExecutor(
         val wasAliveBeforeAttack =
             !enemy.isDead
 
+        val tamgaModifiedDamage =
+            context.modifiedDamageAgainst(
+                enemy = enemy,
+                baseDamage =
+                    finalDamage
+            )
+
         val appliedDamage =
             enemy.takeDamage(
-                finalDamage
+                tamgaModifiedDamage
             )
 
         if (appliedDamage > 0) {

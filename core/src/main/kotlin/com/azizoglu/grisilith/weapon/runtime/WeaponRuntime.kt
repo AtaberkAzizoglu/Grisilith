@@ -93,6 +93,18 @@ class WeaponRuntime(
                                 onEnemyKilled =
                                     onEnemyKilled
                             )
+                    },
+
+                    modifyWeaponDamage = {
+                            enemy,
+                            baseDamage ->
+
+                        tamgaRuntimeManager
+                            .modifyWeaponDamage(
+                                enemy = enemy,
+                                baseDamage =
+                                    baseDamage
+                            )
                     }
                 )
             )

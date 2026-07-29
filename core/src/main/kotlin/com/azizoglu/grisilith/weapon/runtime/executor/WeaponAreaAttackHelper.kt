@@ -37,12 +37,24 @@ object WeaponAreaAttackHelper {
                 }
                 ?: DamageType.NONE
 
+        /*
+         * Crit ve Weapon scaling hesaplandıktan
+         * sonra hedefe bağlı Tamga modifier'ları
+         * uygulanır.
+         */
+        val finalDamage =
+            context.modifiedDamageAgainst(
+                enemy = enemy,
+                baseDamage =
+                    damageResult.damage
+            )
+
         val wasAliveBeforeAttack =
             !enemy.isDead
 
         val appliedDamage =
             enemy.takeDamage(
-                damageResult.damage
+                finalDamage
             )
 
         if (appliedDamage > 0) {
@@ -67,12 +79,6 @@ object WeaponAreaAttackHelper {
             )
         }
 
-        /*
-         * Önce base Weapon ölümünü bildiriyoruz.
-         *
-         * Böylece Flame Blades bonus hasarı ayrıca
-         * öldürürse aynı Enemy iki kez bildirilmez.
-         */
         if (
             wasAliveBeforeAttack &&
             enemy.isDead

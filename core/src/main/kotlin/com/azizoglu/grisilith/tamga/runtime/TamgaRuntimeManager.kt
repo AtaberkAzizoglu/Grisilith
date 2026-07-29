@@ -10,6 +10,8 @@ import com.azizoglu.grisilith.tamga.definition.TamgaEffectId
 import com.azizoglu.grisilith.weapon.runtime.WeaponHitEvent
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
+import com.azizoglu.grisilith.enemy.EnemyType
+import kotlin.math.roundToInt
 
 class TamgaRuntimeManager(
     private val weaponInventory:
@@ -19,6 +21,9 @@ class TamgaRuntimeManager(
     PlayerStats,
 
     private val weaponTamga:
+    TamgaDefinition?,
+
+    private val armorTamga:
     TamgaDefinition?,
 
     private val currentStageProvider:
@@ -53,6 +58,15 @@ class TamgaRuntimeManager(
 
         private const val FLAME_BLADES_ELEMENTAL_SCALING =
             1.1f
+
+        private const val HEIGHT_INSECURITY_BASE_BONUS =
+            0.05f
+
+        private const val HEIGHT_INSECURITY_STAGE_BONUS =
+            0.05f
+
+        private const val HEIGHT_INSECURITY_STAGE_INTERVAL =
+            10
     }
 
     /*
@@ -116,6 +130,120 @@ class TamgaRuntimeManager(
             resetQuickShotStacks()
         }
     }
+
+
+    fun modifyWeaponDamage(
+        enemy: Enemy,
+        baseDamage: Int
+    ): Int {
+        if (
+            baseDamage <= 0 ||
+            enemy.isDead
+        ) {
+            return baseDamage
+                .coerceAtLeast(0)
+        }
+
+        var modifiedDamage =
+            baseDamage
+
+        modifiedDamage =
+            applyHeightInsecurityModifier(
+                enemy = enemy,
+                currentDamage =
+                    modifiedDamage
+            )
+
+        /*
+         * İleride diğer damage modifier Tamgaları
+         * bu zincire sırayla eklenecek.
+         */
+        return modifiedDamage
+            .coerceAtLeast(1)
+    }
+
+    private fun applyHeightInsecurityModifier(
+        enemy: Enemy,
+        currentDamage: Int
+    ): Int {
+        if (!isHeightInsecurityActive()) {
+            return currentDamage
+        }
+
+        if (!isHeightInsecurityTarget(enemy)) {
+            return currentDamage
+        }
+
+        val damageMultiplier =
+            1f +
+                heightInsecurityBonusRatio()
+
+        return (
+            currentDamage *
+                damageMultiplier
+            )
+            .roundToInt()
+            .coerceAtLeast(1)
+    }
+
+    private fun heightInsecurityBonusRatio():
+        Float {
+
+        val currentStage =
+            currentStageProvider()
+                .coerceAtLeast(1)
+
+        /*
+         * Stage 1–9   = %5
+         * Stage 10–19 = %10
+         * Stage 20–29 = %15
+         */
+        val completedIntervals =
+            currentStage /
+                HEIGHT_INSECURITY_STAGE_INTERVAL
+
+        return HEIGHT_INSECURITY_BASE_BONUS +
+            completedIntervals *
+            HEIGHT_INSECURITY_STAGE_BONUS
+    }
+
+    private fun isHeightInsecurityTarget(
+        enemy: Enemy
+    ): Boolean {
+
+        return when (enemy.type) {
+            EnemyType.UNIQUE,
+            EnemyType.MINI_BOSS,
+            EnemyType.FINAL_BOSS -> {
+                true
+            }
+
+            EnemyType.NORMAL -> {
+                false
+            }
+        }
+    }
+
+    private fun isHeightInsecurityActive():
+        Boolean {
+
+        return hasTamgaEffect(
+            TamgaEffectId.HEIGHT_INSECURITY
+        )
+    }
+
+    private fun hasTamgaEffect(
+        effectId: TamgaEffectId
+    ): Boolean {
+
+        return weaponTamga
+            ?.effectId ==
+            effectId ||
+            armorTamga
+                ?.effectId ==
+            effectId
+    }
+
 
     /*
      * Quick Shot:
@@ -396,9 +524,9 @@ class TamgaRuntimeManager(
     private fun isQuickShotActive():
         Boolean {
 
-        return weaponTamga
-            ?.effectId ==
+        return hasTamgaEffect(
             TamgaEffectId.QUICK_SHOT
+        )
     }
 
     private fun isFlameBladesActive():

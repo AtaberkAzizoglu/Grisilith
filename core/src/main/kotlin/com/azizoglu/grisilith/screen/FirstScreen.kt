@@ -194,6 +194,10 @@ class FirstScreen(
                 selectedPreset
                     ?.weaponTamga,
 
+            armorTamga =
+                selectedPreset
+                    ?.armorTamga,
+
             currentStageProvider = {
                 stageController.currentStage
             }
@@ -942,36 +946,50 @@ class FirstScreen(
                 onWeaponHit = {
                         hitEvent ->
 
-                    tamgaRuntimeManager.onWeaponHit(
-                        event =
-                            hitEvent,
+                    tamgaRuntimeManager
+                        .onWeaponHit(
+                            event =
+                                hitEvent,
 
-                        onDamageDealt = {
-                                bonusDamage,
-                                weaponName ->
-
-                            runStatistics.recordDamageDealt(
-                                amount =
+                            onDamageDealt = {
                                     bonusDamage,
+                                    weaponName ->
 
-                                weaponName =
-                                    weaponName
-                            )
+                                runStatistics
+                                    .recordDamageDealt(
+                                        amount =
+                                            bonusDamage,
 
-                            player.tryLifeSteal(
-                                appliedDamage =
-                                    bonusDamage
-                            )
-                        },
+                                        weaponName =
+                                            weaponName
+                                    )
 
-                        onEnemyKilled = {
-                                killedEnemy ->
+                                player.tryLifeSteal(
+                                    appliedDamage =
+                                        bonusDamage
+                                )
+                            },
 
-                            handleEnemyKilled(
-                                killedEnemy
-                            )
-                        }
-                    )
+                            onEnemyKilled = {
+                                    killedEnemy ->
+
+                                handleEnemyKilled(
+                                    killedEnemy
+                                )
+                            }
+                        )
+                },
+
+                modifyWeaponDamage = {
+                        enemy,
+                        baseDamage ->
+
+                    tamgaRuntimeManager
+                        .modifyWeaponDamage(
+                            enemy = enemy,
+                            baseDamage =
+                                baseDamage
+                        )
                 }
             )
         }

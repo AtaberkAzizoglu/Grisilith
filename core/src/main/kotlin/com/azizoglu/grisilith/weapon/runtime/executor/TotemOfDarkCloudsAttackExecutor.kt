@@ -145,9 +145,16 @@ class TotemOfDarkCloudsAttackExecutor(
         val wasAliveBeforeAttack =
             !target.isDead
 
+        val tamgaModifiedDamage =
+            context.modifiedDamageAgainst(
+                enemy = target,
+                baseDamage =
+                    finalDamage
+            )
+
         val appliedDamage =
             target.takeDamage(
-                finalDamage
+                tamgaModifiedDamage
             )
 
         if (appliedDamage > 0) {

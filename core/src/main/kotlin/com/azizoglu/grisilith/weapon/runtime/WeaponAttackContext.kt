@@ -31,8 +31,29 @@ data class WeaponAttackContext(
         (Enemy) -> Unit,
 
     val onWeaponHit:
-        (WeaponHitEvent) -> Unit
+        (WeaponHitEvent) -> Unit,
+
+    val modifyWeaponDamage: (
+        enemy: Enemy,
+        baseDamage: Int
+    ) -> Int
 ) {
+
+    fun modifiedDamageAgainst(
+        enemy: Enemy,
+        baseDamage: Int
+    ): Int {
+
+        if (baseDamage <= 0) {
+            return 0
+        }
+
+        return modifyWeaponDamage(
+            enemy,
+            baseDamage
+        )
+            .coerceAtLeast(1)
+    }
 
     fun reportWeaponHit(
         enemy: Enemy,

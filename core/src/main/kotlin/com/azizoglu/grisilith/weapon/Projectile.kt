@@ -245,7 +245,11 @@ class Projectile(
         enemies: List<Enemy>,
         onDamageDealt: (Int) -> Unit,
         onEnemyKilled: (Enemy) -> Unit,
-        onWeaponHit: (WeaponHitEvent) -> Unit
+        onWeaponHit: (WeaponHitEvent) -> Unit,
+        modifyWeaponDamage: (
+            enemy: Enemy,
+            baseDamage: Int
+        ) -> Int
     ) {
         if (
             !isActive ||
@@ -289,9 +293,27 @@ class Projectile(
                         .coerceAtLeast(1)
                 }
 
+            val modifiedHitDamage =
+                if (
+                    sourceWeapon != null &&
+                    sourceWeaponSlotIndex >= 0
+                ) {
+                    modifyWeaponDamage(
+                        enemy,
+                        hitDamage
+                    )
+                        .coerceAtLeast(1)
+                } else {
+                    /*
+                     * Hasarsız veya yalnızca görsel amaçlı
+                     * projectile'larda Tamga çalıştırılmaz.
+                     */
+                    hitDamage
+                }
+
             val appliedDamage =
                 enemy.takeDamage(
-                    hitDamage
+                    modifiedHitDamage
                 )
 
             if (appliedDamage > 0) {
