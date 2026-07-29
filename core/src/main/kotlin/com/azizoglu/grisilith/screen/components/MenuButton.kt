@@ -23,7 +23,7 @@ class MenuButton(
     width: Float,
     height: Float,
 
-    val isEnabled: Boolean = true,
+    var isEnabled: Boolean = true,
 
     private val onClick:
         () -> Unit

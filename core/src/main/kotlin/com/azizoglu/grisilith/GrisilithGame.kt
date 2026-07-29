@@ -18,6 +18,7 @@ import com.azizoglu.grisilith.settings.GameSettings
 import com.azizoglu.grisilith.screen.SettingsScreen
 import com.azizoglu.grisilith.preset.PresetRepository
 import com.azizoglu.grisilith.screen.preset.PresetManagerScreen
+import com.azizoglu.grisilith.screen.preset.CreatePresetScreen
 
 class GrisilithGame : Game() {
 
@@ -148,36 +149,20 @@ class GrisilithGame : Game() {
 
     fun showCreatePreset() {
         changeScreen(
-            PlaceholderMenuScreen(
-                title =
-                    "CREATE PRESET",
-
-                description =
-                    "The Create Preset editor will be implemented in the next step.",
-
-                onBack = {
-                    showPresetMenu()
-                }
+            CreatePresetScreen(
+                game = this,
+                editingPresetId = null
             )
         )
     }
 
     fun showEditPreset(
-        presetId:
-        String
+        presetId: String
     ) {
         changeScreen(
-            PlaceholderMenuScreen(
-                title =
-                    "EDIT PRESET",
-
-                description =
-                    "Preset ID:\n$presetId\n\n" +
-                        "The editor will open this Preset in the next step.",
-
-                onBack = {
-                    showPresetMenu()
-                }
+            CreatePresetScreen(
+                game = this,
+                editingPresetId = presetId
             )
         )
     }
