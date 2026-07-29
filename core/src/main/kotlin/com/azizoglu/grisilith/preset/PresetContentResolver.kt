@@ -5,19 +5,9 @@ import com.azizoglu.grisilith.character.CharacterDefinition
 import com.azizoglu.grisilith.content.ContentRegistry
 import com.azizoglu.grisilith.item.definition.ItemDefinition
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.tamga.definition.TamgaDefinition
 import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 
-/*
- * Preset içindeki Content ID'lerini gerçek
- * tanımlara dönüştürür.
- *
- * Stat sonuçlarını dört ayrı katmanda verir:
- *
- * - Character base Stat
- * - Preset Stat Point bonusu
- * - Gear bonusu
- * - Toplam başlangıç Statı
- */
 class PresetContentResolver(
     private val contentRegistry:
     ContentRegistry
@@ -52,6 +42,24 @@ class PresetContentResolver(
             ) as? ItemDefinition
                 ?: return null
 
+        val weaponTamga =
+            preset.weaponTamgaId
+                ?.let { tamgaId ->
+                    contentRegistry.findById(
+                        tamgaId
+                    ) as? TamgaDefinition
+                        ?: return null
+                }
+
+        val armorTamga =
+            preset.armorTamgaId
+                ?.let { tamgaId ->
+                    contentRegistry.findById(
+                        tamgaId
+                    ) as? TamgaDefinition
+                        ?: return null
+                }
+
         val statBreakdown =
             calculateStatBreakdown(
                 preset =
@@ -67,7 +75,13 @@ class PresetContentResolver(
                     armor,
 
                 item =
-                    item
+                    item,
+
+                weaponTamga =
+                    weaponTamga,
+
+                armorTamga =
+                    armorTamga
             )
 
         return ResolvedPresetContent(
@@ -86,11 +100,26 @@ class PresetContentResolver(
             item =
                 item,
 
+            weaponTamga =
+                weaponTamga,
+
+            armorTamga =
+                armorTamga,
+
             baseStats =
                 statBreakdown.baseStats,
 
             presetStatBonuses =
                 statBreakdown.presetStatBonuses,
+
+            armorAndTamgaBonuses =
+                statBreakdown.armorAndTamgaBonuses,
+
+            weaponBonuses =
+                statBreakdown.weaponBonuses,
+
+            itemBonuses =
+                statBreakdown.itemBonuses,
 
             gearBonuses =
                 statBreakdown.gearBonuses,
@@ -114,7 +143,13 @@ class PresetContentResolver(
         ArmorDefinition,
 
         item:
-        ItemDefinition
+        ItemDefinition,
+
+        weaponTamga:
+        TamgaDefinition?,
+
+        armorTamga:
+        TamgaDefinition?
     ): PresetStatBreakdown {
 
         val baseStats =
@@ -125,11 +160,6 @@ class PresetContentResolver(
                     ] ?: 0
                 }
 
-        /*
-         * PresetStatAllocation.finalScores()
-         * Character base değerini ve maksimum 25
-         * sınırını birlikte uygular.
-         */
         val preRunStats =
             preset.statAllocation
                 .finalScores(
@@ -158,45 +188,76 @@ class PresetContentResolver(
                         )
                 }
 
-        val gearBonuses =
-            StatType.entries
-                .associateWith {
-                    0
-                }
-                .toMutableMap()
+        val armorAndTamgaBonuses =
+            emptyStatMap()
 
         armor.allStatModifiers()
             .forEach { modifier ->
-                gearBonuses.addModifier(
-                    statType =
-                        modifier.statType,
-
-                    amount =
-                        modifier.amount
+                armorAndTamgaBonuses.addModifier(
+                    modifier.statType,
+                    modifier.amount
                 )
             }
 
-        item.statModifiers
-            .forEach { modifier ->
-                gearBonuses.addModifier(
-                    statType =
-                        modifier.statType,
-
-                    amount =
-                        modifier.amount
+        weaponTamga
+            ?.statModifiers
+            ?.forEach { modifier ->
+                armorAndTamgaBonuses.addModifier(
+                    modifier.statType,
+                    modifier.amount
                 )
             }
+
+        armorTamga
+            ?.statModifiers
+            ?.forEach { modifier ->
+                armorAndTamgaBonuses.addModifier(
+                    modifier.statType,
+                    modifier.amount
+                )
+            }
+
+        val weaponBonuses =
+            emptyStatMap()
 
         weapon.passiveStatModifiers
             .forEach { modifier ->
-                gearBonuses.addModifier(
-                    statType =
-                        modifier.statType,
-
-                    amount =
-                        modifier.amount
+                weaponBonuses.addModifier(
+                    modifier.statType,
+                    modifier.amount
                 )
             }
+
+        val itemBonuses =
+            emptyStatMap()
+
+        item.statModifiers
+            .forEach { modifier ->
+                itemBonuses.addModifier(
+                    modifier.statType,
+                    modifier.amount
+                )
+            }
+
+        val gearBonuses =
+            StatType.entries
+                .associateWith { statType ->
+                    (
+                        armorAndTamgaBonuses[
+                            statType
+                        ] ?: 0
+                        ) +
+                        (
+                            weaponBonuses[
+                                statType
+                            ] ?: 0
+                            ) +
+                        (
+                            itemBonuses[
+                                statType
+                            ] ?: 0
+                            )
+                }
 
         val totalStats =
             StatType.entries
@@ -233,12 +294,31 @@ class PresetContentResolver(
             presetStatBonuses =
                 presetStatBonuses,
 
+            armorAndTamgaBonuses =
+                armorAndTamgaBonuses,
+
+            weaponBonuses =
+                weaponBonuses,
+
+            itemBonuses =
+                itemBonuses,
+
             gearBonuses =
                 gearBonuses,
 
             totalStats =
                 totalStats
         )
+    }
+
+    private fun emptyStatMap():
+        MutableMap<StatType, Int> {
+
+        return StatType.entries
+            .associateWith {
+                0
+            }
+            .toMutableMap()
     }
 
     private fun MutableMap<StatType, Int>
@@ -269,6 +349,15 @@ private data class PresetStatBreakdown(
     val presetStatBonuses:
     Map<StatType, Int>,
 
+    val armorAndTamgaBonuses:
+    Map<StatType, Int>,
+
+    val weaponBonuses:
+    Map<StatType, Int>,
+
+    val itemBonuses:
+    Map<StatType, Int>,
+
     val gearBonuses:
     Map<StatType, Int>,
 
@@ -292,10 +381,25 @@ data class ResolvedPresetContent(
     val item:
     ItemDefinition,
 
+    val weaponTamga:
+    TamgaDefinition?,
+
+    val armorTamga:
+    TamgaDefinition?,
+
     val baseStats:
     Map<StatType, Int>,
 
     val presetStatBonuses:
+    Map<StatType, Int>,
+
+    val armorAndTamgaBonuses:
+    Map<StatType, Int>,
+
+    val weaponBonuses:
+    Map<StatType, Int>,
+
+    val itemBonuses:
     Map<StatType, Int>,
 
     val gearBonuses:
@@ -303,4 +407,22 @@ data class ResolvedPresetContent(
 
     val totalStats:
     Map<StatType, Int>
-)
+) {
+
+    val preRunBaseStats:
+        Map<StatType, Int>
+        get() =
+            StatType.entries
+                .associateWith { statType ->
+                    (
+                        baseStats[
+                            statType
+                        ] ?: 0
+                        ) +
+                        (
+                            presetStatBonuses[
+                                statType
+                            ] ?: 0
+                            )
+                }
+}

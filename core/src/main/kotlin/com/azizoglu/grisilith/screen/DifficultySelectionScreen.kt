@@ -1,7 +1,10 @@
 package com.azizoglu.grisilith.screen
 
 import com.azizoglu.grisilith.GrisilithGame
+import com.azizoglu.grisilith.character.CharacterDefinition
 import com.azizoglu.grisilith.config.GameDifficulty
+import com.azizoglu.grisilith.config.GameMap
+import com.azizoglu.grisilith.preset.PresetRepository
 import com.azizoglu.grisilith.screen.components.MenuButton
 import com.azizoglu.grisilith.screen.components.MenuPointer
 import com.badlogic.gdx.Gdx
@@ -11,9 +14,8 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
-import com.azizoglu.grisilith.character.CharacterDefinition
-import com.azizoglu.grisilith.config.GameMap
 
 class DifficultySelectionScreen(
     private val game:
@@ -23,7 +25,10 @@ class DifficultySelectionScreen(
     GameMap,
 
     private val selectedCharacter:
-    CharacterDefinition
+    CharacterDefinition? = null,
+
+    private val presetId:
+    String? = null
 ) : ScreenAdapter() {
 
     companion object {
@@ -32,6 +37,15 @@ class DifficultySelectionScreen(
 
         private const val VIEWPORT_HEIGHT =
             720f
+    }
+
+    init {
+        require(
+            selectedCharacter != null ||
+                presetId != null
+        ) {
+            "DifficultySelectionScreen requires a Character or Preset."
+        }
     }
 
     private val camera =
@@ -55,6 +69,46 @@ class DifficultySelectionScreen(
             viewport
         )
 
+    private fun start(
+        difficulty:
+        GameDifficulty
+    ) {
+        val selectedPresetId =
+            presetId
+
+        if (
+            selectedPresetId != null
+        ) {
+            game.startPresetRun(
+                difficulty =
+                    difficulty,
+
+                gameMap =
+                    gameMap,
+
+                presetId =
+                    selectedPresetId
+            )
+
+            return
+        }
+
+        val character =
+            selectedCharacter
+                ?: return
+
+        game.startRun(
+            difficulty =
+                difficulty,
+
+            gameMap =
+                gameMap,
+
+            character =
+                character
+        )
+    }
+
     private val buttons =
         listOf(
             MenuButton(
@@ -73,15 +127,8 @@ class DifficultySelectionScreen(
                 height =
                     75f
             ) {
-                game.startRun(
-                    difficulty =
-                        GameDifficulty.EASY,
-
-                    gameMap =
-                        gameMap,
-
-                    character =
-                        selectedCharacter
+                start(
+                    GameDifficulty.EASY
                 )
             },
 
@@ -101,15 +148,8 @@ class DifficultySelectionScreen(
                 height =
                     75f
             ) {
-                game.startRun(
-                    difficulty =
-                        GameDifficulty.NORMAL,
-
-                    gameMap =
-                        gameMap,
-
-                    character =
-                        selectedCharacter
+                start(
+                    GameDifficulty.NORMAL
                 )
             },
 
@@ -129,15 +169,8 @@ class DifficultySelectionScreen(
                 height =
                     75f
             ) {
-                game.startRun(
-                    difficulty =
-                        GameDifficulty.HARD,
-
-                    gameMap =
-                        gameMap,
-
-                    character =
-                        selectedCharacter
+                start(
+                    GameDifficulty.HARD
                 )
             },
 
@@ -157,10 +190,19 @@ class DifficultySelectionScreen(
                 height =
                     65f
             ) {
-                game.showCharacterSelection(
-                    gameMap =
-                        gameMap
-                )
+                if (
+                    presetId != null
+                ) {
+                    game.showPresetMenu(
+                        selectedMap =
+                            gameMap
+                    )
+                } else {
+                    game.showCharacterSelection(
+                        gameMap =
+                            gameMap
+                    )
+                }
             }
         )
 
@@ -218,12 +260,6 @@ class DifficultySelectionScreen(
 
         batch.begin()
 
-        val oldScaleX =
-            font.data.scaleX
-
-        val oldScaleY =
-            font.data.scaleY
-
         font.data.setScale(
             2f
         )
@@ -237,59 +273,49 @@ class DifficultySelectionScreen(
             0f,
             620f,
             VIEWPORT_WIDTH,
-            1,
+            Align.center,
             false
         )
 
         font.data.setScale(
-            0.95f
+            0.90f
         )
 
         font.color =
             Color.LIGHT_GRAY
 
-        font.draw(
-            batch,
-            "Character: " +
-                selectedCharacter.displayName,
-            0f,
-            565f,
-            VIEWPORT_WIDTH,
-            1,
-            false
-        )
+        val selectionText =
+            presetId
+                ?.let { id ->
+                    val presetName =
+                        PresetRepository
+                            .findById(
+                                id
+                            )
+                            ?.presetName
+                            ?: "Preset"
+
+                    "$presetName  •  ${gameMap.displayName}"
+                }
+                ?: (
+                    selectedCharacter
+                        ?.displayName
+                        ?: "Character"
+                    ) +
+                "  •  ${gameMap.displayName}"
 
         font.draw(
             batch,
-            "Map: " +
-                gameMap.displayName,
+            selectionText,
             0f,
-            535f,
+            555f,
             VIEWPORT_WIDTH,
-            1,
-            false
-        )
-
-        font.data.setScale(
-            0.85f
-        )
-
-        font.color =
-            Color.GRAY
-
-        font.draw(
-            batch,
-            "Difficulty changes run length, not enemy scaling.",
-            0f,
-            500f,
-            VIEWPORT_WIDTH,
-            1,
+            Align.center,
             false
         )
 
         font.data.setScale(
-            oldScaleX,
-            oldScaleY
+            1f
         )
 
         buttons.forEach { button ->

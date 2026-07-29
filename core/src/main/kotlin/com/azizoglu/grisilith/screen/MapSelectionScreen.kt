@@ -15,7 +15,10 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 
 class MapSelectionScreen(
     private val game:
-    GrisilithGame
+    GrisilithGame,
+
+    private val presetId:
+    String? = null
 ) : ScreenAdapter() {
 
     companion object {
@@ -56,8 +59,7 @@ class MapSelectionScreen(
                 MenuButton(
                     text =
                         if (
-                            gameMap
-                                .isInitiallyUnlocked
+                            gameMap.isInitiallyUnlocked
                         ) {
                             gameMap.displayName
                         } else {
@@ -78,13 +80,24 @@ class MapSelectionScreen(
                         80f,
 
                     isEnabled =
-                        gameMap
-                            .isInitiallyUnlocked
+                        gameMap.isInitiallyUnlocked
                 ) {
-                    game.showCharacterSelection(
-                        gameMap =
-                            gameMap
-                    )
+                    if (
+                        presetId == null
+                    ) {
+                        game.showPresetMenu(
+                            selectedMap =
+                                gameMap
+                        )
+                    } else {
+                        game.showPresetDifficultySelection(
+                            presetId =
+                                presetId,
+
+                            gameMap =
+                                gameMap
+                        )
+                    }
                 }
             }
 
@@ -105,7 +118,13 @@ class MapSelectionScreen(
             height =
                 65f
         ) {
-            game.showPlayMenu()
+            if (
+                presetId == null
+            ) {
+                game.showPlayMenu()
+            } else {
+                game.showPresetMenu()
+            }
         }
 
     private val buttons =
@@ -166,12 +185,6 @@ class MapSelectionScreen(
 
         batch.begin()
 
-        val oldScaleX =
-            font.data.scaleX
-
-        val oldScaleY =
-            font.data.scaleY
-
         font.data.setScale(
             2f
         )
@@ -190,12 +203,30 @@ class MapSelectionScreen(
         )
 
         font.data.setScale(
-            1f
+            0.82f
+        )
+
+        font.color =
+            Color.LIGHT_GRAY
+
+        font.draw(
+            batch,
+            if (
+                presetId == null
+            ) {
+                "Choose a map, then select the Preset for this run."
+            } else {
+                "Choose the map for the selected Preset."
+            },
+            0f,
+            570f,
+            VIEWPORT_WIDTH,
+            1,
+            false
         )
 
         font.data.setScale(
-            oldScaleX,
-            oldScaleY
+            1f
         )
 
         buttons.forEach { button ->

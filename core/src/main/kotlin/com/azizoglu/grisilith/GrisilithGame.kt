@@ -17,6 +17,7 @@ import com.badlogic.gdx.Screen
 import com.azizoglu.grisilith.settings.GameSettings
 import com.azizoglu.grisilith.screen.SettingsScreen
 import com.azizoglu.grisilith.preset.PresetRepository
+import com.azizoglu.grisilith.preset.PresetContentResolver
 import com.azizoglu.grisilith.screen.preset.PresetManagerScreen
 import com.azizoglu.grisilith.screen.preset.CreatePresetScreen
 
@@ -75,7 +76,26 @@ class GrisilithGame : Game() {
     fun showMapSelection() {
         changeScreen(
             MapSelectionScreen(
-                game = this
+                game =
+                    this,
+
+                presetId =
+                    null
+            )
+        )
+    }
+
+    fun showPresetMapSelection(
+        presetId:
+        String
+    ) {
+        changeScreen(
+            MapSelectionScreen(
+                game =
+                    this,
+
+                presetId =
+                    presetId
             )
         )
     }
@@ -138,11 +158,17 @@ class GrisilithGame : Game() {
         )
     }
 
-    fun showPresetMenu() {
+    fun showPresetMenu(
+        selectedMap:
+        GameMap? = null
+    ) {
         changeScreen(
             PresetManagerScreen(
                 game =
-                    this
+                    this,
+
+                selectedMap =
+                    selectedMap
             )
         )
     }
@@ -169,22 +195,82 @@ class GrisilithGame : Game() {
 
     fun showPresetDifficultySelection(
         presetId:
-        String
+        String,
+
+        gameMap:
+        GameMap
     ) {
         changeScreen(
-            PlaceholderMenuScreen(
-                title =
-                    "PRESET READY",
+            DifficultySelectionScreen(
+                game =
+                    this,
 
-                description =
-                    "Selected Preset:\n$presetId\n\n" +
-                        "Difficulty selection will be connected " +
-                        "after the Create Preset editor and " +
-                        "Preset run loader are completed.",
+                gameMap =
+                    gameMap,
 
-                onBack = {
-                    showPresetMenu()
+                selectedCharacter =
+                    null,
+
+                presetId =
+                    presetId
+            )
+        )
+    }
+
+    fun startPresetRun(
+        difficulty:
+        GameDifficulty,
+
+        gameMap:
+        GameMap,
+
+        presetId:
+        String
+    ) {
+        val preset =
+            PresetRepository.findById(
+                presetId
+            )
+                ?: run {
+                    showPresetMenu(
+                        selectedMap =
+                            gameMap
+                    )
+
+                    return
                 }
+
+        val resolvedPreset =
+            PresetContentResolver(
+                DefaultContentRegistry.instance
+            ).resolve(
+                preset
+            )
+                ?: run {
+                    showPresetMenu(
+                        selectedMap =
+                            gameMap
+                    )
+
+                    return
+                }
+
+        changeScreen(
+            FirstScreen(
+                game =
+                    this,
+
+                difficulty =
+                    difficulty,
+
+                gameMap =
+                    gameMap,
+
+                selectedCharacter =
+                    resolvedPreset.character,
+
+                selectedPreset =
+                    resolvedPreset
             )
         )
     }

@@ -68,6 +68,8 @@ import com.azizoglu.grisilith.screen.pause.PauseAction
 import com.azizoglu.grisilith.screen.pause.PauseInputController
 import com.azizoglu.grisilith.screen.pause.PauseInteractionState
 import com.azizoglu.grisilith.screen.render.PauseRenderer
+import com.azizoglu.grisilith.preset.ResolvedPresetContent
+import com.azizoglu.grisilith.armor.runtime.EquippedArmor
 
 
 class FirstScreen(
@@ -75,7 +77,10 @@ class FirstScreen(
     private val difficulty: GameDifficulty,
     private val gameMap: GameMap,
     private val selectedCharacter:
-    CharacterDefinition
+    CharacterDefinition,
+
+    private val selectedPreset:
+    ResolvedPresetContent? = null
 ) : ScreenAdapter() {
 
     companion object {
@@ -113,8 +118,17 @@ class FirstScreen(
     private val playerStats =
         PlayerStats(
             initialBaseScores =
-                selectedCharacter.baseStats
-        )
+                selectedPreset
+                    ?.preRunBaseStats
+                    ?: selectedCharacter.baseStats
+        ).apply {
+            selectedPreset
+                ?.let { preset ->
+                    setGearBonuses(
+                        preset.armorAndTamgaBonuses
+                    )
+                }
+        }
 
     private val weaponInventory =
         WeaponInventory()
@@ -135,6 +149,16 @@ class FirstScreen(
         worldHeight = worldHeight,
         stats = playerStats
     )
+
+    private val equippedArmor =
+        EquippedArmor().apply {
+            selectedPreset
+                ?.let { preset ->
+                    equip(
+                        preset.armor
+                    )
+                }
+        }
 
     private val itemInventory =
         ItemInventory()
@@ -460,39 +484,73 @@ class FirstScreen(
             hasInitializedRun =
                 true
 
-            weaponInventory.addWeapon(
-                WeaponInstance(
-                    definition =
-                        DefaultWeapons.longbow,
-
-                    level =
-                        2
-                )
-            )
-
-            weaponInventory.addWeapon(
-                WeaponInstance(
-                    definition =
-                        DefaultWeapons.longbow,
-
-                    level =
-                        2
-                )
-            )
-
-            weaponInventory.addWeapon(
-                WeaponInstance(
-                    definition =
-                        DefaultWeapons.longbow,
-
-                    level =
-                        2
-                )
-            )
-
+            initializeStartingLoadout()
         }
 
         camera.update()
+    }
+
+
+    private fun initializeStartingLoadout() {
+        val preset =
+            selectedPreset
+
+        if (
+            preset == null
+        ) {
+            /*
+             * Legacy Character Selection akışı geçici
+             * olarak korunuyor.
+             */
+            weaponInventory.addWeapon(
+                WeaponInstance(
+                    definition =
+                        DefaultWeapons.longbow,
+
+                    level =
+                        2
+                )
+            )
+
+            synchronizeWeaponInventoryEffects()
+
+            return
+        }
+
+        weaponInventory.addWeapon(
+            WeaponInstance(
+                definition =
+                    preset.weapon,
+
+                level =
+                    WeaponInstance.MINIMUM_LEVEL
+            )
+        )
+
+        itemInventory.addItem(
+            ItemInstance(
+                definition =
+                    preset.item
+            )
+        )
+
+        weaponStatBonusSynchronizer
+            .invalidate()
+
+        weaponStatBonusSynchronizer
+            .synchronize()
+
+        itemStatSynchronizer
+            .synchronize()
+
+        player
+            .synchronizeMaximumHealthWithStats(
+                healAddedHealth =
+                    true
+            )
+
+        weaponRuntimeManager
+            .resetAllTimers()
     }
 
     override fun render(
@@ -638,16 +696,7 @@ class FirstScreen(
 
             PauseAction.RESTART -> {
 
-                game.startRun(
-                    difficulty =
-                        difficulty,
-
-                    gameMap =
-                        gameMap,
-
-                    character =
-                        selectedCharacter
-                )
+                restartRun()
             }
 
             PauseAction.OPEN_SETTINGS -> {
@@ -666,17 +715,47 @@ class FirstScreen(
         }
     }
 
+
+    private fun restartRun() {
+        val preset =
+            selectedPreset
+
+        if (
+            preset != null
+        ) {
+            game.startPresetRun(
+                difficulty =
+                    difficulty,
+
+                gameMap =
+                    gameMap,
+
+                presetId =
+                    preset.preset.presetId
+            )
+
+            return
+        }
+
+        game.startRun(
+            difficulty =
+                difficulty,
+
+            gameMap =
+                gameMap,
+
+            character =
+                selectedCharacter
+        )
+    }
+
     private fun handleRunSummaryControls() {
         if (
             Gdx.input.isKeyJustPressed(
                 Input.Keys.R
             )
         ) {
-            game.startRun(
-                difficulty = difficulty,
-                gameMap = gameMap,
-                character = selectedCharacter
-            )
+            restartRun()
             return
         }
 

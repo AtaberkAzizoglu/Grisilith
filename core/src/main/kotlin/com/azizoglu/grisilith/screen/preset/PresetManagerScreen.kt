@@ -2,6 +2,10 @@ package com.azizoglu.grisilith.screen.preset
 
 import com.azizoglu.grisilith.GrisilithGame
 import com.azizoglu.grisilith.content.DefaultContentRegistry
+import com.azizoglu.grisilith.config.GameMap
+import com.azizoglu.grisilith.tamga.definition.TamgaActivationType
+import com.azizoglu.grisilith.tamga.definition.TamgaDefinition
+import com.azizoglu.grisilith.tamga.definition.TamgaSlotType
 import com.azizoglu.grisilith.preset.PresetConstants
 import com.azizoglu.grisilith.preset.PresetContentResolver
 import com.azizoglu.grisilith.preset.PresetRepository
@@ -38,7 +42,10 @@ import kotlin.math.roundToInt
 
 class PresetManagerScreen(
     private val game:
-    GrisilithGame
+    GrisilithGame,
+
+    private val selectedMap:
+    GameMap? = null
 ) : ScreenAdapter() {
 
     companion object {
@@ -149,7 +156,13 @@ class PresetManagerScreen(
             height =
                 55f
         ) {
-            game.showPlayMenu()
+            if (
+                selectedMap != null
+            ) {
+                game.showMapSelection()
+            } else {
+                game.showPlayMenu()
+            }
         }
 
     private val createPresetButton =
@@ -600,9 +613,21 @@ class PresetManagerScreen(
                 pointer.position
             )
         ) {
-            game.showPresetDifficultySelection(
-                preset.preset.presetId
-            )
+            if (
+                selectedMap != null
+            ) {
+                game.showPresetDifficultySelection(
+                    presetId =
+                        preset.preset.presetId,
+
+                    gameMap =
+                        selectedMap
+                )
+            } else {
+                game.showPresetMapSelection(
+                    preset.preset.presetId
+                )
+            }
         }
     }
 
@@ -1001,11 +1026,15 @@ class PresetManagerScreen(
                     }
 
                     PresetCardContentType.WEAPON_TAMGA -> {
-                        "No Weapon Tamga"
+                        preset.weaponTamga
+                            ?.displayName
+                            ?: "No Weapon Tamga"
                     }
 
                     PresetCardContentType.ARMOR_TAMGA -> {
-                        "No Armor Tamga"
+                        preset.armorTamga
+                            ?.displayName
+                            ?: "No Armor Tamga"
                     }
                 }
 
@@ -1069,7 +1098,25 @@ class PresetManagerScreen(
                         PresetCardContentType
                             .ARMOR_TAMGA
                     ) {
-                        Color.GRAY
+                        val hasTamga =
+                            when (contentType) {
+                                PresetCardContentType
+                                    .WEAPON_TAMGA ->
+                                    preset.weaponTamga != null
+
+                                PresetCardContentType
+                                    .ARMOR_TAMGA ->
+                                    preset.armorTamga != null
+
+                                else ->
+                                    true
+                            }
+
+                        if (hasTamga) {
+                            Color.WHITE
+                        } else {
+                            Color.GRAY
+                        }
                     } else {
                         Color.WHITE
                     },
@@ -1663,25 +1710,51 @@ class PresetManagerScreen(
             }
 
             PresetCardContentType.WEAPON_TAMGA -> {
+                val tamga =
+                    preset.weaponTamga
+
                 title =
-                    "WEAPON TAMGA"
+                    tamga
+                        ?.displayName
+                        ?: "WEAPON TAMGA"
 
                 description =
-                    "No Weapon Tamga selected."
+                    tamga
+                        ?.description
+                        ?: "No Weapon Tamga selected."
 
                 details =
-                    "Tamga system has not been implemented yet."
+                    tamga
+                        ?.let {
+                            tamgaDetailsText(
+                                it
+                            )
+                        }
+                        ?: "Empty Tamga slot."
             }
 
             PresetCardContentType.ARMOR_TAMGA -> {
+                val tamga =
+                    preset.armorTamga
+
                 title =
-                    "ARMOR TAMGA"
+                    tamga
+                        ?.displayName
+                        ?: "ARMOR TAMGA"
 
                 description =
-                    "No Armor Tamga selected."
+                    tamga
+                        ?.description
+                        ?: "No Armor Tamga selected."
 
                 details =
-                    "Tamga system has not been implemented yet."
+                    tamga
+                        ?.let {
+                            tamgaDetailsText(
+                                it
+                            )
+                        }
+                        ?: "Empty Tamga slot."
             }
         }
 
@@ -1730,6 +1803,135 @@ class PresetManagerScreen(
         )
 
         renderModalCloseHint()
+    }
+
+
+    private fun tamgaDetailsText(
+        tamga:
+        TamgaDefinition
+    ): String {
+
+        val slotText =
+            when (tamga.slotType) {
+                TamgaSlotType.WEAPON ->
+                    "Weapon Tamga"
+
+                TamgaSlotType.ARMOR ->
+                    "Armor Tamga"
+
+                TamgaSlotType.GENERAL ->
+                    "General Tamga"
+            }
+
+        val activationText =
+            when (tamga.activationType) {
+                TamgaActivationType.ACTIVE ->
+                    "Active"
+
+                TamgaActivationType.PASSIVE ->
+                    "Passive"
+            }
+
+        return buildString {
+            appendLine(
+                "Type: $slotText"
+            )
+
+            appendLine(
+                "Activation: $activationText"
+            )
+
+            if (
+                tamga.requiredWeaponTags
+                    .isNotEmpty()
+            ) {
+                appendLine(
+                    "Required Weapon: " +
+                        tamga.requiredWeaponTags
+                            .joinToString {
+                                tagDisplayName(
+                                    it
+                                )
+                            }
+                )
+            }
+
+            if (
+                tamga.requiredArmorTags
+                    .isNotEmpty()
+            ) {
+                appendLine(
+                    "Required Armor: " +
+                        tamga.requiredArmorTags
+                            .joinToString {
+                                tagDisplayName(
+                                    it
+                                )
+                            }
+                )
+            }
+
+            if (
+                tamga.interactableStats
+                    .isNotEmpty()
+            ) {
+                appendLine(
+                    "Interactable Stats: " +
+                        tamga.interactableStats
+                            .joinToString {
+                                it.displayName
+                            }
+                )
+            }
+
+            if (
+                tamga.statModifiers
+                    .isNotEmpty()
+            ) {
+                appendLine()
+                appendLine(
+                    "Stat Modifiers:"
+                )
+
+                tamga.statModifiers
+                    .forEach { modifier ->
+                        appendLine(
+                            "${modifier.statType.displayName}: " +
+                                signed(
+                                    modifier.amount
+                                )
+                        )
+                    }
+            }
+        }
+            .trim()
+            .ifBlank {
+                "No direct Stat modifiers."
+            }
+    }
+
+    private fun tagDisplayName(
+        tag:
+        ContentTag
+    ): String {
+
+        return tag.name
+            .lowercase(
+                Locale.US
+            )
+            .split(
+                "_"
+            )
+            .joinToString(
+                separator =
+                    " "
+            ) { word ->
+                word.replaceFirstChar {
+                    it.uppercase(
+                        Locale.US
+                    )
+                }
+            }
     }
 
     private fun renderWeaponContentModal(
