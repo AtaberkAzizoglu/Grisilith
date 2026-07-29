@@ -26,6 +26,15 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.azizoglu.grisilith.content.ContentTag
+import com.azizoglu.grisilith.statistics.PlayerStats
+import com.azizoglu.grisilith.weapon.definition.WeaponAttackPattern
+import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
+import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
+import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
+import java.util.Locale
+import kotlin.math.roundToInt
 
 class PresetManagerScreen(
     private val game:
@@ -73,6 +82,9 @@ class PresetManagerScreen(
 
     private val font =
         BitmapFont()
+
+    private val glyphLayout =
+        GlyphLayout()
 
     private val pointer =
         MenuPointer(
@@ -1210,6 +1222,10 @@ class PresetManagerScreen(
                 ) /
                 2
 
+        var hoveredStat:
+            StatType? =
+            null
+
         stats.forEachIndexed {
                 index,
                 statType ->
@@ -1218,7 +1234,7 @@ class PresetManagerScreen(
                 index /
                     rowsPerColumn
 
-            val row =
+            val rowIndex =
                 index %
                     rowsPerColumn
 
@@ -1229,8 +1245,23 @@ class PresetManagerScreen(
 
             val y =
                 510f -
-                    row *
+                    rowIndex *
                     32f
+
+            val valueRectangle =
+                Rectangle(
+                    x +
+                        220f,
+                    y -
+                        22f,
+                    78f,
+                    28f
+                )
+
+            val isHovered =
+                valueRectangle.contains(
+                    pointer.position
+                )
 
             font.color =
                 Color.LIGHT_GRAY
@@ -1243,7 +1274,11 @@ class PresetManagerScreen(
             )
 
             font.color =
-                Color.WHITE
+                if (isHovered) {
+                    Color.GOLD
+                } else {
+                    Color.WHITE
+                }
 
             font.draw(
                 batch,
@@ -1260,9 +1295,188 @@ class PresetManagerScreen(
                 Align.right,
                 false
             )
+
+            if (isHovered) {
+                hoveredStat =
+                    statType
+            }
         }
 
         renderModalCloseHint()
+
+        if (hoveredStat != null) {
+            renderStatBreakdownTooltip(
+                preset =
+                    preset,
+
+                statType =
+                    hoveredStat
+            )
+        }
+    }
+
+    private fun renderStatBreakdownTooltip(
+        preset:
+        ResolvedPresetContent,
+
+        statType:
+        StatType
+    ) {
+        val total =
+            preset.totalStats[
+                statType
+            ] ?: 0
+
+        val base =
+            preset.baseStats[
+                statType
+            ] ?: 0
+
+        val gear =
+            preset.gearBonuses[
+                statType
+            ] ?: 0
+
+        val presetPoints =
+            preset.presetStatBonuses[
+                statType
+            ] ?: 0
+
+        val tooltipWidth =
+            335f
+
+        val tooltipHeight =
+            92f
+
+        val desiredX =
+            pointer.position.x +
+                18f
+
+        val desiredY =
+            pointer.position.y -
+                tooltipHeight -
+                12f
+
+        val x =
+            desiredX.coerceIn(
+                modalRectangle().x +
+                    10f,
+
+                modalRectangle().x +
+                    modalRectangle().width -
+                    tooltipWidth -
+                    10f
+            )
+
+        val y =
+            desiredY.coerceIn(
+                modalRectangle().y +
+                    10f,
+
+                modalRectangle().y +
+                    modalRectangle().height -
+                    tooltipHeight -
+                    10f
+            )
+
+        val tooltip =
+            Rectangle(
+                x,
+                y,
+                tooltipWidth,
+                tooltipHeight
+            )
+
+        drawFilledRectangle(
+            Rectangle(
+                tooltip.x +
+                    4f,
+                tooltip.y -
+                    4f,
+                tooltip.width,
+                tooltip.height
+            ),
+            Color(
+                0f,
+                0f,
+                0f,
+                0.45f
+            )
+        )
+
+        drawPanel(
+            rectangle =
+                tooltip,
+
+            fillColor =
+                Color(
+                    0.055f,
+                    0.075f,
+                    0.12f,
+                    1f
+                )
+        )
+
+        font.data.setScale(
+            0.83f
+        )
+
+        font.color =
+            Color.WHITE
+
+        font.draw(
+            batch,
+            statType.displayName,
+            tooltip.x +
+                13f,
+            tooltip.y +
+                tooltip.height -
+                17f
+        )
+
+        font.data.setScale(
+            0.72f
+        )
+
+        font.color =
+            Color.LIGHT_GRAY
+
+        font.draw(
+            batch,
+            "$total = $base Base " +
+                signedPart(
+                    gear
+                ) +
+                " Gear " +
+                signedPart(
+                    presetPoints
+                ) +
+                " Stat Points",
+            tooltip.x +
+                13f,
+            tooltip.y +
+                31f,
+            tooltip.width -
+                26f,
+            Align.left,
+            true
+        )
+
+        font.data.setScale(
+            1f
+        )
+    }
+
+    private fun signedPart(
+        amount:
+        Int
+    ): String {
+
+        return if (amount >= 0) {
+            "+ $amount"
+        } else {
+            "- ${kotlin.math.abs(amount)}"
+        }
     }
 
     private fun renderCharacterModal(
@@ -1293,7 +1507,7 @@ class PresetManagerScreen(
         )
 
         font.data.setScale(
-            0.9f
+            0.92f
         )
 
         font.color =
@@ -1309,16 +1523,42 @@ class PresetManagerScreen(
             true
         )
 
+        font.data.setScale(
+            0.78f
+        )
+
         font.color =
             Color.WHITE
 
         font.draw(
             batch,
-            "Minions: " +
-                preset.character
-                    .minionDescription,
+            "Base Stats",
             300f,
-            355f,
+            350f
+        )
+
+        val baseStatPreview =
+            StatType.entries
+                .joinToString(
+                    separator =
+                        "   |   "
+                ) { statType ->
+                    "${statType.displayName}: " +
+                        (
+                            preset.baseStats[
+                                statType
+                            ] ?: 0
+                            )
+                }
+
+        font.color =
+            Color.LIGHT_GRAY
+
+        font.draw(
+            batch,
+            baseStatPreview,
+            300f,
+            315f,
             680f,
             Align.left,
             true
@@ -1338,6 +1578,17 @@ class PresetManagerScreen(
             presetById(
                 presetId
             ) ?: return
+
+        if (
+            contentType ==
+            PresetCardContentType.WEAPON
+        ) {
+            renderWeaponContentModal(
+                preset
+            )
+
+            return
+        }
 
         drawPanel(
             modalRectangle()
@@ -1479,6 +1730,586 @@ class PresetManagerScreen(
         )
 
         renderModalCloseHint()
+    }
+
+    private fun renderWeaponContentModal(
+        preset:
+        ResolvedPresetContent
+    ) {
+        val panel =
+            Rectangle(
+                250f,
+                175f,
+                780f,
+                370f
+            )
+
+        drawPanel(
+            rectangle =
+                panel,
+
+            fillColor =
+                Color(
+                    0.07f,
+                    0.10f,
+                    0.16f,
+                    1f
+                )
+        )
+
+        val weapon =
+            WeaponInstance(
+                definition =
+                    preset.weapon,
+
+                level =
+                    1
+            )
+
+        val playerStats =
+            createPresetPreviewPlayerStats(
+                preset
+            )
+
+        val definition =
+            weapon.definition
+
+        val levelStats =
+            weapon.currentLevelStats
+
+        val damageCalculator =
+            WeaponDamageCalculator(
+                playerStats =
+                    playerStats
+            )
+
+        val damage =
+            damageCalculator
+                .calculateNonCriticalDamage(
+                    weapon
+                )
+
+        val attackSpeedStatMultiplier =
+            when (
+                definition.normalAttackSpeedStat
+            ) {
+                StatType.HASTE -> {
+                    playerStats
+                        .hasteAttackSpeedMultiplier()
+                }
+
+                else -> {
+                    playerStats
+                        .attackSpeedMultiplier()
+                }
+            }
+
+        val attacksPerSecond =
+            definition.baseAttacksPerSecond *
+                levelStats.attackSpeedMultiplier *
+                attackSpeedStatMultiplier
+
+        val range =
+            definition.baseRange *
+                levelStats.rangeMultiplier
+
+        val knockback =
+            definition.baseKnockback *
+                levelStats.knockbackMultiplier
+
+        val leftX =
+            panel.x +
+                24f
+
+        val rightX =
+            panel.x +
+                440f
+
+        var lineY =
+            panel.y +
+                panel.height -
+                35f
+
+        font.data.setScale(
+            1.25f
+        )
+
+        font.color =
+            Color.WHITE
+
+        font.draw(
+            batch,
+            definition.displayName,
+            leftX,
+            lineY
+        )
+
+        lineY -=
+            38f
+
+        font.data.setScale(
+            0.92f
+        )
+
+        font.color =
+            Color.GOLD
+
+        font.draw(
+            batch,
+            "Level I",
+            leftX,
+            lineY
+        )
+
+        lineY -=
+            31f
+
+        font.color =
+            Color.LIGHT_GRAY
+
+        font.draw(
+            batch,
+            "Weapon Type: " +
+                weaponTypeText(
+                    definition
+                ),
+            leftX,
+            lineY
+        )
+
+        lineY -=
+            27f
+
+        renderMainScalingLine(
+            definition =
+                definition,
+
+            x =
+                leftX,
+
+            y =
+                lineY
+        )
+
+        lineY -=
+            27f
+
+        font.color =
+            Color.LIGHT_GRAY
+
+        font.draw(
+            batch,
+            secondaryScalingText(
+                definition
+            ),
+            leftX,
+            lineY
+        )
+
+        lineY -=
+            27f
+
+        font.draw(
+            batch,
+            "Attack Model: " +
+                attackModelText(
+                    weapon
+                ),
+            leftX,
+            lineY
+        )
+
+        lineY -=
+            27f
+
+        font.color =
+            Color.WHITE
+
+        font.draw(
+            batch,
+            "Damage: $damage",
+            leftX,
+            lineY
+        )
+
+        lineY -=
+            25f
+
+        font.draw(
+            batch,
+            "Attacks per Second: " +
+                formatDecimal(
+                    attacksPerSecond
+                ),
+            leftX,
+            lineY
+        )
+
+        lineY -=
+            25f
+
+        font.draw(
+            batch,
+            "Range: " +
+                range.roundToInt(),
+            leftX,
+            lineY
+        )
+
+        lineY -=
+            25f
+
+        if (knockback > 0f) {
+            font.draw(
+                batch,
+                "Knockback: " +
+                    knockback.roundToInt(),
+                leftX,
+                lineY
+            )
+
+            lineY -=
+                25f
+        }
+
+        font.draw(
+            batch,
+            "Piercing: " +
+                playerStats.totalScore(
+                    StatType.PIERCING
+                ),
+            leftX,
+            lineY
+        )
+
+        lineY -=
+            25f
+
+        font.draw(
+            batch,
+            "Critical Rate: " +
+                formatDecimal(
+                    playerStats
+                        .criticalHitChance() *
+                        100f
+                ) +
+                "%",
+            leftX,
+            lineY
+        )
+
+        lineY -=
+            25f
+
+        font.draw(
+            batch,
+            "Critical Damage: " +
+                formatDecimal(
+                    playerStats
+                        .criticalDamageMultiplier() *
+                        100f
+                ) +
+                "%",
+            leftX,
+            lineY
+        )
+
+        font.color =
+            Color.LIGHT_GRAY
+
+        font.data.setScale(
+            0.94f
+        )
+
+        font.draw(
+            batch,
+            definition.description,
+            rightX,
+            panel.y +
+                panel.height -
+                75f,
+            panel.width -
+                465f,
+            Align.left,
+            true
+        )
+
+        font.color =
+            Color.GRAY
+
+        font.data.setScale(
+            0.70f
+        )
+
+        font.draw(
+            batch,
+            "Click outside to close.",
+            panel.x +
+                20f,
+            panel.y +
+                18f
+        )
+
+        font.data.setScale(
+            1f
+        )
+    }
+
+    private fun createPresetPreviewPlayerStats(
+        preset:
+        ResolvedPresetContent
+    ): PlayerStats {
+
+        /*
+         * Character base + Preset Stat Point değerleri
+         * PlayerStats'in base katmanına verilir.
+         *
+         * Armor, Item ve pasif Weapon bonusları
+         * Gear katmanına verilir.
+         */
+        val preRunBaseStats =
+            StatType.entries
+                .associateWith { statType ->
+                    val base =
+                        preset.baseStats[
+                            statType
+                        ] ?: 0
+
+                    val presetBonus =
+                        preset.presetStatBonuses[
+                            statType
+                        ] ?: 0
+
+                    base +
+                        presetBonus
+                }
+
+        return PlayerStats(
+            initialBaseScores =
+                preRunBaseStats
+        ).apply {
+            setGearBonuses(
+                preset.gearBonuses
+            )
+        }
+    }
+
+    private fun renderMainScalingLine(
+        definition:
+        WeaponDefinition,
+
+        x:
+        Float,
+
+        y:
+        Float
+    ) {
+        val mainScalingStat =
+            definition
+                .orderedDamageScaling()
+                .firstOrNull()
+                ?.first
+
+        val label =
+            "Main Damage Scaling: "
+
+        font.color =
+            Color.GOLD
+
+        font.draw(
+            batch,
+            label,
+            x,
+            y
+        )
+
+        glyphLayout.setText(
+            font,
+            label
+        )
+
+        if (mainScalingStat != null) {
+            font.color =
+                scalingStatColor(
+                    mainScalingStat
+                )
+
+            font.draw(
+                batch,
+                mainScalingStat.displayName,
+                x +
+                    glyphLayout.width,
+                y
+            )
+        } else {
+            font.color =
+                Color.GRAY
+
+            font.draw(
+                batch,
+                "None",
+                x +
+                    glyphLayout.width,
+                y
+            )
+        }
+    }
+
+    private fun scalingStatColor(
+        statType:
+        StatType
+    ): Color {
+
+        return when (statType) {
+            StatType.STRENGTH -> {
+                Color(
+                    0.95f,
+                    0.20f,
+                    0.17f,
+                    1f
+                )
+            }
+
+            StatType.DEXTERITY -> {
+                Color(
+                    1f,
+                    0.82f,
+                    0.12f,
+                    1f
+                )
+            }
+
+            StatType.WISDOM -> {
+                Color(
+                    0.55f,
+                    0.18f,
+                    0.72f,
+                    1f
+                )
+            }
+
+            else -> {
+                Color.CYAN
+            }
+        }
+    }
+
+    private fun secondaryScalingText(
+        definition:
+        WeaponDefinition
+    ): String {
+
+        val secondaryScaling =
+            definition
+                .orderedDamageScaling()
+                .drop(1)
+
+        return if (
+            secondaryScaling.isEmpty()
+        ) {
+            "Secondary Scaling: None"
+        } else {
+            "Secondary Scaling: " +
+                secondaryScaling.joinToString(
+                    separator =
+                        ", "
+                ) { scaling ->
+                    scaling.first.displayName
+                }
+        }
+    }
+
+    private fun weaponTypeText(
+        definition:
+        WeaponDefinition
+    ): String {
+
+        return when {
+            ContentTag.SPELL_FOCUS in
+                definition.tags -> {
+                "Spell Focus"
+            }
+
+            ContentTag.MELEE_WEAPON in
+                definition.tags -> {
+                "Melee Weapon"
+            }
+
+            ContentTag.RANGED_WEAPON in
+                definition.tags -> {
+                "Ranged Weapon"
+            }
+
+            else -> {
+                "Weapon"
+            }
+        }
+    }
+
+    private fun attackModelText(
+        weapon:
+        WeaponInstance
+    ): String {
+
+        if (
+            weapon.displayName
+                .lowercase(
+                    Locale.US
+                ) ==
+            "double swords"
+        ) {
+            return "X"
+        }
+
+        return when (
+            weapon.definition
+                .attackPattern
+        ) {
+            WeaponAttackPattern.SHORT_SLASH_LINES ->
+                "Slash"
+
+            WeaponAttackPattern.FORWARD_CONE ->
+                "Cone"
+
+            WeaponAttackPattern.TARGET_AREA_CIRCLE ->
+                "Circle"
+
+            WeaponAttackPattern.MELEE_OR_THROW ->
+                "Stab / Throw"
+
+            WeaponAttackPattern.STRAIGHT_PROJECTILE ->
+                "Projectile"
+
+            WeaponAttackPattern.PIERCING_PROJECTILE ->
+                "Piercing Projectile"
+
+            WeaponAttackPattern.LONG_PIERCING_LINE ->
+                "Piercing Line"
+
+            WeaponAttackPattern.SHIELD_CONE ->
+                "Shield Cone"
+
+            WeaponAttackPattern.TOME_PROJECTILE_OR_BEAM ->
+                "Projectile / Beam"
+
+            WeaponAttackPattern.TOTEM_PROJECTILE_OR_DRAIN ->
+                "Projectile / Drain"
+
+            WeaponAttackPattern.NONE ->
+                "Passive"
+        }
+    }
+
+    private fun formatDecimal(
+        value:
+        Float
+    ): String {
+
+        return String.format(
+            Locale.US,
+            "%.2f",
+            value
+        )
     }
 
     private fun renderDeleteConfirmation(

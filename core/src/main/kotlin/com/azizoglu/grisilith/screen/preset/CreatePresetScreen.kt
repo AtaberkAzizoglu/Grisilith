@@ -67,19 +67,19 @@ class CreatePresetScreen(
             8f
 
         private const val WEAPON_VISIBLE_CARD_COUNT =
-            12
+            4
 
         private const val ARMOR_VISIBLE_CARD_COUNT =
-            8
+            3
 
         private const val LIST_DRAG_THRESHOLD =
-            8f
+            5f
 
         private const val LIST_DRAG_SCROLL_STEP =
-            45f
+            26f
 
         private const val ITEM_VISIBLE_CARD_COUNT =
-            15
+            4
     }
 
     private val camera =
@@ -194,121 +194,83 @@ class CreatePresetScreen(
 
     private val leftPanel =
         Rectangle(
-            35f,
+            28f,
             PANEL_BOTTOM,
-            380f,
-            PANEL_TOP -
-                PANEL_BOTTOM
+            335f,
+            PANEL_TOP - PANEL_BOTTOM
         )
 
     private val centerPanel =
         Rectangle(
-            435f,
+            382f,
             PANEL_BOTTOM,
-            410f,
-            PANEL_TOP -
-                PANEL_BOTTOM
+            516f,
+            PANEL_TOP - PANEL_BOTTOM
         )
 
     private val rightPanel =
         Rectangle(
-            865f,
+            917f,
             PANEL_BOTTOM,
-            380f,
-            PANEL_TOP -
-                PANEL_BOTTOM
+            335f,
+            PANEL_TOP - PANEL_BOTTOM
         )
 
     private val characterPortrait =
         Rectangle(
-            centerPanel.x +
-                105f,
-            centerPanel.y +
-                155f,
-            200f,
-            245f
+            centerPanel.x + 148f,
+            centerPanel.y + 150f,
+            220f,
+            252f
         )
 
     private val weaponSlot =
         Rectangle(
-            centerPanel.x +
-                20f,
-            centerPanel.y +
-                300f,
-            72f,
-            72f
+            centerPanel.x + 30f,
+            centerPanel.y + 315f,
+            92f,
+            78f
         )
 
     private val weaponTamgaSlot =
         Rectangle(
-            centerPanel.x +
-                20f,
-            centerPanel.y +
-                175f,
-            72f,
-            72f
+            centerPanel.x + 30f,
+            centerPanel.y + 184f,
+            92f,
+            78f
         )
 
     private val armorSlot =
         Rectangle(
-            centerPanel.x +
-                centerPanel.width -
-                92f,
-            centerPanel.y +
-                300f,
-            72f,
-            72f
+            centerPanel.x + centerPanel.width - 122f,
+            centerPanel.y + 315f,
+            92f,
+            78f
         )
 
     private val armorTamgaSlot =
         Rectangle(
-            centerPanel.x +
-                centerPanel.width -
-                92f,
-            centerPanel.y +
-                175f,
-            72f,
-            72f
+            centerPanel.x + centerPanel.width - 122f,
+            centerPanel.y + 184f,
+            92f,
+            78f
         )
 
     private val itemSlot =
         Rectangle(
-            centerPanel.x +
-                169f,
-            centerPanel.y +
-                30f,
-            72f,
-            72f
+            centerPanel.x + 212f,
+            centerPanel.y + 28f,
+            92f,
+            78f
         )
 
     private val editStatsButtonRectangle =
         Rectangle(
-            centerPanel.x +
-                105f,
-            centerPanel.y +
-                centerPanel.height -
-                72f,
-            200f,
-            46f
+            centerPanel.x + 148f,
+            centerPanel.y + centerPanel.height - 68f,
+            220f,
+            44f
         )
-
-    private var pointerPressedWeaponIndex:
-        Int? = null
-
-    private var pointerPressedArmorIndex:
-        Int? = null
-
-    private var pointerPressedItemIndex:
-        Int? = null
-
-    private var equipmentPressStartX =
-        0f
-
-    private var equipmentPressStartY =
-        0f
-
-    private var equipmentDragStarted =
-        false
 
     private var weaponScrollOffset =
         0
@@ -322,20 +284,25 @@ class CreatePresetScreen(
     private var previousInputProcessor:
         InputProcessor? = null
 
-    private var draggedListSection:
-        CreatePresetListSection? = null
+    private var activeListGesture:
+        CreatePresetListGesture? =
+        null
 
-    private var listPressStartY =
+    private var listGestureMode:
+        CreatePresetListGestureMode =
+        CreatePresetListGestureMode.NONE
+
+    private var listGestureStartX =
         0f
 
-    private var previousListDragY =
+    private var listGestureStartY =
         0f
 
-    private var accumulatedListDragY =
+    private var previousListGestureY =
         0f
 
-    private var listDragStarted =
-        false
+    private var accumulatedListGestureY =
+        0f
 
 
     override fun show() {
@@ -375,11 +342,7 @@ class CreatePresetScreen(
         itemScrollOffset =
             0
 
-        draggedListSection =
-            null
-
-        listDragStarted =
-            false
+        clearListGesture()
 
         previousInputProcessor =
             Gdx.input.inputProcessor
@@ -394,6 +357,12 @@ class CreatePresetScreen(
                     amountY:
                     Float
                 ): Boolean {
+
+                    /*
+ * Scroll eventi render frame'inden bağımsız
+ * geldiği için fare konumunu burada yeniliyoruz.
+ */
+                    pointer.updatePosition()
 
                     if (
                         interactionState
@@ -476,14 +445,12 @@ class CreatePresetScreen(
     }
 
     private fun handleNormalInput() {
-        if (
-            handleScrollableEquipmentLists()
-        ) {
+        if (handleListControlClick()) {
             return
         }
 
         if (
-            handleEquipmentDragInput()
+            handleListAndEquipmentGesture()
         ) {
             return
         }
@@ -584,331 +551,197 @@ class CreatePresetScreen(
         }
     }
 
-    private fun handleScrollableEquipmentLists():
+    private fun handleListAndEquipmentGesture():
         Boolean {
-
-        /*
-         * Bir Weapon veya Armor kartına basılmışsa
-         * mevcut equipment drag sistemi yönetsin.
-         */
-        if (
-            pointer.justPressed &&
-            (
-                weaponCardRectangles()
-                    .any { rectangle ->
-                        rectangle.contains(
-                            pointer.position
-                        )
-                    } ||
-                    armorCardRectangles()
-                        .any { rectangle ->
-                            rectangle.contains(
-                                pointer.position
-                            )
-                        } ||
-                    itemCardRectangles()
-                        .any { rectangle ->
-                            rectangle.contains(
-                                pointer.position
-                            )
-                        }
-                )
-        ) {
-            return false
-        }
 
         if (pointer.justPressed) {
-            draggedListSection =
-                when {
-                    weaponListArea()
-                        .contains(
-                            pointer.position
-                        ) -> {
-                        CreatePresetListSection
-                            .WEAPONS
-                    }
+            val gesture =
+                createListGestureAtPointer()
 
-                    armorListArea()
-                        .contains(
-                            pointer.position
-                        ) -> {
-                        CreatePresetListSection
-                            .ARMORS
-                    }
+            if (gesture != null) {
+                activeListGesture =
+                    gesture
 
-                    itemListArea()
-                        .contains(
-                            pointer.position
-                        ) -> {
-                        CreatePresetListSection.ITEMS
-                    }
+                listGestureMode =
+                    CreatePresetListGestureMode.PENDING
 
-                    else -> {
-                        null
-                    }
-                }
-
-            if (draggedListSection != null) {
-                listPressStartY =
-                    pointer.position.y
-
-                previousListDragY =
-                    pointer.position.y
-
-                accumulatedListDragY =
-                    0f
-
-                listDragStarted =
-                    false
-
-                return true
-            }
-        }
-
-        val section =
-            draggedListSection
-                ?: return false
-
-        if (pointer.isHeld) {
-            val currentY =
-                pointer.position.y
-
-            if (
-                abs(
-                    currentY -
-                        listPressStartY
-                ) >=
-                LIST_DRAG_THRESHOLD
-            ) {
-                listDragStarted =
-                    true
-            }
-
-            if (listDragStarted) {
-                accumulatedListDragY +=
-                    currentY -
-                        previousListDragY
-
-                /*
-                 * Listeyi yukarı sürüklemek daha aşağıdaki
-                 * içerikleri gösterir.
-                 */
-                while (
-                    accumulatedListDragY <=
-                    -LIST_DRAG_SCROLL_STEP
-                ) {
-                    when (section) {
-                        CreatePresetListSection.WEAPONS -> {
-                            scrollWeapons(
-                                1
-                            )
-                        }
-
-                        CreatePresetListSection.ARMORS -> {
-                            scrollArmors(
-                                1
-                            )
-                        }
-
-                        CreatePresetListSection.ITEMS -> {
-                            scrollItems(
-                                1
-                            )
-                        }
-                    }
-
-                    accumulatedListDragY +=
-                        LIST_DRAG_SCROLL_STEP
-                }
-
-                /*
-                 * Listeyi aşağı sürüklemek önceki
-                 * içeriklere döner.
-                 */
-                while (
-                    accumulatedListDragY >=
-                    LIST_DRAG_SCROLL_STEP
-                ) {
-                    when (section) {
-                        CreatePresetListSection.WEAPONS -> {
-                            scrollWeapons(
-                                -1
-                            )
-                        }
-
-                        CreatePresetListSection.ARMORS -> {
-                            scrollArmors(
-                                -1
-                            )
-                        }
-
-                        CreatePresetListSection.ITEMS -> {
-                            scrollItems(
-                                -1
-                            )
-                        }
-                    }
-
-                    accumulatedListDragY -=
-                        LIST_DRAG_SCROLL_STEP
-                }
-            }
-
-            previousListDragY =
-                currentY
-
-            return true
-        }
-
-        if (pointer.justReleased) {
-            draggedListSection =
-                null
-
-            listDragStarted =
-                false
-
-            accumulatedListDragY =
-                0f
-
-            return true
-        }
-
-        return true
-    }
-
-    private fun handleEquipmentDragInput():
-        Boolean {
-
-        if (
-            pointer.justPressed
-        ) {
-            pointerPressedWeaponIndex =
-                weaponCardRectangles()
-                    .indexOfFirst { rectangle ->
-                        rectangle.contains(
-                            pointer.position
-                        )
-                    }
-                    .takeIf { index ->
-                        index >= 0
-                    }
-
-            pointerPressedArmorIndex =
-                armorCardRectangles()
-                    .indexOfFirst { rectangle ->
-                        rectangle.contains(
-                            pointer.position
-                        )
-                    }
-                    .takeIf { index ->
-                        index >= 0
-                    }
-
-            pointerPressedItemIndex =
-                itemCardRectangles()
-                    .indexOfFirst { rectangle ->
-                        rectangle.contains(
-                            pointer.position
-                        )
-                    }
-                    .takeIf { index ->
-                        index >= 0
-                    }
-
-            if (
-                pointerPressedWeaponIndex !=
-                null ||
-                pointerPressedArmorIndex !=
-                null ||
-                pointerPressedItemIndex !=
-                null
-            ) {
-                equipmentPressStartX =
+                listGestureStartX =
                     pointer.position.x
 
-                equipmentPressStartY =
+                listGestureStartY =
                     pointer.position.y
 
-                equipmentDragStarted =
-                    false
+                previousListGestureY =
+                    pointer.position.y
+
+                accumulatedListGestureY =
+                    0f
 
                 return true
             }
         }
 
-        val pressedWeaponIndex =
-            pointerPressedWeaponIndex
-
-        val pressedArmorIndex =
-            pointerPressedArmorIndex
-
-        val pressedItemIndex =
-            pointerPressedItemIndex
-
-        if (
-            pressedWeaponIndex == null &&
-            pressedArmorIndex == null &&
-            pressedItemIndex == null
-        ) {
-            return false
-        }
+        val gesture =
+            activeListGesture
+                ?: return false
 
         if (pointer.isHeld) {
             val deltaX =
                 pointer.position.x -
-                    equipmentPressStartX
+                    listGestureStartX
 
             val deltaY =
                 pointer.position.y -
-                    equipmentPressStartY
+                    listGestureStartY
 
-            val distanceSquared =
-                deltaX *
-                    deltaX +
-                    deltaY *
+            val absoluteX =
+                abs(
+                    deltaX
+                )
+
+            val absoluteY =
+                abs(
                     deltaY
+                )
 
             if (
-                !equipmentDragStarted &&
-                distanceSquared >=
-                EQUIPMENT_DRAG_THRESHOLD *
-                EQUIPMENT_DRAG_THRESHOLD
+                listGestureMode ==
+                CreatePresetListGestureMode.PENDING &&
+                (
+                    absoluteX >=
+                        LIST_DRAG_THRESHOLD ||
+                        absoluteY >=
+                        LIST_DRAG_THRESHOLD
+                    )
             ) {
-                equipmentDragStarted =
-                    true
+                /*
+                 * Dikey hareket baskınsa liste kaydırılır.
+                 *
+                 * Böylece kartın tam üstünden de yukarı veya
+                 * aşağı sürükleyerek liste kaydırılabilir.
+                 */
+                if (
+                    absoluteY >=
+                    absoluteX
+                ) {
+                    listGestureMode =
+                        CreatePresetListGestureMode.SCROLLING
+                } else if (
+                    gesture.visibleContentIndex !=
+                    null &&
+                    gesture.equipmentType !=
+                    null
+                ) {
+                    /*
+                     * Yatay veya çapraz hareket baskınsa
+                     * ekipman sürükleme başlar.
+                     */
+                    val dragStarted =
+                        beginGestureEquipmentDrag(
+                            gesture
+                        )
 
-                beginEquipmentDrag(
-                    weaponIndex =
-                        pressedWeaponIndex,
+                    listGestureMode =
+                        if (dragStarted) {
+                            CreatePresetListGestureMode
+                                .EQUIPMENT_DRAGGING
+                        } else {
+                            CreatePresetListGestureMode
+                                .SCROLLING
+                        }
+                } else {
+                    /*
+                     * Boş alana basıldıysa yalnızca
+                     * liste kaydırma mümkündür.
+                     */
+                    listGestureMode =
+                        CreatePresetListGestureMode.SCROLLING
+                }
+            }
 
-                    armorIndex =
-                        pressedArmorIndex,
+            when (listGestureMode) {
+                CreatePresetListGestureMode.SCROLLING -> {
+                    val currentY =
+                        pointer.position.y
 
-                    itemIndex =
-                        pressedItemIndex
-                )
+                    accumulatedListGestureY +=
+                        currentY -
+                            previousListGestureY
+
+                    while (
+                        accumulatedListGestureY <=
+                        -LIST_DRAG_SCROLL_STEP
+                    ) {
+                        scrollListSection(
+                            section =
+                                gesture.section,
+
+                            amount =
+                                1
+                        )
+
+                        accumulatedListGestureY +=
+                            LIST_DRAG_SCROLL_STEP
+                    }
+
+                    while (
+                        accumulatedListGestureY >=
+                        LIST_DRAG_SCROLL_STEP
+                    ) {
+                        scrollListSection(
+                            section =
+                                gesture.section,
+
+                            amount =
+                                -1
+                        )
+
+                        accumulatedListGestureY -=
+                            LIST_DRAG_SCROLL_STEP
+                    }
+
+                    previousListGestureY =
+                        currentY
+                }
+
+                CreatePresetListGestureMode
+                    .EQUIPMENT_DRAGGING -> {
+                    /*
+                     * Sürüklenen kartın görsel önizlemesi
+                     * mevcut render kodu tarafından çizilir.
+                     */
+                }
+
+                else -> {
+                }
             }
 
             return true
         }
 
         if (pointer.justReleased) {
-            if (equipmentDragStarted) {
-                finishEquipmentDrag()
-            } else {
-                openPressedEquipmentDetail(
-                    weaponIndex =
-                        pressedWeaponIndex,
+            when (listGestureMode) {
+                CreatePresetListGestureMode.PENDING -> {
+                    /*
+                     * Hareket edilmeden bırakıldıysa
+                     * normal kısa tıklama sayılır.
+                     */
+                    openGestureContentDetail(
+                        gesture
+                    )
+                }
 
-                    armorIndex =
-                        pressedArmorIndex,
+                CreatePresetListGestureMode
+                    .EQUIPMENT_DRAGGING -> {
+                    finishEquipmentDrag()
+                }
 
-                    itemIndex =
-                        pressedItemIndex
-                )
+                CreatePresetListGestureMode.SCROLLING,
+                CreatePresetListGestureMode.NONE -> {
+                }
             }
 
-            clearEquipmentPressState()
+            clearListGesture()
 
             return true
         }
@@ -916,89 +749,296 @@ class CreatePresetScreen(
         return true
     }
 
-    private fun beginEquipmentDrag(
-        weaponIndex:
-        Int?,
+    private fun createListGestureAtPointer():
+        CreatePresetListGesture? {
 
-        armorIndex:
-        Int?,
+        val weaponIndex =
+            weaponCardRectangles()
+                .indexOfFirst { rectangle ->
+                    rectangle.contains(
+                        pointer.position
+                    )
+                }
+                .takeIf { index ->
+                    index >= 0
+                }
 
-        itemIndex:
-        Int?
-    ) {
+        if (
+            weaponListArea()
+                .contains(
+                    pointer.position
+                )
+        ) {
+            return CreatePresetListGesture(
+                section =
+                    CreatePresetListSection.WEAPONS,
+
+                visibleContentIndex =
+                    weaponIndex,
+
+                equipmentType =
+                    if (weaponIndex != null) {
+                        CreatePresetEquipmentType.WEAPON
+                    } else {
+                        null
+                    }
+            )
+        }
+
+        val armorIndex =
+            armorCardRectangles()
+                .indexOfFirst { rectangle ->
+                    rectangle.contains(
+                        pointer.position
+                    )
+                }
+                .takeIf { index ->
+                    index >= 0
+                }
+
+        if (
+            armorListArea()
+                .contains(
+                    pointer.position
+                )
+        ) {
+            return CreatePresetListGesture(
+                section =
+                    CreatePresetListSection.ARMORS,
+
+                visibleContentIndex =
+                    armorIndex,
+
+                equipmentType =
+                    if (armorIndex != null) {
+                        CreatePresetEquipmentType.ARMOR
+                    } else {
+                        null
+                    }
+            )
+        }
+
+        val itemIndex =
+            itemCardRectangles()
+                .indexOfFirst { rectangle ->
+                    rectangle.contains(
+                        pointer.position
+                    )
+                }
+                .takeIf { index ->
+                    index >= 0
+                }
+
+        if (
+            itemListArea()
+                .contains(
+                    pointer.position
+                )
+        ) {
+            return CreatePresetListGesture(
+                section =
+                    CreatePresetListSection.ITEMS,
+
+                visibleContentIndex =
+                    itemIndex,
+
+                equipmentType =
+                    if (itemIndex != null) {
+                        CreatePresetEquipmentType.ITEM
+                    } else {
+                        null
+                    }
+            )
+        }
+
+        return null
+    }
+
+    private fun beginGestureEquipmentDrag(
+        gesture:
+        CreatePresetListGesture
+    ): Boolean {
+
         if (
             !interactionState
                 .hasCharacterSelected
         ) {
-            return
+            return false
         }
 
-        if (weaponIndex != null) {
-            val weapon =
-                visibleWeapons()
-                    .getOrNull(
-                        weaponIndex
-                    )
-                    ?: return
+        val index =
+            gesture.visibleContentIndex
+                ?: return false
 
-            if (
-                weapon.initialUnlockState !=
-                ContentUnlockState.UNLOCKED
-            ) {
-                return
+        when (gesture.equipmentType) {
+            CreatePresetEquipmentType.WEAPON -> {
+                val weapon =
+                    visibleWeapons()
+                        .getOrNull(
+                            index
+                        )
+                        ?: return false
+
+                if (
+                    weapon.initialUnlockState !=
+                    ContentUnlockState.UNLOCKED
+                ) {
+                    return false
+                }
+
+                interactionState
+                    .beginWeaponDrag(
+                        weapon.id
+                    )
+
+                return true
             }
 
-            interactionState
-                .beginWeaponDrag(
-                    weapon.id
-                )
+            CreatePresetEquipmentType.ARMOR -> {
+                val armor =
+                    visibleArmors()
+                        .getOrNull(
+                            index
+                        )
+                        ?: return false
 
-            return
-        }
+                if (
+                    armor.initialUnlockState !=
+                    ContentUnlockState.UNLOCKED
+                ) {
+                    return false
+                }
 
-        if (armorIndex != null) {
-            val armor =
-                visibleArmors()
-                    .getOrNull(
-                        armorIndex
+                interactionState
+                    .beginArmorDrag(
+                        armor.id
                     )
-                    ?: return
 
-            if (
-                armor.initialUnlockState !=
-                ContentUnlockState.UNLOCKED
-            ) {
-                return
+                return true
             }
 
-            interactionState
-                .beginArmorDrag(
-                    armor.id
-                )
+            CreatePresetEquipmentType.ITEM -> {
+                val item =
+                    visibleItems()
+                        .getOrNull(
+                            index
+                        )
+                        ?: return false
 
-            return
-        }
+                if (
+                    item.initialUnlockState !=
+                    ContentUnlockState.UNLOCKED
+                ) {
+                    return false
+                }
 
-        if (itemIndex != null) {
-            val item =
-                visibleItems()
-                    .getOrNull(
-                        itemIndex
+                interactionState
+                    .beginItemDrag(
+                        item.id
                     )
-                    ?: return
 
-            if (
-                item.initialUnlockState !=
-                ContentUnlockState.UNLOCKED
-            ) {
-                return
+                return true
             }
 
-            interactionState
-                .beginItemDrag(
-                    item.id
-                )
+            null -> {
+                return false
+            }
         }
+    }
+
+    private fun openGestureContentDetail(
+        gesture:
+        CreatePresetListGesture
+    ) {
+        val index =
+            gesture.visibleContentIndex
+                ?: return
+
+        when (gesture.equipmentType) {
+            CreatePresetEquipmentType.WEAPON -> {
+                val weapon =
+                    visibleWeapons()
+                        .getOrNull(
+                            index
+                        )
+                        ?: return
+
+                interactionState
+                    .inspectWeapon(
+                        weapon.id
+                    )
+            }
+
+            CreatePresetEquipmentType.ARMOR -> {
+                val armor =
+                    visibleArmors()
+                        .getOrNull(
+                            index
+                        )
+                        ?: return
+
+                interactionState
+                    .inspectArmor(
+                        armor.id
+                    )
+            }
+
+            CreatePresetEquipmentType.ITEM -> {
+                val item =
+                    visibleItems()
+                        .getOrNull(
+                            index
+                        )
+                        ?: return
+
+                interactionState
+                    .inspectItem(
+                        item.id
+                    )
+            }
+
+            null -> {
+            }
+        }
+    }
+
+    private fun scrollListSection(
+        section:
+        CreatePresetListSection,
+
+        amount:
+        Int
+    ) {
+        when (section) {
+            CreatePresetListSection.WEAPONS -> {
+                scrollWeapons(
+                    amount
+                )
+            }
+
+            CreatePresetListSection.ARMORS -> {
+                scrollArmors(
+                    amount
+                )
+            }
+
+            CreatePresetListSection.ITEMS -> {
+                scrollItems(
+                    amount
+                )
+            }
+        }
+    }
+
+    private fun clearListGesture() {
+        activeListGesture =
+            null
+
+        listGestureMode =
+            CreatePresetListGestureMode.NONE
+
+        accumulatedListGestureY =
+            0f
     }
 
     private fun finishEquipmentDrag() {
@@ -1050,77 +1090,6 @@ class CreatePresetScreen(
                 }
             }
         }
-    }
-
-    private fun openPressedEquipmentDetail(
-        weaponIndex:
-        Int?,
-
-        armorIndex:
-        Int?,
-
-        itemIndex:
-        Int?
-    ) {
-        if (weaponIndex != null) {
-            val weapon =
-                visibleWeapons()
-                    .getOrNull(
-                        weaponIndex
-                    )
-                    ?: return
-
-            interactionState
-                .inspectWeapon(
-                    weapon.id
-                )
-
-            return
-        }
-
-        if (armorIndex != null) {
-            val armor =
-                visibleArmors()
-                    .getOrNull(
-                        armorIndex
-                    )
-                    ?: return
-
-            interactionState
-                .inspectArmor(
-                    armor.id
-                )
-
-            return
-        }
-
-        if (itemIndex != null) {
-            val item =
-                visibleItems()
-                    .getOrNull(
-                        itemIndex
-                    )
-                    ?: return
-
-            interactionState
-                .inspectItem(
-                    item.id
-                )
-        }
-    }
-
-    private fun clearEquipmentPressState() {
-        pointerPressedWeaponIndex =
-            null
-
-        pointerPressedArmorIndex =
-            null
-
-        pointerPressedItemIndex =
-            null
-
-        equipmentDragStarted =
-            false
     }
 
     private fun handleModalInput() {
@@ -1177,27 +1146,35 @@ class CreatePresetScreen(
 
         if (
             interactionState
-                .inspectedStatType !=
-            null
+                .isStatEditorOpen
         ) {
+            /*
+             * Küçük açıklama kutusu açıksa:
+             * - Kutunun içine basmak bir şey yapmaz.
+             * - Kutunun dışına basmak açıklamayı kapatır.
+             * - Ardından aynı tıklama Edit Stats üzerinde
+             *   normal şekilde işlenebilir.
+             */
             if (
-                !statDescriptionRectangle()
-                    .contains(
-                        pointer.position
-                    )
+                interactionState
+                    .inspectedStatType !=
+                null
             ) {
+                if (
+                    statDescriptionRectangle()
+                        .contains(
+                            pointer.position
+                        )
+                ) {
+                    return
+                }
+
                 interactionState
                     .closeStatDescription()
             }
 
-            return
-        }
-
-        if (
-            interactionState
-                .isStatEditorOpen
-        ) {
             handleStatEditorClick()
+
             return
         }
 
@@ -1617,86 +1594,50 @@ class CreatePresetScreen(
             )
     }
 
-    private fun maximumItemScrollOffset():
-        Int {
-
-        return (
-            filteredItems().size -
-                ITEM_VISIBLE_CARD_COUNT
-            )
-            .coerceAtLeast(
-                0
-            )
+    private fun maximumItemScrollOffset(): Int {
+        val size = filteredItems().size
+        return if (size <= ITEM_VISIBLE_CARD_COUNT) 0
+        else ((size - 1) / ITEM_VISIBLE_CARD_COUNT) * ITEM_VISIBLE_CARD_COUNT
     }
+
 
     private fun scrollItems(
-        amount:
-        Int
+        amount: Int
     ) {
-        itemScrollOffset =
-            (
-                itemScrollOffset +
-                    amount
-                )
-                .coerceIn(
-                    0,
-                    maximumItemScrollOffset()
-                )
+        itemScrollOffset = (itemScrollOffset + amount * ITEM_VISIBLE_CARD_COUNT)
+            .coerceIn(0, maximumItemScrollOffset())
     }
 
-    private fun maximumWeaponScrollOffset():
-        Int {
 
-        return (
-            filteredWeapons().size -
-                WEAPON_VISIBLE_CARD_COUNT
-            )
-            .coerceAtLeast(
-                0
-            )
+    private fun maximumWeaponScrollOffset(): Int {
+        val size = filteredWeapons().size
+        return if (size <= WEAPON_VISIBLE_CARD_COUNT) 0
+        else ((size - 1) / WEAPON_VISIBLE_CARD_COUNT) * WEAPON_VISIBLE_CARD_COUNT
     }
 
-    private fun maximumArmorScrollOffset():
-        Int {
 
-        return (
-            filteredArmors().size -
-                ARMOR_VISIBLE_CARD_COUNT
-            )
-            .coerceAtLeast(
-                0
-            )
+    private fun maximumArmorScrollOffset(): Int {
+        val size = filteredArmors().size
+        return if (size <= ARMOR_VISIBLE_CARD_COUNT) 0
+        else ((size - 1) / ARMOR_VISIBLE_CARD_COUNT) * ARMOR_VISIBLE_CARD_COUNT
     }
+
 
     private fun scrollWeapons(
-        amount:
-        Int
+        amount: Int
     ) {
-        weaponScrollOffset =
-            (
-                weaponScrollOffset +
-                    amount
-                )
-                .coerceIn(
-                    0,
-                    maximumWeaponScrollOffset()
-                )
+        weaponScrollOffset = (weaponScrollOffset + amount * WEAPON_VISIBLE_CARD_COUNT)
+            .coerceIn(0, maximumWeaponScrollOffset())
     }
 
+
     private fun scrollArmors(
-        amount:
-        Int
+        amount: Int
     ) {
-        armorScrollOffset =
-            (
-                armorScrollOffset +
-                    amount
-                )
-                .coerceIn(
-                    0,
-                    maximumArmorScrollOffset()
-                )
+        armorScrollOffset = (armorScrollOffset + amount * ARMOR_VISIBLE_CARD_COUNT)
+            .coerceIn(0, maximumArmorScrollOffset())
     }
+
 
     private fun visibleCharacters():
         List<CharacterDefinition> {
@@ -2021,541 +1962,319 @@ class CreatePresetScreen(
     }
 
     private fun renderPanels() {
-        drawPanel(
-            leftPanel,
-            Color(
-                0.05f,
-                0.25f,
-                0.09f,
-                1f
-            )
-        )
-
-        drawPanel(
-            centerPanel,
-            Color(
-                0.28f,
-                0.07f,
-                0.31f,
-                1f
-            )
-        )
-
-        drawPanel(
-            rightPanel,
-            Color(
-                0.04f,
-                0.28f,
-                0.32f,
-                1f
-            )
-        )
+        drawPanel(centerPanel, Color(0.20f, 0.06f, 0.25f, 1f))
+        drawPanel(weaponPanel(), Color(0.04f, 0.20f, 0.09f, 1f))
+        drawPanel(armorPanel(), Color(0.10f, 0.14f, 0.18f, 1f))
+        drawPanel(itemPanel(), Color(0.18f, 0.07f, 0.09f, 1f))
+        drawPanel(tamgaPanel(), Color(0.09f, 0.12f, 0.24f, 1f))
     }
 
-    private fun weaponListArea():
-        Rectangle {
 
-        return Rectangle(
-            leftPanel.x,
-            leftPanel.y +
-                210f,
-            leftPanel.width,
-            leftPanel.height -
-                210f
-        )
+    private fun weaponPanel() =
+        Rectangle(leftPanel.x, leftPanel.y + 242f, leftPanel.width, 258f)
+
+    private fun armorPanel() =
+        Rectangle(leftPanel.x, leftPanel.y, leftPanel.width, 224f)
+
+    private fun itemPanel() =
+        Rectangle(rightPanel.x, rightPanel.y + 242f, rightPanel.width, 258f)
+
+    private fun tamgaPanel() =
+        Rectangle(rightPanel.x, rightPanel.y, rightPanel.width, 224f)
+
+    private fun weaponListArea(): Rectangle {
+        val panel = weaponPanel()
+        return Rectangle(panel.x + 8f, panel.y + 35f, panel.width - 16f, panel.height - 76f)
     }
 
-    private fun armorListArea():
-        Rectangle {
 
-        return Rectangle(
-            leftPanel.x,
-            leftPanel.y,
-            leftPanel.width,
-            200f
-        )
+    private fun armorListArea(): Rectangle {
+        val panel = armorPanel()
+        return Rectangle(panel.x + 8f, panel.y + 35f, panel.width - 16f, panel.height - 76f)
     }
 
-    private fun itemListArea():
-        Rectangle {
 
-        return Rectangle(
-            rightPanel.x,
-            rightPanel.y +
-                205f,
-            rightPanel.width,
-            rightPanel.height -
-                205f
-        )
+    private fun itemListArea(): Rectangle {
+        val panel = itemPanel()
+        return Rectangle(panel.x + 8f, panel.y + 35f, panel.width - 16f, panel.height - 76f)
     }
 
-    private fun weaponCardRectangles():
-        List<Rectangle> {
 
-        val columns =
-            4
-
-        val rows =
-            3
-
-        val horizontalPadding =
-            16f
-
-        val gap =
-            10f
-
-        val cardWidth =
-            (
-                leftPanel.width -
-                    horizontalPadding * 2f -
-                    gap * (columns - 1)
-                ) /
-                columns
-
-        val cardHeight =
-            62f
-
-        val firstY =
-            leftPanel.y +
-                leftPanel.height -
-                78f -
-                cardHeight
-
-        return List(
-            columns *
-                rows
-        ) { index ->
-            val column =
-                index %
-                    columns
-
-            val row =
-                index /
-                    columns
-
+    private fun weaponCardRectangles(): List<Rectangle> {
+        val area = weaponListArea()
+        val rowHeight = 38f
+        val gap = 6f
+        return List(WEAPON_VISIBLE_CARD_COUNT) { index ->
             Rectangle(
-                leftPanel.x +
-                    horizontalPadding +
-                    column *
-                    (
-                        cardWidth +
-                            gap
-                        ),
-
-                firstY -
-                    row *
-                    (
-                        cardHeight +
-                            gap
-                        ),
-
-                cardWidth,
-
-                cardHeight
+                area.x + 4f,
+                area.y + area.height - rowHeight - index * (rowHeight + gap),
+                area.width - 8f,
+                rowHeight
             )
         }
     }
 
-    private fun armorCardRectangles():
-        List<Rectangle> {
 
-        val columns =
-            4
-
-        val rows =
-            2
-
-        val horizontalPadding =
-            16f
-
-        val gap =
-            10f
-
-        val cardWidth =
-            (
-                leftPanel.width -
-                    horizontalPadding * 2f -
-                    gap * (columns - 1)
-                ) /
-                columns
-
-        val cardHeight =
-            62f
-
-        val firstY =
-            leftPanel.y +
-                145f -
-                cardHeight
-
-        return List(
-            columns *
-                rows
-        ) { index ->
-            val column =
-                index %
-                    columns
-
-            val row =
-                index /
-                    columns
-
+    private fun armorCardRectangles(): List<Rectangle> {
+        val area = armorListArea()
+        val rowHeight = 47f
+        val gap = 6f
+        return List(ARMOR_VISIBLE_CARD_COUNT) { index ->
             Rectangle(
-                leftPanel.x +
-                    horizontalPadding +
-                    column *
-                    (
-                        cardWidth +
-                            gap
-                        ),
-
-                firstY -
-                    row *
-                    (
-                        cardHeight +
-                            gap
-                        ),
-
-                cardWidth,
-
-                cardHeight
+                area.x + 4f,
+                area.y + area.height - rowHeight - index * (rowHeight + gap),
+                area.width - 8f,
+                rowHeight
             )
         }
     }
 
-    private fun itemCardRectangles():
-        List<Rectangle> {
 
-        val columns =
-            5
+    private fun itemCardRectangles(): List<Rectangle> {
+        val area = itemListArea()
+        val rowHeight = 38f
+        val gap = 6f
+        return List(ITEM_VISIBLE_CARD_COUNT) { index ->
+            Rectangle(
+                area.x + 4f,
+                area.y + area.height - rowHeight - index * (rowHeight + gap),
+                area.width - 8f,
+                rowHeight
+            )
+        }
+    }
 
-        val rows =
-            3
 
-        val horizontalPadding =
-            16f
+    private fun renderLinearListRow(
+        rectangle:
+        Rectangle,
 
-        val horizontalGap =
-            9f
+        title:
+        String,
 
-        val verticalGap =
-            12f
+        subtitle:
+        String,
 
-        val cardWidth =
-            (
-                rightPanel.width -
-                    horizontalPadding * 2f -
-                    horizontalGap *
-                    (
-                        columns -
-                            1
+        unlocked:
+        Boolean,
+
+        selected:
+        Boolean,
+
+        normalFillColor:
+        Color
+    ) {
+        drawPanel(
+            rectangle =
+                rectangle,
+
+            fillColor =
+                when {
+                    !unlocked -> {
+                        Color(
+                            0.16f,
+                            0.16f,
+                            0.16f,
+                            1f
                         )
-                ) /
-                columns
+                    }
 
-        val cardHeight =
-            58f
+                    selected -> {
+                        Color(
+                            0.08f,
+                            0.40f,
+                            0.22f,
+                            1f
+                        )
+                    }
 
-        val itemsArea =
-            itemListArea()
+                    else -> {
+                        normalFillColor
+                    }
+                }
+        )
 
-        val firstY =
-            itemsArea.y +
-                itemsArea.height -
-                72f -
-                cardHeight
-
-        return List(
-            columns *
-                rows
-        ) { index ->
-
-            val column =
-                index %
-                    columns
-
-            val row =
-                index /
-                    columns
-
+        val imageRectangle =
             Rectangle(
-                itemsArea.x +
-                    horizontalPadding +
-                    column *
-                    (
-                        cardWidth +
-                            horizontalGap
-                        ),
-
-                firstY -
-                    row *
-                    (
-                        cardHeight +
-                            verticalGap
-                        ),
-
-                cardWidth,
-
-                cardHeight
+                rectangle.x +
+                    6f,
+                rectangle.y +
+                    6f,
+                40f,
+                40f
             )
+
+        drawPanel(
+            rectangle =
+                imageRectangle,
+
+            fillColor =
+                if (unlocked) {
+                    Color(
+                        0.10f,
+                        0.13f,
+                        0.18f,
+                        1f
+                    )
+                } else {
+                    Color(
+                        0.12f,
+                        0.12f,
+                        0.12f,
+                        1f
+                    )
+                }
+        )
+
+        drawCenteredText(
+            text =
+                "IMG",
+
+            rectangle =
+                imageRectangle,
+
+            color =
+                if (unlocked) {
+                    Color.GRAY
+                } else {
+                    Color.DARK_GRAY
+                },
+
+            scale =
+                0.45f
+        )
+
+        font.color =
+            if (unlocked) {
+                Color.WHITE
+            } else {
+                Color.GRAY
+            }
+
+        font.data.setScale(
+            0.72f
+        )
+
+        font.draw(
+            batch,
+            if (unlocked) {
+                title
+            } else {
+                "$title — LOCKED"
+            },
+            rectangle.x +
+                56f,
+            rectangle.y +
+                34f,
+            rectangle.width -
+                66f,
+            Align.left,
+            false
+        )
+
+        font.color =
+            Color.GRAY
+
+        font.data.setScale(
+            0.55f
+        )
+
+        font.draw(
+            batch,
+            subtitle,
+            rectangle.x +
+                56f,
+            rectangle.y +
+                15f,
+            rectangle.width -
+                66f,
+            Align.left,
+            false
+        )
+
+        font.data.setScale(
+            1f
+        )
+    }
+
+    private fun renderListHeader(
+        title: String,
+        panel: Rectangle,
+        offset: Int,
+        visibleCount: Int,
+        totalCount: Int,
+        section: CreatePresetListSection
+    ) {
+        drawSectionTitle(title, panel.x + 8f, panel.y + panel.height - 16f, panel.width - 90f)
+        val up = listUpButton(section)
+        val down = listDownButton(section)
+        drawPanel(up, Color(0.08f, 0.16f, 0.25f, 1f))
+        drawPanel(down, Color(0.08f, 0.16f, 0.25f, 1f))
+        drawCenteredText("▲", up, Color.WHITE, 0.7f)
+        drawCenteredText("▼", down, Color.WHITE, 0.7f)
+        renderListPosition(offset, visibleCount, totalCount, panel.x + 14f, panel.y + 14f)
+    }
+
+    private fun listUpButton(section: CreatePresetListSection): Rectangle {
+        val panel = when (section) {
+            CreatePresetListSection.WEAPONS -> weaponPanel()
+            CreatePresetListSection.ARMORS -> armorPanel()
+            CreatePresetListSection.ITEMS -> itemPanel()
         }
+        return Rectangle(panel.x + panel.width - 70f, panel.y + panel.height - 34f, 28f, 24f)
+    }
+
+    private fun listDownButton(section: CreatePresetListSection): Rectangle {
+        val up = listUpButton(section)
+        return Rectangle(up.x + 34f, up.y, 28f, 24f)
+    }
+
+    private fun handleListControlClick(): Boolean {
+        if (!pointer.justReleased) return false
+        for (section in CreatePresetListSection.values()) {
+            if (listUpButton(section).contains(pointer.position)) {
+                scrollListSection(section, -1)
+                return true
+            }
+            if (listDownButton(section).contains(pointer.position)) {
+                scrollListSection(section, 1)
+                return true
+            }
+        }
+        return false
     }
 
     private fun renderLeftPanel() {
-        drawSectionTitle(
-            text =
-                "WEAPONS LIST",
-
-            x =
-                leftPanel.x,
-
-            y =
-                leftPanel.y +
-                    leftPanel.height -
-                    20f,
-
-            width =
-                leftPanel.width
-        )
-
-        val visibleWeapons =
-            visibleWeapons()
-
-        weaponCardRectangles()
-            .forEachIndexed {
-                    index,
-                    rectangle ->
-
-                val weapon =
-                    visibleWeapons
-                        .getOrNull(
-                            index
-                        )
-                        ?: return@forEachIndexed
-
-                val unlocked =
-                    weapon.initialUnlockState ==
-                        ContentUnlockState.UNLOCKED
-
-                drawPanel(
-                    rectangle =
-                        rectangle,
-
-                    fillColor =
-                        if (unlocked) {
-                            Color(
-                                0.09f,
-                                0.28f,
-                                0.13f,
-                                1f
-                            )
-                        } else {
-                            Color(
-                                0.16f,
-                                0.16f,
-                                0.16f,
-                                1f
-                            )
-                        }
-                )
-
-                drawCenteredText(
-                    text =
-                        if (unlocked) {
-                            weapon.displayName
-                        } else {
-                            "${weapon.displayName}\nLOCKED"
-                        },
-
-                    rectangle =
-                        rectangle,
-
-                    color =
-                        if (unlocked) {
-                            Color.WHITE
-                        } else {
-                            Color.GRAY
-                        },
-
-                    scale =
-                        0.58f
-                )
-            }
-
-        drawFilledRectangle(
-            Rectangle(
-                leftPanel.x,
-                leftPanel.y +
-                    205f,
-                leftPanel.width,
-                5f
-            ),
-            Color.BLACK
-        )
-
-        if (
-            maximumWeaponScrollOffset() >
-            0
-        ) {
-            font.color =
-                Color.GRAY
-
-            font.data.setScale(
-                0.58f
-            )
-
-            font.draw(
-                batch,
-                "${weaponScrollOffset + 1}–" +
-                    "${
-                        weaponScrollOffset +
-                            visibleWeapons().size
-                    } / ${filteredWeapons().size}",
-                leftPanel.x +
-                    10f,
-                leftPanel.y +
-                    219f
-            )
-
-            font.data.setScale(
-                1f
+        renderListHeader("WEAPONS", weaponPanel(), weaponScrollOffset, visibleWeapons().size, filteredWeapons().size, CreatePresetListSection.WEAPONS)
+        visibleWeapons().forEachIndexed { index, weapon ->
+            val rectangle = weaponCardRectangles().getOrNull(index) ?: return@forEachIndexed
+            renderLinearListRow(
+                rectangle, weapon.displayName, weaponTypeText(weapon),
+                weapon.initialUnlockState == ContentUnlockState.UNLOCKED,
+                weapon.id == interactionState.selectedWeaponId,
+                Color(0.07f, 0.27f, 0.12f, 1f)
             )
         }
 
-        drawSectionTitle(
-            text =
-                "ARMORS LIST",
-
-            x =
-                leftPanel.x,
-
-            y =
-                leftPanel.y +
-                    185f,
-
-            width =
-                leftPanel.width
-        )
-
-        val visibleArmors =
-            visibleArmors()
-
-        armorCardRectangles()
-            .forEachIndexed {
-                    index,
-                    rectangle ->
-
-                val armor =
-                    visibleArmors
-                        .getOrNull(
-                            index
-                        )
-                        ?: return@forEachIndexed
-
-                val unlocked =
-                    armor.initialUnlockState ==
-                        ContentUnlockState.UNLOCKED
-
-                drawPanel(
-                    rectangle =
-                        rectangle,
-
-                    fillColor =
-                        if (unlocked) {
-                            Color(
-                                0.22f,
-                                0.22f,
-                                0.25f,
-                                1f
-                            )
-                        } else {
-                            Color(
-                                0.16f,
-                                0.16f,
-                                0.16f,
-                                1f
-                            )
-                        }
-                )
-
-                drawCenteredText(
-                    text =
-                        if (unlocked) {
-                            armor.displayName
-                        } else {
-                            "${armor.displayName}\nLOCKED"
-                        },
-
-                    rectangle =
-                        rectangle,
-
-                    color =
-                        if (unlocked) {
-                            Color.WHITE
-                        } else {
-                            Color.GRAY
-                        },
-
-                    scale =
-                        0.58f
-                )
-            }
-
-        if (
-            maximumArmorScrollOffset() >
-            0
-        ) {
-            font.color =
-                Color.GRAY
-
-            font.data.setScale(
-                0.58f
-            )
-
-            font.draw(
-                batch,
-                "${armorScrollOffset + 1}–" +
-                    "${
-                        armorScrollOffset +
-                            visibleArmors().size
-                    } / ${filteredArmors().size}",
-                leftPanel.x +
-                    10f,
-                leftPanel.y +
-                    9f
-            )
-
-            font.data.setScale(
-                1f
+        renderListHeader("ARMORS", armorPanel(), armorScrollOffset, visibleArmors().size, filteredArmors().size, CreatePresetListSection.ARMORS)
+        visibleArmors().forEachIndexed { index, armor ->
+            val rectangle = armorCardRectangles().getOrNull(index) ?: return@forEachIndexed
+            renderLinearListRow(
+                rectangle, armor.displayName, "Armor",
+                armor.initialUnlockState == ContentUnlockState.UNLOCKED,
+                armor.id == interactionState.selectedArmorId,
+                Color(0.16f, 0.19f, 0.23f, 1f)
             )
         }
 
-        if (
-            !interactionState
-                .hasCharacterSelected
-        ) {
-            font.color =
-                Color.GOLD
-
-            font.data.setScale(
-                0.68f
-            )
-
-            font.draw(
-                batch,
-                "Choose a Character before equipping Gear.",
-                leftPanel.x,
-                leftPanel.y +
-                    12f,
-                leftPanel.width,
-                Align.center,
-                false
-            )
-
-            font.data.setScale(
-                1f
-            )
+        if (!interactionState.hasCharacterSelected) {
+            font.color = Color.GOLD
+            font.data.setScale(0.62f)
+            font.draw(batch, "Choose a Character before equipping.", leftPanel.x, 62f, leftPanel.width, Align.center, false)
+            font.data.setScale(1f)
         }
     }
+
 
     private fun renderCenterPanel() {
         renderEditStatsPlaceholder()
@@ -2840,204 +2559,78 @@ class CreatePresetScreen(
         )
     }
 
-    private fun renderRightPanel() {
-        /*
-         * Üst bölüm: Items
-         */
-        val itemsSection =
-            Rectangle(
-                rightPanel.x,
-                rightPanel.y +
-                    205f,
-                rightPanel.width,
-                rightPanel.height -
-                    205f
-            )
+    private fun renderListPosition(
+        currentOffset:
+        Int,
 
-        drawSectionTitle(
-            text =
-                "ITEMS LIST",
+        visibleCount:
+        Int,
 
-            x =
-                itemsSection.x,
+        totalCount:
+        Int,
 
-            y =
-                itemsSection.y +
-                    itemsSection.height -
-                    20f,
+        x:
+        Float,
 
-            width =
-                itemsSection.width
+        y:
+        Float
+    ) {
+        if (totalCount <= 0) {
+            return
+        }
+
+        font.color =
+            Color.GRAY
+
+        font.data.setScale(
+            0.55f
         )
 
-        val visibleItems =
-            visibleItems()
+        val first =
+            currentOffset +
+                1
 
-        itemCardRectangles()
-            .forEachIndexed {
-                    index,
-                    rectangle ->
-
-                val item =
-                    visibleItems
-                        .getOrNull(
-                            index
-                        )
-                        ?: return@forEachIndexed
-
-                val unlocked =
-                    item.initialUnlockState ==
-                        ContentUnlockState.UNLOCKED
-
-                val selected =
-                    item.id ==
-                        interactionState
-                            .selectedItemId
-
-                drawPanel(
-                    rectangle =
-                        rectangle,
-
-                    fillColor =
-                        when {
-                            !unlocked -> {
-                                Color(
-                                    0.16f,
-                                    0.16f,
-                                    0.16f,
-                                    1f
-                                )
-                            }
-
-                            selected -> {
-                                Color(
-                                    0.08f,
-                                    0.40f,
-                                    0.22f,
-                                    1f
-                                )
-                            }
-
-                            else -> {
-                                Color(
-                                    0.25f,
-                                    0.10f,
-                                    0.11f,
-                                    1f
-                                )
-                            }
-                        }
+        val last =
+            (
+                currentOffset +
+                    visibleCount
+                )
+                .coerceAtMost(
+                    totalCount
                 )
 
-                drawCenteredText(
-                    text =
-                        if (unlocked) {
-                            item.displayName
-                        } else {
-                            "${item.displayName}\nLOCKED"
-                        },
+        font.draw(
+            batch,
+            "$first–$last / $totalCount",
+            x,
+            y
+        )
 
-                    rectangle =
-                        rectangle,
+        font.data.setScale(
+            1f
+        )
+    }
 
-                    color =
-                        if (unlocked) {
-                            Color.WHITE
-                        } else {
-                            Color.GRAY
-                        },
-
-                    scale =
-                        0.52f
-                )
-            }
-
-        if (
-            maximumItemScrollOffset() >
-            0
-        ) {
-            font.color =
-                Color.GRAY
-
-            font.data.setScale(
-                0.58f
-            )
-
-            font.draw(
-                batch,
-                "${itemScrollOffset + 1}–" +
-                    "${
-                        itemScrollOffset +
-                            visibleItems.size
-                    } / ${filteredItems().size}",
-                itemsSection.x +
-                    10f,
-                itemsSection.y +
-                    8f
-            )
-
-            font.data.setScale(
-                1f
+    private fun renderRightPanel() {
+        renderListHeader("ITEMS", itemPanel(), itemScrollOffset, visibleItems().size, filteredItems().size, CreatePresetListSection.ITEMS)
+        visibleItems().forEachIndexed { index, item ->
+            val rectangle = itemCardRectangles().getOrNull(index) ?: return@forEachIndexed
+            renderLinearListRow(
+                rectangle, item.displayName, "${item.rarity.displayName} Item",
+                item.initialUnlockState == ContentUnlockState.UNLOCKED,
+                item.id == interactionState.selectedItemId,
+                Color(0.24f, 0.08f, 0.10f, 1f)
             )
         }
 
-        /*
-         * Item ve Tamga listelerini ayıran çizgi.
-         */
-        drawFilledRectangle(
-            Rectangle(
-                rightPanel.x,
-                rightPanel.y +
-                    198f,
-                rightPanel.width,
-                7f
-            ),
-            Color.BLACK
-        )
-
-        /*
-         * Alt bölüm: Tamgas
-         */
-        val tamgaSection =
-            Rectangle(
-                rightPanel.x,
-                rightPanel.y,
-                rightPanel.width,
-                198f
-            )
-
-        drawSectionTitle(
-            text =
-                "TAMGA LIST",
-
-            x =
-                tamgaSection.x,
-
-            y =
-                tamgaSection.y +
-                    tamgaSection.height -
-                    18f,
-
-            width =
-                tamgaSection.width
-        )
-
-        renderPlaceholderGrid(
-            section =
-                tamgaSection,
-
-            startY =
-                tamgaSection.y +
-                    tamgaSection.height -
-                    78f,
-
-            rowCount =
-                2,
-
-            columnCount =
-                5
-        )
+        val panel = tamgaPanel()
+        drawSectionTitle("TAMGAS", panel.x, panel.y + panel.height - 16f, panel.width)
+        font.color = Color.GRAY
+        font.data.setScale(0.72f)
+        font.draw(batch, "Tamga selection will be connected next.", panel.x + 18f, panel.y + 112f, panel.width - 36f, Align.center, true)
+        font.data.setScale(1f)
     }
+
 
     private fun renderPlaceholderGrid(
         section:
@@ -3240,14 +2833,23 @@ class CreatePresetScreen(
             }
 
             interactionState
-                .inspectedStatType !=
-                null -> {
-                renderStatDescription()
-            }
-
-            interactionState
                 .isStatEditorOpen -> {
+                /*
+                 * Edit Stats her zaman arkada kalır.
+                 */
                 renderStatEditor()
+
+                /*
+                 * Seçili Stat varsa küçük açıklama kutusu
+                 * Edit Stats'ın üzerine çizilir.
+                 */
+                if (
+                    interactionState
+                        .inspectedStatType !=
+                    null
+                ) {
+                    renderStatDescription()
+                }
             }
 
             interactionState
@@ -4298,9 +3900,13 @@ class CreatePresetScreen(
                     batch,
                     "$base + $bonus = $finalScore",
                     row.x +
-                        205f,
+                        145f,
                     row.y +
-                        22f
+                        22f,
+                    row.width -
+                        230f,
+                    Align.right,
+                    false
                 )
 
                 drawPanel(
@@ -4406,6 +4012,26 @@ class CreatePresetScreen(
         val panel =
             statDescriptionRectangle()
 
+        /*
+         * Küçük bir gölge.
+         */
+        drawFilledRectangle(
+            Rectangle(
+                panel.x +
+                    5f,
+                panel.y -
+                    5f,
+                panel.width,
+                panel.height
+            ),
+            Color(
+                0f,
+                0f,
+                0f,
+                0.45f
+            )
+        )
+
         drawPanel(
             panel,
             Color(
@@ -4417,7 +4043,7 @@ class CreatePresetScreen(
         )
 
         font.data.setScale(
-            1.2f
+            0.95f
         )
 
         font.color =
@@ -4426,17 +4052,15 @@ class CreatePresetScreen(
         font.draw(
             batch,
             statType.displayName,
-            panel.x,
+            panel.x +
+                16f,
             panel.y +
                 panel.height -
-                28f,
-            panel.width,
-            Align.center,
-            false
+                22f
         )
 
         font.data.setScale(
-            0.86f
+            0.70f
         )
 
         font.color =
@@ -4448,12 +4072,12 @@ class CreatePresetScreen(
                 statType
             ),
             panel.x +
-                28f,
+                16f,
             panel.y +
                 panel.height -
-                90f,
+                55f,
             panel.width -
-                56f,
+                32f,
             Align.left,
             true
         )
@@ -4462,16 +4086,16 @@ class CreatePresetScreen(
             Color.GRAY
 
         font.data.setScale(
-            0.7f
+            0.58f
         )
 
         font.draw(
             batch,
-            "Click outside to close.",
+            "Click outside this box to close.",
             panel.x +
-                20f,
+                16f,
             panel.y +
-                18f
+                13f
         )
 
         font.data.setScale(
@@ -4754,10 +4378,10 @@ class CreatePresetScreen(
 
     private fun statDescriptionRectangle() =
         Rectangle(
-            385f,
-            205f,
-            510f,
-            310f
+            665f,
+            345f,
+            300f,
+            190f
         )
 
     private fun statEditorRows():
@@ -5120,5 +4744,26 @@ class CreatePresetScreen(
 
         ITEMS
     }
-}
 
+    private enum class CreatePresetListGestureMode {
+
+        NONE,
+
+        PENDING,
+
+        SCROLLING,
+
+        EQUIPMENT_DRAGGING
+    }
+
+    private data class CreatePresetListGesture(
+        val section:
+        CreatePresetListSection,
+
+        val visibleContentIndex:
+        Int?,
+
+        val equipmentType:
+        CreatePresetEquipmentType?
+    )
+}

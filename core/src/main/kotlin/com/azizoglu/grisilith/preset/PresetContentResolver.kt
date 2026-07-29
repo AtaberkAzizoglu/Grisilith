@@ -8,11 +8,15 @@ import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 
 /*
- * RunPreset içinde yalnızca Content ID'leri
- * saklanır.
+ * Preset içindeki Content ID'lerini gerçek
+ * tanımlara dönüştürür.
  *
- * Bu sınıf ID'leri gerçek içerik tanımlarına
- * çevirir ve toplam başlangıç Statlarını hesaplar.
+ * Stat sonuçlarını dört ayrı katmanda verir:
+ *
+ * - Character base Stat
+ * - Preset Stat Point bonusu
+ * - Gear bonusu
+ * - Toplam başlangıç Statı
  */
 class PresetContentResolver(
     private val contentRegistry:
@@ -48,6 +52,24 @@ class PresetContentResolver(
             ) as? ItemDefinition
                 ?: return null
 
+        val statBreakdown =
+            calculateStatBreakdown(
+                preset =
+                    preset,
+
+                character =
+                    character,
+
+                weapon =
+                    weapon,
+
+                armor =
+                    armor,
+
+                item =
+                    item
+            )
+
         return ResolvedPresetContent(
             preset =
                 preset,
@@ -64,27 +86,21 @@ class PresetContentResolver(
             item =
                 item,
 
+            baseStats =
+                statBreakdown.baseStats,
+
+            presetStatBonuses =
+                statBreakdown.presetStatBonuses,
+
+            gearBonuses =
+                statBreakdown.gearBonuses,
+
             totalStats =
-                calculateTotalStats(
-                    preset =
-                        preset,
-
-                    character =
-                        character,
-
-                    weapon =
-                        weapon,
-
-                    armor =
-                        armor,
-
-                    item =
-                        item
-                )
+                statBreakdown.totalStats
         )
     }
 
-    private fun calculateTotalStats(
+    private fun calculateStatBreakdown(
         preset:
         RunPreset,
 
@@ -99,18 +115,59 @@ class PresetContentResolver(
 
         item:
         ItemDefinition
-    ): Map<StatType, Int> {
+    ): PresetStatBreakdown {
 
-        val totals =
+        val baseStats =
+            StatType.entries
+                .associateWith { statType ->
+                    character.baseStats[
+                        statType
+                    ] ?: 0
+                }
+
+        /*
+         * PresetStatAllocation.finalScores()
+         * Character base değerini ve maksimum 25
+         * sınırını birlikte uygular.
+         */
+        val preRunStats =
             preset.statAllocation
                 .finalScores(
                     character.baseStats
                 )
+
+        val presetStatBonuses =
+            StatType.entries
+                .associateWith { statType ->
+                    val base =
+                        baseStats[
+                            statType
+                        ] ?: 0
+
+                    val preRun =
+                        preRunStats[
+                            statType
+                        ] ?: base
+
+                    (
+                        preRun -
+                            base
+                        )
+                        .coerceAtLeast(
+                            0
+                        )
+                }
+
+        val gearBonuses =
+            StatType.entries
+                .associateWith {
+                    0
+                }
                 .toMutableMap()
 
         armor.allStatModifiers()
             .forEach { modifier ->
-                totals.addModifier(
+                gearBonuses.addModifier(
                     statType =
                         modifier.statType,
 
@@ -121,7 +178,7 @@ class PresetContentResolver(
 
         item.statModifiers
             .forEach { modifier ->
-                totals.addModifier(
+                gearBonuses.addModifier(
                     statType =
                         modifier.statType,
 
@@ -132,7 +189,7 @@ class PresetContentResolver(
 
         weapon.passiveStatModifiers
             .forEach { modifier ->
-                totals.addModifier(
+                gearBonuses.addModifier(
                     statType =
                         modifier.statType,
 
@@ -141,17 +198,47 @@ class PresetContentResolver(
                 )
             }
 
-        return StatType.entries
-            .associateWith { statType ->
-                (
-                    totals[
-                        statType
-                    ] ?: 0
-                    )
-                    .coerceAtLeast(
-                        0
-                    )
-            }
+        val totalStats =
+            StatType.entries
+                .associateWith { statType ->
+                    val base =
+                        baseStats[
+                            statType
+                        ] ?: 0
+
+                    val presetBonus =
+                        presetStatBonuses[
+                            statType
+                        ] ?: 0
+
+                    val gearBonus =
+                        gearBonuses[
+                            statType
+                        ] ?: 0
+
+                    (
+                        base +
+                            presetBonus +
+                            gearBonus
+                        )
+                        .coerceAtLeast(
+                            0
+                        )
+                }
+
+        return PresetStatBreakdown(
+            baseStats =
+                baseStats,
+
+            presetStatBonuses =
+                presetStatBonuses,
+
+            gearBonuses =
+                gearBonuses,
+
+            totalStats =
+                totalStats
+        )
     }
 
     private fun MutableMap<StatType, Int>
@@ -175,6 +262,20 @@ class PresetContentResolver(
     }
 }
 
+private data class PresetStatBreakdown(
+    val baseStats:
+    Map<StatType, Int>,
+
+    val presetStatBonuses:
+    Map<StatType, Int>,
+
+    val gearBonuses:
+    Map<StatType, Int>,
+
+    val totalStats:
+    Map<StatType, Int>
+)
+
 data class ResolvedPresetContent(
     val preset:
     RunPreset,
@@ -190,6 +291,15 @@ data class ResolvedPresetContent(
 
     val item:
     ItemDefinition,
+
+    val baseStats:
+    Map<StatType, Int>,
+
+    val presetStatBonuses:
+    Map<StatType, Int>,
+
+    val gearBonuses:
+    Map<StatType, Int>,
 
     val totalStats:
     Map<StatType, Int>

@@ -17,16 +17,13 @@ class MenuPointer(
     val position =
         Vector2()
 
-    val justPressed: Boolean
+    val justPressed:
+        Boolean
         get() =
             Gdx.input.isButtonJustPressed(
                 Input.Buttons.LEFT
             )
 
-    /*
-     * LibGDX'de doğrudan justReleased olmadığı
-     * için önceki frame durumu tutulur.
-     */
     private var wasHeld =
         false
 
@@ -34,13 +31,21 @@ class MenuPointer(
         Boolean = false
         private set
 
-    val isHeld: Boolean
+    val isHeld:
+        Boolean
         get() =
             Gdx.input.isButtonPressed(
                 Input.Buttons.LEFT
             )
 
-    fun update() {
+    /*
+     * Yalnızca fare konumunu günceller.
+     *
+     * Scroll eventleri render döngüsünün dışında
+     * gelebileceği için InputAdapter.scrolled()
+     * içinde de bu fonksiyon çağrılmalıdır.
+     */
+    fun updatePosition() {
         position.set(
             Gdx.input.x.toFloat(),
             Gdx.input.y.toFloat()
@@ -49,6 +54,10 @@ class MenuPointer(
         viewport.unproject(
             position
         )
+    }
+
+    fun update() {
+        updatePosition()
 
         val heldNow =
             isHeld
@@ -62,7 +71,12 @@ class MenuPointer(
     }
 
     fun reset() {
-        wasHeld = false
-        justReleased = false
+        updatePosition()
+
+        wasHeld =
+            false
+
+        justReleased =
+            false
     }
 }

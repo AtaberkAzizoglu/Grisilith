@@ -47,7 +47,7 @@ object CrossbowDefinition {
 
             damageScaling =
                 mapOf(
-                    StatType.STRENGTH to 1f,
+                    StatType.DEXTERITY to 1f,
                     StatType.PIERCING to 0.25f
                 ),
 
