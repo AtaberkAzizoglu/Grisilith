@@ -3,14 +3,24 @@ package com.azizoglu.grisilith.tamga.runtime
 import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.EnemyType
+import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.tamga.definition.TamgaDefinition
 import com.azizoglu.grisilith.tamga.definition.TamgaEffectId
+import com.azizoglu.grisilith.tamga.render.ChargerExplosionRenderer
+import com.azizoglu.grisilith.tamga.render.PhantomSteedRenderer
+import com.azizoglu.grisilith.tamga.runtime.active.ActiveTamgaState
+import com.azizoglu.grisilith.tamga.runtime.active.ChargerEndEvent
+import com.azizoglu.grisilith.tamga.runtime.active.ChargerExplosionEffect
+import com.azizoglu.grisilith.tamga.runtime.active.ChargerExplosionRuntime
+import com.azizoglu.grisilith.tamga.runtime.active.ChargerRuntime
+import com.azizoglu.grisilith.tamga.runtime.active.PhantomSteedRuntime
 import com.azizoglu.grisilith.weapon.runtime.WeaponHitEvent
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
-import com.azizoglu.grisilith.enemy.EnemyType
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import kotlin.math.roundToInt
 
 class TamgaRuntimeManager(
@@ -26,10 +36,54 @@ class TamgaRuntimeManager(
     private val armorTamga:
     TamgaDefinition?,
 
+    private val characterPreferredStats:
+    Set<StatType>,
+
     private val currentStageProvider:
         () -> Int
 ) {
 
+    private val holyLightsRuntime =
+        HolyLightsRuntime(
+            playerStats =
+                playerStats,
+
+            preferredStats =
+                characterPreferredStats,
+
+            currentStageProvider =
+                currentStageProvider
+        )
+
+    private val arcaneAuraRuntime =
+        ArcaneAuraRuntime(
+            playerStats =
+                playerStats,
+
+            weaponInventory =
+                weaponInventory,
+
+            currentStageProvider =
+                currentStageProvider
+        )
+
+    private val chargerRuntime =
+        ChargerRuntime()
+
+    private val phantomSteedRuntime =
+        PhantomSteedRuntime(
+            playerStats = playerStats,
+            currentStageProvider = currentStageProvider
+        )
+
+    private val phantomSteedRenderer =
+        PhantomSteedRenderer()
+
+    private val chargerExplosionRuntime =
+        ChargerExplosionRuntime()
+
+    private val chargerExplosionRenderer =
+        ChargerExplosionRenderer()
     companion object {
 
         private const val FIRST_WEAPON_SLOT_INDEX =
@@ -67,6 +121,9 @@ class TamgaRuntimeManager(
 
         private const val HEIGHT_INSECURITY_STAGE_INTERVAL =
             10
+
+        private const val FLAME_BLADES_BURN_DURATION_SECONDS =
+            5f
     }
 
     /*
@@ -110,27 +167,427 @@ class TamgaRuntimeManager(
 
         if (!isQuickShotActive()) {
             resetQuickShotStacks()
-            return
-        }
-
-        if (quickShotStacks <= 0) {
+        } else if (quickShotStacks <= 0) {
             quickShotIdleTime =
                 0f
+        } else {
+            quickShotIdleTime +=
+                delta
+
+            if (
+                quickShotIdleTime >=
+                QUICK_SHOT_RESET_SECONDS
+            ) {
+                resetQuickShotStacks()
+            }
+        }
+
+        if (isPhantomSteedEquipped()) {
+            phantomSteedRuntime.update(delta)
+        } else if (
+            phantomSteedRuntime.state !=
+            ActiveTamgaState.READY
+        ) {
+            phantomSteedRuntime.reset()
+        }
+
+        chargerExplosionRuntime
+            .update(
+                delta
+            )
+    }
+
+    fun triggerChargerExplosion(
+        centerX:
+        Float,
+
+        centerY:
+        Float,
+
+        chargedSeconds:
+        Float,
+
+        completedSuccessfully:
+        Boolean,
+
+        enemies:
+        List<Enemy>,
+
+        onDamageDealt:
+            (
+            appliedDamage: Int,
+            sourceName: String
+        ) -> Unit,
+
+        onEnemyKilled:
+            (Enemy) -> Unit
+    ) {
+        if (!isChargerEquipped()) {
+            return
+        }
+
+        val elementalDamage =
+            playerStats.totalScore(
+                StatType.ELEMENTAL_DAMAGE
+            )
+
+        chargerExplosionRuntime
+            .createExplosion(
+                centerX =
+                    centerX,
+
+                centerY =
+                    centerY,
+
+                elementalDamage =
+                    elementalDamage,
+
+                currentStage =
+                    currentStageProvider(),
+
+                chargedSeconds =
+                    chargedSeconds,
+
+                completedSuccessfully =
+                    completedSuccessfully,
+
+                enemies =
+                    enemies,
+
+                onDamageDealt =
+                    onDamageDealt,
+
+                onEnemyKilled =
+                    onEnemyKilled
+            )
+    }
+
+    fun updateHolyLights(
+        delta: Float,
+        player: Player,
+        enemies: List<Enemy>,
+        onDamageDealt: (
+            damage: Int,
+            sourceName: String
+        ) -> Unit,
+        onEnemyKilled: (Enemy) -> Unit,
+        onLifeStealDamage: (Int) -> Unit
+    ) {
+        if (!isHolyLightsActive()) {
+            holyLightsRuntime
+                .deactivate()
 
             return
         }
 
-        quickShotIdleTime +=
-            delta
+        holyLightsRuntime.update(
+            delta = delta,
+            player = player,
+            enemies = enemies,
+            onDamageDealt =
+                onDamageDealt,
+            onEnemyKilled =
+                onEnemyKilled,
+            onLifeStealDamage =
+                onLifeStealDamage
+        )
+    }
 
-        if (
-            quickShotIdleTime >=
-            QUICK_SHOT_RESET_SECONDS
-        ) {
-            resetQuickShotStacks()
+    fun updateArcaneAura(
+        delta: Float,
+        player: Player,
+        enemies: List<Enemy>,
+        onDamageDealt: (
+            damage: Int,
+            sourceName: String
+        ) -> Unit,
+        onEnemyKilled: (Enemy) -> Unit
+    ) {
+        /*
+         * Arcane Aura takılı değilse runtime'ı
+         * sıfırlarız ve işlem yapmayız.
+         */
+        if (!isArcaneAuraActive()) {
+            arcaneAuraRuntime
+                .deactivate()
+
+            return
+        }
+
+        /*
+         * Tamga aktifse gerçek aura runtime'ına
+         * gerekli oyun verilerini göndeririz.
+         */
+        arcaneAuraRuntime.update(
+            delta = delta,
+
+            player = player,
+
+            enemies = enemies,
+
+            onDamageDealt =
+                onDamageDealt,
+
+            onEnemyKilled =
+                onEnemyKilled
+        )
+    }
+
+    fun renderHolyLights(
+        shapeRenderer: ShapeRenderer,
+        player: Player
+    ) {
+        if (!isHolyLightsActive()) {
+            return
+        }
+
+        holyLightsRuntime.render(
+            shapeRenderer =
+                shapeRenderer,
+            player =
+                player
+        )
+    }
+
+    fun renderArcaneAura(
+        shapeRenderer: ShapeRenderer,
+        player: Player
+    ) {
+        if (!isArcaneAuraActive()) {
+            return
+        }
+
+        arcaneAuraRuntime.render(
+            shapeRenderer =
+                shapeRenderer,
+
+            player =
+                player
+        )
+    }
+
+    fun renderChargerExplosionFill(
+        shapeRenderer:
+        ShapeRenderer
+    ) {
+        chargerExplosionRenderer
+            .render(
+                shapeRenderer =
+                    shapeRenderer,
+
+                effects =
+                    chargerExplosionRuntime
+                        .effects
+            )
+    }
+
+    fun renderChargerExplosionRings(
+        shapeRenderer:
+        ShapeRenderer
+    ) {
+        chargerExplosionRenderer
+            .renderRings(
+                shapeRenderer =
+                    shapeRenderer,
+
+                effects =
+                    chargerExplosionRuntime
+                        .effects
+            )
+    }
+
+    val chargerExplosionEffects:
+        List<ChargerExplosionEffect>
+        get() =
+            chargerExplosionRuntime
+                .effects
+
+    private fun isHolyLightsActive():
+        Boolean {
+
+        return hasTamgaEffect(
+            TamgaEffectId.HOLY_LIGHTS
+        )
+    }
+
+    private fun isArcaneAuraActive():
+        Boolean {
+
+        return hasTamgaEffect(
+            TamgaEffectId.ARCANE_AURA
+        )
+    }
+
+    fun attachPlayer(
+        player:
+        Player
+    ) {
+        chargerRuntime
+            .attachPlayer(
+                player
+            )
+
+        phantomSteedRuntime
+            .attachPlayer(
+                player
+            )
+    }
+
+    fun tryActivateWeaponTamga():
+        Boolean {
+
+        if (!isChargerEquipped()) {
+            return false
+        }
+
+        return chargerRuntime
+            .tryActivate()
+    }
+
+    fun tryActivateArmorTamga():
+        Boolean {
+
+        if (!isPhantomSteedEquipped()) {
+            return false
+        }
+
+        return phantomSteedRuntime
+            .tryActivate()
+    }
+
+    fun updateChargerAfterMovement(
+        delta:
+        Float
+    ) {
+        if (!isChargerEquipped()) {
+            if (
+                chargerRuntime.state !=
+                ActiveTamgaState.READY
+            ) {
+                chargerRuntime.reset()
+            }
+
+            return
+        }
+
+        chargerRuntime
+            .updateAfterMovement(
+                delta =
+                    delta
+            )
+    }
+
+    fun consumeChargerEndEvent():
+        ChargerEndEvent? {
+
+        return chargerRuntime
+            .consumeEndEvent()
+    }
+
+    val hasActiveWeaponTamga:
+        Boolean
+        get() =
+            isChargerEquipped()
+
+    val activeWeaponTamgaState:
+        ActiveTamgaState?
+        get() =
+            if (isChargerEquipped()) {
+                chargerRuntime.state
+            } else {
+                null
+            }
+
+    val activeWeaponTamgaRemainingActiveSeconds:
+        Float
+        get() =
+            if (isChargerEquipped()) {
+                chargerRuntime.remainingActiveSeconds
+            } else {
+                0f
+            }
+
+    val activeWeaponTamgaRemainingCooldownSeconds:
+        Float
+        get() =
+            if (isChargerEquipped()) {
+                chargerRuntime.remainingCooldownSeconds
+            } else {
+                0f
+            }
+
+    val hasActiveArmorTamga:
+        Boolean
+        get() =
+            isPhantomSteedEquipped()
+
+    val activeArmorTamgaState:
+        ActiveTamgaState?
+        get() =
+            if (isPhantomSteedEquipped()) {
+                phantomSteedRuntime.state
+            } else {
+                null
+            }
+
+    val activeArmorTamgaRemainingActiveSeconds:
+        Float
+        get() =
+            if (isPhantomSteedEquipped()) {
+                phantomSteedRuntime.remainingActiveSeconds
+            } else {
+                0f
+            }
+
+    val activeArmorTamgaRemainingCooldownSeconds:
+        Float
+        get() =
+            if (isPhantomSteedEquipped()) {
+                phantomSteedRuntime.remainingCooldownSeconds
+            } else {
+                0f
+            }
+
+    fun weaponRangeBonusPixels(): Float {
+        return if (isPhantomSteedEquipped()) {
+            phantomSteedRuntime.weaponRangeBonusPixels
+        } else {
+            0f
         }
     }
 
+    fun renderPhantomSteed(
+        shapeRenderer: ShapeRenderer,
+        player: Player
+    ) {
+        if (
+            !isPhantomSteedEquipped() ||
+            !phantomSteedRuntime.isActive
+        ) {
+            return
+        }
+
+        phantomSteedRenderer.render(
+            shapeRenderer = shapeRenderer,
+            player = player,
+            activeProgress =
+                phantomSteedRuntime.activeProgress
+        )
+    }
+
+    private fun isPhantomSteedEquipped(): Boolean {
+        return armorTamga
+            ?.effectId ==
+            TamgaEffectId.PHANTOM_STEED
+    }
+
+    private fun isChargerEquipped():
+        Boolean {
+
+        return weaponTamga
+            ?.effectId ==
+            TamgaEffectId.CHARGER
+    }
 
     fun modifyWeaponDamage(
         enemy: Enemy,
@@ -346,7 +803,10 @@ class TamgaRuntimeManager(
         if (isFirstSlotAttack) {
             event.enemy.applyCondition(
                 conditionType =
-                    ConditionType.BURNED
+                    ConditionType.BURNED,
+
+                durationSeconds =
+                    FLAME_BLADES_BURN_DURATION_SECONDS
             )
         }
 
@@ -396,6 +856,11 @@ class TamgaRuntimeManager(
             null
 
         resetQuickShotStacks()
+        holyLightsRuntime.reset()
+        arcaneAuraRuntime.reset()
+        chargerRuntime.reset()
+        phantomSteedRuntime.reset()
+        chargerExplosionRuntime.reset()
     }
 
     private fun applyFlameBladesBonusDamage(
@@ -532,9 +997,9 @@ class TamgaRuntimeManager(
     private fun isFlameBladesActive():
         Boolean {
 
-        return weaponTamga
-            ?.effectId ==
+        return hasTamgaEffect(
             TamgaEffectId.FLAME_BLADES
+        )
     }
 
     private fun isRangedWeapon(

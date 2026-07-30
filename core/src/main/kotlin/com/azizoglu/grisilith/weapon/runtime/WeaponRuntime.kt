@@ -105,6 +105,14 @@ class WeaponRuntime(
                                 baseDamage =
                                     baseDamage
                             )
+                    },
+
+                    modifyWeaponRange = {
+                            baseRange ->
+
+                        baseRange +
+                            tamgaRuntimeManager
+                                .weaponRangeBonusPixels()
                     }
                 )
             )

@@ -98,8 +98,10 @@ class ProjectileWeaponAttackExecutor(
 
         val effectiveRange =
             (
-                definition.baseRange *
-                    levelStats.rangeMultiplier
+                context.effectiveWeaponRange(
+                    definition.baseRange *
+                        levelStats.rangeMultiplier
+                )
                 )
                 .coerceAtLeast(0f)
 
@@ -504,11 +506,11 @@ class ProjectileWeaponAttackExecutor(
             }
 
         val effectiveRange =
-            (
+            context.effectiveWeaponRange(
                 definition.baseRange *
                     levelStats.rangeMultiplier *
                     travelRangeMultiplier
-                )
+            )
                 .coerceAtLeast(1f)
 
         val effectiveProjectileSpeed =

@@ -36,7 +36,11 @@ data class WeaponAttackContext(
     val modifyWeaponDamage: (
         enemy: Enemy,
         baseDamage: Int
-    ) -> Int
+    ) -> Int,
+
+    val modifyWeaponRange: (
+        baseRange: Float
+    ) -> Float
 ) {
 
     fun modifiedDamageAgainst(
@@ -53,6 +57,17 @@ data class WeaponAttackContext(
             baseDamage
         )
             .coerceAtLeast(1)
+    }
+
+    fun effectiveWeaponRange(
+        baseRange: Float
+    ): Float {
+        if (baseRange <= 0f) {
+            return 0f
+        }
+
+        return modifyWeaponRange(baseRange)
+            .coerceAtLeast(0f)
     }
 
     fun reportWeaponHit(

@@ -98,8 +98,10 @@ class TotemOfDarkCloudsAttackExecutor(
 
         val effectiveRange =
             (
-                definition.baseRange *
-                    levelStats.rangeMultiplier
+                context.effectiveWeaponRange(
+                    definition.baseRange *
+                        levelStats.rangeMultiplier
+                )
                 )
                 .coerceAtLeast(1f)
 

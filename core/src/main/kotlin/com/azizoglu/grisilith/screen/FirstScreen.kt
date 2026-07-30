@@ -71,6 +71,10 @@ import com.azizoglu.grisilith.screen.render.PauseRenderer
 import com.azizoglu.grisilith.preset.ResolvedPresetContent
 import com.azizoglu.grisilith.armor.runtime.EquippedArmor
 import com.azizoglu.grisilith.tamga.runtime.TamgaRuntimeManager
+import com.azizoglu.grisilith.tamga.runtime.active.ActiveTamgaEndReason
+import com.azizoglu.grisilith.tamga.render.ActiveTamgaHudRenderer
+import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.graphics.GL20
 
 
 class FirstScreen(
@@ -198,10 +202,23 @@ class FirstScreen(
                 selectedPreset
                     ?.armorTamga,
 
+            characterPreferredStats =
+                selectedPreset
+                    ?.character
+                    ?.preferredMarketStats
+                    ?: emptySet(),
+
             currentStageProvider = {
                 stageController.currentStage
             }
         )
+
+    init {
+        tamgaRuntimeManager
+            .attachPlayer(
+                player
+            )
+    }
 
     private val weaponRuntimeManager =
         WeaponRuntimeManager(
@@ -307,6 +324,16 @@ class FirstScreen(
                 gameTimeController,
             weaponInventory =
                 weaponInventory
+        )
+
+    private val activeTamgaHudRenderer =
+        ActiveTamgaHudRenderer(
+            camera = camera,
+            cameraWidth = CAMERA_WIDTH,
+            cameraHeight = CAMERA_HEIGHT,
+            shapeRenderer = shapeRenderer,
+            batch = hudBatch,
+            font = hudFont
         )
 
     private val runSummaryRenderer =
@@ -661,10 +688,38 @@ class FirstScreen(
         }
 
         if (
-            Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.ESCAPE
+            )
+        ) {
             openPauseMenu()
             return
         }
+
+        /*
+         * Active Tamga kısayolları:
+         * Weapon Tamga -> Z
+         * Armor Tamga  -> X
+         */
+        if (
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.Z
+            )
+        ) {
+            tamgaRuntimeManager
+                .tryActivateWeaponTamga()
+        }
+
+        if (
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.X
+            )
+        ) {
+            tamgaRuntimeManager
+                .tryActivateArmorTamga()
+        }
+
+        handleActiveTamgaButtonInput()
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
             gameTimeController.setGameSpeed(0.5f)
@@ -680,6 +735,50 @@ class FirstScreen(
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) {
             gameTimeController.setGameSpeed(3f)
+        }
+    }
+
+    private fun handleActiveTamgaButtonInput() {
+        if (
+            !Gdx.input.justTouched()
+        ) {
+            return
+        }
+
+        val pointerPosition =
+            Vector2(
+                Gdx.input.x.toFloat(),
+                Gdx.input.y.toFloat()
+            )
+
+        viewport.unproject(
+            pointerPosition
+        )
+
+        when {
+            tamgaRuntimeManager
+                .hasActiveWeaponTamga &&
+                activeTamgaHudRenderer
+                    .isWeaponButtonHit(
+                        pointerPosition.x,
+                        pointerPosition.y
+                    ) -> {
+
+                tamgaRuntimeManager
+                    .tryActivateWeaponTamga()
+            }
+
+            tamgaRuntimeManager
+                .hasActiveArmorTamga &&
+                activeTamgaHudRenderer
+                    .isArmorButtonHit(
+                        pointerPosition.x,
+                        pointerPosition.y
+                    ) -> {
+
+                tamgaRuntimeManager
+                    .tryActivateArmorTamga()
+            }
         }
     }
 
@@ -799,6 +898,67 @@ class FirstScreen(
         }
     }
 
+    private fun handleChargerEndEvent() {
+        val event =
+            tamgaRuntimeManager
+                .consumeChargerEndEvent()
+                ?: return
+
+        when (event.reason) {
+
+            ActiveTamgaEndReason.COMPLETED,
+            ActiveTamgaEndReason.INTERRUPTED -> {
+
+                tamgaRuntimeManager
+                    .triggerChargerExplosion(
+                        centerX =
+                            event.centerX,
+
+                        centerY =
+                            event.centerY,
+
+                        chargedSeconds =
+                            event.chargedSeconds,
+
+                        completedSuccessfully =
+                            event.wasCompletedSuccessfully,
+
+                        enemies =
+                            enemyManager
+                                .allEnemies,
+
+                        onDamageDealt = {
+                                appliedDamage,
+                                sourceName ->
+
+                            runStatistics
+                                .recordDamageDealt(
+                                    amount =
+                                        appliedDamage,
+
+                                    weaponName =
+                                        sourceName
+                                )
+                        },
+
+                        onEnemyKilled = {
+                                killedEnemy ->
+
+                            handleEnemyKilled(
+                                killedEnemy
+                            )
+                        }
+                    )
+            }
+
+            ActiveTamgaEndReason.RESET -> {
+                /*
+                 * Run resetinde patlama oluşturulmaz.
+                 */
+            }
+        }
+    }
+
     private fun collectAllGoldPickups() {
         goldCoinPickups.forEach { pickup ->
             pickup.collectImmediately { collectedGold ->
@@ -830,13 +990,17 @@ class FirstScreen(
         )
     }
 
-    private fun updateGame(delta: Float) {
+    private fun updateGame(
+        delta: Float
+    ) {
         if (player.health.isDead) {
             return
         }
 
         val stageChanged =
-            updateStage(delta)
+            updateStage(
+                delta
+            )
 
         if (
             stageChanged ||
@@ -845,7 +1009,9 @@ class FirstScreen(
             return
         }
 
-        player.update(delta)
+        player.update(
+            delta
+        )
 
         mapObstacles.forEach { obstacle ->
             player.resolveObstacleCollision(
@@ -853,50 +1019,190 @@ class FirstScreen(
             )
         }
 
-        enemyManager.resolvePlayerCollisions { enemyBounds ->
-            player.resolveCollision(enemyBounds)
+        enemyManager.resolvePlayerCollisions {
+                enemyBounds ->
+
+            player.resolveCollision(
+                enemyBounds
+            )
         }
+
+        /*
+         * Player.update() sonrasında obstacle ve Enemy
+         * collision çözümü konumu değiştirebilir.
+         * Charger gerçek hareket hızını bu son konuma
+         * göre değerlendirmelidir.
+         */
+        player.finalizeMovementAfterCollisions(
+            delta =
+                delta
+        )
+
+        tamgaRuntimeManager
+            .updateChargerAfterMovement(
+                delta =
+                    delta
+            )
+
+        handleChargerEndEvent()
 
         enemyManager.update(
             delta = delta,
-            targetX = player.centerX,
-            targetY = player.centerY,
-            targetBounds = player.bounds,
-            worldWidth = worldWidth,
-            worldHeight = worldHeight
+
+            targetX =
+                player.centerX,
+
+            targetY =
+                player.centerY,
+
+            targetBounds =
+                player.bounds,
+
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight
         ) { damage ->
+
             val appliedDamage =
-                player.takeDamage(damage)
+                player.takeDamage(
+                    damage
+                )
 
             runStatistics.recordDamageTaken(
                 appliedDamage
             )
         }
 
+        /*
+         * Quick Shot timer ve diğer genel
+         * Tamga runtime güncellemeleri.
+         */
         tamgaRuntimeManager.update(
             delta = delta
         )
 
+        /*
+         * Holy Lights yalnızca takılıysa
+         * manager içinde çalışır.
+         */
+        tamgaRuntimeManager
+            .updateHolyLights(
+                delta = delta,
+
+                player =
+                    player,
+
+                enemies =
+                    enemyManager.allEnemies,
+
+                onDamageDealt = {
+                        appliedDamage,
+                        sourceName ->
+
+                    runStatistics
+                        .recordDamageDealt(
+                            amount =
+                                appliedDamage,
+
+                            weaponName =
+                                sourceName
+                        )
+                },
+
+                onEnemyKilled = {
+                        killedEnemy ->
+
+                    handleEnemyKilled(
+                        killedEnemy
+                    )
+                },
+
+                onLifeStealDamage = {
+                        appliedDamage ->
+
+                    player.tryLifeSteal(
+                        appliedDamage =
+                            appliedDamage
+                    )
+                }
+            )
+
+        /*
+         * Arcane Aura yalnızca takılıysa
+         * manager içinde çalışır.
+         */
+        tamgaRuntimeManager
+            .updateArcaneAura(
+                delta = delta,
+
+                player =
+                    player,
+
+                enemies =
+                    enemyManager.allEnemies,
+
+                onDamageDealt = {
+                        appliedDamage,
+                        sourceName ->
+
+                    runStatistics
+                        .recordDamageDealt(
+                            amount =
+                                appliedDamage,
+
+                            weaponName =
+                                sourceName
+                        )
+                },
+
+                onEnemyKilled = {
+                        killedEnemy ->
+
+                    handleEnemyKilled(
+                        killedEnemy
+                    )
+                }
+            )
+
+        /*
+         * Aura hasarı oyuncuyu öldürmez ama
+         * genel güvenlik için Weapon update'i
+         * yalnızca oyuncu hayattaysa çalışır.
+         */
         if (!player.health.isDead) {
             weaponRuntimeManager.update(
                 delta = delta,
-                player = player,
-                enemyManager = enemyManager,
-                projectiles = projectiles,
+
+                player =
+                    player,
+
+                enemyManager =
+                    enemyManager,
+
+                projectiles =
+                    projectiles,
+
                 onDamageDealt = {
                         appliedDamage,
                         weaponName ->
 
-                    runStatistics.recordDamageDealt(
-                        amount = appliedDamage,
-                        weaponName = weaponName
-                    )
+                    runStatistics
+                        .recordDamageDealt(
+                            amount =
+                                appliedDamage,
+
+                            weaponName =
+                                weaponName
+                        )
 
                     player.tryLifeSteal(
                         appliedDamage =
                             appliedDamage
                     )
                 },
+
                 onEnemyKilled = {
                         killedEnemy ->
 
@@ -910,8 +1216,12 @@ class FirstScreen(
         projectiles.forEach { projectile ->
             projectile.update(
                 delta = delta,
-                worldWidth = worldWidth,
-                worldHeight = worldHeight
+
+                worldWidth =
+                    worldWidth,
+
+                worldHeight =
+                    worldHeight
             )
 
             projectile.checkCollision(
@@ -921,13 +1231,15 @@ class FirstScreen(
                 onDamageDealt = {
                         appliedDamage ->
 
-                    runStatistics.recordDamageDealt(
-                        amount =
-                            appliedDamage,
+                    runStatistics
+                        .recordDamageDealt(
+                            amount =
+                                appliedDamage,
 
-                        weaponName =
-                            projectile.sourceWeaponName
-                    )
+                            weaponName =
+                                projectile
+                                    .sourceWeaponName
+                        )
 
                     player.tryLifeSteal(
                         appliedDamage =
@@ -986,7 +1298,9 @@ class FirstScreen(
 
                     tamgaRuntimeManager
                         .modifyWeaponDamage(
-                            enemy = enemy,
+                            enemy =
+                                enemy,
+
                             baseDamage =
                                 baseDamage
                         )
@@ -1001,10 +1315,18 @@ class FirstScreen(
         goldCoinPickups.forEach { pickup ->
             pickup.update(
                 delta = delta,
-                targetX = player.centerX,
-                targetY = player.centerY
+
+                targetX =
+                    player.centerX,
+
+                targetY =
+                    player.centerY
             ) { collectedGold ->
-                sessionWallet.addGold(collectedGold)
+
+                sessionWallet.addGold(
+                    collectedGold
+                )
+
                 runStatistics.recordGoldCollected(
                     collectedGold
                 )
@@ -1051,7 +1373,8 @@ class FirstScreen(
                 ChestRewardRoller
                     .rollChoiceSet(
                         luckScore =
-                            playerStats.luckScore(),
+                            playerStats
+                                .luckScore(),
 
                         availableStatTypes =
                             availableStats,
@@ -1075,14 +1398,23 @@ class FirstScreen(
 
         enemySpawner.update(
             delta = delta,
-            camera = camera,
-            enemyManager = enemyManager,
+
+            camera =
+                camera,
+
+            enemyManager =
+                enemyManager,
+
             currentStage =
                 stageController.currentStage,
+
             stageType =
-                stageController.currentStageType,
+                stageController
+                    .currentStageType,
+
             enemyCountMultiplier =
-                playerStats.enemyCountMultiplier()
+                playerStats
+                    .enemyCountMultiplier()
         )
     }
 
@@ -1298,6 +1630,15 @@ class FirstScreen(
     }
 
     private fun renderGame() {
+        Gdx.gl.glEnable(
+            GL20.GL_BLEND
+        )
+
+        Gdx.gl.glBlendFunc(
+            GL20.GL_SRC_ALPHA,
+            GL20.GL_ONE_MINUS_SRC_ALPHA
+        )
+
         worldRenderer.render(
             mapObstacles =
                 mapObstacles,
@@ -1315,32 +1656,145 @@ class FirstScreen(
                 chestPickupManager,
 
             projectiles =
-                projectiles
+                projectiles,
+
+            renderBehindEntities = {
+                    activeShapeRenderer ->
+
+                tamgaRuntimeManager
+                    .renderChargerExplosionFill(
+                        shapeRenderer =
+                            activeShapeRenderer
+                    )
+
+                tamgaRuntimeManager
+                    .renderPhantomSteed(
+                        shapeRenderer =
+                            activeShapeRenderer,
+
+                        player =
+                            player
+                    )
+
+                tamgaRuntimeManager
+                    .renderHolyLights(
+                        shapeRenderer =
+                            activeShapeRenderer,
+
+                        player =
+                            player
+                    )
+
+                tamgaRuntimeManager
+                    .renderArcaneAura(
+                        shapeRenderer =
+                            activeShapeRenderer,
+
+                        player =
+                            player
+                    )
+            }
         )
+
+        if (
+            tamgaRuntimeManager
+                .chargerExplosionEffects
+                .isNotEmpty()
+        ) {
+            shapeRenderer.projectionMatrix =
+                camera.combined
+
+            shapeRenderer.begin(
+                ShapeRenderer.ShapeType.Line
+            )
+
+            tamgaRuntimeManager
+                .renderChargerExplosionRings(
+                    shapeRenderer =
+                        shapeRenderer
+                )
+
+            shapeRenderer.end()
+        }
+
+        Gdx.gl.glDisable(
+            GL20.GL_BLEND
+        )
+
+        if (
+            !isRunSummaryOpen &&
+            !isMarketOpen &&
+            !chestRewardController.isOpen &&
+            !statCardController.isOpen &&
+            !isPauseMenuOpen
+        ) {
+            activeTamgaHudRenderer.render(
+                showWeaponButton =
+                    tamgaRuntimeManager
+                        .hasActiveWeaponTamga,
+
+                weaponState =
+                    tamgaRuntimeManager
+                        .activeWeaponTamgaState,
+
+                weaponRemainingActiveSeconds =
+                    tamgaRuntimeManager
+                        .activeWeaponTamgaRemainingActiveSeconds,
+
+                weaponRemainingCooldownSeconds =
+                    tamgaRuntimeManager
+                        .activeWeaponTamgaRemainingCooldownSeconds,
+
+                showArmorButton =
+                    tamgaRuntimeManager
+                        .hasActiveArmorTamga,
+
+                armorState =
+                    tamgaRuntimeManager
+                        .activeArmorTamgaState,
+
+                armorRemainingActiveSeconds =
+                    tamgaRuntimeManager
+                        .activeArmorTamgaRemainingActiveSeconds,
+
+                armorRemainingCooldownSeconds =
+                    tamgaRuntimeManager
+                        .activeArmorTamgaRemainingCooldownSeconds
+            )
+        }
 
         hudRenderer.render(
             displayedStage =
                 displayedStage(),
+
             remainingStageSeconds =
                 remainingStageSeconds(),
+
             formattedGameTime =
                 formatGameTime(),
+
             isRunSummaryOpen =
                 isRunSummaryOpen,
+
             isMarketOpen =
                 isMarketOpen,
+
             isShowingChestReward =
                 chestRewardController.isOpen,
+
             isChoosingStatCard =
                 statCardController.isOpen,
+
             renderRunSummary = {
                 runSummaryRenderer.render(
                     displayedStage =
                         displayedStage(),
+
                     formattedGameTime =
                         formatGameTime()
                 )
             },
+
             renderMarket = {
                 marketRenderer.render(
                     marketSlots =
@@ -1379,7 +1833,6 @@ class FirstScreen(
 
             hudBatch.end()
         }
-
     }
 
     private fun updateCamera() {
@@ -2978,5 +3431,3 @@ class FirstScreen(
     }
 
 }
-
-

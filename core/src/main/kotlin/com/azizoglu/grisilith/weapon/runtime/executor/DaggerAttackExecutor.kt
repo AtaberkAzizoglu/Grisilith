@@ -31,13 +31,13 @@ class DaggerAttackExecutor(
             context.weapon.currentLevelStats
 
         val effectiveThrowRange =
-            (
+            context.effectiveWeaponRange(
                 (
                     definition.secondaryRange
                         ?: definition.baseRange
                     ) *
                     levelStats.rangeMultiplier
-                )
+            )
                 .coerceAtLeast(0f)
 
         val target =
@@ -131,8 +131,10 @@ class DaggerAttackExecutor(
 
         val effectiveMeleeRange =
             (
-                definition.baseRange *
-                    levelStats.rangeMultiplier
+                context.effectiveWeaponRange(
+                    definition.baseRange *
+                        levelStats.rangeMultiplier
+                )
                 )
                 .coerceAtLeast(0f)
 
@@ -269,13 +271,13 @@ class DaggerAttackExecutor(
                 .coerceAtLeast(1)
 
         val throwRange =
-            (
+            context.effectiveWeaponRange(
                 (
                     definition.secondaryRange
                         ?: definition.baseRange
                     ) *
                     levelStats.rangeMultiplier
-                )
+            )
                 .coerceAtLeast(1f)
 
         /*

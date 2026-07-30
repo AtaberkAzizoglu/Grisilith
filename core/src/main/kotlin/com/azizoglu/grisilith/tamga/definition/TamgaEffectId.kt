@@ -12,7 +12,7 @@ enum class TamgaEffectId {
 
     HEIGHT_INSECURITY,
 
-    MOUNTED_COMBATANT,
+    PHANTOM_STEED,
 
     HOLY_LIGHTS,
 

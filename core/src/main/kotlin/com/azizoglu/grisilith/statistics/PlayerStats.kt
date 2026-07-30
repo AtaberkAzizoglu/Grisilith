@@ -33,6 +33,16 @@ class PlayerStats(
     private val itemBonuses =
         mutableMapOf<StatType, Int>()
 
+    private val tamgaBonuses =
+        mutableMapOf<StatType, Int>()
+
+    /*
+     * Süreli Active Tamga bonusları, Holy Lights gibi
+     * pasif Tamga bonuslarından ayrı tutulur.
+     */
+    private val activeTamgaBonuses =
+        mutableMapOf<StatType, Int>()
+
     init {
         StatType.entries.forEach { statType ->
             val initialValue =
@@ -48,6 +58,8 @@ class PlayerStats(
             weaponBonuses[statType] = 0
             itemBonuses[statType] = 0
             runBonuses[statType] = 0
+            tamgaBonuses[statType] = 0
+            activeTamgaBonuses[statType] = 0
         }
     }
 
@@ -83,9 +95,48 @@ class PlayerStats(
         return runBonuses[statType] ?: 0
     }
 
+    fun tamgaBonus(
+        statType: StatType
+    ): Int {
+
+        return tamgaBonuses[statType]
+            ?: 0
+    }
+
+    fun activeTamgaBonus(
+        statType: StatType
+    ): Int {
+        return activeTamgaBonuses[statType] ?: 0
+    }
+
     fun totalScore(
         statType: StatType
     ): Int {
+        return (
+            totalScoreWithoutTamga(
+                statType
+            ) +
+                tamgaBonus(
+                    statType
+                ) +
+                activeTamgaBonus(
+                    statType
+                )
+            )
+            .coerceIn(
+                MINIMUM_SCORE,
+                RUN_MAXIMUM_SCORE
+            )
+    }
+
+    /*
+ * Aura'nın hangi Stat'ı seçeceğini hesaplarken
+ * Tamga'nın kendi verdiği bonus dahil edilmez.
+ */
+    fun totalScoreWithoutTamga(
+        statType: StatType
+    ): Int {
+
         return (
             baseScore(statType) +
                 gearBonus(statType) +
@@ -97,6 +148,38 @@ class PlayerStats(
                 MINIMUM_SCORE,
                 RUN_MAXIMUM_SCORE
             )
+    }
+
+    fun setTamgaBonuses(
+        bonuses: Map<StatType, Int>
+    ) {
+        StatType.entries.forEach { statType ->
+            tamgaBonuses[statType] =
+                bonuses[statType]
+                    ?: 0
+        }
+    }
+
+    fun clearTamgaBonuses() {
+        StatType.entries.forEach { statType ->
+            tamgaBonuses[statType] = 0
+        }
+    }
+
+
+    fun setActiveTamgaBonuses(
+        bonuses: Map<StatType, Int>
+    ) {
+        StatType.entries.forEach { statType ->
+            activeTamgaBonuses[statType] =
+                bonuses[statType] ?: 0
+        }
+    }
+
+    fun clearActiveTamgaBonuses() {
+        StatType.entries.forEach { statType ->
+            activeTamgaBonuses[statType] = 0
+        }
     }
 
     fun addRunBonus(

@@ -28,6 +28,26 @@ class Player(
     private val movementDirection =
         Vector2()
 
+    private val chargerMovementDirection =
+        Vector2()
+
+    private var chargerMovementSpeedMultiplier =
+        1f
+
+    private var chargerSteeringResponse =
+        0f
+
+    private var isChargerMovementActive =
+        false
+
+    private var forceStopThisFrame =
+        false
+
+    var actualMovementSpeed:
+        Float =
+        0f
+        private set
+
     private val size = 48f
 
     private val collisionBounds =
@@ -59,28 +79,189 @@ class Player(
             return collisionBounds
         }
 
-    fun update(delta: Float) {
+    fun update(
+        delta:
+        Float
+    ) {
         if (health.isDead) {
+            actualMovementSpeed =
+                0f
+
             return
         }
 
-        updateHealthRegeneration(delta)
+        val safeDelta =
+            delta.coerceAtLeast(
+                0f
+            )
 
-        previousPosition.set(position)
+        previousPosition.set(
+            position
+        )
 
         readMovementInput()
 
-        if (!movementDirection.isZero) {
-            movementDirection.nor()
+        if (forceStopThisFrame) {
+            /*
+             * Charger başarıyla bittiğinde tek frame
+             * boyunca oyuncuyu anlık olarak durdurur.
+             */
+            forceStopThisFrame =
+                false
 
-            position.mulAdd(
-                movementDirection,
-                stats.calculatedMovementSpeed() *
-                    delta
+            movementDirection
+                .setZero()
+
+            chargerMovementDirection
+                .setZero()
+        } else if (
+            isChargerMovementActive
+        ) {
+            updateChargerMovement(
+                delta =
+                    safeDelta
+            )
+        } else {
+            updateNormalMovement(
+                delta =
+                    safeDelta
             )
         }
 
         keepInsideWorld()
+
+        updateActualMovementSpeed(
+            delta =
+                safeDelta
+        )
+    }
+
+    private fun updateNormalMovement(
+        delta:
+        Float
+    ) {
+        if (
+            movementDirection
+                .isZero
+        ) {
+            return
+        }
+
+        movementDirection
+            .nor()
+
+        position.mulAdd(
+            movementDirection,
+            calculatedMovementSpeed() *
+                delta
+        )
+    }
+
+    private fun updateChargerMovement(
+        delta:
+        Float
+    ) {
+        val desiredDirection =
+            movementDirection
+
+        /*
+         * Hiç input yoksa mevcut momentum yönü korunur.
+         * Charger kendi kendine ileri akmaya devam eder.
+         */
+        if (
+            !desiredDirection
+                .isZero
+        ) {
+            desiredDirection
+                .nor()
+
+            val interpolationAmount =
+                (
+                    chargerSteeringResponse *
+                        delta
+                    )
+                    .coerceIn(
+                        0f,
+                        1f
+                    )
+
+            if (
+                chargerMovementDirection
+                    .isZero
+            ) {
+                chargerMovementDirection.set(
+                    desiredDirection
+                )
+            } else {
+                chargerMovementDirection
+                    .lerp(
+                        desiredDirection,
+                        interpolationAmount
+                    )
+            }
+        }
+
+        /*
+         * Zıt input verilirse lerp sırasında vektörün
+         * uzunluğu küçülür. Böylece karakter yavaşlar.
+         *
+         * Ancak sırf ters input verildi diye Charger
+         * runtime'ı burada doğrudan iptal edilmez.
+         */
+        val momentumStrength =
+            chargerMovementDirection
+                .len()
+                .coerceIn(
+                    0f,
+                    1f
+                )
+
+        if (
+            momentumStrength <=
+            0.001f
+        ) {
+            return
+        }
+
+        val normalizedDirection =
+            Vector2(
+                chargerMovementDirection
+            )
+                .nor()
+
+        position.mulAdd(
+            normalizedDirection,
+
+            calculatedMovementSpeed() *
+                chargerMovementSpeedMultiplier *
+                momentumStrength *
+                delta
+        )
+    }
+
+    private fun calculatedMovementSpeed(): Float {
+        return stats.calculatedMovementSpeed()
+    }
+
+    private fun updateActualMovementSpeed(
+        delta:
+        Float
+    ) {
+        if (
+            delta <=
+            0f
+        ) {
+            actualMovementSpeed =
+                0f
+
+            return
+        }
+
+        actualMovementSpeed =
+            position.dst(
+                previousPosition
+            ) /
+                delta
     }
 
     private fun updateHealthRegeneration(
@@ -257,6 +438,78 @@ class Player(
         keepInsideWorld()
     }
 
+    fun beginChargerMovement(
+        steeringResponse:
+        Float
+    ) {
+        isChargerMovementActive =
+            true
+
+        chargerSteeringResponse =
+            steeringResponse
+                .coerceAtLeast(
+                    0.01f
+                )
+
+        /*
+         * Charger açıldığı anda mevcut input yönünden
+         * başlarız. Böylece yön sıfırdan oluşmaz.
+         */
+        chargerMovementDirection.set(
+            movementDirection
+        )
+
+        if (
+            chargerMovementDirection
+                .isZero
+        ) {
+            readMovementInputInto(
+                chargerMovementDirection
+            )
+        }
+
+        if (
+            !chargerMovementDirection
+                .isZero
+        ) {
+            chargerMovementDirection
+                .nor()
+        }
+    }
+
+    fun setChargerMovementSpeedMultiplier(
+        multiplier:
+        Float
+    ) {
+        chargerMovementSpeedMultiplier =
+            multiplier
+                .coerceAtLeast(
+                    0f
+                )
+    }
+
+    fun endChargerMovement(
+        stopImmediately:
+        Boolean
+    ) {
+        isChargerMovementActive =
+            false
+
+        chargerMovementSpeedMultiplier =
+            1f
+
+        chargerSteeringResponse =
+            0f
+
+        chargerMovementDirection
+            .setZero()
+
+        if (stopImmediately) {
+            forceStopThisFrame =
+                true
+        }
+    }
+
     fun takeDamage(amount: Int): Int {
         if (amount <= 0) {
             return 0
@@ -357,7 +610,16 @@ class Player(
     }
 
     private fun readMovementInput() {
-        movementDirection.setZero()
+        readMovementInputInto(
+            movementDirection
+        )
+    }
+
+    private fun readMovementInputInto(
+        target:
+        Vector2
+    ) {
+        target.setZero()
 
         if (
             Gdx.input.isKeyPressed(
@@ -367,7 +629,8 @@ class Player(
                 Input.Keys.UP
             )
         ) {
-            movementDirection.y += 1f
+            target.y +=
+                1f
         }
 
         if (
@@ -378,7 +641,8 @@ class Player(
                 Input.Keys.DOWN
             )
         ) {
-            movementDirection.y -= 1f
+            target.y -=
+                1f
         }
 
         if (
@@ -389,7 +653,8 @@ class Player(
                 Input.Keys.LEFT
             )
         ) {
-            movementDirection.x -= 1f
+            target.x -=
+                1f
         }
 
         if (
@@ -400,8 +665,21 @@ class Player(
                 Input.Keys.RIGHT
             )
         ) {
-            movementDirection.x += 1f
+            target.x +=
+                1f
         }
+    }
+
+    fun finalizeMovementAfterCollisions(
+        delta:
+        Float
+    ) {
+        updateActualMovementSpeed(
+            delta =
+                delta.coerceAtLeast(
+                    0f
+                )
+        )
     }
 
     private fun keepInsideWorld() {

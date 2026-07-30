@@ -18,17 +18,15 @@ object DefaultTamgas {
                 "Charger",
 
             description =
-                "Activate to gradually increase Movement Speed, " +
-                    "starting with a small bonus and building toward " +
-                    "a powerful charge. Shortly after reaching maximum " +
-                    "speed, the charge ends, immediately stops the player, " +
-                    "and damages and knocks back nearby enemies. Sharp turns " +
-                    "become harder while charging. Completely stopping or " +
-                    "colliding with an obstacle interrupts the skill and " +
-                    "starts its cooldown.",
+                "Activate to gradually increase Movement Speed while building up " +
+                    "an explosive charge. Stopping or colliding with an obstacle " +
+                    "causes an early explosion whose damage and radius scale with " +
+                    "the time spent charging. Completing the full charge produces " +
+                    "the largest explosion and grants additional damage and radius. " +
+                    "Sharp turns become harder while charging.",
 
             slotType =
-                TamgaSlotType.GENERAL,
+                TamgaSlotType.WEAPON,
 
             activationType =
                 TamgaActivationType.ACTIVE,
@@ -90,7 +88,8 @@ object DefaultTamgas {
                 ContentUnlockState.UNLOCKED
         )
 
-    val mountedCombatant =
+    val phantomSteed =
+
         TamgaDefinition(
             id =
                 ContentId(
@@ -98,23 +97,25 @@ object DefaultTamgas {
                 ),
 
             displayName =
-                "Mounted Combatant",
+                "Phantom Steed",
 
             description =
                 "Activate to summon a mount for 15 seconds. While mounted, " +
                     "Weapon Range, Max HP and Movement Speed increase, while " +
-                    "Harvest decreases. The strength of these changes grows " +
-                    "for every 5 stages reached. This Tamga has a 120-second " +
-                    "cooldown.",
+                    "Harvest decreases. It initially grants +50 px Weapon " +
+                    "Range, +2 Max HP, +2 Movement Speed and -5 Harvest. Every " +
+                    "10 stages, Range gains another 10 px, Max HP and Movement " +
+                    "Speed gain another +1, and Harvest loses another 1 point. " +
+                    "This Tamga has a 120-second cooldown.",
 
             slotType =
-                TamgaSlotType.GENERAL,
+                TamgaSlotType.ARMOR,
 
             activationType =
                 TamgaActivationType.ACTIVE,
 
             effectId =
-                TamgaEffectId.MOUNTED_COMBATANT,
+                TamgaEffectId.PHANTOM_STEED,
 
             interactableStats =
                 setOf(
@@ -319,7 +320,7 @@ object DefaultTamgas {
         listOf(
             charger,
             heightInsecurity,
-            mountedCombatant,
+            phantomSteed,
             holyLights,
             arcaneAura,
             flameBlades,

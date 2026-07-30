@@ -83,9 +83,11 @@ class TomeOfEryndorAttackExecutor(
 
         val effectiveRange =
             (
-                definition.baseRange *
-                    levelStats.rangeMultiplier *
-                    BEAM_RANGE_MULTIPLIER
+                context.effectiveWeaponRange(
+                    definition.baseRange *
+                        levelStats.rangeMultiplier *
+                        BEAM_RANGE_MULTIPLIER
+                )
                 )
                 .coerceAtLeast(1f)
 

@@ -39,7 +39,10 @@ class WorldRenderer(
         ChestPickupManager,
 
         projectiles:
-        List<Projectile>
+        List<Projectile>,
+
+        renderBehindEntities:
+        ((ShapeRenderer) -> Unit)? = null
     ) {
         clearScreen()
 
@@ -52,6 +55,16 @@ class WorldRenderer(
         shapeRenderer.begin(
             ShapeRenderer.ShapeType.Filled
         )
+
+        /*
+         * Aura, alan efekti ve benzeri dünya efektleri
+         * Entity'lerden önce fakat aynı ShapeRenderer
+         * begin/end bloğu içerisinde çizilir.
+         */
+        renderBehindEntities
+            ?.invoke(
+                shapeRenderer
+            )
 
         mapObstacles.forEach { obstacle ->
             obstacle.render(shapeRenderer)
