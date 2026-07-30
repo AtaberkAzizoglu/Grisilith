@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.azizoglu.grisilith.profile.PlayerProfileRepository
+import com.azizoglu.grisilith.screen.render.GrisilithCoinRenderer
 
 class MainMenuScreen(
     private val game:
@@ -40,6 +42,9 @@ class MainMenuScreen(
 
     private val font =
         BitmapFont()
+
+    private val grisilithCoinRenderer =
+        GrisilithCoinRenderer()
 
     private val pointer =
         MenuPointer(
@@ -241,6 +246,25 @@ class MainMenuScreen(
         font.data.setScale(
             oldScaleX,
             oldScaleY
+        )
+
+        grisilithCoinRenderer.render(
+            batch =
+                batch,
+
+            font =
+                font,
+
+            amount =
+                PlayerProfileRepository
+                    .profile
+                    .grisilithCoins,
+
+            x =
+                1080f,
+
+            y =
+                680f
         )
 
         buttons.forEach { button ->

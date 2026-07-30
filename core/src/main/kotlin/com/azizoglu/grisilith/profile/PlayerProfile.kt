@@ -2,7 +2,9 @@ package com.azizoglu.grisilith.profile
 
 class PlayerProfile(
     initialGrisilithCoins: Int = 0,
-    initialPurchasedStatPoints: Int = 0
+    initialPurchasedStatPoints: Int = 0,
+    initialUnlockedIds: Set<String> =
+        emptySet()
 ) {
 
     var grisilithCoins: Int =
@@ -14,6 +16,19 @@ class PlayerProfile(
         initialPurchasedStatPoints
             .coerceAtLeast(0)
         private set
+
+    private val mutableUnlockedIds =
+        initialUnlockedIds
+            .filter {
+                it.isNotBlank()
+            }
+            .toMutableSet()
+
+    val unlockedIds:
+        Set<String>
+        get() =
+            mutableUnlockedIds
+                .toSet()
 
     fun addGrisilithCoins(
         amount: Int
@@ -61,5 +76,26 @@ class PlayerProfile(
 
         purchasedStatPoints +=
             amount
+    }
+
+    fun isUnlocked(
+        unlockId: String
+    ): Boolean {
+
+        return unlockId in
+            mutableUnlockedIds
+    }
+
+    fun unlock(
+        unlockId: String
+    ): Boolean {
+
+        if (unlockId.isBlank()) {
+            return false
+        }
+
+        return mutableUnlockedIds.add(
+            unlockId
+        )
     }
 }

@@ -6,13 +6,13 @@ import com.azizoglu.grisilith.statistics.StatType
 
 object DefaultCharacters {
 
-    val knight =
+    val SirImbert =
         CharacterDefinition(
             id =
-                ContentId("CHR_KNIGHT"),
+                ContentId("CHR_SIR_IMBERT"),
 
             displayName =
-                "Sir Imbert \"the Yellow Knight\"",
+                "Sir Imbert \"the Yellow\"",
 
             description =
                 "The magic-phobic yellow knight will not stop until he and his comrades are the only ones left on the world who practice magic.",
@@ -59,13 +59,15 @@ object DefaultCharacters {
                 ContentUnlockState.UNLOCKED
         )
 
-    val ranger =
+    val ywalethYoster =
         CharacterDefinition(
             id =
-                ContentId("CHR_RANGER"),
+                ContentId(
+                    "CHR_YWALETH_YOSTER"
+                ),
 
             displayName =
-                "Rousey Browne",
+                "Ywaleth Yoster",
 
             description =
                 "When she died, the gods did not accept it and decided that the revenge she deserved was the revenge of the gods as well. She will continue to be among us, suffering until she finishes his work.",
@@ -118,7 +120,7 @@ object DefaultCharacters {
                 ContentId("CHR_LAVENA_VOL"),
 
             displayName =
-                "Lavena Vol \"One of Five\"",
+                "Lavena Vol",
 
             description =
                 "One of the greatest wizard of the time specialized in forbidden spells for the approaching danger. Now the approaching danger is her.",
@@ -168,8 +170,8 @@ object DefaultCharacters {
     val all:
         List<CharacterDefinition> =
         listOf(
-            knight,
-            ranger,
+            SirImbert,
+            ywalethYoster,
             lavenaVol
         )
 

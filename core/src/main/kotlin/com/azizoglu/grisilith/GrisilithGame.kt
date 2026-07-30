@@ -20,6 +20,9 @@ import com.azizoglu.grisilith.preset.PresetRepository
 import com.azizoglu.grisilith.preset.PresetContentResolver
 import com.azizoglu.grisilith.screen.preset.PresetManagerScreen
 import com.azizoglu.grisilith.screen.preset.CreatePresetScreen
+import com.azizoglu.grisilith.profile.PlayerProfileRepository
+import com.azizoglu.grisilith.screen.CollectionScreen
+import com.azizoglu.grisilith.screen.MerchantScreen
 
 class GrisilithGame : Game() {
 
@@ -32,6 +35,17 @@ class GrisilithGame : Game() {
         GameSettings.load()
 
         PresetRepository.load()
+
+        PlayerProfileRepository.load()
+
+        if (
+            PlayerProfileRepository
+                .profile
+                .grisilithCoins < 1000
+        ) {
+            PlayerProfileRepository
+                .addGrisilithCoins(1000)
+        }
 
         showMainMenu()
     }
@@ -277,32 +291,17 @@ class GrisilithGame : Game() {
 
     fun showCollection() {
         changeScreen(
-            PlaceholderMenuScreen(
-                title =
-                    "COLLECTION",
-
-                description =
-                    "Characters, Weapons, Armors, Items and Tamgas will be displayed here.",
-
-                onBack = {
-                    showMainMenu()
-                }
+            CollectionScreen(
+                game = this
             )
         )
     }
 
     fun showMerchant() {
         changeScreen(
-            PlaceholderMenuScreen(
-                title =
-                    "MERCHANT FROM HALATHA",
-
-                description =
-                    "Characters, Gears, Tamgas and Cosmetics will be unlocked here with Grisilith Coin.",
-
-                onBack = {
-                    showMainMenu()
-                }
+            MerchantScreen(
+                game =
+                    this
             )
         )
     }
