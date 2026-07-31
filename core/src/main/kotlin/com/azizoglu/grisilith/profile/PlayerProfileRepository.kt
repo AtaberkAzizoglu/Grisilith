@@ -23,6 +23,12 @@ object PlayerProfileRepository {
     private const val UNLOCK_ID_SEPARATOR =
         "\n"
 
+    private const val KEY_DEFEATED_HARD_FINAL_BOSS_IDS =
+        "defeated_hard_final_boss_ids"
+
+    private const val ID_SEPARATOR =
+        "\n"
+
     private val preferences:
         Preferences
         get() =
@@ -62,9 +68,17 @@ object PlayerProfileRepository {
                         .coerceAtLeast(0),
 
                 unlockedIds =
-                    decodeUnlockedIds(
+                    decodeIds(
                         preferences.getString(
                             KEY_UNLOCKED_IDS,
+                            ""
+                        )
+                    ),
+
+                defeatedHardFinalBossIds =
+                    decodeIds(
+                        preferences.getString(
+                            KEY_DEFEATED_HARD_FINAL_BOSS_IDS,
                             ""
                         )
                     )
@@ -82,7 +96,11 @@ object PlayerProfileRepository {
 
                 initialUnlockedIds =
                     loadedSnapshot
-                        .unlockedIds
+                        .unlockedIds,
+
+                initialDefeatedHardFinalBossIds =
+                    loadedSnapshot
+                        .defeatedHardFinalBossIds
             )
 
         if (
@@ -187,47 +205,85 @@ object PlayerProfileRepository {
             )
             .putString(
                 KEY_UNLOCKED_IDS,
-                encodeUnlockedIds(
+                encodeIds(
+                    currentProfile.unlockedIds
+                )
+            )
+
+            .putString(
+                KEY_DEFEATED_HARD_FINAL_BOSS_IDS,
+                encodeIds(
                     currentProfile
-                        .unlockedIds
+                        .defeatedHardFinalBossIds
                 )
             )
             .flush()
     }
 
-    private fun encodeUnlockedIds(
-        unlockedIds: Set<String>
+    private fun encodeIds(
+        ids: Set<String>
     ): String {
-
-        return unlockedIds
+        return ids
+            .map {
+                it.trim()
+            }
             .filter {
-                it.isNotBlank()
+                it.isNotEmpty()
             }
             .sorted()
             .joinToString(
                 separator =
-                    UNLOCK_ID_SEPARATOR
+                    ID_SEPARATOR
             )
     }
 
-    private fun decodeUnlockedIds(
+    private fun decodeIds(
         encodedValue: String
     ): Set<String> {
-
         if (encodedValue.isBlank()) {
             return emptySet()
         }
 
         return encodedValue
             .split(
-                UNLOCK_ID_SEPARATOR
+                ID_SEPARATOR
             )
             .map {
                 it.trim()
             }
             .filter {
-                it.isNotBlank()
+                it.isNotEmpty()
             }
             .toSet()
+    }
+
+    fun applyRunRewards(
+        grisilithCoins: Int,
+        defeatedHardFinalBossIds: Set<String>
+    ) {
+        var changed =
+            false
+
+        if (grisilithCoins > 0) {
+            currentProfile.addGrisilithCoins(
+                grisilithCoins
+            )
+
+            changed =
+                true
+        }
+
+        if (
+            currentProfile.markHardFinalBossesDefeated(
+                defeatedHardFinalBossIds
+            )
+        ) {
+            changed =
+                true
+        }
+
+        if (changed) {
+            save()
+        }
     }
 }

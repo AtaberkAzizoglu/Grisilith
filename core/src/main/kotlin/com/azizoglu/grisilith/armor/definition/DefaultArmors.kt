@@ -193,7 +193,7 @@ object DefaultArmors {
                 ),
 
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 
     /*

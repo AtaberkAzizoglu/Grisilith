@@ -113,7 +113,8 @@ class DifficultySelectionScreen(
         listOf(
             MenuButton(
                 text =
-                    "EASY — 20 STAGES",
+                    "${GameDifficulty.EASY.displayName.uppercase()} — " +
+                        "${GameDifficulty.EASY.maximumStage} STAGES",
 
                 x =
                     440f,
@@ -134,7 +135,8 @@ class DifficultySelectionScreen(
 
             MenuButton(
                 text =
-                    "NORMAL — 30 STAGES",
+                    "${GameDifficulty.Normal.displayName.uppercase()} — " +
+                        "${GameDifficulty.Normal.maximumStage} STAGES",
 
                 x =
                     440f,
@@ -149,13 +151,14 @@ class DifficultySelectionScreen(
                     75f
             ) {
                 start(
-                    GameDifficulty.NORMAL
+                    GameDifficulty.Normal
                 )
             },
 
             MenuButton(
                 text =
-                    "HARD — 40 STAGES",
+                    "${GameDifficulty.HARD.displayName.uppercase()} — " +
+                        "${GameDifficulty.HARD.maximumStage} STAGES",
 
                 x =
                     440f,

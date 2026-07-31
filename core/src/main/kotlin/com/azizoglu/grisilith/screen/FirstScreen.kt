@@ -75,6 +75,7 @@ import com.azizoglu.grisilith.tamga.runtime.active.ActiveTamgaEndReason
 import com.azizoglu.grisilith.tamga.render.ActiveTamgaHudRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.graphics.GL20
+import com.azizoglu.grisilith.reward.RunRewardTracker
 
 
 class FirstScreen(
@@ -177,13 +178,12 @@ class FirstScreen(
                 playerStats
         )
 
-    private val stageController =
-        StageController(
-            normalStageDurationSeconds = 30f,
-            miniBossStageDurationSeconds = 45f,
-            finalBossStageDurationSeconds = 60f,
-            maximumStage = 20
-        )
+    private val stageController = StageController(
+        normalStageDurationSeconds = 30f,
+        miniBossStageDurationSeconds = 45f,
+        finalBossStageDurationSeconds = 60f,
+        maximumStage = difficulty.maximumStage
+    )
 
 
     private val tamgaRuntimeManager =
@@ -294,6 +294,15 @@ class FirstScreen(
     private val sessionWallet =
         SessionWallet()
 
+    private val runRewardTracker =
+        RunRewardTracker(
+            difficulty =
+                difficulty
+        )
+
+    private val finalBossRewardId =
+        "map:${gameMap.name.lowercase()}"
+
     private val goldCoinPickups =
         mutableListOf<GoldCoinPickup>()
 
@@ -350,7 +359,11 @@ class FirstScreen(
             stageController =
                 stageController,
             runStatistics =
-                runStatistics
+                runStatistics,
+
+            grisilithCoinsEarned =
+                runRewardTracker
+                    .grisilithCoinsEarned
         )
 
     private val marketInteractionState =
@@ -622,6 +635,13 @@ class FirstScreen(
             player.health.isDead ||
             stageController.isRunComplete
         ) {
+
+            if (!isRunSummaryOpen) {
+
+                runRewardTracker
+                    .commitToProfile()
+            }
+
             isRunSummaryOpen = true
         }
 
@@ -1388,7 +1408,23 @@ class FirstScreen(
             )
         }
 
-        enemyManager.removeDeadEnemies()
+        enemyManager.removeDeadEnemies { enemy ->
+
+            runRewardTracker.onEnemyKilled(
+                enemyType =
+                    enemy.type,
+
+                finalBossId =
+                    if (
+                        enemy.type ==
+                        EnemyType.FINAL_BOSS
+                    ) {
+                        finalBossRewardId
+                    } else {
+                        null
+                    }
+            )
+        }
 
         if (completeBossStageIfDefeated()) {
             return
@@ -1421,6 +1457,22 @@ class FirstScreen(
     private fun handleEnemyKilled(
         killedEnemy: Enemy
     ) {
+
+        runRewardTracker.onEnemyKilled(
+            enemyType =
+                killedEnemy.type,
+
+            finalBossId =
+                if (
+                    killedEnemy.type ==
+                    EnemyType.FINAL_BOSS
+                ) {
+                    finalBossRewardId
+                } else {
+                    null
+                }
+        )
+
         runStatistics.recordEnemyKilled()
 
         val harvestedGoldReward =

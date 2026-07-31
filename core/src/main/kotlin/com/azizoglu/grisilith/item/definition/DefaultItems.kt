@@ -43,7 +43,7 @@ object DefaultItems {
                 ),
 
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
     }
 

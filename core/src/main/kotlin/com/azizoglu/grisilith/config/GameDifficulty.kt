@@ -2,20 +2,24 @@ package com.azizoglu.grisilith.config
 
 enum class GameDifficulty(
     val displayName: String,
-    val maximumStage: Int
+    val maximumStage: Int,
+    val maximumGrisilithCoinsPerRun: Int
 ) {
     EASY(
         displayName = "Easy",
-        maximumStage = 20
+        maximumStage = 25,
+        maximumGrisilithCoinsPerRun = 2
     ),
 
-    NORMAL(
+    Normal(
         displayName = "Normal",
-        maximumStage = 30
+        maximumStage = 35,
+        maximumGrisilithCoinsPerRun = 3
     ),
 
     HARD(
         displayName = "Hard",
-        maximumStage = 40
+        maximumStage = 50,
+        maximumGrisilithCoinsPerRun = 6
     )
 }

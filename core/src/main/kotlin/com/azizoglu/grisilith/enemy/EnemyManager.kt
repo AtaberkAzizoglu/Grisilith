@@ -107,9 +107,22 @@ class EnemyManager {
             }
     }
 
-    fun removeDeadEnemies() {
-        enemies.removeAll { enemy ->
-            enemy.isDead
+    fun removeDeadEnemies(
+        onEnemyRemoved: (Enemy) -> Unit = {}
+    ) {
+        val iterator =
+            enemies.iterator()
+
+        while (iterator.hasNext()) {
+            val enemy =
+                iterator.next()
+
+            if (!enemy.isDead) {
+                continue
+            }
+
+            onEnemyRemoved(enemy)
+            iterator.remove()
         }
     }
 

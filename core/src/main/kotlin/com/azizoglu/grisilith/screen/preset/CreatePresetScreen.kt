@@ -48,6 +48,7 @@ import com.azizoglu.grisilith.tamga.definition.TamgaCompatibilityResult
 import com.azizoglu.grisilith.tamga.definition.TamgaDefinition
 import com.azizoglu.grisilith.tamga.definition.TamgaPresetSlot
 import com.azizoglu.grisilith.tamga.definition.TamgaSlotType
+import com.azizoglu.grisilith.content.ContentUnlockResolver
 
 class CreatePresetScreen(
     private val game:
@@ -922,8 +923,10 @@ class CreatePresetScreen(
                         ?: return false
 
                 if (
-                    tamga.initialUnlockState !=
-                    ContentUnlockState.UNLOCKED
+                    !ContentUnlockResolver
+                        .isUnlocked(
+                            tamga
+                        )
                 ) {
                     return false
                 }
@@ -944,8 +947,10 @@ class CreatePresetScreen(
                         ?: return false
 
                 if (
-                    weapon.initialUnlockState !=
-                    ContentUnlockState.UNLOCKED
+                    !ContentUnlockResolver
+                        .isUnlocked(
+                            weapon
+                        )
                 ) {
                     return false
                 }
@@ -967,8 +972,10 @@ class CreatePresetScreen(
                         ?: return false
 
                 if (
-                    armor.initialUnlockState !=
-                    ContentUnlockState.UNLOCKED
+                    !ContentUnlockResolver
+                        .isUnlocked(
+                            armor
+                        )
                 ) {
                     return false
                 }
@@ -990,8 +997,10 @@ class CreatePresetScreen(
                         ?: return false
 
                 if (
-                    item.initialUnlockState !=
-                    ContentUnlockState.UNLOCKED
+                    !ContentUnlockResolver
+                        .isUnlocked(
+                            item
+                        )
                 ) {
                     return false
                 }
@@ -1804,9 +1813,12 @@ class CreatePresetScreen(
         List<WeaponDefinition> {
 
         return weapons.filter { weapon ->
+
             interactionState.showLockedContent ||
-                weapon.initialUnlockState ==
-                ContentUnlockState.UNLOCKED
+                ContentUnlockResolver
+                    .isUnlocked(
+                        weapon
+                    )
         }
     }
 
@@ -1820,9 +1832,12 @@ class CreatePresetScreen(
         List<ArmorDefinition> {
 
         return armors.filter { armor ->
+
             interactionState.showLockedContent ||
-                armor.initialUnlockState ==
-                ContentUnlockState.UNLOCKED
+                ContentUnlockResolver
+                    .isUnlocked(
+                        armor
+                    )
         }
     }
 
@@ -1836,9 +1851,12 @@ class CreatePresetScreen(
         List<ItemDefinition> {
 
         return items.filter { item ->
+
             interactionState.showLockedContent ||
-                item.initialUnlockState ==
-                ContentUnlockState.UNLOCKED
+                ContentUnlockResolver
+                    .isUnlocked(
+                        item
+                    )
         }
     }
 
@@ -1852,9 +1870,12 @@ class CreatePresetScreen(
         List<TamgaDefinition> {
 
         return tamgas.filter { tamga ->
+
             interactionState.showLockedContent ||
-                tamga.initialUnlockState ==
-                ContentUnlockState.UNLOCKED
+                ContentUnlockResolver
+                    .isUnlocked(
+                        tamga
+                    )
         }
     }
 
@@ -2889,8 +2910,10 @@ class CreatePresetScreen(
                             ),
 
                         unlocked =
-                            weapon.initialUnlockState ==
-                                ContentUnlockState.UNLOCKED,
+                            ContentUnlockResolver
+                                .isUnlocked(
+                                    weapon
+                                ),
 
                         selected =
                             weapon.id ==
@@ -2963,8 +2986,10 @@ class CreatePresetScreen(
                             "Armor",
 
                         unlocked =
-                            armor.initialUnlockState ==
-                                ContentUnlockState.UNLOCKED,
+                            ContentUnlockResolver
+                                .isUnlocked(
+                                    armor
+                                ),
 
                         selected =
                             armor.id ==
@@ -3452,8 +3477,10 @@ class CreatePresetScreen(
                             "${item.rarity.displayName} Item",
 
                         unlocked =
-                            item.initialUnlockState ==
-                                ContentUnlockState.UNLOCKED,
+                            ContentUnlockResolver
+                                .isUnlocked(
+                                    item
+                                ),
 
                         selected =
                             item.id ==
@@ -3536,8 +3563,10 @@ class CreatePresetScreen(
                             ),
 
                         unlocked =
-                            tamga.initialUnlockState ==
-                                ContentUnlockState.UNLOCKED,
+                            ContentUnlockResolver
+                                .isUnlocked(
+                                    tamga
+                                ),
 
                         selected =
                             selected,

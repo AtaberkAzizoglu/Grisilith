@@ -4,6 +4,8 @@ class PlayerProfile(
     initialGrisilithCoins: Int = 0,
     initialPurchasedStatPoints: Int = 0,
     initialUnlockedIds: Set<String> =
+        emptySet(),
+    initialDefeatedHardFinalBossIds: Set<String> =
         emptySet()
 ) {
 
@@ -23,6 +25,21 @@ class PlayerProfile(
                 it.isNotBlank()
             }
             .toMutableSet()
+
+    private val mutableDefeatedHardFinalBossIds =
+        initialDefeatedHardFinalBossIds
+            .map {
+                it.trim()
+            }
+            .filter {
+                it.isNotEmpty()
+            }
+            .toMutableSet()
+
+    val defeatedHardFinalBossIds: Set<String>
+        get() =
+            mutableDefeatedHardFinalBossIds
+                .toSet()
 
     val unlockedIds:
         Set<String>
@@ -98,4 +115,51 @@ class PlayerProfile(
             unlockId
         )
     }
+
+    fun hasDefeatedHardFinalBoss(
+        finalBossId: String
+    ): Boolean {
+        val normalizedId =
+            finalBossId.trim()
+
+        return normalizedId.isNotEmpty() &&
+            normalizedId in
+            mutableDefeatedHardFinalBossIds
+    }
+
+    fun markHardFinalBossDefeated(
+        finalBossId: String
+    ): Boolean {
+        val normalizedId =
+            finalBossId.trim()
+
+        if (normalizedId.isEmpty()) {
+            return false
+        }
+
+        return mutableDefeatedHardFinalBossIds.add(
+            normalizedId
+        )
+    }
+
+    fun markHardFinalBossesDefeated(
+        finalBossIds: Iterable<String>
+    ): Boolean {
+        var changed =
+            false
+
+        finalBossIds.forEach { finalBossId ->
+            if (
+                markHardFinalBossDefeated(
+                    finalBossId
+                )
+            ) {
+                changed =
+                    true
+            }
+        }
+
+        return changed
+    }
+
 }

@@ -93,6 +93,6 @@ object CrossbowDefinition {
                     ),
 
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 }

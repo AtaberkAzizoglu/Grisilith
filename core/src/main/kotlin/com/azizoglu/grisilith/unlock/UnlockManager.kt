@@ -12,13 +12,19 @@ object UnlockManager {
             UnlockRegistry.find(
                 unlockId
             )
-                ?: return UnlockPurchaseResult.UNKNOWN_UNLOCK
+                ?: return UnlockPurchaseResult
+                    .UNKNOWN_UNLOCK
 
         val profile =
             PlayerProfileRepository
                 .profile
 
+        val isRepeatableStatPoint =
+            definition.type ==
+                UnlockType.STAT_POINT
+
         if (
+            !isRepeatableStatPoint &&
             profile.isUnlocked(
                 unlockId
             )
@@ -61,6 +67,17 @@ object UnlockManager {
                 .NOT_ENOUGH_COINS
         }
 
+        if (isRepeatableStatPoint) {
+
+            PlayerProfileRepository
+                .addPurchasedStatPoints(
+                    1
+                )
+
+            return UnlockPurchaseResult
+                .SUCCESS
+        }
+
         val wasUnlocked =
             PlayerProfileRepository
                 .unlock(
@@ -68,10 +85,7 @@ object UnlockManager {
                 )
 
         if (!wasUnlocked) {
-            /*
-             * Normal akışta buraya girilmez.
-             * Coin kaybını önlemek için geri ödeme yapılır.
-             */
+
             PlayerProfileRepository
                 .addGrisilithCoins(
                     definition.cost
@@ -81,26 +95,7 @@ object UnlockManager {
                 .ALREADY_UNLOCKED
         }
 
-        applyPurchasedEffect(
-            definition
-        )
-
         return UnlockPurchaseResult
             .SUCCESS
-    }
-
-    private fun applyPurchasedEffect(
-        definition: UnlockDefinition
-    ) {
-        when (definition.id) {
-            UnlockRegistry
-                .STAT_POINT_01_ID -> {
-
-                PlayerProfileRepository
-                    .addPurchasedStatPoints(
-                        1
-                    )
-            }
-        }
     }
 }

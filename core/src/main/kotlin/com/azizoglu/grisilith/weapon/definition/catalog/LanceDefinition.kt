@@ -94,6 +94,6 @@ object LanceDefinition {
                     ),
 
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 }

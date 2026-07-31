@@ -6,6 +6,7 @@ import com.azizoglu.grisilith.preset.RunPreset
 import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.tamga.definition.TamgaDefinition
 import com.azizoglu.grisilith.tamga.definition.TamgaPresetSlot
+import com.azizoglu.grisilith.profile.PlayerProfileRepository
 
 class CreatePresetInteractionState {
 
@@ -44,9 +45,8 @@ class CreatePresetInteractionState {
         PresetStatAllocation()
         private set
 
-    var statPointBudget:
-        Int =
-        10
+    var statPointBudget: Int =
+        currentStatPointBudget()
         private set
 
     var isCharacterPickerOpen:
@@ -161,6 +161,17 @@ class CreatePresetInteractionState {
                     0
                 )
 
+    companion object {
+        private const val BASE_STAT_POINT_BUDGET = 10
+    }
+
+    private fun currentStatPointBudget(): Int {
+        return BASE_STAT_POINT_BUDGET +
+            PlayerProfileRepository
+                .profile
+                .purchasedStatPoints
+    }
+
     fun loadFromPreset(
         preset:
         RunPreset
@@ -189,7 +200,7 @@ class CreatePresetInteractionState {
             preset.statAllocation
 
         statPointBudget =
-            preset.statPointBudget
+            currentStatPointBudget()
     }
 
     fun openCharacterPicker() {
@@ -640,7 +651,7 @@ class CreatePresetInteractionState {
             PresetStatAllocation()
 
         statPointBudget =
-            10
+            currentStatPointBudget()
 
         isCharacterPickerOpen =
             false

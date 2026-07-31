@@ -21,7 +21,8 @@ class RunSummaryRenderer(
     private val selectedCharacter:
     CharacterDefinition,
     private val stageController: StageController,
-    private val runStatistics: RunStatistics
+    private val runStatistics: RunStatistics,
+    private val grisilithCoinsEarned: Int
 ) {
 
     fun render(
@@ -138,6 +139,16 @@ class RunSummaryRenderer(
                     "%.1f",
                     runStatistics.totalGoldCollected
                 ),
+            startX,
+            currentY
+        )
+
+        currentY -= 32f
+
+        font.draw(
+            batch,
+            "Grisilith Coin Earned: " +
+                grisilithCoinsEarned,
             startX,
             currentY
         )

@@ -102,6 +102,6 @@ object EnchantedChalkDustDefinition {
             maximumInventoryCopies = 1,
 
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 }

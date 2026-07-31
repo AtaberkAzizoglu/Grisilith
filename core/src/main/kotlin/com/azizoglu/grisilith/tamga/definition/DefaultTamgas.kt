@@ -48,7 +48,7 @@ object DefaultTamgas {
                 ),
 
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 
     val heightInsecurity =
@@ -85,7 +85,7 @@ object DefaultTamgas {
                 ),
 
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 
     val phantomSteed =
@@ -131,7 +131,7 @@ object DefaultTamgas {
                 ),
 
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 
     val holyLights =
@@ -177,7 +177,7 @@ object DefaultTamgas {
                 ),
 
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 
     val arcaneAura =
@@ -220,7 +220,7 @@ object DefaultTamgas {
                 ),
 
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 
     val flameBlades =
@@ -266,7 +266,7 @@ object DefaultTamgas {
                 ),
 
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 
     val quickShot =
@@ -312,7 +312,7 @@ object DefaultTamgas {
                 ),
 
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 
     val all:
