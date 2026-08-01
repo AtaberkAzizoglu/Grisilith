@@ -78,6 +78,8 @@ import com.badlogic.gdx.graphics.GL20
 import com.azizoglu.grisilith.reward.RunRewardTracker
 import com.azizoglu.grisilith.content.CollectionEncounterIds
 import com.azizoglu.grisilith.profile.PlayerProfileRepository
+import com.azizoglu.grisilith.statistics.career.CompletedRunStatistics
+import com.azizoglu.grisilith.statistics.career.HighScoreRepository
 
 
 class FirstScreen(
@@ -293,6 +295,9 @@ class FirstScreen(
 
     private var previousInputProcessor:
         InputProcessor? = null
+
+    private var hasCommittedCareerStatistics =
+        false
 
     private val sessionWallet =
         SessionWallet()
@@ -557,6 +562,9 @@ class FirstScreen(
             hasInitializedRun =
                 true
 
+            HighScoreRepository
+                .recordRunStarted()
+
             PlayerProfileRepository
                 .markMapEncountered(
                     CollectionEncounterIds.map(
@@ -656,9 +664,12 @@ class FirstScreen(
 
                 runRewardTracker
                     .commitToProfile()
+
+                commitCareerStatistics()
             }
 
-            isRunSummaryOpen = true
+            isRunSummaryOpen =
+                true
         }
 
         val gameplayStopped =
@@ -686,6 +697,67 @@ class FirstScreen(
         }
 
         renderGame()
+    }
+
+    private fun commitCareerStatistics() {
+
+        if (
+            hasCommittedCareerStatistics
+        ) {
+            return
+        }
+
+        hasCommittedCareerStatistics =
+            true
+
+        HighScoreRepository
+            .commitCompletedRun(
+                CompletedRunStatistics(
+                    wasSuccessful =
+                        stageController
+                            .isRunComplete,
+
+                    durationSeconds =
+                        gameTimeController
+                            .elapsedGameTimeSeconds
+                            .toLong()
+                            .coerceAtLeast(
+                                0L
+                            ),
+
+                    enemiesKilled =
+                        runStatistics
+                            .totalEnemiesKilled,
+
+                    bossesDefeated =
+                        runStatistics
+                            .totalBossesDefeated,
+
+                    finalBossesDefeated =
+                        runStatistics
+                            .totalFinalBossesDefeated,
+
+                    damageDealt =
+                        runStatistics
+                            .totalDamageDealt,
+
+                    damageTaken =
+                        runStatistics
+                            .totalDamageTaken,
+
+                    goldCollected =
+                        runStatistics
+                            .totalGoldCollected,
+
+                    goldSpent =
+                        runStatistics
+                            .totalGoldSpent,
+
+                    grisilithCoinsEarned =
+                        runRewardTracker
+                            .grisilithCoinsEarned
+                )
+            )
     }
 
     private fun handleGameControls(
@@ -1491,7 +1563,9 @@ class FirstScreen(
                 }
         )
 
-        runStatistics.recordEnemyKilled()
+        runStatistics.recordEnemyKilled(
+            killedEnemy.type
+        )
 
         val harvestedGoldReward =
             killedEnemy.goldReward *
@@ -3072,6 +3146,10 @@ class FirstScreen(
             return
         }
 
+        runStatistics.recordGoldSpent(
+            offer.price.toFloat()
+        )
+
         weaponRuntimeManager
             .resetAllTimers()
 
@@ -3175,7 +3253,8 @@ class FirstScreen(
 
         val paymentSuccessful =
             sessionWallet.spendGold(
-                amount = offer.price
+                amount =
+                    offer.price
             )
 
         /*
@@ -3185,6 +3264,10 @@ class FirstScreen(
         if (!paymentSuccessful) {
             return
         }
+
+        runStatistics.recordGoldSpent(
+            offer.price.toFloat()
+        )
 
         marketSlots =
             marketSlots
@@ -3419,7 +3502,8 @@ class FirstScreen(
         if (rerollPrice > 0) {
             val rerollSuccessful =
                 sessionWallet.spendGold(
-                    amount = rerollPrice
+                    amount =
+                        rerollPrice
                 )
 
             if (!rerollSuccessful) {
@@ -3433,6 +3517,10 @@ class FirstScreen(
 
                 return
             }
+
+            runStatistics.recordGoldSpent(
+                rerollPrice.toFloat()
+            )
         }
 
         marketRerollsUsed++

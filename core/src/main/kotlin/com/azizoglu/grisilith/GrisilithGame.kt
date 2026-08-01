@@ -25,6 +25,8 @@ import com.azizoglu.grisilith.screen.CollectionScreen
 import com.azizoglu.grisilith.screen.MerchantScreen
 import com.azizoglu.grisilith.content.ContentCategory
 import com.azizoglu.grisilith.screen.CollectionCategoryScreen
+import com.azizoglu.grisilith.statistics.career.HighScoreRepository
+import com.azizoglu.grisilith.screen.HighScoreScreen
 
 class GrisilithGame : Game() {
 
@@ -39,6 +41,8 @@ class GrisilithGame : Game() {
         PresetRepository.load()
 
         PlayerProfileRepository.load()
+
+        HighScoreRepository.load()
 
         if (
             PlayerProfileRepository
@@ -327,17 +331,11 @@ class GrisilithGame : Game() {
     }
 
     fun showHighScores() {
+
         changeScreen(
-            PlaceholderMenuScreen(
-                title =
-                    "HIGH SCORES",
-
-                description =
-                    "Run results and score overviews will be displayed here.",
-
-                onBack = {
-                    showMainMenu()
-                }
+            HighScoreScreen(
+                game =
+                    this
             )
         )
     }
