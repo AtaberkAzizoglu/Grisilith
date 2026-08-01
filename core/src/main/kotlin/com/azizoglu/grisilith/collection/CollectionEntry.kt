@@ -9,6 +9,10 @@ data class CollectionEntry(
     val encountered: Boolean
 ) {
 
+    /*
+     * Yalnızca Enemy ve Map içerikleri karşılaşma
+     * bilgisine ihtiyaç duyar.
+     */
     val requiresEncounter:
         Boolean
         get() =
@@ -17,6 +21,12 @@ data class CollectionEntry(
                 definition.category ==
                 ContentCategory.MAP
 
+    /*
+     * Hiç karşılaşılmamış Enemy veya Map.
+     *
+     * Collection ekranında ismi ve açıklaması yerine
+     * ???? gösterilir ve detay paneli açılamaz.
+     */
     val isUnknown:
         Boolean
         get() =

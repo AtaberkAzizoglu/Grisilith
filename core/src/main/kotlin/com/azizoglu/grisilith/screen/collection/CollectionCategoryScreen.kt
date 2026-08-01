@@ -3,6 +3,10 @@ package com.azizoglu.grisilith.screen
 import com.azizoglu.grisilith.GrisilithGame
 import com.azizoglu.grisilith.collection.CollectionEntry
 import com.azizoglu.grisilith.collection.CollectionProvider
+import com.azizoglu.grisilith.collection.filter.CollectionFilterEngine
+import com.azizoglu.grisilith.collection.filter.CollectionFilterOption
+import com.azizoglu.grisilith.collection.filter.CollectionFilterRegistry
+import com.azizoglu.grisilith.collection.filter.CollectionFilterState
 import com.azizoglu.grisilith.content.ContentCategory
 import com.azizoglu.grisilith.screen.components.MenuButton
 import com.azizoglu.grisilith.screen.components.MenuPointer
@@ -73,6 +77,21 @@ class CollectionCategoryScreen(
 
         private const val DETAIL_PANEL_HEIGHT =
             455f
+
+        private const val FILTER_HEADER_X =
+            955f
+
+        private const val FILTER_HEADER_Y =
+            585f
+
+        private const val FILTER_HEADER_WIDTH =
+            245f
+
+        private const val FILTER_HEADER_HEIGHT =
+            44f
+
+        private const val FILTER_OPTION_HEIGHT =
+            38f
     }
 
     private val camera =
@@ -102,13 +121,38 @@ class CollectionCategoryScreen(
     private val renderer =
         CollectionCategoryRenderer()
 
+    private val filterOptions:
+        List<CollectionFilterOption> =
+        CollectionFilterRegistry.optionsFor(
+            category
+        )
 
+    private val filterState =
+        CollectionFilterState(
+            filterOptions
+        )
+
+    private val filterHeaderBounds =
+        Rectangle(
+            FILTER_HEADER_X,
+            FILTER_HEADER_Y,
+            FILTER_HEADER_WIDTH,
+            FILTER_HEADER_HEIGHT
+        )
+
+    /*
+     * Registry'den gelen, filtre uygulanmamış ana liste.
+     */
     private var entries:
         List<CollectionEntry> =
         emptyList()
 
-    private var selectedIndex:
-        Int? =
+    /*
+     * Filtre sonrası indeks tutmak yerine Content ID tutulur.
+     * Böylece filtre değişince yanlış kartın seçilmesi önlenir.
+     */
+    private var selectedContentId:
+        String? =
         null
 
     private var currentPage =
@@ -200,6 +244,17 @@ class CollectionCategoryScreen(
 
         pointer.reset()
 
+        /*
+         * Kategori ekranı her açıldığında filtreler sıfırlanır.
+         */
+        filterState.reset()
+
+        selectedContentId =
+            null
+
+        currentPage =
+            0
+
         refreshEntries()
     }
 
@@ -209,16 +264,46 @@ class CollectionCategoryScreen(
 
         pointer.update()
 
-        handleKeyboardInput()
-
         if (
-            updateBackButton()
+            handleKeyboardInput()
         ) {
             return
         }
 
-        updatePageButtons()
-        updateCards()
+        /*
+         * Input önceliği:
+         *
+         * 1. Detay paneli
+         * 2. Filtre
+         * 3. Geri ve sayfa butonları
+         * 4. Collection kartları
+         */
+        val detailConsumedInput =
+            updateDetailModalInput()
+
+        val filterConsumedInput =
+            if (
+                detailConsumedInput
+            ) {
+                false
+            } else {
+                updateFilterInput()
+            }
+
+        if (
+            !detailConsumedInput &&
+            !filterConsumedInput
+        ) {
+
+            if (
+                updateBackButton()
+            ) {
+                return
+            }
+
+            updatePageButtons()
+            updateCards()
+        }
 
         Gdx.gl.glClearColor(
             0.035f,
@@ -240,6 +325,16 @@ class CollectionCategoryScreen(
         val visibleEntries =
             visibleEntries()
 
+        val selectedEntry =
+            selectedEntry()
+
+        /*
+         * ==================================================
+         * PASS 1 — ANA ARKA PLANLAR VE ÇERÇEVELER
+         * ==================================================
+         *
+         * Kart kareleri ve detay paneli burada çizilir.
+         */
         renderer.renderCardBackgrounds(
             shapeRenderer =
                 shapeRenderer,
@@ -254,21 +349,26 @@ class CollectionCategoryScreen(
                 selectedLocalIndex()
         )
 
-        selectedEntry()
-            ?.let { selectedEntry ->
+        if (
+            selectedEntry != null
+        ) {
+            renderer.renderDetailBackground(
+                shapeRenderer =
+                    shapeRenderer,
 
-                renderer.renderDetailBackground(
-                    shapeRenderer =
-                        shapeRenderer,
+                panelBounds =
+                    detailPanelBounds,
 
-                    panelBounds =
-                        detailPanelBounds,
+                entry =
+                    selectedEntry
+            )
+        }
 
-                    entry =
-                        selectedEntry
-                )
-            }
-
+        /*
+         * ==================================================
+         * PASS 2 — ANA METİNLER VE BUTONLAR
+         * ==================================================
+         */
         batch.begin()
 
         renderer.renderTexts(
@@ -294,10 +394,25 @@ class CollectionCategoryScreen(
                 pageCount(),
 
             selectedEntry =
-                selectedEntry(),
+                selectedEntry,
 
             detailPanelBounds =
-                detailPanelBounds
+                detailPanelBounds,
+
+            filterOptions =
+                filterOptions,
+
+            filterHeaderBounds =
+                filterHeaderBounds,
+
+            filterOptionBounds =
+                filterOptionBounds(),
+
+            filterDropdownOpen =
+                filterState.isDropdownOpen,
+
+            selectedFilterIds =
+                filterState.selectedOptionIds
         )
 
         backButton.render(
@@ -315,9 +430,9 @@ class CollectionCategoryScreen(
         )
 
         if (
-            pageCount() > 1
+            pageCount() > 1 &&
+            selectedEntry == null
         ) {
-
             previousPageButton.render(
                 batch =
                     batch,
@@ -348,9 +463,76 @@ class CollectionCategoryScreen(
         }
 
         batch.end()
+
+        /*
+         * ==================================================
+         * PASS 3 — FİLTRE OVERLAY
+         * ==================================================
+         *
+         * Filtre en son çizildiği için kartların,
+         * kart yazılarının ve butonların üzerinde kalır.
+         *
+         * Detay paneli açıkken filtre çizilmez.
+         */
+        if (
+            filterOptions.isNotEmpty() &&
+            selectedEntry == null
+        ) {
+
+            renderer.renderFilterBackgrounds(
+                shapeRenderer =
+                    shapeRenderer,
+
+                headerBounds =
+                    filterHeaderBounds,
+
+                optionBounds =
+                    filterOptionBounds(),
+
+                dropdownOpen =
+                    filterState.isDropdownOpen,
+
+                selectedOptionIds =
+                    filterState.selectedOptionIds,
+
+                options =
+                    filterOptions
+            )
+
+            batch.begin()
+
+            renderer.renderFilterTexts(
+                batch =
+                    batch,
+
+                font =
+                    font,
+
+                options =
+                    filterOptions,
+
+                headerBounds =
+                    filterHeaderBounds,
+
+                optionBounds =
+                    filterOptionBounds(),
+
+                dropdownOpen =
+                    filterState.isDropdownOpen,
+
+                selectedOptionIds =
+                    filterState.selectedOptionIds
+            )
+
+            batch.end()
+        }
     }
 
-    private fun handleKeyboardInput() {
+    /*
+     * true dönerse ekran değişmiştir ve render() bitmelidir.
+     */
+    private fun handleKeyboardInput():
+        Boolean {
 
         if (
             Gdx.input.isKeyJustPressed(
@@ -358,16 +540,35 @@ class CollectionCategoryScreen(
             )
         ) {
 
-            if (
-                selectedIndex != null
-            ) {
-                selectedIndex =
-                    null
-            } else {
-                game.showCollection()
+            when {
+
+                selectedContentId != null -> {
+                    selectedContentId =
+                        null
+                }
+
+                filterState.isDropdownOpen -> {
+                    filterState.closeDropdown()
+                }
+
+                else -> {
+                    game.showCollection()
+                    return true
+                }
             }
 
-            return
+            return false
+        }
+
+        /*
+         * Modal veya dropdown açıkken yön tuşları
+         * alttaki sayfalara etki etmez.
+         */
+        if (
+            selectedContentId != null ||
+            filterState.isDropdownOpen
+        ) {
+            return false
         }
 
         if (
@@ -385,6 +586,105 @@ class CollectionCategoryScreen(
         ) {
             nextPage()
         }
+
+        return false
+    }
+
+    /*
+     * Detay paneli modal gibi davranır:
+     *
+     * - Panel içine tıklama hiçbir şey yapmaz.
+     * - Panel dışına tıklama paneli kapatır.
+     * - Aynı tıklama alttaki UI'a aktarılmaz.
+     */
+    private fun updateDetailModalInput():
+        Boolean {
+
+        if (
+            selectedContentId == null ||
+            !pointer.justReleased
+        ) {
+            return false
+        }
+
+        if (
+            !detailPanelBounds.contains(
+                pointer.position
+            )
+        ) {
+            selectedContentId =
+                null
+        }
+
+        return true
+    }
+
+    private fun updateFilterInput():
+        Boolean {
+
+        if (
+            filterOptions.isEmpty() ||
+            selectedEntry() != null ||
+            !pointer.justReleased
+        ) {
+            return false
+        }
+
+        /*
+         * Başlığa basınca dropdown açılır/kapanır.
+         */
+        if (
+            filterHeaderBounds.contains(
+                pointer.position
+            )
+        ) {
+            filterState.toggleDropdown()
+            return true
+        }
+
+        if (
+            !filterState.isDropdownOpen
+        ) {
+            return false
+        }
+
+        val optionIndex =
+            filterOptionBounds()
+                .indexOfFirst {
+                        bounds ->
+
+                    bounds.contains(
+                        pointer.position
+                    )
+                }
+
+        if (
+            optionIndex >= 0
+        ) {
+            val changed =
+                filterState.toggle(
+                    filterOptions[
+                        optionIndex
+                    ].id
+                )
+
+            if (changed) {
+                onFiltersChanged()
+            }
+
+            /*
+             * Seçim sonrası dropdown bilerek açık kalır.
+             */
+            return true
+        }
+
+        /*
+         * Dropdown dışına basılırsa kapanır.
+         * Bu tıklama alttaki karta veya butona geçmez.
+         */
+        filterState.closeDropdown()
+
+        return true
     }
 
     private fun updateBackButton():
@@ -441,31 +741,10 @@ class CollectionCategoryScreen(
             return
         }
 
-        /*
-         * Detay paneli açıksa tıklamaları modal gibi ele al.
-         *
-         * Panelin içine basılırsa hiçbir şey olmaz.
-         * Panel dışına basılırsa panel kapanır.
-         * Alttaki kartlara tıklama geçmez.
-         */
-        if (
-            selectedIndex != null
-        ) {
-
-            if (
-                !detailPanelBounds.contains(
-                    pointer.position
-                )
-            ) {
-                selectedIndex =
-                    null
-            }
-
-            return
-        }
-
         val localIndex =
-            cardBounds.indexOfFirst { bounds ->
+            cardBounds.indexOfFirst {
+                    bounds ->
+
                 bounds.contains(
                     pointer.position
                 )
@@ -482,35 +761,52 @@ class CollectionCategoryScreen(
                 ENTRIES_PER_PAGE +
                 localIndex
 
+        val filteredEntries =
+            filteredEntries()
+
         if (
             globalIndex !in
-            entries.indices
+            filteredEntries.indices
         ) {
             return
         }
 
         val selectedEntry =
-            entries[globalIndex]
+            filteredEntries[
+                globalIndex
+            ]
 
+        /*
+         * Hiç karşılaşılmamış Map veya Enemy
+         * detay panelini açamaz.
+         */
         if (
             selectedEntry.isUnknown
         ) {
             return
         }
 
-        selectedIndex =
-            globalIndex}
+        selectedContentId =
+            selectedEntry
+                .definition
+                .id
+                .value
+    }
 
     private fun selectedEntry():
         CollectionEntry? {
 
-        val index =
-            selectedIndex
+        val selectedId =
+            selectedContentId
                 ?: return null
 
-        return entries.getOrNull(
-            index
-        )
+        return filteredEntries()
+            .firstOrNull {
+                    entry ->
+
+                entry.definition.id.value ==
+                    selectedId
+            }
     }
 
     private fun refreshEntries() {
@@ -526,17 +822,45 @@ class CollectionCategoryScreen(
                 lastPageIndex()
             )
 
-        selectedIndex =
-            selectedIndex
-                ?.takeIf { index ->
-                    index in entries.indices
-                }
+        val selectedId =
+            selectedContentId
+
+        if (
+            selectedId != null &&
+            filteredEntries().none {
+                    entry ->
+
+                entry.definition.id.value ==
+                    selectedId
+            }
+        ) {
+            selectedContentId =
+                null
+        }
 
         rebuildCardBounds()
     }
 
+    private fun filteredEntries():
+        List<CollectionEntry> {
+
+        return CollectionFilterEngine.apply(
+            entries =
+                entries,
+
+            options =
+                filterOptions,
+
+            selectedOptionIds =
+                filterState.selectedOptionIds
+        )
+    }
+
     private fun visibleEntries():
         List<CollectionEntry> {
+
+        val filteredEntries =
+            filteredEntries()
 
         val startIndex =
             currentPage *
@@ -544,7 +868,7 @@ class CollectionCategoryScreen(
 
         if (
             startIndex >=
-            entries.size
+            filteredEntries.size
         ) {
             return emptyList()
         }
@@ -554,10 +878,10 @@ class CollectionCategoryScreen(
                 startIndex +
                     ENTRIES_PER_PAGE,
 
-                entries.size
+                filteredEntries.size
             )
 
-        return entries.subList(
+        return filteredEntries.subList(
             startIndex,
             endIndex
         )
@@ -568,7 +892,8 @@ class CollectionCategoryScreen(
         cardBounds =
             visibleEntries()
                 .indices
-                .map { localIndex ->
+                .map {
+                        localIndex ->
 
                     val column =
                         localIndex %
@@ -603,6 +928,44 @@ class CollectionCategoryScreen(
                 }
     }
 
+    private fun onFiltersChanged() {
+
+        currentPage =
+            0
+
+        selectedContentId =
+            null
+
+        rebuildCardBounds()
+    }
+
+    private fun filterOptionBounds():
+        List<Rectangle> {
+
+        if (
+            !filterState.isDropdownOpen
+        ) {
+            return emptyList()
+        }
+
+        return filterOptions.mapIndexed {
+                index,
+                _ ->
+
+            Rectangle(
+                FILTER_HEADER_X,
+                FILTER_HEADER_Y -
+                    FILTER_OPTION_HEIGHT *
+                    (
+                        index +
+                            1
+                        ),
+                FILTER_HEADER_WIDTH,
+                FILTER_OPTION_HEIGHT
+            )
+        }
+    }
+
     private fun previousPage() {
 
         if (
@@ -614,7 +977,7 @@ class CollectionCategoryScreen(
         currentPage -=
             1
 
-        selectedIndex =
+        selectedContentId =
             null
 
         rebuildCardBounds()
@@ -632,7 +995,7 @@ class CollectionCategoryScreen(
         currentPage +=
             1
 
-        selectedIndex =
+        selectedContentId =
             null
 
         rebuildCardBounds()
@@ -641,14 +1004,17 @@ class CollectionCategoryScreen(
     private fun pageCount():
         Int {
 
+        val filteredSize =
+            filteredEntries().size
+
         if (
-            entries.isEmpty()
+            filteredSize == 0
         ) {
             return 1
         }
 
         return ceil(
-            entries.size.toFloat() /
+            filteredSize.toFloat() /
                 ENTRIES_PER_PAGE.toFloat()
         ).toInt()
     }
@@ -667,27 +1033,20 @@ class CollectionCategoryScreen(
     private fun selectedLocalIndex():
         Int? {
 
-        val selected =
-            selectedIndex
+        val selectedId =
+            selectedContentId
                 ?: return null
 
-        val pageStart =
-            currentPage *
-                ENTRIES_PER_PAGE
+        return visibleEntries()
+            .indexOfFirst {
+                    entry ->
 
-        val pageEnd =
-            pageStart +
-                ENTRIES_PER_PAGE
-
-        if (
-            selected !in
-            pageStart until pageEnd
-        ) {
-            return null
-        }
-
-        return selected -
-            pageStart
+                entry.definition.id.value ==
+                    selectedId
+            }
+            .takeIf {
+                it >= 0
+            }
     }
 
     override fun resize(

@@ -1,6 +1,9 @@
 package com.azizoglu.grisilith.screen.render
 
 import com.azizoglu.grisilith.collection.CollectionEntry
+import com.azizoglu.grisilith.collection.detail.CollectionDetailDefinition
+import com.azizoglu.grisilith.collection.detail.CollectionDetailRegistry
+import com.azizoglu.grisilith.collection.filter.CollectionFilterOption
 import com.azizoglu.grisilith.content.ContentCategory
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
@@ -163,6 +166,148 @@ class CollectionCategoryRenderer {
         )
     }
 
+    fun renderFilterBackgrounds(
+        shapeRenderer: ShapeRenderer,
+        headerBounds: Rectangle,
+        optionBounds: List<Rectangle>,
+        dropdownOpen: Boolean,
+        selectedOptionIds: Set<String>,
+        options: List<CollectionFilterOption>
+    ) {
+
+        shapeRenderer.begin(
+            ShapeRenderer.ShapeType.Filled
+        )
+
+        shapeRenderer.color =
+            Color(
+                0.12f,
+                0.10f,
+                0.17f,
+                1f
+            )
+
+        shapeRenderer.rect(
+            headerBounds.x,
+            headerBounds.y,
+            headerBounds.width,
+            headerBounds.height
+        )
+
+        if (
+            dropdownOpen
+        ) {
+            optionBounds.forEachIndexed {
+                    index,
+                    bounds ->
+
+                val selected =
+                    options[index].id in
+                        selectedOptionIds
+
+                shapeRenderer.color =
+                    if (
+                        selected
+                    ) {
+                        Color(
+                            0.20f,
+                            0.30f,
+                            0.22f,
+                            1f
+                        )
+                    } else {
+                        Color(
+                            0.065f,
+                            0.055f,
+                            0.085f,
+                            1f
+                        )
+                    }
+
+                shapeRenderer.rect(
+                    bounds.x,
+                    bounds.y,
+                    bounds.width,
+                    bounds.height
+                )
+
+                shapeRenderer.color =
+                    if (
+                        selected
+                    ) {
+                        Color(
+                            0.35f,
+                            0.85f,
+                            0.45f,
+                            1f
+                        )
+                    } else {
+                        Color(
+                            0.18f,
+                            0.16f,
+                            0.22f,
+                            1f
+                        )
+                    }
+
+                shapeRenderer.rect(
+                    bounds.x +
+                        10f,
+                    bounds.y +
+                        9f,
+                    20f,
+                    20f
+                )
+            }
+        }
+
+        shapeRenderer.end()
+
+        Gdx.gl.glLineWidth(
+            2f
+        )
+
+        shapeRenderer.begin(
+            ShapeRenderer.ShapeType.Line
+        )
+
+        shapeRenderer.color =
+            Color(
+                0.42f,
+                0.37f,
+                0.52f,
+                1f
+            )
+
+        shapeRenderer.rect(
+            headerBounds.x,
+            headerBounds.y,
+            headerBounds.width,
+            headerBounds.height
+        )
+
+        if (
+            dropdownOpen
+        ) {
+            optionBounds.forEach {
+                    bounds ->
+
+                shapeRenderer.rect(
+                    bounds.x,
+                    bounds.y,
+                    bounds.width,
+                    bounds.height
+                )
+            }
+        }
+
+        shapeRenderer.end()
+
+        Gdx.gl.glLineWidth(
+            1f
+        )
+    }
+
     fun renderDetailBackground(
         shapeRenderer: ShapeRenderer,
         panelBounds: Rectangle,
@@ -299,7 +444,12 @@ class CollectionCategoryRenderer {
         currentPage: Int,
         pageCount: Int,
         selectedEntry: CollectionEntry?,
-        detailPanelBounds: Rectangle
+        detailPanelBounds: Rectangle,
+        filterOptions: List<CollectionFilterOption>,
+        filterHeaderBounds: Rectangle,
+        filterOptionBounds: List<Rectangle>,
+        filterDropdownOpen: Boolean,
+        selectedFilterIds: Set<String>
     ) {
 
         val oldScaleX =
@@ -342,6 +492,18 @@ class CollectionCategoryRenderer {
             )
 
             if (
+                entries.isEmpty()
+            ) {
+                renderEmptyFilterResult(
+                    batch =
+                        batch,
+
+                    font =
+                        font
+                )
+            }
+
+            if (
                 pageCount > 1
             ) {
                 renderPageIndicator(
@@ -358,6 +520,8 @@ class CollectionCategoryRenderer {
                         pageCount
                 )
             }
+
+
         } else {
             renderDetailTexts(
                 batch =
@@ -474,7 +638,6 @@ class CollectionCategoryRenderer {
                     else ->
                         "LOCKED"
                 },
-
                 bounds.x,
                 bounds.y +
                     CARD_NAME_HEIGHT +
@@ -513,6 +676,150 @@ class CollectionCategoryRenderer {
         }
     }
 
+    fun renderFilterTexts(
+        batch: SpriteBatch,
+        font: BitmapFont,
+        options: List<CollectionFilterOption>,
+        headerBounds: Rectangle,
+        optionBounds: List<Rectangle>,
+        dropdownOpen: Boolean,
+        selectedOptionIds: Set<String>
+    ) {
+
+        font.data.setScale(
+            0.78f
+        )
+
+        font.color =
+            Color.WHITE
+
+        val headerText =
+            if (
+                selectedOptionIds.isEmpty()
+            ) {
+                "FILTER: ALL"
+            } else {
+                "FILTER: ${selectedOptionIds.size} ACTIVE"
+            }
+
+        font.draw(
+            batch,
+            headerText,
+            headerBounds.x +
+                12f,
+            headerBounds.y +
+                28f,
+            headerBounds.width -
+                24f,
+            Align.left,
+            false
+        )
+
+        font.data.setScale(
+            0.70f
+        )
+
+        font.color =
+            Color.LIGHT_GRAY
+
+        font.draw(
+            batch,
+            if (
+                dropdownOpen
+            ) {
+                "^"
+            } else {
+                "v"
+            },
+            headerBounds.x +
+                headerBounds.width -
+                28f,
+            headerBounds.y +
+                28f
+        )
+
+        if (
+            !dropdownOpen
+        ) {
+            return
+        }
+
+        optionBounds.forEachIndexed {
+                index,
+                bounds ->
+
+            val option =
+                options[index]
+
+            val selected =
+                option.id in
+                    selectedOptionIds
+
+            font.data.setScale(
+                0.70f
+            )
+
+            font.color =
+                option.textColor
+
+            font.draw(
+                batch,
+                option.displayName,
+                bounds.x +
+                    40f,
+                bounds.y +
+                    25f,
+                bounds.width -
+                    50f,
+                Align.left,
+                false
+            )
+
+            if (
+                selected
+            ) {
+                font.data.setScale(
+                    0.72f
+                )
+
+                font.color =
+                    Color.WHITE
+
+                font.draw(
+                    batch,
+                    "X",
+                    bounds.x +
+                        15f,
+                    bounds.y +
+                        25f
+                )
+            }
+        }
+    }
+
+    private fun renderEmptyFilterResult(
+        batch: SpriteBatch,
+        font: BitmapFont
+    ) {
+
+        font.data.setScale(
+            1f
+        )
+
+        font.color =
+            Color.GRAY
+
+        font.draw(
+            batch,
+            "NO MATCHING CONTENT",
+            0f,
+            355f,
+            VIEWPORT_WIDTH,
+            Align.center,
+            false
+        )
+    }
+
     private fun renderDetailTexts(
         batch: SpriteBatch,
         font: BitmapFont,
@@ -522,6 +829,11 @@ class CollectionCategoryRenderer {
 
         val definition =
             entry.definition
+
+        val collectionDetail =
+            CollectionDetailRegistry.find(
+                definition.id
+            )
 
         /*
          * Geçici büyük görsel alanı yazısı.
@@ -650,8 +962,57 @@ class CollectionCategoryRenderer {
                 150f
         )
 
+        renderCustomCollectionDetail(
+            batch =
+                batch,
+
+            font =
+                font,
+
+            detail =
+                collectionDetail,
+
+            panelBounds =
+                panelBounds
+        )
+    }
+
+    private fun renderCustomCollectionDetail(
+        batch: SpriteBatch,
+        font: BitmapFont,
+        detail: CollectionDetailDefinition?,
+        panelBounds: Rectangle
+    ) {
+
+        if (
+            detail == null
+        ) {
+            font.data.setScale(
+                1.1f
+            )
+
+            font.color =
+                Color.GRAY
+
+            font.draw(
+                batch,
+                "COMING SOON",
+                panelBounds.x +
+                    225f,
+                panelBounds.y +
+                    panelBounds.height -
+                    235f,
+                panelBounds.width -
+                    270f,
+                Align.left,
+                false
+            )
+
+            return
+        }
+
         /*
-         * Açıklama.
+         * Elle yazılmış ana açıklama.
          */
         font.data.setScale(
             0.82f
@@ -662,7 +1023,7 @@ class CollectionCategoryRenderer {
 
         font.draw(
             batch,
-            definition.description,
+            detail.description,
             panelBounds.x +
                 225f,
             panelBounds.y +
@@ -674,49 +1035,89 @@ class CollectionCategoryRenderer {
             true
         )
 
-        /*
-         * Tag listesi.
-         */
-        font.data.setScale(
-            0.72f
-        )
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        val tagText =
-            if (
-                definition.tags.isEmpty()
-            ) {
-                "Tags: None"
-            } else {
-                "Tags: " +
-                    definition.tags
-                        .joinToString(
-                            separator =
-                                ", "
-                        ) { tag ->
-                            tag.name
-                                .replace(
-                                    "_",
-                                    " "
-                                )
-                        }
-            }
-
-        font.draw(
-            batch,
-            tagText,
-            panelBounds.x +
-                30f,
+        var currentY =
             panelBounds.y +
-                75f,
-            panelBounds.width -
-                60f,
-            Align.left,
-            true
-        )
+                panelBounds.height -
+                285f
 
+        /*
+         * Özel bilgi satırları.
+         */
+        detail.rows.forEach {
+                row ->
+
+            font.data.setScale(
+                0.76f
+            )
+
+            font.color =
+                Color.LIGHT_GRAY
+
+            font.draw(
+                batch,
+                "${row.label}:",
+                panelBounds.x +
+                    225f,
+                currentY,
+                180f,
+                Align.left,
+                false
+            )
+
+            font.color =
+                Color.WHITE
+
+            font.draw(
+                batch,
+                row.value,
+                panelBounds.x +
+                    405f,
+                currentY,
+                panelBounds.width -
+                    450f,
+                Align.left,
+                true
+            )
+
+            currentY -=
+                30f
+        }
+
+        /*
+         * Ek notlar.
+         */
+        if (
+            detail.notes.isNotEmpty()
+        ) {
+            currentY -=
+                12f
+
+            detail.notes.forEach {
+                    note ->
+
+                font.data.setScale(
+                    0.70f
+                )
+
+                font.color =
+                    Color.LIGHT_GRAY
+
+                font.draw(
+                    batch,
+                    "- $note",
+                    panelBounds.x +
+                        225f,
+                    currentY,
+                    panelBounds.width -
+                        270f,
+                    Align.left,
+                    true
+                )
+
+                currentY -=
+                    34f
+            }
+        }
     }
 
     private fun renderPageIndicator(

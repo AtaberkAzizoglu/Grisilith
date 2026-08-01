@@ -1,7 +1,7 @@
 package com.azizoglu.grisilith.economy
 
 import com.azizoglu.grisilith.content.ContentTag
-import com.azizoglu.grisilith.content.ContentUnlockState
+import com.azizoglu.grisilith.content.ContentUnlockResolver
 import com.azizoglu.grisilith.item.definition.DefaultItems
 import com.azizoglu.grisilith.item.definition.ItemDefinition
 import com.azizoglu.grisilith.statistics.StatType
@@ -13,21 +13,6 @@ import com.azizoglu.grisilith.item.definition.ItemRarity
 import kotlin.random.Random
 
 object MarketOfferGenerator {
-
-    /*
- * Ana market kategorileri Luck'tan etkilenmez.
- */
-    private const val WEAPON_PRODUCT_CHANCE =
-        0.35f
-
-    private const val ITEM_PRODUCT_CHANCE =
-        0.35f
-
-    /*
-     * Kalan %30 Stat'tır.
-     */
-    private const val STAT_PRODUCT_CHANCE =
-        0.30f
 
     private const val MAXIMUM_LUCK =
         50
@@ -47,14 +32,6 @@ object MarketOfferGenerator {
      */
     private const val OWNED_WEAPON_CHANCE_PER_LUCK =
         0.001f
-
-    /*
-     * Tercih edilen Stat:
-     * 0 Luck  → ×1,00
-     * 50 Luck → ×1,50
-     */
-    private const val PREFERRED_STAT_WEIGHT_PER_LUCK =
-        0.01f
 
     /*
      * Item rarity bonusu:
@@ -130,20 +107,9 @@ object MarketOfferGenerator {
         ownedWeaponIds:
         Set<String>
     ): MarketOffer {
-        val productRoll =
-            Random.nextFloat()
 
-        /*
-         * Luck bu ilk seçimi değiştirmez:
-         *
-         * 0.00–0.35 → Weapon
-         * 0.35–0.70 → Item
-         * 0.70–1.00 → Stat
-         */
-        return when {
-            productRoll <
-                WEAPON_PRODUCT_CHANCE -> {
-
+        val weaponOffer =
+            {
                 createRandomWeaponOffer(
                     currentStage =
                         currentStage,
@@ -158,23 +124,10 @@ object MarketOfferGenerator {
                     ownedWeaponIds =
                         ownedWeaponIds
                 )
-                    ?: createRandomStatOffer(
-                        currentStage =
-                            currentStage,
-
-                        luckScore =
-                            luckScore,
-
-                        preferredStats =
-                            selectedCharacter
-                                .preferredMarketStats
-                    )
             }
 
-            productRoll <
-                WEAPON_PRODUCT_CHANCE +
-                ITEM_PRODUCT_CHANCE -> {
-
+        val itemOffer =
+            {
                 createRandomItemOffer(
                     currentStage =
                         currentStage,
@@ -182,32 +135,36 @@ object MarketOfferGenerator {
                     luckScore =
                         luckScore
                 )
-                    ?: createRandomStatOffer(
-                        currentStage =
-                            currentStage,
-
-                        luckScore =
-                            luckScore,
-
-                        preferredStats =
-                            selectedCharacter
-                                .preferredMarketStats
-                    )
             }
 
-            else -> {
-                createRandomStatOffer(
-                    currentStage =
-                        currentStage,
+        /*
+         * Ana kategori seçimi Luck'tan etkilenmez:
+         *
+         * %50 Weapon
+         * %50 Item
+         *
+         * Seçilen kategori boşsa diğer kategori
+         * güvenli fallback olarak kullanılır.
+         */
+        return if (
+            Random.nextBoolean()
+        ) {
 
-                    luckScore =
-                        luckScore,
-
-                    preferredStats =
-                        selectedCharacter
-                            .preferredMarketStats
+            weaponOffer()
+                ?: itemOffer()
+                ?: error(
+                    "Market cannot generate an offer: " +
+                        "no unlocked Weapons or Items are available."
                 )
-            }
+
+        } else {
+
+            itemOffer()
+                ?: weaponOffer()
+                ?: error(
+                    "Market cannot generate an offer: " +
+                        "no unlocked Weapons or Items are available."
+                )
         }
     }
 
@@ -222,8 +179,9 @@ object MarketOfferGenerator {
         val availableWeapons =
             DefaultWeapons.all
                 .filter { weapon ->
-                    weapon.initialUnlockState ==
-                        ContentUnlockState.UNLOCKED
+                    ContentUnlockResolver.isUnlocked(
+                        weapon
+                    )
                 }
 
         if (availableWeapons.isEmpty()) {
@@ -545,8 +503,9 @@ object MarketOfferGenerator {
         val availableItems =
             DefaultItems.all
                 .filter { item ->
-                    item.initialUnlockState ==
-                        ContentUnlockState.UNLOCKED
+                    ContentUnlockResolver.isUnlocked(
+                        item
+                    )
                 }
 
         if (availableItems.isEmpty()) {
@@ -706,88 +665,6 @@ object MarketOfferGenerator {
             )
     }
 
-    private fun createRandomStatOffer(
-        currentStage: Int,
-        luckScore: Int,
-        preferredStats:
-        Set<StatType>
-    ): MarketOffer {
-        val safeLuck =
-            luckScore.coerceIn(
-                0,
-                MAXIMUM_LUCK
-            )
-
-        val preferredWeight =
-            1f +
-                safeLuck *
-                PREFERRED_STAT_WEIGHT_PER_LUCK
-
-        val weightedStats =
-            StatType.entries.map { statType ->
-                statType to
-                    if (
-                        statType in
-                        preferredStats
-                    ) {
-                        preferredWeight
-                    } else {
-                        1f
-                    }
-            }
-
-        val selectedStat =
-            selectWeighted(
-                weightedValues =
-                    weightedStats
-            )
-
-        /*
-         * Şimdilik bütün market stat kartları
-         * +1 verir.
-         */
-        val statAmount = 1
-
-        val productLevel = 1
-
-        val price =
-            MarketPriceCalculator
-                .calculatePrice(
-                    productType =
-                        MarketProductType.STAT,
-
-                    productLevel =
-                        productLevel,
-
-                    currentStage =
-                        currentStage
-                )
-
-        return MarketOffer(
-            productType =
-                MarketProductType.STAT,
-
-            productLevel =
-                productLevel,
-
-            title =
-                selectedStat.displayName,
-
-            description =
-                "Permanently increases " +
-                    "${selectedStat.displayName} " +
-                    "by $statAmount for this run.",
-
-            price =
-                price,
-
-            statType =
-                selectedStat,
-
-            statAmount =
-                statAmount
-        )
-    }
 
     private fun buildWeaponDescription(
         weapon:

@@ -58,11 +58,16 @@ object CollectionProvider {
             .sortedWith(
                 compareByDescending<CollectionEntry> {
                     /*
-                     * Bilinen içerikler bilinmeyenlerden önce.
+                     * Karşılaşılmış Map ve Enemy'ler
+                     * bilinmeyenlerden önce gösterilir.
                      */
                     !it.isUnknown
                 }
                     .thenByDescending {
+                        /*
+                         * Açılmış gear ve character'lar
+                         * kilitlilerden önce gösterilir.
+                         */
                         it.unlocked
                     }
                     .thenBy {
