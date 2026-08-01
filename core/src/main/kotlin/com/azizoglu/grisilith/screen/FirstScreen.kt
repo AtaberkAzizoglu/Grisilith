@@ -511,6 +511,55 @@ class FirstScreen(
             rewardQueue =
                 chestRewardQueue,
 
+            difficulty =
+                difficulty,
+
+            currentStageProvider = {
+                stageController
+                    .currentStage
+            },
+
+            luckScoreProvider = {
+                playerStats
+                    .luckScore()
+            },
+
+            availableStatTypesProvider = {
+                StatType.entries
+                    .filter {
+                            statType ->
+
+                        playerStats
+                            .totalScore(
+                                statType
+                            ) <
+                            PlayerStats
+                                .RUN_MAXIMUM_SCORE
+                    }
+            },
+
+            availableItemDefinitionsProvider = {
+                DefaultItems.all
+                    .filter {
+                            definition ->
+
+                        val maximumCopies =
+                            definition
+                                .maximumInventoryCopies
+                                ?: definition
+                                    .rarity
+                                    .maximumInventoryCopies
+
+                        maximumCopies ==
+                            null ||
+                            itemInventory
+                                .countByDefinitionId(
+                                    definition.id
+                                ) <
+                            maximumCopies
+                    }
+            },
+
             camera =
                 camera,
 
@@ -545,8 +594,17 @@ class FirstScreen(
                         shouldOpenMarketAfterSelection =
                             shouldOpenMarketAfterStatSelection
                     )
+            },
+
+            /*
+             * Gelecekte discard hakkını artıran Item
+             * burada hesaplanacak.
+             */
+            additionalDiscardAllowanceProvider = {
+                0
             }
         )
+
 
     override fun show() {
         viewport.apply()
@@ -654,6 +712,11 @@ class FirstScreen(
         handleGameControls(
             delta
         )
+
+        chestRewardController
+            .update(
+                delta
+            )
 
         if (
             player.health.isDead ||
@@ -1449,52 +1512,10 @@ class FirstScreen(
             playerBounds =
                 player.bounds
         ) {
-            val availableStats =
-                StatType.entries
-                    .filter { statType ->
-                        playerStats.totalScore(
-                            statType
-                        ) <
-                            PlayerStats
-                                .RUN_MAXIMUM_SCORE
-                    }
-
-            val availableItems =
-                DefaultItems.all
-                    .filter { definition ->
-                        val maximumCopies =
-                            definition
-                                .maximumInventoryCopies
-                                ?: definition
-                                    .rarity
-                                    .maximumInventoryCopies
-
-                        maximumCopies == null ||
-                            itemInventory
-                                .countByDefinitionId(
-                                    definition.id
-                                ) <
-                            maximumCopies
-                    }
-
-            val choiceSet =
-                ChestRewardRoller
-                    .rollChoiceSet(
-                        luckScore =
-                            playerStats
-                                .luckScore(),
-
-                        availableStatTypes =
-                            availableStats,
-
-                        availableItemDefinitions =
-                            availableItems
-                    )
-
-            chestRewardQueue.addChoiceSet(
-                choiceSet
-            )
+            chestRewardQueue
+                .addChest()
         }
+
 
         enemyManager.removeDeadEnemies { enemy ->
 

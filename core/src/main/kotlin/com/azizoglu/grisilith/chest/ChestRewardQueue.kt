@@ -1,69 +1,53 @@
 package com.azizoglu.grisilith.chest
 
 /*
- * Stage sırasında toplanmış sandıkların
- * üçlü ödül seçeneklerini saklar.
+ * Yeni sistemde chest toplandığı anda ödül üretilmez.
+ *
+ * Bu sınıf yalnızca stage içinde toplanan ve henüz
+ * işlenmemiş chest sayısını tutar.
+ *
+ * Ödül, chest ekranında ilk kilit tıklamasında üretilir.
  */
 class ChestRewardQueue {
 
-    private val pendingChoiceSets =
-        mutableListOf<ChestRewardChoiceSet>()
+    private var pendingChestCount =
+        0
 
-    /*
-     * Bekleyen sandık sayısıdır.
-     * Toplam ödül seçeneği sayısı değildir.
-     */
     val rewardCount: Int
         get() =
-            pendingChoiceSets.size
+            pendingChestCount
 
     val isEmpty: Boolean
         get() =
-            pendingChoiceSets.isEmpty()
+            pendingChestCount <= 0
 
     val isNotEmpty: Boolean
         get() =
-            pendingChoiceSets.isNotEmpty()
+            pendingChestCount > 0
 
-    fun addChoiceSet(
-        choiceSet:
-        ChestRewardChoiceSet
-    ) {
-        pendingChoiceSets.add(
-            choiceSet
-        )
+    fun addChest() {
+        pendingChestCount +=
+            1
     }
 
-    fun peekFirst():
-        ChestRewardChoiceSet? {
+    /*
+     * Stage sonu ekranı açılırken bütün chest sayısını
+     * tek seferde Controller'a aktarır ve kuyruğu temizler.
+     */
+    fun takeAll():
+        Int {
 
-        return pendingChoiceSets
-            .firstOrNull()
-    }
+        val result =
+            pendingChestCount
 
-    fun removeFirst():
-        ChestRewardChoiceSet? {
+        pendingChestCount =
+            0
 
-        if (
-            pendingChoiceSets.isEmpty()
-        ) {
-            return null
-        }
-
-        return pendingChoiceSets
-            .removeAt(
-                0
-            )
-    }
-
-    fun allChoiceSets():
-        List<ChestRewardChoiceSet> {
-
-        return pendingChoiceSets
-            .toList()
+        return result
     }
 
     fun clear() {
-        pendingChoiceSets.clear()
+        pendingChestCount =
+            0
     }
 }

@@ -1,104 +1,81 @@
 package com.azizoglu.grisilith.statistics
 
+import kotlin.random.Random
+
 object StatCardGenerator {
 
-    fun generateCards(): List<StatCard> {
-        val cardPool =
-            listOf(
-                createCard(
-                    StatUpgradeType.MAX_HEALTH,
-                    "Max Health"
-                ),
+    const val STAGE_REWARD_CARD_COUNT = 4
 
-                createCard(
-                    StatUpgradeType.ARMOR_CLASS,
-                    "Armor Class"
-                ),
+    fun generateCards(
+        currentStage: Int,
+        luckScore: Int,
+        availableUpgradeTypes:
+        List<StatUpgradeType> =
+            StatUpgradeType.entries.toList(),
+        random: Random = Random.Default
+    ): List<StatCard> {
+        if (availableUpgradeTypes.isEmpty()) {
+            return emptyList()
+        }
 
-                createCard(
-                    StatUpgradeType.STRENGTH,
-                    "Strength"
-                ),
+        val distinctPool =
+            availableUpgradeTypes.distinct()
 
-                createCard(
-                    StatUpgradeType.DEXTERITY,
-                    "Dexterity"
-                ),
+        val selectedTypes =
+            distinctPool
+                .shuffled(random)
+                .take(STAGE_REWARD_CARD_COUNT)
+                .toMutableList()
 
-                createCard(
-                    StatUpgradeType.WISDOM,
-                    "Wisdom"
-                ),
-
-                createCard(
-                    StatUpgradeType.HASTE,
-                    "Haste"
-                ),
-
-                createCard(
-                    StatUpgradeType.ATTACK_SPEED,
-                    "Attack Speed"
-                ),
-
-                createCard(
-                    StatUpgradeType.CRIT_RATE,
-                    "Crit Rate"
-                ),
-
-                createCard(
-                    StatUpgradeType.CRIT_DAMAGE,
-                    "Crit Damage"
-                ),
-
-                createCard(
-                    StatUpgradeType.MOVEMENT_SPEED,
-                    "Movement Speed"
-                ),
-
-                createCard(
-                    StatUpgradeType.LUCK,
-                    "Luck"
-                ),
-
-                createCard(
-                    StatUpgradeType.HARVEST,
-                    "Harvest"
-                ),
-
-                createCard(
-                    StatUpgradeType.PIERCING,
-                    "Piercing"
-                ),
-
-                createCard(
-                    StatUpgradeType.ENEMY_COUNT,
-                    "Enemy Count"
-                ),
-
-                createCard(
-                    StatUpgradeType.HP_REGENERATION,
-                    "HP Regeneration"
-                ),
-
-                createCard(
-                    StatUpgradeType.LIFE_STEAL,
-                    "Life Steal"
-                )
+        while (
+            selectedTypes.size <
+            STAGE_REWARD_CARD_COUNT
+        ) {
+            selectedTypes.add(
+                distinctPool.random(random)
             )
+        }
 
-        return cardPool
-            .shuffled()
-            .take(3)
+        return selectedTypes.map { upgradeType ->
+            val amount =
+                StatRewardAmountCalculator
+                    .rollAmount(
+                        currentStage = currentStage,
+                        luckScore = luckScore,
+                        random = random
+                    )
+
+            createCard(
+                type = upgradeType,
+                amount = amount
+            )
+        }
+    }
+
+    /*
+     * Eski Controller henüz değiştirilmeden proje
+     * derlenmeye devam etsin diye geçici uyumluluk.
+     */
+    fun generateCards(): List<StatCard> {
+        return generateCards(
+            currentStage = 1,
+            luckScore = 0
+        ).take(3)
     }
 
     private fun createCard(
         type: StatUpgradeType,
-        title: String
+        amount: Int
     ): StatCard {
+        val title =
+            type.statType.displayName
+
         return StatCard(
             type = type,
             title = title,
-            description = "+1 $title score"
+            amount = amount,
+            description =
+                "+$amount $title score"
         )
     }
 }

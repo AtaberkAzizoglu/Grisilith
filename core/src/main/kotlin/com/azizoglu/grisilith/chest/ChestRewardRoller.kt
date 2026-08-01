@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.chest
 
 import com.azizoglu.grisilith.item.definition.ItemDefinition
+import com.azizoglu.grisilith.statistics.StatRewardAmountCalculator
 import com.azizoglu.grisilith.statistics.StatType
 import kotlin.random.Random
 
@@ -10,36 +11,22 @@ object ChestRewardRoller {
         50
 
     /*
-     * Luck, daha nadir Item ağırlıklarını çok
-     * küçük miktarda artırır.
+     * Mevcut rarity + Luck sistemini koruyoruz.
      *
-     * Her Luck seviyesi rarity tier başına
-     * yaklaşık %0,1 göreceli ağırlık verir.
-     *
-     * Örnek, 50 Luck:
-     * Uncommon → yaklaşık +%5 ağırlık
-     * Rare     → yaklaşık +%10
-     * Legendary→ yaklaşık +%15
-     * Artifact → yaklaşık +%20
-     *
-     * Artifact temel ağırlığı çok düşük olduğu
-     * için yine de son derece nadir kalır.
+     * Luck arttıkça daha yüksek rarity tier'larının
+     * göreceli ağırlığı yükselir.
      */
     private const val RARITY_WEIGHT_BONUS_PER_LUCK =
         0.001f
 
     fun rollReward(
+        currentStage: Int,
         luckScore: Int,
-
-        availableStatTypes:
-        List<StatType>,
-
-        availableItemDefinitions:
-        List<ItemDefinition>,
-
-        random:
-        Random = Random.Default
+        availableStatTypes: List<StatType>,
+        availableItemDefinitions: List<ItemDefinition>,
+        random: Random = Random.Default
     ): ChestRewardRoll {
+
         val requestedRewardType =
             ChestRewardTypeCalculator
                 .rollRewardType(
@@ -50,17 +37,18 @@ object ChestRewardRoller {
                         random
                 )
 
-        /*
-         * İstenen türün havuzu boşsa diğer tür
-         * kullanılır. Böylece geçersiz ödül
-         * üretilmez.
-         */
         return when (requestedRewardType) {
+
             ChestRewardType.STAT -> {
                 when {
-                    availableStatTypes
-                        .isNotEmpty() -> {
+                    availableStatTypes.isNotEmpty() -> {
                         rollStatReward(
+                            currentStage =
+                                currentStage,
+
+                            luckScore =
+                                luckScore,
+
                             availableStatTypes =
                                 availableStatTypes,
 
@@ -69,8 +57,7 @@ object ChestRewardRoller {
                         )
                     }
 
-                    availableItemDefinitions
-                        .isNotEmpty() -> {
+                    availableItemDefinitions.isNotEmpty() -> {
                         rollItemReward(
                             luckScore =
                                 luckScore,
@@ -84,23 +71,15 @@ object ChestRewardRoller {
                     }
 
                     else -> {
-                        /*
-                         * Bütün Statlar maksimum ve bütün
-                         * Item limitleri doluysa güvenli
-                         * fallback.
-                         *
-                         * Normal oyunda bu noktaya gelmesi
-                         * çok düşük ihtimaldir.
-                         */
-                        ChestRewardRoll(
-                            rewardType =
-                                ChestRewardType.STAT,
+                        fallbackStatReward(
+                            currentStage =
+                                currentStage,
 
-                            statType =
-                                StatType.MAX_HP,
+                            luckScore =
+                                luckScore,
 
-                            statAmount =
-                                1
+                            random =
+                                random
                         )
                     }
                 }
@@ -108,8 +87,7 @@ object ChestRewardRoller {
 
             ChestRewardType.ITEM -> {
                 when {
-                    availableItemDefinitions
-                        .isNotEmpty() -> {
+                    availableItemDefinitions.isNotEmpty() -> {
                         rollItemReward(
                             luckScore =
                                 luckScore,
@@ -122,9 +100,14 @@ object ChestRewardRoller {
                         )
                     }
 
-                    availableStatTypes
-                        .isNotEmpty() -> {
+                    availableStatTypes.isNotEmpty() -> {
                         rollStatReward(
+                            currentStage =
+                                currentStage,
+
+                            luckScore =
+                                luckScore,
+
                             availableStatTypes =
                                 availableStatTypes,
 
@@ -134,15 +117,15 @@ object ChestRewardRoller {
                     }
 
                     else -> {
-                        ChestRewardRoll(
-                            rewardType =
-                                ChestRewardType.STAT,
+                        fallbackStatReward(
+                            currentStage =
+                                currentStage,
 
-                            statType =
-                                StatType.MAX_HP,
+                            luckScore =
+                                luckScore,
 
-                            statAmount =
-                                1
+                            random =
+                                random
                         )
                     }
                 }
@@ -150,124 +133,41 @@ object ChestRewardRoller {
         }
     }
 
-    fun rollChoiceSet(
+    private fun fallbackStatReward(
+        currentStage: Int,
         luckScore: Int,
+        random: Random
+    ): ChestRewardRoll {
 
-        availableStatTypes:
-        List<StatType>,
+        return ChestRewardRoll(
+            rewardType =
+                ChestRewardType.STAT,
 
-        availableItemDefinitions:
-        List<ItemDefinition>,
+            statType =
+                StatType.MAX_HP,
 
-        random:
-        Random = Random.Default
-    ): ChestRewardChoiceSet {
+            statAmount =
+                StatRewardAmountCalculator
+                    .rollAmount(
+                        currentStage =
+                            currentStage,
 
-        val choices =
-            mutableListOf<ChestRewardRoll>()
+                        luckScore =
+                            luckScore,
 
-        var attempts =
-            0
-
-        val maximumAttempts =
-            30
-
-        while (
-            choices.size <
-            ChestRewardChoiceSet.CHOICE_COUNT &&
-            attempts <
-            maximumAttempts
-        ) {
-            attempts++
-
-            val candidate =
-                rollReward(
-                    luckScore =
-                        luckScore,
-
-                    availableStatTypes =
-                        availableStatTypes,
-
-                    availableItemDefinitions =
-                        availableItemDefinitions,
-
-                    random =
-                        random
-                )
-
-            val duplicate =
-                choices.any { existingChoice ->
-                    rewardIdentity(
-                        existingChoice
-                    ) ==
-                        rewardIdentity(
-                            candidate
-                        )
-                }
-
-            if (!duplicate) {
-                choices.add(
-                    candidate
-                )
-            }
-        }
-
-        while (
-            choices.size <
-            ChestRewardChoiceSet.CHOICE_COUNT
-        ) {
-            choices.add(
-                rollReward(
-                    luckScore =
-                        luckScore,
-
-                    availableStatTypes =
-                        availableStatTypes,
-
-                    availableItemDefinitions =
-                        availableItemDefinitions,
-
-                    random =
-                        random
-                )
-            )
-        }
-
-        return ChestRewardChoiceSet(
-            choices =
-                choices
+                        random =
+                            random
+                    )
         )
     }
 
-    private fun rewardIdentity(
-        reward:
-        ChestRewardRoll
-    ): String {
-        return when (
-            reward.rewardType
-        ) {
-            ChestRewardType.STAT -> {
-                "STAT:" +
-                    reward.statType
-                        ?.name
-            }
-
-            ChestRewardType.ITEM -> {
-                "ITEM:" +
-                    reward.itemDefinition
-                        ?.id
-                        ?.value
-            }
-        }
-    }
-
     private fun rollStatReward(
-        availableStatTypes:
-        List<StatType>,
-
-        random:
-        Random
+        currentStage: Int,
+        luckScore: Int,
+        availableStatTypes: List<StatType>,
+        random: Random
     ): ChestRewardRoll {
+
         val selectedStat =
             availableStatTypes.random(
                 random
@@ -281,19 +181,26 @@ object ChestRewardRoller {
                 selectedStat,
 
             statAmount =
-                1
+                StatRewardAmountCalculator
+                    .rollAmount(
+                        currentStage =
+                            currentStage,
+
+                        luckScore =
+                            luckScore,
+
+                        random =
+                            random
+                    )
         )
     }
 
     private fun rollItemReward(
         luckScore: Int,
-
-        availableItemDefinitions:
-        List<ItemDefinition>,
-
-        random:
-        Random
+        availableItemDefinitions: List<ItemDefinition>,
+        random: Random
     ): ChestRewardRoll {
+
         val selectedItem =
             weightedItemSelection(
                 luckScore =
@@ -317,13 +224,10 @@ object ChestRewardRoller {
 
     private fun weightedItemSelection(
         luckScore: Int,
-
-        itemDefinitions:
-        List<ItemDefinition>,
-
-        random:
-        Random
+        itemDefinitions: List<ItemDefinition>,
+        random: Random
     ): ItemDefinition {
+
         require(
             itemDefinitions.isNotEmpty()
         )
@@ -335,7 +239,9 @@ object ChestRewardRoller {
             )
 
         val weightedItems =
-            itemDefinitions.map { definition ->
+            itemDefinitions.map {
+                    definition ->
+
                 val rarityTier =
                     rarityTier(
                         definition
@@ -386,7 +292,9 @@ object ChestRewardRoller {
             roll -=
                 weightedItem.second
 
-            if (roll <= 0f) {
+            if (
+                roll <= 0f
+            ) {
                 return weightedItem.first
             }
         }
@@ -396,17 +304,10 @@ object ChestRewardRoller {
             .first
     }
 
-    /*
-     * Başlangıç rarity ağırlıkları.
-     *
-     * Şimdilik Common Item sayısı daha fazla
-     * olduğu için ayrıca her Item kendi rarity
-     * ağırlığını paylaşır.
-     */
     private fun baseRarityWeight(
-        rarityName:
-        String
+        rarityName: String
     ): Float {
+
         return when (
             rarityName.uppercase()
         ) {
@@ -431,9 +332,9 @@ object ChestRewardRoller {
     }
 
     private fun rarityTier(
-        rarityName:
-        String
+        rarityName: String
     ): Int {
+
         return when (
             rarityName.uppercase()
         ) {
