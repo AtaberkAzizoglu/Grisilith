@@ -26,10 +26,12 @@ data class RunPreset(
     ContentId,
 
     val armorId:
-    ContentId,
+    ContentId? =
+        null,
 
     val itemId:
-    ContentId,
+    ContentId? =
+        null,
 
     val weaponTamgaId:
     ContentId? =
@@ -144,11 +146,11 @@ data class RunPreset(
             this.weaponId,
 
         armorId:
-        ContentId =
+        ContentId? =
             this.armorId,
 
         itemId:
-        ContentId =
+        ContentId? =
             this.itemId,
 
         weaponTamgaId:

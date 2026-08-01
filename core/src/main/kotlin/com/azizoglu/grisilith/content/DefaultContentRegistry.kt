@@ -11,6 +11,7 @@ object DefaultContentRegistry {
     val instance:
         ContentRegistry =
         ContentRegistry().apply {
+
             registerAll(
                 DefaultCharacters.all
             )
@@ -29,6 +30,14 @@ object DefaultContentRegistry {
 
             registerAll(
                 DefaultTamgas.all
+            )
+
+            registerAll(
+                DefaultCollectionEnemies.all
+            )
+
+            registerAll(
+                DefaultCollectionMaps.all
             )
         }
 }

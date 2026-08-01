@@ -14,11 +14,18 @@ data class PlayerProfileSnapshot(
         emptySet(),
 
     val defeatedHardFinalBossIds: Set<String> =
+        emptySet(),
+
+    val encounteredMapIds: Set<String> =
+        emptySet(),
+
+    val encounteredEnemyIds: Set<String> =
         emptySet()
 ) {
 
     companion object {
+
         const val CURRENT_VERSION =
-            3
+            4
     }
 }

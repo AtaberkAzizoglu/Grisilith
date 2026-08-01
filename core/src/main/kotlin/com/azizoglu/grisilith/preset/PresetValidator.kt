@@ -60,35 +60,26 @@ object PresetValidator {
                 )
 
         val armor =
-            contentRegistry.findById(
-                preset.armorId
-            ) as?
-                ArmorDefinition
-                ?: return invalid(
-                    "The selected Armor does not exist."
-                )
+            preset.armorId
+                ?.let { armorId ->
+                    contentRegistry.findById(
+                        armorId
+                    ) as? ArmorDefinition
+                        ?: return invalid(
+                            "The selected Armor does not exist."
+                        )
+                }
 
         val item =
-            contentRegistry.findById(
-                preset.itemId
-            ) as?
-                ItemDefinition
-                ?: return invalid(
-                    "The selected Item does not exist."
-                )
-
-        /*
-         * Yanlış kategoride bir Content ID'nin
-         * Preset'e kaydedilmesini engellemek için
-         * bütün ana ekipmanlar resolve edilir.
-         */
-        @Suppress("UNUSED_VARIABLE")
-        val resolvedEquipment =
-            listOf(
-                weapon,
-                armor,
-                item
-            )
+            preset.itemId
+                ?.let { itemId ->
+                    contentRegistry.findById(
+                        itemId
+                    ) as? ItemDefinition
+                        ?: return invalid(
+                            "The selected Item does not exist."
+                        )
+                }
 
         if (
             preset.statPointBudget <
@@ -233,7 +224,7 @@ object PresetValidator {
         WeaponDefinition,
 
         armor:
-        ArmorDefinition,
+        ArmorDefinition?,
 
         contentRegistry:
         ContentRegistry

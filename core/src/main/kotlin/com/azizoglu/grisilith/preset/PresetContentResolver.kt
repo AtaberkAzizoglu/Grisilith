@@ -31,16 +31,22 @@ class PresetContentResolver(
                 ?: return null
 
         val armor =
-            contentRegistry.findById(
-                preset.armorId
-            ) as? ArmorDefinition
-                ?: return null
+            preset.armorId
+                ?.let { armorId ->
+                    contentRegistry.findById(
+                        armorId
+                    ) as? ArmorDefinition
+                        ?: return null
+                }
 
         val item =
-            contentRegistry.findById(
-                preset.itemId
-            ) as? ItemDefinition
-                ?: return null
+            preset.itemId
+                ?.let { itemId ->
+                    contentRegistry.findById(
+                        itemId
+                    ) as? ItemDefinition
+                        ?: return null
+                }
 
         val weaponTamga =
             preset.weaponTamgaId
@@ -140,10 +146,10 @@ class PresetContentResolver(
         WeaponDefinition,
 
         armor:
-        ArmorDefinition,
+        ArmorDefinition?,
 
         item:
-        ItemDefinition,
+        ItemDefinition?,
 
         weaponTamga:
         TamgaDefinition?,
@@ -191,8 +197,9 @@ class PresetContentResolver(
         val armorAndTamgaBonuses =
             emptyStatMap()
 
-        armor.allStatModifiers()
-            .forEach { modifier ->
+        armor
+            ?.allStatModifiers()
+            ?.forEach { modifier ->
                 armorAndTamgaBonuses.addModifier(
                     modifier.statType,
                     modifier.amount
@@ -231,8 +238,9 @@ class PresetContentResolver(
         val itemBonuses =
             emptyStatMap()
 
-        item.statModifiers
-            .forEach { modifier ->
+        item
+            ?.statModifiers
+            ?.forEach { modifier ->
                 itemBonuses.addModifier(
                     modifier.statType,
                     modifier.amount
@@ -376,10 +384,10 @@ data class ResolvedPresetContent(
     WeaponDefinition,
 
     val armor:
-    ArmorDefinition,
+    ArmorDefinition?,
 
     val item:
-    ItemDefinition,
+    ItemDefinition?,
 
     val weaponTamga:
     TamgaDefinition?,

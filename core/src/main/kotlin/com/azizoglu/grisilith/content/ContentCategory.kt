@@ -1,14 +1,11 @@
 package com.azizoglu.grisilith.content
 
 enum class ContentCategory {
-
     CHARACTER,
-
     WEAPON,
-
     ARMOR,
-
     ITEM,
-
-    TAMGA
+    TAMGA,
+    ENEMY,
+    MAP
 }

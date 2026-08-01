@@ -461,7 +461,7 @@ class CreatePresetScreen(
 
         saveButton.isEnabled =
             interactionState
-                .isCompleteWithoutTamga
+                .hasRequiredSelections
 
         if (
             interactionState
@@ -1584,7 +1584,7 @@ class CreatePresetScreen(
     private fun requestSave() {
         if (
             !interactionState
-                .isCompleteWithoutTamga
+                .hasRequiredSelections
         ) {
             return
         }
@@ -1610,12 +1610,10 @@ class CreatePresetScreen(
         val armorId =
             interactionState
                 .selectedArmorId
-                ?: return
 
         val itemId =
             interactionState
                 .selectedItemId
-                ?: return
 
         val existingPreset =
             editingPresetId

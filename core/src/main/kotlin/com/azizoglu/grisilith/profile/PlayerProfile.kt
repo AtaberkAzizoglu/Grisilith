@@ -6,6 +6,12 @@ class PlayerProfile(
     initialUnlockedIds: Set<String> =
         emptySet(),
     initialDefeatedHardFinalBossIds: Set<String> =
+        emptySet(),
+
+    initialEncounteredMapIds: Set<String> =
+        emptySet(),
+
+    initialEncounteredEnemyIds: Set<String> =
         emptySet()
 ) {
 
@@ -45,6 +51,38 @@ class PlayerProfile(
         Set<String>
         get() =
             mutableUnlockedIds
+                .toSet()
+
+    private val mutableEncounteredMapIds =
+        initialEncounteredMapIds
+            .map {
+                it.trim()
+            }
+            .filter {
+                it.isNotEmpty()
+            }
+            .toMutableSet()
+
+    val encounteredMapIds:
+        Set<String>
+        get() =
+            mutableEncounteredMapIds
+                .toSet()
+
+    private val mutableEncounteredEnemyIds =
+        initialEncounteredEnemyIds
+            .map {
+                it.trim()
+            }
+            .filter {
+                it.isNotEmpty()
+            }
+            .toMutableSet()
+
+    val encounteredEnemyIds:
+        Set<String>
+        get() =
+            mutableEncounteredEnemyIds
                 .toSet()
 
     fun addGrisilithCoins(
@@ -161,5 +199,63 @@ class PlayerProfile(
 
         return changed
     }
+    fun hasEncounteredMap(
+        mapId: String
+    ): Boolean {
 
+        val normalizedId =
+            mapId.trim()
+
+        return normalizedId.isNotEmpty() &&
+            normalizedId in
+            mutableEncounteredMapIds
+    }
+
+    fun markMapEncountered(
+        mapId: String
+    ): Boolean {
+
+        val normalizedId =
+            mapId.trim()
+
+        if (
+            normalizedId.isEmpty()
+        ) {
+            return false
+        }
+
+        return mutableEncounteredMapIds.add(
+            normalizedId
+        )
+    }
+
+    fun hasEncounteredEnemy(
+        enemyId: String
+    ): Boolean {
+
+        val normalizedId =
+            enemyId.trim()
+
+        return normalizedId.isNotEmpty() &&
+            normalizedId in
+            mutableEncounteredEnemyIds
+    }
+
+    fun markEnemyEncountered(
+        enemyId: String
+    ): Boolean {
+
+        val normalizedId =
+            enemyId.trim()
+
+        if (
+            normalizedId.isEmpty()
+        ) {
+            return false
+        }
+
+        return mutableEncounteredEnemyIds.add(
+            normalizedId
+        )
+    }
 }

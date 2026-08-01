@@ -29,6 +29,12 @@ object PlayerProfileRepository {
     private const val ID_SEPARATOR =
         "\n"
 
+    private const val KEY_ENCOUNTERED_MAP_IDS =
+        "encountered_map_ids"
+
+    private const val KEY_ENCOUNTERED_ENEMY_IDS =
+        "encountered_enemy_ids"
+
     private val preferences:
         Preferences
         get() =
@@ -81,6 +87,22 @@ object PlayerProfileRepository {
                             KEY_DEFEATED_HARD_FINAL_BOSS_IDS,
                             ""
                         )
+                    ),
+
+                encounteredMapIds =
+                    decodeIds(
+                        preferences.getString(
+                            KEY_ENCOUNTERED_MAP_IDS,
+                            ""
+                        )
+                    ),
+
+                encounteredEnemyIds =
+                    decodeIds(
+                        preferences.getString(
+                            KEY_ENCOUNTERED_ENEMY_IDS,
+                            ""
+                        )
                     )
             )
 
@@ -100,7 +122,15 @@ object PlayerProfileRepository {
 
                 initialDefeatedHardFinalBossIds =
                     loadedSnapshot
-                        .defeatedHardFinalBossIds
+                        .defeatedHardFinalBossIds,
+
+                initialEncounteredMapIds =
+                    loadedSnapshot
+                        .encounteredMapIds,
+
+                initialEncounteredEnemyIds =
+                    loadedSnapshot
+                        .encounteredEnemyIds
             )
 
         if (
@@ -217,6 +247,22 @@ object PlayerProfileRepository {
                         .defeatedHardFinalBossIds
                 )
             )
+
+            .putString(
+                KEY_ENCOUNTERED_MAP_IDS,
+                encodeIds(
+                    currentProfile
+                        .encounteredMapIds
+                )
+            )
+            .putString(
+                KEY_ENCOUNTERED_ENEMY_IDS,
+                encodeIds(
+                    currentProfile
+                        .encounteredEnemyIds
+                )
+            )
+
             .flush()
     }
 
@@ -285,5 +331,39 @@ object PlayerProfileRepository {
         if (changed) {
             save()
         }
+    }
+
+    fun markMapEncountered(
+        mapId: String
+    ): Boolean {
+
+        val changed =
+            currentProfile
+                .markMapEncountered(
+                    mapId
+                )
+
+        if (changed) {
+            save()
+        }
+
+        return changed
+    }
+
+    fun markEnemyEncountered(
+        enemyId: String
+    ): Boolean {
+
+        val changed =
+            currentProfile
+                .markEnemyEncountered(
+                    enemyId
+                )
+
+        if (changed) {
+            save()
+        }
+
+        return changed
     }
 }

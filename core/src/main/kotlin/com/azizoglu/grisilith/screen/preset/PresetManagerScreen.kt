@@ -1018,11 +1018,15 @@ class PresetManagerScreen(
                     }
 
                     PresetCardContentType.ARMOR -> {
-                        preset.armor.displayName
+                        preset.armor
+                            ?.displayName
+                            ?: "No Armor"
                     }
 
                     PresetCardContentType.ITEM -> {
-                        preset.item.displayName
+                        preset.item
+                            ?.displayName
+                            ?: "No Item"
                     }
 
                     PresetCardContentType.WEAPON_TAMGA -> {
@@ -1670,43 +1674,87 @@ class PresetManagerScreen(
             }
 
             PresetCardContentType.ARMOR -> {
-                title =
-                    preset.armor.displayName
 
-                description =
-                    preset.armor.description
-
-                details =
+                val armor =
                     preset.armor
-                        .allStatModifiers()
-                        .joinToString(
-                            separator = "\n"
-                        ) { modifier ->
-                            "${modifier.statType.displayName}: " +
-                                signed(
-                                    modifier.amount
-                                )
-                        }
+
+                if (
+                    armor == null
+                ) {
+                    title =
+                        "NO ARMOR"
+
+                    description =
+                        "This Preset starts without Armor."
+
+                    details =
+                        "Armor can be obtained during the run."
+                } else {
+                    title =
+                        armor.displayName
+
+                    description =
+                        armor.description
+
+                    details =
+                        armor
+                            .allStatModifiers()
+                            .joinToString(
+                                separator =
+                                    "\n"
+                            ) { modifier ->
+
+                                "${modifier.statType.displayName}: " +
+                                    signed(
+                                        modifier.amount
+                                    )
+                            }
+                            .ifBlank {
+                                "No Stat bonuses."
+                            }
+                }
             }
 
             PresetCardContentType.ITEM -> {
-                title =
-                    preset.item.displayName
 
-                description =
-                    preset.item.description
-
-                details =
+                val item =
                     preset.item
-                        .statModifiers
-                        .joinToString(
-                            separator = "\n"
-                        ) { modifier ->
-                            "${modifier.statType.displayName}: " +
-                                signed(
-                                    modifier.amount
-                                )
-                        }
+
+                if (
+                    item == null
+                ) {
+                    title =
+                        "NO ITEM"
+
+                    description =
+                        "This Preset starts without an Item."
+
+                    details =
+                        "Items can be obtained during the run."
+                } else {
+                    title =
+                        item.displayName
+
+                    description =
+                        item.description
+
+                    details =
+                        item
+                            .statModifiers
+                            .joinToString(
+                                separator =
+                                    "\n"
+                            ) { modifier ->
+
+                                "${modifier.statType.displayName}: " +
+                                    signed(
+                                        modifier.amount
+                                    )
+                            }
+                            .ifBlank {
+                                "No Stat bonuses."
+                            }
+                }
             }
 
             PresetCardContentType.WEAPON_TAMGA -> {

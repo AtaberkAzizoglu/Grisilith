@@ -23,6 +23,8 @@ import com.azizoglu.grisilith.screen.preset.CreatePresetScreen
 import com.azizoglu.grisilith.profile.PlayerProfileRepository
 import com.azizoglu.grisilith.screen.CollectionScreen
 import com.azizoglu.grisilith.screen.MerchantScreen
+import com.azizoglu.grisilith.content.ContentCategory
+import com.azizoglu.grisilith.screen.CollectionCategoryScreen
 
 class GrisilithGame : Game() {
 
@@ -290,9 +292,27 @@ class GrisilithGame : Game() {
     }
 
     fun showCollection() {
+
         changeScreen(
             CollectionScreen(
-                game = this
+                game =
+                    this
+            )
+        )
+    }
+
+    fun showCollectionCategory(
+        category:
+        ContentCategory
+    ) {
+
+        changeScreen(
+            CollectionCategoryScreen(
+                game =
+                    this,
+
+                category =
+                    category
             )
         )
     }

@@ -401,9 +401,7 @@ private class PresetRecord {
             presetId.isBlank() ||
             presetName.isBlank() ||
             characterId.isBlank() ||
-            weaponId.isBlank() ||
-            armorId.isBlank() ||
-            itemId.isBlank()
+            weaponId.isBlank()
         ) {
             return null
         }
@@ -449,14 +447,26 @@ private class PresetRecord {
                     ),
 
                 armorId =
-                    ContentId(
-                        armorId
-                    ),
+                    armorId
+                        .takeIf {
+                            it.isNotBlank()
+                        }
+                        ?.let {
+                            ContentId(
+                                it
+                            )
+                        },
 
                 itemId =
-                    ContentId(
-                        itemId
-                    ),
+                    itemId
+                        .takeIf {
+                            it.isNotBlank()
+                        }
+                        ?.let {
+                            ContentId(
+                                it
+                            )
+                        },
 
                 weaponTamgaId =
                     weaponTamgaId
@@ -524,10 +534,14 @@ private class PresetRecord {
                     preset.weaponId.value
 
                 armorId =
-                    preset.armorId.value
+                    preset.armorId
+                        ?.value
+                        .orEmpty()
 
                 itemId =
-                    preset.itemId.value
+                    preset.itemId
+                        ?.value
+                        .orEmpty()
 
                 weaponTamgaId =
                     preset.weaponTamgaId

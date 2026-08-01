@@ -76,6 +76,8 @@ import com.azizoglu.grisilith.tamga.render.ActiveTamgaHudRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.graphics.GL20
 import com.azizoglu.grisilith.reward.RunRewardTracker
+import com.azizoglu.grisilith.content.CollectionEncounterIds
+import com.azizoglu.grisilith.profile.PlayerProfileRepository
 
 
 class FirstScreen(
@@ -159,9 +161,10 @@ class FirstScreen(
     private val equippedArmor =
         EquippedArmor().apply {
             selectedPreset
-                ?.let { preset ->
+                ?.armor
+                ?.let { armor ->
                     equip(
-                        preset.armor
+                        armor
                     )
                 }
         }
@@ -550,10 +553,20 @@ class FirstScreen(
         )
 
         if (!hasInitializedRun) {
+
             hasInitializedRun =
                 true
 
+            PlayerProfileRepository
+                .markMapEncountered(
+                    CollectionEncounterIds.map(
+                        gameMap
+                    )
+                )
+
             initializeStartingLoadout()
+
+            recordCurrentEnemyEncounters()
         }
 
         camera.update()
@@ -596,12 +609,15 @@ class FirstScreen(
             )
         )
 
-        itemInventory.addItem(
-            ItemInstance(
-                definition =
-                    preset.item
-            )
-        )
+        preset.item
+            ?.let { item ->
+                itemInventory.addItem(
+                    ItemInstance(
+                        definition =
+                            item
+                    )
+                )
+            }
 
         weaponStatBonusSynchronizer
             .invalidate()
@@ -1452,6 +1468,8 @@ class FirstScreen(
                 playerStats
                     .enemyCountMultiplier()
         )
+
+        recordCurrentEnemyEncounters()
     }
 
     private fun handleEnemyKilled(
@@ -3479,6 +3497,21 @@ class FirstScreen(
                             false
                     )
                 }
+            }
+    }
+
+    private fun recordCurrentEnemyEncounters() {
+
+        enemyManager
+            .allEnemies
+            .forEach { enemy ->
+
+                PlayerProfileRepository
+                    .markEnemyEncountered(
+                        CollectionEncounterIds.enemy(
+                            enemy.type
+                        )
+                    )
             }
     }
 

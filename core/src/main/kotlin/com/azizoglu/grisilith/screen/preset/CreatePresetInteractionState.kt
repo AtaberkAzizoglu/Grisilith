@@ -143,12 +143,10 @@ class CreatePresetInteractionState {
     /*
      * Tamga slotları isteğe bağlıdır.
      */
-    val isCompleteWithoutTamga: Boolean
+    val hasRequiredSelections: Boolean
         get() =
             selectedCharacterId != null &&
-                selectedWeaponId != null &&
-                selectedArmorId != null &&
-                selectedItemId != null
+                selectedWeaponId != null
 
     val remainingStatPoints: Int
         get() =
