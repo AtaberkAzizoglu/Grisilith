@@ -9,28 +9,18 @@ import com.azizoglu.grisilith.chest.ChestRewardRoller
 import com.azizoglu.grisilith.chest.ChestRewardType
 import com.azizoglu.grisilith.config.GameDifficulty
 import com.azizoglu.grisilith.item.definition.ItemDefinition
+import com.azizoglu.grisilith.screen.render.ChestCharacterStatRow
+import com.azizoglu.grisilith.screen.render.ChestRewardOverlayRenderer
 import com.azizoglu.grisilith.statistics.StatType
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.Viewport
 
-/*
- * Yeni tek-sandık açma akışının Controller'ı.
- *
- * Görsel sistem Paket 3'te geliştirilecek. Bu sürüm:
- * - chest sayısını işler,
- * - iki tıklamalı açılmayı çalıştırır,
- * - TAKE / DISCARD davranışını uygular,
- * - rarity sonucunu üretir,
- * - sıradaki chest'e geçer.
- */
 class ChestRewardController(
     private val rewardQueue: ChestRewardQueue,
     private val difficulty: GameDifficulty,
@@ -44,12 +34,18 @@ class ChestRewardController(
     private val availableItemDefinitionsProvider:
         () -> List<ItemDefinition>,
 
-    private val camera: OrthographicCamera,
-    private val cameraWidth: Float,
-    private val cameraHeight: Float,
-    private val viewport: Viewport,
-    private val batch: SpriteBatch,
-    private val font: BitmapFont,
+    camera: OrthographicCamera,
+    cameraWidth: Float,
+    cameraHeight: Float,
+    viewport: Viewport,
+    shapeRenderer: ShapeRenderer,
+    batch: SpriteBatch,
+    font: BitmapFont,
+    characterNameProvider:
+        () -> String,
+
+    characterStatsProvider:
+        () -> List<ChestCharacterStatRow>,
 
     private val onApplyReward:
         (ChestRewardRoll) -> Unit,
@@ -60,10 +56,6 @@ class ChestRewardController(
         Boolean
     ) -> Unit,
 
-    /*
-     * Gelecekte discard hakkı artıran Item buraya
-     * bağlanabilir. Şimdilik her zaman 0 dönecek.
-     */
     private val additionalDiscardAllowanceProvider:
         () -> Int = {
         0
@@ -72,25 +64,8 @@ class ChestRewardController(
 
     companion object {
 
-        private const val CHEST_WIDTH =
-            250f
-
-        private const val CHEST_HEIGHT =
-            180f
-
-        private const val ACTION_BUTTON_WIDTH =
-            210f
-
-        private const val ACTION_BUTTON_HEIGHT =
-            64f
-
-        /*
-         * Paket 3'te gerçek animasyona dönüştürülecek.
-         * Şimdilik REVEALING state'inin gerçekten ayrı
-         * bir frame/state olmasını sağlar.
-         */
         private const val REVEAL_DURATION_SECONDS =
-            0.22f
+            0.44f
     }
 
     private val openingSession =
@@ -99,20 +74,44 @@ class ChestRewardController(
     private val pointerPosition =
         Vector2()
 
-    private val chestBounds =
-        Rectangle()
+    private val overlayRenderer =
+        ChestRewardOverlayRenderer(
+            camera =
+                camera,
 
-    private val takeButtonBounds =
-        Rectangle()
+            cameraWidth =
+                cameraWidth,
 
-    private val discardButtonBounds =
-        Rectangle()
+            cameraHeight =
+                cameraHeight,
+
+            shapeRenderer =
+                shapeRenderer,
+
+            batch =
+                batch,
+
+            font =
+                font,
+
+            characterNameProvider =
+                characterNameProvider,
+
+            characterStatsProvider =
+                characterStatsProvider
+        )
+
+    private val viewport =
+        viewport
 
     private var openMarketAfterStatSelection =
         false
 
     private var revealElapsedSeconds =
         0f
+
+    private var isItemDetailOpen =
+        false
 
     var isOpen:
         Boolean =
@@ -191,15 +190,21 @@ class ChestRewardController(
         revealElapsedSeconds =
             0f
 
+        isItemDetailOpen =
+            false
+
         isOpen =
             true
-
-        updateBounds()
     }
 
     fun update(
         delta: Float
     ) {
+
+        overlayRenderer
+            .update(
+                delta
+            )
 
         if (
             !isOpen ||
@@ -219,7 +224,7 @@ class ChestRewardController(
             REVEAL_DURATION_SECONDS
         ) {
             revealElapsedSeconds =
-                0f
+                REVEAL_DURATION_SECONDS
 
             openingSession
                 .finishReveal()
@@ -232,7 +237,12 @@ class ChestRewardController(
             return
         }
 
-        updateBounds()
+        if (
+            isItemDetailOpen
+        ) {
+            handleItemDetailInput()
+            return
+        }
 
         if (
             Gdx.input.isKeyJustPressed(
@@ -277,14 +287,11 @@ class ChestRewardController(
             return
         }
 
-        pointerPosition.set(
-            Gdx.input.x.toFloat(),
-            Gdx.input.y.toFloat()
-        )
+        updatePointerPosition()
 
-        viewport.unproject(
-            pointerPosition
-        )
+        val layout =
+            overlayRenderer
+                .currentLayout()
 
         when (
             openingSession.state
@@ -292,7 +299,7 @@ class ChestRewardController(
             ChestOpeningState.LOCKED,
             ChestOpeningState.UNLOCKED -> {
                 if (
-                    chestBounds.contains(
+                    layout.chestBounds.contains(
                         pointerPosition
                     )
                 ) {
@@ -302,13 +309,23 @@ class ChestRewardController(
 
             ChestOpeningState.REWARD_SHOWN -> {
                 when {
-                    takeButtonBounds.contains(
+                    currentReward
+                        ?.rewardType ==
+                        ChestRewardType.ITEM &&
+                        layout.rewardVisualBounds.contains(
+                            pointerPosition
+                        ) -> {
+                        isItemDetailOpen =
+                            true
+                    }
+
+                    layout.takeButtonBounds.contains(
                         pointerPosition
                     ) -> {
                         takeCurrentReward()
                     }
 
-                    discardButtonBounds.contains(
+                    layout.discardButtonBounds.contains(
                         pointerPosition
                     ) -> {
                         discardCurrentReward()
@@ -320,6 +337,56 @@ class ChestRewardController(
             ChestOpeningState.COMPLETED -> {
             }
         }
+    }
+
+    private fun handleItemDetailInput() {
+
+        if (
+            Gdx.input.isKeyJustPressed(
+                Input.Keys.ESCAPE
+            )
+        ) {
+            isItemDetailOpen =
+                false
+
+            return
+        }
+
+        if (
+            !Gdx.input.isButtonJustPressed(
+                Input.Buttons.LEFT
+            )
+        ) {
+            return
+        }
+
+        updatePointerPosition()
+
+        val bounds =
+            overlayRenderer
+                .currentLayout()
+                .itemDetailBounds
+
+        if (
+            !bounds.contains(
+                pointerPosition
+            )
+        ) {
+            isItemDetailOpen =
+                false
+        }
+    }
+
+    private fun updatePointerPosition() {
+
+        pointerPosition.set(
+            Gdx.input.x.toFloat(),
+            Gdx.input.y.toFloat()
+        )
+
+        viewport.unproject(
+            pointerPosition
+        )
     }
 
     private fun handlePrimaryChestAction() {
@@ -387,6 +454,9 @@ class ChestRewardController(
             return
         }
 
+        isItemDetailOpen =
+            false
+
         finishOrPrepareNextChest()
     }
 
@@ -399,10 +469,16 @@ class ChestRewardController(
             return
         }
 
+        isItemDetailOpen =
+            false
+
         finishOrPrepareNextChest()
     }
 
     private fun finishOrPrepareNextChest() {
+
+        revealElapsedSeconds =
+            0f
 
         if (
             openingSession.state ==
@@ -415,6 +491,9 @@ class ChestRewardController(
     private fun finish() {
 
         isOpen =
+            false
+
+        isItemDetailOpen =
             false
 
         openingSession.reset()
@@ -430,349 +509,87 @@ class ChestRewardController(
         )
     }
 
-    fun render() {
+    fun renderShapes() {
 
         if (!isOpen) {
             return
         }
 
-        updateBounds()
+        overlayRenderer
+            .renderShapes(
+                state =
+                    openingSession.state,
 
-        /*
-         * Paket 3'te:
-         * - mor sis,
-         * - transparan pencere,
-         * - çizgili rarity parlaması,
-         * - karakter portresi,
-         * - item detay paneli
-         * eklenecek.
-         *
-         * Bu geçici render, yeni akışın test edilmesini sağlar.
-         */
+                reward =
+                    openingSession.currentReward,
 
-        font.color =
-            Color.GOLD
+                revealProgress =
+                    revealProgress(),
 
-        font.draw(
-            batch,
-            "CHEST " +
-                "$currentChestNumber / " +
-                "$totalChestCount",
-            0f,
-            camera.position.y +
-                cameraHeight / 2f -
-                58f,
-            cameraWidth,
-            Align.center,
-            false
-        )
+                discardEnabled =
+                    openingSession.canDiscard,
 
-        when (
-            openingSession.state
-        ) {
-            ChestOpeningState.LOCKED -> {
-                renderChestPlaceholder(
-                    title =
-                        "LOCKED CHEST",
+                itemDetailOpen =
+                    isItemDetailOpen
+            )
+    }
 
-                    instruction =
-                        "Click the chest to unlock it"
-                )
-            }
+    fun renderTexts() {
 
-            ChestOpeningState.UNLOCKED -> {
-                renderChestPlaceholder(
-                    title =
-                        unlockedTitle(),
-
-                    instruction =
-                        "Click the chest again to open it"
-                )
-            }
-
-            ChestOpeningState.REVEALING -> {
-                font.color =
-                    Color.LIGHT_GRAY
-
-                font.draw(
-                    batch,
-                    "OPENING...",
-                    0f,
-                    camera.position.y,
-                    cameraWidth,
-                    Align.center,
-                    false
-                )
-            }
-
-            ChestOpeningState.REWARD_SHOWN -> {
-                renderCurrentReward()
-            }
-
-            ChestOpeningState.COMPLETED -> {
-            }
+        if (!isOpen) {
+            return
         }
-    }
 
-    private fun renderChestPlaceholder(
-        title: String,
-        instruction: String
-    ) {
+        overlayRenderer
+            .renderTexts(
+                state =
+                    openingSession.state,
 
-        font.color =
-            rewardAccentColor()
+                reward =
+                    openingSession.currentReward,
 
-        font.draw(
-            batch,
-            title,
-            chestBounds.x,
-            chestBounds.y +
-                chestBounds.height /
-                2f +
-                12f,
-            chestBounds.width,
-            Align.center,
-            false
-        )
+                currentChestNumber =
+                    openingSession.currentChestNumber,
 
-        font.color =
-            Color.LIGHT_GRAY
+                totalChestCount =
+                    openingSession.totalChestCount,
 
-        font.draw(
-            batch,
-            instruction,
-            0f,
-            chestBounds.y -
-                28f,
-            cameraWidth,
-            Align.center,
-            false
-        )
-    }
+                remainingDiscardCount =
+                    openingSession.remainingDiscardCount,
 
-    private fun renderCurrentReward() {
-
-        val reward =
-            openingSession.currentReward
-                ?: return
-
-        font.color =
-            rewardAccentColor()
-
-        font.draw(
-            batch,
-            reward.title,
-            0f,
-            camera.position.y +
-                80f,
-            cameraWidth,
-            Align.center,
-            false
-        )
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            reward.description,
-            camera.position.x -
-                290f,
-            camera.position.y +
-                30f,
-            580f,
-            Align.center,
-            true
-        )
-
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            "TAKE  [T]",
-            takeButtonBounds.x,
-            takeButtonBounds.y +
-                38f,
-            takeButtonBounds.width,
-            Align.center,
-            false
-        )
-
-        font.color =
-            if (canDiscard) {
-                Color.WHITE
-            } else {
-                Color.DARK_GRAY
-            }
-
-        font.draw(
-            batch,
-            "DISCARD  [D]",
-            discardButtonBounds.x,
-            discardButtonBounds.y +
-                38f,
-            discardButtonBounds.width,
-            Align.center,
-            false
-        )
-
-        font.color =
-            Color.GRAY
-
-        font.draw(
-            batch,
-            "Discards left: " +
-                remainingDiscardCount,
-            0f,
-            camera.position.y -
-                cameraHeight /
-                2f +
-                48f,
-            cameraWidth,
-            Align.center,
-            false
-        )
-    }
-
-    private fun unlockedTitle():
-        String {
-
-        val reward =
-            openingSession.currentReward
-                ?: return "UNLOCKED"
-
-        return when (
-            reward.rewardType
-        ) {
-            ChestRewardType.STAT -> {
-                "STAT REWARD"
-            }
-
-            ChestRewardType.ITEM -> {
-                val rarity =
-                    reward.itemDefinition
-                        ?.rarity
-                        ?.displayName
-                        ?: "Item"
-
-                "$rarity REWARD"
-            }
-        }
+                itemDetailOpen =
+                    isItemDetailOpen
+            )
     }
 
     /*
-     * Paket 3'te aynı renk ShapeRenderer çizgilerine
-     * ve glow efektine aktarılacak.
+     * Eski FirstScreen render çağrısı geçici olarak
+     * kalmışsa kod derlensin diye bırakıldı.
+     *
+     * Ancak doğru görünüm için renderShapes() ve
+     * renderTexts() ayrı ayrı çağrılmalıdır.
      */
-    fun rewardAccentColor():
-        Color {
-
-        val reward =
-            openingSession.currentReward
-                ?: return Color(
-                    0.35f,
-                    0.72f,
-                    1f,
-                    1f
-                )
-
-        if (
-            reward.rewardType ==
-            ChestRewardType.STAT
-        ) {
-            return Color(
-                0.35f,
-                0.72f,
-                1f,
-                1f
-            )
-        }
-
-        return when (
-            reward.itemDefinition
-                ?.rarity
-                ?.name
-                ?.uppercase()
-        ) {
-            "UNCOMMON" -> {
-                Color(
-                    0.25f,
-                    0.90f,
-                    0.35f,
-                    1f
-                )
-            }
-
-            "RARE" -> {
-                Color(
-                    0.20f,
-                    0.55f,
-                    1f,
-                    1f
-                )
-            }
-
-            "LEGENDARY" -> {
-                Color(
-                    1f,
-                    0.82f,
-                    0.15f,
-                    1f
-                )
-            }
-
-            "ARTIFACT" -> {
-                Color(
-                    0.95f,
-                    0.18f,
-                    0.18f,
-                    1f
-                )
-            }
-
-            else -> {
-                Color(
-                    0.72f,
-                    0.72f,
-                    0.76f,
-                    1f
-                )
-            }
-        }
+    fun render() {
+        renderTexts()
     }
 
-    private fun updateBounds() {
+    private fun revealProgress():
+        Float {
 
-        chestBounds.set(
-            camera.position.x -
-                CHEST_WIDTH /
-                2f,
-            camera.position.y -
-                CHEST_HEIGHT /
-                2f +
-                25f,
-            CHEST_WIDTH,
-            CHEST_HEIGHT
-        )
+        if (
+            openingSession.state !=
+            ChestOpeningState.REVEALING
+        ) {
+            return 0f
+        }
 
-        takeButtonBounds.set(
-            camera.position.x -
-                ACTION_BUTTON_WIDTH -
-                18f,
-            camera.position.y -
-                190f,
-            ACTION_BUTTON_WIDTH,
-            ACTION_BUTTON_HEIGHT
-        )
-
-        discardButtonBounds.set(
-            camera.position.x +
-                18f,
-            camera.position.y -
-                190f,
-            ACTION_BUTTON_WIDTH,
-            ACTION_BUTTON_HEIGHT
-        )
+        return (
+            revealElapsedSeconds /
+                REVEAL_DURATION_SECONDS
+            )
+            .coerceIn(
+                0f,
+                1f
+            )
     }
 }

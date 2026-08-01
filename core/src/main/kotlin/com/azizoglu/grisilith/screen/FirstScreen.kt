@@ -80,6 +80,7 @@ import com.azizoglu.grisilith.content.CollectionEncounterIds
 import com.azizoglu.grisilith.profile.PlayerProfileRepository
 import com.azizoglu.grisilith.statistics.career.CompletedRunStatistics
 import com.azizoglu.grisilith.statistics.career.HighScoreRepository
+import com.azizoglu.grisilith.screen.render.ChestCharacterStatRow
 
 
 class FirstScreen(
@@ -572,11 +573,213 @@ class FirstScreen(
             viewport =
                 viewport,
 
+            shapeRenderer =
+                shapeRenderer,
+
             batch =
                 hudBatch,
 
             font =
                 hudFont,
+
+            characterNameProvider = {
+                selectedCharacter
+                    .displayName
+            },
+
+            characterStatsProvider = {
+                listOf(
+                    ChestCharacterStatRow(
+                        label = "Max HP",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.MAX_HP
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Armor Class",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.ARMOR_CLASS
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Strenght",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.STRENGTH
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Dexterity",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.DEXTERITY
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Wisdom",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.WISDOM
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Haste",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.HASTE
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Attack Speed",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.ATTACK_SPEED
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Crit Rate",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.CRIT_RATE
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Crit Damage",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.CRIT_DAMAGE
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Movement Speed",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.MOVEMENT_SPEED
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Luck",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.LUCK
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Harvest",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.HARVEST
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Elemental Damage",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.ELEMENTAL_DAMAGE
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Might of Nature",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.MIGHT_OF_NATURE
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Shepherd",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.SHEPHERD
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Piercing",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.PIERCING
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Enemy Count",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.ENEMY_COUNT
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "HP Regeneration",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.HP_REGENERATION
+                                )
+                                .toString()
+                    ),
+
+                    ChestCharacterStatRow(
+                        label = "Life Steal",
+                        value =
+                            playerStats
+                                .totalScore(
+                                    StatType.LIFE_STEAL
+                                )
+                                .toString()
+                    )
+                )
+            },
 
             onApplyReward = {
                     reward ->
@@ -1928,6 +2131,22 @@ class FirstScreen(
             )
         }
 
+        Gdx.gl.glEnable(
+            GL20.GL_BLEND
+        )
+
+        Gdx.gl.glBlendFunc(
+            GL20.GL_SRC_ALPHA,
+            GL20.GL_ONE_MINUS_SRC_ALPHA
+        )
+
+        chestRewardController
+            .renderShapes()
+
+        Gdx.gl.glDisable(
+            GL20.GL_BLEND
+        )
+
         hudRenderer.render(
             displayedStage =
                 displayedStage(),
@@ -1977,7 +2196,8 @@ class FirstScreen(
             },
 
             renderChestReward = {
-                chestRewardController.render()
+                chestRewardController
+                    .renderTexts()
             },
 
             renderStatCardSelection = {
