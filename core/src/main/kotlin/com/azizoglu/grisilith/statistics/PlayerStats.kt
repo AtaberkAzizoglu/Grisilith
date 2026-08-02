@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.statistics
 
+import com.azizoglu.grisilith.save.RunSaveStatLayers
 import kotlin.math.roundToInt
 
 class PlayerStats(
@@ -538,4 +539,211 @@ class PlayerStats(
 
         return 1 + additionalTargets
     }
+
+    /*
+     * Save sistemi için bütün kalıcı Stat katmanlarını dışarı aktarır.
+     *
+     * Anahtar olarak StatType.name kullanılır. displayName
+     * kullanılmaz; böylece görsel metin değişiklikleri save
+     * dosyasını bozmaz.
+     */
+    fun exportSaveLayers():
+        RunSaveStatLayers {
+
+        return RunSaveStatLayers(
+            baseScores =
+                encodeLayer(
+                    baseScores
+                ),
+
+            gearBonuses =
+                encodeLayer(
+                    gearBonuses
+                ),
+
+            weaponBonuses =
+                encodeLayer(
+                    weaponBonuses
+                ),
+
+            itemBonuses =
+                encodeLayer(
+                    itemBonuses
+                ),
+
+            runBonuses =
+                encodeLayer(
+                    runBonuses
+                ),
+
+            tamgaBonuses =
+                encodeLayer(
+                    tamgaBonuses
+                ),
+
+            activeTamgaBonuses =
+                encodeLayer(
+                    activeTamgaBonuses
+                )
+        )
+    }
+
+    /*
+     * Save dosyasındaki Stat katmanlarını mevcut PlayerStats
+     * nesnesine uygular.
+     *
+     * Bilinmeyen Stat anahtarları yok sayılır. Böylece ileride
+     * kaldırılmış veya yeniden adlandırılmış bir Stat, bütün save
+     * yüklemesini çökertmez.
+     *
+     * Base değer eksikse constructor tarafından kurulmuş mevcut
+     * Character / Preset değeri korunur. Bonus katmanında eksik
+     * değer varsa güvenli biçimde 0 kabul edilir.
+     */
+    fun restoreSaveLayers(
+        layers:
+        RunSaveStatLayers
+    ) {
+
+        val restoredBaseScores =
+            decodeLayer(
+                layers.baseScores
+            )
+
+        val restoredGearBonuses =
+            decodeLayer(
+                layers.gearBonuses
+            )
+
+        val restoredWeaponBonuses =
+            decodeLayer(
+                layers.weaponBonuses
+            )
+
+        val restoredItemBonuses =
+            decodeLayer(
+                layers.itemBonuses
+            )
+
+        val restoredRunBonuses =
+            decodeLayer(
+                layers.runBonuses
+            )
+
+        val restoredTamgaBonuses =
+            decodeLayer(
+                layers.tamgaBonuses
+            )
+
+        val restoredActiveTamgaBonuses =
+            decodeLayer(
+                layers.activeTamgaBonuses
+            )
+
+        StatType.entries
+            .forEach { statType ->
+
+                restoredBaseScores[
+                    statType
+                ]
+                    ?.let {
+                            restoredValue ->
+
+                        baseScores[
+                            statType
+                        ] =
+                            restoredValue
+                                .coerceIn(
+                                    MINIMUM_SCORE,
+                                    PRE_RUN_MAXIMUM_SCORE
+                                )
+                    }
+
+                gearBonuses[
+                    statType
+                ] =
+                    restoredGearBonuses[
+                        statType
+                    ] ?: 0
+
+                weaponBonuses[
+                    statType
+                ] =
+                    restoredWeaponBonuses[
+                        statType
+                    ] ?: 0
+
+                itemBonuses[
+                    statType
+                ] =
+                    restoredItemBonuses[
+                        statType
+                    ] ?: 0
+
+                runBonuses[
+                    statType
+                ] =
+                    restoredRunBonuses[
+                        statType
+                    ] ?: 0
+
+                tamgaBonuses[
+                    statType
+                ] =
+                    restoredTamgaBonuses[
+                        statType
+                    ] ?: 0
+
+                activeTamgaBonuses[
+                    statType
+                ] =
+                    restoredActiveTamgaBonuses[
+                        statType
+                    ] ?: 0
+            }
+    }
+
+    private fun encodeLayer(
+        layer:
+        Map<StatType, Int>
+    ): Map<String, Int> {
+
+        return StatType.entries
+            .associate {
+                    statType ->
+
+                statType.name to
+                    (
+                        layer[
+                            statType
+                        ] ?: 0
+                        )
+            }
+    }
+
+    private fun decodeLayer(
+        encodedLayer:
+        Map<String, Int>
+    ): Map<StatType, Int> {
+
+        return encodedLayer
+            .mapNotNull {
+                    entry ->
+
+                val statType =
+                    StatType.entries
+                        .firstOrNull {
+                                candidate ->
+
+                            candidate.name ==
+                                entry.key
+                        }
+                        ?: return@mapNotNull null
+
+                statType to
+                    entry.value
+            }
+            .toMap()
+    }
+
 }
