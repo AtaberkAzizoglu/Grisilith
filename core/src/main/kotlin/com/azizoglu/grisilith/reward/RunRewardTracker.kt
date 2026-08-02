@@ -102,7 +102,7 @@ class RunRewardTracker(
         val requestedReward =
             when (difficulty) {
                 GameDifficulty.EASY,
-                GameDifficulty.Normal ->
+                GameDifficulty.NORMAL ->
                     1
 
                 GameDifficulty.HARD -> {

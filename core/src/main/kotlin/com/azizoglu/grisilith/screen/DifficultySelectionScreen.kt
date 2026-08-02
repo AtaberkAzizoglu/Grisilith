@@ -135,8 +135,8 @@ class DifficultySelectionScreen(
 
             MenuButton(
                 text =
-                    "${GameDifficulty.Normal.displayName.uppercase()} — " +
-                        "${GameDifficulty.Normal.maximumStage} STAGES",
+                    "${GameDifficulty.NORMAL.displayName.uppercase()} — " +
+                        "${GameDifficulty.NORMAL.maximumStage} STAGES",
 
                 x =
                     440f,
@@ -151,7 +151,7 @@ class DifficultySelectionScreen(
                     75f
             ) {
                 start(
-                    GameDifficulty.Normal
+                    GameDifficulty.NORMAL
                 )
             },
 

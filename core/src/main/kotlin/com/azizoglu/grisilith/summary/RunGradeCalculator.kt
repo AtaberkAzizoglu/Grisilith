@@ -46,7 +46,7 @@ object RunGradeCalculator {
         val multiplier =
             when (difficulty) {
                 GameDifficulty.EASY -> 1.00f
-                GameDifficulty.Normal -> 1.35f
+                GameDifficulty.NORMAL -> 1.35f
                 GameDifficulty.HARD -> 1.75f
             }
 

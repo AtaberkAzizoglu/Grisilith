@@ -11,7 +11,7 @@ enum class GameDifficulty(
         maximumGrisilithCoinsPerRun = 2
     ),
 
-    Normal(
+    NORMAL(
         displayName = "Normal",
         maximumStage = 35,
         maximumGrisilithCoinsPerRun = 3

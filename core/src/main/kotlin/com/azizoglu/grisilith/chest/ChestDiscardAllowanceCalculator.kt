@@ -11,7 +11,7 @@ object ChestDiscardAllowanceCalculator {
         val baseAllowance =
             when (difficulty) {
                 GameDifficulty.EASY -> 2
-                GameDifficulty.Normal -> 4
+                GameDifficulty.NORMAL -> 4
                 GameDifficulty.HARD -> 7
             }
 
