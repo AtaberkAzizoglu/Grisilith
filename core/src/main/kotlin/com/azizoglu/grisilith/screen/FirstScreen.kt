@@ -92,7 +92,8 @@ import com.azizoglu.grisilith.screen.controller.RunSummaryStatInteractionControl
 import com.azizoglu.grisilith.summary.RunSummaryStatEntry
 import com.azizoglu.grisilith.summary.StatContributionSource
 import com.azizoglu.grisilith.summary.StatSourceContribution
-
+import com.azizoglu.grisilith.save.RunSaveBuilder
+import com.azizoglu.grisilith.save.RunSaveRepository
 
 class FirstScreen(
     private val game: GrisilithGame,
@@ -1716,7 +1717,11 @@ class FirstScreen(
             }
 
             PauseAction.QUIT_GAME -> {
+
+                RunSaveRepository.delete()
+
                 game.showMainMenu()
+
             }
 
             null -> {
@@ -1726,6 +1731,9 @@ class FirstScreen(
 
 
     private fun restartRun() {
+
+        RunSaveRepository.delete()
+
         val preset =
             selectedPreset
 
@@ -1793,6 +1801,8 @@ class FirstScreen(
                 Input.Keys.ENTER
             )
         ) {
+            RunSaveRepository.delete()
+
             game.showMainMenu()
         }
     }
@@ -3164,6 +3174,7 @@ class FirstScreen(
         itemScrollOffset = 0
 
         enemySpawner.resetTimer()
+        saveCheckpoint()
     }
 
     private fun handleWeaponDrop(
@@ -4402,6 +4413,108 @@ class FirstScreen(
                     )
                 }
             }
+    }
+
+    private fun buildCheckpointSnapshot() =
+        RunSaveBuilder.createSnapshot(
+            difficulty =
+                difficulty,
+
+            gameMap =
+                gameMap,
+
+            characterDefinitionId =
+                selectedCharacter
+                    .id
+                    .toString(),
+
+            characterDisplayName =
+                selectedCharacter
+                    .displayName,
+
+            presetId =
+                selectedPreset
+                    ?.preset
+                    ?.presetId,
+
+            checkpointStage =
+                stageController
+                    .currentStage,
+
+            maximumStage =
+                stageController
+                    .maximumStage,
+
+            elapsedRunTimeSeconds =
+                gameTimeController
+                    .elapsedGameTimeSeconds,
+
+            currentHealth =
+                player
+                    .health
+                    .currentHealth,
+
+            playerStats =
+                playerStats,
+
+            weaponInventory =
+                weaponInventory,
+
+            equippedArmor =
+                equippedArmor,
+
+            itemInventory =
+                itemInventory,
+
+            sessionWallet =
+                sessionWallet,
+
+            runStatistics =
+                runStatistics,
+
+            runRewardTracker =
+                runRewardTracker,
+
+            remainingChestDiscards =
+                remainingRunChestDiscards,
+
+            weaponTamgaDefinitionId =
+                selectedPreset
+                    ?.weaponTamga
+                    ?.id
+                    ?.toString(),
+
+            armorTamgaDefinitionId =
+                selectedPreset
+                    ?.armorTamga
+                    ?.id
+                    ?.toString(),
+
+            weaponTamgaRuntimeState =
+                null,
+
+            armorTamgaRuntimeState =
+                null
+        )
+
+    private fun saveCheckpoint() {
+
+        try {
+
+            RunSaveRepository.save(
+                buildCheckpointSnapshot()
+            )
+
+        } catch (exception: Exception) {
+
+            Gdx.app.error(
+                "RunSave",
+                "Checkpoint save failed.",
+                exception
+            )
+
+        }
+
     }
 
     private fun recordCurrentEnemyEncounters() {

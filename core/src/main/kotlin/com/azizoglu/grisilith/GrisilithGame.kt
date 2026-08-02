@@ -27,6 +27,7 @@ import com.azizoglu.grisilith.content.ContentCategory
 import com.azizoglu.grisilith.screen.CollectionCategoryScreen
 import com.azizoglu.grisilith.statistics.career.HighScoreRepository
 import com.azizoglu.grisilith.screen.HighScoreScreen
+import com.azizoglu.grisilith.save.RunSaveRepository
 
 class GrisilithGame : Game() {
 
@@ -145,6 +146,7 @@ class GrisilithGame : Game() {
         character:
         CharacterDefinition
     ) {
+        RunSaveRepository.delete()
         changeScreen(
             FirstScreen(
                 game =
@@ -274,6 +276,8 @@ class GrisilithGame : Game() {
 
                     return
                 }
+
+        RunSaveRepository.delete()
 
         changeScreen(
             FirstScreen(
