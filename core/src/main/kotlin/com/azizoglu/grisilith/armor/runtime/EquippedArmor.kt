@@ -52,4 +52,12 @@ class EquippedArmor {
         definition =
             null
     }
+
+    fun exportDefinitionId():
+        String? {
+
+        return definition
+            ?.id
+            ?.toString()
+    }
 }

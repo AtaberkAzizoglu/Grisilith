@@ -4,6 +4,7 @@ import com.azizoglu.grisilith.config.GameDifficulty
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.profile.PlayerProfileRepository
 import com.badlogic.gdx.math.MathUtils
+import com.azizoglu.grisilith.save.RunSaveRewardState
 
 class RunRewardTracker(
     private val difficulty: GameDifficulty
@@ -148,5 +149,53 @@ class RunRewardTracker(
             awardedAmount
 
         return awardedAmount
+    }
+
+    fun exportSaveState():
+        RunSaveRewardState {
+
+        return RunSaveRewardState(
+            grisilithCoinsEarned =
+                grisilithCoinsEarned,
+
+            defeatedHardFinalBossIds =
+                pendingHardFinalBossIds
+                    .toSet()
+        )
+    }
+
+    fun restoreSaveState(
+        saveState:
+        RunSaveRewardState
+    ) {
+
+        grisilithCoinsEarned =
+            saveState.grisilithCoinsEarned
+                .coerceIn(
+                    0,
+                    maximumGrisilithCoins
+                )
+
+        pendingHardFinalBossIds.clear()
+
+        saveState.defeatedHardFinalBossIds
+            .map {
+                it.trim()
+            }
+            .filter {
+                it.isNotEmpty()
+            }
+            .forEach {
+                pendingHardFinalBossIds.add(
+                    it
+                )
+            }
+
+        /*
+         * Checkpoint'teki ödüller henüz profile işlenmemiştir.
+         * Yüklenen run tamamlandığında normal commit akışı çalışır.
+         */
+        rewardsCommitted =
+            false
     }
 }

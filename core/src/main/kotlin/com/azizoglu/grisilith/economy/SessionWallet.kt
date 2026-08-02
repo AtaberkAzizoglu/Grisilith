@@ -29,4 +29,26 @@ class SessionWallet {
     fun reset() {
         exactGoldCoins = 0f
     }
+
+    fun exportGold():
+        Int {
+
+        return goldCoins
+            .coerceAtLeast(
+                0
+            )
+    }
+
+    fun restoreGold(
+        amount:
+        Int
+    ) {
+
+        exactGoldCoins =
+            amount
+                .coerceAtLeast(
+                    0
+                )
+                .toFloat()
+    }
 }

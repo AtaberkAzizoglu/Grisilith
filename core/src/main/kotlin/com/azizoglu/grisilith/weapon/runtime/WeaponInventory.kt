@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.weapon.runtime
 
 import com.azizoglu.grisilith.content.ContentId
+import com.azizoglu.grisilith.save.RunSaveWeaponSlot
 
 class WeaponInventory {
 
@@ -438,6 +439,39 @@ class WeaponInventory {
         return weaponSlots
             .mapNotNull { slot ->
                 slot.weapon
+            }
+    }
+
+    fun exportSaveSlots():
+        List<RunSaveWeaponSlot> {
+
+        return weaponSlots
+            .mapNotNull {
+                    slot ->
+
+                val weapon =
+                    slot.weapon
+                        ?: return@mapNotNull null
+
+                RunSaveWeaponSlot(
+                    slotIndex =
+                        slot.index,
+
+                    weaponDefinitionId =
+                        weapon.definition.id
+                            .toString(),
+
+                    level =
+                        weapon.level
+                )
+            }
+    }
+
+    fun clearAllSlots() {
+
+        weaponSlots
+            .forEach {
+                it.clear()
             }
     }
 }

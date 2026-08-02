@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.item.runtime
 
 import com.azizoglu.grisilith.content.ContentId
+import com.azizoglu.grisilith.save.RunSaveItemStack
 
 class ItemInventory {
 
@@ -102,5 +103,29 @@ class ItemInventory {
 
     fun clear() {
         items.clear()
+    }
+
+    fun exportSaveStacks():
+        List<RunSaveItemStack> {
+
+        return items
+            .groupBy {
+                it.definition.id
+                    .toString()
+            }
+            .map {
+                    entry ->
+
+                RunSaveItemStack(
+                    itemDefinitionId =
+                        entry.key,
+
+                    count =
+                        entry.value.size
+                )
+            }
+            .sortedBy {
+                it.itemDefinitionId
+            }
     }
 }

@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.statistics
 
 import com.azizoglu.grisilith.enemy.EnemyType
+import com.azizoglu.grisilith.save.RunSaveStatistics
 
 class RunStatistics {
 
@@ -133,4 +134,112 @@ class RunStatistics {
             1
     }
 
+    fun exportSaveState():
+        RunSaveStatistics {
+
+        return RunSaveStatistics(
+            totalDamageDealt =
+                totalDamageDealt,
+
+            totalDamageTaken =
+                totalDamageTaken,
+
+            totalEnemiesKilled =
+                totalEnemiesKilled,
+
+            totalMiniBossesDefeated =
+                totalBossesDefeated,
+
+            totalFinalBossesDefeated =
+                totalFinalBossesDefeated,
+
+            totalGoldCollected =
+                totalGoldCollected,
+
+            totalGoldSpent =
+                totalGoldSpent,
+
+            totalChestsOpened =
+                totalChestsOpened,
+
+            damageBySource =
+                weaponDamage.toMap()
+        )
+    }
+
+    fun restoreSaveState(
+        saveState:
+        RunSaveStatistics
+    ) {
+
+        totalDamageDealt =
+            saveState.totalDamageDealt
+                .coerceAtLeast(
+                    0L
+                )
+
+        totalDamageTaken =
+            saveState.totalDamageTaken
+                .coerceAtLeast(
+                    0L
+                )
+
+        totalEnemiesKilled =
+            saveState.totalEnemiesKilled
+                .coerceAtLeast(
+                    0
+                )
+
+        totalBossesDefeated =
+            saveState.totalMiniBossesDefeated
+                .coerceAtLeast(
+                    0
+                )
+
+        totalFinalBossesDefeated =
+            saveState.totalFinalBossesDefeated
+                .coerceAtLeast(
+                    0
+                )
+
+        totalGoldCollected =
+            saveState.totalGoldCollected
+                .coerceAtLeast(
+                    0f
+                )
+
+        totalGoldSpent =
+            saveState.totalGoldSpent
+                .coerceAtLeast(
+                    0f
+                )
+
+        totalChestsOpened =
+            saveState.totalChestsOpened
+                .coerceAtLeast(
+                    0
+                )
+
+        weaponDamage.clear()
+
+        saveState.damageBySource
+            .forEach {
+                    source,
+                    damage ->
+
+                val normalizedSource =
+                    source.trim()
+
+                if (
+                    normalizedSource.isNotEmpty() &&
+                    damage >
+                    0L
+                ) {
+                    weaponDamage[
+                        normalizedSource
+                    ] =
+                        damage
+                }
+            }
+    }
 }

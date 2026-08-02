@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.tamga.runtime.active
 
+import com.azizoglu.grisilith.save.RunSaveActiveTamgaState
 abstract class ActiveTamgaRuntime(
     private val durationSeconds: Float,
     private val cooldownSeconds: Float
@@ -285,5 +286,26 @@ abstract class ActiveTamgaRuntime(
         /*
          * Alt runtime isterse uygular.
          */
+    }
+
+    fun exportSaveState():
+        RunSaveActiveTamgaState {
+
+        return RunSaveActiveTamgaState(
+            stateName =
+                state.name,
+
+            activeElapsedSeconds =
+                activeElapsedSeconds
+                    .coerceAtLeast(
+                        0f
+                    ),
+
+            cooldownRemainingSeconds =
+                cooldownRemainingSeconds
+                    .coerceAtLeast(
+                        0f
+                    )
+        )
     }
 }
