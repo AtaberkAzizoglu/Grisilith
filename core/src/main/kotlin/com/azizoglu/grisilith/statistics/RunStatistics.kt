@@ -32,6 +32,12 @@ class RunStatistics {
         0f
         private set
 
+    var totalChestsOpened:
+        Int =
+        0
+        private set
+
+
     private val weaponDamage =
         mutableMapOf<String, Long>()
 
@@ -120,4 +126,11 @@ class RunStatistics {
         totalGoldSpent +=
             amount
     }
+
+    fun recordChestOpened() {
+
+        totalChestsOpened +=
+            1
+    }
+
 }

@@ -820,6 +820,11 @@ class FirstScreen(
                 chestCharacterStatRows()
             },
 
+            onChestCompleted = {
+                runStatistics
+                    .recordChestOpened()
+            },
+
             onApplyReward = {
                     reward ->
 

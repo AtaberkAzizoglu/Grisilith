@@ -50,6 +50,9 @@ class ChestRewardController(
     private val onApplyReward:
         (ChestRewardRoll) -> Unit,
 
+    private val onChestCompleted:
+        () -> Unit,
+
     private val onAllRewardsCollected:
         (
         shouldOpenMarketAfterStatSelection:
@@ -454,6 +457,8 @@ class ChestRewardController(
             return
         }
 
+        onChestCompleted()
+
         isItemDetailOpen =
             false
 
@@ -468,6 +473,8 @@ class ChestRewardController(
         ) {
             return
         }
+
+        onChestCompleted()
 
         isItemDetailOpen =
             false
