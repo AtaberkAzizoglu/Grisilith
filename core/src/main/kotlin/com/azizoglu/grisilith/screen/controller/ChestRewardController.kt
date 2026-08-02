@@ -23,7 +23,6 @@ import com.badlogic.gdx.utils.viewport.Viewport
 
 class ChestRewardController(
     private val rewardQueue: ChestRewardQueue,
-    private val difficulty: GameDifficulty,
 
     private val currentStageProvider: () -> Int,
     private val luckScoreProvider: () -> Int,
@@ -59,10 +58,11 @@ class ChestRewardController(
         Boolean
     ) -> Unit,
 
-    private val additionalDiscardAllowanceProvider:
-        () -> Int = {
-        0
-    }
+    private val remainingRunDiscardCountProvider:
+        () -> Int,
+
+    private val onRunDiscardUsed:
+        () -> Unit
 ) {
 
     companion object {
@@ -172,22 +172,15 @@ class ChestRewardController(
         openMarketAfterStatSelection =
             shouldOpenMarketAfterStatSelection
 
-        val discardAllowance =
-            ChestDiscardAllowanceCalculator
-                .calculate(
-                    difficulty =
-                        difficulty,
-
-                    futureItemBonus =
-                        additionalDiscardAllowanceProvider()
-                )
-
         openingSession.begin(
             chestCount =
                 collectedChestCount,
 
             discardAllowance =
-                discardAllowance
+                remainingRunDiscardCountProvider()
+                    .coerceAtLeast(
+                        0
+                    )
         )
 
         revealElapsedSeconds =
@@ -474,7 +467,7 @@ class ChestRewardController(
             return
         }
 
-        onChestCompleted()
+        onRunDiscardUsed()
 
         isItemDetailOpen =
             false

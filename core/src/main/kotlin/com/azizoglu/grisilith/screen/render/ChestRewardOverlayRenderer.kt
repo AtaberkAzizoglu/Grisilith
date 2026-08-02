@@ -899,25 +899,6 @@ class ChestRewardOverlayRenderer(
     ) {
 
         font.data.setScale(
-            1.18f
-        )
-
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            "CHEST OPENING",
-            0f,
-            layout.panelBounds.y +
-                layout.panelBounds.height -
-                35f,
-            cameraWidth,
-            Align.center,
-            false
-        )
-
-        font.data.setScale(
             0.92f
         )
 

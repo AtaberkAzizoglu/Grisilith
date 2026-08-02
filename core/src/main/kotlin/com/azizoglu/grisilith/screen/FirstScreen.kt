@@ -39,6 +39,12 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
 import com.azizoglu.grisilith.screen.render.HudRenderer
 import com.azizoglu.grisilith.screen.render.MarketRenderer
 import com.azizoglu.grisilith.screen.render.RunSummaryRenderer
+import com.azizoglu.grisilith.summary.RunGradeCalculator
+import com.azizoglu.grisilith.summary.RunSummaryArmorEntry
+import com.azizoglu.grisilith.summary.RunSummaryItemEntry
+import com.azizoglu.grisilith.summary.RunSummarySnapshot
+import com.azizoglu.grisilith.summary.RunSummaryTamgaEntry
+import com.azizoglu.grisilith.summary.RunSummaryWeaponEntry
 import com.azizoglu.grisilith.screen.controller.StatCardController
 import com.azizoglu.grisilith.screen.render.WorldRenderer
 import com.azizoglu.grisilith.weapon.runtime.WeaponRuntimeManager
@@ -300,6 +306,9 @@ class FirstScreen(
     private var hasCommittedCareerStatistics =
         false
 
+    private var remainingRunChestDiscards =
+        2
+
     private val sessionWallet =
         SessionWallet()
 
@@ -356,23 +365,23 @@ class FirstScreen(
 
     private val runSummaryRenderer =
         RunSummaryRenderer(
-            camera = camera,
-            cameraWidth = CAMERA_WIDTH,
-            cameraHeight = CAMERA_HEIGHT,
-            batch = hudBatch,
-            font = hudFont,
-            difficulty = difficulty,
-            gameMap = gameMap,
-            selectedCharacter =
-                selectedCharacter,
-            stageController =
-                stageController,
-            runStatistics =
-                runStatistics,
+            camera =
+                camera,
 
-            grisilithCoinsEarned =
-                runRewardTracker
-                    .grisilithCoinsEarned
+            cameraWidth =
+                CAMERA_WIDTH,
+
+            cameraHeight =
+                CAMERA_HEIGHT,
+
+            shapeRenderer =
+                shapeRenderer,
+
+            batch =
+                hudBatch,
+
+            font =
+                hudFont
         )
 
     private val marketInteractionState =
@@ -735,14 +744,270 @@ class FirstScreen(
         )
     }
 
+    private fun currentRunSummarySnapshot():
+        RunSummarySnapshot {
+
+        val weaponEntries =
+            weaponInventory
+                .allWeapons()
+                .map { weapon ->
+
+                    RunSummaryWeaponEntry(
+                        definitionId =
+                            weapon.definition.id
+                                .toString(),
+
+                        displayName =
+                            weapon.displayName,
+
+                        level =
+                            weapon.level,
+
+                        damageDealt =
+                            (
+                                runStatistics
+                                    .weaponDamageStatistics[
+                                    weapon.displayName
+                                ]
+                                    ?: 0L
+                                )
+                                .toFloat()
+                    )
+                }
+
+        val equippedWeaponNames =
+            weaponEntries
+                .map {
+                    it.displayName
+                }
+                .toSet()
+
+        val otherDamageSources =
+            runStatistics
+                .weaponDamageStatistics
+                .filterKeys { sourceName ->
+
+                    sourceName !in
+                        equippedWeaponNames
+                }
+                .mapValues {
+                    it.value.toFloat()
+                }
+
+        val armorDefinition =
+            equippedArmor.definition
+
+        val armorEntry =
+            RunSummaryArmorEntry(
+                definitionId =
+                    armorDefinition
+                        ?.id
+                        ?.toString(),
+
+                displayName =
+                    armorDefinition
+                        ?.displayName
+                        ?: "No Armor",
+
+                /*
+                 * ArmorDefinition içinde tür etiketi için public
+                 * alan bulunmadığından bu aşamada güvenli genel etiket.
+                 */
+                armorTypeLabel =
+                    if (
+                        armorDefinition !=
+                        null
+                    ) {
+                        "Equipped Armor"
+                    } else {
+                        "Empty Slot"
+                    }
+            )
+
+        val tamgaEntries =
+            listOf(
+                RunSummaryTamgaEntry(
+                    slotLabel =
+                        "Weapon",
+
+                    definitionId =
+                        selectedPreset
+                            ?.weaponTamga
+                            ?.id
+                            ?.toString(),
+
+                    displayName =
+                        selectedPreset
+                            ?.weaponTamga
+                            ?.displayName
+                            ?: "No Weapon Tamga"
+                ),
+
+                RunSummaryTamgaEntry(
+                    slotLabel =
+                        "Armor",
+
+                    definitionId =
+                        selectedPreset
+                            ?.armorTamga
+                            ?.id
+                            ?.toString(),
+
+                    displayName =
+                        selectedPreset
+                            ?.armorTamga
+                            ?.displayName
+                            ?: "No Armor Tamga"
+                )
+            )
+
+        val itemEntries =
+            itemInventory
+                .allItems()
+                .groupBy {
+                    it.definition.id
+                }
+                .values
+                .mapNotNull { groupedItems ->
+
+                    val firstItem =
+                        groupedItems
+                            .firstOrNull()
+                            ?: return@mapNotNull null
+
+                    RunSummaryItemEntry(
+                        definitionId =
+                            firstItem.definition.id
+                                .toString(),
+
+                        displayName =
+                            firstItem.definition
+                                .displayName,
+
+                        count =
+                            groupedItems.size
+                    )
+                }
+                .sortedBy {
+                    it.displayName
+                }
+
+        val gradeResult =
+            RunGradeCalculator
+                .calculate(
+                    difficulty =
+                        difficulty,
+
+                    wasSuccessful =
+                        stageController
+                            .isRunComplete,
+
+                    stageReached =
+                        displayedStage(),
+
+                    enemiesKilled =
+                        runStatistics
+                            .totalEnemiesKilled,
+
+                    miniBossesDefeated =
+                        runStatistics
+                            .totalBossesDefeated,
+
+                    finalBossesDefeated =
+                        runStatistics
+                            .totalFinalBossesDefeated,
+
+                    totalDamageDealt =
+                        runStatistics
+                            .totalDamageDealt
+                            .toFloat(),
+
+                    grisilithCoinsEarned =
+                        runRewardTracker
+                            .grisilithCoinsEarned
+                )
+
+        return RunSummarySnapshot(
+            wasSuccessful =
+                stageController
+                    .isRunComplete,
+
+            difficultyLabel =
+                difficulty
+                    .displayName,
+
+            mapName =
+                gameMap
+                    .displayName,
+
+            characterName =
+                selectedCharacter
+                    .displayName,
+
+            stageReached =
+                displayedStage(),
+
+            formattedRunTime =
+                formatGameTime(),
+
+            enemiesKilled =
+                runStatistics
+                    .totalEnemiesKilled,
+
+            totalDamageDealt =
+                runStatistics
+                    .totalDamageDealt
+                    .toFloat(),
+
+            totalDamageTaken =
+                runStatistics
+                    .totalDamageTaken
+                    .toFloat(),
+
+            goldCollected =
+                runStatistics
+                    .totalGoldCollected,
+
+            grisilithCoinsEarned =
+                runRewardTracker
+                    .grisilithCoinsEarned,
+
+            chestsOpened =
+                runStatistics
+                    .totalChestsOpened,
+
+            gradeResult =
+                gradeResult,
+
+            /*
+             * Çift Stat paneli Paket 3'te bağlanacak.
+             */
+            stats =
+                emptyList(),
+
+            weapons =
+                weaponEntries,
+
+            armor =
+                armorEntry,
+
+            tamgas =
+                tamgaEntries,
+
+            items =
+                itemEntries,
+
+            otherDamageSources =
+                otherDamageSources
+        )
+    }
+
+
 
     private val chestRewardController =
         ChestRewardController(
             rewardQueue =
                 chestRewardQueue,
-
-            difficulty =
-                difficulty,
 
             currentStageProvider = {
                 stageController
@@ -825,6 +1090,21 @@ class FirstScreen(
                     .recordChestOpened()
             },
 
+            remainingRunDiscardCountProvider = {
+                remainingRunChestDiscards
+            },
+
+            onRunDiscardUsed = {
+                remainingRunChestDiscards =
+                    (
+                        remainingRunChestDiscards -
+                            1
+                        )
+                        .coerceAtLeast(
+                            0
+                        )
+            },
+
             onApplyReward = {
                     reward ->
 
@@ -841,14 +1121,6 @@ class FirstScreen(
                         shouldOpenMarketAfterSelection =
                             shouldOpenMarketAfterStatSelection
                     )
-            },
-
-            /*
-             * Gelecekte discard hakkını artıran Item
-             * burada hesaplanacak.
-             */
-            additionalDiscardAllowanceProvider = {
-                0
             }
         )
 
@@ -2195,6 +2467,13 @@ class FirstScreen(
         statCardController
             .renderShapes()
 
+        if (isRunSummaryOpen) {
+            runSummaryRenderer
+                .renderShapes(
+                    currentRunSummarySnapshot()
+                )
+        }
+
         Gdx.gl.glDisable(
             GL20.GL_BLEND
         )
@@ -2222,13 +2501,10 @@ class FirstScreen(
                 statCardController.isOpen,
 
             renderRunSummary = {
-                runSummaryRenderer.render(
-                    displayedStage =
-                        displayedStage(),
-
-                    formattedGameTime =
-                        formatGameTime()
-                )
+                runSummaryRenderer
+                    .renderTexts(
+                        currentRunSummarySnapshot()
+                    )
             },
 
             renderMarket = {
