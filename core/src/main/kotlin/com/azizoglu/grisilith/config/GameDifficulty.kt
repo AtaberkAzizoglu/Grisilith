@@ -7,7 +7,7 @@ enum class GameDifficulty(
 ) {
     EASY(
         displayName = "Easy",
-        maximumStage = 25,
+        maximumStage = 1,
         maximumGrisilithCoinsPerRun = 2
     ),
 

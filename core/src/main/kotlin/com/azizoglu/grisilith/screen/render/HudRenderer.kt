@@ -348,24 +348,6 @@ class HudRenderer(
 
     private fun renderCentralStatus() {
         when {
-            player.health.isDead -> {
-                font.draw(
-                    batch,
-                    "DEFEATED",
-                    camera.position.x - 45f,
-                    camera.position.y + 40f
-                )
-            }
-
-            stageController.isRunComplete -> {
-                font.draw(
-                    batch,
-                    "RUN COMPLETE",
-                    camera.position.x - 55f,
-                    camera.position.y + 40f
-                )
-            }
-
             gameTimeController.isPaused -> {
                 font.draw(
                     batch,

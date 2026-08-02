@@ -472,43 +472,43 @@ class RunSummaryRenderer(
     private fun renderBuildCards(
         snapshot: RunSummarySnapshot
     ) {
-        /*
-         * Sağ kolon kart arka planları.
-         * Metinler ayrı SpriteBatch geçişinde çizilir.
-         */
         var y =
             layout.rightColumn.y +
                 layout.rightColumn.height -
-                76f
+                70f
 
         snapshot.weapons
-            .take(3)
+            .take(6)
             .forEach {
-                renderSmallCard(
+                renderBuildCardWithIcon(
                     x =
-                        layout.rightColumn.x + 14f,
+                        layout.rightColumn.x + 12f,
                     y =
-                        y - 56f,
+                        y - 36f,
                     width =
-                        layout.rightColumn.width - 28f,
+                        layout.rightColumn.width - 24f,
                     height =
-                        52f
+                        34f,
+                    iconShape =
+                        BuildIconShape.WEAPON
                 )
 
-                y -= 60f
+                y -= 38f
             }
 
-        y -= 12f
+        y -= 20f
 
-        renderSmallCard(
+        renderBuildCardWithIcon(
             x =
-                layout.rightColumn.x + 14f,
+                layout.rightColumn.x + 12f,
             y =
-                y - 50f,
+                y - 34f,
             width =
-                layout.rightColumn.width - 28f,
+                layout.rightColumn.width - 24f,
             height =
-                46f
+                32f,
+            iconShape =
+                BuildIconShape.ARMOR
         )
 
         y -= 72f
@@ -516,38 +516,195 @@ class RunSummaryRenderer(
         snapshot.tamgas
             .take(2)
             .forEach {
-                renderSmallCard(
+                renderBuildCardWithIcon(
                     x =
-                        layout.rightColumn.x + 14f,
+                        layout.rightColumn.x + 12f,
                     y =
-                        y - 44f,
+                        y - 31f,
                     width =
-                        layout.rightColumn.width - 28f,
+                        layout.rightColumn.width - 24f,
                     height =
-                        40f
+                        29f,
+                    iconShape =
+                        BuildIconShape.TAMGA
                 )
 
-                y -= 46f
+                y -= 33f
             }
 
-        y -= 10f
+        y -= 32f
 
         snapshot.items
-            .take(4)
+            .take(6)
             .forEach {
-                renderSmallCard(
+                renderBuildCardWithIcon(
                     x =
-                        layout.rightColumn.x + 14f,
+                        layout.rightColumn.x + 12f,
                     y =
-                        y - 38f,
+                        y - 29f,
                     width =
-                        layout.rightColumn.width - 28f,
+                        layout.rightColumn.width - 24f,
                     height =
-                        34f
+                        27f,
+                    iconShape =
+                        BuildIconShape.ITEM
                 )
 
-                y -= 40f
+                y -= 31f
             }
+    }
+
+    private enum class BuildIconShape {
+        WEAPON,
+        ARMOR,
+        TAMGA,
+        ITEM
+    }
+
+    private fun renderBuildCardWithIcon(
+        x: Float,
+        y: Float,
+        width: Float,
+        height: Float,
+        iconShape: BuildIconShape
+    ) {
+        renderSmallCard(
+            x =
+                x,
+            y =
+                y,
+            width =
+                width,
+            height =
+                height
+        )
+
+        val iconSize =
+            (height - 8f)
+                .coerceAtLeast(
+                    16f
+                )
+
+        val iconX =
+            x + 5f
+
+        val iconY =
+            y +
+                (
+                    height -
+                        iconSize
+                    ) /
+                2f
+
+        shapeRenderer.begin(
+            ShapeRenderer.ShapeType.Filled
+        )
+
+        shapeRenderer.color =
+            Color(
+                0.34f,
+                0.29f,
+                0.42f,
+                1f
+            )
+
+        when (iconShape) {
+            BuildIconShape.WEAPON -> {
+                shapeRenderer.rect(
+                    iconX,
+                    iconY,
+                    iconSize,
+                    iconSize
+                )
+
+                shapeRenderer.color =
+                    Color(
+                        0.70f,
+                        0.65f,
+                        0.78f,
+                        1f
+                    )
+
+                shapeRenderer.rectLine(
+                    iconX + 4f,
+                    iconY + 4f,
+                    iconX + iconSize - 4f,
+                    iconY + iconSize - 4f,
+                    3f
+                )
+            }
+
+            BuildIconShape.ARMOR -> {
+                shapeRenderer.circle(
+                    iconX +
+                        iconSize /
+                        2f,
+                    iconY +
+                        iconSize /
+                        2f,
+                    iconSize /
+                        2f
+                )
+            }
+
+            BuildIconShape.TAMGA -> {
+                shapeRenderer.triangle(
+                    iconX +
+                        iconSize /
+                        2f,
+                    iconY +
+                        iconSize,
+
+                    iconX +
+                        iconSize,
+                    iconY,
+
+                    iconX,
+                    iconY
+                )
+            }
+
+            BuildIconShape.ITEM -> {
+                shapeRenderer.triangle(
+                    iconX +
+                        iconSize /
+                        2f,
+                    iconY +
+                        iconSize,
+
+                    iconX +
+                        iconSize,
+                    iconY +
+                        iconSize /
+                        2f,
+
+                    iconX +
+                        iconSize /
+                        2f,
+                    iconY
+                )
+
+                shapeRenderer.triangle(
+                    iconX +
+                        iconSize /
+                        2f,
+                    iconY +
+                        iconSize,
+
+                    iconX +
+                        iconSize /
+                        2f,
+                    iconY,
+
+                    iconX,
+                    iconY +
+                        iconSize /
+                        2f
+                )
+            }
+        }
+
+        shapeRenderer.end()
     }
 
     private fun renderSmallCard(
@@ -717,7 +874,7 @@ class RunSummaryRenderer(
             layout.leftColumn.x,
             layout.leftColumn.y +
                 layout.leftColumn.height -
-                26f,
+                24f,
             layout.leftColumn.width,
             Align.center,
             false
@@ -772,11 +929,11 @@ class RunSummaryRenderer(
         var y =
             layout.leftColumn.y +
                 layout.leftColumn.height -
-                62f
+                56f
 
         rows.forEach { row ->
             font.data.setScale(
-                0.60f
+                0.54f
             )
 
             font.color =
@@ -785,7 +942,7 @@ class RunSummaryRenderer(
             font.draw(
                 batch,
                 row.first,
-                layout.leftColumn.x + 14f,
+                layout.leftColumn.x + 12f,
                 y
             )
 
@@ -795,41 +952,18 @@ class RunSummaryRenderer(
             font.draw(
                 batch,
                 row.second,
-                layout.leftColumn.x + 112f,
+                layout.leftColumn.x + 108f,
                 y,
-                layout.leftColumn.width - 126f,
+                layout.leftColumn.width - 120f,
                 Align.right,
                 false
             )
 
-            y -= 30f
+            y -= 24f
         }
-    }
-
-    private fun renderCenterColumn(
-        snapshot: RunSummarySnapshot
-    ) {
-        font.data.setScale(
-            0.68f
-        )
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            "RESULT ARTWORK",
-            layout.resultArtwork.x,
-            layout.resultArtwork.y +
-                layout.resultArtwork.height / 2f +
-                4f,
-            layout.resultArtwork.width,
-            Align.center,
-            false
-        )
 
         font.data.setScale(
-            0.76f
+            0.62f
         )
 
         font.color =
@@ -838,17 +972,17 @@ class RunSummaryRenderer(
         font.draw(
             batch,
             snapshot.characterName,
-            layout.portrait.x - 20f,
+            layout.portrait.x - 5f,
             layout.portrait.y +
                 layout.portrait.height +
-                24f,
-            layout.portrait.width + 40f,
+                18f,
+            layout.portrait.width + 10f,
             Align.center,
             true
         )
 
         font.data.setScale(
-            0.64f
+            0.50f
         )
 
         font.color =
@@ -859,15 +993,16 @@ class RunSummaryRenderer(
             "PORTRAIT",
             layout.portrait.x,
             layout.portrait.y +
-                layout.portrait.height / 2f +
-                4f,
+                layout.portrait.height /
+                2f +
+                3f,
             layout.portrait.width,
             Align.center,
             false
         )
 
         font.data.setScale(
-            0.72f
+            0.56f
         )
 
         font.color =
@@ -879,14 +1014,14 @@ class RunSummaryRenderer(
             layout.gradeCard.x,
             layout.gradeCard.y +
                 layout.gradeCard.height -
-                20f,
+                17f,
             layout.gradeCard.width,
             Align.center,
             false
         )
 
         font.data.setScale(
-            2.10f
+            1.55f
         )
 
         font.color =
@@ -899,14 +1034,14 @@ class RunSummaryRenderer(
                 .displayName,
             layout.gradeCard.x,
             layout.gradeCard.y +
-                74f,
+                54f,
             layout.gradeCard.width,
             Align.center,
             false
         )
 
         font.data.setScale(
-            0.65f
+            0.48f
         )
 
         font.color =
@@ -921,8 +1056,32 @@ class RunSummaryRenderer(
                 ),
             layout.gradeCard.x,
             layout.gradeCard.y +
-                24f,
+                17f,
             layout.gradeCard.width,
+            Align.center,
+            false
+        )
+    }
+
+    private fun renderCenterColumn(
+        snapshot: RunSummarySnapshot
+    ) {
+        font.data.setScale(
+            0.70f
+        )
+
+        font.color =
+            Color.LIGHT_GRAY
+
+        font.draw(
+            batch,
+            "RESULT ARTWORK",
+            layout.resultArtwork.x,
+            layout.resultArtwork.y +
+                layout.resultArtwork.height /
+                2f +
+                4f,
+            layout.resultArtwork.width,
             Align.center,
             false
         )
@@ -932,7 +1091,7 @@ class RunSummaryRenderer(
         snapshot: RunSummarySnapshot
     ) {
         font.data.setScale(
-            0.86f
+            1.02f
         )
 
         font.color =
@@ -944,7 +1103,7 @@ class RunSummaryRenderer(
             layout.rightColumn.x,
             layout.rightColumn.y +
                 layout.rightColumn.height -
-                26f,
+                15f,
             layout.rightColumn.width,
             Align.center,
             false
@@ -953,10 +1112,10 @@ class RunSummaryRenderer(
         var y =
             layout.rightColumn.y +
                 layout.rightColumn.height -
-                62f
+                44f
 
         font.data.setScale(
-            0.62f
+            0.58f
         )
 
         font.color =
@@ -965,11 +1124,11 @@ class RunSummaryRenderer(
         font.draw(
             batch,
             "WEAPONS",
-            layout.rightColumn.x + 14f,
+            layout.rightColumn.x + 12f,
             y
         )
 
-        y -= 22f
+        y -= 17f
 
         if (snapshot.weapons.isEmpty()) {
             drawBuildEmpty(
@@ -977,13 +1136,13 @@ class RunSummaryRenderer(
                 y
             )
 
-            y -= 42f
+            y -= 34f
         } else {
             snapshot.weapons
-                .take(3)
+                .take(6)
                 .forEach { weapon ->
                     font.data.setScale(
-                        0.58f
+                        0.49f
                     )
 
                     font.color =
@@ -992,12 +1151,12 @@ class RunSummaryRenderer(
                     font.draw(
                         batch,
                         "${weapon.displayName}  Lv.${weapon.level}",
-                        layout.rightColumn.x + 24f,
+                        layout.rightColumn.x + 45f,
                         y
                     )
 
                     font.data.setScale(
-                        0.50f
+                        0.41f
                     )
 
                     font.color =
@@ -1005,20 +1164,22 @@ class RunSummaryRenderer(
 
                     font.draw(
                         batch,
-                        "Damage: " +
-                            formatNumber(
-                                weapon.damageDealt
-                            ),
-                        layout.rightColumn.x + 24f,
-                        y - 19f
+                        formatNumber(
+                            weapon.damageDealt
+                        ) +
+                            " dmg",
+                        layout.rightColumn.x + 45f,
+                        y - 13f
                     )
 
-                    y -= 60f
+                    y -= 38f
                 }
         }
 
+        y -= 14f
+
         font.data.setScale(
-            0.62f
+            0.58f
         )
 
         font.color =
@@ -1027,14 +1188,14 @@ class RunSummaryRenderer(
         font.draw(
             batch,
             "ARMOR",
-            layout.rightColumn.x + 14f,
+            layout.rightColumn.x + 12f,
             y
         )
 
-        y -= 22f
+        y -= 17f
 
         font.data.setScale(
-            0.57f
+            0.48f
         )
 
         font.color =
@@ -1043,14 +1204,14 @@ class RunSummaryRenderer(
         font.draw(
             batch,
             snapshot.armor.displayName,
-            layout.rightColumn.x + 24f,
+            layout.rightColumn.x + 45f,
             y
         )
 
-        y -= 48f
+        y -= 60f
 
         font.data.setScale(
-            0.62f
+            0.58f
         )
 
         font.color =
@@ -1059,17 +1220,17 @@ class RunSummaryRenderer(
         font.draw(
             batch,
             "TAMGAS",
-            layout.rightColumn.x + 14f,
+            layout.rightColumn.x + 12f,
             y
         )
 
-        y -= 20f
+        y -= 16f
 
         snapshot.tamgas
             .take(2)
             .forEach { tamga ->
                 font.data.setScale(
-                    0.54f
+                    0.46f
                 )
 
                 font.color =
@@ -1078,15 +1239,17 @@ class RunSummaryRenderer(
                 font.draw(
                     batch,
                     "${tamga.slotLabel}: ${tamga.displayName}",
-                    layout.rightColumn.x + 24f,
+                    layout.rightColumn.x + 45f,
                     y
                 )
 
-                y -= 46f
+                y -= 33f
             }
 
+        y -= 14f
+
         font.data.setScale(
-            0.62f
+            0.58f
         )
 
         font.color =
@@ -1095,11 +1258,11 @@ class RunSummaryRenderer(
         font.draw(
             batch,
             "ITEMS",
-            layout.rightColumn.x + 14f,
+            layout.rightColumn.x + 12f,
             y
         )
 
-        y -= 19f
+        y -= 15f
 
         if (snapshot.items.isEmpty()) {
             drawBuildEmpty(
@@ -1108,10 +1271,10 @@ class RunSummaryRenderer(
             )
         } else {
             snapshot.items
-                .take(4)
+                .take(6)
                 .forEach { item ->
                     font.data.setScale(
-                        0.52f
+                        0.45f
                     )
 
                     font.color =
@@ -1120,24 +1283,24 @@ class RunSummaryRenderer(
                     font.draw(
                         batch,
                         "${item.displayName}  x${item.count}",
-                        layout.rightColumn.x + 24f,
+                        layout.rightColumn.x + 45f,
                         y
                     )
 
-                    y -= 40f
+                    y -= 31f
                 }
         }
 
         val hiddenItemCount =
             (
                 snapshot.items.size -
-                    4
+                    6
                 )
                 .coerceAtLeast(0)
 
         if (hiddenItemCount > 0) {
             font.data.setScale(
-                0.48f
+                0.43f
             )
 
             font.color =
@@ -1146,7 +1309,7 @@ class RunSummaryRenderer(
             font.draw(
                 batch,
                 "+$hiddenItemCount more item groups",
-                layout.rightColumn.x + 24f,
+                layout.rightColumn.x + 45f,
                 y
             )
         }
@@ -1256,44 +1419,44 @@ class RunSummaryRenderer(
 
         layout.leftColumn.set(
             centerX - 590f,
-            centerY - 245f,
+            centerY - 285f,
             300f,
-            510f
+            570f
         )
 
         layout.centerColumn.set(
             centerX - 270f,
             centerY - 245f,
             540f,
-            510f
+            530f
         )
 
         layout.rightColumn.set(
             centerX + 290f,
-            centerY - 245f,
+            centerY - 285f,
             300f,
-            510f
+            590f
         )
 
         layout.resultArtwork.set(
-            centerX - 210f,
-            centerY + 80f,
-            420f,
-            145f
+            centerX - 225f,
+            centerY + 95f,
+            450f,
+            165f
         )
 
         layout.portrait.set(
-            centerX - 165f,
-            centerY - 105f,
-            170f,
-            170f
+            layout.leftColumn.x + 18f,
+            layout.leftColumn.y + 22f,
+            118f,
+            118f
         )
 
         layout.gradeCard.set(
-            centerX + 30f,
-            centerY - 105f,
-            205f,
-            170f
+            layout.leftColumn.x + 151f,
+            layout.leftColumn.y + 22f,
+            131f,
+            118f
         )
 
         layout.restartButton.set(

@@ -87,6 +87,11 @@ import com.azizoglu.grisilith.profile.PlayerProfileRepository
 import com.azizoglu.grisilith.statistics.career.CompletedRunStatistics
 import com.azizoglu.grisilith.statistics.career.HighScoreRepository
 import com.azizoglu.grisilith.screen.render.ChestCharacterStatRow
+import com.azizoglu.grisilith.screen.render.RunSummaryStatRenderer
+import com.azizoglu.grisilith.screen.controller.RunSummaryStatInteractionController
+import com.azizoglu.grisilith.summary.RunSummaryStatEntry
+import com.azizoglu.grisilith.summary.StatContributionSource
+import com.azizoglu.grisilith.summary.StatSourceContribution
 
 
 class FirstScreen(
@@ -382,6 +387,34 @@ class FirstScreen(
 
             font =
                 hudFont
+        )
+
+    private val runSummaryStatRenderer =
+        RunSummaryStatRenderer(
+            camera =
+                camera,
+
+            shapeRenderer =
+                shapeRenderer,
+
+            batch =
+                hudBatch,
+
+            font =
+                hudFont
+        )
+
+    private val runSummaryStatInteractionController =
+        RunSummaryStatInteractionController(
+            viewport =
+                viewport,
+
+            renderer =
+                runSummaryStatRenderer,
+
+            snapshotProvider = {
+                currentRunSummarySnapshot()
+            }
         )
 
     private val marketInteractionState =
@@ -744,6 +777,155 @@ class FirstScreen(
         )
     }
 
+    private fun currentRunSummaryStats():
+        List<RunSummaryStatEntry> {
+
+        return StatType.entries
+            .map { statType ->
+
+                /*
+                 * PlayerStats totalScore değerini RUN_MAXIMUM_SCORE
+                 * sınırında clamp eder.
+                 *
+                 * Kaynakların ham toplamı 50'yi aşarsa detail toplamı
+                 * görünen total ile eşleşmelidir. Bu nedenle son katkı
+                 * effective total üzerinden düzeltilir.
+                 */
+                val total =
+                    playerStats
+                        .totalScore(
+                            statType
+                        )
+
+                val base =
+                    playerStats
+                        .baseScore(
+                            statType
+                        )
+
+                val gear =
+                    playerStats
+                        .gearBonus(
+                            statType
+                        )
+
+                val weapon =
+                    playerStats
+                        .weaponBonus(
+                            statType
+                        )
+
+                val item =
+                    playerStats
+                        .itemBonus(
+                            statType
+                        )
+
+                val run =
+                    playerStats
+                        .runBonus(
+                            statType
+                        )
+
+                val rawContributions =
+                    listOf(
+                        StatContributionSource
+                            .PRESET_OR_BASE to
+                            base,
+
+                        StatContributionSource
+                            .STAGE_REWARDS to
+                            run,
+
+                        StatContributionSource
+                            .ITEMS to
+                            item,
+
+                        StatContributionSource
+                            .WEAPONS to
+                            weapon,
+
+                        StatContributionSource
+                            .ARMOR_AND_TAMGAS to
+                            gear
+                    )
+
+                /*
+                 * Genellikle rawTotal == total olur.
+                 * Stat 50 cap'ine ulaştığında fazla değerleri
+                 * OTHER altında negatif correction olarak göstermek
+                 * yerine katkıları sırayla görünen total içinde clamp
+                 * ediyoruz.
+                 */
+                var remaining =
+                    total
+
+                val effectiveContributions =
+                    rawContributions
+                        .map {
+                                sourceAmount ->
+
+                            val source =
+                                sourceAmount.first
+
+                            val requestedAmount =
+                                sourceAmount.second
+                                    .coerceAtLeast(
+                                        0
+                                    )
+
+                            val effectiveAmount =
+                                requestedAmount
+                                    .coerceAtMost(
+                                        remaining
+                                    )
+
+                            remaining -=
+                                effectiveAmount
+
+                            StatSourceContribution(
+                                source =
+                                    source,
+
+                                amount =
+                                    effectiveAmount
+                            )
+                        }
+                        .toMutableList()
+
+                if (
+                    remaining >
+                    0
+                ) {
+                    effectiveContributions.add(
+                        StatSourceContribution(
+                            source =
+                                StatContributionSource
+                                    .OTHER,
+
+                            amount =
+                                remaining
+                        )
+                    )
+                }
+
+                RunSummaryStatEntry(
+                    statType =
+                        statType,
+
+                    label =
+                        statType
+                            .displayName,
+
+                    totalValue =
+                        total,
+
+                    contributions =
+                        effectiveContributions
+                )
+            }
+    }
+
     private fun currentRunSummarySnapshot():
         RunSummarySnapshot {
 
@@ -979,11 +1161,8 @@ class FirstScreen(
             gradeResult =
                 gradeResult,
 
-            /*
-             * Çift Stat paneli Paket 3'te bağlanacak.
-             */
             stats =
-                emptyList(),
+                currentRunSummaryStats(),
 
             weapons =
                 weaponEntries,
@@ -1231,6 +1410,11 @@ class FirstScreen(
         handleGameControls(
             delta
         )
+
+        if (isRunSummaryOpen) {
+            runSummaryStatInteractionController
+                .update()
+        }
 
         chestRewardController
             .update(
@@ -1575,6 +1759,26 @@ class FirstScreen(
     }
 
     private fun handleRunSummaryControls() {
+
+        /*
+         * Stat detay kartının input'u her şeyden önce işlenir.
+         *
+         * Detail açıksa:
+         * - ESC kartı kapatır.
+         * - Kart dışına tıklamak kartı kapatır.
+         * - Kart içine tıklamak arkadaki inputlara geçmez.
+         * - R ve ENTER çalışmaz.
+         */
+        val summaryStatInputConsumed =
+            runSummaryStatInteractionController
+                .handleInput()
+
+        if (
+            summaryStatInputConsumed
+        ) {
+            return
+        }
+
         if (
             Gdx.input.isKeyJustPressed(
                 Input.Keys.R
@@ -2474,6 +2678,26 @@ class FirstScreen(
                 )
         }
 
+        if (isRunSummaryOpen) {
+
+            val summarySnapshot =
+                currentRunSummarySnapshot()
+
+            runSummaryStatRenderer
+                .renderShapes(
+                    stats =
+                        summarySnapshot.stats,
+
+                    hoveredIndex =
+                        runSummaryStatInteractionController
+                            .hoveredStatIndex,
+
+                    selectedEntry =
+                        runSummaryStatInteractionController
+                            .selectedStat
+                )
+        }
+
         Gdx.gl.glDisable(
             GL20.GL_BLEND
         )
@@ -2501,9 +2725,31 @@ class FirstScreen(
                 statCardController.isOpen,
 
             renderRunSummary = {
-                runSummaryRenderer
+
+                val summarySnapshot =
+                    currentRunSummarySnapshot()
+
+                val selectedSummaryStat =
+                    runSummaryStatInteractionController
+                        .selectedStat
+
+                if (
+                    selectedSummaryStat ==
+                    null
+                ) {
+                    runSummaryRenderer
+                        .renderTexts(
+                            summarySnapshot
+                        )
+                }
+
+                runSummaryStatRenderer
                     .renderTexts(
-                        currentRunSummarySnapshot()
+                        stats =
+                            summarySnapshot.stats,
+
+                        selectedEntry =
+                            selectedSummaryStat
                     )
             },
 
