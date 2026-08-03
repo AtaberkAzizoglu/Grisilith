@@ -9,6 +9,7 @@ import com.azizoglu.grisilith.weapon.definition.WeaponAttackPattern
 import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 import com.azizoglu.grisilith.weapon.definition.WeaponLevelProgressionFactory
 import com.azizoglu.grisilith.weapon.definition.WeaponModifierFactory
+import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
 
 object SteamWandDefinition {
 
@@ -74,24 +75,24 @@ object SteamWandDefinition {
 
                         level2Modifiers =
                             listOf(
-                                WeaponModifierFactory
-                                    .create(
-                                        statType =
-                                            StatType.HASTE,
-                                        amount = 1
-                                    )
+                                WeaponModifierFactory.create(
+                                    statType = StatType.HASTE,
+                                    amount = 1
+                                )
                             ),
 
                         level4Modifiers =
                             listOf(
-                                WeaponModifierFactory
-                                    .create(
-                                        statType =
-                                            StatType.ELEMENTAL_DAMAGE,
-                                        amount = 2
-                                    )
+                                WeaponModifierFactory.create(
+                                    statType = StatType.ELEMENTAL_DAMAGE,
+                                    amount = 2
+                                )
                             )
                     ),
+
+            weaponAbility =
+                DefaultWeaponAbilities
+                    .igniteDash,
 
             initialUnlockState =
                 ContentUnlockState.UNLOCKED

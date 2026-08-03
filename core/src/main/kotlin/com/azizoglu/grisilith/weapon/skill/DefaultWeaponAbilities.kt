@@ -2,6 +2,31 @@ package com.azizoglu.grisilith.weapon.skill
 
 object DefaultWeaponAbilities {
 
+    const val IGNITE_DASH_ID =
+        "WPN_ABILITY_IGNITE_DASH"
+
+    const val IGNITE_DASH_AIM_DURATION_SECONDS =
+        3f
+
+    /*
+     * Dokümanda cooldown 3-4 stage arası / 50-100 saniye
+     * olarak tarif edildiği için ilk denge değeri 75 saniyedir.
+     */
+    const val IGNITE_DASH_COOLDOWN_SECONDS =
+        75f
+
+    const val IGNITE_DASH_MAXIMUM_RANGE =
+        430f
+
+    const val IGNITE_DASH_EXPLOSION_RADIUS =
+        120f
+
+    const val IGNITE_DASH_DAMAGE_MULTIPLIER =
+        3f
+
+    const val IGNITE_DASH_BURN_DURATION_SECONDS =
+        3f
+
     const val HEAVY_BOLTS_ID =
         "WPN_ABILITY_HEAVY_BOLTS"
 
@@ -61,6 +86,25 @@ object DefaultWeaponAbilities {
 
     const val ASSASSINATE_PROJECTILE_SIZE_MULTIPLIER =
         1.8f
+
+    val igniteDash =
+        WeaponAbilityDefinition(
+            id =
+                IGNITE_DASH_ID,
+
+            displayName =
+                "Ignite Dash",
+
+            activationType =
+                WeaponAbilityActivationType
+                    .ACTIVE,
+
+            cooldownSeconds =
+                IGNITE_DASH_COOLDOWN_SECONDS,
+
+            durationSeconds =
+                IGNITE_DASH_AIM_DURATION_SECONDS
+        )
 
     val heavyBolts =
         WeaponAbilityDefinition(

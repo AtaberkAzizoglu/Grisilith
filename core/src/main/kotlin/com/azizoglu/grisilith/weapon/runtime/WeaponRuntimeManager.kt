@@ -8,6 +8,10 @@ import com.azizoglu.grisilith.tamga.runtime.TamgaRuntimeManager
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
 import com.azizoglu.grisilith.weapon.skill.DefensiveLineRuntime
+import com.azizoglu.grisilith.map.MapObstacle
+import com.azizoglu.grisilith.weapon.skill.IgniteDashRuntime
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Rectangle
 
 class WeaponRuntimeManager(
     private val inventory:
@@ -47,11 +51,20 @@ class WeaponRuntimeManager(
                 currentStageProvider
         )
 
+    private val igniteDashRuntime =
+        IgniteDashRuntime(
+            playerStats =
+                playerStats
+        )
+
     fun update(
         delta: Float,
         player: Player,
         enemyManager: EnemyManager,
         projectiles: MutableList<Projectile>,
+        mapObstacles: List<MapObstacle>,
+        worldWidth: Float,
+        worldHeight: Float,
         onDamageDealt: (
             damage: Int,
             weaponName: String
@@ -68,6 +81,34 @@ class WeaponRuntimeManager(
             player = player,
             equippedWeapons =
                 inventory.allWeapons()
+        )
+
+        igniteDashRuntime.update(
+            delta =
+                delta,
+
+            player =
+                player,
+
+            enemyManager =
+                enemyManager,
+
+            obstacleBounds =
+                mapObstacles.map {
+                    it.bounds
+                },
+
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight,
+
+            onDamageDealt =
+                onDamageDealt,
+
+            onEnemyKilled =
+                onEnemyKilled
         )
 
         /*
@@ -147,6 +188,8 @@ class WeaponRuntimeManager(
         slotIndex: Int
     ): Boolean {
 
+        synchronizeWithInventory()
+
         val weapon =
             inventory.weaponAt(
                 slotIndex
@@ -159,8 +202,58 @@ class WeaponRuntimeManager(
             ]
                 ?: return false
 
-        return runtime
-            .tryActivateAbility()
+        return igniteDashRuntime
+            .handleActivation(
+                weapon =
+                    weapon,
+
+                weaponRuntime =
+                    runtime
+            )
+    }
+
+    fun updateActiveSkillAim(
+        worldX: Float,
+        worldY: Float
+    ) {
+        igniteDashRuntime
+            .updateAimPosition(
+                worldX =
+                    worldX,
+
+                worldY =
+                    worldY
+            )
+    }
+
+    fun cancelActiveAbilities() {
+        igniteDashRuntime.cancel()
+
+        runtimesByWeapon.values
+            .forEach {
+                    runtime ->
+
+                if (
+                    runtime.abilityState ==
+                    WeaponAbilityState.ACTIVE
+                ) {
+                    runtime
+                        .endActiveAbilityEarly()
+                }
+            }
+    }
+
+    fun renderActiveSkillEffects(
+        shapeRenderer: ShapeRenderer,
+        player: Player
+    ) {
+        igniteDashRuntime.render(
+            shapeRenderer =
+                shapeRenderer,
+
+            player =
+                player
+        )
     }
 
     fun abilityStateInSlot(
@@ -216,6 +309,7 @@ class WeaponRuntimeManager(
 
     fun resetAllTimers() {
         defensiveLineRuntime.reset()
+        igniteDashRuntime.reset()
 
         runtimesByWeapon.values
             .forEach { runtime ->

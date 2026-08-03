@@ -674,6 +674,50 @@ class Player(
         }
     }
 
+    fun teleportCenterTo(
+        targetCenterX: Float,
+        targetCenterY: Float
+    ) {
+        position.x =
+            (
+                targetCenterX -
+                    size / 2f
+                )
+                .coerceIn(
+                    0f,
+                    (
+                        worldWidth -
+                            size
+                        )
+                        .coerceAtLeast(
+                            0f
+                        )
+                )
+
+        position.y =
+            (
+                targetCenterY -
+                    size / 2f
+                )
+                .coerceIn(
+                    0f,
+                    (
+                        worldHeight -
+                            size
+                        )
+                        .coerceAtLeast(
+                            0f
+                        )
+                )
+
+        previousPosition.set(
+            position
+        )
+
+        actualMovementSpeed =
+            0f
+    }
+
     fun finalizeMovementAfterCollisions(
         delta:
         Float
