@@ -5,6 +5,7 @@ import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.profile.PlayerProfileRepository
 import com.badlogic.gdx.math.MathUtils
 import com.azizoglu.grisilith.save.RunSaveRewardState
+import java.util.HashSet
 
 class RunRewardTracker(
     private val difficulty: GameDifficulty
@@ -159,8 +160,9 @@ class RunRewardTracker(
                 grisilithCoinsEarned,
 
             defeatedHardFinalBossIds =
-                pendingHardFinalBossIds
-                    .toSet()
+                HashSet(
+                    pendingHardFinalBossIds
+                )
         )
     }
 

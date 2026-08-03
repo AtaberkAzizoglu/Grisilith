@@ -94,6 +94,9 @@ import com.azizoglu.grisilith.summary.StatContributionSource
 import com.azizoglu.grisilith.summary.StatSourceContribution
 import com.azizoglu.grisilith.save.RunSaveBuilder
 import com.azizoglu.grisilith.save.RunSaveRepository
+import com.azizoglu.grisilith.save.RunSaveSnapshot
+import com.azizoglu.grisilith.armor.definition.DefaultArmors
+import com.azizoglu.grisilith.tamga.definition.DefaultTamgas
 
 class FirstScreen(
     private val game: GrisilithGame,
@@ -103,7 +106,10 @@ class FirstScreen(
     CharacterDefinition,
 
     private val selectedPreset:
-    ResolvedPresetContent? = null
+    ResolvedPresetContent? = null,
+
+    private val restoredRun:
+    RunSaveSnapshot? = null
 ) : ScreenAdapter() {
 
     companion object {
@@ -292,6 +298,9 @@ class FirstScreen(
 
     private var hasInitializedRun =
         false
+
+    private val checkpointSavingEnabled =
+        restoredRun == null
 
     private var marketSlots =
         emptyList<MarketSlot>()
@@ -1319,8 +1328,13 @@ class FirstScreen(
             hasInitializedRun =
                 true
 
-            HighScoreRepository
-                .recordRunStarted()
+            if (
+                restoredRun ==
+                null
+            ) {
+                HighScoreRepository
+                    .recordRunStarted()
+            }
 
             PlayerProfileRepository
                 .markMapEncountered(
@@ -1329,7 +1343,19 @@ class FirstScreen(
                     )
                 )
 
-            initializeStartingLoadout()
+            val snapshot =
+                restoredRun
+
+            if (
+                snapshot ==
+                null
+            ) {
+                initializeStartingLoadout()
+            } else {
+                restoreRunCheckpoint(
+                    snapshot
+                )
+            }
 
             recordCurrentEnemyEncounters()
         }
@@ -1337,6 +1363,183 @@ class FirstScreen(
         camera.update()
     }
 
+
+
+    private fun restoreRunCheckpoint(
+        snapshot:
+        RunSaveSnapshot
+    ) {
+
+        enemyManager.clearAll()
+        projectiles.clear()
+        goldCoinPickups.clear()
+
+        chestPickupManager
+            .clearUncollectedChests()
+
+        chestRewardQueue.clear()
+
+        stageController
+            .restoreCheckpointStage(
+                snapshot.checkpointStage
+            )
+
+        gameTimeController
+            .restoreElapsedGameTime(
+                snapshot.elapsedRunTimeSeconds
+            )
+
+        playerStats
+            .restoreSaveLayers(
+                snapshot.statLayers
+            )
+
+        weaponInventory
+            .clearAllSlots()
+
+        snapshot.weaponSlots
+            .sortedBy {
+                it.slotIndex
+            }
+            .forEach {
+                    savedSlot ->
+
+                val definition =
+                    DefaultWeapons.all
+                        .firstOrNull {
+                            it.id.toString() ==
+                                savedSlot.weaponDefinitionId ||
+                                it.id.value ==
+                                savedSlot.weaponDefinitionId
+                        }
+                        ?: return@forEach
+
+                val weapon =
+                    WeaponInstance(
+                        definition =
+                            definition,
+
+                        level =
+                            savedSlot.level
+                                .coerceIn(
+                                    WeaponInstance.MINIMUM_LEVEL,
+                                    WeaponInstance.MAXIMUM_LEVEL
+                                )
+                    )
+
+                weaponInventory
+                    .addPurchasedWeaponToSlot(
+                        weapon =
+                            weapon,
+
+                        targetSlotIndex =
+                            savedSlot.slotIndex
+                    )
+            }
+
+        itemInventory.clear()
+
+        snapshot.itemStacks
+            .forEach {
+                    savedStack ->
+
+                val definition =
+                    DefaultItems.all
+                        .firstOrNull {
+                            it.id.toString() ==
+                                savedStack.itemDefinitionId ||
+                                it.id.value ==
+                                savedStack.itemDefinitionId
+                        }
+                        ?: return@forEach
+
+                repeat(
+                    savedStack.count
+                        .coerceAtLeast(
+                            0
+                        )
+                ) {
+                    itemInventory.addItem(
+                        ItemInstance(
+                            definition =
+                                definition
+                        )
+                    )
+                }
+            }
+
+        equippedArmor.clear()
+
+        snapshot.armorDefinitionId
+            ?.let {
+                    savedArmorId ->
+
+                DefaultArmors.all
+                    .firstOrNull {
+                        it.id.toString() ==
+                            savedArmorId ||
+                            it.id.value ==
+                            savedArmorId
+                    }
+                    ?.let {
+                            definition ->
+
+                        equippedArmor.equip(
+                            definition
+                        )
+                    }
+            }
+
+        sessionWallet
+            .restoreGold(
+                snapshot.sessionGold
+            )
+
+        runStatistics
+            .restoreSaveState(
+                snapshot.statistics
+            )
+
+        runRewardTracker
+            .restoreSaveState(
+                snapshot.rewardState
+            )
+
+        remainingRunChestDiscards =
+            snapshot.remainingChestDiscards
+                .coerceAtLeast(
+                    0
+                )
+
+        weaponStatBonusSynchronizer
+            .invalidate()
+
+        weaponStatBonusSynchronizer
+            .synchronize()
+
+        itemStatSynchronizer
+            .synchronize()
+
+        player
+            .synchronizeMaximumHealthWithStats(
+                healAddedHealth =
+                    false
+            )
+
+        player.health
+            .restoreCurrentHealth(
+                snapshot.currentHealth
+            )
+
+        tamgaRuntimeManager.reset()
+
+        weaponRuntimeManager
+            .resetAllTimers()
+
+        enemySpawner.resetTimer()
+
+        updateCamera()
+    }
 
     private fun initializeStartingLoadout() {
         val preset =
@@ -2302,7 +2505,6 @@ class FirstScreen(
 
         recordCurrentEnemyEncounters()
     }
-
     private fun handleEnemyKilled(
         killedEnemy: Enemy
     ) {
@@ -4499,22 +4701,56 @@ class FirstScreen(
 
     private fun saveCheckpoint() {
 
+        if (
+            !checkpointSavingEnabled
+        ) {
+
+            Gdx.app.log(
+                "RunSave",
+                "Checkpoint skipped because this run was loaded from a consumed save."
+            )
+
+            return
+        }
+
         try {
 
-            RunSaveRepository.save(
+            val snapshot =
                 buildCheckpointSnapshot()
-            )
+
+            val saveSuccessful =
+                RunSaveRepository.save(
+                    snapshot
+                )
+
+            if (saveSuccessful) {
+
+                Gdx.app.log(
+                    "RunSave",
+                    "Checkpoint saved successfully. " +
+                        "Stage: ${snapshot.checkpointStage}"
+                )
+
+            } else {
+
+                Gdx.app.error(
+                    "RunSave",
+                    "Checkpoint save returned false. " +
+                        "Stage: ${snapshot.checkpointStage}, " +
+                        "validationErrors: " +
+                        snapshot.validationErrors()
+                            .joinToString()
+                )
+            }
 
         } catch (exception: Exception) {
 
             Gdx.app.error(
                 "RunSave",
-                "Checkpoint save failed.",
+                "Checkpoint creation or save failed.",
                 exception
             )
-
         }
-
     }
 
     private fun recordCurrentEnemyEncounters() {

@@ -1,4 +1,5 @@
 package com.azizoglu.grisilith.save
+import java.util.HashMap
 
 data class RunSaveStatistics(
     val totalDamageDealt: Long = 0L,
@@ -9,5 +10,4 @@ data class RunSaveStatistics(
     val totalGoldCollected: Float = 0f,
     val totalGoldSpent: Float = 0f,
     val totalChestsOpened: Int = 0,
-    val damageBySource: Map<String, Long> = emptyMap()
-)
+    val damageBySource: HashMap<String, Long> = hashMapOf())

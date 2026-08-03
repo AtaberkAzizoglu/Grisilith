@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.statistics
 
 import com.azizoglu.grisilith.save.RunSaveStatLayers
 import kotlin.math.roundToInt
+import java.util.HashMap
 
 class PlayerStats(
     initialBaseScores: Map<StatType, Int> =
@@ -706,19 +707,23 @@ class PlayerStats(
     private fun encodeLayer(
         layer:
         Map<StatType, Int>
-    ): Map<String, Int> {
+    ): HashMap<String, Int> {
 
-        return StatType.entries
-            .associate {
-                    statType ->
+        val encodedLayer =
+            hashMapOf<String, Int>()
 
-                statType.name to
-                    (
-                        layer[
-                            statType
-                        ] ?: 0
-                        )
+        StatType.entries
+            .forEach { statType ->
+
+                encodedLayer[
+                    statType.name
+                ] =
+                    layer[
+                        statType
+                    ] ?: 0
             }
+
+        return encodedLayer
     }
 
     private fun decodeLayer(

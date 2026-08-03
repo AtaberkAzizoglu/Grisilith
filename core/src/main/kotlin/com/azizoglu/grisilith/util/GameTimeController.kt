@@ -44,4 +44,17 @@ class GameTimeController {
             3f
         )
     }
+
+    fun restoreElapsedGameTime(
+        elapsedSeconds: Float
+    ) {
+        elapsedGameTime =
+            elapsedSeconds
+                .coerceAtLeast(
+                    0f
+                )
+
+        isPaused =
+            false
+    }
 }

@@ -115,4 +115,15 @@ class HealthComponent(
             }
         }
     }
+
+    fun restoreCurrentHealth(
+        restoredHealth: Int
+    ) {
+        currentHealth =
+            restoredHealth
+                .coerceIn(
+                    1,
+                    maximumHealth
+                )
+    }
 }

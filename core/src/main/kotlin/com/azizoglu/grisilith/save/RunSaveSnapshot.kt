@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.save
 
+import java.util.ArrayList
 data class RunSaveSnapshot(
     val version: Int = CURRENT_VERSION,
     val savedAtEpochMillis: Long = System.currentTimeMillis(),
@@ -14,13 +15,17 @@ data class RunSaveSnapshot(
     val sessionGold: Int = 0,
     val remainingChestDiscards: Int = 0,
     val statLayers: RunSaveStatLayers = RunSaveStatLayers(),
-    val weaponSlots: List<RunSaveWeaponSlot> = emptyList(),
+    val weaponSlots:
+    ArrayList<RunSaveWeaponSlot> =
+        arrayListOf(),
     val armorDefinitionId: String? = null,
     val weaponTamgaDefinitionId: String? = null,
     val armorTamgaDefinitionId: String? = null,
     val weaponTamgaRuntimeState: RunSaveActiveTamgaState? = null,
     val armorTamgaRuntimeState: RunSaveActiveTamgaState? = null,
-    val itemStacks: List<RunSaveItemStack> = emptyList(),
+    val itemStacks:
+    ArrayList<RunSaveItemStack> =
+        arrayListOf(),
     val statistics: RunSaveStatistics = RunSaveStatistics(),
     val rewardState: RunSaveRewardState = RunSaveRewardState(),
     val preview: RunSavePreview = RunSavePreview()

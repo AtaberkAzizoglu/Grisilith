@@ -28,6 +28,10 @@ import com.azizoglu.grisilith.screen.CollectionCategoryScreen
 import com.azizoglu.grisilith.statistics.career.HighScoreRepository
 import com.azizoglu.grisilith.screen.HighScoreScreen
 import com.azizoglu.grisilith.save.RunSaveRepository
+import com.azizoglu.grisilith.character.DefaultCharacters
+import com.azizoglu.grisilith.save.RunSaveLoadResult
+import com.azizoglu.grisilith.save.RunSaveSnapshot
+import com.azizoglu.grisilith.screen.LoadGameScreen
 
 class GrisilithGame : Game() {
 
@@ -165,13 +169,182 @@ class GrisilithGame : Game() {
     }
 
     fun showLoadGame() {
+
+        when (
+            val loadResult =
+                RunSaveRepository.load()
+        ) {
+
+            is RunSaveLoadResult.Success -> {
+
+                val snapshot =
+                    loadResult.snapshot
+
+                changeScreen(
+                    LoadGameScreen(
+                        snapshot =
+                            snapshot,
+
+                        onContinue = {
+                            consumeSavedRun(
+                                snapshot
+                            )
+                        },
+
+                        onBack = {
+                            showPlayMenu()
+                        }
+                    )
+                )
+            }
+
+            RunSaveLoadResult.NoSave -> {
+
+                showLoadFailure(
+                    "No saved run was found."
+                )
+            }
+
+            is RunSaveLoadResult.UnsupportedVersion -> {
+
+                showLoadFailure(
+                    "This save belongs to a newer game version."
+                )
+            }
+
+            is RunSaveLoadResult.InvalidSave -> {
+
+                showLoadFailure(
+                    "The saved run is incomplete or invalid."
+                )
+            }
+
+            is RunSaveLoadResult.CorruptedSave -> {
+
+                showLoadFailure(
+                    "The saved run could not be read."
+                )
+            }
+        }
+    }
+
+    private fun consumeSavedRun(
+        snapshot:
+        RunSaveSnapshot
+    ) {
+
+        val difficulty =
+            GameDifficulty.entries
+                .firstOrNull {
+                    it.name ==
+                        snapshot.difficultyName
+                }
+
+        val gameMap =
+            GameMap.entries
+                .firstOrNull {
+                    it.name ==
+                        snapshot.mapName
+                }
+
+        val character =
+            DefaultCharacters.all
+                .firstOrNull {
+                    it.id.toString() ==
+                        snapshot.characterDefinitionId ||
+                        it.id.value ==
+                        snapshot.characterDefinitionId
+                }
+
+        if (
+            difficulty == null ||
+            gameMap == null ||
+            character == null
+        ) {
+            showLoadFailure(
+                "Saved character, map or difficulty is no longer available."
+            )
+
+            return
+        }
+
+        val resolvedPreset =
+            snapshot.presetId
+                ?.let { presetId ->
+
+                    val preset =
+                        PresetRepository
+                            .findById(
+                                presetId
+                            )
+                            ?: return@let null
+
+                    PresetContentResolver(
+                        DefaultContentRegistry.instance
+                    ).resolve(
+                        preset
+                    )
+                }
+
+        if (
+            snapshot.presetId != null &&
+            resolvedPreset == null
+        ) {
+            showLoadFailure(
+                "The preset used by this run no longer exists."
+            )
+
+            return
+        }
+
+        val saveDeleted =
+            RunSaveRepository.delete()
+
+        if (
+            !saveDeleted &&
+            RunSaveRepository.hasSave()
+        ) {
+
+            showLoadFailure(
+                "The checkpoint could not be consumed."
+            )
+
+            return
+        }
+
+        changeScreen(
+            FirstScreen(
+                game =
+                    this,
+
+                difficulty =
+                    difficulty,
+
+                gameMap =
+                    gameMap,
+
+                selectedCharacter =
+                    character,
+
+                selectedPreset =
+                    resolvedPreset,
+
+                restoredRun =
+                    snapshot
+            )
+        )
+    }
+
+    private fun showLoadFailure(
+        message: String
+    ) {
         changeScreen(
             PlaceholderMenuScreen(
                 title =
                     "LOAD GAME",
 
                 description =
-                    "Save and Load systems will be added later.",
+                    message,
 
                 onBack = {
                     showPlayMenu()

@@ -11,11 +11,21 @@ object RunSaveRepository {
     private const val TEMP_FILE_NAME = "active_run.tmp"
     private const val BACKUP_FILE_NAME = "active_run.backup.json"
 
-    private val json = Json().apply {
-        setOutputType(JsonWriter.OutputType.json)
-        setIgnoreUnknownFields(true)
-        setUsePrototypes(false)
-    }
+    private val json =
+        Json().apply {
+
+            setOutputType(
+                JsonWriter.OutputType.json
+            )
+
+            setIgnoreUnknownFields(
+                true
+            )
+
+            setUsePrototypes(
+                false
+            )
+        }
 
     private val saveDirectory: FileHandle get() = Gdx.files.local(SAVE_DIRECTORY)
     private val saveFile: FileHandle get() = saveDirectory.child(SAVE_FILE_NAME)
@@ -23,6 +33,14 @@ object RunSaveRepository {
     private val backupFile: FileHandle get() = saveDirectory.child(BACKUP_FILE_NAME)
 
     fun hasSave(): Boolean = saveFile.exists()
+
+    fun saveFilePath():
+        String {
+
+        return saveFile
+            .file()
+            .absolutePath
+    }
 
     fun save(snapshot: RunSaveSnapshot): Boolean {
         val errors = snapshot.validationErrors()

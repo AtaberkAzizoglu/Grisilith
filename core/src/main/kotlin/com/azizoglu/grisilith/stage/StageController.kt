@@ -89,4 +89,21 @@ class StageController(
                 StageType.NORMAL
         }
     }
+
+    fun restoreCheckpointStage(
+        checkpointStage: Int
+    ) {
+        require(
+            checkpointStage in
+                1..maximumStage
+        ) {
+            "Checkpoint stage must be between 1 and $maximumStage."
+        }
+
+        currentStage =
+            checkpointStage
+
+        elapsedStageTime =
+            0f
+    }
 }

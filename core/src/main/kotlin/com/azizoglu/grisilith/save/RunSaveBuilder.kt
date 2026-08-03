@@ -9,6 +9,7 @@ import com.azizoglu.grisilith.reward.RunRewardTracker
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.RunStatistics
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
+import java.util.ArrayList
 
 object RunSaveBuilder {
 
@@ -130,8 +131,10 @@ object RunSaveBuilder {
                     .exportSaveLayers(),
 
             weaponSlots =
-                weaponInventory
-                    .exportSaveSlots(),
+                ArrayList(
+                    weaponInventory
+                        .exportSaveSlots()
+                ),
 
             armorDefinitionId =
                 equippedArmor
@@ -158,8 +161,10 @@ object RunSaveBuilder {
                 armorTamgaRuntimeState,
 
             itemStacks =
-                itemInventory
-                    .exportSaveStacks(),
+                ArrayList(
+                    itemInventory
+                        .exportSaveStacks()
+                ),
 
             statistics =
                 runStatistics

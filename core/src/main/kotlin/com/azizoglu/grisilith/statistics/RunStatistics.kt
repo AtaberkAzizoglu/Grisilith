@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.statistics
 
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.save.RunSaveStatistics
+import java.util.HashMap
 
 class RunStatistics {
 
@@ -163,7 +164,9 @@ class RunStatistics {
                 totalChestsOpened,
 
             damageBySource =
-                weaponDamage.toMap()
+                HashMap(
+                    weaponDamage
+                )
         )
     }
 

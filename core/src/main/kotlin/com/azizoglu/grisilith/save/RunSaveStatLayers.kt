@@ -1,11 +1,33 @@
 package com.azizoglu.grisilith.save
 
+import java.util.HashMap
+
 data class RunSaveStatLayers(
-    val baseScores: Map<String, Int> = emptyMap(),
-    val gearBonuses: Map<String, Int> = emptyMap(),
-    val weaponBonuses: Map<String, Int> = emptyMap(),
-    val itemBonuses: Map<String, Int> = emptyMap(),
-    val runBonuses: Map<String, Int> = emptyMap(),
-    val tamgaBonuses: Map<String, Int> = emptyMap(),
-    val activeTamgaBonuses: Map<String, Int> = emptyMap()
+    val baseScores:
+    HashMap<String, Int> =
+        hashMapOf(),
+
+    val gearBonuses:
+    HashMap<String, Int> =
+        hashMapOf(),
+
+    val weaponBonuses:
+    HashMap<String, Int> =
+        hashMapOf(),
+
+    val itemBonuses:
+    HashMap<String, Int> =
+        hashMapOf(),
+
+    val runBonuses:
+    HashMap<String, Int> =
+        hashMapOf(),
+
+    val tamgaBonuses:
+    HashMap<String, Int> =
+        hashMapOf(),
+
+    val activeTamgaBonuses:
+    HashMap<String, Int> =
+        hashMapOf()
 )
