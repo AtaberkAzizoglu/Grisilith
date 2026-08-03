@@ -307,6 +307,27 @@ class WeaponRuntimeManager(
             ?: 0f
     }
 
+    fun prepareForStageTransition() {
+        /*
+         * Açık hedefleme veya çalışan Active Skill
+         * stage sınırını geçmez.
+         *
+         * endActiveAbilityEarly() skill'i cooldown'a
+         * geçirir; cooldown değeri korunur.
+         */
+        cancelActiveAbilities()
+
+        /*
+         * Normal saldırı zamanlayıcıları yeni stage'de
+         * temiz başlar fakat ability cooldown'ları
+         * korunur.
+         */
+        runtimesByWeapon.values
+            .forEach { runtime ->
+                runtime.resetAttackTimer()
+            }
+    }
+
     fun resetAllTimers() {
         defensiveLineRuntime.reset()
         igniteDashRuntime.reset()

@@ -2,6 +2,43 @@ package com.azizoglu.grisilith.weapon.skill
 
 object DefaultWeaponAbilities {
 
+    const val VORTEX_PULL_ID =
+        "WPN_ABILITY_VORTEX_PULL"
+
+    /*
+     * İlk denge değerleri. Vortex Pull tanımında kesin süre ve
+     * cooldown verilmediği için test edilebilir orta değerler seçildi.
+     */
+    const val VORTEX_PULL_DURATION_SECONDS =
+        5f
+
+    const val VORTEX_PULL_COOLDOWN_SECONDS =
+        45f
+
+    const val VORTEX_PULL_PLACEMENT_RANGE =
+        340f
+
+    const val VORTEX_PULL_RADIUS =
+        150f
+
+    const val VORTEX_PULL_DAMAGE_TICK_SECONDS =
+        0.25f
+
+    const val VORTEX_PULL_DAMAGE_PER_SECOND_MULTIPLIER =
+        0.85f
+
+    const val VORTEX_PULL_NORMAL_PULL_MULTIPLIER =
+        1f
+
+    const val VORTEX_PULL_UNIQUE_PULL_MULTIPLIER =
+        0.72f
+
+    const val VORTEX_PULL_MINI_BOSS_PULL_MULTIPLIER =
+        0.22f
+
+    const val VORTEX_PULL_FINAL_BOSS_PULL_MULTIPLIER =
+        0.10f
+
     const val IGNITE_DASH_ID =
         "WPN_ABILITY_IGNITE_DASH"
 
@@ -86,6 +123,25 @@ object DefaultWeaponAbilities {
 
     const val ASSASSINATE_PROJECTILE_SIZE_MULTIPLIER =
         1.8f
+
+    val vortexPull =
+        WeaponAbilityDefinition(
+            id =
+                VORTEX_PULL_ID,
+
+            displayName =
+                "Vortex Pull",
+
+            activationType =
+                WeaponAbilityActivationType
+                    .ACTIVE,
+
+            cooldownSeconds =
+                VORTEX_PULL_COOLDOWN_SECONDS,
+
+            durationSeconds =
+                VORTEX_PULL_DURATION_SECONDS
+        )
 
     val igniteDash =
         WeaponAbilityDefinition(

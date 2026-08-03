@@ -2903,10 +2903,9 @@ class FirstScreen(
         enemyManager.clearAll()
         projectiles.clear()
         synchronizeWeaponInventoryEffects()
-        weaponRuntimeManager
-            .cancelActiveAbilities()
 
-        weaponRuntimeManager.resetAllTimers()
+        weaponRuntimeManager
+            .prepareForStageTransition()
 
         chestPickupManager
             .clearUncollectedChests()
@@ -3370,7 +3369,9 @@ class FirstScreen(
 
             enemyManager.clearAll()
             projectiles.clear()
-            weaponRuntimeManager.resetAllTimers()
+
+            weaponRuntimeManager
+                .prepareForStageTransition()
 
             stageController.completeCurrentStage()
 

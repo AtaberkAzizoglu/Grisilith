@@ -9,6 +9,7 @@ import com.azizoglu.grisilith.weapon.definition.WeaponAttackPattern
 import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 import com.azizoglu.grisilith.weapon.definition.WeaponLevelProgressionFactory
 import com.azizoglu.grisilith.weapon.definition.WeaponModifierFactory
+import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
 
 object OrbOfSkyDefinition {
 
@@ -92,6 +93,10 @@ object OrbOfSkyDefinition {
                                     )
                             )
                     ),
+
+            weaponAbility =
+                DefaultWeaponAbilities
+                    .vortexPull,
 
             initialUnlockState =
                 ContentUnlockState.UNLOCKED

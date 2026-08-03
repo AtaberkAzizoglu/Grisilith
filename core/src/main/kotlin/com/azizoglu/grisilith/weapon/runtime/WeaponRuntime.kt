@@ -230,6 +230,9 @@ class WeaponRuntime(
             .endActiveEarly()
     }
 
+    fun resetAttackTimer() {
+        attackTimer.reset()
+    }
     fun resetTimer() {
         attackTimer.reset()
 
