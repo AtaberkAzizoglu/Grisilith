@@ -8,6 +8,7 @@ import com.azizoglu.grisilith.content.ContentUnlockState
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.content.StatModifier
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.weapon.skill.WeaponAbilityDefinition
 
 data class WeaponDefinition(
     override val id: ContentId,
@@ -95,6 +96,15 @@ data class WeaponDefinition(
      * tek kopyası bulunabilen içerikler.
      */
     val maximumInventoryCopies: Int? = null,
+
+    /*
+     * Level 5'te açılan silaha özgü yetenek.
+     *
+     * Geçiş sürecinde null bırakılabilir. Weapon Skills
+     * paketlerinde silahlar tek tek bu alana bağlanacaktır.
+     */
+    val weaponAbility:
+    WeaponAbilityDefinition? = null,
 
     override val initialUnlockState:
     ContentUnlockState =

@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.weapon.runtime
 
 import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 import java.util.UUID
+import com.azizoglu.grisilith.weapon.skill.WeaponAbilityDefinition
 
 class WeaponInstance(
     val definition: WeaponDefinition,
@@ -60,6 +61,17 @@ class WeaponInstance(
         get() =
             currentLevelStats
                 .weaponAbilityUnlocked
+
+    val unlockedAbility:
+        WeaponAbilityDefinition?
+        get() =
+            if (
+                hasWeaponAbility
+            ) {
+                definition.weaponAbility
+            } else {
+                null
+            }
 
     val completedNormalAttackCount: Int
         get() =

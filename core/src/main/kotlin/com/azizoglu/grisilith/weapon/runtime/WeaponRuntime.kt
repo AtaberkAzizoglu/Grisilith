@@ -8,6 +8,8 @@ import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.tamga.runtime.TamgaRuntimeManager
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.definition.WeaponAttackPattern
+import com.azizoglu.grisilith.weapon.skill.WeaponAbilityRuntime
+import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
 
 class WeaponRuntime(
     val weapon: WeaponInstance,
@@ -21,6 +23,28 @@ class WeaponRuntime(
     private val attackTimer =
         WeaponAttackTimer()
 
+    private val abilityRuntime =
+        WeaponAbilityRuntime(
+            weapon
+        )
+
+    val abilityState:
+        WeaponAbilityState
+        get() =
+            abilityRuntime.state
+
+    val abilityRemainingActiveSeconds:
+        Float
+        get() =
+            abilityRuntime
+                .remainingActiveSeconds
+
+    val abilityRemainingCooldownSeconds:
+        Float
+        get() =
+            abilityRuntime
+                .remainingCooldownSeconds
+
     fun update(
         delta: Float,
         slotIndex: Int,
@@ -33,6 +57,10 @@ class WeaponRuntime(
         ) -> Unit,
         onEnemyKilled: (Enemy) -> Unit
     ) {
+        abilityRuntime.update(
+            delta
+        )
+
         val definition =
             weapon.definition
 
@@ -178,7 +206,28 @@ class WeaponRuntime(
             )
     }
 
+    fun tryActivateAbility():
+        Boolean {
+
+        return abilityRuntime
+            .tryActivate()
+    }
+
+    fun triggerAutomaticAbility():
+        Boolean {
+
+        return abilityRuntime
+            .triggerAutomatic()
+    }
+
+    fun endActiveAbilityEarly() {
+        abilityRuntime
+            .endActiveEarly()
+    }
+
     fun resetTimer() {
         attackTimer.reset()
+
+        abilityRuntime.reset()
     }
 }

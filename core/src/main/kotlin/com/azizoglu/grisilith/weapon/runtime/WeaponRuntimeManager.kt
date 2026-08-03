@@ -6,6 +6,7 @@ import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.tamga.runtime.TamgaRuntimeManager
 import com.azizoglu.grisilith.weapon.Projectile
+import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
 
 class WeaponRuntimeManager(
     private val inventory:
@@ -122,6 +123,77 @@ class WeaponRuntimeManager(
                         )
                     }
             }
+    }
+
+    fun tryActivateAbilityInSlot(
+        slotIndex: Int
+    ): Boolean {
+
+        val weapon =
+            inventory.weaponAt(
+                slotIndex
+            )
+                ?: return false
+
+        val runtime =
+            runtimesByWeapon[
+                weapon
+            ]
+                ?: return false
+
+        return runtime
+            .tryActivateAbility()
+    }
+
+    fun abilityStateInSlot(
+        slotIndex: Int
+    ): WeaponAbilityState {
+
+        val weapon =
+            inventory.weaponAt(
+                slotIndex
+            )
+                ?: return WeaponAbilityState.LOCKED
+
+        return runtimesByWeapon[
+            weapon
+        ]
+            ?.abilityState
+            ?: WeaponAbilityState.LOCKED
+    }
+
+    fun abilityRemainingActiveSecondsInSlot(
+        slotIndex: Int
+    ): Float {
+
+        val weapon =
+            inventory.weaponAt(
+                slotIndex
+            )
+                ?: return 0f
+
+        return runtimesByWeapon[
+            weapon
+        ]
+            ?.abilityRemainingActiveSeconds
+            ?: 0f
+    }
+
+    fun abilityRemainingCooldownSecondsInSlot(
+        slotIndex: Int
+    ): Float {
+
+        val weapon =
+            inventory.weaponAt(
+                slotIndex
+            )
+                ?: return 0f
+
+        return runtimesByWeapon[
+            weapon
+        ]
+            ?.abilityRemainingCooldownSeconds
+            ?: 0f
     }
 
     fun resetAllTimers() {
