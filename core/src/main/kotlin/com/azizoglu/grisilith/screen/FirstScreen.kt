@@ -97,6 +97,7 @@ import com.azizoglu.grisilith.save.RunSaveRepository
 import com.azizoglu.grisilith.save.RunSaveSnapshot
 import com.azizoglu.grisilith.armor.definition.DefaultArmors
 import com.azizoglu.grisilith.tamga.definition.DefaultTamgas
+import com.azizoglu.grisilith.settings.GameSettings
 
 class FirstScreen(
     private val game: GrisilithGame,
@@ -253,7 +254,11 @@ class FirstScreen(
                 playerStats,
 
             tamgaRuntimeManager =
-                tamgaRuntimeManager
+                tamgaRuntimeManager,
+
+            currentStageProvider = {
+                stageController.currentStage
+            }
         )
 
     private val mapObstacles: List<MapObstacle> =
@@ -267,7 +272,12 @@ class FirstScreen(
 
     private val runStatistics = RunStatistics()
 
-    private val gameTimeController = GameTimeController()
+    private val gameTimeController =
+        GameTimeController().apply {
+            setGameSpeed(
+                GameSettings.gameSpeed
+            )
+        }
 
     private val hudBatch = SpriteBatch()
     private val hudFont = BitmapFont()
@@ -354,18 +364,20 @@ class FirstScreen(
             camera = camera,
             cameraWidth = CAMERA_WIDTH,
             cameraHeight = CAMERA_HEIGHT,
+            shapeRenderer = shapeRenderer,
             batch = hudBatch,
             font = hudFont,
             player = player,
-            playerStats = playerStats,
             stageController = stageController,
             sessionWallet = sessionWallet,
-            enemyManager = enemyManager,
-            runStatistics = runStatistics,
+            runRewardTracker =
+                runRewardTracker,
             gameTimeController =
                 gameTimeController,
             weaponInventory =
-                weaponInventory
+                weaponInventory,
+            weaponRuntimeManager =
+                weaponRuntimeManager
         )
 
     private val activeTamgaHudRenderer =
@@ -1817,22 +1829,140 @@ class FirstScreen(
         }
 
         handleActiveTamgaButtonInput()
+        handleGameSpeedButtonInput()
+        handleWeaponAbilityInput()
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1)) {
-            gameTimeController.setGameSpeed(0.5f)
+    }
+
+    private fun handleGameSpeedButtonInput() {
+        if (
+            !GameSettings
+                .showGameSpeedButton ||
+            !Gdx.input.justTouched()
+        ) {
+            return
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
-            gameTimeController.setGameSpeed(1f)
+        val pointerPosition =
+            Vector2(
+                Gdx.input.x
+                    .toFloat(),
+                Gdx.input.y
+                    .toFloat()
+            )
+
+        viewport.unproject(
+            pointerPosition
+        )
+
+        if (
+            !hudRenderer
+                .isGameSpeedButtonAt(
+                    worldX =
+                        pointerPosition.x,
+
+                    worldY =
+                        pointerPosition.y
+                )
+        ) {
+            return
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_3)) {
-            gameTimeController.setGameSpeed(2f)
+        val nextSpeed =
+            when (
+                gameTimeController
+                    .gameSpeed
+            ) {
+                0.5f -> 1f
+                1f -> 2f
+                else -> 0.5f
+            }
+
+        gameTimeController
+            .setGameSpeed(
+                nextSpeed
+            )
+
+        GameSettings
+            .setGameSpeed(
+                nextSpeed
+            )
+    }
+
+    private fun handleWeaponAbilityInput() {
+        val functionKeys =
+            intArrayOf(
+                Input.Keys.F1,
+                Input.Keys.F2,
+                Input.Keys.F3,
+                Input.Keys.F4,
+                Input.Keys.F5,
+                Input.Keys.F6
+            )
+
+        functionKeys
+            .forEachIndexed {
+                    slotIndex,
+                    keyCode ->
+
+                if (
+                    Gdx.input
+                        .isKeyJustPressed(
+                            keyCode
+                        )
+                ) {
+                    weaponRuntimeManager
+                        .tryActivateAbilityInSlot(
+                            slotIndex
+                        )
+                }
+            }
+
+        if (
+            !Gdx.input.justTouched()
+        ) {
+            return
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_4)) {
-            gameTimeController.setGameSpeed(3f)
+        val pointerPosition =
+            Vector2(
+                Gdx.input.x
+                    .toFloat(),
+                Gdx.input.y
+                    .toFloat()
+            )
+
+        viewport.unproject(
+            pointerPosition
+        )
+
+        if (
+            hudRenderer
+                .isGameSpeedButtonAt(
+                    worldX =
+                        pointerPosition.x,
+
+                    worldY =
+                        pointerPosition.y
+                )
+        ) {
+            return
         }
+
+        val clickedSlot =
+            hudRenderer.weaponSlotAt(
+                worldX =
+                    pointerPosition.x,
+
+                worldY =
+                    pointerPosition.y
+            )
+                ?: return
+
+        weaponRuntimeManager
+            .tryActivateAbilityInSlot(
+                clickedSlot
+            )
     }
 
     private fun handleActiveTamgaButtonInput() {
@@ -2255,270 +2385,279 @@ class FirstScreen(
                 }
             )
 
-        /*
-         * Arcane Aura yalnızca takılıysa
-         * manager içinde çalışır.
-         */
-        tamgaRuntimeManager
-            .updateArcaneAura(
-                delta = delta,
+        if (!player.health.isDead) {
+                    weaponRuntimeManager.update(
+                        delta = delta,
 
-                player =
-                    player,
+                        player =
+                            player,
 
-                enemies =
-                    enemyManager.allEnemies,
+                        enemyManager =
+                            enemyManager,
 
-                onDamageDealt = {
-                        appliedDamage,
-                        sourceName ->
+                        projectiles =
+                            projectiles,
 
-                    runStatistics
-                        .recordDamageDealt(
-                            amount =
+                        onDamageDealt = {
                                 appliedDamage,
+                                weaponName ->
 
-                            weaponName =
-                                sourceName
-                        )
-                },
+                            runStatistics
+                                .recordDamageDealt(
+                                    amount =
+                                        appliedDamage,
 
-                onEnemyKilled = {
-                        killedEnemy ->
+                                    weaponName =
+                                        weaponName
+                                )
 
-                    handleEnemyKilled(
-                        killedEnemy
+                            player.tryLifeSteal(
+                                appliedDamage =
+                                    appliedDamage
+                            )
+                        },
+
+                        onEnemyKilled = {
+                                killedEnemy ->
+
+                            handleEnemyKilled(
+                                killedEnemy
+                            )
+                        }
                     )
                 }
-            )
 
-        /*
-         * Aura hasarı oyuncuyu öldürmez ama
-         * genel güvenlik için Weapon update'i
-         * yalnızca oyuncu hayattaysa çalışır.
-         */
-        if (!player.health.isDead) {
-            weaponRuntimeManager.update(
-                delta = delta,
+                /*
+                 * Aura hasarı oyuncuyu öldürmez ama
+                 * genel güvenlik için Weapon update'i
+                 * yalnızca oyuncu hayattaysa çalışır.
+                 */
+                if (!player.health.isDead) {
+                    weaponRuntimeManager.update(
+                        delta = delta,
 
-                player =
-                    player,
+                        player =
+                            player,
+
+                        enemyManager =
+                            enemyManager,
+
+                        projectiles =
+                            projectiles,
+
+                        onDamageDealt = {
+                                appliedDamage,
+                                weaponName ->
+
+                            runStatistics
+                                .recordDamageDealt(
+                                    amount =
+                                        appliedDamage,
+
+                                    weaponName =
+                                        weaponName
+                                )
+
+                            player.tryLifeSteal(
+                                appliedDamage =
+                                    appliedDamage
+                            )
+                        },
+
+                        onEnemyKilled = {
+                                killedEnemy ->
+
+                            handleEnemyKilled(
+                                killedEnemy
+                            )
+                        }
+                    )
+                }
+
+                    projectiles.forEach { projectile ->
+                    projectile.update(
+                        delta = delta,
+                        worldWidth = worldWidth,
+                        worldHeight = worldHeight
+                    )
+
+                    projectile.checkObstacleCollision(
+                        obstacleBounds =
+                            mapObstacles.map {
+                                it.bounds
+                            }
+                    )
+
+                    projectile.checkCollision(
+                        enemies =
+                            enemyManager.allEnemies,
+
+                        onDamageDealt = {
+                                appliedDamage ->
+
+                            runStatistics
+                                .recordDamageDealt(
+                                    amount =
+                                        appliedDamage,
+
+                                    weaponName =
+                                        projectile
+                                            .sourceWeaponName
+                                )
+
+                            player.tryLifeSteal(
+                                appliedDamage =
+                                    appliedDamage
+                            )
+                        },
+
+                        onEnemyKilled = {
+                                killedEnemy ->
+
+                            handleEnemyKilled(
+                                killedEnemy
+                            )
+                        },
+
+                        onWeaponHit = {
+                                hitEvent ->
+
+                            tamgaRuntimeManager
+                                .onWeaponHit(
+                                    event =
+                                        hitEvent,
+
+                                    onDamageDealt = {
+                                            bonusDamage,
+                                            weaponName ->
+
+                                        runStatistics
+                                            .recordDamageDealt(
+                                                amount =
+                                                    bonusDamage,
+
+                                                weaponName =
+                                                    weaponName
+                                            )
+
+                                        player.tryLifeSteal(
+                                            appliedDamage =
+                                                bonusDamage
+                                        )
+                                    },
+
+                                    onEnemyKilled = {
+                                            killedEnemy ->
+
+                                        handleEnemyKilled(
+                                            killedEnemy
+                                        )
+                                    }
+                                )
+                        },
+
+                        modifyWeaponDamage = {
+                                enemy,
+                                baseDamage ->
+
+                            tamgaRuntimeManager
+                                .modifyWeaponDamage(
+                                    enemy =
+                                        enemy,
+
+                                    baseDamage =
+                                        baseDamage
+                                )
+                        }
+                    )
+                }
+
+                    projectiles.removeAll { projectile ->
+                    !projectile.isActive
+                }
+
+                    goldCoinPickups.forEach { pickup ->
+                    pickup.update(
+                        delta = delta,
+
+                        targetX =
+                            player.centerX,
+
+                        targetY =
+                            player.centerY
+                    ) { collectedGold ->
+
+                        sessionWallet.addGold(
+                            collectedGold
+                        )
+
+                        runStatistics.recordGoldCollected(
+                            collectedGold
+                        )
+                    }
+                }
+
+                    goldCoinPickups.removeAll { pickup ->
+                    pickup.isCollected
+                }
+
+                    chestPickupManager.update(
+                    playerBounds =
+                        player.bounds
+                    ) {
+                    chestRewardQueue
+                        .addChest()
+                }
+
+
+                    enemyManager.removeDeadEnemies { enemy ->
+
+                    runRewardTracker.onEnemyKilled(
+                        enemyType =
+                            enemy.type,
+
+                        finalBossId =
+                            if (
+                                enemy.type ==
+                                EnemyType.FINAL_BOSS
+                            ) {
+                                finalBossRewardId
+                            } else {
+                                null
+                            }
+                    )
+                }
+
+                if (completeBossStageIfDefeated()) {
+                    return
+                }
+
+                    updateCamera()
+
+                    enemySpawner.update(
+                    delta = delta,
+
+                camera =
+                    camera,
 
                 enemyManager =
                     enemyManager,
 
-                projectiles =
-                    projectiles,
+                currentStage =
+                    stageController.currentStage,
 
-                onDamageDealt = {
-                        appliedDamage,
-                        weaponName ->
+                stageType =
+                    stageController
+                        .currentStageType,
 
-                    runStatistics
-                        .recordDamageDealt(
-                            amount =
-                                appliedDamage,
-
-                            weaponName =
-                                weaponName
-                        )
-
-                    player.tryLifeSteal(
-                        appliedDamage =
-                            appliedDamage
-                    )
-                },
-
-                onEnemyKilled = {
-                        killedEnemy ->
-
-                    handleEnemyKilled(
-                        killedEnemy
-                    )
-                }
+                enemyCountMultiplier =
+                    playerStats
+                        .enemyCountMultiplier()
             )
-        }
-
-        projectiles.forEach { projectile ->
-            projectile.update(
-                delta = delta,
-
-                worldWidth =
-                    worldWidth,
-
-                worldHeight =
-                    worldHeight
-            )
-
-            projectile.checkCollision(
-                enemies =
-                    enemyManager.allEnemies,
-
-                onDamageDealt = {
-                        appliedDamage ->
-
-                    runStatistics
-                        .recordDamageDealt(
-                            amount =
-                                appliedDamage,
-
-                            weaponName =
-                                projectile
-                                    .sourceWeaponName
-                        )
-
-                    player.tryLifeSteal(
-                        appliedDamage =
-                            appliedDamage
-                    )
-                },
-
-                onEnemyKilled = {
-                        killedEnemy ->
-
-                    handleEnemyKilled(
-                        killedEnemy
-                    )
-                },
-
-                onWeaponHit = {
-                        hitEvent ->
-
-                    tamgaRuntimeManager
-                        .onWeaponHit(
-                            event =
-                                hitEvent,
-
-                            onDamageDealt = {
-                                    bonusDamage,
-                                    weaponName ->
-
-                                runStatistics
-                                    .recordDamageDealt(
-                                        amount =
-                                            bonusDamage,
-
-                                        weaponName =
-                                            weaponName
-                                    )
-
-                                player.tryLifeSteal(
-                                    appliedDamage =
-                                        bonusDamage
-                                )
-                            },
-
-                            onEnemyKilled = {
-                                    killedEnemy ->
-
-                                handleEnemyKilled(
-                                    killedEnemy
-                                )
-                            }
-                        )
-                },
-
-                modifyWeaponDamage = {
-                        enemy,
-                        baseDamage ->
-
-                    tamgaRuntimeManager
-                        .modifyWeaponDamage(
-                            enemy =
-                                enemy,
-
-                            baseDamage =
-                                baseDamage
-                        )
-                }
-            )
-        }
-
-        projectiles.removeAll { projectile ->
-            !projectile.isActive
-        }
-
-        goldCoinPickups.forEach { pickup ->
-            pickup.update(
-                delta = delta,
-
-                targetX =
-                    player.centerX,
-
-                targetY =
-                    player.centerY
-            ) { collectedGold ->
-
-                sessionWallet.addGold(
-                    collectedGold
-                )
-
-                runStatistics.recordGoldCollected(
-                    collectedGold
-                )
-            }
-        }
-
-        goldCoinPickups.removeAll { pickup ->
-            pickup.isCollected
-        }
-
-        chestPickupManager.update(
-            playerBounds =
-                player.bounds
-        ) {
-            chestRewardQueue
-                .addChest()
-        }
-
-
-        enemyManager.removeDeadEnemies { enemy ->
-
-            runRewardTracker.onEnemyKilled(
-                enemyType =
-                    enemy.type,
-
-                finalBossId =
-                    if (
-                        enemy.type ==
-                        EnemyType.FINAL_BOSS
-                    ) {
-                        finalBossRewardId
-                    } else {
-                        null
-                    }
-            )
-        }
-
-        if (completeBossStageIfDefeated()) {
-            return
-        }
-
-        updateCamera()
-
-        enemySpawner.update(
-            delta = delta,
-
-            camera =
-                camera,
-
-            enemyManager =
-                enemyManager,
-
-            currentStage =
-                stageController.currentStage,
-
-            stageType =
-                stageController
-                    .currentStageType,
-
-            enemyCountMultiplier =
-                playerStats
-                    .enemyCountMultiplier()
-        )
 
         recordCurrentEnemyEncounters()
     }
+
     private fun handleEnemyKilled(
         killedEnemy: Enemy
     ) {
@@ -2928,6 +3067,18 @@ class FirstScreen(
             GL20.GL_BLEND
         )
 
+        val showGameplayHud =
+            !isRunSummaryOpen &&
+                !isMarketOpen &&
+                !chestRewardController.isOpen &&
+                !statCardController.isOpen &&
+                !isPauseMenuOpen
+
+        hudRenderer.renderShapes(
+            showGameplayHud =
+                showGameplayHud
+        )
+
         hudRenderer.render(
             displayedStage =
                 displayedStage(),
@@ -2937,6 +3088,9 @@ class FirstScreen(
 
             formattedGameTime =
                 formatGameTime(),
+
+            showGameplayHud =
+                showGameplayHud,
 
             isRunSummaryOpen =
                 isRunSummaryOpen,

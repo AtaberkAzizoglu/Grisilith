@@ -35,6 +35,9 @@ object GameSettings {
     private const val KEY_DAMAGE_NUMBERS =
         "damage_numbers"
 
+    private const val KEY_SHOW_GAME_SPEED_BUTTON =
+        "show_game_speed_button"
+
     private const val DEFAULT_MASTER_VOLUME =
         1f
 
@@ -56,8 +59,17 @@ object GameSettings {
     private const val DEFAULT_DAMAGE_NUMBERS =
         true
 
+    private const val DEFAULT_SHOW_GAME_SPEED_BUTTON =
+        true
+
     private const val VOLUME_STEP =
         0.1f
+
+    private const val KEY_GAME_SPEED =
+        "game_speed"
+
+    private const val DEFAULT_GAME_SPEED =
+        1f
 
     private val preferences:
         Preferences
@@ -92,6 +104,16 @@ object GameSettings {
 
     var damageNumbers:
         Boolean = DEFAULT_DAMAGE_NUMBERS
+        private set
+
+    var showGameSpeedButton:
+        Boolean =
+        DEFAULT_SHOW_GAME_SPEED_BUTTON
+        private set
+
+    var gameSpeed:
+        Float =
+        DEFAULT_GAME_SPEED
         private set
 
     /*
@@ -153,6 +175,28 @@ object GameSettings {
                 DEFAULT_DAMAGE_NUMBERS
             )
 
+        showGameSpeedButton =
+            preferences.getBoolean(
+                KEY_SHOW_GAME_SPEED_BUTTON,
+                DEFAULT_SHOW_GAME_SPEED_BUTTON
+            )
+
+        gameSpeed =
+            preferences
+                .getFloat(
+                    KEY_GAME_SPEED,
+                    DEFAULT_GAME_SPEED
+                )
+                .takeIf {
+                    it in
+                        setOf(
+                            0.5f,
+                            1f,
+                            2f
+                        )
+                }
+                ?: DEFAULT_GAME_SPEED
+
         applyDisplaySettings()
     }
 
@@ -161,6 +205,26 @@ object GameSettings {
             increaseVolume(
                 masterVolume
             )
+
+        save()
+    }
+
+    fun setGameSpeed(
+        speed: Float
+    ) {
+        require(
+            speed in
+                setOf(
+                    0.5f,
+                    1f,
+                    2f
+                )
+        ) {
+            "Unsupported saved game speed: $speed"
+        }
+
+        gameSpeed =
+            speed
 
         save()
     }
@@ -243,6 +307,13 @@ object GameSettings {
         save()
     }
 
+    fun toggleGameSpeedButton() {
+        showGameSpeedButton =
+            !showGameSpeedButton
+
+        save()
+    }
+
     fun resetToDefaults() {
         masterVolume =
             DEFAULT_MASTER_VOLUME
@@ -264,6 +335,12 @@ object GameSettings {
 
         damageNumbers =
             DEFAULT_DAMAGE_NUMBERS
+
+        showGameSpeedButton =
+            DEFAULT_SHOW_GAME_SPEED_BUTTON
+
+        gameSpeed =
+            DEFAULT_GAME_SPEED
 
         applyDisplaySettings()
         save()
@@ -393,6 +470,14 @@ object GameSettings {
             .putBoolean(
                 KEY_DAMAGE_NUMBERS,
                 damageNumbers
+            )
+            .putBoolean(
+                KEY_SHOW_GAME_SPEED_BUTTON,
+                showGameSpeedButton
+            )
+            .putFloat(
+                KEY_GAME_SPEED,
+                gameSpeed
             )
             .flush()
     }

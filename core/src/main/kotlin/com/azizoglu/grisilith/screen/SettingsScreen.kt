@@ -37,10 +37,10 @@ class SettingsScreen(
             690f
 
         private const val ROW_START_Y =
-            500f
+            535f
 
         private const val ROW_SPACING =
-            62f
+            52f
     }
 
     private val camera =
@@ -488,6 +488,34 @@ class SettingsScreen(
                 refreshButtons()
             },
 
+            /*
+             * Game Speed HUD Button
+             */
+            MenuButton(
+                text =
+                    onOffText(
+                        GameSettings
+                            .showGameSpeedButton
+                    ),
+
+                x =
+                    VALUE_X,
+
+                y =
+                    rowY(7),
+
+                width =
+                    320f,
+
+                height =
+                    buttonHeight
+            ) {
+                GameSettings
+                    .toggleGameSpeedButton()
+
+                refreshButtons()
+            },
+
             MenuButton(
                 text =
                     "RESET TO DEFAULTS",
@@ -600,7 +628,8 @@ class SettingsScreen(
                 "Display Mode",
                 "VSync",
                 "Screen Shake",
-                "Damage Numbers"
+                "Damage Numbers",
+                "Game Speed Button"
             )
 
         val oldScaleX =

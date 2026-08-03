@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.azizoglu.grisilith.weapon.runtime.WeaponHitEvent
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
+import com.azizoglu.grisilith.enemy.EnemyType
 
 class Projectile(
     startX: Float,
@@ -52,7 +53,19 @@ class Projectile(
 
     wallBounceCount: Int = 0,
 
-    sizeMultiplier: Float = 1f
+    sizeMultiplier: Float = 1f,
+
+    private val activationDelaySeconds:
+    Float = 0f,
+
+    private val isHeavyBolt:
+    Boolean = false,
+
+    private val firstTargetBossDamageMultiplier:
+    Float = 1f,
+
+    private val carryFirstNormalTarget:
+    Boolean = false
 ) {
 
     private val position =
@@ -60,6 +73,16 @@ class Projectile(
             startX,
             startY
         )
+
+    private var activationDelayRemaining =
+        activationDelaySeconds
+            .coerceAtLeast(
+                0f
+            )
+
+    private var carriedEnemy:
+        Enemy? =
+        null
 
     private val velocity =
         Vector2(
@@ -147,6 +170,22 @@ class Projectile(
             return
         }
 
+        if (
+            activationDelayRemaining >
+            0f
+        ) {
+            activationDelayRemaining =
+                (
+                    activationDelayRemaining -
+                        delta
+                    )
+                    .coerceAtLeast(
+                        0f
+                    )
+
+            return
+        }
+
         val movementX =
             velocity.x * delta
 
@@ -158,6 +197,29 @@ class Projectile(
             movementY
         )
 
+        carriedEnemy
+            ?.let { enemy ->
+                if (enemy.isDead) {
+                    releaseCarriedEnemy()
+                } else {
+                    enemy.updateHeavyBoltCarryPosition(
+                        centerX =
+                            position.x +
+                                size / 2f,
+
+                        centerY =
+                            position.y +
+                                size / 2f,
+
+                        worldWidth =
+                            worldWidth,
+
+                        worldHeight =
+                            worldHeight
+                    )
+                }
+            }
+
         travelledDistance +=
             Vector2.len(
                 movementX,
@@ -168,7 +230,7 @@ class Projectile(
             travelledDistance >=
             currentMaximumTravelDistance
         ) {
-            isActive = false
+            deactivate()
             return
         }
 
@@ -230,7 +292,7 @@ class Projectile(
         }
 
         if (remainingWallBounces <= 0) {
-            isActive = false
+            deactivate()
             return
         }
 
@@ -261,7 +323,9 @@ class Projectile(
     ) {
         if (
             !isActive ||
-            ignoresEnemyCollisions
+            ignoresEnemyCollisions ||
+            activationDelayRemaining >
+            0f
         ) {
             return
         }
@@ -289,9 +353,33 @@ class Projectile(
             val wasAliveBeforeHit =
                 !enemy.isDead
 
+            val isFirstTarget =
+                successfulHitCount ==
+                    0
+
+            val isFirstTargetBoss =
+                isFirstTarget &&
+                    enemy.type in
+                    setOf(
+                        EnemyType.MINI_BOSS,
+                        EnemyType.FINAL_BOSS
+                    )
+
             val hitDamage =
-                if (successfulHitCount == 0) {
-                    damage
+                if (isFirstTarget) {
+                    if (
+                        isHeavyBolt &&
+                        isFirstTargetBoss
+                    ) {
+                        (
+                            damage *
+                                firstTargetBossDamageMultiplier
+                            )
+                            .toInt()
+                            .coerceAtLeast(1)
+                    } else {
+                        damage
+                    }
                 } else {
                     (
                         damage *
@@ -342,6 +430,23 @@ class Projectile(
             }
 
             if (
+                isHeavyBolt &&
+                isFirstTarget &&
+                carryFirstNormalTarget &&
+                !enemy.isDead &&
+                enemy.type in
+                setOf(
+                    EnemyType.NORMAL,
+                    EnemyType.UNIQUE
+                )
+            ) {
+                carriedEnemy =
+                    enemy
+
+                enemy.beginHeavyBoltCarry()
+            }
+
+            if (
                 wasAliveBeforeHit &&
                 enemy.isDead
             ) {
@@ -380,7 +485,10 @@ class Projectile(
             }
 
             successfulHitCount++
-            remainingTargets--
+
+            if (!isHeavyBolt) {
+                remainingTargets--
+            }
 
             /*
  * Sekme hedefleri yalnızca ilk isabet
@@ -434,7 +542,7 @@ class Projectile(
                 ricochetRange > 0f &&
                 successfulHitCount >= 1
             ) {
-                isActive = false
+                deactivate()
                 return
             }
 
@@ -451,11 +559,58 @@ class Projectile(
             }
 
             if (remainingTargets <= 0) {
-                isActive = false
+                deactivate()
             }
 
             return
         }
+    }
+
+    fun checkObstacleCollision(
+        obstacleBounds:
+        List<Rectangle>
+    ) {
+        if (
+            !isActive ||
+            activationDelayRemaining >
+            0f
+        ) {
+            return
+        }
+
+        collisionBounds.set(
+            position.x,
+            position.y,
+            size,
+            size
+        )
+
+        if (
+            obstacleBounds.any {
+                collisionBounds.overlaps(it)
+            }
+        ) {
+            deactivate()
+        }
+    }
+
+    private fun deactivate() {
+        if (!isActive) {
+            return
+        }
+
+        isActive =
+            false
+
+        releaseCarriedEnemy()
+    }
+
+    private fun releaseCarriedEnemy() {
+        carriedEnemy
+            ?.endHeavyBoltCarry()
+
+        carriedEnemy =
+            null
     }
 
     private fun queueRicochetTargets(
@@ -572,7 +727,9 @@ class Projectile(
     ) {
         if (
             !isActive ||
-            ignoresEnemyCollisions
+            ignoresEnemyCollisions ||
+            activationDelayRemaining >
+            0f
         ) {
             return
         }
@@ -589,6 +746,19 @@ class Projectile(
     }
 
     private fun projectileColor(): Color {
+        if (isHeavyBolt) {
+            return if (isCriticalHit) {
+                Color.GOLD
+            } else {
+                Color(
+                    0.60f,
+                    0.60f,
+                    0.68f,
+                    1f
+                )
+            }
+        }
+
         if (isCriticalHit) {
             return Color.GOLD
         }

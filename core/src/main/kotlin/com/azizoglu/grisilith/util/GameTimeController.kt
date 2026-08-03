@@ -36,25 +36,18 @@ class GameTimeController {
         return gameDelta
     }
 
-    companion object {
-        val ALLOWED_GAME_SPEEDS = setOf(
-            0.5f,
-            1f,
-            2f,
-            3f
-        )
-    }
-
     fun restoreElapsedGameTime(
         elapsedSeconds: Float
     ) {
         elapsedGameTime =
-            elapsedSeconds
-                .coerceAtLeast(
-                    0f
-                )
+            elapsedSeconds.coerceAtLeast(0f)
+    }
 
-        isPaused =
-            false
+    companion object {
+        val ALLOWED_GAME_SPEEDS = setOf(
+            0.5f,
+            1f,
+            2f
+        )
     }
 }

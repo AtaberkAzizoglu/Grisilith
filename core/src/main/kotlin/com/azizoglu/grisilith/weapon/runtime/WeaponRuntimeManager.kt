@@ -7,6 +7,7 @@ import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.tamga.runtime.TamgaRuntimeManager
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
+import com.azizoglu.grisilith.weapon.skill.DefensiveLineRuntime
 
 class WeaponRuntimeManager(
     private val inventory:
@@ -16,7 +17,10 @@ class WeaponRuntimeManager(
     PlayerStats,
 
     private val tamgaRuntimeManager:
-    TamgaRuntimeManager
+    TamgaRuntimeManager,
+
+    private val currentStageProvider:
+        () -> Int = { 1 }
 ) {
 
     private val runtimesByWeapon =
@@ -36,6 +40,13 @@ class WeaponRuntimeManager(
             playerStats = playerStats
         )
 
+    private val defensiveLineRuntime =
+        DefensiveLineRuntime(
+            playerStats = playerStats,
+            currentStageProvider =
+                currentStageProvider
+        )
+
     fun update(
         delta: Float,
         player: Player,
@@ -51,6 +62,13 @@ class WeaponRuntimeManager(
 
         statBonusSynchronizer
             .synchronize()
+
+        defensiveLineRuntime.update(
+            delta = delta,
+            player = player,
+            equippedWeapons =
+                inventory.allWeapons()
+        )
 
         /*
          * Runtime'ları map sırasıyla değil gerçek
@@ -197,6 +215,8 @@ class WeaponRuntimeManager(
     }
 
     fun resetAllTimers() {
+        defensiveLineRuntime.reset()
+
         runtimesByWeapon.values
             .forEach { runtime ->
                 runtime.resetTimer()

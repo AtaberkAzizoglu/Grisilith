@@ -48,6 +48,9 @@ class Enemy(
     private var executionMarkRemainingSeconds =
         0f
 
+    private var carriedByHeavyBolt =
+        false
+
     private val collisionBounds = Rectangle()
 
     private val contactDamageTimer = ContactDamageTimer(
@@ -119,6 +122,11 @@ class Enemy(
         }
 
         if (isDead) {
+            conditions.clear()
+            return
+        }
+
+        if (carriedByHeavyBolt) {
             conditions.clear()
             return
         }
@@ -312,6 +320,60 @@ class Enemy(
         get() =
             executionMarkRemainingSeconds >
                 0f
+
+    val isCarriedByHeavyBolt:
+        Boolean
+        get() =
+            carriedByHeavyBolt
+
+    fun beginHeavyBoltCarry() {
+        carriedByHeavyBolt =
+            true
+    }
+
+    fun updateHeavyBoltCarryPosition(
+        centerX: Float,
+        centerY: Float,
+        worldWidth: Float,
+        worldHeight: Float
+    ) {
+        if (!carriedByHeavyBolt) {
+            return
+        }
+
+        position.x =
+            (
+                centerX -
+                    size / 2f
+                )
+                .coerceIn(
+                    0f,
+                    (
+                        worldWidth -
+                            size
+                        )
+                        .coerceAtLeast(0f)
+                )
+
+        position.y =
+            (
+                centerY -
+                    size / 2f
+                )
+                .coerceIn(
+                    0f,
+                    (
+                        worldHeight -
+                            size
+                        )
+                        .coerceAtLeast(0f)
+                )
+    }
+
+    fun endHeavyBoltCarry() {
+        carriedByHeavyBolt =
+            false
+    }
 
     fun applyCondition(
         conditionType: ConditionType,

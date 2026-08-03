@@ -45,6 +45,12 @@ class PlayerStats(
     private val activeTamgaBonuses =
         mutableMapOf<StatType, Int>()
 
+    private val weaponSkillBonuses =
+        mutableMapOf<StatType, Int>()
+
+    private val weaponSkillBonusLimits =
+        mutableMapOf<StatType, Int>()
+
     init {
         StatType.entries.forEach { statType ->
             val initialValue =
@@ -62,6 +68,8 @@ class PlayerStats(
             runBonuses[statType] = 0
             tamgaBonuses[statType] = 0
             activeTamgaBonuses[statType] = 0
+            weaponSkillBonuses[statType] = 0
+            weaponSkillBonusLimits[statType] = 0
         }
     }
 
@@ -111,6 +119,61 @@ class PlayerStats(
         return activeTamgaBonuses[statType] ?: 0
     }
 
+    fun weaponSkillBonus(
+        statType: StatType
+    ): Int {
+        return weaponSkillBonuses[statType] ?: 0
+    }
+
+    fun weaponSkillBonusLimit(
+        statType: StatType
+    ): Int {
+
+        return weaponSkillBonusLimits[
+            statType
+        ] ?: 0
+    }
+
+    fun setWeaponSkillBonuses(
+        bonuses: Map<StatType, Int>,
+        limits: Map<StatType, Int> =
+            emptyMap()
+    ) {
+
+        StatType.entries
+            .forEach { statType ->
+
+                weaponSkillBonuses[
+                    statType
+                ] =
+                    bonuses[
+                        statType
+                    ] ?: 0
+
+                weaponSkillBonusLimits[
+                    statType
+                ] =
+                    limits[
+                        statType
+                    ] ?: 0
+            }
+    }
+
+    fun clearWeaponSkillBonuses() {
+
+        StatType.entries
+            .forEach { statType ->
+
+                weaponSkillBonuses[
+                    statType
+                ] = 0
+
+                weaponSkillBonusLimits[
+                    statType
+                ] = 0
+            }
+    }
+
     fun totalScore(
         statType: StatType
     ): Int {
@@ -122,6 +185,9 @@ class PlayerStats(
                     statType
                 ) +
                 activeTamgaBonus(
+                    statType
+                ) +
+                weaponSkillBonus(
                     statType
                 )
             )
