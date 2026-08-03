@@ -9,6 +9,8 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
 import com.badlogic.gdx.math.Vector2
+import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
+import kotlin.math.roundToInt
 
 class DaggerAttackExecutor(
     private val damageCalculator:
@@ -20,6 +22,11 @@ class DaggerAttackExecutor(
     private val playerStats:
     PlayerStats
 ) : WeaponAttackExecutor {
+
+    private data class AbilityDamageResult(
+        val damage: Int,
+        val abilityTriggered: Boolean
+    )
 
     override fun execute(
         context: WeaponAttackContext
@@ -157,6 +164,67 @@ class DaggerAttackExecutor(
         }
     }
 
+    private fun abilityModifiedDamage(
+        context: WeaponAttackContext,
+        baseDamage: Int,
+        isCriticalHit: Boolean
+    ): AbilityDamageResult {
+
+        if (
+            !isCriticalHit ||
+            context.weapon
+                .unlockedAbility
+                ?.id !=
+            DefaultWeaponAbilities
+                .ASSASSINATE_ID
+        ) {
+            return AbilityDamageResult(
+                damage =
+                    baseDamage
+                        .coerceAtLeast(
+                            1
+                        ),
+
+                abilityTriggered =
+                    false
+            )
+        }
+
+        val activated =
+            context.triggerAutomaticAbility()
+
+        if (
+            !activated
+        ) {
+            return AbilityDamageResult(
+                damage =
+                    baseDamage
+                        .coerceAtLeast(
+                            1
+                        ),
+
+                abilityTriggered =
+                    false
+            )
+        }
+
+        return AbilityDamageResult(
+            damage =
+                (
+                    baseDamage *
+                        DefaultWeaponAbilities
+                            .ASSASSINATE_DAMAGE_MULTIPLIER
+                    )
+                    .roundToInt()
+                    .coerceAtLeast(
+                        1
+                    ),
+
+            abilityTriggered =
+                true
+        )
+    }
+
     private fun executeMeleeAttack(
         context: WeaponAttackContext,
         target: Enemy
@@ -179,11 +247,23 @@ class DaggerAttackExecutor(
         val wasAliveBeforeAttack =
             !target.isDead
 
+        val abilityDamage =
+            abilityModifiedDamage(
+                context =
+                    context,
+
+                baseDamage =
+                    damageResult.damage,
+
+                isCriticalHit =
+                    damageResult.isCriticalHit
+            )
+
         val finalDamage =
             context.modifiedDamageAgainst(
                 enemy = target,
                 baseDamage =
-                    damageResult.damage
+                    abilityDamage.damage
             )
 
         val appliedDamage =
@@ -253,6 +333,18 @@ class DaggerAttackExecutor(
 
         val levelStats =
             context.weapon.currentLevelStats
+
+        val projectileDamage =
+            abilityModifiedDamage(
+                context =
+                    context,
+
+                baseDamage =
+                    damageResult.damage,
+
+                isCriticalHit =
+                    damageResult.isCriticalHit
+            )
 
         val statAdditionalTargets =
             (
@@ -348,7 +440,7 @@ class DaggerAttackExecutor(
                     context.weaponSlotIndex,
 
                 damage =
-                    damageResult.damage,
+                    projectileDamage.damage,
 
                 isCriticalHit =
                     damageResult.isCriticalHit,
@@ -372,7 +464,18 @@ class DaggerAttackExecutor(
                         definition.baseKnockback *
                             levelStats.knockbackMultiplier
                         )
-                        .coerceAtLeast(0f)
+                        .coerceAtLeast(0f),
+
+                sizeMultiplier =
+                    if (
+                        projectileDamage
+                            .abilityTriggered
+                    ) {
+                        DefaultWeaponAbilities
+                            .ASSASSINATE_PROJECTILE_SIZE_MULTIPLIER
+                    } else {
+                        1f
+                    }
             )
         )
     }

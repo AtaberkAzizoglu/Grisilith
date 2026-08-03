@@ -45,6 +45,9 @@ class Enemy(
 
     private val size = stats.size
 
+    private var executionMarkRemainingSeconds =
+        0f
+
     private val collisionBounds = Rectangle()
 
     private val contactDamageTimer = ContactDamageTimer(
@@ -101,6 +104,20 @@ class Enemy(
         targetBounds: Rectangle,
         onContactDamage: (Int) -> Unit
     ) {
+        if (
+            executionMarkRemainingSeconds >
+            0f
+        ) {
+            executionMarkRemainingSeconds =
+                (
+                    executionMarkRemainingSeconds -
+                        delta
+                    )
+                    .coerceAtLeast(
+                        0f
+                    )
+        }
+
         if (isDead) {
             conditions.clear()
             return
@@ -280,6 +297,22 @@ class Enemy(
         return health.takeDamage(amount)
     }
 
+    fun markExecuted(
+        durationSeconds: Float = 0.45f
+    ) {
+        executionMarkRemainingSeconds =
+            durationSeconds
+                .coerceAtLeast(
+                    0f
+                )
+    }
+
+    val shouldRemainForExecutionMark:
+        Boolean
+        get() =
+            executionMarkRemainingSeconds >
+                0f
+
     fun applyCondition(
         conditionType: ConditionType,
         durationSeconds: Float? = null
@@ -359,6 +392,10 @@ class Enemy(
 
     fun render(shapeRenderer: ShapeRenderer) {
         if (isDead) {
+            renderExecutionMark(
+                shapeRenderer
+            )
+
             return
         }
 
@@ -445,6 +482,57 @@ class Enemy(
             position.y,
             borderThickness,
             size
+        )
+    }
+
+    private fun renderExecutionMark(
+        shapeRenderer: ShapeRenderer
+    ) {
+        if (
+            executionMarkRemainingSeconds <=
+            0f
+        ) {
+            return
+        }
+
+        val padding =
+            size * 0.18f
+
+        val minimumX =
+            position.x +
+                padding
+
+        val minimumY =
+            position.y +
+                padding
+
+        val maximumX =
+            position.x +
+                size -
+                padding
+
+        val maximumY =
+            position.y +
+                size -
+                padding
+
+        shapeRenderer.color =
+            Color.RED
+
+        shapeRenderer.rectLine(
+            minimumX,
+            minimumY,
+            maximumX,
+            maximumY,
+            4f
+        )
+
+        shapeRenderer.rectLine(
+            minimumX,
+            maximumY,
+            maximumX,
+            minimumY,
+            4f
         )
     }
 

@@ -4,6 +4,8 @@ import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
+import com.azizoglu.grisilith.enemy.EnemyType
+import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
 
 object WeaponAreaAttackHelper {
 
@@ -52,14 +54,58 @@ object WeaponAreaAttackHelper {
         val wasAliveBeforeAttack =
             !enemy.isDead
 
-        val appliedDamage =
+        var totalAppliedDamage =
             enemy.takeDamage(
                 finalDamage
             )
 
-        if (appliedDamage > 0) {
+        /*
+         * Executioner:
+         * A Level 5 Longsword immediately finishes NORMAL and
+         * UNIQUE enemies that survive the hit at or below 15% HP.
+         *
+         * Boss and Mini Boss enemies are explicitly excluded.
+         * The ability is consumed only when an actual execution
+         * can happen, then enters its 5 second cooldown.
+         */
+        val canBeExecuted =
+            !enemy.isDead &&
+                enemy.type in
+                setOf(
+                    EnemyType.NORMAL,
+                    EnemyType.UNIQUE
+                ) &&
+                enemy.health.healthRatio <=
+                DefaultWeaponAbilities
+                    .EXECUTIONER_HEALTH_THRESHOLD
+
+        val isExecutionerWeapon =
+            context.weapon
+                .unlockedAbility
+                ?.id ==
+                DefaultWeaponAbilities
+                    .EXECUTIONER_ID
+
+        if (
+            canBeExecuted &&
+            isExecutionerWeapon &&
+            context.triggerAutomaticAbility()
+        ) {
+            enemy.markExecuted()
+
+            totalAppliedDamage +=
+                enemy.takeDamage(
+                    enemy.health
+                        .currentHealth
+                )
+        }
+
+        if (
+            totalAppliedDamage >
+            0
+        ) {
             context.onDamageDealt(
-                appliedDamage,
+                totalAppliedDamage,
                 context.weapon.displayName
             )
 
@@ -91,7 +137,7 @@ object WeaponAreaAttackHelper {
         context.reportWeaponHit(
             enemy = enemy,
             appliedDamage =
-                appliedDamage,
+                totalAppliedDamage,
             damageType =
                 damageType
         )

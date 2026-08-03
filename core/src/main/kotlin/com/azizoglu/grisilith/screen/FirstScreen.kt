@@ -1635,12 +1635,26 @@ class FirstScreen(
             stageController.isRunComplete
         ) {
 
-            if (!isRunSummaryOpen) {
+            if (
+                !isRunSummaryOpen
+            ) {
 
+                /*
+                 * Önce run sonunda kalıcı hâle gelmesi gereken
+                 * ödül ve istatistikleri kaydediyoruz.
+                 */
                 runRewardTracker
                     .commitToProfile()
 
                 commitCareerStatistics()
+
+                /*
+                 * Run artık başarıyla veya başarısızlıkla sona erdi.
+                 * Devam ettirilebilecek aktif bir checkpoint kalmadığı
+                 * için Load Game save'i tamamen silinir.
+                 */
+                RunSaveRepository
+                    .delete()
             }
 
             isRunSummaryOpen =

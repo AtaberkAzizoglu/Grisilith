@@ -141,6 +141,11 @@ class WeaponRuntime(
                         baseRange +
                             tamgaRuntimeManager
                                 .weaponRangeBonusPixels()
+                    },
+
+                    tryTriggerAutomaticAbility = {
+                        abilityRuntime
+                            .triggerAutomatic()
                     }
                 )
             )

@@ -50,7 +50,9 @@ class Projectile(
     private val ignoresEnemyCollisions:
     Boolean = false,
 
-    wallBounceCount: Int = 0
+    wallBounceCount: Int = 0,
+
+    sizeMultiplier: Float = 1f
 ) {
 
     private val position =
@@ -66,11 +68,17 @@ class Projectile(
         )
 
     private val size =
-        if (isCriticalHit) {
-            15f
-        } else {
-            11f
-        }
+        (
+            if (isCriticalHit) {
+                15f
+            } else {
+                11f
+            }
+            ) *
+            sizeMultiplier
+                .coerceAtLeast(
+                    0.1f
+                )
 
     private val collisionBounds =
         Rectangle()

@@ -40,7 +40,15 @@ data class WeaponAttackContext(
 
     val modifyWeaponRange: (
         baseRange: Float
-    ) -> Float
+    ) -> Float,
+
+    /*
+     * Attempts to consume the current weapon's automatic
+     * Level 5 ability. Returns true only if that ability is
+     * unlocked, ready and successfully triggered.
+     */
+    val tryTriggerAutomaticAbility:
+        () -> Boolean
 ) {
 
     fun modifiedDamageAgainst(
@@ -68,6 +76,12 @@ data class WeaponAttackContext(
 
         return modifyWeaponRange(baseRange)
             .coerceAtLeast(0f)
+    }
+
+    fun triggerAutomaticAbility():
+        Boolean {
+
+        return tryTriggerAutomaticAbility()
     }
 
     fun reportWeaponHit(

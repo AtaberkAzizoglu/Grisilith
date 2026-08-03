@@ -117,7 +117,10 @@ class EnemyManager {
             val enemy =
                 iterator.next()
 
-            if (!enemy.isDead) {
+            if (
+                !enemy.isDead ||
+                enemy.shouldRemainForExecutionMark
+            ) {
                 continue
             }
 
