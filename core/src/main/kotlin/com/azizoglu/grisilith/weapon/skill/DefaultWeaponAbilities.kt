@@ -2,6 +2,31 @@ package com.azizoglu.grisilith.weapon.skill
 
 object DefaultWeaponAbilities {
 
+    const val STATIC_CLOUDS_ID =
+        "WPN_ABILITY_STATIC_CLOUDS"
+
+    const val STATIC_CLOUDS_DURATION_SECONDS =
+        5f
+
+    /*
+     * Kaynak tasarım 30-45 saniye aralığı veriyor.
+     * İlk sabit denge değeri olarak orta nokta kullanılır.
+     */
+    const val STATIC_CLOUDS_COOLDOWN_SECONDS =
+        38f
+
+    const val STATIC_CLOUDS_RADIUS =
+        145f
+
+    const val STATIC_CLOUDS_TICK_SECONDS =
+        0.50f
+
+    const val STATIC_CLOUDS_LIGHTNING_DPS_MULTIPLIER =
+        0.55f
+
+    const val STATIC_CLOUDS_STUN_CHANCE =
+        0.05f
+
     const val VORTEX_PULL_ID =
         "WPN_ABILITY_VORTEX_PULL"
 
@@ -123,6 +148,25 @@ object DefaultWeaponAbilities {
 
     const val ASSASSINATE_PROJECTILE_SIZE_MULTIPLIER =
         1.8f
+
+    val staticClouds =
+        WeaponAbilityDefinition(
+            id =
+                STATIC_CLOUDS_ID,
+
+            displayName =
+                "Static Clouds",
+
+            activationType =
+                WeaponAbilityActivationType
+                    .ACTIVE,
+
+            cooldownSeconds =
+                STATIC_CLOUDS_COOLDOWN_SECONDS,
+
+            durationSeconds =
+                STATIC_CLOUDS_DURATION_SECONDS
+        )
 
     val vortexPull =
         WeaponAbilityDefinition(

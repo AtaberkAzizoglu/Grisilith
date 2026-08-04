@@ -16,6 +16,8 @@ import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
 import com.azizoglu.grisilith.weapon.skill.VortexPullRuntime
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import kotlin.math.roundToInt
+import com.azizoglu.grisilith.weapon.skill.StaticCloudsRuntime
+import com.azizoglu.grisilith.weapon.skill.area.PersistentAreaManager
 
 class WeaponRuntimeManager(
     private val inventory:
@@ -69,12 +71,25 @@ class WeaponRuntimeManager(
     private val vortexPullRuntime =
         VortexPullRuntime()
 
+    private val persistentAreaManager =
+        PersistentAreaManager()
+
+    private val staticCloudsRuntime =
+        StaticCloudsRuntime(
+            areaManager =
+                persistentAreaManager
+        )
+
     private var vortexWeaponRuntime:
         WeaponRuntime? =
         null
 
     private var vortexWeapon:
         WeaponInstance? =
+        null
+
+    private var staticCloudsWeaponRuntime:
+        WeaponRuntime? =
         null
 
     fun update(
@@ -198,6 +213,29 @@ class WeaponRuntimeManager(
                     null
 
                 vortexWeapon =
+                    null
+            }
+        )
+
+        staticCloudsRuntime.update(
+            delta =
+                delta,
+
+            player =
+                player,
+
+            onTick = {
+                /*
+                 * Part 8B:
+                 * Lightning DPS ve %5 Stun buraya bağlanacak.
+                 */
+            },
+
+            onCompleted = {
+                staticCloudsWeaponRuntime
+                    ?.endActiveAbilityEarly()
+
+                staticCloudsWeaponRuntime =
                     null
             }
         )
@@ -338,6 +376,18 @@ class WeaponRuntimeManager(
                 )
             }
 
+            DefaultWeaponAbilities
+                .STATIC_CLOUDS_ID -> {
+
+                tryActivateStaticClouds(
+                    weaponRuntime =
+                        runtime,
+
+                    player =
+                        player
+                )
+            }
+
             else -> {
                 runtime
                     .tryActivateAbility()
@@ -403,6 +453,43 @@ class WeaponRuntimeManager(
 
         vortexWeapon =
             weaponRuntime.weapon
+
+        return true
+    }
+
+    private fun tryActivateStaticClouds(
+        weaponRuntime: WeaponRuntime,
+        player: Player
+    ): Boolean {
+        if (
+            weaponRuntime.abilityState !=
+            WeaponAbilityState.READY ||
+            staticCloudsRuntime.isActive
+        ) {
+            return false
+        }
+
+        val areaStarted =
+            staticCloudsRuntime
+                .tryBegin(
+                    player
+                )
+
+        if (!areaStarted) {
+            return false
+        }
+
+        val activated =
+            weaponRuntime
+                .tryActivateAbility()
+
+        if (!activated) {
+            staticCloudsRuntime.clear()
+            return false
+        }
+
+        staticCloudsWeaponRuntime =
+            weaponRuntime
 
         return true
     }
@@ -518,6 +605,9 @@ class WeaponRuntimeManager(
         vortexWeaponRuntime = null
         vortexWeapon = null
 
+        staticCloudsRuntime.clear()
+        staticCloudsWeaponRuntime = null
+
         runtimesByWeapon.values
             .forEach {
                     runtime ->
@@ -545,6 +635,11 @@ class WeaponRuntimeManager(
         )
 
         vortexPullRuntime.render(
+            shapeRenderer =
+                shapeRenderer
+        )
+
+        staticCloudsRuntime.render(
             shapeRenderer =
                 shapeRenderer
         )
@@ -628,6 +723,10 @@ class WeaponRuntimeManager(
         vortexPullRuntime.clear()
         vortexWeaponRuntime = null
         vortexWeapon = null
+
+        staticCloudsRuntime.clear()
+        staticCloudsWeaponRuntime = null
+        persistentAreaManager.clearAll()
 
         runtimesByWeapon.values
             .forEach { runtime ->
