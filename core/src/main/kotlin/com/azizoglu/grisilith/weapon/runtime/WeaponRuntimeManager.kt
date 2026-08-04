@@ -12,6 +12,10 @@ import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.weapon.skill.IgniteDashRuntime
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
+import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
+import com.azizoglu.grisilith.weapon.skill.VortexPullRuntime
+import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
+import kotlin.math.roundToInt
 
 class WeaponRuntimeManager(
     private val inventory:
@@ -38,6 +42,11 @@ class WeaponRuntimeManager(
             playerStats = playerStats
         )
 
+    private val activeSkillDamageCalculator =
+        WeaponDamageCalculator(
+            playerStats
+        )
+
     private val statBonusSynchronizer =
         WeaponStatBonusSynchronizer(
             inventory = inventory,
@@ -56,6 +65,17 @@ class WeaponRuntimeManager(
             playerStats =
                 playerStats
         )
+
+    private val vortexPullRuntime =
+        VortexPullRuntime()
+
+    private var vortexWeaponRuntime:
+        WeaponRuntime? =
+        null
+
+    private var vortexWeapon:
+        WeaponInstance? =
+        null
 
     fun update(
         delta: Float,
@@ -109,6 +129,77 @@ class WeaponRuntimeManager(
 
             onEnemyKilled =
                 onEnemyKilled
+        )
+
+        vortexPullRuntime.update(
+            delta =
+                delta,
+
+            enemies =
+                enemyManager
+                    .allEnemies,
+
+            currentStage =
+                currentStageProvider(),
+
+            onPullEnemy = {
+                    enemy,
+                    centerX,
+                    centerY,
+                    pullMultiplier,
+                    frameDelta ->
+
+                enemy.pullToward(
+                    targetCenterX =
+                        centerX,
+
+                    targetCenterY =
+                        centerY,
+
+                    pullSpeedPixelsPerSecond =
+                        VORTEX_BASE_PULL_SPEED *
+                            pullMultiplier,
+
+                    delta =
+                        frameDelta,
+
+                    worldWidth =
+                        worldWidth,
+
+                    worldHeight =
+                        worldHeight
+                )
+            },
+
+            onDamageTick = {
+                    enemy,
+                    tickIntervalSeconds ->
+
+                applyVortexDamageTick(
+                    enemy =
+                        enemy,
+
+                    tickIntervalSeconds =
+                        tickIntervalSeconds,
+
+                    onDamageDealt =
+                        onDamageDealt,
+
+                    onEnemyKilled =
+                        onEnemyKilled
+                )
+            },
+
+            onCompleted = {
+                vortexWeaponRuntime
+                    ?.endActiveAbilityEarly()
+
+                vortexWeaponRuntime =
+                    null
+
+                vortexWeapon =
+                    null
+            }
         )
 
         /*
@@ -185,7 +276,11 @@ class WeaponRuntimeManager(
     }
 
     fun tryActivateAbilityInSlot(
-        slotIndex: Int
+        slotIndex: Int,
+        player: Player,
+        enemyManager: EnemyManager,
+        worldWidth: Float,
+        worldHeight: Float
     ): Boolean {
 
         synchronizeWithInventory()
@@ -202,14 +297,205 @@ class WeaponRuntimeManager(
             ]
                 ?: return false
 
-        return igniteDashRuntime
-            .handleActivation(
-                weapon =
-                    weapon,
+        val ability =
+            weapon.unlockedAbility
+                ?: return false
 
-                weaponRuntime =
-                    runtime
+        return when (
+            ability.id
+        ) {
+            DefaultWeaponAbilities
+                .IGNITE_DASH_ID -> {
+
+                igniteDashRuntime
+                    .handleActivation(
+                        weapon =
+                            weapon,
+
+                        weaponRuntime =
+                            runtime
+                    )
+            }
+
+            DefaultWeaponAbilities
+                .VORTEX_PULL_ID -> {
+
+                tryActivateVortexPull(
+                    weaponRuntime =
+                        runtime,
+
+                    player =
+                        player,
+
+                    enemyManager =
+                        enemyManager,
+
+                    worldWidth =
+                        worldWidth,
+
+                    worldHeight =
+                        worldHeight
+                )
+            }
+
+            else -> {
+                runtime
+                    .tryActivateAbility()
+            }
+        }
+    }
+
+    private fun tryActivateVortexPull(
+        weaponRuntime: WeaponRuntime,
+        player: Player,
+        enemyManager: EnemyManager,
+        worldWidth: Float,
+        worldHeight: Float
+    ): Boolean {
+        if (
+            weaponRuntime.abilityState !=
+            WeaponAbilityState.READY ||
+            vortexPullRuntime.isActive
+        ) {
+            return false
+        }
+
+        /*
+         * Önce uygun alan ve hedef kontrol edilir.
+         * Başarısızsa WeaponAbilityRuntime ACTIVE yapılmadığı için
+         * cooldown başlamaz.
+         */
+        val areaStarted =
+            vortexPullRuntime
+                .tryBegin(
+                    playerCenterX =
+                        player.centerX,
+
+                    playerCenterY =
+                        player.centerY,
+
+                    enemies =
+                        enemyManager
+                            .allEnemies,
+
+                    worldWidth =
+                        worldWidth,
+
+                    worldHeight =
+                        worldHeight
+                )
+
+        if (!areaStarted) {
+            return false
+        }
+
+        val abilityActivated =
+            weaponRuntime
+                .tryActivateAbility()
+
+        if (!abilityActivated) {
+            vortexPullRuntime.clear()
+            return false
+        }
+
+        vortexWeaponRuntime =
+            weaponRuntime
+
+        vortexWeapon =
+            weaponRuntime.weapon
+
+        return true
+    }
+
+    private fun applyVortexDamageTick(
+        enemy: Enemy,
+        tickIntervalSeconds: Float,
+        onDamageDealt: (
+            damage: Int,
+            weaponName: String
+        ) -> Unit,
+        onEnemyKilled: (Enemy) -> Unit
+    ) {
+        val weapon =
+            vortexWeapon
+                ?: return
+
+        if (
+            enemy.isDead ||
+            tickIntervalSeconds <=
+            0f
+        ) {
+            return
+        }
+
+        val calculatedDamage =
+            activeSkillDamageCalculator
+                .calculate(
+                    weapon
+                )
+                .damage
+
+        /*
+         * Sabit tick aralığı kullandığımız için multiplier
+         * DPS olarak değerlendirilir.
+         *
+         * Örnek:
+         * normal damage 20,
+         * DPS multiplier 0.85,
+         * tick 0.25 sn
+         * -> tick başına yaklaşık 4 damage.
+         */
+        val rawTickDamage =
+            (
+                calculatedDamage *
+                    DefaultWeaponAbilities
+                        .VORTEX_PULL_DAMAGE_PER_SECOND_MULTIPLIER *
+                    tickIntervalSeconds
+                )
+                .roundToInt()
+                .coerceAtLeast(
+                    1
+                )
+
+        val modifiedDamage =
+            tamgaRuntimeManager
+                .modifyWeaponDamage(
+                    enemy =
+                        enemy,
+
+                    baseDamage =
+                        rawTickDamage
+                )
+                .coerceAtLeast(
+                    1
+                )
+
+        val wasAlive =
+            !enemy.isDead
+
+        val appliedDamage =
+            enemy.takeDamage(
+                modifiedDamage
             )
+
+        if (
+            appliedDamage >
+            0
+        ) {
+            onDamageDealt(
+                appliedDamage,
+                weapon.displayName
+            )
+        }
+
+        if (
+            wasAlive &&
+            enemy.isDead
+        ) {
+            onEnemyKilled(
+                enemy
+            )
+        }
     }
 
     fun updateActiveSkillAim(
@@ -228,6 +514,9 @@ class WeaponRuntimeManager(
 
     fun cancelActiveAbilities() {
         igniteDashRuntime.cancel()
+        vortexPullRuntime.clear()
+        vortexWeaponRuntime = null
+        vortexWeapon = null
 
         runtimesByWeapon.values
             .forEach {
@@ -253,6 +542,11 @@ class WeaponRuntimeManager(
 
             player =
                 player
+        )
+
+        vortexPullRuntime.render(
+            shapeRenderer =
+                shapeRenderer
         )
     }
 
@@ -331,6 +625,9 @@ class WeaponRuntimeManager(
     fun resetAllTimers() {
         defensiveLineRuntime.reset()
         igniteDashRuntime.reset()
+        vortexPullRuntime.clear()
+        vortexWeaponRuntime = null
+        vortexWeapon = null
 
         runtimesByWeapon.values
             .forEach { runtime ->
@@ -349,4 +646,14 @@ class WeaponRuntimeManager(
     val activeRuntimeCount: Int
         get() =
             runtimesByWeapon.size
+
+    companion object {
+        /*
+         * Normal enemy için merkez yönündeki temel hız.
+         * Enemy type/stage dirençleri bu değeri çarpar.
+         */
+        private const val VORTEX_BASE_PULL_SPEED =
+            235f
+    }
+
 }

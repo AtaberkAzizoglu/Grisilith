@@ -408,6 +408,80 @@ class Enemy(
         )
     }
 
+    fun pullToward(
+        targetCenterX: Float,
+        targetCenterY: Float,
+        pullSpeedPixelsPerSecond: Float,
+        delta: Float,
+        worldWidth: Float,
+        worldHeight: Float
+    ) {
+        if (
+            isDead ||
+            carriedByHeavyBolt ||
+            pullSpeedPixelsPerSecond <=
+            0f ||
+            delta <=
+            0f
+        ) {
+            return
+        }
+
+        val direction =
+            Vector2(
+                targetCenterX -
+                    centerX,
+
+                targetCenterY -
+                    centerY
+            )
+
+        if (
+            direction.isZero(
+                0.001f
+            )
+        ) {
+            return
+        }
+
+        val remainingDistance =
+            direction.len()
+
+        val requestedMovement =
+            (
+                pullSpeedPixelsPerSecond *
+                    delta
+                )
+                .coerceAtMost(
+                    remainingDistance
+                )
+
+        direction.nor()
+
+        position.mulAdd(
+            direction,
+            requestedMovement
+        )
+
+        /*
+         * Vortex hareketi normal knockback ile kavga etmesin.
+         * Alan düşmanı çektiğinde mevcut knockback momentumu
+         * temizlenir.
+         */
+        knockbackVelocity.setZero()
+
+        knockbackTimeRemaining =
+            0f
+
+        keepInsideWorld(
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight
+        )
+    }
+
     fun applyKnockback(
         directionX: Float,
         directionY: Float,

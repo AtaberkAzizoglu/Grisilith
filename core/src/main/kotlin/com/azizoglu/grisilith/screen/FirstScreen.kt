@@ -1812,7 +1812,7 @@ class FirstScreen(
          */
         if (
             Gdx.input.isKeyJustPressed(
-                Input.Keys.Z
+                Input.Keys.Q
             )
         ) {
             tamgaRuntimeManager
@@ -1821,7 +1821,7 @@ class FirstScreen(
 
         if (
             Gdx.input.isKeyJustPressed(
-                Input.Keys.X
+                Input.Keys.E
             )
         ) {
             tamgaRuntimeManager
@@ -1914,17 +1914,17 @@ class FirstScreen(
     }
 
     private fun handleWeaponAbilityInput() {
-        val functionKeys =
+        val weaponSkillKeys =
             intArrayOf(
-                Input.Keys.F1,
-                Input.Keys.F2,
-                Input.Keys.F3,
-                Input.Keys.F4,
-                Input.Keys.F5,
-                Input.Keys.F6
+                Input.Keys.NUM_1,
+                Input.Keys.NUM_2,
+                Input.Keys.NUM_3,
+                Input.Keys.NUM_4,
+                Input.Keys.NUM_5,
+                Input.Keys.NUM_6
             )
 
-        functionKeys
+        weaponSkillKeys
             .forEachIndexed {
                     slotIndex,
                     keyCode ->
@@ -1937,7 +1937,20 @@ class FirstScreen(
                 ) {
                     weaponRuntimeManager
                         .tryActivateAbilityInSlot(
-                            slotIndex
+                            slotIndex =
+                                slotIndex,
+
+                            player =
+                                player,
+
+                            enemyManager =
+                                enemyManager,
+
+                            worldWidth =
+                                worldWidth,
+
+                            worldHeight =
+                                worldHeight
                         )
                 }
             }
@@ -1985,10 +1998,22 @@ class FirstScreen(
 
         weaponRuntimeManager
             .tryActivateAbilityInSlot(
-                clickedSlot
+                slotIndex =
+                    clickedSlot,
+
+                player =
+                    player,
+
+                enemyManager =
+                    enemyManager,
+
+                worldWidth =
+                    worldWidth,
+
+                worldHeight =
+                    worldHeight
             )
     }
-
     private fun handleActiveTamgaButtonInput() {
         if (
             !Gdx.input.justTouched()
@@ -4160,7 +4185,6 @@ class FirstScreen(
                 itemDefinition.id.value
             )
     }
-
     private fun handleMarketOfferDrop(
         offerIndex: Int,
         targetWeaponSlotIndex: Int?,
