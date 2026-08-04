@@ -2,6 +2,40 @@ package com.azizoglu.grisilith.weapon.skill
 
 object DefaultWeaponAbilities {
 
+    const val GLYPH_CASTING_ID =
+        "WPN_ABILITY_GLYPH_CASTING"
+
+    /*
+     * Glyph Motion en fazla 10 saniye boyunca çizim toplar.
+     *
+     * Başarı ve başarısızlık cooldown'ları klasik
+     * WeaponAbilityRuntime cooldown'undan ayrı yönetilecektir;
+     * çünkü sonuç çizim değerlendirildikten sonra belli olur.
+     */
+    const val GLYPH_CASTING_DRAW_DURATION_SECONDS =
+        10f
+
+    const val GLYPH_CASTING_SUCCESS_COOLDOWN_SECONDS =
+        30f
+
+    const val GLYPH_CASTING_FAILURE_COOLDOWN_SECONDS =
+        5f
+
+    const val GLYPH_TRAIL_DAMAGE_TICK_SECONDS =
+        1f
+
+    const val GLYPH_TRAIL_WISDOM_DAMAGE_MULTIPLIER =
+        0.35f
+
+    const val GLYPH_MINIMUM_DRAW_DURATION_SECONDS =
+        0.75f
+
+    const val GLYPH_MINIMUM_PATH_LENGTH =
+        120f
+
+    const val GLYPH_MINIMUM_POINT_COUNT =
+        12
+
     const val ERASING_SOULS_ID =
         "WPN_ABILITY_ERASING_SOULS"
 
@@ -238,6 +272,30 @@ object DefaultWeaponAbilities {
 
     const val ASSASSINATE_PROJECTILE_SIZE_MULTIPLIER =
         1.8f
+
+    val glyphCasting =
+        WeaponAbilityDefinition(
+            id =
+                GLYPH_CASTING_ID,
+
+            displayName =
+                "Glyph Casting",
+
+            activationType =
+                WeaponAbilityActivationType
+                    .ACTIVE,
+
+            /*
+             * Başarı/başarısızlık sonucuna göre 30/5 saniyelik
+             * cooldown Glyph Motion runtime tarafından uygulanır.
+             * Genel ability runtime burada ek cooldown başlatmaz.
+             */
+            cooldownSeconds =
+                0f,
+
+            durationSeconds =
+                GLYPH_CASTING_DRAW_DURATION_SECONDS
+        )
 
     val impaleAndDrag =
         WeaponAbilityDefinition(
