@@ -100,6 +100,7 @@ import com.azizoglu.grisilith.tamga.definition.DefaultTamgas
 import com.azizoglu.grisilith.settings.GameSettings
 import com.azizoglu.grisilith.screen.summon.ChooseToSummonPopup
 import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
+import com.azizoglu.grisilith.summon.SummonManager
 
 class FirstScreen(
     private val game: GrisilithGame,
@@ -271,6 +272,15 @@ class FirstScreen(
         )
 
     private val projectiles = mutableListOf<Projectile>()
+
+    private val summonManager =
+        SummonManager(
+            weaponInventory =
+                weaponInventory,
+
+            playerStats =
+                playerStats
+        )
 
     private val runStatistics = RunStatistics()
 
@@ -1402,6 +1412,7 @@ class FirstScreen(
         RunSaveSnapshot
     ) {
 
+        summonManager.clear()
         enemyManager.clearAll()
         projectiles.clear()
         goldCoinPickups.clear()
@@ -2420,6 +2431,23 @@ class FirstScreen(
                 delta
         )
 
+        summonManager.update(
+            delta =
+                delta,
+
+            playerCenterX =
+                player.centerX,
+
+            playerCenterY =
+                player.centerY,
+
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight
+        )
+
         tamgaRuntimeManager
             .updateChargerAfterMovement(
                 delta =
@@ -3084,6 +3112,7 @@ class FirstScreen(
                 completedStageType
         )
 
+        summonManager.clear()
         enemyManager.clearAll()
         projectiles.clear()
         synchronizeWeaponInventoryEffects()
@@ -3184,6 +3213,11 @@ class FirstScreen(
                         player =
                             player
                     )
+
+                summonManager.render(
+                    shapeRenderer =
+                        activeShapeRenderer
+                )
             }
         )
 
@@ -3555,6 +3589,7 @@ class FirstScreen(
             chestPickupManager
                 .clearUncollectedChests()
 
+            summonManager.clear()
             enemyManager.clearAll()
             projectiles.clear()
 
