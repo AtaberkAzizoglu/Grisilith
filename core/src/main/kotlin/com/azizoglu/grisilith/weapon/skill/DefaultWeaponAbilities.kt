@@ -2,6 +2,21 @@ package com.azizoglu.grisilith.weapon.skill
 
 object DefaultWeaponAbilities {
 
+    const val ERASING_SOULS_ID =
+        "WPN_ABILITY_ERASING_SOULS"
+
+    const val ERASING_SOULS_TRIGGER_RADIUS =
+        640f
+
+    const val ERASING_SOULS_EXPLOSION_RADIUS =
+        92f
+
+    const val ERASING_SOULS_DAMAGE_MULTIPLIER =
+        1f
+
+    const val ERASING_SOULS_NECROSIS_DURATION_SECONDS =
+        2f
+
     const val IMPALE_AND_DRAG_ID =
         "WPN_ABILITY_IMPALE_AND_DRAG"
 
@@ -318,4 +333,13 @@ object DefaultWeaponAbilities {
             cooldownSeconds =
                 ASSASSINATE_COOLDOWN_SECONDS
         )
+
+    val erasingSouls =
+        WeaponAbilityDefinition(
+            id = ERASING_SOULS_ID,
+            displayName = "Erasing the Souls",
+            activationType =
+                WeaponAbilityActivationType.PASSIVE
+        )
+
 }

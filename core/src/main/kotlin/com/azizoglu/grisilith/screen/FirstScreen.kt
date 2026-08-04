@@ -2751,18 +2751,35 @@ class FirstScreen(
     private fun handleEnemyKilled(
         killedEnemy: Enemy
     ) {
-        weaponRuntimeManager
-            .onEnemyKilledForActiveSkills(
-                killedEnemy
+        val chainedDeaths =
+            weaponRuntimeManager.resolveErasingSoulsChain(
+                initialDeadEnemy = killedEnemy,
+                player = player,
+                enemyManager = enemyManager,
+                onDamageDealt = { damage, sourceName ->
+                    runStatistics.recordDamageDealt(
+                        amount = damage,
+                        weaponName = sourceName
+                    )
+                    player.tryLifeSteal(damage)
+                }
             )
 
-        runRewardTracker.onEnemyKilled(
-            enemyType =
-                killedEnemy.type,
+        recordEnemyDeath(killedEnemy)
+        chainedDeaths.forEach(::recordEnemyDeath)
+    }
 
+    private fun recordEnemyDeath(
+        killedEnemy: Enemy
+    ) {
+        weaponRuntimeManager.onEnemyKilledForActiveSkills(
+            killedEnemy
+        )
+
+        runRewardTracker.onEnemyKilled(
+            enemyType = killedEnemy.type,
             finalBossId =
-                if (
-                    killedEnemy.type ==
+                if (killedEnemy.type ==
                     EnemyType.FINAL_BOSS
                 ) {
                     finalBossRewardId
@@ -2777,25 +2794,17 @@ class FirstScreen(
 
         val harvestedGoldReward =
             killedEnemy.goldReward *
-                playerStats
-                    .harvestGoldMultiplier()
+                playerStats.harvestGoldMultiplier()
 
         goldCoinPickups.add(
             GoldCoinPickup(
-                startX =
-                    killedEnemy.centerX,
-
-                startY =
-                    killedEnemy.centerY,
-
-                value =
-                    harvestedGoldReward
+                startX = killedEnemy.centerX,
+                startY = killedEnemy.centerY,
+                value = harvestedGoldReward
             )
         )
 
-        tryDropChestFromEnemy(
-            killedEnemy
-        )
+        tryDropChestFromEnemy(killedEnemy)
     }
 
     private fun applyChestReward(
@@ -3986,6 +3995,7 @@ class FirstScreen(
                 .resetAllTimers()
         }
     }
+
     private fun handleMarketControls(
         delta: Float
     ) {

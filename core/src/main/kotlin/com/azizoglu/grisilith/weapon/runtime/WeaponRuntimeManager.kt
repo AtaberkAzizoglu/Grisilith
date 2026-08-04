@@ -23,6 +23,8 @@ import com.azizoglu.grisilith.enemy.EnemyType
 import com.badlogic.gdx.math.MathUtils
 import com.azizoglu.grisilith.weapon.skill.ImpaleAndDragRuntime
 import com.azizoglu.grisilith.weapon.skill.ImpaleAndDragReward
+import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.weapon.skill.ErasingSoulsRuntime
 
 class WeaponRuntimeManager(
     private val inventory:
@@ -88,6 +90,9 @@ class WeaponRuntimeManager(
     private val impaleAndDragRuntime =
         ImpaleAndDragRuntime()
 
+    private val erasingSoulsRuntime =
+        ErasingSoulsRuntime()
+
     private var vortexWeaponRuntime:
         WeaponRuntime? =
         null
@@ -119,6 +124,8 @@ class WeaponRuntimeManager(
         onEnemyKilled: (Enemy) -> Unit
     ) {
         synchronizeWithInventory()
+
+        erasingSoulsRuntime.update(delta)
 
         statBonusSynchronizer
             .synchronize()
@@ -760,6 +767,67 @@ class WeaponRuntimeManager(
         }
     }
 
+    fun resolveErasingSoulsChain(
+        initialDeadEnemy: Enemy,
+        player: Player,
+        enemyManager: EnemyManager,
+        onDamageDealt: (Int, String) -> Unit
+    ): List<Enemy> {
+        val activeTomes =
+            inventory.allWeapons().filter { weapon ->
+                weapon.unlockedAbility?.id ==
+                    DefaultWeaponAbilities.ERASING_SOULS_ID
+            }
+
+        if (activeTomes.isEmpty()) {
+            return emptyList()
+        }
+
+        val lethalContext =
+            initialDeadEnemy.lethalDamageContext
+                ?: return emptyList()
+
+        val sourceIsQualifiedTome =
+            lethalContext.sourceWeaponRuntimeId?.let { id ->
+                activeTomes.any { it.runtimeId == id }
+            } ?: false
+
+        val wasKilledByNecroticDamage =
+            lethalContext.damageType ==
+                DamageType.NECROTIC
+
+        if (!sourceIsQualifiedTome &&
+            !wasKilledByNecroticDamage
+        ) {
+            return emptyList()
+        }
+
+        val sourceWeapon =
+            activeTomes.firstOrNull { tome ->
+                tome.runtimeId ==
+                    lethalContext.sourceWeaponRuntimeId
+            } ?: activeTomes.first()
+
+        val explosionDamage =
+            (activeSkillDamageCalculator
+                .calculate(sourceWeapon)
+                .damage *
+                DefaultWeaponAbilities
+                    .ERASING_SOULS_DAMAGE_MULTIPLIER)
+                .roundToInt()
+                .coerceAtLeast(1)
+
+        return erasingSoulsRuntime.resolveChain(
+            initialDeadEnemy = initialDeadEnemy,
+            sourceWeapon = sourceWeapon,
+            playerCenterX = player.centerX,
+            playerCenterY = player.centerY,
+            enemies = enemyManager.allEnemies,
+            explosionDamage = explosionDamage,
+            onDamageDealt = onDamageDealt
+        )
+    }
+
     fun onEnemyKilledForActiveSkills(
         enemy: Enemy
     ) {
@@ -806,6 +874,7 @@ class WeaponRuntimeManager(
         staticCloudsRuntime.clear()
         staticCloudsWeaponRuntime = null
         staticCloudsWeapon = null
+        erasingSoulsRuntime.clear()
 
         runtimesByWeapon.values
             .forEach {
@@ -849,6 +918,10 @@ class WeaponRuntimeManager(
 
             player =
                 player
+        )
+
+        erasingSoulsRuntime.render(
+            shapeRenderer
         )
     }
 
@@ -937,6 +1010,7 @@ class WeaponRuntimeManager(
         persistentAreaManager.clearAll()
 
         impaleAndDragRuntime.reset()
+        erasingSoulsRuntime.clear()
 
         runtimesByWeapon.values
             .forEach { runtime ->

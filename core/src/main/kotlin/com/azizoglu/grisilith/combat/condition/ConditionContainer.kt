@@ -5,30 +5,24 @@ import com.azizoglu.grisilith.content.ConditionType
 class ConditionContainer {
 
     private val conditions =
-        mutableMapOf<
-            ConditionType,
-            ActiveCondition
-            >()
+        mutableMapOf<ConditionType, ActiveCondition>()
 
     fun update(
-        delta: Float
+        delta: Float,
+        onTick: (ConditionTick) -> Unit = {}
     ) {
         if (delta <= 0f) {
             return
         }
 
-        val iterator =
-            conditions.iterator()
+        val iterator = conditions.iterator()
 
         while (iterator.hasNext()) {
-            val entry =
-                iterator.next()
-
-            val condition =
-                entry.value
+            val condition = iterator.next().value
 
             condition.update(
-                delta = delta
+                delta = delta,
+                onTick = onTick
             )
 
             if (condition.isExpired) {
@@ -37,60 +31,54 @@ class ConditionContainer {
         }
     }
 
+    fun apply(
+        application: ConditionApplication
+    ) {
+        val existing = conditions[application.type]
+
+        if (existing == null) {
+            conditions[application.type] =
+                ActiveCondition(application)
+            return
+        }
+
+        existing.refresh(application)
+    }
+
     /*
-     * durationSeconds null ise condition kalıcıdır.
-     *
-     * Aynı condition tekrar uygulanırsa süre
-     * yenilenir. Kalıcı condition süreliye çevrilmez.
+     * Eski çağrılarla geriye uyumludur.
+     * Bu sürüm kaynak snapshot'ı taşımadığı için DoT hasarı üretmez.
+     * Weapon ve Skill bağlantıları ConditionApplication kullanacaktır.
      */
     fun apply(
         type: ConditionType,
         durationSeconds: Float? = null
     ) {
-        val existing =
-            conditions[type]
-
-        if (existing == null) {
-            conditions[type] =
-                ActiveCondition(
-                    type = type,
-                    durationSeconds =
-                        durationSeconds
-                )
-
-            return
-        }
-
-        existing.refresh(
-            durationSeconds =
-                durationSeconds
+        apply(
+            ConditionApplication(
+                type = type,
+                durationSeconds = durationSeconds,
+                source = ConditionSource.NONE
+            )
         )
     }
 
-    fun contains(
-        type: ConditionType
-    ): Boolean {
-
-        return conditions.containsKey(
-            type
-        )
+    fun contains(type: ConditionType): Boolean {
+        return conditions.containsKey(type)
     }
 
-    fun remove(
-        type: ConditionType
-    ): Boolean {
+    fun activeCondition(type: ConditionType): ActiveCondition? {
+        return conditions[type]
+    }
 
-        return conditions.remove(
-            type
-        ) != null
+    fun remove(type: ConditionType): Boolean {
+        return conditions.remove(type) != null
     }
 
     fun clear() {
         conditions.clear()
     }
 
-    val activeTypes:
-        Set<ConditionType>
-        get() =
-            conditions.keys.toSet()
+    val activeTypes: Set<ConditionType>
+        get() = conditions.keys.toSet()
 }

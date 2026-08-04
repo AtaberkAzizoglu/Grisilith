@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.weapon.runtime.executor
 
 import com.azizoglu.grisilith.combat.debug.CombatDebugVisualManager
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
@@ -280,7 +281,17 @@ class TomeOfEryndorAttackExecutor(
 
         val appliedDamage =
             enemy.takeDamage(
-                tamgaModifiedDamage
+                amount = tamgaModifiedDamage,
+                damageContext =
+                    EnemyDamageContext(
+                        damageType = DamageType.FIRE,
+                        sourceWeaponRuntimeId =
+                            context.weapon.runtimeId,
+                        sourceWeaponDefinitionId =
+                            context.weapon.definition.id.value,
+                        sourceName =
+                            context.weapon.displayName
+                    )
             )
 
         if (appliedDamage > 0) {
@@ -329,14 +340,7 @@ class TomeOfEryndorAttackExecutor(
             appliedDamage =
                 appliedDamage,
             damageType =
-                context.weapon
-                    .definition
-                    .damageTypes
-                    .firstOrNull { type ->
-                        type !=
-                            DamageType.NONE
-                    }
-                    ?: DamageType.NONE
+                DamageType.FIRE
         )
     }
 

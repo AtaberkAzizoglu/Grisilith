@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.weapon.runtime.executor
 
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.enemy.EnemyType
@@ -56,7 +57,17 @@ object WeaponAreaAttackHelper {
 
         var totalAppliedDamage =
             enemy.takeDamage(
-                finalDamage
+                amount = finalDamage,
+                damageContext =
+                    EnemyDamageContext(
+                        damageType = damageType,
+                        sourceWeaponRuntimeId =
+                            context.weapon.runtimeId,
+                        sourceWeaponDefinitionId =
+                            context.weapon.definition.id.value,
+                        sourceName =
+                            context.weapon.displayName
+                    )
             )
 
         /*
@@ -95,8 +106,18 @@ object WeaponAreaAttackHelper {
 
             totalAppliedDamage +=
                 enemy.takeDamage(
-                    enemy.health
-                        .currentHealth
+                    amount =
+                        enemy.health.currentHealth,
+                    damageContext =
+                        EnemyDamageContext(
+                            damageType = damageType,
+                            sourceWeaponRuntimeId =
+                                context.weapon.runtimeId,
+                            sourceWeaponDefinitionId =
+                                context.weapon.definition.id.value,
+                            sourceName =
+                                context.weapon.displayName
+                        )
                 )
         }
 

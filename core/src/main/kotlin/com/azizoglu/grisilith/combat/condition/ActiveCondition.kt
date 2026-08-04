@@ -3,80 +3,104 @@ package com.azizoglu.grisilith.combat.condition
 import com.azizoglu.grisilith.content.ConditionType
 
 class ActiveCondition(
-    val type: ConditionType,
-    durationSeconds: Float?
+    application: ConditionApplication
 ) {
+    val type: ConditionType = application.type
 
-    /*
-     * null:
-     * Condition süre dolana kadar değil, dışarıdan
-     * kaldırılana veya Enemy ölünceye kadar aktiftir.
-     */
-    private var remainingDuration:
-        Float? =
-        durationSeconds
-            ?.coerceAtLeast(
-                0f
-            )
+    private var remainingDuration: Float? =
+        application.durationSeconds
+            ?.coerceAtLeast(0f)
+
+    private var currentSource: ConditionSource =
+        application.source
+
+    private var secondsUntilNextTick: Float =
+        tickIntervalSeconds()
+            ?: Float.POSITIVE_INFINITY
+
+    val source: ConditionSource
+        get() = currentSource
+
+    val remainingDurationSeconds: Float?
+        get() = remainingDuration
 
     val isPermanent: Boolean
-        get() =
-            remainingDuration == null
+        get() = remainingDuration == null
 
     val isExpired: Boolean
-        get() =
-            remainingDuration
-                ?.let { duration ->
-                    duration <= 0f
-                }
-                ?: false
+        get() = remainingDuration?.let { it <= 0f } ?: false
 
     fun update(
-        delta: Float
+        delta: Float,
+        onTick: (ConditionTick) -> Unit
     ) {
-        val currentDuration =
-            remainingDuration
-                ?: return
-
-        remainingDuration =
-            (
-                currentDuration -
-                    delta
-                )
-                .coerceAtLeast(
-                    0f
-                )
-    }
-
-    fun refresh(
-        durationSeconds: Float?
-    ) {
-        /*
-         * Yeni uygulama kalıcıysa mevcut condition
-         * doğrudan kalıcı hâle gelir.
-         */
-        if (durationSeconds == null) {
-            remainingDuration =
-                null
-
+        if (delta <= 0f || isExpired) {
             return
         }
 
-        /*
-         * Zaten kalıcı olan condition süreliye
-         * çevrilmez.
-         */
-        val currentDuration =
+        val activeDelta =
             remainingDuration
-                ?: return
+                ?.let { duration ->
+                    minOf(delta, duration)
+                }
+                ?: delta
+
+        val interval = tickIntervalSeconds()
+
+        if (
+            interval != null &&
+            currentSource.tickDamage > 0
+        ) {
+            secondsUntilNextTick -= activeDelta
+
+            while (secondsUntilNextTick <= 0f) {
+                onTick(
+                    ConditionTick(
+                        type = type,
+                        source = currentSource
+                    )
+                )
+
+                secondsUntilNextTick += interval
+            }
+        }
 
         remainingDuration =
-            maxOf(
-                currentDuration,
-                durationSeconds
-                    .coerceAtLeast(
-                        0f
-                    )
-            )
+            remainingDuration?.let { duration ->
+                (duration - delta).coerceAtLeast(0f)
+            }
+    }
+
+    fun refresh(
+        application: ConditionApplication
+    ) {
+        require(application.type == type) {
+            "Cannot refresh $type with ${application.type}."
+        }
+
+        val newDuration = application.durationSeconds
+
+        remainingDuration =
+            when {
+                newDuration == null -> null
+                remainingDuration == null -> null
+                else -> maxOf(
+                    remainingDuration ?: 0f,
+                    newDuration.coerceAtLeast(0f)
+                )
+            }
+
+        if (
+            application.source.tickDamage >
+            currentSource.tickDamage
+        ) {
+            currentSource = application.source
+        }
+    }
+
+    private fun tickIntervalSeconds(): Float? {
+        return DefaultConditionDefinitions
+            .definitionFor(type)
+            .tickIntervalSeconds
     }
 }

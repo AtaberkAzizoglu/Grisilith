@@ -12,5 +12,6 @@ enum class ConditionType(
     ROOTED("Rooted"),
     PARALYZED("Paralyzed"),
     FRIGHTENED("Frightened"),
-    SLOWED("Slowed")
+    SLOWED("Slowed"),
+    XXX_CURSE("XXX Curse")
 }

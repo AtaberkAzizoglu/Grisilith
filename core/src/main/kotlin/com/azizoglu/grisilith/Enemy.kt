@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import kotlin.math.sqrt
+import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionContainer
 import com.azizoglu.grisilith.content.ConditionType
 
@@ -16,6 +17,9 @@ class Enemy(
     startY: Float,
     private val stats: EnemyStats
 ) {
+    private var latestDamageContext =
+        EnemyDamageContext.NONE
+
     private val position = Vector2(startX, startY)
     private val previousPosition = Vector2(startX, startY)
     private val movementDirection = Vector2()
@@ -63,6 +67,9 @@ class Enemy(
 
     val conditions =
         ConditionContainer()
+
+    private val pendingConditionDamageEvents =
+        mutableListOf<EnemyConditionDamageEvent>()
 
     val isBurned: Boolean
         get() =
@@ -133,7 +140,42 @@ class Enemy(
 
         conditions.update(
             delta = delta
-        )
+        ) { tick ->
+            val wasAlive = !isDead
+
+            val damageContext =
+                EnemyDamageContext(
+                    damageType = tick.source.damageType,
+                    sourceWeaponRuntimeId =
+                        tick.source.sourceWeaponRuntimeId,
+                    sourceWeaponDefinitionId =
+                        tick.source.sourceWeaponDefinitionId,
+                    sourceName = tick.source.sourceName
+                )
+
+            val appliedDamage =
+                takeDamage(
+                    amount = tick.source.tickDamage,
+                    damageContext = damageContext
+                )
+
+            if (appliedDamage > 0) {
+                pendingConditionDamageEvents.add(
+                    EnemyConditionDamageEvent(
+                        enemy = this,
+                        conditionType = tick.type,
+                        appliedDamage = appliedDamage,
+                        damageContext = damageContext,
+                        killedEnemy = wasAlive && isDead
+                    )
+                )
+            }
+        }
+
+        if (isDead) {
+            conditions.clear()
+            return
+        }
 
         previousPosition.set(position)
 
@@ -301,9 +343,28 @@ class Enemy(
         )
     }
 
-    fun takeDamage(amount: Int): Int {
-        return health.takeDamage(amount)
+    fun takeDamage(
+        amount: Int,
+        damageContext: EnemyDamageContext =
+            EnemyDamageContext.NONE
+    ): Int {
+        val appliedDamage =
+            health.takeDamage(amount)
+
+        if (appliedDamage > 0) {
+            latestDamageContext =
+                damageContext
+        }
+
+        return appliedDamage
     }
+
+    val lethalDamageContext: EnemyDamageContext?
+        get() = if (isDead) {
+            latestDamageContext
+        } else {
+            null
+        }
 
     fun markExecuted(
         durationSeconds: Float = 0.45f
@@ -376,6 +437,16 @@ class Enemy(
     }
 
     fun applyCondition(
+        application: ConditionApplication
+    ) {
+        if (isDead) {
+            return
+        }
+
+        conditions.apply(application)
+    }
+
+    fun applyCondition(
         conditionType: ConditionType,
         durationSeconds: Float? = null
     ) {
@@ -385,9 +456,19 @@ class Enemy(
 
         conditions.apply(
             type = conditionType,
-            durationSeconds =
-                durationSeconds
+            durationSeconds = durationSeconds
         )
+    }
+
+    fun consumeConditionDamageEvents():
+        List<EnemyConditionDamageEvent> {
+        if (pendingConditionDamageEvents.isEmpty()) {
+            return emptyList()
+        }
+
+        val events = pendingConditionDamageEvents.toList()
+        pendingConditionDamageEvents.clear()
+        return events
     }
 
     fun hasCondition(

@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.weapon
 
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
@@ -409,7 +410,16 @@ class Projectile(
 
             val appliedDamage =
                 enemy.takeDamage(
-                    modifiedHitDamage
+                    amount = modifiedHitDamage,
+                    damageContext =
+                        EnemyDamageContext(
+                            damageType = damageType,
+                            sourceWeaponRuntimeId =
+                                sourceWeapon?.runtimeId,
+                            sourceWeaponDefinitionId =
+                                sourceWeapon?.definition?.id?.value,
+                            sourceName = sourceWeaponName
+                        )
                 )
 
             if (appliedDamage > 0) {
