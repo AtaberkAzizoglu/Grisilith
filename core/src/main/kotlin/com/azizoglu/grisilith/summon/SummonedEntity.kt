@@ -1,5 +1,7 @@
 package com.azizoglu.grisilith.summon
 
+import com.azizoglu.grisilith.combat.HealthComponent
+import com.azizoglu.grisilith.enemy.Enemy
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
@@ -8,6 +10,8 @@ import java.util.UUID
 
 class SummonedEntity(
     val sourceWeaponRuntimeId: String,
+    val sourceWeaponDefinitionId: String,
+    val sourceWeaponDisplayName: String,
     val type: SummonType,
     val stats: SummonStats,
     startCenterX: Float,
@@ -25,10 +29,22 @@ class SummonedEntity(
             startCenterY
         )
 
+    private val movementDirection =
+        Vector2()
+
     private val visualPhase =
         MathUtils.random(
             0f,
             MathUtils.PI2
+        )
+
+    private var attackCooldownRemainingSeconds =
+        0f
+
+    val health =
+        HealthComponent(
+            maximumHealth =
+                stats.maximumHealth
         )
 
     var remainingLifetimeSeconds: Float =
@@ -41,7 +57,8 @@ class SummonedEntity(
     val isExpired: Boolean
         get() =
             remainingLifetimeSeconds <=
-                0f
+                0f ||
+                health.isDead
 
     val centerX: Float
         get() =
@@ -56,7 +73,12 @@ class SummonedEntity(
         playerCenterX: Float,
         playerCenterY: Float,
         worldWidth: Float,
-        worldHeight: Float
+        worldHeight: Float,
+        enemies: List<Enemy>,
+        onCowAttack: (
+            summon: SummonedEntity,
+            enemy: Enemy
+        ) -> Unit
     ) {
 
         if (
@@ -75,80 +97,74 @@ class SummonedEntity(
                     0f
                 )
 
-        /*
-         * Paket 2A'da combat AI yoktur.
-         *
-         * Entity yalnızca oyuncunun çevresinde yumuşak bir
-         * placeholder formasyonu korur. Cow/Imp/Knight davranışları
-         * sonraki paketlerde bu ortak entity üzerine bağlanacaktır.
-         */
-        val desiredDistance =
-            when (type) {
-                SummonType.COW ->
-                    86f
+        attackCooldownRemainingSeconds =
+            (
+                attackCooldownRemainingSeconds -
+                    delta
+                )
+                .coerceAtLeast(
+                    0f
+                )
 
-                SummonType.IMP ->
-                    112f
+        when (type) {
 
-                SummonType.KNIGHT_SPIRIT ->
-                    156f
+            SummonType.COW -> {
+                updateCow(
+                    delta =
+                        delta,
+
+                    playerCenterX =
+                        playerCenterX,
+
+                    playerCenterY =
+                        playerCenterY,
+
+                    enemies =
+                        enemies,
+
+                    onAttack =
+                        onCowAttack
+                )
             }
 
-        val desiredX =
-            playerCenterX +
-                MathUtils.cos(
-                    visualPhase
-                ) *
-                desiredDistance
+            SummonType.IMP,
+            SummonType.KNIGHT_SPIRIT -> {
+                updatePlaceholderFormation(
+                    delta =
+                        delta,
 
-        val desiredY =
-            playerCenterY +
-                MathUtils.sin(
-                    visualPhase
-                ) *
-                desiredDistance
+                    playerCenterX =
+                        playerCenterX,
 
-        val interpolation =
-            (
-                delta *
-                    2.4f
+                    playerCenterY =
+                        playerCenterY
                 )
-                .coerceIn(
-                    0f,
-                    1f
-                )
+            }
+        }
 
-        center.lerp(
-            Vector2(
-                desiredX,
-                desiredY
-            ),
-            interpolation
+        keepInsideWorld(
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight
         )
+    }
 
-        center.x =
-            center.x.coerceIn(
-                12f,
-                (
-                    worldWidth -
-                        12f
-                    )
-                    .coerceAtLeast(
-                        12f
-                    )
-            )
+    fun takeDamage(
+        amount: Int
+    ): Int {
 
-        center.y =
-            center.y.coerceIn(
-                12f,
-                (
-                    worldHeight -
-                        12f
-                    )
-                    .coerceAtLeast(
-                        12f
-                    )
-            )
+        if (
+            amount <= 0 ||
+            isExpired
+        ) {
+            return 0
+        }
+
+        return health.takeDamage(
+            amount
+        )
     }
 
     fun render(
@@ -227,5 +243,304 @@ class SummonedEntity(
                 0.32f,
             18
         )
+
+        renderHealthBar(
+            shapeRenderer =
+                shapeRenderer,
+
+            radius =
+                radius
+        )
+    }
+
+    private fun updateCow(
+        delta: Float,
+        playerCenterX: Float,
+        playerCenterY: Float,
+        enemies: List<Enemy>,
+        onAttack: (
+            summon: SummonedEntity,
+            enemy: Enemy
+        ) -> Unit
+    ) {
+
+        val target =
+            enemies
+                .asSequence()
+                .filter {
+                    !it.isDead
+                }
+                .minByOrNull {
+                    Vector2.dst2(
+                        center.x,
+                        center.y,
+                        it.centerX,
+                        it.centerY
+                    )
+                }
+
+        if (target == null) {
+            moveTowardFormationPoint(
+                delta =
+                    delta,
+
+                playerCenterX =
+                    playerCenterX,
+
+                playerCenterY =
+                    playerCenterY,
+
+                distance =
+                    82f
+            )
+
+            return
+        }
+
+        val targetRadius =
+            target.bounds.width /
+                2f
+
+        val effectiveAttackRange =
+            stats.attackRange +
+                targetRadius
+
+        val distanceSquared =
+            Vector2.dst2(
+                center.x,
+                center.y,
+                target.centerX,
+                target.centerY
+            )
+
+        if (
+            distanceSquared <=
+            effectiveAttackRange *
+            effectiveAttackRange
+        ) {
+            if (
+                attackCooldownRemainingSeconds <=
+                0f
+            ) {
+                onAttack(
+                    this,
+                    target
+                )
+
+                attackCooldownRemainingSeconds =
+                    COW_ATTACK_INTERVAL_SECONDS
+            }
+
+            return
+        }
+
+        movementDirection.set(
+            target.centerX -
+                center.x,
+
+            target.centerY -
+                center.y
+        )
+
+        if (
+            !movementDirection.isZero(
+                0.001f
+            )
+        ) {
+            movementDirection.nor()
+
+            center.mulAdd(
+                movementDirection,
+                stats.movementSpeed *
+                    delta
+            )
+        }
+    }
+
+    private fun updatePlaceholderFormation(
+        delta: Float,
+        playerCenterX: Float,
+        playerCenterY: Float
+    ) {
+
+        val desiredDistance =
+            when (type) {
+                SummonType.COW ->
+                    86f
+
+                SummonType.IMP ->
+                    112f
+
+                SummonType.KNIGHT_SPIRIT ->
+                    156f
+            }
+
+        moveTowardFormationPoint(
+            delta =
+                delta,
+
+            playerCenterX =
+                playerCenterX,
+
+            playerCenterY =
+                playerCenterY,
+
+            distance =
+                desiredDistance
+        )
+    }
+
+    private fun moveTowardFormationPoint(
+        delta: Float,
+        playerCenterX: Float,
+        playerCenterY: Float,
+        distance: Float
+    ) {
+
+        val desiredX =
+            playerCenterX +
+                MathUtils.cos(
+                    visualPhase
+                ) *
+                distance
+
+        val desiredY =
+            playerCenterY +
+                MathUtils.sin(
+                    visualPhase
+                ) *
+                distance
+
+        movementDirection.set(
+            desiredX -
+                center.x,
+
+            desiredY -
+                center.y
+        )
+
+        if (
+            movementDirection.isZero(
+                0.001f
+            )
+        ) {
+            return
+        }
+
+        movementDirection.nor()
+
+        val maximumMovement =
+            stats.movementSpeed *
+                delta
+
+        val remainingDistance =
+            Vector2.dst(
+                center.x,
+                center.y,
+                desiredX,
+                desiredY
+            )
+
+        center.mulAdd(
+            movementDirection,
+            minOf(
+                maximumMovement,
+                remainingDistance
+            )
+        )
+    }
+
+    private fun keepInsideWorld(
+        worldWidth: Float,
+        worldHeight: Float
+    ) {
+
+        center.x =
+            center.x.coerceIn(
+                12f,
+                (
+                    worldWidth -
+                        12f
+                    )
+                    .coerceAtLeast(
+                        12f
+                    )
+            )
+
+        center.y =
+            center.y.coerceIn(
+                12f,
+                (
+                    worldHeight -
+                        12f
+                    )
+                    .coerceAtLeast(
+                        12f
+                    )
+            )
+    }
+
+    private fun renderHealthBar(
+        shapeRenderer: ShapeRenderer,
+        radius: Float
+    ) {
+
+        val width =
+            radius *
+                2f
+
+        val height =
+            3f
+
+        val x =
+            center.x -
+                width /
+                2f
+
+        val y =
+            center.y +
+                radius +
+                5f
+
+        shapeRenderer.color =
+            Color(
+                0.12f,
+                0.08f,
+                0.10f,
+                0.90f
+            )
+
+        shapeRenderer.rect(
+            x,
+            y,
+            width,
+            height
+        )
+
+        shapeRenderer.color =
+            Color(
+                0.30f,
+                0.86f,
+                0.38f,
+                0.95f
+            )
+
+        shapeRenderer.rect(
+            x,
+            y,
+            width *
+                health.healthRatio
+                    .coerceIn(
+                        0f,
+                        1f
+                    ),
+            height
+        )
+    }
+
+    companion object {
+
+        private const val COW_ATTACK_INTERVAL_SECONDS =
+            1.15f
     }
 }

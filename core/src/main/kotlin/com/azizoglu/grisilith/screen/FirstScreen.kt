@@ -2445,7 +2445,38 @@ class FirstScreen(
                 worldWidth,
 
             worldHeight =
-                worldHeight
+                worldHeight,
+
+            enemies =
+                enemyManager
+                    .allEnemies,
+
+            onDamageDealt = {
+                    appliedDamage,
+                    sourceName ->
+
+                runStatistics
+                    .recordDamageDealt(
+                        amount =
+                            appliedDamage,
+
+                        weaponName =
+                            sourceName
+                    )
+
+                player.tryLifeSteal(
+                    appliedDamage =
+                        appliedDamage
+                )
+            },
+
+            onEnemyKilled = {
+                    killedEnemy ->
+
+                handleEnemyKilled(
+                    killedEnemy
+                )
+            }
         )
 
         tamgaRuntimeManager

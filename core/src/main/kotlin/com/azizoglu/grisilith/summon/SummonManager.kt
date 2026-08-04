@@ -1,8 +1,10 @@
 package com.azizoglu.grisilith.summon
 
+import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
-import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
@@ -28,7 +30,13 @@ class SummonManager(
         playerCenterX: Float,
         playerCenterY: Float,
         worldWidth: Float,
-        worldHeight: Float
+        worldHeight: Float,
+        enemies: List<Enemy>,
+        onDamageDealt: (
+            damage: Int,
+            sourceName: String
+        ) -> Unit,
+        onEnemyKilled: (Enemy) -> Unit
     ) {
 
         if (
@@ -40,6 +48,7 @@ class SummonManager(
         synchronizeSchedulers()
 
         entities
+            .toList()
             .forEach {
                     entity ->
 
@@ -57,7 +66,29 @@ class SummonManager(
                         worldWidth,
 
                     worldHeight =
-                        worldHeight
+                        worldHeight,
+
+                    enemies =
+                        enemies,
+
+                    onCowAttack = {
+                            summon,
+                            enemy ->
+
+                        applyCowAttack(
+                            summon =
+                                summon,
+
+                            enemy =
+                                enemy,
+
+                            onDamageDealt =
+                                onDamageDealt,
+
+                            onEnemyKilled =
+                                onEnemyKilled
+                        )
+                    }
                 )
             }
 
@@ -137,6 +168,73 @@ class SummonManager(
 
         entities.clear()
         schedulersByWeaponRuntimeId.clear()
+    }
+
+    private fun applyCowAttack(
+        summon: SummonedEntity,
+        enemy: Enemy,
+        onDamageDealt: (
+            damage: Int,
+            sourceName: String
+        ) -> Unit,
+        onEnemyKilled: (Enemy) -> Unit
+    ) {
+
+        if (
+            summon.type !=
+            SummonType.COW ||
+            summon.isExpired ||
+            enemy.isDead
+        ) {
+            return
+        }
+
+        val sourceName =
+            summon.sourceWeaponDisplayName +
+                " — Summon Animal"
+
+        val wasAlive =
+            !enemy.isDead
+
+        val appliedDamage =
+            enemy.takeDamage(
+                amount =
+                    summon.stats.baseDamage,
+
+                damageContext =
+                    EnemyDamageContext(
+                        damageType =
+                            DamageType.BLUDGEONING,
+
+                        sourceWeaponRuntimeId =
+                            summon.sourceWeaponRuntimeId,
+
+                        sourceWeaponDefinitionId =
+                            summon.sourceWeaponDefinitionId,
+
+                        sourceName =
+                            sourceName
+                    )
+            )
+
+        if (
+            appliedDamage >
+            0
+        ) {
+            onDamageDealt(
+                appliedDamage,
+                sourceName
+            )
+        }
+
+        if (
+            wasAlive &&
+            enemy.isDead
+        ) {
+            onEnemyKilled(
+                enemy
+            )
+        }
     }
 
     private fun synchronizeSchedulers() {
@@ -221,6 +319,16 @@ class SummonManager(
         playerCenterY: Float
     ) {
 
+        val weapon =
+            weaponInventory
+                .allWeapons()
+                .firstOrNull {
+                    it.runtimeId ==
+                        scheduler
+                            .sourceWeaponRuntimeId
+                }
+                ?: return
+
         val type =
             summonTypeFor(
                 scheduler.choice
@@ -259,8 +367,16 @@ class SummonManager(
             entities.add(
                 SummonedEntity(
                     sourceWeaponRuntimeId =
-                        scheduler
-                            .sourceWeaponRuntimeId,
+                        weapon.runtimeId,
+
+                    sourceWeaponDefinitionId =
+                        weapon
+                            .definition
+                            .id
+                            .value,
+
+                    sourceWeaponDisplayName =
+                        weapon.displayName,
 
                     type =
                         type,
