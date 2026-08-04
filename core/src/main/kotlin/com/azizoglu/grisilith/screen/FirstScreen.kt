@@ -2014,6 +2014,7 @@ class FirstScreen(
                     worldHeight
             )
     }
+
     private fun handleActiveTamgaButtonInput() {
         if (
             !Gdx.input.justTouched()
@@ -2378,6 +2379,9 @@ class FirstScreen(
             )
         }
 
+
+        consumeEnemyConditionDamageEvents()
+
         /*
          * Quick Shot timer ve diğer genel
          * Tamga runtime güncellemeleri.
@@ -2719,6 +2723,41 @@ class FirstScreen(
         )
 
         recordCurrentEnemyEncounters()
+    }
+
+    private fun consumeEnemyConditionDamageEvents() {
+
+        enemyManager
+            .allEnemies
+            .toList()
+            .forEach { enemy ->
+
+                enemy.consumeConditionDamageEvents()
+                    .forEach { event ->
+
+                        runStatistics.recordDamageDealt(
+                            amount =
+                                event.appliedDamage,
+
+                            weaponName =
+                                event.damageContext.sourceName
+                                    ?: event.conditionType.displayName
+                        )
+
+                        player.tryLifeSteal(
+                            appliedDamage =
+                                event.appliedDamage
+                        )
+
+                        if (
+                            event.killedEnemy
+                        ) {
+                            handleEnemyKilled(
+                                event.enemy
+                            )
+                        }
+                    }
+            }
     }
 
     private fun consumeImpaleAndDragReward() {

@@ -9,7 +9,7 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import kotlin.math.sqrt
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
-import com.azizoglu.grisilith.combat.condition.ConditionContainer
+import com.azizoglu.grisilith.combat.condition.ConditionRuntime
 import com.azizoglu.grisilith.content.ConditionType
 
 class Enemy(
@@ -65,11 +65,14 @@ class Enemy(
         maximumHealth = stats.maximumHealth
     )
 
-    val conditions =
-        ConditionContainer()
+    private val conditionRuntime =
+        ConditionRuntime(
+            owner = this
+        )
 
-    private val pendingConditionDamageEvents =
-        mutableListOf<EnemyConditionDamageEvent>()
+    val conditions
+        get() =
+            conditionRuntime.conditions
 
     val isBurned: Boolean
         get() =
@@ -138,42 +141,11 @@ class Enemy(
             return
         }
 
-        conditions.update(
+        conditionRuntime.update(
             delta = delta
-        ) { tick ->
-            val wasAlive = !isDead
-
-            val damageContext =
-                EnemyDamageContext(
-                    damageType = tick.source.damageType,
-                    sourceWeaponRuntimeId =
-                        tick.source.sourceWeaponRuntimeId,
-                    sourceWeaponDefinitionId =
-                        tick.source.sourceWeaponDefinitionId,
-                    sourceName = tick.source.sourceName
-                )
-
-            val appliedDamage =
-                takeDamage(
-                    amount = tick.source.tickDamage,
-                    damageContext = damageContext
-                )
-
-            if (appliedDamage > 0) {
-                pendingConditionDamageEvents.add(
-                    EnemyConditionDamageEvent(
-                        enemy = this,
-                        conditionType = tick.type,
-                        appliedDamage = appliedDamage,
-                        damageContext = damageContext,
-                        killedEnemy = wasAlive && isDead
-                    )
-                )
-            }
-        }
+        )
 
         if (isDead) {
-            conditions.clear()
             return
         }
 
@@ -462,13 +434,9 @@ class Enemy(
 
     fun consumeConditionDamageEvents():
         List<EnemyConditionDamageEvent> {
-        if (pendingConditionDamageEvents.isEmpty()) {
-            return emptyList()
-        }
 
-        val events = pendingConditionDamageEvents.toList()
-        pendingConditionDamageEvents.clear()
-        return events
+        return conditionRuntime
+            .consumeDamageEvents()
     }
 
     fun hasCondition(

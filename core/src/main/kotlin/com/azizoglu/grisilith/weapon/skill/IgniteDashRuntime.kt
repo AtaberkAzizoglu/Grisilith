@@ -1,6 +1,9 @@
 package com.azizoglu.grisilith.weapon.skill
 
 import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
+import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.player.Player
@@ -15,7 +18,7 @@ import com.badlogic.gdx.math.Vector2
 import kotlin.math.roundToInt
 
 class IgniteDashRuntime(
-    playerStats: PlayerStats
+    private val playerStats: PlayerStats
 ) {
 
     private val damageCalculator =
@@ -572,7 +575,24 @@ class IgniteDashRuntime(
 
                 val appliedDamage =
                     enemy.takeDamage(
-                        explosionDamage
+                        amount =
+                            explosionDamage,
+
+                        damageContext =
+                            EnemyDamageContext(
+                                damageType =
+                                    DamageType.FIRE,
+
+                                sourceWeaponRuntimeId =
+                                    weapon.runtimeId,
+
+                                sourceWeaponDefinitionId =
+                                    weapon.definition.id.value,
+
+                                sourceName =
+                                    weapon.displayName +
+                                        " — Ignite Dash"
+                            )
                     )
 
                 if (
@@ -580,12 +600,34 @@ class IgniteDashRuntime(
                     0
                 ) {
                     enemy.applyCondition(
-                        conditionType =
-                            ConditionType.BURNED,
+                        ConditionDamageCalculator
+                            .createApplication(
+                                type =
+                                    ConditionType.BURNED,
 
-                        durationSeconds =
-                            DefaultWeaponAbilities
-                                .IGNITE_DASH_BURN_DURATION_SECONDS
+                                playerStats =
+                                    playerStats,
+
+                                durationSeconds =
+                                    DefaultWeaponAbilities
+                                        .IGNITE_DASH_BURN_DURATION_SECONDS,
+
+                                sourceWeaponRuntimeId =
+                                    weapon.runtimeId,
+
+                                sourceWeaponDefinitionId =
+                                    weapon.definition.id.value,
+
+                                sourceName =
+                                    weapon.displayName +
+                                        " — Ignite Dash",
+
+                                sourceCenterX =
+                                    player.centerX,
+
+                                sourceCenterY =
+                                    player.centerY
+                            )
                     )
 
                     onDamageDealt(

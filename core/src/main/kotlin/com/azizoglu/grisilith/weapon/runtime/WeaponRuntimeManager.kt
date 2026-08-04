@@ -824,6 +824,7 @@ class WeaponRuntimeManager(
             playerCenterY = player.centerY,
             enemies = enemyManager.allEnemies,
             explosionDamage = explosionDamage,
+            playerStats = playerStats,
             onDamageDealt = onDamageDealt
         )
     }

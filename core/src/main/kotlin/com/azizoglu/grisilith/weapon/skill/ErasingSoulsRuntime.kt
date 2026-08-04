@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.weapon.skill
 
 import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
+import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
@@ -37,6 +39,7 @@ class ErasingSoulsRuntime {
         playerCenterY: Float,
         enemies: List<Enemy>,
         explosionDamage: Int,
+        playerStats: PlayerStats,
         onDamageDealt: (
             appliedDamage: Int,
             sourceName: String
@@ -183,12 +186,34 @@ class ErasingSoulsRuntime {
                          * şekilde hiçbir şey yapmaz.
                          */
                         target.applyCondition(
-                            conditionType =
-                                ConditionType.NECROSIS,
+                            ConditionDamageCalculator
+                                .createApplication(
+                                    type =
+                                        ConditionType.NECROSIS,
 
-                            durationSeconds =
-                                DefaultWeaponAbilities
-                                    .ERASING_SOULS_NECROSIS_DURATION_SECONDS
+                                    playerStats =
+                                        playerStats,
+
+                                    durationSeconds =
+                                        DefaultWeaponAbilities
+                                            .ERASING_SOULS_NECROSIS_DURATION_SECONDS,
+
+                                    sourceWeaponRuntimeId =
+                                        sourceWeapon.runtimeId,
+
+                                    sourceWeaponDefinitionId =
+                                        sourceWeapon.definition.id.value,
+
+                                    sourceName =
+                                        sourceWeapon.displayName +
+                                            " — Erasing the Souls",
+
+                                    sourceCenterX =
+                                        deadEnemy.centerX,
+
+                                    sourceCenterY =
+                                        deadEnemy.centerY
+                                )
                         )
 
                         onDamageDealt(
