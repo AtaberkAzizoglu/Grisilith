@@ -98,6 +98,8 @@ import com.azizoglu.grisilith.save.RunSaveSnapshot
 import com.azizoglu.grisilith.armor.definition.DefaultArmors
 import com.azizoglu.grisilith.tamga.definition.DefaultTamgas
 import com.azizoglu.grisilith.settings.GameSettings
+import com.azizoglu.grisilith.screen.summon.ChooseToSummonPopup
+import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
 
 class FirstScreen(
     private val game: GrisilithGame,
@@ -1326,6 +1328,24 @@ class FirstScreen(
         )
 
 
+    private val chooseToSummonPopup =
+        ChooseToSummonPopup(
+            camera =
+                camera,
+
+            viewport =
+                viewport,
+
+            shapeRenderer =
+                shapeRenderer,
+
+            batch =
+                hudBatch,
+
+            font =
+                hudFont
+        )
+
     override fun show() {
         viewport.apply()
 
@@ -1438,6 +1458,14 @@ class FirstScreen(
                                     WeaponInstance.MAXIMUM_LEVEL
                                 )
                     )
+
+                weapon.restoreIvySummonChoice(
+                    IvySummonChoice
+                        .fromSavedName(
+                            savedSlot
+                                .ivySummonChoiceName
+                        )
+                )
 
                 weaponInventory
                     .addPurchasedWeaponToSlot(
@@ -1673,11 +1701,14 @@ class FirstScreen(
                 true
         }
 
+        openPendingIvySummonChoiceIfReady()
+
         val gameplayStopped =
             player.health.isDead ||
                 stageController.isRunComplete ||
                 chestRewardController.isOpen ||
                 statCardController.isOpen ||
+                chooseToSummonPopup.isOpen ||
                 isMarketOpen ||
                 isPauseMenuOpen ||
                 isRunSummaryOpen
@@ -1761,9 +1792,57 @@ class FirstScreen(
             )
     }
 
+    private fun openPendingIvySummonChoiceIfReady() {
+
+        if (
+            chooseToSummonPopup.isOpen ||
+            player.health.isDead ||
+            stageController.isRunComplete ||
+            chestRewardController.isOpen ||
+            statCardController.isOpen ||
+            isMarketOpen ||
+            isPauseMenuOpen ||
+            isRunSummaryOpen
+        ) {
+            return
+        }
+
+        val pendingWeapon =
+            weaponInventory
+                .allWeapons()
+                .firstOrNull {
+                        weapon ->
+
+                    weapon.definition.id.value ==
+                        "WPN_IVY_STAFF" &&
+                        weapon.hasWeaponAbility &&
+                        weapon.unlockedAbility
+                            ?.id ==
+                        com.azizoglu.grisilith.weapon.skill
+                            .DefaultWeaponAbilities
+                            .CHOOSE_TO_SUMMON_ID &&
+                        weapon.ivySummonChoice ==
+                        null
+                }
+                ?: return
+
+        chooseToSummonPopup.open(
+            pendingWeapon
+        )
+    }
+
     private fun handleGameControls(
         delta: Float
     ) {
+        if (
+            chooseToSummonPopup.isOpen
+        ) {
+            chooseToSummonPopup
+                .handleInput()
+
+            return
+        }
+
         if (isRunSummaryOpen) {
             handleRunSummaryControls()
             return
@@ -2014,7 +2093,6 @@ class FirstScreen(
                     worldHeight
             )
     }
-
     private fun handleActiveTamgaButtonInput() {
         if (
             !Gdx.input.justTouched()
@@ -3139,6 +3217,7 @@ class FirstScreen(
             !isMarketOpen &&
             !chestRewardController.isOpen &&
             !statCardController.isOpen &&
+            !chooseToSummonPopup.isOpen &&
             !isPauseMenuOpen
         ) {
             activeTamgaHudRenderer.render(
@@ -3328,6 +3407,7 @@ class FirstScreen(
 
             hudBatch.end()
         }
+        chooseToSummonPopup.render()
     }
 
     private fun updateCamera() {
@@ -4010,7 +4090,6 @@ class FirstScreen(
         marketInteractionState
             .closeMergeConfirmation()
     }
-
     private fun performWeaponMerge(
         sourceSlotIndex: Int,
         targetSlotIndex: Int

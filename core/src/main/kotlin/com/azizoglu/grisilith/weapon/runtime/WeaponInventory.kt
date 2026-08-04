@@ -339,12 +339,22 @@ class WeaponInventory {
                 ?: return WeaponInventoryResult
                     .INVALID_SLOT
 
+        val consumedWeapon =
+            consumedSlot.weapon
+                ?: return WeaponInventoryResult
+                    .INVALID_SLOT
+
         if (
             !survivingWeapon.increaseLevel()
         ) {
             return WeaponInventoryResult
                 .MAXIMUM_LEVEL_REACHED
         }
+
+        survivingWeapon
+            .inheritIvySummonChoiceFrom(
+                consumedWeapon
+            )
 
         consumedSlot.clear()
 
@@ -462,7 +472,12 @@ class WeaponInventory {
                             .toString(),
 
                     level =
-                        weapon.level
+                        weapon.level,
+
+                    ivySummonChoiceName =
+                        weapon
+                            .ivySummonChoice
+                            ?.name
                 )
             }
     }

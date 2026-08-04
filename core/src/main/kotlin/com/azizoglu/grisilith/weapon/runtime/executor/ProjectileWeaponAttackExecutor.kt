@@ -548,6 +548,12 @@ class ProjectileWeaponAttackExecutor(
                 context.weapon
                     .hasBasicAttackUpgrade
 
+        val isUpgradedIvyStaff =
+            weaponId ==
+                IVY_STAFF_ID &&
+                context.weapon
+                    .hasBasicAttackUpgrade
+
         val isCrossbow =
             weaponId == CROSSBOW_ID
 
@@ -803,6 +809,17 @@ class ProjectileWeaponAttackExecutor(
                 .roundToInt()
                 .coerceAtLeast(1)
 
+        val effectiveSizeMultiplier =
+            sizeMultiplier *
+                if (
+                    isUpgradedIvyStaff
+                ) {
+                    DefaultWeaponAbilities
+                        .IVY_STAFF_PROJECTILE_SIZE_MULTIPLIER
+                } else {
+                    1f
+                }
+
         context.projectiles.add(
             Projectile(
                 startX =
@@ -863,7 +880,7 @@ class ProjectileWeaponAttackExecutor(
                     wallBounceCount,
 
                 sizeMultiplier =
-                    sizeMultiplier,
+                    effectiveSizeMultiplier,
 
                 activationDelaySeconds =
                     activationDelaySeconds,
@@ -878,7 +895,27 @@ class ProjectileWeaponAttackExecutor(
                     carryFirstNormalTarget,
 
                 conditionApplication =
-                    conditionApplication
+                    conditionApplication,
+
+                armorClassReduction =
+                    if (
+                        isUpgradedIvyStaff
+                    ) {
+                        DefaultWeaponAbilities
+                            .IVY_STAFF_ARMOR_CLASS_REDUCTION
+                    } else {
+                        0
+                    },
+
+                armorClassReductionDurationSeconds =
+                    if (
+                        isUpgradedIvyStaff
+                    ) {
+                        DefaultWeaponAbilities
+                            .IVY_STAFF_ARMOR_CLASS_REDUCTION_SECONDS
+                    } else {
+                        0f
+                    }
             )
         )
     }

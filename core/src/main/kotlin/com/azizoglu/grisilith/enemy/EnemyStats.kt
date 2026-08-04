@@ -6,5 +6,6 @@ data class EnemyStats(
     val contactDamage: Int,
     val movementSpeed: Float,
     val size: Float,
-    val goldReward: Float
+    val goldReward: Float,
+    val armorClass: Int = 0
 )

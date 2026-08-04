@@ -70,7 +70,13 @@ class Projectile(
     Boolean = false,
 
     private val conditionApplication:
-    ConditionApplication? = null
+    ConditionApplication? = null,
+
+    private val armorClassReduction:
+    Int = 0,
+
+    private val armorClassReductionDurationSeconds:
+    Float = 0f
 ) {
 
     private val position =
@@ -433,6 +439,21 @@ class Projectile(
                             application
                         )
                     }
+
+                if (
+                    armorClassReduction >
+                    0 &&
+                    armorClassReductionDurationSeconds >
+                    0f
+                ) {
+                    enemy.applyTemporaryArmorClassReduction(
+                        amount =
+                            armorClassReduction,
+
+                        durationSeconds =
+                            armorClassReductionDurationSeconds
+                    )
+                }
 
                 onDamageDealt(
                     appliedDamage

@@ -57,6 +57,17 @@ class Enemy(
     private var carriedByHeavyBolt =
         false
 
+    private var armorClassReduction =
+        0
+
+    private var armorClassReductionRemainingSeconds =
+        0f
+
+    val effectiveArmorClass: Int
+        get() =
+            stats.armorClass -
+                armorClassReduction
+
     private val collisionBounds = Rectangle()
 
     private val contactDamageTimer = ContactDamageTimer(
@@ -119,6 +130,30 @@ class Enemy(
         targetBounds: Rectangle,
         onContactDamage: (Int) -> Unit
     ) {
+        if (
+            armorClassReductionRemainingSeconds >
+            0f
+        ) {
+            armorClassReductionRemainingSeconds =
+                (
+                    armorClassReductionRemainingSeconds -
+                        delta.coerceAtLeast(
+                            0f
+                        )
+                    )
+                    .coerceAtLeast(
+                        0f
+                    )
+
+            if (
+                armorClassReductionRemainingSeconds <=
+                0f
+            ) {
+                armorClassReduction =
+                    0
+            }
+        }
+
         if (
             executionMarkRemainingSeconds >
             0f
@@ -354,10 +389,19 @@ class Enemy(
                         conditions
                 )
 
+        val armorModifiedDamage =
+            (
+                reactionResult
+                    .resolvedDamage -
+                    effectiveArmorClass
+                )
+                .coerceAtLeast(
+                    1
+                )
+
         val appliedDamage =
             health.takeDamage(
-                reactionResult
-                    .resolvedDamage
+                armorModifiedDamage
             )
 
         if (
@@ -456,6 +500,32 @@ class Enemy(
     fun endHeavyBoltCarry() {
         carriedByHeavyBolt =
             false
+    }
+
+    fun applyTemporaryArmorClassReduction(
+        amount: Int,
+        durationSeconds: Float
+    ) {
+
+        if (
+            isDead ||
+            amount <= 0 ||
+            durationSeconds <= 0f
+        ) {
+            return
+        }
+
+        armorClassReduction =
+            maxOf(
+                armorClassReduction,
+                amount
+            )
+
+        armorClassReductionRemainingSeconds =
+            maxOf(
+                armorClassReductionRemainingSeconds,
+                durationSeconds
+            )
     }
 
     fun applyCondition(

@@ -3,6 +3,7 @@ package com.azizoglu.grisilith.weapon.runtime
 import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 import java.util.UUID
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityDefinition
+import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
 
 class WeaponInstance(
     val definition: WeaponDefinition,
@@ -23,6 +24,11 @@ class WeaponInstance(
      */
     private var normalAttackCount =
         0
+
+    var ivySummonChoice:
+        IvySummonChoice? =
+        null
+        private set
 
     var level: Int =
         level
@@ -102,6 +108,43 @@ class WeaponInstance(
         }
 
         level = newLevel
+    }
+
+    fun chooseIvySummon(
+        choice: IvySummonChoice
+    ): Boolean {
+
+        if (
+            ivySummonChoice !=
+            null
+        ) {
+            return false
+        }
+
+        ivySummonChoice =
+            choice
+
+        return true
+    }
+
+    fun restoreIvySummonChoice(
+        choice: IvySummonChoice?
+    ) {
+        ivySummonChoice =
+            choice
+    }
+
+    fun inheritIvySummonChoiceFrom(
+        other: WeaponInstance
+    ) {
+
+        if (
+            ivySummonChoice ==
+            null
+        ) {
+            ivySummonChoice =
+                other.ivySummonChoice
+        }
     }
 
     fun registerNormalAttack(): Int {

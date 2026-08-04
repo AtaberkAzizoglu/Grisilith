@@ -31,7 +31,7 @@ data class RunSaveSnapshot(
     val preview: RunSavePreview = RunSavePreview()
 ) {
     companion object {
-        const val CURRENT_VERSION: Int = 2
+        const val CURRENT_VERSION: Int = 3
     }
 
     fun validationErrors(): List<String> {

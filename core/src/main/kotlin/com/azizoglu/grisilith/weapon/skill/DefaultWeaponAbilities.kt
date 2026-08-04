@@ -75,6 +75,18 @@ object DefaultWeaponAbilities {
     const val STATIC_CLOUDS_STUN_DURATION_SECONDS =
         1f
 
+    const val CHOOSE_TO_SUMMON_ID =
+        "WPN_ABILITY_CHOOSE_TO_SUMMON"
+
+    const val IVY_STAFF_PROJECTILE_SIZE_MULTIPLIER =
+        1.18f
+
+    const val IVY_STAFF_ARMOR_CLASS_REDUCTION =
+        1
+
+    const val IVY_STAFF_ARMOR_CLASS_REDUCTION_SECONDS =
+        3f
+
     const val ACIDIC_POOL_ID =
         "WPN_ABILITY_ACIDIC_POOL"
 
@@ -263,6 +275,19 @@ object DefaultWeaponAbilities {
 
             durationSeconds =
                 STATIC_CLOUDS_DURATION_SECONDS
+        )
+
+    val chooseToSummon =
+        WeaponAbilityDefinition(
+            id =
+                CHOOSE_TO_SUMMON_ID,
+
+            displayName =
+                "Choose to Summon",
+
+            activationType =
+                WeaponAbilityActivationType
+                    .PASSIVE
         )
 
     val acidicPool =
