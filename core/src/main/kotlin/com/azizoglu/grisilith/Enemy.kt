@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector2
 import kotlin.math.sqrt
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionRuntime
+import com.azizoglu.grisilith.combat.condition.ConditionControlRules
 import com.azizoglu.grisilith.content.ConditionType
 
 class Enemy(
@@ -151,10 +152,18 @@ class Enemy(
 
         previousPosition.set(position)
 
+        val controlState =
+            ConditionControlRules.resolve(
+                conditions = conditions,
+                fallbackSourceX = targetX,
+                fallbackSourceY = targetY
+            )
+
         if (isBeingKnockedBack) {
             /*
-             * Knockback aktifken düşman oyuncuya doğru
-             * ilerlemez. Yalnızca darbenin yönünde gider.
+             * Condition'lar normal hareketi durdurabilir fakat
+             * dışarıdan gelen knockback fiziksel yer değiştirme
+             * olarak çalışmaya devam eder.
              */
             position.mulAdd(
                 knockbackVelocity,
@@ -168,10 +177,6 @@ class Enemy(
                     )
                     .coerceAtLeast(0f)
 
-            /*
-             * Frame rate'ten bağımsız yavaşlama.
-             * Yaklaşık 1200 px/s² kuvvet kaybeder.
-             */
             val currentSpeed =
                 knockbackVelocity.len()
 
@@ -192,22 +197,27 @@ class Enemy(
                     )
                 }
             }
-        } else {
-            /*
-             * Knockback bittikten sonra normal takip
-             * hareketine geri döner.
-             */
-            movementDirection.set(
-                targetX - centerX,
-                targetY - centerY
-            )
+        } else if (controlState.canMove) {
+            if (controlState.isFrightened) {
+                movementDirection.set(
+                    centerX - controlState.sourceX,
+                    centerY - controlState.sourceY
+                )
+            } else {
+                movementDirection.set(
+                    targetX - centerX,
+                    targetY - centerY
+                )
+            }
 
             if (!movementDirection.isZero) {
                 movementDirection.nor()
 
                 position.mulAdd(
                     movementDirection,
-                    stats.movementSpeed * delta
+                    controlState.modifiedMovementSpeed(
+                        stats.movementSpeed
+                    ) * delta
                 )
             }
         }
@@ -234,7 +244,9 @@ class Enemy(
 
         contactDamageTimer.update(
             delta = delta,
-            isTouching = isTouchingPlayer
+            isTouching =
+                isTouchingPlayer &&
+                    controlState.canAttack
         ) {
             onContactDamage(contactDamage)
         }

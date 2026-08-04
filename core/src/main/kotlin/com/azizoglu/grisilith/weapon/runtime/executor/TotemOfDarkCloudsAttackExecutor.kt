@@ -1,6 +1,10 @@
 package com.azizoglu.grisilith.weapon.runtime.executor
 
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
+import com.azizoglu.grisilith.enemy.EnemyDamageContext
+import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
@@ -18,7 +22,10 @@ class TotemOfDarkCloudsAttackExecutor(
     WeaponTargetSelector,
 
     private val projectileExecutor:
-    ProjectileWeaponAttackExecutor
+    ProjectileWeaponAttackExecutor,
+
+    private val playerStats:
+    PlayerStats
 ) : WeaponAttackExecutor {
 
     companion object {
@@ -156,10 +163,28 @@ class TotemOfDarkCloudsAttackExecutor(
 
         val appliedDamage =
             target.takeDamage(
-                tamgaModifiedDamage
+                amount = tamgaModifiedDamage,
+                damageContext = EnemyDamageContext(
+                    damageType = DamageType.NECROTIC,
+                    sourceWeaponRuntimeId = context.weapon.runtimeId,
+                    sourceWeaponDefinitionId = context.weapon.definition.id.value,
+                    sourceName = context.weapon.displayName
+                )
             )
 
         if (appliedDamage > 0) {
+            target.applyCondition(
+                ConditionDamageCalculator.createApplication(
+                    type = ConditionType.NECROSIS,
+                    playerStats = playerStats,
+                    sourceWeaponRuntimeId = context.weapon.runtimeId,
+                    sourceWeaponDefinitionId = context.weapon.definition.id.value,
+                    sourceName = context.weapon.displayName,
+                    sourceCenterX = context.player.centerX,
+                    sourceCenterY = context.player.centerY
+                )
+            )
+
             context.onDamageDealt(
                 appliedDamage,
                 context.weapon.displayName
@@ -180,14 +205,7 @@ class TotemOfDarkCloudsAttackExecutor(
             appliedDamage =
                 appliedDamage,
             damageType =
-                context.weapon
-                    .definition
-                    .damageTypes
-                    .firstOrNull { type ->
-                        type !=
-                            DamageType.NONE
-                    }
-                    ?: DamageType.NONE
+                DamageType.NECROTIC
         )
 
         /*

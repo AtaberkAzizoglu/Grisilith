@@ -10,6 +10,9 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
 import com.badlogic.gdx.math.Vector2
 import kotlin.math.roundToInt
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
+import com.azizoglu.grisilith.statistics.PlayerStats
 
 class TomeOfEryndorAttackExecutor(
     private val damageCalculator:
@@ -23,7 +26,10 @@ class TomeOfEryndorAttackExecutor(
      * mevcut ortak executor üzerinden çalıştırır.
      */
     private val projectileExecutor:
-    ProjectileWeaponAttackExecutor
+    ProjectileWeaponAttackExecutor,
+
+    private val playerStats:
+    PlayerStats
 ) : WeaponAttackExecutor {
 
     companion object {
@@ -295,6 +301,18 @@ class TomeOfEryndorAttackExecutor(
             )
 
         if (appliedDamage > 0) {
+            enemy.applyCondition(
+                ConditionDamageCalculator.createApplication(
+                    type = ConditionType.BURNED,
+                    playerStats = playerStats,
+                    sourceWeaponRuntimeId = context.weapon.runtimeId,
+                    sourceWeaponDefinitionId = context.weapon.definition.id.value,
+                    sourceName = context.weapon.displayName,
+                    sourceCenterX = context.player.centerX,
+                    sourceCenterY = context.player.centerY
+                )
+            )
+
             context.onDamageDealt(
                 appliedDamage,
                 context.weapon.displayName

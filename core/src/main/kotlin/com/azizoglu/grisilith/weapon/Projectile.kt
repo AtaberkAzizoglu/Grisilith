@@ -3,6 +3,7 @@ package com.azizoglu.grisilith.weapon
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
+import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
@@ -66,7 +67,10 @@ class Projectile(
     Float = 1f,
 
     private val carryFirstNormalTarget:
-    Boolean = false
+    Boolean = false,
+
+    private val conditionApplication:
+    ConditionApplication? = null
 ) {
 
     private val position =
@@ -423,6 +427,13 @@ class Projectile(
                 )
 
             if (appliedDamage > 0) {
+                conditionApplication
+                    ?.let { application ->
+                        enemy.applyCondition(
+                            application
+                        )
+                    }
+
                 onDamageDealt(
                     appliedDamage
                 )

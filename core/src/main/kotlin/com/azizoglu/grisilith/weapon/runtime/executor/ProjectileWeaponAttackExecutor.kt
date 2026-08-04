@@ -1,6 +1,9 @@
 package com.azizoglu.grisilith.weapon.runtime.executor
 
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.combat.condition.ConditionApplication
+import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
@@ -31,6 +34,12 @@ class ProjectileWeaponAttackExecutor(
 
         private const val STEAM_WAND_ID =
             "WPN_STEAM_WAND"
+
+        private const val IVY_STAFF_ID =
+            "WPN_IVY_STAFF"
+
+        private const val AMULET_OF_TROLL_KING_DISPLAY_NAME =
+            "Amulet of Troll King"
 
         private const val ORB_OF_SKY_ID =
             "WPN_ORB_OF_SKY"
@@ -594,6 +603,13 @@ class ProjectileWeaponAttackExecutor(
                 }
             }
 
+        val conditionApplication =
+            conditionApplicationFor(
+                context = context,
+                weaponId = weaponId,
+                selectedDamageType = selectedDamageType
+            )
+
         /*
          * Orb’un normal seviyelerinde yalnızca
          * Lightning saldırısı sekebilir.
@@ -859,8 +875,54 @@ class ProjectileWeaponAttackExecutor(
                     firstTargetBossDamageMultiplier,
 
                 carryFirstNormalTarget =
-                    carryFirstNormalTarget
+                    carryFirstNormalTarget,
+
+                conditionApplication =
+                    conditionApplication
             )
+        )
+    }
+
+    private fun conditionApplicationFor(
+        context: WeaponAttackContext,
+        weaponId: String,
+        selectedDamageType: DamageType
+    ): ConditionApplication? {
+
+        val conditionType =
+            when {
+                weaponId == IVY_STAFF_ID ->
+                    ConditionType.CORRODING
+
+                weaponId == STEAM_WAND_ID &&
+                    selectedDamageType == DamageType.WATER ->
+                    ConditionType.WET
+
+                context.weapon.displayName ==
+                    AMULET_OF_TROLL_KING_DISPLAY_NAME &&
+                    selectedDamageType == DamageType.WATER ->
+                    ConditionType.WET
+
+                weaponId == TOTEM_OF_DARK_CLOUDS_ID &&
+                    selectedDamageType == DamageType.NECROTIC ->
+                    ConditionType.NECROSIS
+
+                context.weapon.displayName ==
+                    "Tome of Eryndor" &&
+                    selectedDamageType == DamageType.FIRE ->
+                    ConditionType.BURNED
+
+                else -> null
+            } ?: return null
+
+        return ConditionDamageCalculator.createApplication(
+            type = conditionType,
+            playerStats = playerStats,
+            sourceWeaponRuntimeId = context.weapon.runtimeId,
+            sourceWeaponDefinitionId = context.weapon.definition.id.value,
+            sourceName = context.weapon.displayName,
+            sourceCenterX = context.player.centerX,
+            sourceCenterY = context.player.centerY
         )
     }
 

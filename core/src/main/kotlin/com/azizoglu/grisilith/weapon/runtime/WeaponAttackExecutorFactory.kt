@@ -95,7 +95,10 @@ class WeaponAttackExecutorFactory(
                 targetSelector,
 
             projectileExecutor =
-                projectileExecutor
+                projectileExecutor,
+
+            playerStats =
+                playerStats
         )
 
     private val totemOfDarkCloudsExecutor =
@@ -107,7 +110,10 @@ class WeaponAttackExecutorFactory(
                 targetSelector,
 
             projectileExecutor =
-                projectileExecutor
+                projectileExecutor,
+
+            playerStats =
+                playerStats
         )
 
     fun executorFor(
