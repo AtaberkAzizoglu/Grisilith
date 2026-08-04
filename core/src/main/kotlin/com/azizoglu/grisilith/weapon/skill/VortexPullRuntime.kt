@@ -19,6 +19,19 @@ class VortexPullRuntime {
     private var visualRotationDegrees =
         0f
 
+    private var plagueStormActive =
+        false
+
+    private var plagueActivationVisualRemainingSeconds =
+        0f
+
+    private var plaguePulseSeconds =
+        0f
+
+    val isPlagueStormActive: Boolean
+        get() =
+            plagueStormActive
+
     val isActive:
         Boolean
         get() =
@@ -51,6 +64,39 @@ class VortexPullRuntime {
                     1f
                 )
         }
+
+    fun contains(
+        worldX: Float,
+        worldY: Float
+    ): Boolean {
+
+        return areaRuntime
+            .field
+            ?.contains(
+                worldX,
+                worldY
+            )
+            ?: false
+    }
+
+    fun activatePlagueStorm():
+        Boolean {
+
+        if (
+            !isActive ||
+            plagueStormActive
+        ) {
+            return false
+        }
+
+        plagueStormActive =
+            true
+
+        plagueActivationVisualRemainingSeconds =
+            PLAGUE_ACTIVATION_VISUAL_SECONDS
+
+        return true
+    }
 
     /*
      * Uygun düşman yoksa false döner.
@@ -249,6 +295,22 @@ class VortexPullRuntime {
                 ) %
                 360f
 
+        plaguePulseSeconds +=
+            delta.coerceAtLeast(
+                0f
+            )
+
+        plagueActivationVisualRemainingSeconds =
+            (
+                plagueActivationVisualRemainingSeconds -
+                    delta.coerceAtLeast(
+                        0f
+                    )
+                )
+                .coerceAtLeast(
+                    0f
+                )
+
         areaRuntime.update(
             delta =
                 delta,
@@ -260,6 +322,69 @@ class VortexPullRuntime {
             onFrame = {
                     area,
                     frameDelta ->
+
+                if (
+                    plagueStormActive
+                ) {
+                    val hasEnemyInside =
+                        enemies.any {
+                            !it.isDead &&
+                                area.contains(
+                                    it.centerX,
+                                    it.centerY
+                                )
+                        }
+
+                    if (
+                        !hasEnemyInside
+                    ) {
+                        val nearestEnemy =
+                            enemies
+                                .asSequence()
+                                .filter {
+                                    !it.isDead
+                                }
+                                .minByOrNull {
+                                    Vector2.dst2(
+                                        area.center.x,
+                                        area.center.y,
+                                        it.centerX,
+                                        it.centerY
+                                    )
+                                }
+
+                        nearestEnemy
+                            ?.let {
+                                    target ->
+
+                                val movement =
+                                    Vector2(
+                                        target.centerX -
+                                            area.center.x,
+
+                                        target.centerY -
+                                            area.center.y
+                                    )
+
+                                if (
+                                    !movement.isZero(
+                                        0.001f
+                                    )
+                                ) {
+                                    movement
+                                        .nor()
+                                        .scl(
+                                            PLAGUE_STORM_MOVE_SPEED *
+                                                frameDelta
+                                        )
+
+                                    area.center.add(
+                                        movement
+                                    )
+                                }
+                            }
+                    }
+                }
 
                 enemies
                     .asSequence()
@@ -353,12 +478,23 @@ class VortexPullRuntime {
                 )
 
         shapeRenderer.color =
-            Color(
-                0.42f,
-                0.74f,
-                1f,
-                0.34f
-            )
+            if (
+                plagueStormActive
+            ) {
+                Color(
+                    0.52f,
+                    0.12f,
+                    0.68f,
+                    0.44f
+                )
+            } else {
+                Color(
+                    0.42f,
+                    0.74f,
+                    1f,
+                    0.34f
+                )
+            }
 
         shapeRenderer.circle(
             centerX,
@@ -455,13 +591,130 @@ class VortexPullRuntime {
             )
         }
 
+        if (
+            plagueStormActive
+        ) {
+            val plaguePulse =
+                (
+                    MathUtils.sin(
+                        plaguePulseSeconds *
+                            PLAGUE_PULSE_SPEED
+                    ) +
+                        1f
+                    ) /
+                    2f
+
+            shapeRenderer.color =
+                Color(
+                    0.88f,
+                    0.22f,
+                    1f,
+                    0.32f +
+                        plaguePulse *
+                        0.20f
+                )
+
+            repeat(
+                PLAGUE_ORBITAL_COUNT
+            ) {
+                    index ->
+
+                val angle =
+                    visualRotationDegrees *
+                        -1.4f +
+                        index *
+                        (
+                            360f /
+                                PLAGUE_ORBITAL_COUNT
+                            )
+
+                val orbitalDistance =
+                    radius *
+                        (
+                            0.42f +
+                                plaguePulse *
+                                0.08f
+                            )
+
+                shapeRenderer.circle(
+                    centerX +
+                        MathUtils.cosDeg(
+                            angle
+                        ) *
+                        orbitalDistance,
+
+                    centerY +
+                        MathUtils.sinDeg(
+                            angle
+                        ) *
+                        orbitalDistance,
+
+                    4.5f +
+                        plaguePulse *
+                        2f,
+                    18
+                )
+            }
+
+            if (
+                plagueActivationVisualRemainingSeconds >
+                0f
+            ) {
+                val progress =
+                    1f -
+                        (
+                            plagueActivationVisualRemainingSeconds /
+                                PLAGUE_ACTIVATION_VISUAL_SECONDS
+                            )
+                            .coerceIn(
+                                0f,
+                                1f
+                            )
+
+                shapeRenderer.color =
+                    Color(
+                        0.94f,
+                        0.36f,
+                        1f,
+                        (
+                            1f -
+                                progress
+                            ) *
+                            0.76f
+                    )
+
+                shapeRenderer.circle(
+                    centerX,
+                    centerY,
+                    radius *
+                        (
+                            0.55f +
+                                progress *
+                                0.75f
+                            ),
+                    64
+                )
+            }
+        }
+
         shapeRenderer.color =
-            Color(
-                0.88f,
-                0.96f,
-                1f,
-                1f
-            )
+            if (
+                plagueStormActive
+            ) {
+                Color(
+                    0.98f,
+                    0.70f,
+                    1f,
+                    1f
+                )
+            } else {
+                Color(
+                    0.88f,
+                    0.96f,
+                    1f,
+                    1f
+                )
+            }
 
         shapeRenderer.circle(
             centerX,
@@ -475,6 +728,15 @@ class VortexPullRuntime {
         areaRuntime.clear()
 
         visualRotationDegrees =
+            0f
+
+        plagueStormActive =
+            false
+
+        plagueActivationVisualRemainingSeconds =
+            0f
+
+        plaguePulseSeconds =
             0f
     }
 
@@ -490,6 +752,18 @@ class VortexPullRuntime {
 
         private const val CENTER_MARKER_RADIUS =
             9f
+
+        private const val PLAGUE_STORM_MOVE_SPEED =
+            34f
+
+        private const val PLAGUE_ACTIVATION_VISUAL_SECONDS =
+            0.60f
+
+        private const val PLAGUE_PULSE_SPEED =
+            4.4f
+
+        private const val PLAGUE_ORBITAL_COUNT =
+            7
     }
 
 }

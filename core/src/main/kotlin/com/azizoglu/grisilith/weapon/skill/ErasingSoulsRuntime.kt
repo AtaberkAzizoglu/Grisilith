@@ -43,7 +43,11 @@ class ErasingSoulsRuntime {
         onDamageDealt: (
             appliedDamage: Int,
             sourceName: String
-        ) -> Unit
+        ) -> Unit,
+
+        onExplosionStarted: (
+            deadEnemy: Enemy
+        ) -> Unit = {}
     ): List<Enemy> {
 
         if (
@@ -120,6 +124,10 @@ class ErasingSoulsRuntime {
 
                 centerY =
                     deadEnemy.centerY
+            )
+
+            onExplosionStarted(
+                deadEnemy
             )
 
             /*

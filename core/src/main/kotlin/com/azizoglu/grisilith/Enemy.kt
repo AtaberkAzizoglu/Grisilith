@@ -12,6 +12,9 @@ import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionRuntime
 import com.azizoglu.grisilith.combat.condition.ConditionControlRules
 import com.azizoglu.grisilith.combat.reaction.SpellReactionResolver
+import com.azizoglu.grisilith.combat.interaction.CombatInteractionEvent
+import com.azizoglu.grisilith.combat.interaction.CombatInteractionManager
+import com.azizoglu.grisilith.combat.interaction.CombatInteractionTrigger
 import com.azizoglu.grisilith.content.ConditionType
 
 class Enemy(
@@ -410,6 +413,43 @@ class Enemy(
         ) {
             latestDamageContext =
                 damageContext
+
+            CombatInteractionManager
+                .notifyGlobal(
+                    CombatInteractionEvent(
+                        trigger =
+                            CombatInteractionTrigger
+                                .DAMAGE_APPLIED,
+
+                        damageType =
+                            damageContext
+                                .damageType,
+
+                        enemy =
+                            this,
+
+                        worldX =
+                            centerX,
+
+                        worldY =
+                            centerY,
+
+                        appliedDamage =
+                            appliedDamage,
+
+                        sourceWeaponRuntimeId =
+                            damageContext
+                                .sourceWeaponRuntimeId,
+
+                        sourceWeaponDefinitionId =
+                            damageContext
+                                .sourceWeaponDefinitionId,
+
+                        sourceName =
+                            damageContext
+                                .sourceName
+                    )
+                )
         }
 
         reactionResult

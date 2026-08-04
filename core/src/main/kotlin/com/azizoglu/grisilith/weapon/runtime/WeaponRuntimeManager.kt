@@ -28,6 +28,12 @@ import com.azizoglu.grisilith.weapon.skill.ImpaleAndDragReward
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.weapon.skill.ErasingSoulsRuntime
 import com.azizoglu.grisilith.weapon.skill.AcidicPoolRuntime
+import com.azizoglu.grisilith.combat.interaction.CombatInteractionManager
+import com.azizoglu.grisilith.combat.interaction.CombatInteractionEvent
+import com.azizoglu.grisilith.combat.interaction.CombatInteractionTrigger
+import com.azizoglu.grisilith.combat.interaction.VitriolicIgnitionRule
+import com.azizoglu.grisilith.combat.interaction.PlagueStormRule
+import com.badlogic.gdx.math.Vector2
 
 class WeaponRuntimeManager(
     private val inventory:
@@ -127,6 +133,71 @@ class WeaponRuntimeManager(
         WeaponInstance? =
         null
 
+    private val combatInteractionManager =
+        CombatInteractionManager()
+
+    private data class PendingVitriolicIgnition(
+        val centerX: Float,
+        val centerY: Float
+    )
+
+    private val pendingVitriolicIgnitions =
+        ArrayDeque<PendingVitriolicIgnition>()
+
+    init {
+        combatInteractionManager
+            .register(
+                VitriolicIgnitionRule(
+                    tryIgnitePool = {
+                            worldX,
+                            worldY ->
+
+                        acidicPoolRuntime
+                            .tryActivateVitriolicIgnition(
+                                worldX,
+                                worldY
+                            )
+                    },
+
+                    onTriggered = {
+                            worldX,
+                            worldY ->
+
+                        pendingVitriolicIgnitions
+                            .addLast(
+                                PendingVitriolicIgnition(
+                                    centerX =
+                                        worldX,
+
+                                    centerY =
+                                        worldY
+                                )
+                            )
+                    }
+                )
+            )
+
+        combatInteractionManager
+            .register(
+                PlagueStormRule(
+                    isInsideVortex = {
+                            worldX,
+                            worldY ->
+
+                        vortexPullRuntime
+                            .contains(
+                                worldX,
+                                worldY
+                            )
+                    },
+
+                    activatePlagueStorm = {
+                        vortexPullRuntime
+                            .activatePlagueStorm()
+                    }
+                )
+            )
+    }
 
     fun update(
         delta: Float,
@@ -143,6 +214,17 @@ class WeaponRuntimeManager(
         onEnemyKilled: (Enemy) -> Unit
     ) {
         synchronizeWithInventory()
+
+        resolvePendingVitriolicIgnitions(
+            enemyManager =
+                enemyManager,
+
+            onDamageDealt =
+                onDamageDealt,
+
+            onEnemyKilled =
+                onEnemyKilled
+        )
 
         erasingSoulsRuntime.update(delta)
 
@@ -696,6 +778,158 @@ class WeaponRuntimeManager(
         return true
     }
 
+    private fun resolvePendingVitriolicIgnitions(
+        enemyManager: EnemyManager,
+        onDamageDealt: (
+            damage: Int,
+            weaponName: String
+        ) -> Unit,
+        onEnemyKilled: (Enemy) -> Unit
+    ) {
+
+        val weapon =
+            acidicPoolWeapon
+                ?: run {
+                    pendingVitriolicIgnitions
+                        .clear()
+
+                    return
+                }
+
+        val pool =
+            acidicPoolRuntime
+                .field
+                ?: run {
+                    pendingVitriolicIgnitions
+                        .clear()
+
+                    return
+                }
+
+        while (
+            pendingVitriolicIgnitions
+                .isNotEmpty()
+        ) {
+            pendingVitriolicIgnitions
+                .removeFirst()
+
+            val explosionDamage =
+                (
+                    activeSkillDamageCalculator
+                        .calculate(
+                            weapon
+                        )
+                        .damage *
+                        VITRIOLIC_IGNITION_DAMAGE_MULTIPLIER
+                    )
+                    .roundToInt()
+                    .coerceAtLeast(
+                        1
+                    )
+
+            val explosionRadius =
+                pool.radius *
+                    VITRIOLIC_IGNITION_RADIUS_MULTIPLIER
+
+            enemyManager
+                .allEnemies
+                .toList()
+                .forEach {
+                        enemy ->
+
+                    if (
+                        enemy.isDead ||
+                        Vector2.dst2(
+                            pool.center.x,
+                            pool.center.y,
+                            enemy.centerX,
+                            enemy.centerY
+                        ) >
+                        explosionRadius *
+                        explosionRadius
+                    ) {
+                        return@forEach
+                    }
+
+                    val wasAlive =
+                        !enemy.isDead
+
+                    val appliedDamage =
+                        enemy.takeDamage(
+                            amount =
+                                explosionDamage,
+
+                            damageContext =
+                                EnemyDamageContext(
+                                    damageType =
+                                        DamageType.FIRE,
+
+                                    sourceWeaponRuntimeId =
+                                        weapon.runtimeId,
+
+                                    sourceWeaponDefinitionId =
+                                        weapon.definition.id.value,
+
+                                    sourceName =
+                                        weapon.displayName +
+                                            " — Vitriolic Ignition"
+                                )
+                        )
+
+                    if (
+                        appliedDamage >
+                        0
+                    ) {
+                        enemy.applyCondition(
+                            ConditionDamageCalculator
+                                .createApplication(
+                                    type =
+                                        ConditionType.BURNED,
+
+                                    playerStats =
+                                        playerStats,
+
+                                    durationSeconds =
+                                        DefaultWeaponAbilities
+                                            .ACIDIC_POOL_CORRODING_DURATION_SECONDS,
+
+                                    sourceWeaponRuntimeId =
+                                        weapon.runtimeId,
+
+                                    sourceWeaponDefinitionId =
+                                        weapon.definition.id.value,
+
+                                    sourceName =
+                                        weapon.displayName +
+                                            " — Vitriolic Ignition",
+
+                                    sourceCenterX =
+                                        pool.center.x,
+
+                                    sourceCenterY =
+                                        pool.center.y
+                                )
+                        )
+
+                        onDamageDealt(
+                            appliedDamage,
+                            weapon.displayName +
+                                " — Vitriolic Ignition"
+                        )
+                    }
+
+                    if (
+                        wasAlive &&
+                        enemy.isDead
+                    ) {
+                        onEnemyKilled(
+                            enemy
+                        )
+                    }
+                }
+        }
+    }
+
     private fun applyAcidicPoolDamageTick(
         enemy: Enemy,
         tickIntervalSeconds: Float,
@@ -819,6 +1053,42 @@ class WeaponRuntimeManager(
                             poolCenterY
                     )
             )
+
+            if (
+                acidicPoolRuntime
+                    .isVitriolicIgnitionActive
+            ) {
+                enemy.applyCondition(
+                    ConditionDamageCalculator
+                        .createApplication(
+                            type =
+                                ConditionType.BURNED,
+
+                            playerStats =
+                                playerStats,
+
+                            durationSeconds =
+                                DefaultWeaponAbilities
+                                    .ACIDIC_POOL_CORRODING_DURATION_SECONDS,
+
+                            sourceWeaponRuntimeId =
+                                weapon.runtimeId,
+
+                            sourceWeaponDefinitionId =
+                                weapon.definition.id.value,
+
+                            sourceName =
+                                weapon.displayName +
+                                    " — Vitriolic Ignition",
+
+                            sourceCenterX =
+                                poolCenterX,
+
+                            sourceCenterY =
+                                poolCenterY
+                        )
+                )
+            }
 
             onDamageDealt(
                 appliedDamage,
@@ -995,6 +1265,14 @@ class WeaponRuntimeManager(
                 calculatedDamage *
                     DefaultWeaponAbilities
                         .VORTEX_PULL_DAMAGE_PER_SECOND_MULTIPLIER *
+                    if (
+                        vortexPullRuntime
+                            .isPlagueStormActive
+                    ) {
+                        PLAGUE_STORM_DAMAGE_MULTIPLIER
+                    } else {
+                        1f
+                    } *
                     tickIntervalSeconds
                 )
                 .roundToInt()
@@ -1027,9 +1305,58 @@ class WeaponRuntimeManager(
             appliedDamage >
             0
         ) {
+            if (
+                vortexPullRuntime
+                    .isPlagueStormActive
+            ) {
+                enemy.applyCondition(
+                    ConditionDamageCalculator
+                        .createApplication(
+                            type =
+                                ConditionType.NECROSIS,
+
+                            playerStats =
+                                playerStats,
+
+                            durationSeconds =
+                                PLAGUE_STORM_NECROSIS_SECONDS,
+
+                            sourceWeaponRuntimeId =
+                                weapon.runtimeId,
+
+                            sourceWeaponDefinitionId =
+                                weapon.definition.id.value,
+
+                            sourceName =
+                                weapon.displayName +
+                                    " — Plague Storm",
+
+                            sourceCenterX =
+                                vortexPullRuntime
+                                    .field
+                                    ?.center
+                                    ?.x,
+
+                            sourceCenterY =
+                                vortexPullRuntime
+                                    .field
+                                    ?.center
+                                    ?.y
+                        )
+                )
+            }
+
             onDamageDealt(
                 appliedDamage,
-                weapon.displayName
+                if (
+                    vortexPullRuntime
+                        .isPlagueStormActive
+                ) {
+                    weapon.displayName +
+                        " — Plague Storm"
+                } else {
+                    weapon.displayName
+                }
             )
         }
 
@@ -1101,7 +1428,39 @@ class WeaponRuntimeManager(
             enemies = enemyManager.allEnemies,
             explosionDamage = explosionDamage,
             playerStats = playerStats,
-            onDamageDealt = onDamageDealt
+            onDamageDealt = onDamageDealt,
+
+            onExplosionStarted = {
+                    deadEnemy ->
+
+                combatInteractionManager
+                    .notify(
+                        CombatInteractionEvent(
+                            trigger =
+                                CombatInteractionTrigger
+                                    .ERASING_SOULS_EXPLOSION,
+
+                            enemy =
+                                deadEnemy,
+
+                            worldX =
+                                deadEnemy.centerX,
+
+                            worldY =
+                                deadEnemy.centerY,
+
+                            sourceWeaponRuntimeId =
+                                sourceWeapon.runtimeId,
+
+                            sourceWeaponDefinitionId =
+                                sourceWeapon.definition.id.value,
+
+                            sourceName =
+                                sourceWeapon.displayName +
+                                    " — Erasing the Souls"
+                        )
+                    )
+            }
         )
     }
 
@@ -1155,6 +1514,7 @@ class WeaponRuntimeManager(
         acidicPoolRuntime.clear()
         acidicPoolWeaponRuntime = null
         acidicPoolWeapon = null
+        pendingVitriolicIgnitions.clear()
 
         erasingSoulsRuntime.clear()
 
@@ -1298,6 +1658,7 @@ class WeaponRuntimeManager(
         acidicPoolRuntime.clear()
         acidicPoolWeaponRuntime = null
         acidicPoolWeapon = null
+        pendingVitriolicIgnitions.clear()
 
         persistentAreaManager.clearAll()
 
@@ -1329,6 +1690,18 @@ class WeaponRuntimeManager(
          */
         private const val VORTEX_BASE_PULL_SPEED =
             235f
+
+        private const val VITRIOLIC_IGNITION_RADIUS_MULTIPLIER =
+            2f
+
+        private const val VITRIOLIC_IGNITION_DAMAGE_MULTIPLIER =
+            2.40f
+
+        private const val PLAGUE_STORM_DAMAGE_MULTIPLIER =
+            1.75f
+
+        private const val PLAGUE_STORM_NECROSIS_SECONDS =
+            2f
     }
 
 }
