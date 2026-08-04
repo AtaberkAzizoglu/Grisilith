@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
+import com.azizoglu.grisilith.enemy.Enemy
 
 class StaticCloudsRuntime(
     areaManager:
@@ -23,6 +24,12 @@ class StaticCloudsRuntime(
 
     private var visualRotationDegrees =
         0f
+
+    private var lightningFlashRemainingSeconds =
+        0f
+
+    private val lightningTarget =
+        Vector2()
 
     val isActive:
         Boolean
@@ -65,7 +72,11 @@ class StaticCloudsRuntime(
     fun update(
         delta: Float,
         player: Player,
-        onTick: () -> Unit,
+        enemies: List<Enemy>,
+        onDamageTick: (
+            enemy: Enemy,
+            tickIntervalSeconds: Float
+        ) -> Unit,
         onCompleted: () -> Unit
     ) {
         visualRotationDegrees =
@@ -77,6 +88,17 @@ class StaticCloudsRuntime(
                     VISUAL_ROTATION_SPEED
                 ) %
                 360f
+
+        lightningFlashRemainingSeconds =
+            (
+                lightningFlashRemainingSeconds -
+                    delta.coerceAtLeast(
+                        0f
+                    )
+                )
+                .coerceAtLeast(
+                    0f
+                )
 
         areaRuntime.update(
             delta =
@@ -94,14 +116,41 @@ class StaticCloudsRuntime(
             },
 
             onTick = {
-                    _ ->
+                    area ->
 
-                /*
-                 * Part 8A sadece aura lifecycle ve render kurar.
-                 * Lightning DPS ve Stun Part 8B'de bu callback'e
-                 * bağlanacaktır.
-                 */
-                onTick()
+                val livingTargets =
+                    enemies.filter {
+                            enemy ->
+
+                        !enemy.isDead &&
+                            area.contains(
+                                enemy.centerX,
+                                enemy.centerY
+                            )
+                    }
+
+                livingTargets.forEach {
+                        enemy ->
+
+                    onDamageTick(
+                        enemy,
+                        area.tickIntervalSeconds
+                    )
+                }
+
+                livingTargets
+                    .randomOrNull()
+                    ?.let {
+                            target ->
+
+                        lightningTarget.set(
+                            target.centerX,
+                            target.centerY
+                        )
+
+                        lightningFlashRemainingSeconds =
+                            LIGHTNING_FLASH_SECONDS
+                    }
             },
 
             onCompleted =
@@ -259,12 +308,86 @@ class StaticCloudsRuntime(
                 2f
             )
         }
+
+        if (
+            lightningFlashRemainingSeconds >
+            0f
+        ) {
+            val alpha =
+                (
+                    lightningFlashRemainingSeconds /
+                        LIGHTNING_FLASH_SECONDS
+                    )
+                    .coerceIn(
+                        0f,
+                        1f
+                    )
+
+            shapeRenderer.color =
+                Color(
+                    0.82f,
+                    0.92f,
+                    1f,
+                    alpha
+                )
+
+            val cloudX =
+                centerX +
+                    MathUtils.cosDeg(
+                        visualRotationDegrees
+                    ) *
+                    radius *
+                    0.28f
+
+            val cloudY =
+                centerY +
+                    MathUtils.sinDeg(
+                        visualRotationDegrees
+                    ) *
+                    radius *
+                    0.28f
+
+            val middleX =
+                (
+                    cloudX +
+                        lightningTarget.x
+                    ) /
+                    2f +
+                    12f
+
+            val middleY =
+                (
+                    cloudY +
+                        lightningTarget.y
+                    ) /
+                    2f -
+                    8f
+
+            shapeRenderer.rectLine(
+                cloudX,
+                cloudY,
+                middleX,
+                middleY,
+                4f
+            )
+
+            shapeRenderer.rectLine(
+                middleX,
+                middleY,
+                lightningTarget.x,
+                lightningTarget.y,
+                4f
+            )
+        }
     }
 
     fun clear() {
         areaRuntime.clear()
 
         visualRotationDegrees =
+            0f
+
+        lightningFlashRemainingSeconds =
             0f
     }
 
@@ -280,5 +403,8 @@ class StaticCloudsRuntime(
 
         private const val LIGHTNING_PLACEHOLDER_COUNT =
             4
+
+        private const val LIGHTNING_FLASH_SECONDS =
+            0.16f
     }
 }

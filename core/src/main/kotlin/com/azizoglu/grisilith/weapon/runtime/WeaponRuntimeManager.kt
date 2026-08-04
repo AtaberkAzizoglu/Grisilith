@@ -18,6 +18,9 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import kotlin.math.roundToInt
 import com.azizoglu.grisilith.weapon.skill.StaticCloudsRuntime
 import com.azizoglu.grisilith.weapon.skill.area.PersistentAreaManager
+import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.enemy.EnemyType
+import com.badlogic.gdx.math.MathUtils
 
 class WeaponRuntimeManager(
     private val inventory:
@@ -90,6 +93,10 @@ class WeaponRuntimeManager(
 
     private var staticCloudsWeaponRuntime:
         WeaponRuntime? =
+        null
+
+    private var staticCloudsWeapon:
+        WeaponInstance? =
         null
 
     fun update(
@@ -224,11 +231,27 @@ class WeaponRuntimeManager(
             player =
                 player,
 
-            onTick = {
-                /*
-                 * Part 8B:
-                 * Lightning DPS ve %5 Stun buraya bağlanacak.
-                 */
+            enemies =
+                enemyManager
+                    .allEnemies,
+
+            onDamageTick = {
+                    enemy,
+                    tickIntervalSeconds ->
+
+                applyStaticCloudsDamageTick(
+                    enemy =
+                        enemy,
+
+                    tickIntervalSeconds =
+                        tickIntervalSeconds,
+
+                    onDamageDealt =
+                        onDamageDealt,
+
+                    onEnemyKilled =
+                        onEnemyKilled
+                )
             },
 
             onCompleted = {
@@ -236,6 +259,9 @@ class WeaponRuntimeManager(
                     ?.endActiveAbilityEarly()
 
                 staticCloudsWeaponRuntime =
+                    null
+
+                staticCloudsWeapon =
                     null
             }
         )
@@ -491,7 +517,126 @@ class WeaponRuntimeManager(
         staticCloudsWeaponRuntime =
             weaponRuntime
 
+        staticCloudsWeapon =
+            weaponRuntime.weapon
+
         return true
+    }
+
+    private fun applyStaticCloudsDamageTick(
+        enemy: Enemy,
+        tickIntervalSeconds: Float,
+        onDamageDealt: (
+            damage: Int,
+            weaponName: String
+        ) -> Unit,
+        onEnemyKilled: (Enemy) -> Unit
+    ) {
+        val weapon =
+            staticCloudsWeapon
+                ?: return
+
+        if (
+            enemy.isDead ||
+            tickIntervalSeconds <=
+            0f
+        ) {
+            return
+        }
+
+        val normalDamage =
+            activeSkillDamageCalculator
+                .calculate(
+                    weapon
+                )
+                .damage
+
+        val lightningDamage =
+            (
+                normalDamage *
+                    DefaultWeaponAbilities
+                        .STATIC_CLOUDS_LIGHTNING_DPS_MULTIPLIER *
+                    tickIntervalSeconds
+                )
+                .roundToInt()
+                .coerceAtLeast(
+                    1
+                )
+
+        val modifiedDamage =
+            tamgaRuntimeManager
+                .modifyWeaponDamage(
+                    enemy =
+                        enemy,
+
+                    baseDamage =
+                        lightningDamage
+                )
+                .coerceAtLeast(
+                    1
+                )
+
+        val wasAlive =
+            !enemy.isDead
+
+        val appliedDamage =
+            enemy.takeDamage(
+                modifiedDamage
+            )
+
+        if (
+            appliedDamage >
+            0
+        ) {
+            onDamageDealt(
+                appliedDamage,
+                weapon.displayName
+            )
+
+            tryApplyStaticCloudsStun(
+                enemy
+            )
+        }
+
+        if (
+            wasAlive &&
+            enemy.isDead
+        ) {
+            onEnemyKilled(
+                enemy
+            )
+        }
+    }
+
+    private fun tryApplyStaticCloudsStun(
+        enemy: Enemy
+    ) {
+        if (
+            enemy.isDead ||
+            enemy.type ==
+            EnemyType.MINI_BOSS ||
+            enemy.type ==
+            EnemyType.FINAL_BOSS
+        ) {
+            return
+        }
+
+        if (
+            MathUtils.random() >
+            DefaultWeaponAbilities
+                .STATIC_CLOUDS_STUN_CHANCE
+        ) {
+            return
+        }
+
+        enemy.applyCondition(
+            conditionType =
+                ConditionType.STUNNED,
+
+            durationSeconds =
+                DefaultWeaponAbilities
+                    .STATIC_CLOUDS_STUN_DURATION_SECONDS
+        )
     }
 
     private fun applyVortexDamageTick(
@@ -607,6 +752,7 @@ class WeaponRuntimeManager(
 
         staticCloudsRuntime.clear()
         staticCloudsWeaponRuntime = null
+        staticCloudsWeapon = null
 
         runtimesByWeapon.values
             .forEach {
@@ -726,6 +872,7 @@ class WeaponRuntimeManager(
 
         staticCloudsRuntime.clear()
         staticCloudsWeaponRuntime = null
+        staticCloudsWeapon = null
         persistentAreaManager.clearAll()
 
         runtimesByWeapon.values

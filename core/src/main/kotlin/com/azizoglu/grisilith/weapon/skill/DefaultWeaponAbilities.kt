@@ -27,6 +27,9 @@ object DefaultWeaponAbilities {
     const val STATIC_CLOUDS_STUN_CHANCE =
         0.05f
 
+    const val STATIC_CLOUDS_STUN_DURATION_SECONDS =
+        1f
+
     const val VORTEX_PULL_ID =
         "WPN_ABILITY_VORTEX_PULL"
 
