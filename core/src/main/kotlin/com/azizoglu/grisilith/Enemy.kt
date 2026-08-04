@@ -11,6 +11,7 @@ import kotlin.math.sqrt
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionRuntime
 import com.azizoglu.grisilith.combat.condition.ConditionControlRules
+import com.azizoglu.grisilith.combat.reaction.SpellReactionResolver
 import com.azizoglu.grisilith.content.ConditionType
 
 class Enemy(
@@ -332,13 +333,50 @@ class Enemy(
         damageContext: EnemyDamageContext =
             EnemyDamageContext.NONE
     ): Int {
-        val appliedDamage =
-            health.takeDamage(amount)
 
-        if (appliedDamage > 0) {
+        if (
+            amount <= 0 ||
+            isDead
+        ) {
+            return 0
+        }
+
+        val reactionResult =
+            SpellReactionResolver
+                .resolveIncomingDamage(
+                    baseDamage =
+                        amount,
+
+                    damageContext =
+                        damageContext,
+
+                    conditions =
+                        conditions
+                )
+
+        val appliedDamage =
+            health.takeDamage(
+                reactionResult
+                    .resolvedDamage
+            )
+
+        if (
+            appliedDamage >
+            0
+        ) {
             latestDamageContext =
                 damageContext
         }
+
+        reactionResult
+            .consumedCondition
+            ?.let {
+                    conditionType ->
+
+                conditions.remove(
+                    conditionType
+                )
+            }
 
         return appliedDamage
     }

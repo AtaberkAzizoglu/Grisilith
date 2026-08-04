@@ -19,12 +19,15 @@ import kotlin.math.roundToInt
 import com.azizoglu.grisilith.weapon.skill.StaticCloudsRuntime
 import com.azizoglu.grisilith.weapon.skill.area.PersistentAreaManager
 import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
 import com.azizoglu.grisilith.enemy.EnemyType
+import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.badlogic.gdx.math.MathUtils
 import com.azizoglu.grisilith.weapon.skill.ImpaleAndDragRuntime
 import com.azizoglu.grisilith.weapon.skill.ImpaleAndDragReward
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.weapon.skill.ErasingSoulsRuntime
+import com.azizoglu.grisilith.weapon.skill.AcidicPoolRuntime
 
 class WeaponRuntimeManager(
     private val inventory:
@@ -93,6 +96,13 @@ class WeaponRuntimeManager(
     private val erasingSoulsRuntime =
         ErasingSoulsRuntime()
 
+    private val acidicPoolRuntime =
+        AcidicPoolRuntime(
+            areaManager =
+                persistentAreaManager
+        )
+
+
     private var vortexWeaponRuntime:
         WeaponRuntime? =
         null
@@ -108,6 +118,15 @@ class WeaponRuntimeManager(
     private var staticCloudsWeapon:
         WeaponInstance? =
         null
+
+    private var acidicPoolWeaponRuntime:
+        WeaponRuntime? =
+        null
+
+    private var acidicPoolWeapon:
+        WeaponInstance? =
+        null
+
 
     fun update(
         delta: Float,
@@ -278,6 +297,53 @@ class WeaponRuntimeManager(
             }
         )
 
+        acidicPoolRuntime.update(
+            delta =
+                delta,
+
+            enemies =
+                enemyManager
+                    .allEnemies,
+
+            onDamageTick = {
+                    enemy,
+                    tickIntervalSeconds,
+                    poolCenterX,
+                    poolCenterY ->
+
+                applyAcidicPoolDamageTick(
+                    enemy =
+                        enemy,
+
+                    tickIntervalSeconds =
+                        tickIntervalSeconds,
+
+                    poolCenterX =
+                        poolCenterX,
+
+                    poolCenterY =
+                        poolCenterY,
+
+                    onDamageDealt =
+                        onDamageDealt,
+
+                    onEnemyKilled =
+                        onEnemyKilled
+                )
+            },
+
+            onCompleted = {
+                acidicPoolWeaponRuntime
+                    ?.endActiveAbilityEarly()
+
+                acidicPoolWeaponRuntime =
+                    null
+
+                acidicPoolWeapon =
+                    null
+            }
+        )
+
         impaleAndDragRuntime.update(
             delta =
                 delta,
@@ -439,6 +505,21 @@ class WeaponRuntimeManager(
             }
 
             DefaultWeaponAbilities
+                .ACIDIC_POOL_ID -> {
+
+                tryActivateAcidicPool(
+                    weaponRuntime =
+                        runtime,
+
+                    player =
+                        player,
+
+                    enemyManager =
+                        enemyManager
+                )
+            }
+
+            DefaultWeaponAbilities
                 .IMPALE_AND_DRAG_ID -> {
 
                 impaleAndDragRuntime
@@ -558,6 +639,201 @@ class WeaponRuntimeManager(
             weaponRuntime.weapon
 
         return true
+    }
+
+    private fun tryActivateAcidicPool(
+        weaponRuntime: WeaponRuntime,
+        player: Player,
+        enemyManager: EnemyManager
+    ): Boolean {
+
+        if (
+            weaponRuntime.abilityState !=
+            WeaponAbilityState.READY ||
+            acidicPoolRuntime.isActive
+        ) {
+            return false
+        }
+
+        /*
+         * Önce menzilde hedef aranır ve alan oluşturulur.
+         * Hedef yoksa ability ACTIVE yapılmaz;
+         * dolayısıyla cooldown başlamaz.
+         */
+        val areaStarted =
+            acidicPoolRuntime
+                .tryBegin(
+                    playerCenterX =
+                        player.centerX,
+
+                    playerCenterY =
+                        player.centerY,
+
+                    enemies =
+                        enemyManager
+                            .allEnemies
+                )
+
+        if (!areaStarted) {
+            return false
+        }
+
+        val activated =
+            weaponRuntime
+                .tryActivateAbility()
+
+        if (!activated) {
+            acidicPoolRuntime.clear()
+            return false
+        }
+
+        acidicPoolWeaponRuntime =
+            weaponRuntime
+
+        acidicPoolWeapon =
+            weaponRuntime.weapon
+
+        return true
+    }
+
+    private fun applyAcidicPoolDamageTick(
+        enemy: Enemy,
+        tickIntervalSeconds: Float,
+        poolCenterX: Float,
+        poolCenterY: Float,
+        onDamageDealt: (
+            damage: Int,
+            weaponName: String
+        ) -> Unit,
+        onEnemyKilled: (Enemy) -> Unit
+    ) {
+
+        val weapon =
+            acidicPoolWeapon
+                ?: return
+
+        if (
+            enemy.isDead ||
+            tickIntervalSeconds <=
+            0f
+        ) {
+            return
+        }
+
+        val activeSkillDamage =
+            activeSkillDamageCalculator
+                .calculate(
+                    weapon
+                )
+                .damage
+
+        val rawTickDamage =
+            (
+                activeSkillDamage *
+                    DefaultWeaponAbilities
+                        .ACIDIC_POOL_DAMAGE_PER_SECOND_MULTIPLIER *
+                    tickIntervalSeconds
+                )
+                .roundToInt()
+                .coerceAtLeast(
+                    1
+                )
+
+        val modifiedDamage =
+            tamgaRuntimeManager
+                .modifyWeaponDamage(
+                    enemy =
+                        enemy,
+
+                    baseDamage =
+                        rawTickDamage
+                )
+                .coerceAtLeast(
+                    1
+                )
+
+        val wasAlive =
+            !enemy.isDead
+
+        val sourceName =
+            weapon.displayName +
+                " — Acidic Pool"
+
+        val appliedDamage =
+            enemy.takeDamage(
+                amount =
+                    modifiedDamage,
+
+                damageContext =
+                    EnemyDamageContext(
+                        damageType =
+                            DamageType.ACID,
+
+                        sourceWeaponRuntimeId =
+                            weapon.runtimeId,
+
+                        sourceWeaponDefinitionId =
+                            weapon
+                                .definition
+                                .id
+                                .value,
+
+                        sourceName =
+                            sourceName
+                    )
+            )
+
+        if (
+            appliedDamage >
+            0
+        ) {
+            enemy.applyCondition(
+                ConditionDamageCalculator
+                    .createApplication(
+                        type =
+                            ConditionType.CORRODING,
+
+                        playerStats =
+                            playerStats,
+
+                        durationSeconds =
+                            DefaultWeaponAbilities
+                                .ACIDIC_POOL_CORRODING_DURATION_SECONDS,
+
+                        sourceWeaponRuntimeId =
+                            weapon.runtimeId,
+
+                        sourceWeaponDefinitionId =
+                            weapon
+                                .definition
+                                .id
+                                .value,
+
+                        sourceName =
+                            sourceName,
+
+                        sourceCenterX =
+                            poolCenterX,
+
+                        sourceCenterY =
+                            poolCenterY
+                    )
+            )
+
+            onDamageDealt(
+                appliedDamage,
+                sourceName
+            )
+        }
+
+        if (
+            wasAlive &&
+            enemy.isDead
+        ) {
+            onEnemyKilled(
+                enemy
+            )
+        }
     }
 
     private fun applyStaticCloudsDamageTick(
@@ -875,6 +1151,11 @@ class WeaponRuntimeManager(
         staticCloudsRuntime.clear()
         staticCloudsWeaponRuntime = null
         staticCloudsWeapon = null
+
+        acidicPoolRuntime.clear()
+        acidicPoolWeaponRuntime = null
+        acidicPoolWeapon = null
+
         erasingSoulsRuntime.clear()
 
         runtimesByWeapon.values
@@ -909,6 +1190,11 @@ class WeaponRuntimeManager(
         )
 
         staticCloudsRuntime.render(
+            shapeRenderer =
+                shapeRenderer
+        )
+
+        acidicPoolRuntime.render(
             shapeRenderer =
                 shapeRenderer
         )
@@ -1008,6 +1294,11 @@ class WeaponRuntimeManager(
         staticCloudsRuntime.clear()
         staticCloudsWeaponRuntime = null
         staticCloudsWeapon = null
+
+        acidicPoolRuntime.clear()
+        acidicPoolWeaponRuntime = null
+        acidicPoolWeapon = null
+
         persistentAreaManager.clearAll()
 
         impaleAndDragRuntime.reset()

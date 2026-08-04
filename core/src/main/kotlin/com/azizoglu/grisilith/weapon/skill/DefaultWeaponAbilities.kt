@@ -75,6 +75,36 @@ object DefaultWeaponAbilities {
     const val STATIC_CLOUDS_STUN_DURATION_SECONDS =
         1f
 
+    const val ACIDIC_POOL_ID =
+        "WPN_ABILITY_ACIDIC_POOL"
+
+    const val ACIDIC_POOL_DURATION_SECONDS =
+        6f
+
+    const val ACIDIC_POOL_COOLDOWN_SECONDS =
+        45f
+
+    const val ACIDIC_POOL_PLACEMENT_RANGE =
+        360f
+
+    const val ACIDIC_POOL_RADIUS =
+        155f
+
+    const val ACIDIC_POOL_TICK_SECONDS =
+        0.50f
+
+    /*
+     * Değer DPS çarpanıdır.
+     *
+     * Tick başına:
+     * Active Skill Damage × 0.90 × 0.50
+     */
+    const val ACIDIC_POOL_DAMAGE_PER_SECOND_MULTIPLIER =
+        0.90f
+
+    const val ACIDIC_POOL_CORRODING_DURATION_SECONDS =
+        3f
+
     const val VORTEX_PULL_ID =
         "WPN_ABILITY_VORTEX_PULL"
 
@@ -233,6 +263,25 @@ object DefaultWeaponAbilities {
 
             durationSeconds =
                 STATIC_CLOUDS_DURATION_SECONDS
+        )
+
+    val acidicPool =
+        WeaponAbilityDefinition(
+            id =
+                ACIDIC_POOL_ID,
+
+            displayName =
+                "Acidic Pool",
+
+            activationType =
+                WeaponAbilityActivationType
+                    .ACTIVE,
+
+            cooldownSeconds =
+                ACIDIC_POOL_COOLDOWN_SECONDS,
+
+            durationSeconds =
+                ACIDIC_POOL_DURATION_SECONDS
         )
 
     val vortexPull =
