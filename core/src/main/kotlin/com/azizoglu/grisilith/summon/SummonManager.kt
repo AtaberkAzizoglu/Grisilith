@@ -1,5 +1,7 @@
 package com.azizoglu.grisilith.summon
 
+import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
+import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
@@ -36,7 +38,11 @@ class SummonManager(
             damage: Int,
             sourceName: String
         ) -> Unit,
-        onEnemyKilled: (Enemy) -> Unit
+        onEnemyKilled: (Enemy) -> Unit,
+        onPlayerDamage: (
+            damage: Int,
+            sourceName: String
+        ) -> Unit
     ) {
 
         if (
@@ -75,18 +81,93 @@ class SummonManager(
                             summon,
                             enemy ->
 
-                        applyCowAttack(
+                        applyEnemyAttack(
                             summon =
                                 summon,
 
                             enemy =
                                 enemy,
 
+                            attackName =
+                                "Summon Animal",
+
+                            damageType =
+                                DamageType.BLUDGEONING,
+
+                            conditionType =
+                                null,
+
                             onDamageDealt =
                                 onDamageDealt,
 
                             onEnemyKilled =
                                 onEnemyKilled
+                        )
+                    },
+
+                    onImpAttack = {
+                            summon,
+                            enemy ->
+
+                        applyEnemyAttack(
+                            summon =
+                                summon,
+
+                            enemy =
+                                enemy,
+
+                            attackName =
+                                "Summon Demon",
+
+                            damageType =
+                                DamageType.FIRE,
+
+                            conditionType =
+                                ConditionType.BURNED,
+
+                            onDamageDealt =
+                                onDamageDealt,
+
+                            onEnemyKilled =
+                                onEnemyKilled
+                        )
+                    },
+
+                    onKnightEnemyAttack = {
+                            summon,
+                            enemy ->
+
+                        applyEnemyAttack(
+                            summon =
+                                summon,
+
+                            enemy =
+                                enemy,
+
+                            attackName =
+                                "Call the Knight",
+
+                            damageType =
+                                DamageType.NECROTIC,
+
+                            conditionType =
+                                ConditionType.NECROSIS,
+
+                            onDamageDealt =
+                                onDamageDealt,
+
+                            onEnemyKilled =
+                                onEnemyKilled
+                        )
+                    },
+
+                    onKnightPlayerAttack = {
+                            summon ->
+
+                        onPlayerDamage(
+                            summon.stats.baseDamage,
+                            summon.sourceWeaponDisplayName +
+                                " — Call the Knight"
                         )
                     }
                 )
@@ -170,9 +251,12 @@ class SummonManager(
         schedulersByWeaponRuntimeId.clear()
     }
 
-    private fun applyCowAttack(
+    private fun applyEnemyAttack(
         summon: SummonedEntity,
         enemy: Enemy,
+        attackName: String,
+        damageType: DamageType,
+        conditionType: ConditionType?,
         onDamageDealt: (
             damage: Int,
             sourceName: String
@@ -181,8 +265,6 @@ class SummonManager(
     ) {
 
         if (
-            summon.type !=
-            SummonType.COW ||
             summon.isExpired ||
             enemy.isDead
         ) {
@@ -191,7 +273,8 @@ class SummonManager(
 
         val sourceName =
             summon.sourceWeaponDisplayName +
-                " — Summon Animal"
+                " — " +
+                attackName
 
         val wasAlive =
             !enemy.isDead
@@ -204,7 +287,7 @@ class SummonManager(
                 damageContext =
                     EnemyDamageContext(
                         damageType =
-                            DamageType.BLUDGEONING,
+                            damageType,
 
                         sourceWeaponRuntimeId =
                             summon.sourceWeaponRuntimeId,
@@ -221,6 +304,40 @@ class SummonManager(
             appliedDamage >
             0
         ) {
+            conditionType
+                ?.let {
+                        type ->
+
+                    enemy.applyCondition(
+                        ConditionDamageCalculator
+                            .createApplication(
+                                type =
+                                    type,
+
+                                playerStats =
+                                    playerStats,
+
+                                durationSeconds =
+                                    SUMMON_CONDITION_DURATION_SECONDS,
+
+                                sourceWeaponRuntimeId =
+                                    summon.sourceWeaponRuntimeId,
+
+                                sourceWeaponDefinitionId =
+                                    summon.sourceWeaponDefinitionId,
+
+                                sourceName =
+                                    sourceName,
+
+                                sourceCenterX =
+                                    summon.centerX,
+
+                                sourceCenterY =
+                                    summon.centerY
+                            )
+                    )
+                }
+
             onDamageDealt(
                 appliedDamage,
                 sourceName
@@ -429,5 +546,8 @@ class SummonManager(
 
         private const val IVY_STAFF_ID =
             "WPN_IVY_STAFF"
+
+        private const val SUMMON_CONDITION_DURATION_SECONDS =
+            3f
     }
 }

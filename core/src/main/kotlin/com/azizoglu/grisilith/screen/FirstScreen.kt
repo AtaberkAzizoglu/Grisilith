@@ -2476,6 +2476,21 @@ class FirstScreen(
                 handleEnemyKilled(
                     killedEnemy
                 )
+            },
+
+            onPlayerDamage = {
+                    requestedDamage,
+                    _ ->
+
+                val appliedDamage =
+                    player.takeDamage(
+                        requestedDamage
+                    )
+
+                runStatistics
+                    .recordDamageTaken(
+                        appliedDamage
+                    )
             }
         )
 

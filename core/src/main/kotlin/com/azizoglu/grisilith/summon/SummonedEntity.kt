@@ -19,6 +19,12 @@ class SummonedEntity(
     lifetimeSeconds: Float
 ) {
 
+    enum class KnightTargetType {
+        NONE,
+        ENEMY,
+        PLAYER
+    }
+
     val runtimeId: String =
         UUID.randomUUID()
             .toString()
@@ -39,6 +45,9 @@ class SummonedEntity(
         )
 
     private var attackCooldownRemainingSeconds =
+        0f
+
+    private var attackFlashRemainingSeconds =
         0f
 
     val health =
@@ -78,6 +87,17 @@ class SummonedEntity(
         onCowAttack: (
             summon: SummonedEntity,
             enemy: Enemy
+        ) -> Unit,
+        onImpAttack: (
+            summon: SummonedEntity,
+            enemy: Enemy
+        ) -> Unit,
+        onKnightEnemyAttack: (
+            summon: SummonedEntity,
+            enemy: Enemy
+        ) -> Unit,
+        onKnightPlayerAttack: (
+            summon: SummonedEntity
         ) -> Unit
     ) {
 
@@ -106,6 +126,15 @@ class SummonedEntity(
                     0f
                 )
 
+        attackFlashRemainingSeconds =
+            (
+                attackFlashRemainingSeconds -
+                    delta
+                )
+                .coerceAtLeast(
+                    0f
+                )
+
         when (type) {
 
             SummonType.COW -> {
@@ -127,9 +156,8 @@ class SummonedEntity(
                 )
             }
 
-            SummonType.IMP,
-            SummonType.KNIGHT_SPIRIT -> {
-                updatePlaceholderFormation(
+            SummonType.IMP -> {
+                updateImp(
                     delta =
                         delta,
 
@@ -137,7 +165,35 @@ class SummonedEntity(
                         playerCenterX,
 
                     playerCenterY =
-                        playerCenterY
+                        playerCenterY,
+
+                    enemies =
+                        enemies,
+
+                    onAttack =
+                        onImpAttack
+                )
+            }
+
+            SummonType.KNIGHT_SPIRIT -> {
+                updateKnight(
+                    delta =
+                        delta,
+
+                    playerCenterX =
+                        playerCenterX,
+
+                    playerCenterY =
+                        playerCenterY,
+
+                    enemies =
+                        enemies,
+
+                    onEnemyAttack =
+                        onKnightEnemyAttack,
+
+                    onPlayerAttack =
+                        onKnightPlayerAttack
                 )
             }
         }
@@ -172,43 +228,10 @@ class SummonedEntity(
     ) {
 
         val radius =
-            when (type) {
-                SummonType.COW ->
-                    18f
-
-                SummonType.IMP ->
-                    14f
-
-                SummonType.KNIGHT_SPIRIT ->
-                    20f
-            }
+            visualRadius()
 
         shapeRenderer.color =
-            when (type) {
-                SummonType.COW ->
-                    Color(
-                        0.82f,
-                        0.82f,
-                        0.72f,
-                        0.90f
-                    )
-
-                SummonType.IMP ->
-                    Color(
-                        0.78f,
-                        0.22f,
-                        0.12f,
-                        0.90f
-                    )
-
-                SummonType.KNIGHT_SPIRIT ->
-                    Color(
-                        0.48f,
-                        0.58f,
-                        0.76f,
-                        0.84f
-                    )
-            }
+            baseColor()
 
         shapeRenderer.circle(
             center.x,
@@ -219,6 +242,16 @@ class SummonedEntity(
 
         shapeRenderer.color =
             if (
+                attackFlashRemainingSeconds >
+                0f
+            ) {
+                Color(
+                    1f,
+                    0.92f,
+                    0.46f,
+                    0.96f
+                )
+            } else if (
                 type.isFriendlyToPlayer
             ) {
                 Color(
@@ -265,19 +298,9 @@ class SummonedEntity(
     ) {
 
         val target =
-            enemies
-                .asSequence()
-                .filter {
-                    !it.isDead
-                }
-                .minByOrNull {
-                    Vector2.dst2(
-                        center.x,
-                        center.y,
-                        it.centerX,
-                        it.centerY
-                    )
-                }
+            nearestLivingEnemy(
+                enemies
+            )
 
         if (target == null) {
             moveTowardFormationPoint(
@@ -297,13 +320,73 @@ class SummonedEntity(
             return
         }
 
-        val targetRadius =
-            target.bounds.width /
-                2f
+        if (
+            isInsideEnemyAttackRange(
+                enemy =
+                    target,
 
-        val effectiveAttackRange =
-            stats.attackRange +
-                targetRadius
+                range =
+                    stats.attackRange
+            )
+        ) {
+            tryAttack(
+                cooldownSeconds =
+                    COW_ATTACK_INTERVAL_SECONDS
+            ) {
+                onAttack(
+                    this,
+                    target
+                )
+            }
+
+            return
+        }
+
+        moveToward(
+            targetX =
+                target.centerX,
+
+            targetY =
+                target.centerY,
+
+            delta =
+                delta
+        )
+    }
+
+    private fun updateImp(
+        delta: Float,
+        playerCenterX: Float,
+        playerCenterY: Float,
+        enemies: List<Enemy>,
+        onAttack: (
+            summon: SummonedEntity,
+            enemy: Enemy
+        ) -> Unit
+    ) {
+
+        val target =
+            nearestLivingEnemy(
+                enemies
+            )
+
+        if (target == null) {
+            moveTowardFormationPoint(
+                delta =
+                    delta,
+
+                playerCenterX =
+                    playerCenterX,
+
+                playerCenterY =
+                    playerCenterY,
+
+                distance =
+                    108f
+            )
+
+            return
+        }
 
         val distanceSquared =
             Vector2.dst2(
@@ -313,80 +396,288 @@ class SummonedEntity(
                 target.centerY
             )
 
-        if (
-            distanceSquared <=
-            effectiveAttackRange *
-            effectiveAttackRange
-        ) {
-            if (
-                attackCooldownRemainingSeconds <=
-                0f
-            ) {
-                onAttack(
-                    this,
-                    target
-                )
+        val attackRange =
+            stats.attackRange +
+                target.bounds.width /
+                2f
 
-                attackCooldownRemainingSeconds =
-                    COW_ATTACK_INTERVAL_SECONDS
+        val minimumRange =
+            IMP_MINIMUM_COMFORT_DISTANCE
+
+        when {
+            distanceSquared >
+                attackRange *
+                attackRange -> {
+
+                moveToward(
+                    targetX =
+                        target.centerX,
+
+                    targetY =
+                        target.centerY,
+
+                    delta =
+                        delta
+                )
+            }
+
+            distanceSquared <
+                minimumRange *
+                minimumRange -> {
+
+                moveAwayFrom(
+                    targetX =
+                        target.centerX,
+
+                    targetY =
+                        target.centerY,
+
+                    delta =
+                        delta
+                )
+            }
+
+            else -> {
+                tryAttack(
+                    cooldownSeconds =
+                        IMP_ATTACK_INTERVAL_SECONDS
+                ) {
+                    onAttack(
+                        this,
+                        target
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateKnight(
+        delta: Float,
+        playerCenterX: Float,
+        playerCenterY: Float,
+        enemies: List<Enemy>,
+        onEnemyAttack: (
+            summon: SummonedEntity,
+            enemy: Enemy
+        ) -> Unit,
+        onPlayerAttack: (
+            summon: SummonedEntity
+        ) -> Unit
+    ) {
+
+        val playerDistanceSquared =
+            Vector2.dst2(
+                center.x,
+                center.y,
+                playerCenterX,
+                playerCenterY
+            )
+
+        val targetsPlayer =
+            playerDistanceSquared <=
+                KNIGHT_PLAYER_AGGRO_RANGE *
+                KNIGHT_PLAYER_AGGRO_RANGE
+
+        if (targetsPlayer) {
+            if (
+                playerDistanceSquared <=
+                stats.attackRange *
+                stats.attackRange
+            ) {
+                tryAttack(
+                    cooldownSeconds =
+                        KNIGHT_ATTACK_INTERVAL_SECONDS
+                ) {
+                    onPlayerAttack(
+                        this
+                    )
+                }
+            } else {
+                moveToward(
+                    targetX =
+                        playerCenterX,
+
+                    targetY =
+                        playerCenterY,
+
+                    delta =
+                        delta
+                )
             }
 
             return
         }
 
+        val enemyTarget =
+            nearestLivingEnemy(
+                enemies
+            )
+
+        if (enemyTarget == null) {
+            /*
+             * Knight oyuncunun dostu değildir.
+             * Oyuncu aggro menzili dışındaysa ve Enemy yoksa
+             * mevcut pozisyonunu korur.
+             */
+            return
+        }
+
+        if (
+            isInsideEnemyAttackRange(
+                enemy =
+                    enemyTarget,
+
+                range =
+                    stats.attackRange
+            )
+        ) {
+            tryAttack(
+                cooldownSeconds =
+                    KNIGHT_ATTACK_INTERVAL_SECONDS
+            ) {
+                onEnemyAttack(
+                    this,
+                    enemyTarget
+                )
+            }
+
+            return
+        }
+
+        moveToward(
+            targetX =
+                enemyTarget.centerX,
+
+            targetY =
+                enemyTarget.centerY,
+
+            delta =
+                delta
+        )
+    }
+
+    private fun nearestLivingEnemy(
+        enemies: List<Enemy>
+    ): Enemy? {
+
+        return enemies
+            .asSequence()
+            .filter {
+                !it.isDead
+            }
+            .minByOrNull {
+                Vector2.dst2(
+                    center.x,
+                    center.y,
+                    it.centerX,
+                    it.centerY
+                )
+            }
+    }
+
+    private fun isInsideEnemyAttackRange(
+        enemy: Enemy,
+        range: Float
+    ): Boolean {
+
+        val effectiveRange =
+            range +
+                enemy.bounds.width /
+                2f
+
+        return Vector2.dst2(
+            center.x,
+            center.y,
+            enemy.centerX,
+            enemy.centerY
+        ) <=
+            effectiveRange *
+            effectiveRange
+    }
+
+    private fun tryAttack(
+        cooldownSeconds: Float,
+        action: () -> Unit
+    ) {
+
+        if (
+            attackCooldownRemainingSeconds >
+            0f
+        ) {
+            return
+        }
+
+        action()
+
+        attackCooldownRemainingSeconds =
+            cooldownSeconds
+
+        attackFlashRemainingSeconds =
+            ATTACK_FLASH_SECONDS
+    }
+
+    private fun moveToward(
+        targetX: Float,
+        targetY: Float,
+        delta: Float
+    ) {
+
         movementDirection.set(
-            target.centerX -
+            targetX -
                 center.x,
 
-            target.centerY -
+            targetY -
                 center.y
         )
 
         if (
-            !movementDirection.isZero(
+            movementDirection.isZero(
                 0.001f
             )
         ) {
-            movementDirection.nor()
-
-            center.mulAdd(
-                movementDirection,
-                stats.movementSpeed *
-                    delta
-            )
+            return
         }
+
+        movementDirection.nor()
+
+        center.mulAdd(
+            movementDirection,
+            stats.movementSpeed *
+                delta
+        )
     }
 
-    private fun updatePlaceholderFormation(
-        delta: Float,
-        playerCenterX: Float,
-        playerCenterY: Float
+    private fun moveAwayFrom(
+        targetX: Float,
+        targetY: Float,
+        delta: Float
     ) {
 
-        val desiredDistance =
-            when (type) {
-                SummonType.COW ->
-                    86f
+        movementDirection.set(
+            center.x -
+                targetX,
 
-                SummonType.IMP ->
-                    112f
+            center.y -
+                targetY
+        )
 
-                SummonType.KNIGHT_SPIRIT ->
-                    156f
-            }
+        if (
+            movementDirection.isZero(
+                0.001f
+            )
+        ) {
+            movementDirection.set(
+                1f,
+                0f
+            )
+        }
 
-        moveTowardFormationPoint(
-            delta =
-                delta,
+        movementDirection.nor()
 
-            playerCenterX =
-                playerCenterX,
-
-            playerCenterY =
-                playerCenterY,
-
-            distance =
-                desiredDistance
+        center.mulAdd(
+            movementDirection,
+            stats.movementSpeed *
+                delta
         )
     }
 
@@ -480,6 +771,51 @@ class SummonedEntity(
             )
     }
 
+    private fun visualRadius():
+        Float {
+
+        return when (type) {
+            SummonType.COW ->
+                18f
+
+            SummonType.IMP ->
+                14f
+
+            SummonType.KNIGHT_SPIRIT ->
+                20f
+        }
+    }
+
+    private fun baseColor():
+        Color {
+
+        return when (type) {
+            SummonType.COW ->
+                Color(
+                    0.82f,
+                    0.82f,
+                    0.72f,
+                    0.90f
+                )
+
+            SummonType.IMP ->
+                Color(
+                    0.78f,
+                    0.22f,
+                    0.12f,
+                    0.90f
+                )
+
+            SummonType.KNIGHT_SPIRIT ->
+                Color(
+                    0.48f,
+                    0.58f,
+                    0.76f,
+                    0.84f
+                )
+        }
+    }
+
     private fun renderHealthBar(
         shapeRenderer: ShapeRenderer,
         radius: Float
@@ -542,5 +878,20 @@ class SummonedEntity(
 
         private const val COW_ATTACK_INTERVAL_SECONDS =
             1.15f
+
+        private const val IMP_ATTACK_INTERVAL_SECONDS =
+            1.05f
+
+        private const val IMP_MINIMUM_COMFORT_DISTANCE =
+            105f
+
+        private const val KNIGHT_ATTACK_INTERVAL_SECONDS =
+            1.20f
+
+        private const val KNIGHT_PLAYER_AGGRO_RANGE =
+            210f
+
+        private const val ATTACK_FLASH_SECONDS =
+            0.10f
     }
 }
