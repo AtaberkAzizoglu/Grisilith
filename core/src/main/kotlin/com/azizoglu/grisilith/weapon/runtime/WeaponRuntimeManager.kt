@@ -21,6 +21,8 @@ import com.azizoglu.grisilith.weapon.skill.area.PersistentAreaManager
 import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.badlogic.gdx.math.MathUtils
+import com.azizoglu.grisilith.weapon.skill.ImpaleAndDragRuntime
+import com.azizoglu.grisilith.weapon.skill.ImpaleAndDragReward
 
 class WeaponRuntimeManager(
     private val inventory:
@@ -82,6 +84,9 @@ class WeaponRuntimeManager(
             areaManager =
                 persistentAreaManager
         )
+
+    private val impaleAndDragRuntime =
+        ImpaleAndDragRuntime()
 
     private var vortexWeaponRuntime:
         WeaponRuntime? =
@@ -266,6 +271,18 @@ class WeaponRuntimeManager(
             }
         )
 
+        impaleAndDragRuntime.update(
+            delta =
+                delta,
+
+            player =
+                player,
+
+            harvestMultiplier =
+                playerStats
+                    .harvestGoldMultiplier()
+        )
+
         /*
          * Runtime'ları map sırasıyla değil gerçek
          * inventory slot sırasıyla güncelliyoruz.
@@ -412,6 +429,19 @@ class WeaponRuntimeManager(
                     player =
                         player
                 )
+            }
+
+            DefaultWeaponAbilities
+                .IMPALE_AND_DRAG_ID -> {
+
+                impaleAndDragRuntime
+                    .tryBegin(
+                        weaponRuntime =
+                            runtime,
+
+                        player =
+                            player
+                    )
             }
 
             else -> {
@@ -730,6 +760,22 @@ class WeaponRuntimeManager(
         }
     }
 
+    fun onEnemyKilledForActiveSkills(
+        enemy: Enemy
+    ) {
+        impaleAndDragRuntime
+            .onEnemyKilled(
+                enemy
+            )
+    }
+
+    fun consumeImpaleAndDragReward():
+        ImpaleAndDragReward? {
+
+        return impaleAndDragRuntime
+            .consumeReward()
+    }
+
     fun updateActiveSkillAim(
         worldX: Float,
         worldY: Float
@@ -745,6 +791,13 @@ class WeaponRuntimeManager(
     }
 
     fun cancelActiveAbilities() {
+        impaleAndDragRuntime
+            .cancelForStageTransition(
+                harvestMultiplier =
+                    playerStats
+                        .harvestGoldMultiplier()
+            )
+
         igniteDashRuntime.cancel()
         vortexPullRuntime.clear()
         vortexWeaponRuntime = null
@@ -788,6 +841,14 @@ class WeaponRuntimeManager(
         staticCloudsRuntime.render(
             shapeRenderer =
                 shapeRenderer
+        )
+
+        impaleAndDragRuntime.render(
+            shapeRenderer =
+                shapeRenderer,
+
+            player =
+                player
         )
     }
 
@@ -874,6 +935,8 @@ class WeaponRuntimeManager(
         staticCloudsWeaponRuntime = null
         staticCloudsWeapon = null
         persistentAreaManager.clearAll()
+
+        impaleAndDragRuntime.reset()
 
         runtimesByWeapon.values
             .forEach { runtime ->

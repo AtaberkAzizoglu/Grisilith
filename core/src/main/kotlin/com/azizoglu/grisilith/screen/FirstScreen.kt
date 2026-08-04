@@ -2535,6 +2535,8 @@ class FirstScreen(
             )
         }
 
+        consumeImpaleAndDragReward()
+
         projectiles.forEach { projectile ->
             projectile.update(
                 delta = delta,
@@ -2719,9 +2721,40 @@ class FirstScreen(
         recordCurrentEnemyEncounters()
     }
 
+    private fun consumeImpaleAndDragReward() {
+        val reward =
+            weaponRuntimeManager
+                .consumeImpaleAndDragReward()
+                ?: return
+
+        if (
+            reward.extraGold >
+            0
+        ) {
+            sessionWallet.addGold(
+                reward.extraGold.toFloat()
+            )
+
+            runStatistics.recordGoldCollected(
+                reward.extraGold.toFloat()
+            )
+        }
+
+        repeat(
+            reward.chestRewardCount
+        ) {
+            chestRewardQueue
+                .addChest()
+        }
+    }
+
     private fun handleEnemyKilled(
         killedEnemy: Enemy
     ) {
+        weaponRuntimeManager
+            .onEnemyKilledForActiveSkills(
+                killedEnemy
+            )
 
         runRewardTracker.onEnemyKilled(
             enemyType =
@@ -2931,6 +2964,8 @@ class FirstScreen(
 
         weaponRuntimeManager
             .prepareForStageTransition()
+
+        consumeImpaleAndDragReward()
 
         chestPickupManager
             .clearUncollectedChests()
@@ -3951,7 +3986,6 @@ class FirstScreen(
                 .resetAllTimers()
         }
     }
-
     private fun handleMarketControls(
         delta: Float
     ) {

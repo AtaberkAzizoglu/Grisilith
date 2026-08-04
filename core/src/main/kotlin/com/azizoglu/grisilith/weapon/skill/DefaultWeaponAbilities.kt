@@ -2,6 +2,36 @@ package com.azizoglu.grisilith.weapon.skill
 
 object DefaultWeaponAbilities {
 
+    const val IMPALE_AND_DRAG_ID =
+        "WPN_ABILITY_IMPALE_AND_DRAG"
+
+    const val IMPALE_AND_DRAG_DURATION_SECONDS =
+        5f
+
+    const val IMPALE_AND_DRAG_COOLDOWN_SECONDS =
+        55f
+
+    const val IMPALE_AND_DRAG_MINIMUM_TRAVEL_DISTANCE =
+        115f
+
+    const val IMPALE_AND_DRAG_MOVEMENT_THRESHOLD =
+        12f
+
+    const val IMPALE_AND_DRAG_MAX_IMPALES_PER_SECOND =
+        2
+
+    const val IMPALE_AND_DRAG_MAXIMUM_CORPSES =
+        10
+
+    const val IMPALE_AND_DRAG_GOLD_PER_CORPSE =
+        3
+
+    const val IMPALE_AND_DRAG_BASE_CHEST_CHANCE_PER_CORPSE =
+        0.035f
+
+    const val IMPALE_AND_DRAG_MAXIMUM_CHEST_CHANCE =
+        0.45f
+
     const val STATIC_CLOUDS_ID =
         "WPN_ABILITY_STATIC_CLOUDS"
 
@@ -151,6 +181,25 @@ object DefaultWeaponAbilities {
 
     const val ASSASSINATE_PROJECTILE_SIZE_MULTIPLIER =
         1.8f
+
+    val impaleAndDrag =
+        WeaponAbilityDefinition(
+            id =
+                IMPALE_AND_DRAG_ID,
+
+            displayName =
+                "Impale and Drag",
+
+            activationType =
+                WeaponAbilityActivationType
+                    .ACTIVE,
+
+            cooldownSeconds =
+                IMPALE_AND_DRAG_COOLDOWN_SECONDS,
+
+            durationSeconds =
+                IMPALE_AND_DRAG_DURATION_SECONDS
+        )
 
     val staticClouds =
         WeaponAbilityDefinition(
