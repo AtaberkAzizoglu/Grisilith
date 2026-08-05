@@ -60,6 +60,10 @@ class GlyphMotionRuntime(
         GlyphRecognitionResult? =
         null
 
+    private var pendingCastRequest:
+        GlyphCastRequest? =
+        null
+
     val isDrawing: Boolean
         get() =
             drawing
@@ -146,6 +150,9 @@ class GlyphMotionRuntime(
             true
 
         lastRecognitionResult =
+            null
+
+        pendingCastRequest =
             null
 
         return ActivationResult
@@ -332,6 +339,18 @@ class GlyphMotionRuntime(
         )
     }
 
+    fun consumePendingCastRequest():
+        GlyphCastRequest? {
+
+        val request =
+            pendingCastRequest
+
+        pendingCastRequest =
+            null
+
+        return request
+    }
+
     fun clear() {
 
         points.clear()
@@ -355,6 +374,9 @@ class GlyphMotionRuntime(
             false
 
         lastRecognitionResult =
+            null
+
+        pendingCastRequest =
             null
 
         feedbackDisplayRemainingSeconds =
@@ -432,6 +454,38 @@ class GlyphMotionRuntime(
         lastRecognitionResult =
             result
 
+        if (
+            result.accepted &&
+            result.glyphType !=
+            null
+        ) {
+            val weapon =
+                sourceWeapon
+
+            if (
+                weapon !=
+                null
+            ) {
+                val center =
+                    drawingCenter()
+
+                pendingCastRequest =
+                    GlyphCastRequest(
+                        glyphType =
+                            result.glyphType,
+
+                        centerX =
+                            center.x,
+
+                        centerY =
+                            center.y,
+
+                        sourceWeapon =
+                            weapon
+                    )
+            }
+        }
+
         sharedCooldownRemainingSeconds =
             if (
                 result.accepted
@@ -445,6 +499,32 @@ class GlyphMotionRuntime(
 
         feedbackDisplayRemainingSeconds =
             FEEDBACK_DISPLAY_SECONDS
+    }
+
+    private fun drawingCenter():
+        Vector2 {
+
+        if (
+            points.isEmpty()
+        ) {
+            return Vector2()
+        }
+
+        val center =
+            Vector2()
+
+        points.forEach {
+            center.add(
+                it
+            )
+        }
+
+        center.scl(
+            1f /
+                points.size
+        )
+
+        return center
     }
 
     private fun recordPoint(

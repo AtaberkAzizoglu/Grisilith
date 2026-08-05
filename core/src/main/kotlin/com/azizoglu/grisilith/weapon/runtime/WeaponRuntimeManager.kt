@@ -30,6 +30,7 @@ import com.azizoglu.grisilith.weapon.skill.ErasingSoulsRuntime
 import com.azizoglu.grisilith.weapon.skill.AcidicPoolRuntime
 import com.azizoglu.grisilith.weapon.glyph.GlyphMotionRuntime
 import com.azizoglu.grisilith.weapon.glyph.GlyphFeedback
+import com.azizoglu.grisilith.weapon.glyph.GlyphSpellRuntime
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionManager
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionEvent
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionTrigger
@@ -112,6 +113,12 @@ class WeaponRuntimeManager(
 
     private val glyphMotionRuntime =
         GlyphMotionRuntime(
+            playerStats =
+                playerStats
+        )
+
+    private val glyphSpellRuntime =
+        GlyphSpellRuntime(
             playerStats =
                 playerStats
         )
@@ -267,6 +274,52 @@ class WeaponRuntimeManager(
                 glyphWeaponRuntime =
                     null
             }
+        )
+
+        glyphMotionRuntime
+            .consumePendingCastRequest()
+            ?.let {
+                    request ->
+
+                glyphSpellRuntime.cast(
+                    request =
+                        request,
+
+                    enemyManager =
+                        enemyManager,
+
+                    worldWidth =
+                        worldWidth,
+
+                    worldHeight =
+                        worldHeight,
+
+                    onDamageDealt =
+                        onDamageDealt,
+
+                    onEnemyKilled =
+                        onEnemyKilled
+                )
+            }
+
+        glyphSpellRuntime.update(
+            delta =
+                delta,
+
+            enemyManager =
+                enemyManager,
+
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight,
+
+            onDamageDealt =
+                onDamageDealt,
+
+            onEnemyKilled =
+                onEnemyKilled
         )
 
         statBonusSynchronizer
@@ -1612,6 +1665,7 @@ class WeaponRuntimeManager(
         erasingSoulsRuntime.clear()
 
         glyphMotionRuntime.clear()
+        glyphSpellRuntime.clear()
         glyphWeaponRuntime = null
 
         runtimesByWeapon.values
@@ -1668,6 +1722,10 @@ class WeaponRuntimeManager(
         )
 
         glyphMotionRuntime.render(
+            shapeRenderer
+        )
+
+        glyphSpellRuntime.render(
             shapeRenderer
         )
     }
