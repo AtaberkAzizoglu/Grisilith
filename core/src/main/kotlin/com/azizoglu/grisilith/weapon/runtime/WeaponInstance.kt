@@ -4,6 +4,7 @@ import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 import java.util.UUID
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityDefinition
 import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
+import com.azizoglu.grisilith.weapon.glyph.ChalkDustSpellChoice
 
 class WeaponInstance(
     val definition: WeaponDefinition,
@@ -27,6 +28,11 @@ class WeaponInstance(
 
     var ivySummonChoice:
         IvySummonChoice? =
+        null
+        private set
+
+    var chalkDustSpellChoice:
+        ChalkDustSpellChoice? =
         null
         private set
 
@@ -144,6 +150,28 @@ class WeaponInstance(
         ) {
             ivySummonChoice =
                 other.ivySummonChoice
+        }
+    }
+
+    fun chooseChalkDustSpell(
+        choice: ChalkDustSpellChoice
+    ): Boolean {
+        if (chalkDustSpellChoice != null) return false
+        chalkDustSpellChoice = choice
+        return true
+    }
+
+    fun restoreChalkDustSpellChoice(
+        choice: ChalkDustSpellChoice?
+    ) {
+        chalkDustSpellChoice = choice
+    }
+
+    fun inheritChalkDustSpellChoiceFrom(
+        other: WeaponInstance
+    ) {
+        if (chalkDustSpellChoice == null) {
+            chalkDustSpellChoice = other.chalkDustSpellChoice
         }
     }
 

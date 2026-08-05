@@ -7,408 +7,149 @@ import kotlin.math.min
 
 object GlyphStructuralAnalyzer {
 
-    fun score(
-        glyphType: GlyphType,
-        points: List<Vector2>
-    ): Float {
+    data class Features(
+        val isClosed: Boolean,
+        val closureDistance: Float,
+        val sharpCornerCount: Int,
+        val intersectionCount: Int,
+        val circularity: Float,
+        val width: Float,
+        val height: Float,
+        val simplifiedPointCount: Int
+    )
 
-        if (
-            points.size <
-            3
-        ) {
-            return 0f
+    fun extract(points: List<Vector2>): Features {
+        val normalized = GlyphGeometry.normalize(points)
+        if (normalized.size < 3) {
+            return Features(false, 1f, 0, 0, 0f, 0f, 0f, normalized.size)
         }
 
-        val normalized =
-            GlyphGeometry.normalize(
-                points
-            )
+        val closureDistance = normalized.first().dst(normalized.last())
+        val simplified = GlyphGeometry.simplify(normalized, SIMPLIFICATION_EPSILON)
+        val cornerSource = if (closureDistance <= CLOSED_DISTANCE) {
+            closeForCornerAnalysis(simplified)
+        } else {
+            simplified
+        }
+        val sharpCornerCount = GlyphGeometry.turningAngles(cornerSource)
+            .count { it <= SHARP_CORNER_MAXIMUM_ANGLE }
+        val bounds = bounds(normalized)
 
-        val startEndDistance =
-            normalized.first()
-                .dst(
-                    normalized.last()
-                )
+        return Features(
+            isClosed = closureDistance <= CLOSED_DISTANCE,
+            closureDistance = closureDistance,
+            sharpCornerCount = sharpCornerCount,
+            intersectionCount = GlyphGeometry.segmentIntersectionCount(normalized),
+            circularity = circularityScore(normalized),
+            width = bounds.width,
+            height = bounds.height,
+            simplifiedPointCount = simplified.size
+        )
+    }
 
-        val intersections =
-            GlyphGeometry
-                .segmentIntersectionCount(
-                    normalized
-                )
+    fun isPlausible(glyphType: GlyphType, features: Features): Boolean = when (glyphType) {
+        GlyphType.CALL_LIGHTNING ->
+            !features.isClosed && features.intersectionCount <= 1 &&
+                features.sharpCornerCount in 1..5
 
-        val angles =
-            GlyphGeometry
-                .turningAngles(
-                    normalized
-                )
+        GlyphType.METEOR ->
+            features.isClosed && features.intersectionCount <= 1 &&
+                features.sharpCornerCount in 2..5
 
-        val sharpTurns =
-            angles.count {
-                it <=
-                    112f
-            }
+        GlyphType.TSUNAMI ->
+            features.isClosed && features.intersectionCount <= 1 &&
+                features.sharpCornerCount in 3..7
 
-        val bounds =
-            bounds(
-                normalized
-            )
+        GlyphType.SINGULARITY ->
+            features.isClosed && features.intersectionCount <= 1 &&
+                features.circularity >= 0.60f && features.sharpCornerCount <= 3
+    }
 
-        return when (
-            glyphType
-        ) {
+    fun score(
+        glyphType: GlyphType,
+        points: List<Vector2>,
+        features: Features = extract(points)
+    ): Float {
+        if (!isPlausible(glyphType, features)) return 0f
+
+        return when (glyphType) {
             GlyphType.CALL_LIGHTNING -> {
-                weighted(
-                    openScore =
-                        scaleInverse(
-                            startEndDistance,
-                            0.10f,
-                            0.70f
-                        ),
-
-                    intersectionScore =
-                        if (
-                            intersections ==
-                            0
-                        ) {
-                            1f
-                        } else {
-                            0.25f
-                        },
-
-                    featureScore =
-                        (
-                            sharpTurns /
-                                5f
-                            )
-                            .coerceIn(
-                                0f,
-                                1f
-                            )
-                )
-            }
-
-            GlyphType.TSUNAMI -> {
-                val verticalBody =
-                    (
-                        bounds.height /
-                            bounds.width
-                                .coerceAtLeast(
-                                    0.01f
-                                )
-                        )
-                        .coerceIn(
-                            0f,
-                            2f
-                        ) /
-                        2f
-
-                val rightSideRatio =
-                    normalized.count {
-                        it.x >
-                            0f
-                    }
-                        .toFloat() /
-                        normalized.size
-
-                weighted(
-                    openScore =
-                        scaleInverse(
-                            startEndDistance,
-                            0.05f,
-                            0.75f
-                        ),
-
-                    intersectionScore =
-                        if (
-                            intersections <=
-                            1
-                        ) {
-                            1f
-                        } else {
-                            0.35f
-                        },
-
-                    featureScore =
-                        (
-                            verticalBody *
-                                0.50f +
-                                (
-                                    1f -
-                                        abs(
-                                            rightSideRatio -
-                                                0.68f
-                                        ) *
-                                        2f
-                                    )
-                                    .coerceIn(
-                                        0f,
-                                        1f
-                                    ) *
-                                0.50f
-                            )
-                )
+                val cornerScore = proximityScore(features.sharpCornerCount.toFloat(), 2f, 3f)
+                val opennessScore = (features.closureDistance / 0.70f).coerceIn(0f, 1f)
+                (cornerScore * 0.62f + opennessScore * 0.28f +
+                    noIntersectionScore(features) * 0.10f).coerceIn(0f, 1f)
             }
 
             GlyphType.METEOR -> {
-                val closureScore =
-                    scaleInverse(
-                        startEndDistance,
-                        0.08f,
-                        0.65f
-                    )
+                val cornerScore = proximityScore(features.sharpCornerCount.toFloat(), 3f, 2f)
+                val nonCircularScore = (1f - features.circularity).coerceIn(0f, 1f)
+                (cornerScore * 0.62f + closureScore(features) * 0.28f +
+                    nonCircularScore * 0.10f).coerceIn(0f, 1f)
+            }
 
-                val crossingScore =
-                    (
-                        intersections /
-                            2f
-                        )
-                        .coerceIn(
-                            0f,
-                            1f
-                        )
-
-                weighted(
-                    openScore =
-                        closureScore,
-
-                    intersectionScore =
-                        crossingScore,
-
-                    featureScore =
-                        circularityScore(
-                            normalized
-                        )
-                )
+            GlyphType.TSUNAMI -> {
+                val cornerScore = proximityScore(features.sharpCornerCount.toFloat(), 4f, 3f)
+                val nonCircularScore = (1f - features.circularity).coerceIn(0f, 1f)
+                (cornerScore * 0.64f + closureScore(features) * 0.24f +
+                    nonCircularScore * 0.12f).coerceIn(0f, 1f)
             }
 
             GlyphType.SINGULARITY -> {
-                val closureScore =
-                    scaleInverse(
-                        startEndDistance,
-                        0.03f,
-                        0.55f
-                    )
-
-                val crossingScore =
-                    (
-                        intersections /
-                            1f
-                        )
-                        .coerceIn(
-                            0f,
-                            1f
-                        )
-
-                val leftCount =
-                    normalized.count {
-                        it.x <
-                            0f
-                    }
-
-                val rightCount =
-                    normalized.count {
-                        it.x >=
-                            0f
-                    }
-
-                val balance =
-                    1f -
-                        abs(
-                            leftCount -
-                                rightCount
-                        )
-                            .toFloat() /
-                        normalized.size
-
-                weighted(
-                    openScore =
-                        closureScore,
-
-                    intersectionScore =
-                        crossingScore,
-
-                    featureScore =
-                        balance.coerceIn(
-                            0f,
-                            1f
-                        )
-                )
+                val smoothnessScore =
+                    (1f - features.sharpCornerCount / 4f).coerceIn(0f, 1f)
+                (features.circularity * 0.66f + smoothnessScore * 0.22f +
+                    closureScore(features) * 0.12f).coerceIn(0f, 1f)
             }
         }
     }
 
-    private fun weighted(
-        openScore: Float,
-        intersectionScore: Float,
-        featureScore: Float
-    ): Float {
+    private fun closureScore(features: Features): Float =
+        (1f - features.closureDistance / CLOSED_DISTANCE).coerceIn(0f, 1f)
 
-        return (
-            openScore *
-                0.25f +
-                intersectionScore *
-                0.30f +
-                featureScore *
-                0.45f
-            )
-            .coerceIn(
-                0f,
-                1f
-            )
+    private fun noIntersectionScore(features: Features): Float =
+        if (features.intersectionCount == 0) 1f else 0.45f
+
+    private fun proximityScore(value: Float, ideal: Float, tolerance: Float): Float =
+        (1f - abs(value - ideal) / tolerance).coerceIn(0f, 1f)
+
+    private fun closeForCornerAnalysis(points: List<Vector2>): List<Vector2> {
+        if (points.size < 3) return points
+        val result = points.map { Vector2(it) }.toMutableList()
+        if (result.first().dst(result.last()) > 0.001f) {
+            result.add(Vector2(result.first()))
+        }
+        result.add(0, Vector2(result[result.lastIndex - 1]))
+        return result
     }
 
-    private fun scaleInverse(
-        value: Float,
-        idealMaximum: Float,
-        failureValue: Float
-    ): Float {
-
-        if (
-            value <=
-            idealMaximum
-        ) {
-            return 1f
-        }
-
-        if (
-            value >=
-            failureValue
-        ) {
-            return 0f
-        }
-
-        return 1f -
-            (
-                value -
-                    idealMaximum
-                ) /
-            (
-                failureValue -
-                    idealMaximum
-                )
+    private fun circularityScore(points: List<Vector2>): Float {
+        val center = Vector2()
+        points.forEach { center.add(it) }
+        center.scl(1f / points.size)
+        val distances = points.map { it.dst(center) }
+        val average = distances.average().toFloat().coerceAtLeast(0.001f)
+        val deviation = distances.map { abs(it - average) }.average().toFloat()
+        return (1f - deviation / average).coerceIn(0f, 1f)
     }
 
-    private fun circularityScore(
-        points: List<Vector2>
-    ): Float {
+    private data class Bounds(val width: Float, val height: Float)
 
-        val center =
-            Vector2()
-
+    private fun bounds(points: List<Vector2>): Bounds {
+        var minX = Float.POSITIVE_INFINITY
+        var maxX = Float.NEGATIVE_INFINITY
+        var minY = Float.POSITIVE_INFINITY
+        var maxY = Float.NEGATIVE_INFINITY
         points.forEach {
-            center.add(
-                it
-            )
+            minX = min(minX, it.x)
+            maxX = max(maxX, it.x)
+            minY = min(minY, it.y)
+            maxY = max(maxY, it.y)
         }
-
-        center.scl(
-            1f /
-                points.size
-        )
-
-        val distances =
-            points.map {
-                it.dst(
-                    center
-                )
-            }
-
-        val average =
-            distances.average()
-                .toFloat()
-                .coerceAtLeast(
-                    0.001f
-                )
-
-        val deviation =
-            distances
-                .map {
-                    abs(
-                        it -
-                            average
-                    )
-                }
-                .average()
-                .toFloat()
-
-        return (
-            1f -
-                deviation /
-                average
-            )
-            .coerceIn(
-                0f,
-                1f
-            )
+        return Bounds((maxX - minX).coerceAtLeast(0.01f),
+            (maxY - minY).coerceAtLeast(0.01f))
     }
 
-    private data class Bounds(
-        val width: Float,
-        val height: Float
-    )
-
-    private fun bounds(
-        points: List<Vector2>
-    ): Bounds {
-
-        var minimumX =
-            Float.POSITIVE_INFINITY
-
-        var maximumX =
-            Float.NEGATIVE_INFINITY
-
-        var minimumY =
-            Float.POSITIVE_INFINITY
-
-        var maximumY =
-            Float.NEGATIVE_INFINITY
-
-        points.forEach {
-                point ->
-
-            minimumX =
-                min(
-                    minimumX,
-                    point.x
-                )
-
-            maximumX =
-                max(
-                    maximumX,
-                    point.x
-                )
-
-            minimumY =
-                min(
-                    minimumY,
-                    point.y
-                )
-
-            maximumY =
-                max(
-                    maximumY,
-                    point.y
-                )
-        }
-
-        return Bounds(
-            width =
-                (
-                    maximumX -
-                        minimumX
-                    )
-                    .coerceAtLeast(
-                        0.01f
-                    ),
-
-            height =
-                (
-                    maximumY -
-                        minimumY
-                    )
-                    .coerceAtLeast(
-                        0.01f
-                    )
-        )
-    }
+    private const val CLOSED_DISTANCE = 0.34f
+    private const val SIMPLIFICATION_EPSILON = 0.050f
+    private const val SHARP_CORNER_MAXIMUM_ANGLE = 142f
 }

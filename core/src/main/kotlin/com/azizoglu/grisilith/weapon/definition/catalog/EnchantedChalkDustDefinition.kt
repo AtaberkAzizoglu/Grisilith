@@ -95,13 +95,6 @@ object EnchantedChalkDustDefinition {
                             )
                     ),
 
-            /*
-             * Envanterde yalnızca bir instance.
-             * Yeni alınan kopyalar mevcut olanı
-             * level yükseltir.
-             */
-            maximumInventoryCopies = 1,
-
             weaponAbility =
                 DefaultWeaponAbilities
                     .glyphCasting,

@@ -100,6 +100,8 @@ import com.azizoglu.grisilith.armor.definition.DefaultArmors
 import com.azizoglu.grisilith.tamga.definition.DefaultTamgas
 import com.azizoglu.grisilith.settings.GameSettings
 import com.azizoglu.grisilith.screen.summon.ChooseToSummonPopup
+import com.azizoglu.grisilith.screen.glyph.ChooseGlyphSpellPopup
+import com.azizoglu.grisilith.weapon.glyph.ChalkDustSpellChoice
 import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
 import com.azizoglu.grisilith.summon.SummonManager
 
@@ -1354,6 +1356,15 @@ class FirstScreen(
         )
 
 
+    private val chooseGlyphSpellPopup =
+        ChooseGlyphSpellPopup(
+            camera = camera,
+            viewport = viewport,
+            shapeRenderer = shapeRenderer,
+            batch = hudBatch,
+            font = hudFont
+        )
+
     private val chooseToSummonPopup =
         ChooseToSummonPopup(
             camera =
@@ -1491,6 +1502,14 @@ class FirstScreen(
                         .fromSavedName(
                             savedSlot
                                 .ivySummonChoiceName
+                        )
+                )
+
+                weapon.restoreChalkDustSpellChoice(
+                    ChalkDustSpellChoice
+                        .fromSavedName(
+                            savedSlot
+                                .chalkDustSpellChoiceName
                         )
                 )
 
@@ -1728,6 +1747,7 @@ class FirstScreen(
                 true
         }
 
+        openPendingChalkDustSpellChoiceIfReady()
         openPendingIvySummonChoiceIfReady()
 
         val gameplayStopped =
@@ -1736,6 +1756,7 @@ class FirstScreen(
                 chestRewardController.isOpen ||
                 statCardController.isOpen ||
                 chooseToSummonPopup.isOpen ||
+                chooseGlyphSpellPopup.isOpen ||
                 isMarketOpen ||
                 isPauseMenuOpen ||
                 isRunSummaryOpen
@@ -1819,6 +1840,31 @@ class FirstScreen(
             )
     }
 
+    private fun openPendingChalkDustSpellChoiceIfReady() {
+        if (
+            chooseGlyphSpellPopup.isOpen ||
+            chooseToSummonPopup.isOpen ||
+            chooseGlyphSpellPopup.isOpen ||
+            player.health.isDead ||
+            stageController.isRunComplete ||
+            chestRewardController.isOpen ||
+            statCardController.isOpen ||
+            isMarketOpen ||
+            isPauseMenuOpen ||
+            isRunSummaryOpen
+        ) return
+
+        val pendingWeapon = weaponInventory.allWeapons().firstOrNull { weapon ->
+            weapon.definition.id.value == "WPN_ENCHANTED_CHALK_DUST" &&
+                weapon.hasWeaponAbility &&
+                weapon.unlockedAbility?.id ==
+                com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities.GLYPH_CASTING_ID &&
+                weapon.chalkDustSpellChoice == null
+        } ?: return
+
+        chooseGlyphSpellPopup.open(pendingWeapon)
+    }
+
     private fun openPendingIvySummonChoiceIfReady() {
 
         if (
@@ -1861,6 +1907,11 @@ class FirstScreen(
     private fun handleGameControls(
         delta: Float
     ) {
+        if (chooseGlyphSpellPopup.isOpen) {
+            chooseGlyphSpellPopup.handleInput()
+            return
+        }
+
         if (
             chooseToSummonPopup.isOpen
         ) {
@@ -3514,6 +3565,7 @@ class FirstScreen(
             hudBatch.end()
         }
         chooseToSummonPopup.render()
+        chooseGlyphSpellPopup.render()
     }
 
     private fun updateCamera() {

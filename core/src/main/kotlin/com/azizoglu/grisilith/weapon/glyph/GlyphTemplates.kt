@@ -11,403 +11,82 @@ object GlyphTemplates {
         val points: List<Vector2>
     )
 
-    val all:
-        List<Template> =
-        buildList {
-            lightningTemplates()
-                .forEach {
-                    add(
-                        Template(
-                            glyphType =
-                                GlyphType.CALL_LIGHTNING,
+    val all: List<Template> = buildList {
+        lightningTemplates().forEach { addTemplate(GlyphType.CALL_LIGHTNING, it) }
+        tsunamiTemplates().forEach { addTemplate(GlyphType.TSUNAMI, it) }
+        meteorTemplates().forEach { addTemplate(GlyphType.METEOR, it) }
+        singularityTemplates().forEach { addTemplate(GlyphType.SINGULARITY, it) }
+    }
 
-                            points =
-                                GlyphGeometry.normalize(
-                                    it
-                                )
-                        )
-                    )
-                }
-
-            tsunamiTemplates()
-                .forEach {
-                    add(
-                        Template(
-                            glyphType =
-                                GlyphType.TSUNAMI,
-
-                            points =
-                                GlyphGeometry.normalize(
-                                    it
-                                )
-                        )
-                    )
-                }
-
-            meteorTemplates()
-                .forEach {
-                    add(
-                        Template(
-                            glyphType =
-                                GlyphType.METEOR,
-
-                            points =
-                                GlyphGeometry.normalize(
-                                    it
-                                )
-                        )
-                    )
-                }
-
-            singularityTemplates()
-                .forEach {
-                    add(
-                        Template(
-                            glyphType =
-                                GlyphType.SINGULARITY,
-
-                            points =
-                                GlyphGeometry.normalize(
-                                    it
-                                )
-                        )
-                    )
-                }
-        }
-
-    private fun lightningTemplates():
-        List<List<Vector2>> {
-
-        return listOf(
-            points(
-                0f to 0f,
-                0.18f to 0.42f,
-                -0.02f to 0.34f,
-                0.38f to 0.72f,
-                0.22f to 0.48f,
-                0.62f to 1f
-            ),
-
-            points(
-                0f to 0f,
-                0.25f to 0.35f,
-                0.08f to 0.30f,
-                0.48f to 0.64f,
-                0.30f to 0.56f,
-                0.72f to 1f
-            ),
-
-            points(
-                0f to 0f,
-                -0.14f to 0.40f,
-                0.08f to 0.35f,
-                -0.30f to 0.72f,
-                -0.12f to 0.57f,
-                -0.42f to 1f
+    private fun MutableList<Template>.addTemplate(
+        glyphType: GlyphType,
+        points: List<Vector2>
+    ) {
+        add(
+            Template(
+                glyphType = glyphType,
+                points = GlyphGeometry.normalize(points)
             )
         )
     }
 
-    private fun tsunamiTemplates():
-        List<List<Vector2>> {
+    private fun lightningTemplates(): List<List<Vector2>> = listOf(
+        points(-1f to 0.72f, 0.95f to 0.72f, -0.92f to -0.72f, 1f to -0.72f),
+        points(-1f to 0.58f, 0.82f to 0.58f, -0.72f to -0.62f, 1f to -0.62f),
+        points(-0.88f to 0.82f, 1f to 0.76f, -0.82f to -0.74f, 0.88f to -0.68f)
+    )
 
-        return listOf(
-            createBTemplate(
-                bulge =
-                    0.62f
-            ),
+    private fun tsunamiTemplates(): List<List<Vector2>> = listOf(
+        rectangle(0.78f, 0.72f),
+        rectangle(0.92f, 0.62f),
+        rectangle(0.66f, 0.88f)
+    )
 
-            createBTemplate(
-                bulge =
-                    0.78f
-            ),
+    private fun meteorTemplates(): List<List<Vector2>> = listOf(
+        triangle(0f, 1f, -0.88f, -0.72f, 0.88f),
+        triangle(-0.10f, 1f, -1f, -0.66f, 0.82f),
+        triangle(0.12f, 0.92f, -0.82f, -0.78f, 1f)
+    )
 
-            createBTemplate(
-                bulge =
-                    0.50f
-            )
+    private fun singularityTemplates(): List<List<Vector2>> = listOf(
+        ellipse(1f, 1f),
+        ellipse(1f, 0.82f),
+        ellipse(0.84f, 1f)
+    )
+
+    private fun rectangle(halfWidth: Float, halfHeight: Float): List<Vector2> =
+        points(
+            -halfWidth to halfHeight,
+            halfWidth to halfHeight,
+            halfWidth to -halfHeight,
+            -halfWidth to -halfHeight,
+            -halfWidth to halfHeight
         )
-    }
 
-    private fun meteorTemplates():
-        List<List<Vector2>> {
-
-        return listOf(
-            createMeteorTemplate(
-                circleScaleX =
-                    1f,
-
-                circleScaleY =
-                    1f
-            ),
-
-            createMeteorTemplate(
-                circleScaleX =
-                    0.88f,
-
-                circleScaleY =
-                    1.08f
-            ),
-
-            createMeteorTemplate(
-                circleScaleX =
-                    1.08f,
-
-                circleScaleY =
-                    0.88f
-            )
+    private fun triangle(
+        topX: Float,
+        topY: Float,
+        leftX: Float,
+        bottomY: Float,
+        rightX: Float
+    ): List<Vector2> =
+        points(
+            topX to topY,
+            rightX to bottomY,
+            leftX to bottomY,
+            topX to topY
         )
-    }
 
-    private fun singularityTemplates():
-        List<List<Vector2>> {
-
-        return listOf(
-            createInfinityTemplate(
-                height =
-                    0.55f
-            ),
-
-            createInfinityTemplate(
-                height =
-                    0.72f
-            ),
-
-            createInfinityTemplate(
-                height =
-                    0.42f
-            )
-        )
-    }
-
-    private fun createBTemplate(
-        bulge: Float
-    ): List<Vector2> {
-
-        val result =
-            mutableListOf<Vector2>()
-
-        result.add(
+    private fun ellipse(radiusX: Float, radiusY: Float): List<Vector2> =
+        List(72) { index ->
+            val progress = index / 71f
+            val angle = progress * Math.PI * 2.0
             Vector2(
-                0f,
-                1f
-            )
-        )
-
-        result.add(
-            Vector2(
-                0f,
-                0f
-            )
-        )
-
-        repeat(
-            18
-        ) {
-                index ->
-
-            val progress =
-                index /
-                    17f
-
-            val angle =
-                -90f +
-                    progress *
-                    180f
-
-            result.add(
-                Vector2(
-                    cos(
-                        Math.toRadians(
-                            angle.toDouble()
-                        )
-                    )
-                        .toFloat() *
-                        bulge,
-
-                    0.25f +
-                        sin(
-                            Math.toRadians(
-                                angle.toDouble()
-                            )
-                        )
-                            .toFloat() *
-                        0.25f
-                )
+                cos(angle).toFloat() * radiusX,
+                sin(angle).toFloat() * radiusY
             )
         }
 
-        repeat(
-            18
-        ) {
-                index ->
-
-            val progress =
-                index /
-                    17f
-
-            val angle =
-                -90f +
-                    progress *
-                    180f
-
-            result.add(
-                Vector2(
-                    cos(
-                        Math.toRadians(
-                            angle.toDouble()
-                        )
-                    )
-                        .toFloat() *
-                        bulge,
-
-                    0.75f +
-                        sin(
-                            Math.toRadians(
-                                angle.toDouble()
-                            )
-                        )
-                            .toFloat() *
-                        0.25f
-                )
-            )
-        }
-
-        return result
-    }
-
-    private fun createMeteorTemplate(
-        circleScaleX: Float,
-        circleScaleY: Float
-    ): List<Vector2> {
-
-        val result =
-            mutableListOf<Vector2>()
-
-        repeat(
-            42
-        ) {
-                index ->
-
-            val progress =
-                index /
-                    41f
-
-            val angle =
-                progress *
-                    Math.PI *
-                    2.0
-
-            result.add(
-                Vector2(
-                    cos(
-                        angle
-                    )
-                        .toFloat() *
-                        circleScaleX,
-
-                    sin(
-                        angle
-                    )
-                        .toFloat() *
-                        circleScaleY
-                )
-            )
-        }
-
-        result.add(
-            Vector2(
-                -0.72f *
-                    circleScaleX,
-
-                -0.72f *
-                    circleScaleY
-            )
-        )
-
-        result.add(
-            Vector2(
-                0.72f *
-                    circleScaleX,
-
-                0.72f *
-                    circleScaleY
-            )
-        )
-
-        return result
-    }
-
-    private fun createInfinityTemplate(
-        height: Float
-    ): List<Vector2> {
-
-        val result =
-            mutableListOf<Vector2>()
-
-        repeat(
-            64
-        ) {
-                index ->
-
-            val progress =
-                index /
-                    63f
-
-            val angle =
-                progress *
-                    Math.PI *
-                    2.0
-
-            val denominator =
-                1.0 +
-                    sin(
-                        angle
-                    ) *
-                    sin(
-                        angle
-                    )
-
-            result.add(
-                Vector2(
-                    (
-                        cos(
-                            angle
-                        ) /
-                            denominator
-                        )
-                        .toFloat(),
-
-                    (
-                        sin(
-                            angle
-                        ) *
-                            cos(
-                                angle
-                            ) /
-                            denominator
-                        )
-                        .toFloat() *
-                        height
-                )
-            )
-        }
-
-        return result
-    }
-
-    private fun points(
-        vararg values:
-        Pair<Float, Float>
-    ): List<Vector2> {
-
-        return values.map {
-                value ->
-
-            Vector2(
-                value.first,
-                value.second
-            )
-        }
-    }
+    private fun points(vararg values: Pair<Float, Float>): List<Vector2> =
+        values.map { Vector2(it.first, it.second) }
 }

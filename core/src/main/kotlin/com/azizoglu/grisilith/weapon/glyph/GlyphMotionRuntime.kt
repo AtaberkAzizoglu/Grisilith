@@ -111,6 +111,7 @@ class GlyphMotionRuntime(
         }
 
         if (
+            weapon.chalkDustSpellChoice == null ||
             drawing ||
             sessionVisible ||
             sharedCooldownRemainingSeconds >
@@ -446,9 +447,26 @@ class GlyphMotionRuntime(
                         "Drawing too short"
                 )
             } else {
-                recognizer.recognize(
-                    points
-                )
+                val expectedGlyphType =
+                    sourceWeapon
+                        ?.chalkDustSpellChoice
+                        ?.glyphType
+
+                if (expectedGlyphType == null) {
+                    GlyphRecognitionResult(
+                        glyphType = null,
+                        confidence = 0f,
+                        templateScore = 0f,
+                        structuralScore = 0f,
+                        accepted = false,
+                        reason = "No spell selected"
+                    )
+                } else {
+                    recognizer.recognize(
+                        rawPoints = points,
+                        expectedGlyphType = expectedGlyphType
+                    )
+                }
             }
 
         lastRecognitionResult =

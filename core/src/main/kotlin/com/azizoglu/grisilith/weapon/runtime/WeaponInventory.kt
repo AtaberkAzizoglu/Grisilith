@@ -7,16 +7,6 @@ class WeaponInventory {
 
     companion object {
         const val WEAPON_SLOT_COUNT = 6
-
-        /*
-         * Revize weapon dosyasındaki kalıcı ID.
-         * DefaultWeapons içine eklendiğinde de aynı
-         * ContentId kullanılmalı.
-         */
-        private val ENCHANTED_CHALK_DUST_ID =
-            ContentId(
-                "WPN_ENCHANTED_CHALK_DUST"
-            )
     }
 
     val weaponSlots:
@@ -56,14 +46,6 @@ class WeaponInventory {
     fun addPurchasedWeapon(
         weapon: WeaponInstance
     ): WeaponInventoryResult {
-        if (
-            weapon.definition.id ==
-            ENCHANTED_CHALK_DUST_ID
-        ) {
-            return addEnchantedChalkDust(
-                weapon
-            )
-        }
 
         val emptySlot =
             weaponSlots.firstOrNull { slot ->
@@ -160,31 +142,6 @@ class WeaponInventory {
          * Boş slota doğrudan yerleştir.
          */
         if (targetWeapon == null) {
-            /*
-             * Tek kopya kuralı bulunan Weapon zaten
-             * envanterdeyse ikinci kopya oluşturma.
-             */
-            if (
-                weapon.definition.id ==
-                ENCHANTED_CHALK_DUST_ID
-            ) {
-                val existingWeapon =
-                    firstWeaponById(
-                        weapon.definition.id
-                    )
-
-                if (existingWeapon != null) {
-                    if (
-                        !existingWeapon.increaseLevel()
-                    ) {
-                        return WeaponInventoryResult
-                            .MAXIMUM_LEVEL_REACHED
-                    }
-
-                    return WeaponInventoryResult
-                        .UNIQUE_WEAPON_LEVELLED_UP
-                }
-            }
 
             targetSlot.weapon =
                 weapon
@@ -215,57 +172,6 @@ class WeaponInventory {
 
         return WeaponInventoryResult.MERGED
     }
-
-    private fun addEnchantedChalkDust(
-        weapon: WeaponInstance
-    ): WeaponInventoryResult {
-        val existingSlot =
-            weaponSlots.firstOrNull { slot ->
-                slot.weapon
-                    ?.definition
-                    ?.id ==
-                    ENCHANTED_CHALK_DUST_ID
-            }
-
-        /*
-         * Envanterde zaten Chalk Dust varsa,
-         * yeni kopya eklenmez. İlk kopya level alır.
-         */
-        if (existingSlot != null) {
-            val existingWeapon =
-                existingSlot.weapon
-                    ?: return WeaponInventoryResult
-                        .INVALID_SLOT
-
-            if (
-                !existingWeapon.increaseLevel()
-            ) {
-                return WeaponInventoryResult
-                    .MAXIMUM_LEVEL_REACHED
-            }
-
-            return WeaponInventoryResult
-                .UNIQUE_WEAPON_LEVELLED_UP
-        }
-
-        /*
-         * Henüz Chalk Dust yoksa normal şekilde
-         * bir boş slota eklenir.
-         */
-        val emptySlot =
-            weaponSlots.firstOrNull { slot ->
-                slot.isEmpty
-            }
-                ?: return WeaponInventoryResult
-                    .INVENTORY_FULL
-
-        emptySlot.weapon =
-            weapon
-
-        return WeaponInventoryResult
-            .ADDED_TO_EMPTY_SLOT
-    }
-
 
     fun mergeSlots(
         sourceSlotIndex: Int,
@@ -353,6 +259,11 @@ class WeaponInventory {
 
         survivingWeapon
             .inheritIvySummonChoiceFrom(
+                consumedWeapon
+            )
+
+        survivingWeapon
+            .inheritChalkDustSpellChoiceFrom(
                 consumedWeapon
             )
 
@@ -477,6 +388,11 @@ class WeaponInventory {
                     ivySummonChoiceName =
                         weapon
                             .ivySummonChoice
+                            ?.name,
+
+                    chalkDustSpellChoiceName =
+                        weapon
+                            .chalkDustSpellChoice
                             ?.name
                 )
             }

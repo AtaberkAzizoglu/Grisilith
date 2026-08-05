@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2
 import kotlin.math.acos
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sqrt
 
 object GlyphGeometry {
 
@@ -480,6 +481,46 @@ object GlyphGeometry {
         }
 
         return intersections
+    }
+
+    fun simplify(
+        source: List<Vector2>,
+        epsilon: Float
+    ): List<Vector2> {
+
+        if (source.size < 3 || epsilon <= 0f) {
+            return source.map { Vector2(it) }
+        }
+
+        var maximumDistance = 0f
+        var splitIndex = 0
+        val start = source.first()
+        val end = source.last()
+
+        for (index in 1 until source.lastIndex) {
+            val distance = distanceToSegment(
+                pointX = source[index].x,
+                pointY = source[index].y,
+                start = start,
+                end = end
+            )
+            if (distance > maximumDistance) {
+                maximumDistance = distance
+                splitIndex = index
+            }
+        }
+
+        if (maximumDistance <= epsilon) {
+            return listOf(Vector2(start), Vector2(end))
+        }
+
+        val firstPart = simplify(source.subList(0, splitIndex + 1), epsilon)
+        val secondPart = simplify(source.subList(splitIndex, source.size), epsilon)
+
+        return buildList {
+            addAll(firstPart.dropLast(1))
+            addAll(secondPart)
+        }
     }
 
     fun distanceToSegment(
