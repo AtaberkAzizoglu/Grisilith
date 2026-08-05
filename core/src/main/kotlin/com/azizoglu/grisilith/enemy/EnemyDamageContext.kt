@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.enemy
 
+import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.content.DamageType
 
 data class EnemyDamageContext(
@@ -13,10 +14,30 @@ data class EnemyDamageContext(
         null,
 
     val sourceName: String? =
-        null
+        null,
+
+    val sourceWeaponTags: Set<ContentTag> =
+        emptySet(),
+
+    val attackerPiercingIgnoreRatio: Float =
+        0f
 ) {
 
+    val isPhysicalWeaponDamage: Boolean
+        get() =
+            damageType in PHYSICAL_DAMAGE_TYPES &&
+                sourceWeaponTags.any { tag ->
+                    tag == ContentTag.MELEE_WEAPON ||
+                        tag == ContentTag.RANGED_WEAPON
+                }
+
     companion object {
+        private val PHYSICAL_DAMAGE_TYPES =
+            setOf(
+                DamageType.SLASHING,
+                DamageType.PIERCING,
+                DamageType.BLUDGEONING
+            )
 
         val NONE =
             EnemyDamageContext()

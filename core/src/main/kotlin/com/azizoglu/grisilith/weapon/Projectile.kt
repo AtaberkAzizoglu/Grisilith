@@ -76,6 +76,9 @@ class Projectile(
     Int = 0,
 
     private val armorClassReductionDurationSeconds:
+    Float = 0f,
+
+    private val attackerPiercingIgnoreRatio:
     Float = 0f
 ) {
 
@@ -537,7 +540,14 @@ class Projectile(
                                 sourceWeapon?.runtimeId,
                             sourceWeaponDefinitionId =
                                 sourceWeapon?.definition?.id?.value,
-                            sourceName = sourceWeaponName
+                            sourceName = sourceWeaponName,
+                            sourceWeaponTags =
+                                sourceWeapon
+                                    ?.definition
+                                    ?.tags
+                                    ?: emptySet(),
+                            attackerPiercingIgnoreRatio =
+                                attackerPiercingIgnoreRatio
                         )
                 )
 

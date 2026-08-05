@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import kotlin.math.sqrt
+import kotlin.math.roundToInt
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionRuntime
 import com.azizoglu.grisilith.combat.condition.ConditionControlRules
@@ -393,14 +394,36 @@ class Enemy(
                 )
 
         val armorModifiedDamage =
-            (
-                reactionResult
-                    .resolvedDamage -
+            if (
+                damageContext.isPhysicalWeaponDamage
+            ) {
+                val safePiercingRatio =
+                    damageContext
+                        .attackerPiercingIgnoreRatio
+                        .coerceIn(
+                            0f,
+                            0.75f
+                        )
+
+                val effectiveDamageReduction =
                     effectiveArmorClass
-                )
-                .coerceAtLeast(
-                    1
-                )
+                        .coerceAtLeast(0)
+                        .toFloat() *
+                        (1f - safePiercingRatio)
+
+                (
+                    reactionResult
+                        .resolvedDamage
+                        .toFloat() -
+                        effectiveDamageReduction
+                    )
+                    .roundToInt()
+                    .coerceAtLeast(1)
+            } else {
+                reactionResult
+                    .resolvedDamage
+                    .coerceAtLeast(1)
+            }
 
         val appliedDamage =
             health.takeDamage(

@@ -2530,11 +2530,6 @@ class FirstScreen(
                         weaponName =
                             sourceName
                     )
-
-                player.tryLifeSteal(
-                    appliedDamage =
-                        appliedDamage
-                )
             },
 
             onEnemyKilled = {
@@ -2647,11 +2642,6 @@ class FirstScreen(
 
                 onLifeStealDamage = {
                         appliedDamage ->
-
-                    player.tryLifeSteal(
-                        appliedDamage =
-                            appliedDamage
-                    )
                 }
             )
 
@@ -2687,11 +2677,6 @@ class FirstScreen(
                             weaponName =
                                 weaponName
                         )
-
-                    player.tryLifeSteal(
-                        appliedDamage =
-                            appliedDamage
-                    )
                 },
 
                 onEnemyKilled = {
@@ -2741,11 +2726,6 @@ class FirstScreen(
                             weaponName =
                                 weaponName
                         )
-
-                    player.tryLifeSteal(
-                        appliedDamage =
-                            appliedDamage
-                    )
                 },
 
                 onEnemyKilled = {
@@ -2790,11 +2770,6 @@ class FirstScreen(
                                 projectile
                                     .sourceWeaponName
                         )
-
-                    player.tryLifeSteal(
-                        appliedDamage =
-                            appliedDamage
-                    )
                 },
 
                 onEnemyKilled = {
@@ -2807,6 +2782,11 @@ class FirstScreen(
 
                 onWeaponHit = {
                         hitEvent ->
+
+                    player.tryLifeSteal(
+                        isEligibleHit =
+                            hitEvent.isLifeStealEligible
+                    )
 
                     tamgaRuntimeManager
                         .onWeaponHit(
@@ -2826,10 +2806,6 @@ class FirstScreen(
                                             weaponName
                                     )
 
-                                player.tryLifeSteal(
-                                    appliedDamage =
-                                        bonusDamage
-                                )
                             },
 
                             onEnemyKilled = {
@@ -2963,10 +2939,6 @@ class FirstScreen(
                                     ?: event.conditionType.displayName
                         )
 
-                        player.tryLifeSteal(
-                            appliedDamage =
-                                event.appliedDamage
-                        )
 
                         if (
                             event.killedEnemy
@@ -3019,7 +2991,6 @@ class FirstScreen(
                         amount = damage,
                         weaponName = sourceName
                     )
-                    player.tryLifeSteal(damage)
                 }
             )
 

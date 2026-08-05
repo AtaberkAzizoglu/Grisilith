@@ -134,6 +134,11 @@ class Player(
             delta =
                 safeDelta
         )
+
+        updateHealthRegeneration(
+            delta =
+                safeDelta
+        )
     }
 
     private fun updateNormalMovement(
@@ -276,7 +281,10 @@ class Player(
         }
 
         val regenerationPerSecond =
-            stats.hpRegenerationPerSecond()
+            stats.hpRegenerationPerSecond(
+                currentMaximumHealth =
+                    health.maximumHealth
+            )
 
         if (regenerationPerSecond <= 0f) {
             return
@@ -510,15 +518,42 @@ class Player(
         }
     }
 
-    fun takeDamage(amount: Int): Int {
+    /*
+     * Bağlamı bilinmeyen hasar savunmadan geçirilmez.
+     * Eski çağrıların davranışı güvenli biçimde korunur.
+     */
+    fun takeDamage(
+        amount: Int
+    ): Int {
+        return health.takeDamage(
+            amount =
+                amount.coerceAtLeast(0)
+        )
+    }
+
+    /*
+     * Yalnızca uygun Melee/Ranged fiziksel saldırılar için
+     * düz Armor azaltması uygulanır.
+     */
+    fun takePhysicalWeaponDamage(
+        amount: Int,
+        attackerPiercingIgnoreRatio:
+        Float
+    ): Int {
         if (amount <= 0) {
             return 0
         }
 
+        val damageReduction =
+            stats.effectiveArmorDamageReduction(
+                attackerPiercingIgnoreRatio =
+                    attackerPiercingIgnoreRatio
+            )
+
         val reducedDamage =
             (
-                amount *
-                    stats.armorDamageMultiplier()
+                amount.toFloat() -
+                    damageReduction
                 )
                 .roundToInt()
                 .coerceAtLeast(1)
@@ -528,11 +563,18 @@ class Player(
         )
     }
 
+    /*
+     * Çağıran sistem saldırının:
+     * - Melee veya Ranged Weapon'dan,
+     * - BLUDGEONING / PIERCING / SLASHING tipinden,
+     * - başarılı bir hedef vuruşundan
+     * geldiğini doğrulamalıdır.
+     */
     fun tryLifeSteal(
-        appliedDamage: Int
+        isEligibleHit: Boolean
     ) {
         if (
-            appliedDamage <= 0 ||
+            !isEligibleHit ||
             health.isDead ||
             health.currentHealth >=
             health.maximumHealth
@@ -542,10 +584,6 @@ class Player(
 
         val lifeStealChance =
             stats.lifeStealChance()
-                .coerceIn(
-                    0f,
-                    1f
-                )
 
         if (
             lifeStealChance <= 0f ||
@@ -556,7 +594,33 @@ class Player(
             return
         }
 
-        health.heal(1)
+        val lifeStealPercent =
+            stats.lifeStealPercent()
+
+        val healingAmount =
+            when {
+                lifeStealPercent >= 126 -> {
+                    MathUtils.random(
+                        1,
+                        3
+                    )
+                }
+
+                lifeStealPercent >= 101 -> {
+                    MathUtils.random(
+                        1,
+                        2
+                    )
+                }
+
+                else -> {
+                    1
+                }
+            }
+
+        health.heal(
+            healingAmount
+        )
     }
 
     fun render(

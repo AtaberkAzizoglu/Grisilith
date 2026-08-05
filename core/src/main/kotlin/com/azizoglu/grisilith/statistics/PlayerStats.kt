@@ -51,6 +51,18 @@ class PlayerStats(
     private val weaponSkillBonusLimits =
         mutableMapOf<StatType, Int>()
 
+    /*
+     * Armor'un normal Stat katmanlarından bağımsız
+     * temel yaşam ve savunma değerleri.
+     */
+    private var armorBaseHealth:
+        Int =
+        1
+
+    private var armorBaseArmor:
+        Int =
+        0
+
     init {
         StatType.entries.forEach { statType ->
             val initialValue =
@@ -380,14 +392,32 @@ class PlayerStats(
     }
 
 
+    fun setArmorBaseValues(
+        baseHealth: Int,
+        baseArmor: Int
+    ) {
+        armorBaseHealth =
+            baseHealth.coerceAtLeast(1)
+
+        armorBaseArmor =
+            baseArmor.coerceAtLeast(0)
+    }
+
+    fun armorBaseHealth(): Int =
+        armorBaseHealth
+
+    fun armorBaseArmor(): Int =
+        armorBaseArmor
+
     fun calculatedMaximumHealth(): Int {
-        val score =
+        val maxHpScore =
             totalScore(StatType.MAX_HP)
 
         return (
-            100 +
-                (score - 10) * 10
-            ).coerceAtLeast(10)
+            armorBaseHealth *
+                maxHpScore
+            )
+            .coerceAtLeast(1)
     }
 
     fun calculatedMovementSpeed(): Float {
@@ -437,48 +467,108 @@ class PlayerStats(
             .coerceAtLeast(0.20f)
     }
 
-    fun armorDamageMultiplier(): Float {
-        val armorScore =
+    /*
+     * Piercing uygulanmadan önceki düz savunma miktarı.
+     */
+    fun rawArmorDamageReduction(): Float {
+        val armorClass =
             totalScore(
                 StatType.ARMOR_CLASS
             )
 
-        val damageReduction =
-            armorScore.toFloat() /
-                (armorScore + 50f)
+        return armorBaseArmor.toFloat() *
+            armorClass.toFloat()
+    }
+
+    /*
+     * Her 1 Piercing = %1.5 savunma yok sayma.
+     * Nihai yok sayma oranı %75 ile sınırlıdır.
+     */
+    fun piercingIgnoreRatio(): Float {
+        val piercingScore =
+            totalScore(
+                StatType.PIERCING
+            )
 
         return (
-            1f - damageReduction
-            ).coerceIn(
-                0.25f,
-                1f
+            piercingScore * 0.015f
+            )
+            .coerceIn(
+                0f,
+                0.75f
             )
     }
 
-    fun hpRegenerationPerSecond(): Float {
+    fun effectiveArmorDamageReduction(
+        attackerPiercingIgnoreRatio:
+        Float
+    ): Float {
+        val safePiercingRatio =
+            attackerPiercingIgnoreRatio
+                .coerceIn(
+                    0f,
+                    0.75f
+                )
+
+        return rawArmorDamageReduction() *
+            (1f - safePiercingRatio)
+    }
+
+    /*
+     * Her 1 HP Regeneration puanı:
+     * Current Max HP'nin saniyede %0.1'i.
+     *
+     * Kesirli sonuç Player içinde birikir.
+     */
+    fun hpRegenerationPerSecond(
+        currentMaximumHealth: Int
+    ): Float {
         val score =
             totalScore(
                 StatType.HP_REGENERATION
             )
 
-        return (
-            score - 10
-            )
-            .coerceAtLeast(0) *
-            0.20f
+        if (
+            score <= 0 ||
+            currentMaximumHealth <= 0
+        ) {
+            return 0f
+        }
+
+        return currentMaximumHealth.toFloat() *
+            score.toFloat() *
+            0.001f
     }
 
-    fun lifeStealChance(): Float {
+    /*
+     * 1-29 puan: puan başına %3.
+     * 30 puan: %100.
+     * 30 üzerindeki her puan, iyileştirme kademesi
+     * hesabı için +%3 taşma değeri üretir.
+     */
+    fun lifeStealPercent(): Int {
         val score =
             totalScore(
                 StatType.LIFE_STEAL
             )
 
+        return if (score >= 30) {
+            100 + (score - 30) * 3
+        } else {
+            score * 3
+        }
+    }
+
+    fun lifeStealChance(): Float {
         return (
-            score - 10
+            lifeStealPercent()
+                .coerceAtMost(100) /
+                100f
             )
-            .coerceAtLeast(0) *
-            0.015f
+            .coerceIn(
+                0f,
+                1f
+            )
     }
 
     fun lightWeaponPowerScore(): Int {
@@ -593,19 +683,13 @@ class PlayerStats(
             .coerceAtLeast(0.20f)
     }
 
-    fun projectileTargetCount(): Int {
-        val score =
-            totalScore(
-                StatType.PIERCING
-            )
-
-        val additionalTargets =
-            (score - 10)
-                .coerceAtLeast(0) /
-                5
-
-        return 1 + additionalTargets
-    }
+    /*
+     * Piercing artık projectile hedef sayısını artırmaz.
+     * Eski çağrıların derlenmesini korumak için geçici olarak
+     * yalnızca ilk hedefi döndürür.
+     */
+    fun projectileTargetCount(): Int =
+        1
 
     /*
      * Save sistemi için bütün kalıcı Stat katmanlarını dışarı aktarır.

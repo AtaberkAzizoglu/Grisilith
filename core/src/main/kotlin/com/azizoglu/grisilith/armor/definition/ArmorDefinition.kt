@@ -11,11 +11,9 @@ import com.azizoglu.grisilith.statistics.StatType
 /*
  * Preset sırasında kuşanılan tek Armor'u tanımlar.
  *
- * Armor:
- * - Run marketinde çıkmaz.
- * - Sandıktan düşmez.
- * - Run sırasında değiştirilemez.
- * - Yalnızca Preset üzerinden seçilir.
+ * Base HP ve Base Armor normal Stat bonusları değildir:
+ * - Current Max HP = Base HP * Max HP
+ * - Raw Damage Reduce = Base Armor * Armor Class
  */
 data class ArmorDefinition(
     override val id:
@@ -30,26 +28,15 @@ data class ArmorDefinition(
     override val tags:
     Set<ContentTag>,
 
-    /*
-     * Armor'un doğrudan Max HP hesabına yaptığı
-     * temel katkı.
-     *
-     * PlayerStats içindeki MAX_HP Gear bonusuna
-     * dönüştürülecektir.
-     */
-    val baseMaximumHealthScore:
+    val baseHealth:
+    Int,
+
+    val baseArmor:
     Int,
 
     /*
-     * Armor'un damage reduction hesabına yaptığı
-     * temel Armor Class katkısı.
-     */
-    val baseArmorClassScore:
-    Int,
-
-    /*
-     * Movement Speed, Wisdom, Luck vb. ek
-     * bonuslar ve cezalar.
+     * Movement Speed, Attack Speed, Wisdom, Luck vb.
+     * gerçek Stat değişiklikleri.
      */
     val statModifiers:
     List<StatModifier> =
@@ -65,15 +52,11 @@ data class ArmorDefinition(
         ContentCategory.ARMOR
 
     init {
-        require(
-            displayName.isNotBlank()
-        ) {
+        require(displayName.isNotBlank()) {
             "Armor display name cannot be blank."
         }
 
-        require(
-            description.isNotBlank()
-        ) {
+        require(description.isNotBlank()) {
             "Armor description cannot be blank."
         }
 
@@ -88,80 +71,29 @@ data class ArmorDefinition(
             "Armor $id must have an Armor type tag."
         }
 
-        /*
-         * Negatif değerler Robe gibi savunmasız
-         * Armor'lar için geçerlidir.
-         *
-         * Aşırı yanlış veri girişini önlemek için
-         * makul bir güvenlik aralığı kullanılır.
-         */
-        require(
-            baseMaximumHealthScore in
-                -10..10
-        ) {
-            "Armor Max HP score must be between -10 and 10."
+        require(baseHealth > 0) {
+            "Armor Base HP must be greater than zero."
         }
 
-        require(
-            baseArmorClassScore in
-                -10..10
-        ) {
-            "Armor Class score must be between -10 and 10."
+        require(baseArmor >= 0) {
+            "Armor Base Armor cannot be negative."
         }
 
-        /*
-         * Temel HP ve Armor değerleri ayrı alanlarda
-         * olduğu için modifier listesinde tekrar
-         * bulunmalarına izin vermiyoruz.
-         */
         require(
             statModifiers.none { modifier ->
-                modifier.statType ==
-                    StatType.MAX_HP ||
-                    modifier.statType ==
-                    StatType.ARMOR_CLASS
+                modifier.statType == StatType.MAX_HP ||
+                    modifier.statType == StatType.ARMOR_CLASS
             }
         ) {
-            "Use baseMaximumHealthScore and " +
-                "baseArmorClassScore for Armor HP/Armor values."
+            "Base HP and Base Armor must use their dedicated fields."
         }
     }
 
     /*
-     * Armor'un PlayerStats Gear katmanına
-     * uygulanacak bütün değişiklikleri döndürür.
+     * Gear bonus katmanına yalnızca gerçek Stat modifier'ları gider.
+     * Base HP ve Base Armor bu listeye dahil edilmez.
      */
     fun allStatModifiers():
-        List<StatModifier> {
-
-        val modifiers =
-            mutableListOf<StatModifier>()
-
-        if (baseMaximumHealthScore != 0) {
-            modifiers +=
-                StatModifier(
-                    statType =
-                        StatType.MAX_HP,
-
-                    amount =
-                        baseMaximumHealthScore
-                )
-        }
-
-        if (baseArmorClassScore != 0) {
-            modifiers +=
-                StatModifier(
-                    statType =
-                        StatType.ARMOR_CLASS,
-
-                    amount =
-                        baseArmorClassScore
-                )
-        }
-
-        modifiers +=
-            statModifiers
-
-        return modifiers
-    }
+        List<StatModifier> =
+        statModifiers
 }

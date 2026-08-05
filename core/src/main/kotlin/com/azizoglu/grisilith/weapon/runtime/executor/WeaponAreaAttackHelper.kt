@@ -66,7 +66,12 @@ object WeaponAreaAttackHelper {
                         sourceWeaponDefinitionId =
                             context.weapon.definition.id.value,
                         sourceName =
-                            context.weapon.displayName
+                            context.weapon.displayName,
+                        sourceWeaponTags =
+                            definition.tags,
+                        attackerPiercingIgnoreRatio =
+                            context.player.stats
+                                .piercingIgnoreRatio()
                     )
             )
 
@@ -116,7 +121,12 @@ object WeaponAreaAttackHelper {
                             sourceWeaponDefinitionId =
                                 context.weapon.definition.id.value,
                             sourceName =
-                                context.weapon.displayName
+                                context.weapon.displayName,
+                            sourceWeaponTags =
+                                definition.tags,
+                            attackerPiercingIgnoreRatio =
+                                context.player.stats
+                                    .piercingIgnoreRatio()
                         )
                 )
         }

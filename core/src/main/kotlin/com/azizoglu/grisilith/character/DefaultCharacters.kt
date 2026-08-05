@@ -130,11 +130,11 @@ object DefaultCharacters {
 
             baseStats =
                 createStats(
-                    maxHp = 7,
+                    maxHp = 4,
                     armorClass = 5,
                     strength = 2,
                     dexterity = 5,
-                    wisdom = 14,
+                    wisdom = 15,
                     haste = 11,
                     attackSpeed = 5,
                     critRate = 3,
@@ -142,13 +142,13 @@ object DefaultCharacters {
                     movementSpeed = 9,
                     luck = 8,
                     harvest = 6,
-                    elementalDamage = 10,
-                    mightOfNature = 10,
+                    elementalDamage = 11,
+                    mightOfNature = 11,
                     shepherd = 10,
                     piercing = 0,
                     enemyCount = 2,
-                    hpRegeneration = 2,
-                    lifeSteal = 0
+                    hpRegeneration = 0,
+                    lifeSteal = 2
                 ),
 
             preferredMarketStats =
