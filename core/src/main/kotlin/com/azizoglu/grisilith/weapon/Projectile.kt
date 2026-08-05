@@ -322,6 +322,115 @@ class Projectile(
         travelledDistance = 0f
     }
 
+    fun bendToward(
+        targetCenterX: Float,
+        targetCenterY: Float,
+        influenceRadius: Float,
+        turnStrengthPerSecond: Float,
+        delta: Float
+    ) {
+
+        if (
+            !isActive ||
+            activationDelayRemaining >
+            0f ||
+            influenceRadius <=
+            0f ||
+            turnStrengthPerSecond <=
+            0f ||
+            delta <=
+            0f
+        ) {
+            return
+        }
+
+        val projectileCenterX =
+            position.x +
+                size /
+                2f
+
+        val projectileCenterY =
+            position.y +
+                size /
+                2f
+
+        val distance =
+            Vector2.dst(
+                projectileCenterX,
+                projectileCenterY,
+                targetCenterX,
+                targetCenterY
+            )
+
+        if (
+            distance >
+            influenceRadius ||
+            distance <=
+            1f
+        ) {
+            return
+        }
+
+        val desiredDirection =
+            Vector2(
+                targetCenterX -
+                    projectileCenterX,
+
+                targetCenterY -
+                    projectileCenterY
+            )
+
+        if (
+            desiredDirection.isZero(
+                0.001f
+            )
+        ) {
+            return
+        }
+
+        desiredDirection
+            .nor()
+            .scl(
+                safeProjectileSpeed
+            )
+
+        val influence =
+            (
+                1f -
+                    distance /
+                    influenceRadius
+                )
+                .coerceIn(
+                    0f,
+                    1f
+                )
+
+        velocity.lerp(
+            desiredDirection,
+            (
+                turnStrengthPerSecond *
+                    influence *
+                    delta
+                )
+                .coerceIn(
+                    0f,
+                    0.18f
+                )
+        )
+
+        if (
+            !velocity.isZero(
+                0.001f
+            )
+        ) {
+            velocity
+                .nor()
+                .scl(
+                    safeProjectileSpeed
+                )
+        }
+    }
+
     fun checkCollision(
         enemies: List<Enemy>,
         onDamageDealt: (Int) -> Unit,

@@ -306,8 +306,14 @@ class WeaponRuntimeManager(
             delta =
                 delta,
 
+            player =
+                player,
+
             enemyManager =
                 enemyManager,
+
+            projectiles =
+                projectiles,
 
             worldWidth =
                 worldWidth,

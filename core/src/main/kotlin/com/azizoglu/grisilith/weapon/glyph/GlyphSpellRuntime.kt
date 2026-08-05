@@ -7,6 +7,8 @@ import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.statistics.PlayerStats
+import com.azizoglu.grisilith.player.Player
+import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -21,6 +23,12 @@ class GlyphSpellRuntime(
     private val damageCalculator =
         WeaponDamageCalculator(
             playerStats
+        )
+
+    private val singularityRuntime =
+        SingularityRuntime(
+            damageCalculator =
+                damageCalculator
         )
 
     private data class VisualPulse(
@@ -91,17 +99,18 @@ class GlyphSpellRuntime(
             }
 
             GlyphType.SINGULARITY -> {
-                /*
-                 * Singularity is intentionally implemented
-                 * in the next dedicated package.
-                 */
+                singularityRuntime.begin(
+                    request
+                )
             }
         }
     }
 
     fun update(
         delta: Float,
+        player: Player,
         enemyManager: EnemyManager,
+        projectiles: List<Projectile>,
         worldWidth: Float,
         worldHeight: Float,
         onDamageDealt: (
@@ -141,6 +150,32 @@ class GlyphSpellRuntime(
             worldHeight,
             onDamageDealt,
             onEnemyKilled
+        )
+
+        singularityRuntime.update(
+            delta =
+                delta,
+
+            player =
+                player,
+
+            enemyManager =
+                enemyManager,
+
+            projectiles =
+                projectiles,
+
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight,
+
+            onDamageDealt =
+                onDamageDealt,
+
+            onEnemyKilled =
+                onEnemyKilled
         )
     }
 
@@ -250,12 +285,17 @@ class GlyphSpellRuntime(
                     TSUNAMI_FRONT_THICKNESS
                 )
             }
+
+        singularityRuntime.render(
+            shapeRenderer
+        )
     }
 
     fun clear() {
 
         pulses.clear()
         tsunamiWave = null
+        singularityRuntime.clear()
     }
 
     private fun castCallLightning(
