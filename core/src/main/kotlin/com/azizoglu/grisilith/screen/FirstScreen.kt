@@ -77,6 +77,7 @@ import com.azizoglu.grisilith.screen.pause.PauseInteractionState
 import com.azizoglu.grisilith.screen.render.PauseRenderer
 import com.azizoglu.grisilith.preset.ResolvedPresetContent
 import com.azizoglu.grisilith.armor.runtime.EquippedArmor
+import com.azizoglu.grisilith.armor.runtime.ArmorStatBonusSynchronizer
 import com.azizoglu.grisilith.tamga.runtime.TamgaRuntimeManager
 import com.azizoglu.grisilith.tamga.runtime.active.ActiveTamgaEndReason
 import com.azizoglu.grisilith.tamga.render.ActiveTamgaHudRenderer
@@ -196,6 +197,15 @@ class FirstScreen(
                     )
                 }
         }
+
+    private val armorStatBonusSynchronizer =
+        ArmorStatBonusSynchronizer(
+            equippedArmor =
+                equippedArmor,
+
+            playerStats =
+                playerStats
+        )
 
     private val itemInventory =
         ItemInventory()
@@ -1597,6 +1607,12 @@ class FirstScreen(
                     0
                 )
 
+        armorStatBonusSynchronizer
+            .invalidate()
+
+        armorStatBonusSynchronizer
+            .synchronize()
+
         weaponStatBonusSynchronizer
             .invalidate()
 
@@ -1648,7 +1664,19 @@ class FirstScreen(
                 )
             )
 
+            armorStatBonusSynchronizer
+                .invalidate()
+
+            armorStatBonusSynchronizer
+                .synchronize()
+
             synchronizeWeaponInventoryEffects()
+
+            player
+                .synchronizeMaximumHealthWithStats(
+                    healAddedHealth =
+                        true
+                )
 
             return
         }
@@ -1672,6 +1700,12 @@ class FirstScreen(
                     )
                 )
             }
+
+        armorStatBonusSynchronizer
+            .invalidate()
+
+        armorStatBonusSynchronizer
+            .synchronize()
 
         weaponStatBonusSynchronizer
             .invalidate()

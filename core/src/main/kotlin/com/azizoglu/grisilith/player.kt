@@ -87,6 +87,9 @@ class Player(
             actualMovementSpeed =
                 0f
 
+            accumulatedRegeneration =
+                0f
+
             return
         }
 
@@ -272,11 +275,15 @@ class Player(
     private fun updateHealthRegeneration(
         delta: Float
     ) {
+        if (delta <= 0f) {
+            return
+        }
+
         if (
-            delta <= 0f ||
             health.currentHealth >=
             health.maximumHealth
         ) {
+            accumulatedRegeneration = 0f
             return
         }
 
@@ -287,6 +294,7 @@ class Player(
             )
 
         if (regenerationPerSecond <= 0f) {
+            accumulatedRegeneration = 0f
             return
         }
 
@@ -305,9 +313,18 @@ class Player(
                 wholeHealthPoints
             )
 
-        if (healedAmount > 0) {
-            accumulatedRegeneration -=
-                healedAmount.toFloat()
+        if (
+            health.currentHealth >=
+            health.maximumHealth
+        ) {
+            accumulatedRegeneration = 0f
+        } else {
+            accumulatedRegeneration =
+                (
+                    accumulatedRegeneration -
+                        healedAmount.toFloat()
+                    )
+                    .coerceAtLeast(0f)
         }
     }
 
@@ -364,6 +381,9 @@ class Player(
             healAddedHealth =
                 healAddedHealth
         )
+
+        accumulatedRegeneration =
+            0f
     }
 
     fun resolveCollision(
@@ -594,28 +614,18 @@ class Player(
             return
         }
 
-        val lifeStealPercent =
-            stats.lifeStealPercent()
+        val maximumHealing =
+            stats
+                .maximumLifeStealHealingPerProc()
 
         val healingAmount =
-            when {
-                lifeStealPercent >= 126 -> {
-                    MathUtils.random(
-                        1,
-                        3
-                    )
-                }
-
-                lifeStealPercent >= 101 -> {
-                    MathUtils.random(
-                        1,
-                        2
-                    )
-                }
-
-                else -> {
-                    1
-                }
+            if (maximumHealing <= 1) {
+                1
+            } else {
+                MathUtils.random(
+                    1,
+                    maximumHealing
+                )
             }
 
         health.heal(

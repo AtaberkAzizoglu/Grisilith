@@ -630,14 +630,6 @@ class ProjectileWeaponAttackExecutor(
                 selectedDamageType ==
                 DamageType.LIGHTNING
 
-        val statAdditionalTargets =
-            (
-                playerStats
-                    .projectileTargetCount() -
-                    1
-                )
-                .coerceAtLeast(0)
-
         /*
          * Buradaki değerler ilk hedefin haricindeki
          * silaha özel hedef sayılarını belirtir.
@@ -672,7 +664,6 @@ class ProjectileWeaponAttackExecutor(
                 (
                     definition.baseMaximumTargets +
                         levelStats.additionalTargets +
-                        statAdditionalTargets +
                         weaponSpecificAdditionalTargets
                     )
                     .coerceAtLeast(1)
@@ -915,7 +906,11 @@ class ProjectileWeaponAttackExecutor(
                             .IVY_STAFF_ARMOR_CLASS_REDUCTION_SECONDS
                     } else {
                         0f
-                    }
+                    },
+
+                attackerPiercingIgnoreRatio =
+                    playerStats
+                        .piercingIgnoreRatio()
             )
         )
     }

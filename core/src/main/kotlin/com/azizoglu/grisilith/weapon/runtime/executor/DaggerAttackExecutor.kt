@@ -346,19 +346,10 @@ class DaggerAttackExecutor(
                     damageResult.isCriticalHit
             )
 
-        val statAdditionalTargets =
-            (
-                playerStats
-                    .projectileTargetCount() -
-                    1
-                )
-                .coerceAtLeast(0)
-
         val maximumTargets =
             (
                 definition.baseMaximumTargets +
-                    levelStats.additionalTargets +
-                    statAdditionalTargets
+                    levelStats.additionalTargets
                 )
                 .coerceAtLeast(1)
 
@@ -475,7 +466,11 @@ class DaggerAttackExecutor(
                             .ASSASSINATE_PROJECTILE_SIZE_MULTIPLIER
                     } else {
                         1f
-                    }
+                    },
+
+                attackerPiercingIgnoreRatio =
+                    playerStats
+                        .piercingIgnoreRatio()
             )
         )
     }

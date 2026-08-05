@@ -13,6 +13,12 @@ class PlayerStats(
         const val PRE_RUN_MAXIMUM_SCORE = 25
         const val RUN_MAXIMUM_SCORE = 50
 
+        private const val PIERCING_IGNORE_PER_SCORE = 0.015f
+        private const val MAXIMUM_PIERCING_IGNORE_RATIO = 0.75f
+        private const val HP_REGENERATION_RATIO_PER_SCORE = 0.001f
+        private const val LIFE_STEAL_PERCENT_PER_SCORE = 3
+        private const val GUARANTEED_LIFE_STEAL_SCORE = 30
+
         private fun defaultBaseScores(): Map<StatType, Int> {
             return StatType.entries.associateWith {
                 10
@@ -491,11 +497,11 @@ class PlayerStats(
             )
 
         return (
-            piercingScore * 0.015f
+            piercingScore * PIERCING_IGNORE_PER_SCORE
             )
             .coerceIn(
                 0f,
-                0.75f
+                MAXIMUM_PIERCING_IGNORE_RATIO
             )
     }
 
@@ -537,7 +543,7 @@ class PlayerStats(
 
         return currentMaximumHealth.toFloat() *
             score.toFloat() *
-            0.001f
+            HP_REGENERATION_RATIO_PER_SCORE
     }
 
     /*
@@ -552,10 +558,12 @@ class PlayerStats(
                 StatType.LIFE_STEAL
             )
 
-        return if (score >= 30) {
-            100 + (score - 30) * 3
+        return if (score >= GUARANTEED_LIFE_STEAL_SCORE) {
+            100 +
+                (score - GUARANTEED_LIFE_STEAL_SCORE) *
+                LIFE_STEAL_PERCENT_PER_SCORE
         } else {
-            score * 3
+            score * LIFE_STEAL_PERCENT_PER_SCORE
         }
     }
 
@@ -569,6 +577,14 @@ class PlayerStats(
                 0f,
                 1f
             )
+    }
+
+    fun maximumLifeStealHealingPerProc(): Int {
+        return when {
+            lifeStealPercent() >= 126 -> 3
+            lifeStealPercent() >= 101 -> 2
+            else -> 1
+        }
     }
 
     fun lightWeaponPowerScore(): Int {
