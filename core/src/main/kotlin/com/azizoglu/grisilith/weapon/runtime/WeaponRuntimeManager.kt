@@ -28,6 +28,8 @@ import com.azizoglu.grisilith.weapon.skill.ImpaleAndDragReward
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.weapon.skill.ErasingSoulsRuntime
 import com.azizoglu.grisilith.weapon.skill.AcidicPoolRuntime
+import com.azizoglu.grisilith.weapon.glyph.GlyphMotionRuntime
+import com.azizoglu.grisilith.weapon.glyph.GlyphFeedback
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionManager
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionEvent
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionTrigger
@@ -107,6 +109,16 @@ class WeaponRuntimeManager(
             areaManager =
                 persistentAreaManager
         )
+
+    private val glyphMotionRuntime =
+        GlyphMotionRuntime(
+            playerStats =
+                playerStats
+        )
+
+    private var glyphWeaponRuntime:
+        WeaponRuntime? =
+        null
 
 
     private var vortexWeaponRuntime:
@@ -227,6 +239,35 @@ class WeaponRuntimeManager(
         )
 
         erasingSoulsRuntime.update(delta)
+
+        glyphMotionRuntime.update(
+            delta =
+                delta,
+
+            playerCenterX =
+                player.centerX,
+
+            playerCenterY =
+                player.centerY,
+
+            enemies =
+                enemyManager
+                    .allEnemies,
+
+            onDamageDealt =
+                onDamageDealt,
+
+            onEnemyKilled =
+                onEnemyKilled,
+
+            onDrawingResolved = {
+                glyphWeaponRuntime
+                    ?.endActiveAbilityEarly()
+
+                glyphWeaponRuntime =
+                    null
+            }
+        )
 
         statBonusSynchronizer
             .synchronize()
@@ -612,6 +653,58 @@ class WeaponRuntimeManager(
                         player =
                             player
                     )
+            }
+
+            DefaultWeaponAbilities
+                .GLYPH_CASTING_ID -> {
+
+                when (
+                    glyphMotionRuntime
+                        .handleActivation(
+                            weapon
+                        )
+                ) {
+                    GlyphMotionRuntime
+                        .ActivationResult
+                        .STARTED -> {
+
+                        val activated =
+                            runtime
+                                .tryActivateAbility()
+
+                        if (
+                            activated
+                        ) {
+                            glyphWeaponRuntime =
+                                runtime
+                        } else {
+                            glyphMotionRuntime
+                                .cancelActiveDrawing()
+                        }
+
+                        activated
+                    }
+
+                    GlyphMotionRuntime
+                        .ActivationResult
+                        .FINISHED -> {
+
+                        runtime
+                            .endActiveAbilityEarly()
+
+                        glyphWeaponRuntime =
+                            null
+
+                        true
+                    }
+
+                    GlyphMotionRuntime
+                        .ActivationResult
+                        .REJECTED -> {
+
+                        false
+                    }
+                }
             }
 
             else -> {
@@ -1518,6 +1611,9 @@ class WeaponRuntimeManager(
 
         erasingSoulsRuntime.clear()
 
+        glyphMotionRuntime.clear()
+        glyphWeaponRuntime = null
+
         runtimesByWeapon.values
             .forEach {
                     runtime ->
@@ -1570,6 +1666,17 @@ class WeaponRuntimeManager(
         erasingSoulsRuntime.render(
             shapeRenderer
         )
+
+        glyphMotionRuntime.render(
+            shapeRenderer
+        )
+    }
+
+    fun glyphFeedback():
+        GlyphFeedback? {
+
+        return glyphMotionRuntime
+            .feedback()
     }
 
     fun abilityStateInSlot(
@@ -1581,6 +1688,29 @@ class WeaponRuntimeManager(
                 slotIndex
             )
                 ?: return WeaponAbilityState.LOCKED
+
+        if (
+            weapon.unlockedAbility
+                ?.id ==
+            DefaultWeaponAbilities
+                .GLYPH_CASTING_ID
+        ) {
+            return when {
+                glyphMotionRuntime.isDrawing -> {
+                    WeaponAbilityState.ACTIVE
+                }
+
+                glyphMotionRuntime
+                    .cooldownRemainingSeconds >
+                    0f -> {
+                    WeaponAbilityState.COOLDOWN
+                }
+
+                else -> {
+                    WeaponAbilityState.READY
+                }
+            }
+        }
 
         return runtimesByWeapon[
             weapon
@@ -1599,6 +1729,16 @@ class WeaponRuntimeManager(
             )
                 ?: return 0f
 
+        if (
+            weapon.unlockedAbility
+                ?.id ==
+            DefaultWeaponAbilities
+                .GLYPH_CASTING_ID
+        ) {
+            return glyphMotionRuntime
+                .remainingDrawingSeconds
+        }
+
         return runtimesByWeapon[
             weapon
         ]
@@ -1616,6 +1756,16 @@ class WeaponRuntimeManager(
             )
                 ?: return 0f
 
+        if (
+            weapon.unlockedAbility
+                ?.id ==
+            DefaultWeaponAbilities
+                .GLYPH_CASTING_ID
+        ) {
+            return glyphMotionRuntime
+                .cooldownRemainingSeconds
+        }
+
         return runtimesByWeapon[
             weapon
         ]
@@ -1632,6 +1782,12 @@ class WeaponRuntimeManager(
          * geçirir; cooldown değeri korunur.
          */
         cancelActiveAbilities()
+
+        glyphMotionRuntime
+            .cancelActiveDrawing()
+
+        glyphWeaponRuntime =
+            null
 
         /*
          * Normal saldırı zamanlayıcıları yeni stage'de

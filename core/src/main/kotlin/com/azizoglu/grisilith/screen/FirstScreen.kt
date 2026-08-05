@@ -4,6 +4,7 @@ import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.weapon.Projectile
+import com.azizoglu.grisilith.weapon.glyph.GlyphFeedbackRenderer
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -390,6 +391,21 @@ class FirstScreen(
                 weaponInventory,
             weaponRuntimeManager =
                 weaponRuntimeManager
+        )
+
+    private val glyphFeedbackRenderer =
+        GlyphFeedbackRenderer(
+            camera =
+                camera,
+
+            shapeRenderer =
+                shapeRenderer,
+
+            batch =
+                hudBatch,
+
+            font =
+                hudFont
         )
 
     private val activeTamgaHudRenderer =
@@ -3473,6 +3489,16 @@ class FirstScreen(
                     .renderTexts()
             }
         )
+
+        if (
+            showGameplayHud
+        ) {
+            glyphFeedbackRenderer
+                .render(
+                    weaponRuntimeManager
+                        .glyphFeedback()
+                )
+        }
 
         if (isPauseMenuOpen) {
             hudBatch.projectionMatrix =
