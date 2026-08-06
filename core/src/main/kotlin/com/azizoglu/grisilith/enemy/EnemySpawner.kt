@@ -8,8 +8,19 @@ class EnemySpawner(
     private val worldWidth: Float,
     private val worldHeight: Float
 ) {
+
+    companion object {
+        private const val MINIMUM_DYNAMIC_SPAWN_INTERVAL =
+            0.01f
+    }
     private var spawnTimer = 0f
     private var bossSpawned = false
+
+    private var trackedStage =
+        -1
+
+    private var spawnedRegularEnemiesThisStage =
+        0
 
     val hasSpawnedBoss: Boolean
         get() = bossSpawned
@@ -25,8 +36,14 @@ class EnemySpawner(
         enemyManager: EnemyManager,
         currentStage: Int,
         stageType: StageType,
+        stageDurationSeconds: Float,
         enemyCountMultiplier: Float
     ) {
+        synchronizeStage(
+            currentStage =
+                currentStage
+        )
+
         spawnBossIfRequired(
             camera = camera,
             enemyManager = enemyManager,
@@ -40,6 +57,8 @@ class EnemySpawner(
             enemyManager = enemyManager,
             currentStage = currentStage,
             stageType = stageType,
+            stageDurationSeconds =
+                stageDurationSeconds,
             enemyCountMultiplier =
                 enemyCountMultiplier
         )
@@ -48,6 +67,31 @@ class EnemySpawner(
     fun resetTimer() {
         spawnTimer = 0f
         bossSpawned = false
+        trackedStage = -1
+        spawnedRegularEnemiesThisStage = 0
+    }
+
+    private fun synchronizeStage(
+        currentStage: Int
+    ) {
+        if (
+            trackedStage ==
+            currentStage
+        ) {
+            return
+        }
+
+        trackedStage =
+            currentStage
+
+        spawnTimer =
+            0f
+
+        bossSpawned =
+            false
+
+        spawnedRegularEnemiesThisStage =
+            0
     }
 
     private fun spawnBossIfRequired(
@@ -94,6 +138,7 @@ class EnemySpawner(
         enemyManager: EnemyManager,
         currentStage: Int,
         stageType: StageType,
+        stageDurationSeconds: Float,
         enemyCountMultiplier: Float
     ) {
         val baseSettings =
@@ -104,50 +149,80 @@ class EnemySpawner(
         val isBossStage =
             stageType != StageType.NORMAL
 
-        val spawnInterval =
-            if (isBossStage) {
-                baseSettings.spawnInterval * 2f
-            } else {
-                baseSettings.spawnInterval
-            }
+        val regularEnemyQuota =
+            EnemySpawnScaling
+                .regularEnemyQuotaForStage(
+                    stage =
+                        currentStage,
 
-        val maximumEnemyCount =
-            EnemySpawnScaling.maximumEnemyCountForStage(
-                stage = currentStage,
-                isBossStage = isBossStage,
-                enemyCountMultiplier =
-                    enemyCountMultiplier
-            )
+                    isBossStage =
+                        isBossStage,
+
+                    enemyCountMultiplier =
+                        enemyCountMultiplier
+                )
 
         if (
-            enemyManager.enemyCount >=
-            maximumEnemyCount
+            spawnedRegularEnemiesThisStage >=
+            regularEnemyQuota
         ) {
             return
         }
 
-        spawnTimer += delta
+        /*
+         * Stage süresi değişmez.
+         * Kota büyüdükçe spawn aralığı otomatik küçülür;
+         * böylece normal ve unique düşmanların tamamı
+         * aynı Stage süresi içinde gönderilir.
+         */
+        val spawnInterval =
+            (
+                stageDurationSeconds
+                    .coerceAtLeast(
+                        0.01f
+                    ) /
+                    regularEnemyQuota
+                        .toFloat()
+                )
+                .coerceAtLeast(
+                    MINIMUM_DYNAMIC_SPAWN_INTERVAL
+                )
+
+        spawnTimer +=
+            delta.coerceAtLeast(
+                0f
+            )
 
         while (
-            spawnTimer >= spawnInterval &&
-            enemyManager.enemyCount <
-            maximumEnemyCount
+            spawnTimer >=
+            spawnInterval &&
+            spawnedRegularEnemiesThisStage <
+            regularEnemyQuota
         ) {
-            spawnTimer -= spawnInterval
+            spawnTimer -=
+                spawnInterval
 
             val enemyStats =
                 chooseRegularEnemyStats(
-                    currentStage = currentStage,
+                    currentStage =
+                        currentStage,
+
                     uniqueSpawnChance =
-                        baseSettings.uniqueSpawnChance
+                        baseSettings
+                            .uniqueSpawnChance
                 )
 
             enemyManager.spawn(
                 createEnemyOutsideCamera(
-                    camera = camera,
-                    stats = enemyStats
+                    camera =
+                        camera,
+
+                    stats =
+                        enemyStats
                 )
             )
+
+            spawnedRegularEnemiesThisStage++
         }
     }
 

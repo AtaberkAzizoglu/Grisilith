@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.statistics
 
 import com.azizoglu.grisilith.save.RunSaveStatLayers
 import kotlin.math.roundToInt
+import kotlin.math.pow
 import java.util.HashMap
 
 class PlayerStats(
@@ -674,13 +675,24 @@ class PlayerStats(
             totalScore(
                 StatType.ENEMY_COUNT
             )
+                .coerceAtLeast(
+                    0
+                )
 
-        return (
-            1f +
-                (score - 10) *
-                0.05f
+        /*
+         * Her 1 Enemy Count puanı, Stage'in temel
+         * normal/unique düşman kotasını %10 bileşik artırır.
+         *
+         * Örnek:
+         * 0  -> x1.00
+         * 1  -> x1.10
+         * 10 -> x2.5937
+         */
+        return 1.10
+            .pow(
+                score.toDouble()
             )
-            .coerceAtLeast(0.25f)
+            .toFloat()
     }
 
     fun magicPowerMultiplier(): Float {

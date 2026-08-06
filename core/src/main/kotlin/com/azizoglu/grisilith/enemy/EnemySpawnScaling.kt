@@ -1,5 +1,7 @@
 package com.azizoglu.grisilith.enemy
 
+import kotlin.math.roundToInt
+
 object EnemySpawnScaling {
 
     private const val BASE_SPAWN_INTERVAL = 1.5f
@@ -46,12 +48,12 @@ object EnemySpawnScaling {
         )
     }
 
-    fun maximumEnemyCountForStage(
+    fun regularEnemyQuotaForStage(
         stage: Int,
         isBossStage: Boolean,
         enemyCountMultiplier: Float = 1f
     ): Int {
-        val baseMaximum =
+        val baseStageEnemyCount =
             settingsForStage(stage)
                 .maximumEnemyCount
 
@@ -63,11 +65,11 @@ object EnemySpawnScaling {
             }
 
         return (
-            baseMaximum *
+            baseStageEnemyCount *
                 stageTypeMultiplier *
                 enemyCountMultiplier
             )
-            .toInt()
+            .roundToInt()
             .coerceAtLeast(1)
     }
 

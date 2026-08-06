@@ -2957,6 +2957,10 @@ class FirstScreen(
                 stageController
                     .currentStageType,
 
+            stageDurationSeconds =
+                stageController
+                    .currentStageDuration,
+
             enemyCountMultiplier =
                 playerStats
                     .enemyCountMultiplier()
