@@ -27,9 +27,12 @@ object ConditionDamageCalculator {
                         ?: error("A damaging Condition requires a scaling Stat.")
 
                 (
-                    definition.baseTickDamage +
-                        playerStats.totalScore(stat) *
-                        definition.damagePerStatPoint
+                    definition.baseTickDamage *
+                        playerStats
+                            .totalScore(
+                                stat
+                            )
+                            .toFloat()
                     )
                     .roundToInt()
                     .coerceAtLeast(1)

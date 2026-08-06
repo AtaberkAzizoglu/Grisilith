@@ -681,12 +681,15 @@ class SingularityRuntime(
         val tickDamage =
             (
                 damageCalculator
-                    .calculate(
-                        singularity
-                            .request
-                            .sourceWeapon
-                    )
-                    .damage *
+                    .calculateSpellSkillDamage(
+                        weapon =
+                            singularity
+                                .request
+                                .sourceWeapon,
+
+                        damageType =
+                            DamageType.NECROTIC
+                    ) *
                     DPS_MULTIPLIER *
                     DAMAGE_TICK_SECONDS
                 )
@@ -789,12 +792,15 @@ class SingularityRuntime(
         val explosionDamage =
             (
                 damageCalculator
-                    .calculate(
-                        singularity
-                            .request
-                            .sourceWeapon
-                    )
-                    .damage *
+                    .calculateSpellSkillDamage(
+                        weapon =
+                            singularity
+                                .request
+                                .sourceWeapon,
+
+                        damageType =
+                            DamageType.NECROTIC
+                    ) *
                     explosionMultiplier
                 )
                 .roundToInt()

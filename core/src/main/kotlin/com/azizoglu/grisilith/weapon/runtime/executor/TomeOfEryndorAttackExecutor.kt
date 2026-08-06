@@ -261,15 +261,19 @@ class TomeOfEryndorAttackExecutor(
         /*
          * Her hedefin crit hesabı bağımsızdır.
          */
-        val damageResult =
-            damageCalculator.calculate(
-                weapon =
-                    context.weapon
-            )
+        val baseDamage =
+            damageCalculator
+                .calculateNonCriticalDamage(
+                    weapon =
+                        context.weapon,
+
+                    damageType =
+                        DamageType.FIRE
+                )
 
         val finalDamage =
             (
-                damageResult.damage *
+                baseDamage *
                     damageMultiplier
                 )
                 .roundToInt()

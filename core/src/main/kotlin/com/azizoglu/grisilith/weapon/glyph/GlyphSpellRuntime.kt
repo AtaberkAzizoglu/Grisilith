@@ -310,10 +310,13 @@ class GlyphSpellRuntime(
 
         val baseDamage =
             damageCalculator
-                .calculate(
-                    request.sourceWeapon
+                .calculateSpellSkillDamage(
+                    weapon =
+                        request.sourceWeapon,
+
+                    damageType =
+                        DamageType.LIGHTNING
                 )
-                .damage
 
         val innerDamage =
             (
@@ -486,10 +489,13 @@ class GlyphSpellRuntime(
         val damage =
             (
                 damageCalculator
-                    .calculate(
-                        request.sourceWeapon
-                    )
-                    .damage *
+                    .calculateSpellSkillDamage(
+                        weapon =
+                            request.sourceWeapon,
+
+                        damageType =
+                            DamageType.FIRE
+                    ) *
                     METEOR_DAMAGE_MULTIPLIER
                 )
                 .roundToInt()
@@ -685,11 +691,14 @@ class GlyphSpellRuntime(
         val damage =
             (
                 damageCalculator
-                    .calculate(
-                        wave.request
-                            .sourceWeapon
-                    )
-                    .damage *
+                    .calculateSpellSkillDamage(
+                        weapon =
+                            wave.request
+                                .sourceWeapon,
+
+                        damageType =
+                            DamageType.WATER
+                    ) *
                     TSUNAMI_DAMAGE_MULTIPLIER
                 )
                 .roundToInt()

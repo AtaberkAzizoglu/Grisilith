@@ -535,10 +535,13 @@ class IgniteDashRuntime(
 
         val baseDamage =
             damageCalculator
-                .calculate(
-                    weapon
+                .calculateSpellSkillDamage(
+                    weapon =
+                        weapon,
+
+                    damageType =
+                        DamageType.FIRE
                 )
-                .damage
 
         val explosionDamage =
             (

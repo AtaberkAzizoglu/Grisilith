@@ -610,7 +610,13 @@ class SummonedEntity(
         action()
 
         attackCooldownRemainingSeconds =
-            cooldownSeconds
+            (
+                cooldownSeconds /
+                    stats.attackSpeedMultiplier
+                )
+                .coerceAtLeast(
+                    MINIMUM_ATTACK_INTERVAL_SECONDS
+                )
 
         attackFlashRemainingSeconds =
             ATTACK_FLASH_SECONDS
@@ -875,6 +881,9 @@ class SummonedEntity(
     }
 
     companion object {
+
+        private const val MINIMUM_ATTACK_INTERVAL_SECONDS =
+            0.10f
 
         private const val COW_ATTACK_INTERVAL_SECONDS =
             1.15f

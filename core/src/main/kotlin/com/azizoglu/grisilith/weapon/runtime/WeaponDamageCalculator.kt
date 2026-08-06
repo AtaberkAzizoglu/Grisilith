@@ -262,6 +262,59 @@ class WeaponDamageCalculator(
             )
     }
 
+    fun calculateSpellSkillDamage(
+        weapon:
+        WeaponInstance,
+
+        damageType:
+        DamageType,
+
+        skillPowerMultiplier:
+        Float = 1f
+    ): Int {
+
+        val relatedStat =
+            relatedSpellDamageStat(
+                damageType
+            )
+                ?: return calculateNonCriticalDamage(
+                    weapon =
+                        weapon,
+
+                    damageType =
+                        damageType
+                )
+
+        val levelAdjustedBaseDamage =
+            weapon.definition
+                .baseDamage
+                .toFloat() *
+                weapon.currentLevelStats
+                    .damageMultiplier
+
+        val wisdom =
+            playerStats.totalScore(
+                StatType.WISDOM
+            )
+
+        val relatedStatScore =
+            playerStats.totalScore(
+                relatedStat
+            )
+
+        return (
+            levelAdjustedBaseDamage *
+                wisdom.toFloat() *
+                relatedStatScore.toFloat() *
+                SPELL_SKILL_SCALING *
+                skillPowerMultiplier
+            )
+            .roundToInt()
+            .coerceAtLeast(
+                1
+            )
+    }
+
     fun relatedSpellDamageStat(
         damageType:
         DamageType
@@ -297,6 +350,9 @@ class WeaponDamageCalculator(
 
         private const val SPELL_RELATED_STAT_SCALING =
             0.50f
+
+        private const val SPELL_SKILL_SCALING =
+            0.10f
 
         private val PHYSICAL_CRITICAL_DAMAGE_TYPES =
             setOf(
