@@ -562,7 +562,10 @@ class FirstScreen(
                 weaponInventory,
 
             itemInventory =
-                itemInventory
+                itemInventory,
+
+            equippedArmor =
+                equippedArmor
         )
 
     private val pauseInputController =

@@ -4307,15 +4307,37 @@ class CreatePresetScreen(
                     armor.description
 
                 statText =
-                    armor.allStatModifiers()
-                        .joinToString(
-                            separator = "\n"
-                        ) { modifier ->
-                            "${modifier.statType.displayName}: " +
-                                signedValue(
-                                    modifier.amount
-                                )
-                        }
+                    buildString {
+                        appendLine(
+                            "Base HP: ${armor.baseHealth}"
+                        )
+
+                        appendLine(
+                            "Base Armor: ${armor.baseArmor}"
+                        )
+
+                        val modifierText =
+                            armor
+                                .allStatModifiers()
+                                .joinToString(
+                                    separator =
+                                        "\n"
+                                ) { modifier ->
+
+                                    "${modifier.statType.displayName}: " +
+                                        signedValue(
+                                            modifier.amount
+                                        )
+                                }
+                                .ifBlank {
+                                    "No Stat changes."
+                                }
+
+                        appendLine()
+                        append(
+                            modifierText
+                        )
+                    }
             }
 
             CreatePresetEquipmentType.ITEM -> {

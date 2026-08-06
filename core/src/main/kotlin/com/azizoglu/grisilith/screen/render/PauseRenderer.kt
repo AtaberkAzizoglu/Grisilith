@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.screen.render
 
+import com.azizoglu.grisilith.armor.runtime.EquippedArmor
 import com.azizoglu.grisilith.character.CharacterDefinition
 import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.item.definition.ItemDefinition
@@ -54,7 +55,10 @@ class PauseRenderer(
     WeaponInventory,
 
     private val itemInventory:
-    ItemInventory
+    ItemInventory,
+
+    private val equippedArmor:
+    EquippedArmor
 ) {
 
     companion object {
@@ -396,6 +400,9 @@ class PauseRenderer(
             layout.gearPanel
         )
 
+        val equippedArmorDefinition =
+            equippedArmor.definition
+
         renderPlaceholderSlot(
             rectangle =
                 layout.armorSlot,
@@ -404,7 +411,13 @@ class PauseRenderer(
                 "ARMOR",
 
             value =
-                "EMPTY"
+                equippedArmorDefinition
+                    ?.let { armor ->
+                        armor.displayName +
+                            "\nHP ${armor.baseHealth}" +
+                            "  ARM ${armor.baseArmor}"
+                    }
+                    ?: "EMPTY"
         )
 
         renderPlaceholderSlot(
@@ -1483,13 +1496,72 @@ class PauseRenderer(
 
         when (detailType) {
             PauseGearDetailType.ARMOR -> {
-                title =
-                    "ARMOR"
+                val armor =
+                    equippedArmor.definition
 
-                description =
-                    "No Armor Equipped.\n\n" +
-                        "Armor definitions and the Armor slot " +
-                        "will be connected when the Armor system is implemented."
+                if (armor == null) {
+                    title =
+                        "ARMOR"
+
+                    description =
+                        "No Armor Equipped."
+                } else {
+                    title =
+                        armor.displayName
+
+                    val modifierText =
+                        armor
+                            .allStatModifiers()
+                            .joinToString(
+                                separator =
+                                    "\n"
+                            ) { modifier ->
+
+                                "${modifier.statType.displayName}: " +
+                                    formatSignedValue(
+                                        modifier.amount
+                                    )
+                            }
+                            .ifBlank {
+                                "No Stat changes."
+                            }
+
+                    description =
+                        buildString {
+                            appendLine(
+                                "Base HP: ${armor.baseHealth}"
+                            )
+
+                            appendLine(
+                                "Base Armor: ${armor.baseArmor}"
+                            )
+
+                            appendLine()
+
+                            appendLine(
+                                "Current Max HP: " +
+                                    playerStats
+                                        .calculatedMaximumHealth()
+                            )
+
+                            appendLine(
+                                "Damage Reduce: " +
+                                    formatDecimal(
+                                        playerStats
+                                            .rawArmorDamageReduction()
+                                    )
+                            )
+
+                            appendLine()
+                            appendLine(
+                                modifierText
+                            )
+                            appendLine()
+                            append(
+                                armor.description
+                            )
+                        }
+                }
             }
 
             PauseGearDetailType.WEAPON_TAMGA -> {
@@ -1544,11 +1616,29 @@ class PauseRenderer(
         )
 
         font.color =
-            Color.GRAY
+            if (
+                detailType ==
+                PauseGearDetailType.ARMOR &&
+                equippedArmor.definition !=
+                null
+            ) {
+                Color.GOLD
+            } else {
+                Color.GRAY
+            }
 
         font.draw(
             batch,
-            "NOT EQUIPPED",
+            if (
+                detailType ==
+                PauseGearDetailType.ARMOR &&
+                equippedArmor.definition !=
+                null
+            ) {
+                "EQUIPPED"
+            } else {
+                "NOT EQUIPPED"
+            },
             layout.modalPanel.x +
                 24f,
             layout.modalPanel.y +

@@ -1697,21 +1697,37 @@ class PresetManagerScreen(
                         armor.description
 
                     details =
-                        armor
-                            .allStatModifiers()
-                            .joinToString(
-                                separator =
-                                    "\n"
-                            ) { modifier ->
+                        buildString {
+                            appendLine(
+                                "Base HP: ${armor.baseHealth}"
+                            )
 
-                                "${modifier.statType.displayName}: " +
-                                    signed(
-                                        modifier.amount
-                                    )
-                            }
-                            .ifBlank {
-                                "No Stat bonuses."
-                            }
+                            appendLine(
+                                "Base Armor: ${armor.baseArmor}"
+                            )
+
+                            val modifierText =
+                                armor
+                                    .allStatModifiers()
+                                    .joinToString(
+                                        separator =
+                                            "\n"
+                                    ) { modifier ->
+
+                                        "${modifier.statType.displayName}: " +
+                                            signed(
+                                                modifier.amount
+                                            )
+                                    }
+                                    .ifBlank {
+                                        "No Stat changes."
+                                    }
+
+                            appendLine()
+                            append(
+                                modifierText
+                            )
+                        }
                 }
             }
 
