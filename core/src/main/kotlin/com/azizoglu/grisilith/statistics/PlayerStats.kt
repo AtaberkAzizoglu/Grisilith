@@ -467,30 +467,27 @@ class PlayerStats(
             )
     }
 
-    fun hasteAttackSpeedMultiplier(): Float {
-        val score =
+    fun hasteProgress(): Float {
+        return (
             totalScore(
                 StatType.HASTE
             )
-
-        /*
-         * Yalnızca Spell Focus normal saldırıları:
-         * Staff, Wand ve The Book.
-         *
-         * Haste 10 = x1.00
-         * Her puan ±%5 saldırı hızı.
-         *
-         * Haste 0  = x0.50
-         * Haste 10 = x1.00
-         * Haste 20 = x1.50
-         * Haste 30 = x2.00
-         */
-        return (
-            1f +
-                (score - 10) *
-                0.05f
+                .toFloat() /
+                RUN_MAXIMUM_SCORE.toFloat()
             )
-            .coerceAtLeast(0.20f)
+            .coerceIn(
+                0f,
+                1f
+            )
+    }
+
+    /*
+     * Eski çağrıların derlenmesini korur.
+     * Yeni Spell Focus saldırı hızı hesabı
+     * WeaponRuntime içinde min/max APS arasında yapılır.
+     */
+    fun hasteAttackSpeedMultiplier(): Float {
+        return 1f
     }
 
     /*

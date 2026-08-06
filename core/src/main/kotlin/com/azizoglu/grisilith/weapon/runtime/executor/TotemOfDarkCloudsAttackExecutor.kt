@@ -134,7 +134,11 @@ class TotemOfDarkCloudsAttackExecutor(
         val nonCriticalDamage =
             damageCalculator
                 .calculateNonCriticalDamage(
-                    context.weapon
+                    weapon =
+                        context.weapon,
+
+                    damageType =
+                        DamageType.NECROTIC
                 )
 
         val finalDamage =

@@ -207,10 +207,19 @@ class WeaponRuntime(
                 }
 
                 StatType.HASTE -> {
-                    definition
-                        .baseAttacksPerSecond *
+                    val progress =
                         playerStats
-                            .hasteAttackSpeedMultiplier()
+                            .hasteProgress()
+
+                    definition
+                        .baseAttacksPerSecond +
+                        (
+                            definition
+                                .maximumAttacksPerSecond -
+                                definition
+                                    .baseAttacksPerSecond
+                            ) *
+                        progress
                 }
 
                 else -> {

@@ -589,6 +589,17 @@ class ProjectileWeaponAttackExecutor(
                     DamageType.NECROTIC
                 }
 
+                context.weapon
+                    .hasBasicAttackUpgrade &&
+                    definition
+                        .upgradedBasicAttackDamageType !=
+                    null -> {
+
+                    definition
+                        .upgradedBasicAttackDamageType
+                        ?: DamageType.NONE
+                }
+
                 else -> {
                     selectDamageType(
                         damageTypes =
@@ -686,9 +697,9 @@ class ProjectileWeaponAttackExecutor(
          */
         val effectiveKnockback =
             if (
-                isOrbOfSky &&
-                selectedDamageType ==
-                DamageType.LIGHTNING
+                com.azizoglu.grisilith.content
+                    .ContentTag.SPELL_FOCUS in
+                definition.tags
             ) {
                 0f
             } else {
@@ -787,7 +798,11 @@ class ProjectileWeaponAttackExecutor(
         val nonCriticalDamage =
             damageCalculator
                 .calculateNonCriticalDamage(
-                    context.weapon
+                    weapon =
+                        context.weapon,
+
+                    damageType =
+                        selectedDamageType
                 )
 
         val finalDamage =

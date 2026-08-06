@@ -40,6 +40,9 @@ object TomeOfEryndorDefinition {
             randomDamageTypePerAttack =
                 true,
 
+            upgradedBasicAttackDamageType =
+                DamageType.NECROTIC,
+
             attackPattern =
                 WeaponAttackPattern
                     .TOME_PROJECTILE_OR_BEAM,
@@ -47,10 +50,11 @@ object TomeOfEryndorDefinition {
             normalAttackSpeedStat =
                 StatType.HASTE,
 
-            baseDamage = 18,
-            baseAttacksPerSecond = 1.65f,
-            baseRange = 720f,
-            baseProjectileSpeed = 700f,
+            baseDamage = 13,
+            baseAttacksPerSecond = 0.69f,
+            maximumAttacksPerSecond = 1.75f,
+            baseRange = 500f,
+            baseProjectileSpeed = 500f,
             baseKnockback = 0f,
 
             baseProjectileCount = 1,
@@ -59,8 +63,8 @@ object TomeOfEryndorDefinition {
             damageScaling =
                 mapOf(
                     StatType.WISDOM to 0.70f,
-                    StatType.ELEMENTAL_DAMAGE to 0.30f,
-                    StatType.MIGHT_OF_NATURE to 0.25f
+                    StatType.MIGHT_OF_NATURE to 0.50f,
+                    StatType.ELEMENTAL_DAMAGE to 0.50f
                 ),
 
             passiveStatModifiers =
@@ -69,10 +73,16 @@ object TomeOfEryndorDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.05f,
-                        level3Damage = 1.20f,
-                        level4Damage = 1.32f,
-                        level5Damage = 1.32f,
+                        level2Damage = 1.55f,
+                        level3Damage = 2.65f,
+                        level4Damage = 3.45f,
+                        level5Damage = 4.85f,
+
+                        level2AttackSpeed = 1.15f,
+                        level3AttackSpeed = 1.22f,
+                        level4AttackSpeed = 1.22f,
+                        level5AttackSpeed = 1.30f,
+
 
                         /*
                          * Lv.3 ışını eski saldırıdan daha

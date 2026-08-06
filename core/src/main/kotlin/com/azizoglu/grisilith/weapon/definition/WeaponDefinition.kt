@@ -25,6 +25,15 @@ data class WeaponDefinition(
      */
     val randomDamageTypePerAttack: Boolean = false,
 
+    /*
+     * Spell Focus normal saldırıları Lv.1–2'de
+     * damageTypes içinden rastgele tür seçebilir.
+     * Lv.3 ve sonrasında bu alan doluysa yalnızca
+     * belirtilen tür kullanılır.
+     */
+    val upgradedBasicAttackDamageType:
+    DamageType? = null,
+
     val targetingType:
     WeaponTargetingType =
         WeaponTargetingType.NEAREST_ENEMY,
@@ -237,6 +246,17 @@ data class WeaponDefinition(
                 "Random damage selection requires multiple damage types."
             }
         }
+
+        upgradedBasicAttackDamageType
+            ?.let { upgradedType ->
+
+                require(
+                    upgradedType in damageTypes
+                ) {
+                    "Upgraded basic attack damage type " +
+                        "$upgradedType must exist in damageTypes for $id."
+                }
+            }
 
         (1..5).forEach { level ->
             require(level in levelStats) {

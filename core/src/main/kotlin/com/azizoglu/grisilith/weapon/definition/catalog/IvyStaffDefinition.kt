@@ -34,8 +34,15 @@ object IvyStaffDefinition {
 
             damageTypes =
                 setOf(
-                    DamageType.ACID
+                    DamageType.ACID,
+                    DamageType.POISON
                 ),
+
+            randomDamageTypePerAttack =
+                true,
+
+            upgradedBasicAttackDamageType =
+                DamageType.ACID,
 
             attackPattern =
                 WeaponAttackPattern
@@ -44,10 +51,11 @@ object IvyStaffDefinition {
             normalAttackSpeedStat =
                 StatType.HASTE,
 
-            baseDamage = 18,
-            baseAttacksPerSecond = 1.65f,
-            baseRange = 720f,
-            baseProjectileSpeed = 680f,
+            baseDamage = 10,
+            baseAttacksPerSecond = 0.90f,
+            maximumAttacksPerSecond = 2.25f,
+            baseRange = 560f,
+            baseProjectileSpeed = 620f,
             baseKnockback = 0f,
 
             baseProjectileCount = 1,
@@ -56,7 +64,8 @@ object IvyStaffDefinition {
             damageScaling =
                 mapOf(
                     StatType.WISDOM to 0.70f,
-                    StatType.SHEPHERD to 0.45f
+                    StatType.MIGHT_OF_NATURE to 0.50f,
+                    StatType.SHEPHERD to 0.50f
                 ),
 
             passiveStatModifiers =
@@ -65,10 +74,16 @@ object IvyStaffDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.05f,
-                        level3Damage = 1.22f,
-                        level4Damage = 1.32f,
-                        level5Damage = 1.32f,
+                        level2Damage = 1.55f,
+                        level3Damage = 2.65f,
+                        level4Damage = 3.45f,
+                        level5Damage = 4.85f,
+
+                        level2AttackSpeed = 1.15f,
+                        level3AttackSpeed = 1.22f,
+                        level4AttackSpeed = 1.22f,
+                        level5AttackSpeed = 1.30f,
+
 
                         level3Range = 1.05f,
                         level4Range = 1.05f,

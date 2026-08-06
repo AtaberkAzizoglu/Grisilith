@@ -5,6 +5,7 @@ import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.badlogic.gdx.math.MathUtils
 import kotlin.math.roundToInt
+import com.azizoglu.grisilith.statistics.StatType
 
 class WeaponDamageCalculator(
     private val playerStats:
@@ -50,7 +51,11 @@ class WeaponDamageCalculator(
 
         val nonCriticalDamage =
             calculateNonCriticalDamage(
-                weapon
+                weapon =
+                    weapon,
+
+                damageType =
+                    damageType
             )
 
         val isCriticalHit =
@@ -177,7 +182,14 @@ class WeaponDamageCalculator(
 
     fun calculateNonCriticalDamage(
         weapon:
-        WeaponInstance
+        WeaponInstance,
+
+        damageType:
+        DamageType =
+            weapon.definition
+                .damageTypes
+                .firstOrNull()
+                ?: DamageType.NONE
     ): Int {
 
         val definition =
@@ -186,6 +198,54 @@ class WeaponDamageCalculator(
         val levelStats =
             weapon.currentLevelStats
 
+        val levelAdjustedBaseDamage =
+            definition.baseDamage.toFloat() *
+                levelStats.damageMultiplier
+
+        val isSpellFocus =
+            ContentTag.SPELL_FOCUS in
+                definition.tags
+
+        if (isSpellFocus) {
+            val wisdom =
+                playerStats.totalScore(
+                    StatType.WISDOM
+                )
+
+            val relatedStat =
+                relatedSpellDamageStat(
+                    damageType
+                )
+
+            val relatedStatScore =
+                relatedStat
+                    ?.let { statType ->
+                        playerStats.totalScore(
+                            statType
+                        )
+                    }
+                    ?: 0
+
+            val wisdomDamage =
+                levelAdjustedBaseDamage *
+                    wisdom.toFloat() *
+                    SPELL_WISDOM_SCALING
+
+            val relatedStatDamage =
+                levelAdjustedBaseDamage *
+                    relatedStatScore.toFloat() *
+                    SPELL_RELATED_STAT_SCALING
+
+            return (
+                wisdomDamage +
+                    relatedStatDamage
+                )
+                .roundToInt()
+                .coerceAtLeast(
+                    1
+                )
+        }
+
         val scalingMultiplier =
             calculateStatScaling(
                 weapon =
@@ -193,8 +253,7 @@ class WeaponDamageCalculator(
             )
 
         return (
-            definition.baseDamage *
-                levelStats.damageMultiplier *
+            levelAdjustedBaseDamage *
                 scalingMultiplier
             )
             .roundToInt()
@@ -203,7 +262,41 @@ class WeaponDamageCalculator(
             )
     }
 
+    fun relatedSpellDamageStat(
+        damageType:
+        DamageType
+    ): StatType? {
+
+        return when (damageType) {
+            DamageType.FIRE,
+            DamageType.WATER,
+            DamageType.AIR -> {
+                StatType.ELEMENTAL_DAMAGE
+            }
+
+            DamageType.ACID,
+            DamageType.LIGHTNING,
+            DamageType.NECROTIC -> {
+                StatType.MIGHT_OF_NATURE
+            }
+
+            DamageType.POISON -> {
+                StatType.SHEPHERD
+            }
+
+            else -> {
+                null
+            }
+        }
+    }
+
     companion object {
+
+        private const val SPELL_WISDOM_SCALING =
+            0.70f
+
+        private const val SPELL_RELATED_STAT_SCALING =
+            0.50f
 
         private val PHYSICAL_CRITICAL_DAMAGE_TYPES =
             setOf(

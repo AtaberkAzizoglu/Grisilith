@@ -40,6 +40,9 @@ object OrbOfSkyDefinition {
             randomDamageTypePerAttack =
                 true,
 
+            upgradedBasicAttackDamageType =
+                DamageType.LIGHTNING,
+
             attackPattern =
                 WeaponAttackPattern
                     .STRAIGHT_PROJECTILE,
@@ -47,11 +50,12 @@ object OrbOfSkyDefinition {
             normalAttackSpeedStat =
                 StatType.HASTE,
 
-            baseDamage = 17,
-            baseAttacksPerSecond = 1.55f,
-            baseRange = 690f,
-            baseProjectileSpeed = 760f,
-            baseKnockback = 1f,
+            baseDamage = 7,
+            baseAttacksPerSecond = 1.29f,
+            maximumAttacksPerSecond = 3.20f,
+            baseRange = 580f,
+            baseProjectileSpeed = 920f,
+            baseKnockback = 0f,
 
             baseProjectileCount = 1,
             baseMaximumTargets = 1,
@@ -59,6 +63,7 @@ object OrbOfSkyDefinition {
             damageScaling =
                 mapOf(
                     StatType.WISDOM to 0.70f,
+                    StatType.ELEMENTAL_DAMAGE to 0.50f,
                     StatType.MIGHT_OF_NATURE to 0.50f
                 ),
 
@@ -68,10 +73,16 @@ object OrbOfSkyDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.08f,
-                        level3Damage = 1.22f,
-                        level4Damage = 1.34f,
-                        level5Damage = 1.34f,
+                        level2Damage = 1.55f,
+                        level3Damage = 2.65f,
+                        level4Damage = 3.45f,
+                        level5Damage = 4.85f,
+
+                        level2AttackSpeed = 1.15f,
+                        level3AttackSpeed = 1.22f,
+                        level4AttackSpeed = 1.22f,
+                        level5AttackSpeed = 1.30f,
+
 
                         level2Modifiers =
                             listOf(

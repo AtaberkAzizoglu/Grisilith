@@ -33,12 +33,15 @@ object TotemOfDarkCloudsDefinition {
 
             damageTypes =
                 setOf(
-                    DamageType.NECROTIC,
-                    DamageType.LIGHTNING
+                    DamageType.LIGHTNING,
+                    DamageType.NECROTIC
                 ),
 
             randomDamageTypePerAttack =
                 true,
+
+            upgradedBasicAttackDamageType =
+                DamageType.NECROTIC,
 
             attackPattern =
                 WeaponAttackPattern
@@ -47,10 +50,11 @@ object TotemOfDarkCloudsDefinition {
             normalAttackSpeedStat =
                 StatType.HASTE,
 
-            baseDamage = 17,
-            baseAttacksPerSecond = 1.50f,
-            baseRange = 680f,
-            baseProjectileSpeed = 710f,
+            baseDamage = 14,
+            baseAttacksPerSecond = 0.64f,
+            maximumAttacksPerSecond = 1.60f,
+            baseRange = 490f,
+            baseProjectileSpeed = 470f,
             baseKnockback = 0f,
 
             baseProjectileCount = 1,
@@ -68,10 +72,16 @@ object TotemOfDarkCloudsDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.08f,
-                        level3Damage = 1.24f,
-                        level4Damage = 1.38f,
-                        level5Damage = 1.38f,
+                        level2Damage = 1.55f,
+                        level3Damage = 2.65f,
+                        level4Damage = 3.45f,
+                        level5Damage = 4.85f,
+
+                        level2AttackSpeed = 1.15f,
+                        level3AttackSpeed = 1.22f,
+                        level4AttackSpeed = 1.22f,
+                        level5AttackSpeed = 1.30f,
+
 
                         level2Modifiers =
                             listOf(

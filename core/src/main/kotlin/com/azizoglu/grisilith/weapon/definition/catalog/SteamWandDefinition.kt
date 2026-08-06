@@ -40,6 +40,9 @@ object SteamWandDefinition {
             randomDamageTypePerAttack =
                 true,
 
+            upgradedBasicAttackDamageType =
+                DamageType.FIRE,
+
             attackPattern =
                 WeaponAttackPattern
                     .STRAIGHT_PROJECTILE,
@@ -47,10 +50,11 @@ object SteamWandDefinition {
             normalAttackSpeedStat =
                 StatType.HASTE,
 
-            baseDamage = 18,
-            baseAttacksPerSecond = 1.65f,
-            baseRange = 720f,
-            baseProjectileSpeed = 720f,
+            baseDamage = 9,
+            baseAttacksPerSecond = 1.00f,
+            maximumAttacksPerSecond = 2.50f,
+            baseRange = 550f,
+            baseProjectileSpeed = 660f,
             baseKnockback = 0f,
 
             baseProjectileCount = 1,
@@ -68,10 +72,16 @@ object SteamWandDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.05f,
-                        level3Damage = 1.18f,
-                        level4Damage = 1.30f,
-                        level5Damage = 1.30f,
+                        level2Damage = 1.55f,
+                        level3Damage = 2.65f,
+                        level4Damage = 3.45f,
+                        level5Damage = 4.85f,
+
+                        level2AttackSpeed = 1.15f,
+                        level3AttackSpeed = 1.22f,
+                        level4AttackSpeed = 1.22f,
+                        level5AttackSpeed = 1.30f,
+
 
                         level2Modifiers =
                             listOf(
