@@ -60,15 +60,16 @@ object LongswordDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.13f,
-                        level3Damage = 1.26f,
-                        level4Damage = 1.39f,
-                        level5Damage = 1.52f,
+                        level2Damage = 1.55f,
+                        level3Damage = 2.65f,
+                        level4Damage = 3.45f,
+                        level5Damage = 4.85f,
 
-                        level2AttackSpeed = 1.13f,
-                        level3AttackSpeed = 1.26f,
-                        level4AttackSpeed = 1.39f,
-                        level5AttackSpeed = 1.52f,
+                        level2AttackSpeed = 1.15f,
+                        level3AttackSpeed = 1.22f,
+                        level4AttackSpeed = 1.22f,
+                        level5AttackSpeed = 1.30f,
+
 
 
                         level3Range = 1.30f,
