@@ -41,7 +41,7 @@ object TomeOfEryndorDefinition {
                 true,
 
             upgradedBasicAttackDamageType =
-                DamageType.NECROTIC,
+                DamageType.FIRE,
 
             attackPattern =
                 WeaponAttackPattern

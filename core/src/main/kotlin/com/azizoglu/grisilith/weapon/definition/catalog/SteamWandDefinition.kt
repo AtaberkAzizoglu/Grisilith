@@ -41,7 +41,7 @@ object SteamWandDefinition {
                 true,
 
             upgradedBasicAttackDamageType =
-                DamageType.FIRE,
+                DamageType.WATER,
 
             attackPattern =
                 WeaponAttackPattern

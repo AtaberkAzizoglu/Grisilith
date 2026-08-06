@@ -42,7 +42,7 @@ object IvyStaffDefinition {
                 true,
 
             upgradedBasicAttackDamageType =
-                DamageType.ACID,
+                DamageType.POISON,
 
             attackPattern =
                 WeaponAttackPattern
