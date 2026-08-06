@@ -131,15 +131,15 @@ class TotemOfDarkCloudsAttackExecutor(
          * Hasar projectile oyuncuya dönmeden
          * önce, hedefte anında gerçekleşir.
          */
-        val damageResult =
-            damageCalculator.calculate(
-                weapon =
+        val nonCriticalDamage =
+            damageCalculator
+                .calculateNonCriticalDamage(
                     context.weapon
-            )
+                )
 
         val finalDamage =
             (
-                damageResult.damage *
+                nonCriticalDamage *
                     DRAIN_ATTACK_DAMAGE_MULTIPLIER
                 )
                 .roundToInt()

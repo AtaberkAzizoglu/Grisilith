@@ -44,7 +44,7 @@ object ShieldDefinition {
             baseAttacksPerSecond = 0.6f,
             baseRange = 80f,
             baseProjectileSpeed = 0f,
-            baseKnockback = 55f,
+            baseKnockback = 23f,
 
             areaAngleDegrees = 45f,
             areaRadius = 80f,

@@ -44,7 +44,7 @@ object LongswordDefinition {
             baseAttacksPerSecond = 1.4f,
             baseRange = 165f,
             baseProjectileSpeed = 0f,
-            baseKnockback = 10f,
+            baseKnockback = 5f,
 
             areaAngleDegrees = 20f,
             areaRadius = 165f,

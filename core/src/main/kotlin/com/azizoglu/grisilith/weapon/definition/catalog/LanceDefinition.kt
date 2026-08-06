@@ -48,7 +48,7 @@ object LanceDefinition {
             baseAttacksPerSecond = 0.9f,
             baseRange = 215f,
             baseProjectileSpeed = 0f,
-            baseKnockback = 38f,
+            baseKnockback = 15f,
 
             areaRadius = 32f,
 

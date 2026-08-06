@@ -726,7 +726,7 @@ class PauseRenderer(
 
         renderPauseButton(
             text =
-                "QUIT GAME",
+                "Main Menu",
 
             rectangle =
                 layout.quitGameButton,

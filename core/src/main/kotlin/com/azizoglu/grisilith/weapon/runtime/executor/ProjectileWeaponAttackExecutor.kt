@@ -526,14 +526,6 @@ class ProjectileWeaponAttackExecutor(
         carryFirstNormalTarget:
         Boolean = false
     ) {
-        /*
-         * Her projectile’ın crit hesabı bağımsızdır.
-         */
-        val damageResult =
-            damageCalculator.calculate(
-                weapon = context.weapon
-            )
-
         val definition =
             context.weapon.definition
 
@@ -792,9 +784,15 @@ class ProjectileWeaponAttackExecutor(
                 null
             }
 
+        val nonCriticalDamage =
+            damageCalculator
+                .calculateNonCriticalDamage(
+                    context.weapon
+                )
+
         val finalDamage =
             (
-                damageResult.damage *
+                nonCriticalDamage *
                     damageMultiplier
                 )
                 .roundToInt()
@@ -838,7 +836,7 @@ class ProjectileWeaponAttackExecutor(
                     finalDamage,
 
                 isCriticalHit =
-                    damageResult.isCriticalHit,
+                    false,
 
                 maximumTargets =
                     maximumTargets,
@@ -910,7 +908,25 @@ class ProjectileWeaponAttackExecutor(
 
                 attackerPiercingIgnoreRatio =
                     playerStats
-                        .piercingIgnoreRatio()
+                        .piercingIgnoreRatio(),
+
+                canCriticallyHit =
+                    damageCalculator
+                        .canCriticallyHit(
+                            weapon =
+                                context.weapon,
+
+                            damageType =
+                                selectedDamageType
+                        ),
+
+                criticalHitChance =
+                    damageCalculator
+                        .criticalHitChance(),
+
+                criticalDamageMultiplier =
+                    damageCalculator
+                        .criticalDamageMultiplier()
             )
         )
     }

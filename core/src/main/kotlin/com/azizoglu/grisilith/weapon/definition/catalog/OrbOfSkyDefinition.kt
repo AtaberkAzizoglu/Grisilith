@@ -51,7 +51,7 @@ object OrbOfSkyDefinition {
             baseAttacksPerSecond = 1.55f,
             baseRange = 690f,
             baseProjectileSpeed = 760f,
-            baseKnockback = 3f,
+            baseKnockback = 1f,
 
             baseProjectileCount = 1,
             baseMaximumTargets = 1,

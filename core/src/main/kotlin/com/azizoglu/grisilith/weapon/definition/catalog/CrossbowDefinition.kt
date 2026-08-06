@@ -44,7 +44,7 @@ object CrossbowDefinition {
             baseAttacksPerSecond = 0.8f,
             baseRange = 880f,
             baseProjectileSpeed = 850f,
-            baseKnockback = 20f,
+            baseKnockback = 13f,
 
             damageScaling =
                 mapOf(

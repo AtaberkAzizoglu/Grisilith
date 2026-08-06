@@ -8,6 +8,8 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.MathUtils
+import kotlin.math.roundToInt
 import com.azizoglu.grisilith.weapon.runtime.WeaponHitEvent
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.azizoglu.grisilith.enemy.EnemyType
@@ -79,7 +81,19 @@ class Projectile(
     Float = 0f,
 
     private val attackerPiercingIgnoreRatio:
-    Float = 0f
+    Float = 0f,
+
+    private val canCriticallyHit:
+    Boolean = false,
+
+    private val criticalHitChance:
+    Float = 0f,
+
+    private val criticalDamageMultiplier:
+    Float = 1f,
+
+    private val criticalDamageMultiplierProvider:
+    (() -> Float)? = null
 ) {
 
     private val position =
@@ -488,6 +502,44 @@ class Projectile(
                         EnemyType.FINAL_BOSS
                     )
 
+            /*
+             * Aynı projectile birden fazla hedefe ulaşsa bile
+             * her hedef kendi bağımsız Crit roll'ünü yapar.
+             */
+            val didCriticallyHit =
+                canCriticallyHit &&
+                    MathUtils.randomBoolean(
+                        criticalHitChance
+                            .coerceIn(
+                                0f,
+                                1f
+                            )
+                    )
+
+            val resolvedCriticalMultiplier =
+                if (didCriticallyHit) {
+                    (
+                        criticalDamageMultiplierProvider
+                            ?.invoke()
+                            ?: criticalDamageMultiplier
+                        )
+                        .coerceAtLeast(
+                            1f
+                        )
+                } else {
+                    1f
+                }
+
+            val criticalResolvedDamage =
+                (
+                    damage.toFloat() *
+                        resolvedCriticalMultiplier
+                    )
+                    .roundToInt()
+                    .coerceAtLeast(
+                        1
+                    )
+
             val hitDamage =
                 if (isFirstTarget) {
                     if (
@@ -495,21 +547,25 @@ class Projectile(
                         isFirstTargetBoss
                     ) {
                         (
-                            damage *
+                            criticalResolvedDamage *
                                 firstTargetBossDamageMultiplier
                             )
-                            .toInt()
-                            .coerceAtLeast(1)
+                            .roundToInt()
+                            .coerceAtLeast(
+                                1
+                            )
                     } else {
-                        damage
+                        criticalResolvedDamage
                     }
                 } else {
                     (
-                        damage *
+                        criticalResolvedDamage *
                             damageMultiplierAfterFirstHit
                         )
-                        .toInt()
-                        .coerceAtLeast(1)
+                        .roundToInt()
+                        .coerceAtLeast(
+                            1
+                        )
                 }
 
             val modifiedHitDamage =

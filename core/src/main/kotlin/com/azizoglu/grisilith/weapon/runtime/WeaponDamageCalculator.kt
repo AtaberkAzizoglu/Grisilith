@@ -1,78 +1,152 @@
 package com.azizoglu.grisilith.weapon.runtime
 
+import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.badlogic.gdx.math.MathUtils
 import kotlin.math.roundToInt
 
 class WeaponDamageCalculator(
-    private val playerStats: PlayerStats
+    private val playerStats:
+    PlayerStats
 ) {
 
     fun calculate(
-        weapon: WeaponInstance
+        weapon:
+        WeaponInstance
     ): WeaponDamageResult {
-        val definition =
+
+        val damageType =
             weapon.definition
+                .damageTypes
+                .firstOrNull { type ->
+                    type !=
+                        DamageType.NONE
+                }
+                ?: DamageType.NONE
 
-        val levelStats =
-            weapon.currentLevelStats
+        return calculateForHit(
+            weapon =
+                weapon,
 
-        val damageBeforeCritical =
+            damageType =
+                damageType,
+
+            allowCritical =
+                true
+        )
+    }
+
+    fun calculateForHit(
+        weapon:
+        WeaponInstance,
+
+        damageType:
+        DamageType,
+
+        allowCritical:
+        Boolean = true
+    ): WeaponDamageResult {
+
+        val nonCriticalDamage =
             calculateNonCriticalDamage(
                 weapon
             )
-                .toFloat()
-
-        val canCriticallyHit =
-            definition.damageTypes.any {
-                    damageType ->
-
-                damageType != DamageType.NONE &&
-                    damageType.canCriticallyHit
-            }
 
         val isCriticalHit =
-            canCriticallyHit &&
+            allowCritical &&
+                canCriticallyHit(
+                    weapon =
+                        weapon,
+
+                    damageType =
+                        damageType
+                ) &&
                 MathUtils.randomBoolean(
-                    playerStats
-                        .criticalHitChance()
-                        .coerceIn(
-                            0f,
-                            1f
-                        )
+                    criticalHitChance()
                 )
 
         val finalDamage =
             if (isCriticalHit) {
-                damageBeforeCritical *
-                    playerStats
-                        .criticalDamageMultiplier()
+                nonCriticalDamage.toFloat() *
+                    criticalDamageMultiplier()
             } else {
-                damageBeforeCritical
+                nonCriticalDamage.toFloat()
             }
 
         return WeaponDamageResult(
             damage =
                 finalDamage
                     .roundToInt()
-                    .coerceAtLeast(1),
+                    .coerceAtLeast(
+                        1
+                    ),
+
             isCriticalHit =
                 isCriticalHit
         )
     }
 
+    fun canCriticallyHit(
+        weapon:
+        WeaponInstance,
+
+        damageType:
+        DamageType
+    ): Boolean {
+
+        val isMeleeOrRangedWeapon =
+            weapon.definition
+                .tags
+                .any { tag ->
+                    tag ==
+                        ContentTag.MELEE_WEAPON ||
+                        tag ==
+                        ContentTag.RANGED_WEAPON
+                }
+
+        return isMeleeOrRangedWeapon &&
+            damageType in
+            PHYSICAL_CRITICAL_DAMAGE_TYPES &&
+            damageType.canCriticallyHit
+    }
+
+    fun criticalHitChance():
+        Float {
+
+        return playerStats
+            .criticalHitChance()
+            .coerceIn(
+                0f,
+                1f
+            )
+    }
+
+    fun criticalDamageMultiplier():
+        Float {
+
+        return playerStats
+            .criticalDamageMultiplier()
+            .coerceAtLeast(
+                1f
+            )
+    }
+
     private fun calculateStatScaling(
-        weapon: WeaponInstance
+        weapon:
+        WeaponInstance
     ): Float {
+
         val scalingEntries =
-            weapon.definition.damageScaling
+            weapon.definition
+                .damageScaling
 
         if (scalingEntries.isEmpty()) {
             return 1f
         }
 
-        var bonusMultiplier = 0f
+        var bonusMultiplier =
+            0f
 
         scalingEntries.forEach {
                 statType,
@@ -83,16 +157,6 @@ class WeaponDamageCalculator(
                     statType
                 )
 
-            /*
-             * Score 10 nötr kabul edilir.
-             *
-             * Örnek:
-             * Strength 12, weight 1.0
-             * = +%16 hasar
-             *
-             * Her nötr üstü puan temel olarak
-             * %8 katkı sağlar.
-             */
             val scoreDifference =
                 score - 10
 
@@ -103,14 +167,19 @@ class WeaponDamageCalculator(
         }
 
         return (
-            1f + bonusMultiplier
+            1f +
+                bonusMultiplier
             )
-            .coerceAtLeast(0.20f)
+            .coerceAtLeast(
+                0.20f
+            )
     }
 
     fun calculateNonCriticalDamage(
-        weapon: WeaponInstance
+        weapon:
+        WeaponInstance
     ): Int {
+
         val definition =
             weapon.definition
 
@@ -119,7 +188,8 @@ class WeaponDamageCalculator(
 
         val scalingMultiplier =
             calculateStatScaling(
-                weapon = weapon
+                weapon =
+                    weapon
             )
 
         return (
@@ -128,6 +198,18 @@ class WeaponDamageCalculator(
                 scalingMultiplier
             )
             .roundToInt()
-            .coerceAtLeast(1)
+            .coerceAtLeast(
+                1
+            )
+    }
+
+    companion object {
+
+        private val PHYSICAL_CRITICAL_DAMAGE_TYPES =
+            setOf(
+                DamageType.SLASHING,
+                DamageType.PIERCING,
+                DamageType.BLUDGEONING
+            )
     }
 }

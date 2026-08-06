@@ -323,28 +323,17 @@ class DaggerAttackExecutor(
         targetY: Float,
         angleOffsetDegrees: Float = 0f
     ) {
-        val damageResult =
-            damageCalculator.calculate(
-                weapon = context.weapon
-            )
-
         val definition =
             context.weapon.definition
 
         val levelStats =
             context.weapon.currentLevelStats
 
-        val projectileDamage =
-            abilityModifiedDamage(
-                context =
-                    context,
-
-                baseDamage =
-                    damageResult.damage,
-
-                isCriticalHit =
-                    damageResult.isCriticalHit
-            )
+        val nonCriticalProjectileDamage =
+            damageCalculator
+                .calculateNonCriticalDamage(
+                    context.weapon
+                )
 
         val maximumTargets =
             (
@@ -431,10 +420,10 @@ class DaggerAttackExecutor(
                     context.weaponSlotIndex,
 
                 damage =
-                    projectileDamage.damage,
+                    nonCriticalProjectileDamage,
 
                 isCriticalHit =
-                    damageResult.isCriticalHit,
+                    false,
 
                 maximumTargets =
                     maximumTargets,
@@ -458,19 +447,53 @@ class DaggerAttackExecutor(
                         .coerceAtLeast(0f),
 
                 sizeMultiplier =
-                    if (
-                        projectileDamage
-                            .abilityTriggered
-                    ) {
-                        DefaultWeaponAbilities
-                            .ASSASSINATE_PROJECTILE_SIZE_MULTIPLIER
-                    } else {
-                        1f
-                    },
+                    1f,
 
                 attackerPiercingIgnoreRatio =
                     playerStats
-                        .piercingIgnoreRatio()
+                        .piercingIgnoreRatio(),
+
+                canCriticallyHit =
+                    damageCalculator
+                        .canCriticallyHit(
+                            weapon =
+                                context.weapon,
+
+                            damageType =
+                                damageType
+                        ),
+
+                criticalHitChance =
+                    damageCalculator
+                        .criticalHitChance(),
+
+                criticalDamageMultiplier =
+                    damageCalculator
+                        .criticalDamageMultiplier(),
+
+                criticalDamageMultiplierProvider = {
+                    val baseCriticalMultiplier =
+                        damageCalculator
+                            .criticalDamageMultiplier()
+
+                    val canUseAssassinate =
+                        context.weapon
+                            .unlockedAbility
+                            ?.id ==
+                            DefaultWeaponAbilities
+                                .ASSASSINATE_ID
+
+                    if (
+                        canUseAssassinate &&
+                        context.triggerAutomaticAbility()
+                    ) {
+                        baseCriticalMultiplier *
+                            DefaultWeaponAbilities
+                                .ASSASSINATE_DAMAGE_MULTIPLIER
+                    } else {
+                        baseCriticalMultiplier
+                    }
+                }
             )
         )
     }

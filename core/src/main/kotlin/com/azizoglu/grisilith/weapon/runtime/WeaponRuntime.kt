@@ -110,6 +110,12 @@ class WeaponRuntime(
                     onWeaponHit = {
                             hitEvent ->
 
+                        player.tryLifeSteal(
+                            isEligibleHit =
+                                hitEvent
+                                    .isLifeStealEligible
+                        )
+
                         tamgaRuntimeManager
                             .onWeaponHit(
                                 event =
