@@ -2,7 +2,6 @@ package com.azizoglu.grisilith.statistics
 
 import com.azizoglu.grisilith.save.RunSaveStatLayers
 import kotlin.math.roundToInt
-import kotlin.math.pow
 import java.util.HashMap
 
 class PlayerStats(
@@ -25,6 +24,12 @@ class PlayerStats(
         private const val HP_REGENERATION_RATIO_PER_SCORE = 0.001f
         private const val LIFE_STEAL_PERCENT_PER_SCORE = 3
         private const val GUARANTEED_LIFE_STEAL_SCORE = 30
+
+        private const val PLAYER_BASE_MOVEMENT_SPEED =
+            260f
+
+        private const val MINIMUM_PLAYER_MOVEMENT_SPEED =
+            80f
 
         private fun defaultBaseScores(): Map<StatType, Int> {
             return StatType.entries.associateWith {
@@ -435,14 +440,30 @@ class PlayerStats(
 
     fun calculatedMovementSpeed(): Float {
         val score =
-            totalScore(StatType.MOVEMENT_SPEED)
+            totalScore(
+                StatType.MOVEMENT_SPEED
+            )
 
+        /*
+         * Bütün Character'lar aynı temel hızı kullanır.
+         *
+         * Movement Speed 10 = x1.00
+         * Movement Speed 50 = x2.00
+         *
+         * Her puan temel hıza %2.5 ekler veya çıkarır.
+         */
         val multiplier =
-            1f + (score - 10) * 0.04f
+            1f +
+                (score - 10) *
+                0.025f
 
         return (
-            260f * multiplier
-            ).coerceAtLeast(80f)
+            PLAYER_BASE_MOVEMENT_SPEED *
+                multiplier
+            )
+            .coerceAtLeast(
+                MINIMUM_PLAYER_MOVEMENT_SPEED
+            )
     }
 
     fun attackSpeedMultiplier(): Float {
@@ -675,24 +696,13 @@ class PlayerStats(
             totalScore(
                 StatType.ENEMY_COUNT
             )
-                .coerceAtLeast(
-                    0
-                )
 
-        /*
-         * Her 1 Enemy Count puanı, Stage'in temel
-         * normal/unique düşman kotasını %10 bileşik artırır.
-         *
-         * Örnek:
-         * 0  -> x1.00
-         * 1  -> x1.10
-         * 10 -> x2.5937
-         */
-        return 1.10
-            .pow(
-                score.toDouble()
+        return (
+            1f +
+                (score - 10) *
+                0.05f
             )
-            .toFloat()
+            .coerceAtLeast(0.25f)
     }
 
     fun magicPowerMultiplier(): Float {
