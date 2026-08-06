@@ -43,6 +43,12 @@ object DefaultCharacters {
                     lifeSteal = 1
                 ),
 
+            baseCritRatePercent =
+                15,
+
+            baseCritDamagePercent =
+                125,
+
             preferredMarketStats =
                 setOf(
                     StatType.STRENGTH,
@@ -98,6 +104,12 @@ object DefaultCharacters {
                     lifeSteal = 0
                 ),
 
+            baseCritRatePercent =
+                30,
+
+            baseCritDamagePercent =
+                150,
+
             preferredMarketStats =
                 setOf(
                     StatType.DEXTERITY,
@@ -150,6 +162,12 @@ object DefaultCharacters {
                     hpRegeneration = 0,
                     lifeSteal = 2
                 ),
+
+            baseCritRatePercent =
+                5,
+
+            baseCritDamagePercent =
+                100,
 
             preferredMarketStats =
                 setOf(

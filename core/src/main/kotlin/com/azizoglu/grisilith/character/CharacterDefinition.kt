@@ -14,6 +14,17 @@ data class CharacterDefinition(
     val minionDescription: String,
     val baseStats: Map<StatType, Int>,
 
+    /*
+     * Karaktere özgü ham kritik değerleri.
+     * Crit Rate ve Crit Damage Stat katkıları
+     * bu değerlerin üzerine eklenir.
+     */
+    val baseCritRatePercent:
+    Int = 0,
+
+    val baseCritDamagePercent:
+    Int = 100,
+
     val preferredMarketStats:
     Set<StatType> =
         emptySet(),
@@ -51,6 +62,18 @@ data class CharacterDefinition(
             require(value in 0..20) {
                 "Base stat $statType must be between 0 and 20 for $id."
             }
+        }
+
+        require(
+            baseCritRatePercent in 0..100
+        ) {
+            "Base Crit Rate must be between 0 and 100 for $id."
+        }
+
+        require(
+            baseCritDamagePercent >= 100
+        ) {
+            "Base Crit Damage must be at least 100 for $id."
         }
 
         require(

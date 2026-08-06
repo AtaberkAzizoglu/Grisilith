@@ -6,7 +6,13 @@ import java.util.HashMap
 
 class PlayerStats(
     initialBaseScores: Map<StatType, Int> =
-        defaultBaseScores()
+        defaultBaseScores(),
+
+    private val baseCritRatePercent:
+    Int = 0,
+
+    private val baseCritDamagePercent:
+    Int = 100
 ) {
     companion object {
         const val MINIMUM_SCORE = 0
@@ -447,6 +453,20 @@ class PlayerStats(
             ).coerceAtLeast(0.20f)
     }
 
+    fun attackSpeedProgress(): Float {
+        return (
+            totalScore(
+                StatType.ATTACK_SPEED
+            )
+                .toFloat() /
+                RUN_MAXIMUM_SCORE.toFloat()
+            )
+            .coerceIn(
+                0f,
+                1f
+            )
+    }
+
     fun hasteAttackSpeedMultiplier(): Float {
         val score =
             totalScore(
@@ -621,34 +641,35 @@ class PlayerStats(
     }
 
     fun criticalHitChance(): Float {
-        val score =
+        val statContributionPercent =
             totalScore(
                 StatType.CRIT_RATE
-            )
+            ) * 2
 
         return (
-            0.05f +
-                (score - 10) *
-                0.02f
+            (
+                baseCritRatePercent +
+                    statContributionPercent
+                ) /
+                100f
             )
             .coerceIn(
                 0f,
-                0.95f
+                1f
             )
     }
 
     fun criticalDamageMultiplier(): Float {
-        val score =
+        val statContributionPercent =
             totalScore(
                 StatType.CRIT_DAMAGE
-            )
+            ) * 3
 
         return (
-            1.50f +
-                (score - 10) *
-                0.05f
-            )
-            .coerceAtLeast(1f)
+            baseCritDamagePercent +
+                statContributionPercent
+            ) /
+            100f
     }
 
     fun enemyCountMultiplier(): Float {

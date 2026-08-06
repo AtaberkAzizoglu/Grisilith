@@ -40,8 +40,8 @@ object LongswordDefinition {
                 WeaponAttackPattern
                     .FORWARD_CONE,
 
-            baseDamage = 26,
-            baseAttacksPerSecond = 1.8f,
+            baseDamage = 4,
+            baseAttacksPerSecond = 1.4f,
             baseRange = 165f,
             baseProjectileSpeed = 0f,
             baseKnockback = 10f,
@@ -60,10 +60,16 @@ object LongswordDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.08f,
-                        level3Damage = 1.18f,
-                        level4Damage = 1.38f,
-                        level5Damage = 1.38f,
+                        level2Damage = 1.13f,
+                        level3Damage = 1.26f,
+                        level4Damage = 1.39f,
+                        level5Damage = 1.52f,
+
+                        level2AttackSpeed = 1.13f,
+                        level3AttackSpeed = 1.26f,
+                        level4AttackSpeed = 1.39f,
+                        level5AttackSpeed = 1.52f,
+
 
                         level3Range = 1.30f,
                         level4Range = 1.30f,

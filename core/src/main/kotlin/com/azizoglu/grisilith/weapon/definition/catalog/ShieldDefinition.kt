@@ -40,8 +40,8 @@ object ShieldDefinition {
             attackPattern =
                 WeaponAttackPattern.SHIELD_CONE,
 
-            baseDamage = 10,
-            baseAttacksPerSecond = 0.85f,
+            baseDamage = 2,
+            baseAttacksPerSecond = 0.6f,
             baseRange = 80f,
             baseProjectileSpeed = 0f,
             baseKnockback = 55f,
@@ -60,10 +60,16 @@ object ShieldDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1f,
-                        level3Damage = 1.18f,
-                        level4Damage = 1.18f,
-                        level5Damage = 1.18f,
+                        level2Damage = 1.13f,
+                        level3Damage = 1.26f,
+                        level4Damage = 1.39f,
+                        level5Damage = 1.52f,
+
+                        level2AttackSpeed = 1.13f,
+                        level3AttackSpeed = 1.26f,
+                        level4AttackSpeed = 1.39f,
+                        level5AttackSpeed = 1.52f,
+
 
                         level3Range = 1.20f,
                         level4Range = 1.20f,

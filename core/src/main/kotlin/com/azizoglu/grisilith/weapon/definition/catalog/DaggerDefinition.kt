@@ -42,8 +42,8 @@ object DaggerDefinition {
                 WeaponAttackPattern
                     .MELEE_OR_THROW,
 
-            baseDamage = 13,
-            baseAttacksPerSecond = 3.2f,
+            baseDamage = 2,
+            baseAttacksPerSecond = 1.5f,
 
             /*
              * Çok kısa melee menzili.
@@ -69,15 +69,16 @@ object DaggerDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.08f,
-                        level3Damage = 1.15f,
-                        level4Damage = 1.32f,
-                        level5Damage = 1.32f,
+                        level2Damage = 1.13f,
+                        level3Damage = 1.26f,
+                        level4Damage = 1.39f,
+                        level5Damage = 1.52f,
 
-                        level2AttackSpeed = 1.08f,
-                        level3AttackSpeed = 1.08f,
-                        level4AttackSpeed = 1.15f,
-                        level5AttackSpeed = 1.15f,
+                        level2AttackSpeed = 1.13f,
+                        level3AttackSpeed = 1.26f,
+                        level4AttackSpeed = 1.39f,
+                        level5AttackSpeed = 1.52f,
+
 
                         level2Modifiers =
                             listOf(

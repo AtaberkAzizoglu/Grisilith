@@ -40,8 +40,8 @@ object CrossbowDefinition {
                 WeaponAttackPattern
                     .PIERCING_PROJECTILE,
 
-            baseDamage = 37,
-            baseAttacksPerSecond = 1.05f,
+            baseDamage = 7,
+            baseAttacksPerSecond = 0.8f,
             baseRange = 880f,
             baseProjectileSpeed = 850f,
             baseKnockback = 20f,
@@ -58,10 +58,16 @@ object CrossbowDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.10f,
-                        level3Damage = 1.20f,
-                        level4Damage = 1.48f,
-                        level5Damage = 1.48f,
+                        level2Damage = 1.13f,
+                        level3Damage = 1.26f,
+                        level4Damage = 1.39f,
+                        level5Damage = 1.52f,
+
+                        level2AttackSpeed = 1.13f,
+                        level3AttackSpeed = 1.26f,
+                        level4AttackSpeed = 1.39f,
+                        level5AttackSpeed = 1.52f,
+
 
                         /*
                          * Lv.3 sonrasındaki delme

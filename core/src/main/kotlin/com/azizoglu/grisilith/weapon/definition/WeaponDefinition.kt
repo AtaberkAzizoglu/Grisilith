@@ -39,7 +39,20 @@ data class WeaponDefinition(
      * Level 1 taban değerleri.
      */
     val baseDamage: Int,
+
+    /*
+     * ATTACK_SPEED kullanan silahlarda:
+     * - baseAttacksPerSecond = Attack Speed 0 değeri
+     * - maximumAttacksPerSecond = Attack Speed 50 değeri
+     *
+     * Spell Focus silahları Haste sistemini kullanmaya devam eder.
+     */
     val baseAttacksPerSecond: Float,
+
+    val maximumAttacksPerSecond:
+    Float =
+        baseAttacksPerSecond * 5f,
+
     val baseRange: Float,
     val baseProjectileSpeed: Float,
     val baseKnockback: Float,
@@ -192,6 +205,14 @@ data class WeaponDefinition(
 
         require(baseDamage >= 0)
         require(baseAttacksPerSecond >= 0f)
+
+        require(
+            maximumAttacksPerSecond >=
+                baseAttacksPerSecond
+        ) {
+            "Maximum attacks per second cannot be lower than base APS for $id."
+        }
+
         require(baseRange >= 0f)
         require(baseProjectileSpeed >= 0f)
         require(baseKnockback >= 0f)

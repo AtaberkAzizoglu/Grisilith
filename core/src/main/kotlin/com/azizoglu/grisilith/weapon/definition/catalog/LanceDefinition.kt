@@ -44,8 +44,8 @@ object LanceDefinition {
             attackPattern =
                 WeaponAttackPattern.LONG_PIERCING_LINE,
 
-            baseDamage = 44,
-            baseAttacksPerSecond = 1f,
+            baseDamage = 7,
+            baseAttacksPerSecond = 0.9f,
             baseRange = 215f,
             baseProjectileSpeed = 0f,
             baseKnockback = 38f,
@@ -64,10 +64,16 @@ object LanceDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.10f,
-                        level3Damage = 1.22f,
-                        level4Damage = 1.48f,
-                        level5Damage = 1.48f,
+                        level2Damage = 1.13f,
+                        level3Damage = 1.26f,
+                        level4Damage = 1.39f,
+                        level5Damage = 1.52f,
+
+                        level2AttackSpeed = 1.13f,
+                        level3AttackSpeed = 1.26f,
+                        level4AttackSpeed = 1.39f,
+                        level5AttackSpeed = 1.52f,
+
 
                         level3Range = 1.10f,
                         level4Range = 1.10f,

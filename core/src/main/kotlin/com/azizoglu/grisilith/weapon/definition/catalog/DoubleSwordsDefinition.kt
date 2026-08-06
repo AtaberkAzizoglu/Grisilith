@@ -39,8 +39,8 @@ object DoubleSwordsDefinition {
                 WeaponAttackPattern
                     .SHORT_SLASH_LINES,
 
-            baseDamage = 16,
-            baseAttacksPerSecond = 2.8f,
+            baseDamage = 2,
+            baseAttacksPerSecond = 2f,
             baseRange = 125f,
             baseProjectileSpeed = 0f,
             baseKnockback = 7f,
@@ -59,14 +59,16 @@ object DoubleSwordsDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level3Damage = 1.12f,
-                        level4Damage = 1.20f,
-                        level5Damage = 1.20f,
+                        level2Damage = 1.13f,
+                        level3Damage = 1.26f,
+                        level4Damage = 1.39f,
+                        level5Damage = 1.52f,
 
-                        level4AttackSpeed =
-                            1.18f,
-                        level5AttackSpeed =
-                            1.18f,
+                        level2AttackSpeed = 1.13f,
+                        level3AttackSpeed = 1.26f,
+                        level4AttackSpeed = 1.39f,
+                        level5AttackSpeed = 1.52f,
+
 
                         level3Range = 1.40f,
                         level4Range = 1.40f,

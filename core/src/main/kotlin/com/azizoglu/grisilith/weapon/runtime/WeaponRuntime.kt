@@ -180,31 +180,54 @@ class WeaponRuntime(
         val levelStats =
             weapon.currentLevelStats
 
-        val characterAttackSpeedMultiplier =
+        val statBasedAttacksPerSecond =
             when (
                 definition.normalAttackSpeedStat
             ) {
-                StatType.HASTE -> {
-                    playerStats
-                        .hasteAttackSpeedMultiplier()
+                StatType.ATTACK_SPEED -> {
+                    val progress =
+                        playerStats
+                            .attackSpeedProgress()
+
+                    definition
+                        .baseAttacksPerSecond +
+                        (
+                            definition
+                                .maximumAttacksPerSecond -
+                                definition
+                                    .baseAttacksPerSecond
+                            ) *
+                        progress
                 }
 
-                StatType.ATTACK_SPEED -> {
-                    playerStats
-                        .attackSpeedMultiplier() *
-                        tamgaRuntimeManager
-                            .attackSpeedMultiplier()
+                StatType.HASTE -> {
+                    definition
+                        .baseAttacksPerSecond *
+                        playerStats
+                            .hasteAttackSpeedMultiplier()
                 }
 
                 else -> {
-                    1f
+                    definition
+                        .baseAttacksPerSecond
                 }
             }
 
+        val externalAttackSpeedMultiplier =
+            if (
+                definition.normalAttackSpeedStat ==
+                StatType.ATTACK_SPEED
+            ) {
+                tamgaRuntimeManager
+                    .attackSpeedMultiplier()
+            } else {
+                1f
+            }
+
         return (
-            definition.baseAttacksPerSecond *
+            statBasedAttacksPerSecond *
                 levelStats.attackSpeedMultiplier *
-                characterAttackSpeedMultiplier
+                externalAttackSpeedMultiplier
             )
             .coerceAtLeast(
                 0.01f

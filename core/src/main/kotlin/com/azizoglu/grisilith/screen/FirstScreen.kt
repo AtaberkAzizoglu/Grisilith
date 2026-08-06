@@ -157,7 +157,15 @@ class FirstScreen(
             initialBaseScores =
                 selectedPreset
                     ?.preRunBaseStats
-                    ?: selectedCharacter.baseStats
+                    ?: selectedCharacter.baseStats,
+
+            baseCritRatePercent =
+                selectedCharacter
+                    .baseCritRatePercent,
+
+            baseCritDamagePercent =
+                selectedCharacter
+                    .baseCritDamagePercent
         ).apply {
             selectedPreset
                 ?.let { preset ->
