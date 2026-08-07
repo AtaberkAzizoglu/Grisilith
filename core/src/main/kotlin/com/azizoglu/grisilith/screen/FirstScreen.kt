@@ -1,5 +1,7 @@
 package com.azizoglu.grisilith.screen
 
+import com.azizoglu.grisilith.combat.damage.DamageNumberManager
+
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.player.Player
@@ -326,6 +328,9 @@ class FirstScreen(
 
     private val hudBatch = SpriteBatch()
     private val hudFont = BitmapFont()
+    private val damageNumberManager =
+        DamageNumberManager()
+
 
     private val enemyManager =
         EnemyManager()
@@ -1478,6 +1483,7 @@ class FirstScreen(
 
         summonManager.clear()
         enemyManager.clearAll()
+        damageNumberManager.clear()
         projectiles.clear()
         goldCoinPickups.clear()
 
@@ -2514,6 +2520,11 @@ class FirstScreen(
     private fun updateGame(
         delta: Float
     ) {
+        damageNumberManager.update(
+            delta =
+                delta
+        )
+
         if (player.health.isDead) {
             return
         }
@@ -2846,6 +2857,15 @@ class FirstScreen(
 
                 onWeaponHit = {
                         hitEvent ->
+
+                    if (
+                        hitEvent.isCriticalHit
+                    ) {
+                        hitEvent.enemy
+                            .markLatestDamageNumberCritical(
+                                hitEvent.appliedDamage
+                            )
+                    }
 
                     player.tryLifeSteal(
                         isEligibleHit =
@@ -3274,6 +3294,7 @@ class FirstScreen(
 
         summonManager.clear()
         enemyManager.clearAll()
+        damageNumberManager.clear()
         projectiles.clear()
         synchronizeWeaponInventoryEffects()
 
@@ -3499,6 +3520,21 @@ class FirstScreen(
 
         Gdx.gl.glDisable(
             GL20.GL_BLEND
+        )
+
+        damageNumberManager.collectFrom(
+            enemyManager.allEnemies
+        )
+
+        damageNumberManager.render(
+            batch =
+                hudBatch,
+            font =
+                hudFont,
+            projectionMatrix =
+                camera.combined,
+            enabled =
+                GameSettings.damageNumbers
         )
 
         val showGameplayHud =
@@ -3776,6 +3812,7 @@ class FirstScreen(
 
         summonManager.clear()
         enemyManager.clearAll()
+        damageNumberManager.clear()
         projectiles.clear()
 
         weaponRuntimeManager

@@ -1,5 +1,7 @@
 package com.azizoglu.grisilith.enemy
 
+import com.azizoglu.grisilith.combat.damage.DamageNumberEvent
+
 import com.azizoglu.grisilith.combat.ContactDamageTimer
 import com.azizoglu.grisilith.combat.HealthComponent
 import com.badlogic.gdx.graphics.Color
@@ -96,6 +98,16 @@ class Enemy(
     private var executionMarkRemainingSeconds =
         0f
 
+    /*
+     * Enemy öldüğü anda ekrandan silinmez.
+     * Kısa bir fade tamamlandıktan sonra EnemyManager tarafından kaldırılır.
+     */
+    private var deathFadeRemainingSeconds =
+        DEATH_FADE_DURATION_SECONDS
+
+    private val pendingDamageNumberEvents =
+        mutableListOf<DamageNumberEvent>()
+
     private var carriedByHeavyBolt =
         false
 
@@ -156,6 +168,29 @@ class Enemy(
 
     val isDead: Boolean
         get() = health.isDead
+
+    val isDeathFadeComplete: Boolean
+        get() =
+            isDead &&
+                deathFadeRemainingSeconds <=
+                0f
+
+    val deathFadeAlpha: Float
+        get() =
+            if (
+                !isDead
+            ) {
+                1f
+            } else {
+                (
+                    deathFadeRemainingSeconds /
+                        DEATH_FADE_DURATION_SECONDS
+                    )
+                    .coerceIn(
+                        0f,
+                        1f
+                    )
+            }
 
     val type: EnemyType
         get() = stats.type
@@ -273,6 +308,17 @@ class Enemy(
         }
 
         if (isDead) {
+            deathFadeRemainingSeconds =
+                (
+                    deathFadeRemainingSeconds -
+                        delta.coerceAtLeast(
+                            0f
+                        )
+                    )
+                    .coerceAtLeast(
+                        0f
+                    )
+
             conditions.clear()
             return
         }
@@ -805,6 +851,19 @@ class Enemy(
             latestDamageContext =
                 damageContext
 
+            pendingDamageNumberEvents.add(
+                DamageNumberEvent(
+                    amount =
+                        appliedDamage,
+                    worldX =
+                        centerX,
+                    worldY =
+                        centerY +
+                            size *
+                            0.60f
+                )
+            )
+
             CombatInteractionManager
                 .notifyGlobal(
                     CombatInteractionEvent(
@@ -862,6 +921,37 @@ class Enemy(
         } else {
             null
         }
+
+    fun markLatestDamageNumberCritical(
+        appliedDamage: Int
+    ) {
+        pendingDamageNumberEvents
+            .asReversed()
+            .firstOrNull { event ->
+                !event.isCriticalHit &&
+                    event.amount ==
+                    appliedDamage
+            }
+            ?.isCriticalHit =
+            true
+    }
+
+    fun consumeDamageNumberEvents():
+        List<DamageNumberEvent> {
+
+        if (
+            pendingDamageNumberEvents.isEmpty()
+        ) {
+            return emptyList()
+        }
+
+        val result =
+            pendingDamageNumberEvents.toList()
+
+        pendingDamageNumberEvents.clear()
+
+        return result
+    }
 
     fun resolveTraitContactWith(
         other: Enemy
@@ -1212,6 +1302,41 @@ class Enemy(
 
     fun render(shapeRenderer: ShapeRenderer) {
         if (isDead) {
+            if (
+                deathFadeAlpha >
+                0f
+            ) {
+                val baseColor =
+                    when (stats.type) {
+                        EnemyType.NORMAL ->
+                            Color.RED
+
+                        EnemyType.UNIQUE ->
+                            Color.PURPLE
+
+                        EnemyType.MINI_BOSS ->
+                            Color.ORANGE
+
+                        EnemyType.FINAL_BOSS ->
+                            Color.GOLD
+                    }
+
+                shapeRenderer.color =
+                    Color(
+                        baseColor.r,
+                        baseColor.g,
+                        baseColor.b,
+                        deathFadeAlpha
+                    )
+
+                shapeRenderer.rect(
+                    position.x,
+                    position.y,
+                    size,
+                    size
+                )
+            }
+
             renderExecutionMark(
                 shapeRenderer
             )
@@ -1393,6 +1518,9 @@ class Enemy(
 
         private const val DEFAULT_CONTACT_HITS_PER_SECOND =
             1f
+
+        private const val DEATH_FADE_DURATION_SECONDS =
+            0.30f
     }
 
 }

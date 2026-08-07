@@ -105,7 +105,9 @@ data class WeaponAttackContext(
                 damageType =
                     damageType,
                 isProjectile =
-                    isProjectile
+                    isProjectile,
+                isCriticalHit =
+                    weapon.lastCalculatedHitWasCritical
             )
         )
     }

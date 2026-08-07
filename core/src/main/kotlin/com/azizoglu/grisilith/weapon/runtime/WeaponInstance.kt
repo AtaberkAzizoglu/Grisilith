@@ -119,7 +119,6 @@ class WeaponInstance(
     fun chooseIvySummon(
         choice: IvySummonChoice
     ): Boolean {
-
         if (
             ivySummonChoice !=
             null
@@ -143,7 +142,6 @@ class WeaponInstance(
     fun inheritIvySummonChoiceFrom(
         other: WeaponInstance
     ) {
-
         if (
             ivySummonChoice ==
             null
@@ -156,23 +154,47 @@ class WeaponInstance(
     fun chooseChalkDustSpell(
         choice: ChalkDustSpellChoice
     ): Boolean {
-        if (chalkDustSpellChoice != null) return false
-        chalkDustSpellChoice = choice
+        if (
+            chalkDustSpellChoice !=
+            null
+        ) {
+            return false
+        }
+
+        chalkDustSpellChoice =
+            choice
+
         return true
     }
 
     fun restoreChalkDustSpellChoice(
         choice: ChalkDustSpellChoice?
     ) {
-        chalkDustSpellChoice = choice
+        chalkDustSpellChoice =
+            choice
     }
 
     fun inheritChalkDustSpellChoiceFrom(
         other: WeaponInstance
     ) {
-        if (chalkDustSpellChoice == null) {
-            chalkDustSpellChoice = other.chalkDustSpellChoice
+        if (
+            chalkDustSpellChoice ==
+            null
+        ) {
+            chalkDustSpellChoice =
+                other.chalkDustSpellChoice
         }
+    }
+
+    var lastCalculatedHitWasCritical:
+        Boolean = false
+        private set
+
+    fun recordCalculatedCritical(
+        isCriticalHit: Boolean
+    ) {
+        lastCalculatedHitWasCritical =
+            isCriticalHit
     }
 
     fun registerNormalAttack(): Int {

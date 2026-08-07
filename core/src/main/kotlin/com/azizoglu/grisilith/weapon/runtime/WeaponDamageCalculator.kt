@@ -3,69 +3,50 @@ package com.azizoglu.grisilith.weapon.runtime
 import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.statistics.PlayerStats
+import com.azizoglu.grisilith.statistics.StatType
 import com.badlogic.gdx.math.MathUtils
 import kotlin.math.roundToInt
-import com.azizoglu.grisilith.statistics.StatType
 
 class WeaponDamageCalculator(
-    private val playerStats:
-    PlayerStats
+    private val playerStats: PlayerStats
 ) {
 
     fun calculate(
-        weapon:
-        WeaponInstance
+        weapon: WeaponInstance
     ): WeaponDamageResult {
 
         val damageType =
             weapon.definition
                 .damageTypes
                 .firstOrNull { type ->
-                    type !=
-                        DamageType.NONE
+                    type != DamageType.NONE
                 }
                 ?: DamageType.NONE
 
         return calculateForHit(
-            weapon =
-                weapon,
-
-            damageType =
-                damageType,
-
-            allowCritical =
-                true
+            weapon = weapon,
+            damageType = damageType,
+            allowCritical = true
         )
     }
 
     fun calculateForHit(
-        weapon:
-        WeaponInstance,
-
-        damageType:
-        DamageType,
-
-        allowCritical:
-        Boolean = true
+        weapon: WeaponInstance,
+        damageType: DamageType,
+        allowCritical: Boolean = true
     ): WeaponDamageResult {
 
         val nonCriticalDamage =
             calculateNonCriticalDamage(
-                weapon =
-                    weapon,
-
-                damageType =
-                    damageType
+                weapon = weapon,
+                damageType = damageType
             )
 
         val isCriticalHit =
             allowCritical &&
                 canCriticallyHit(
-                    weapon =
-                        weapon,
-
-                    damageType =
-                        damageType
+                    weapon = weapon,
+                    damageType = damageType
                 ) &&
                 MathUtils.randomBoolean(
                     criticalHitChance()
@@ -79,45 +60,46 @@ class WeaponDamageCalculator(
                 nonCriticalDamage.toFloat()
             }
 
+        /*
+         * Damage Number sistemi için son hesaplanan
+         * normal hit bilgisini WeaponInstance üzerinde tutar.
+         *
+         * Projectile'lar kendi crit roll'ünü yaptığı için
+         * onların WeaponHitEvent'i ayrıca kendi bilgisini taşır.
+         */
+        weapon.recordCalculatedCritical(
+            isCriticalHit = isCriticalHit
+        )
+
         return WeaponDamageResult(
             damage =
                 finalDamage
                     .roundToInt()
-                    .coerceAtLeast(
-                        1
-                    ),
-
+                    .coerceAtLeast(1),
             isCriticalHit =
                 isCriticalHit
         )
     }
 
     fun canCriticallyHit(
-        weapon:
-        WeaponInstance,
-
-        damageType:
-        DamageType
+        weapon: WeaponInstance,
+        damageType: DamageType
     ): Boolean {
 
         val isMeleeOrRangedWeapon =
             weapon.definition
                 .tags
                 .any { tag ->
-                    tag ==
-                        ContentTag.MELEE_WEAPON ||
-                        tag ==
-                        ContentTag.RANGED_WEAPON
+                    tag == ContentTag.MELEE_WEAPON ||
+                        tag == ContentTag.RANGED_WEAPON
                 }
 
         return isMeleeOrRangedWeapon &&
-            damageType in
-            PHYSICAL_CRITICAL_DAMAGE_TYPES &&
+            damageType in PHYSICAL_CRITICAL_DAMAGE_TYPES &&
             damageType.canCriticallyHit
     }
 
-    fun criticalHitChance():
-        Float {
+    fun criticalHitChance(): Float {
 
         return playerStats
             .criticalHitChance()
@@ -127,8 +109,7 @@ class WeaponDamageCalculator(
             )
     }
 
-    fun criticalDamageMultiplier():
-        Float {
+    fun criticalDamageMultiplier(): Float {
 
         return playerStats
             .criticalDamageMultiplier()
@@ -137,9 +118,207 @@ class WeaponDamageCalculator(
             )
     }
 
+    fun calculateNonCriticalDamage(
+        weapon: WeaponInstance
+    ): Int {
+
+        val damageType =
+            weapon.definition
+                .damageTypes
+                .firstOrNull { type ->
+                    type != DamageType.NONE
+                }
+                ?: DamageType.NONE
+
+        return calculateNonCriticalDamage(
+            weapon = weapon,
+            damageType = damageType
+        )
+    }
+
+    fun calculateNonCriticalDamage(
+        weapon: WeaponInstance,
+        damageType: DamageType
+    ): Int {
+
+        val definition =
+            weapon.definition
+
+        val levelStats =
+            weapon.currentLevelStats
+
+        /*
+         * Spell Focus normal saldırıları ayrı scaling sistemini
+         * kullanır. Attack Speed değil Haste tarafının kullanılması
+         * zaten WeaponRuntime/Definition tarafında çözülüyor.
+         */
+        if (
+            definition.tags.contains(
+                ContentTag.SPELL_FOCUS
+            )
+        ) {
+            return calculateSpellFocusNormalDamage(
+                weapon = weapon,
+                damageType = damageType
+            )
+        }
+
+        val scalingMultiplier =
+            calculateStatScaling(
+                weapon = weapon
+            )
+
+        return (
+            definition.baseDamage *
+                levelStats.damageMultiplier *
+                scalingMultiplier
+            )
+            .roundToInt()
+            .coerceAtLeast(1)
+    }
+
+    /*
+     * Spell Focus skill'lerinin ortak damage foundation'ı.
+     *
+     * Skill runtime'ları bunun üzerine kendi skill multiplier'larını
+     * uygular: Meteor, Tsunami, Singularity vb.
+     *
+     * Wisdom ve damage type'ın bağlı olduğu secondary Stat birlikte
+     * ölçeklenir.
+     */
+    fun calculateSpellSkillDamage(
+        weapon: WeaponInstance,
+        damageType: DamageType
+    ): Int {
+
+        val levelAdjustedBaseDamage =
+            weapon.definition.baseDamage *
+                weapon.currentLevelStats
+                    .damageMultiplier
+
+        val wisdom =
+            playerStats
+                .totalScore(
+                    StatType.WISDOM
+                )
+                .coerceAtLeast(0)
+
+        val relatedStat =
+            playerStats
+                .totalScore(
+                    relatedSpellDamageStat(
+                        damageType
+                    )
+                )
+                .coerceAtLeast(0)
+
+        /*
+         * Skill Base Damage × Wisdom × ilgili Stat mantığının
+         * kontrollü formu.
+         *
+         * Her iki Stat'ın doğrudan tam integer çarpımı
+         * yüzlerce/binlerce hasara fırlayabileceği için score'lar
+         * nötr 10 çevresinde normalize edilir.
+         *
+         * Skill'lerin asıl güç farkı runtime tarafındaki
+         * özel multiplier'lardan gelir.
+         */
+        val wisdomMultiplier =
+            wisdom.toFloat() /
+                10f
+
+        val relatedStatMultiplier =
+            relatedStat.toFloat() /
+                10f
+
+        return (
+            levelAdjustedBaseDamage *
+                wisdomMultiplier *
+                relatedStatMultiplier
+            )
+            .roundToInt()
+            .coerceAtLeast(1)
+    }
+
+    private fun calculateSpellFocusNormalDamage(
+        weapon: WeaponInstance,
+        damageType: DamageType
+    ): Int {
+
+        val levelAdjustedBaseDamage =
+            weapon.definition.baseDamage *
+                weapon.currentLevelStats
+                    .damageMultiplier
+
+        val wisdom =
+            playerStats
+                .totalScore(
+                    StatType.WISDOM
+                )
+                .toFloat()
+
+        val relatedStat =
+            playerStats
+                .totalScore(
+                    relatedSpellDamageStat(
+                        damageType
+                    )
+                )
+                .toFloat()
+
+        /*
+         * Onayladığımız Spell Focus formülü:
+         *
+         * Damage =
+         * (Base Damage × Wisdom × 0.7)
+         * +
+         * (Base Damage × Related Stat × 0.5)
+         */
+        return (
+            levelAdjustedBaseDamage *
+                wisdom *
+                0.70f +
+                levelAdjustedBaseDamage *
+                relatedStat *
+                0.50f
+            )
+            .roundToInt()
+            .coerceAtLeast(1)
+    }
+
+    private fun relatedSpellDamageStat(
+        damageType: DamageType
+    ): StatType {
+
+        return when (damageType) {
+
+            DamageType.FIRE,
+            DamageType.WATER,
+            DamageType.AIR,
+            DamageType.EARTH ->
+                StatType.ELEMENTAL_DAMAGE
+
+            DamageType.ACID,
+            DamageType.LIGHTNING,
+            DamageType.NECROTIC,
+            DamageType.COLD ->
+                StatType.MIGHT_OF_NATURE
+
+            DamageType.POISON ->
+                StatType.SHEPHERD
+
+            /*
+             * Bu method Spell damage için kullanılıyor.
+             * Beklenmedik damage type durumunda Wisdom'a dönerek
+             * crash yerine güvenli bir fallback sağlıyoruz.
+             */
+            else ->
+                StatType.WISDOM
+        }
+    }
+
     private fun calculateStatScaling(
-        weapon:
-        WeaponInstance
+        weapon: WeaponInstance
     ): Float {
 
         val scalingEntries =
@@ -180,179 +359,7 @@ class WeaponDamageCalculator(
             )
     }
 
-    fun calculateNonCriticalDamage(
-        weapon:
-        WeaponInstance,
-
-        damageType:
-        DamageType =
-            weapon.definition
-                .damageTypes
-                .firstOrNull()
-                ?: DamageType.NONE
-    ): Int {
-
-        val definition =
-            weapon.definition
-
-        val levelStats =
-            weapon.currentLevelStats
-
-        val levelAdjustedBaseDamage =
-            definition.baseDamage.toFloat() *
-                levelStats.damageMultiplier
-
-        val isSpellFocus =
-            ContentTag.SPELL_FOCUS in
-                definition.tags
-
-        if (isSpellFocus) {
-            val wisdom =
-                playerStats.totalScore(
-                    StatType.WISDOM
-                )
-
-            val relatedStat =
-                relatedSpellDamageStat(
-                    damageType
-                )
-
-            val relatedStatScore =
-                relatedStat
-                    ?.let { statType ->
-                        playerStats.totalScore(
-                            statType
-                        )
-                    }
-                    ?: 0
-
-            val wisdomDamage =
-                levelAdjustedBaseDamage *
-                    wisdom.toFloat() *
-                    SPELL_WISDOM_SCALING
-
-            val relatedStatDamage =
-                levelAdjustedBaseDamage *
-                    relatedStatScore.toFloat() *
-                    SPELL_RELATED_STAT_SCALING
-
-            return (
-                wisdomDamage +
-                    relatedStatDamage
-                )
-                .roundToInt()
-                .coerceAtLeast(
-                    1
-                )
-        }
-
-        val scalingMultiplier =
-            calculateStatScaling(
-                weapon =
-                    weapon
-            )
-
-        return (
-            levelAdjustedBaseDamage *
-                scalingMultiplier
-            )
-            .roundToInt()
-            .coerceAtLeast(
-                1
-            )
-    }
-
-    fun calculateSpellSkillDamage(
-        weapon:
-        WeaponInstance,
-
-        damageType:
-        DamageType,
-
-        skillPowerMultiplier:
-        Float = 1f
-    ): Int {
-
-        val relatedStat =
-            relatedSpellDamageStat(
-                damageType
-            )
-                ?: return calculateNonCriticalDamage(
-                    weapon =
-                        weapon,
-
-                    damageType =
-                        damageType
-                )
-
-        val levelAdjustedBaseDamage =
-            weapon.definition
-                .baseDamage
-                .toFloat() *
-                weapon.currentLevelStats
-                    .damageMultiplier
-
-        val wisdom =
-            playerStats.totalScore(
-                StatType.WISDOM
-            )
-
-        val relatedStatScore =
-            playerStats.totalScore(
-                relatedStat
-            )
-
-        return (
-            levelAdjustedBaseDamage *
-                wisdom.toFloat() *
-                relatedStatScore.toFloat() *
-                SPELL_SKILL_SCALING *
-                skillPowerMultiplier
-            )
-            .roundToInt()
-            .coerceAtLeast(
-                1
-            )
-    }
-
-    fun relatedSpellDamageStat(
-        damageType:
-        DamageType
-    ): StatType? {
-
-        return when (damageType) {
-            DamageType.FIRE,
-            DamageType.WATER,
-            DamageType.AIR -> {
-                StatType.ELEMENTAL_DAMAGE
-            }
-
-            DamageType.ACID,
-            DamageType.LIGHTNING,
-            DamageType.NECROTIC -> {
-                StatType.MIGHT_OF_NATURE
-            }
-
-            DamageType.POISON -> {
-                StatType.SHEPHERD
-            }
-
-            else -> {
-                null
-            }
-        }
-    }
-
     companion object {
-
-        private const val SPELL_WISDOM_SCALING =
-            0.70f
-
-        private const val SPELL_RELATED_STAT_SCALING =
-            0.50f
-
-        private const val SPELL_SKILL_SCALING =
-            0.10f
 
         private val PHYSICAL_CRITICAL_DAMAGE_TYPES =
             setOf(

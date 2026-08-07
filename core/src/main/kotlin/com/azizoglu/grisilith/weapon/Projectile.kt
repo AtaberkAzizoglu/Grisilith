@@ -3,16 +3,16 @@ package com.azizoglu.grisilith.weapon
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
-import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.math.MathUtils
-import kotlin.math.roundToInt
 import com.azizoglu.grisilith.weapon.runtime.WeaponHitEvent
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.azizoglu.grisilith.enemy.EnemyType
+import com.azizoglu.grisilith.combat.condition.ConditionApplication
+import com.badlogic.gdx.math.MathUtils
+import kotlin.math.roundToInt
 
 class Projectile(
     startX: Float,
@@ -349,27 +349,21 @@ class Projectile(
 
         if (
             !isActive ||
-            activationDelayRemaining >
-            0f ||
-            influenceRadius <=
-            0f ||
-            turnStrengthPerSecond <=
-            0f ||
-            delta <=
-            0f
+            activationDelayRemaining > 0f ||
+            influenceRadius <= 0f ||
+            turnStrengthPerSecond <= 0f ||
+            delta <= 0f
         ) {
             return
         }
 
         val projectileCenterX =
             position.x +
-                size /
-                2f
+                size / 2f
 
         val projectileCenterY =
             position.y +
-                size /
-                2f
+                size / 2f
 
         val distance =
             Vector2.dst(
@@ -380,10 +374,8 @@ class Projectile(
             )
 
         if (
-            distance >
-            influenceRadius ||
-            distance <=
-            1f
+            distance > influenceRadius ||
+            distance <= 1f
         ) {
             return
         }
@@ -392,7 +384,6 @@ class Projectile(
             Vector2(
                 targetCenterX -
                     projectileCenterX,
-
                 targetCenterY -
                     projectileCenterY
             )
@@ -502,10 +493,6 @@ class Projectile(
                         EnemyType.FINAL_BOSS
                     )
 
-            /*
-             * Aynı projectile birden fazla hedefe ulaşsa bile
-             * her hedef kendi bağımsız Crit roll'ünü yapar.
-             */
             val didCriticallyHit =
                 canCriticallyHit &&
                     MathUtils.randomBoolean(
@@ -551,9 +538,7 @@ class Projectile(
                                 firstTargetBossDamageMultiplier
                             )
                             .roundToInt()
-                            .coerceAtLeast(
-                                1
-                            )
+                            .coerceAtLeast(1)
                     } else {
                         criticalResolvedDamage
                     }
@@ -563,9 +548,7 @@ class Projectile(
                             damageMultiplierAfterFirstHit
                         )
                         .roundToInt()
-                        .coerceAtLeast(
-                            1
-                        )
+                        .coerceAtLeast(1)
                 }
 
             val modifiedHitDamage =
@@ -592,44 +575,51 @@ class Projectile(
                     damageContext =
                         EnemyDamageContext(
                             damageType = damageType,
+
                             sourceWeaponRuntimeId =
                                 sourceWeapon?.runtimeId,
+
                             sourceWeaponDefinitionId =
-                                sourceWeapon?.definition?.id?.value,
-                            sourceName = sourceWeaponName,
+                                sourceWeapon
+                                    ?.definition
+                                    ?.id
+                                    ?.value,
+
+                            sourceName =
+                                sourceWeaponName,
+
                             sourceWeaponTags =
                                 sourceWeapon
                                     ?.definition
                                     ?.tags
                                     ?: emptySet(),
+
                             attackerPiercingIgnoreRatio =
                                 attackerPiercingIgnoreRatio
                         )
                 )
 
-            if (appliedDamage > 0) {
-                conditionApplication
-                    ?.let { application ->
-                        enemy.applyCondition(
-                            application
-                        )
-                    }
-
-                if (
-                    armorClassReduction >
-                    0 &&
-                    armorClassReductionDurationSeconds >
-                    0f
-                ) {
-                    enemy.applyTemporaryArmorClassReduction(
-                        amount =
-                            armorClassReduction,
-
-                        durationSeconds =
-                            armorClassReductionDurationSeconds
+            conditionApplication
+                ?.let { application ->
+                    enemy.applyCondition(
+                        application
                     )
                 }
 
+            if (
+                armorClassReduction > 0 &&
+                armorClassReductionDurationSeconds > 0f
+            ) {
+                enemy.applyTemporaryArmorClassReduction(
+                    amount =
+                        armorClassReduction,
+
+                    durationSeconds =
+                        armorClassReductionDurationSeconds
+                )
+            }
+
+            if (appliedDamage > 0) {
                 onDamageDealt(
                     appliedDamage
                 )
@@ -696,7 +686,10 @@ class Projectile(
                             damageType,
 
                         isProjectile =
-                            true
+                            true,
+
+                        isCriticalHit =
+                            didCriticallyHit
                     )
                 )
             }

@@ -1,5 +1,8 @@
 package com.azizoglu.grisilith.enemy
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.GL20
+
 import com.azizoglu.grisilith.map.MapObstacle
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -165,6 +168,7 @@ class EnemyManager {
 
             if (
                 !enemy.isDead ||
+                !enemy.isDeathFadeComplete ||
                 enemy.shouldRemainForExecutionMark
             ) {
                 continue
@@ -180,8 +184,27 @@ class EnemyManager {
     }
 
     fun render(shapeRenderer: ShapeRenderer) {
+        /*
+         * ShapeRenderer alpha değeri tek başına yeterli değildir;
+         * fade'in gerçekten görünmesi için blending açık tutulur.
+         */
+        Gdx.gl.glEnable(
+            GL20.GL_BLEND
+        )
+
+        Gdx.gl.glBlendFunc(
+            GL20.GL_SRC_ALPHA,
+            GL20.GL_ONE_MINUS_SRC_ALPHA
+        )
+
         enemies.forEach { enemy ->
-            enemy.render(shapeRenderer)
+            enemy.render(
+                shapeRenderer
+            )
         }
+
+        Gdx.gl.glDisable(
+            GL20.GL_BLEND
+        )
     }
 }

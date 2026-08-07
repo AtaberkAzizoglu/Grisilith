@@ -25,6 +25,9 @@ data class WeaponHitEvent(
     DamageType,
 
     val isProjectile:
+    Boolean,
+
+    val isCriticalHit:
     Boolean
 ) {
 
