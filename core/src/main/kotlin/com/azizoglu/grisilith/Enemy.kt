@@ -20,11 +20,16 @@ import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.enemy.behavior.EnemyBehaviorController
 import com.azizoglu.grisilith.enemy.behavior.EnemyCombatClock
+import com.azizoglu.grisilith.enemy.runtime.EnemyRuntimeBundle
 
 class Enemy(
     startX: Float,
     startY: Float,
-    private val stats: EnemyStats
+    private val stats: EnemyStats,
+
+    private val runtimeBundle:
+    EnemyRuntimeBundle =
+        EnemyRuntimeBundle.EMPTY
 ) {
     private var latestDamageContext =
         EnemyDamageContext.NONE
@@ -146,6 +151,24 @@ class Enemy(
         get() =
             stats.attackRange
 
+    val activeAbilityIds
+        get() =
+            runtimeBundle
+                .abilityRuntime
+                .activeAbilityIds
+
+    val passiveAbilityIds
+        get() =
+            runtimeBundle
+                .abilityRuntime
+                .passiveAbilityIds
+
+    val weaponRuntimes
+        get() =
+            runtimeBundle
+                .weaponRuntime
+                .allWeapons
+
     val ignoresObstacles: Boolean
         get() =
             stats.ignoresObstacles
@@ -238,6 +261,13 @@ class Enemy(
             delta =
                 delta
         )
+
+        runtimeBundle
+            .aiPipeline
+            .update(
+                delta =
+                    delta
+            )
 
         if (isDead) {
             return

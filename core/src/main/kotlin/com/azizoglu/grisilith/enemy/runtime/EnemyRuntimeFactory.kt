@@ -6,13 +6,15 @@ import com.azizoglu.grisilith.enemy.EnemyStats
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.enemy.definition.EnemyKindDefinition
 import com.azizoglu.grisilith.enemy.definition.EnemyKindRegistry
+import com.azizoglu.grisilith.enemy.runtime.ability.EnemyAbilityRuntime
+import com.azizoglu.grisilith.enemy.runtime.ai.EnemyAiPipeline
+import com.azizoglu.grisilith.enemy.runtime.weapon.EnemyWeaponRuntimeGroup
 
 /*
  * EnemyKindDefinition'dan gerçek Enemy runtime nesnesi üretir.
  *
  * Spawn konumu doğrulaması bu sınıfın görevi değildir.
- * Map/Spawner paketi geçerli X/Y konumunu bulduktan sonra
- * factory'yi çağıracaktır.
+ * Map/Spawner geçerli X/Y konumunu bulduktan sonra factory'yi çağırır.
  */
 class EnemyRuntimeFactory(
     private val registry:
@@ -27,14 +29,11 @@ class EnemyRuntimeFactory(
         startY: Float
     ): Enemy {
 
-        val definition =
-            requireDefinition(
-                kindId
-            )
-
         return create(
             definition =
-                definition,
+                requireDefinition(
+                    kindId
+                ),
 
             enemyType =
                 enemyType,
@@ -70,6 +69,12 @@ class EnemyRuntimeFactory(
                     stage
             )
 
+        val runtimeBundle =
+            createRuntimeBundle(
+                definition =
+                    definition
+            )
+
         return Enemy(
             startX =
                 startX,
@@ -78,7 +83,10 @@ class EnemyRuntimeFactory(
                 startY,
 
             stats =
-                stats
+                stats,
+
+            runtimeBundle =
+                runtimeBundle
         )
     }
 
@@ -119,6 +127,48 @@ class EnemyRuntimeFactory(
                 stage =
                     stage
             )
+    }
+
+    fun createRuntimeBundle(
+        definition:
+        EnemyKindDefinition
+    ): EnemyRuntimeBundle {
+
+        val abilityRuntime =
+            EnemyAbilityRuntime(
+                activeAbilityIds =
+                    definition
+                        .activeSkillIds,
+
+                passiveAbilityIds =
+                    definition
+                        .passiveIds
+            )
+
+        val weaponRuntime =
+            EnemyWeaponRuntimeGroup
+                .fromDefinitions(
+                    definition
+                        .equipment
+                        .weapons
+                )
+
+        return EnemyRuntimeBundle(
+            abilityRuntime =
+                abilityRuntime,
+
+            weaponRuntime =
+                weaponRuntime,
+
+            aiPipeline =
+                EnemyAiPipeline(
+                    abilityRuntime =
+                        abilityRuntime,
+
+                    weaponRuntime =
+                        weaponRuntime
+                )
+        )
     }
 
     private fun requireDefinition(
