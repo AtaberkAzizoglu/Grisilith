@@ -233,10 +233,35 @@ class DaggerAttackExecutor(
             return
         }
 
+        val damageType =
+            context.weapon
+                .definition
+                .damageTypes
+                .firstOrNull { type ->
+                    type != DamageType.NONE
+                }
+                ?: DamageType.NONE
+
         val damageResult =
-            damageCalculator.calculate(
-                weapon = context.weapon
-            )
+            damageCalculator
+                .calculateForHit(
+                    weapon =
+                        context.weapon,
+
+                    damageType =
+                        damageType,
+
+                    allowCritical =
+                        true,
+
+                    /*
+                     * Dagger yakın mesafede
+                     * Strength kullanır.
+                     */
+                    primaryPhysicalStatOverride =
+                        com.azizoglu.grisilith.statistics
+                            .StatType.STRENGTH
+                )
 
         val definition =
             context.weapon.definition
@@ -329,11 +354,6 @@ class DaggerAttackExecutor(
         val levelStats =
             context.weapon.currentLevelStats
 
-        val nonCriticalProjectileDamage =
-            damageCalculator
-                .calculateNonCriticalDamage(
-                    context.weapon
-                )
 
         val maximumTargets =
             (
@@ -395,6 +415,24 @@ class DaggerAttackExecutor(
             definition.damageTypes
                 .firstOrNull()
                 ?: DamageType.NONE
+
+        val nonCriticalProjectileDamage =
+            damageCalculator
+                .calculateNonCriticalDamage(
+                    weapon =
+                        context.weapon,
+
+                    damageType =
+                        damageType,
+
+                    /*
+                     * Dagger fırlatıldığında
+                     * Dexterity kullanır.
+                     */
+                    primaryPhysicalStatOverride =
+                        com.azizoglu.grisilith.statistics
+                            .StatType.DEXTERITY
+                )
 
         context.projectiles.add(
             Projectile(

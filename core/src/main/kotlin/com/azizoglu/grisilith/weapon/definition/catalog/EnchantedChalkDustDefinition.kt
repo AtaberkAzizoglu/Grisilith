@@ -53,7 +53,7 @@ object EnchantedChalkDustDefinition {
                 StatType.HASTE,
 
             baseDamage = 6,
-            baseAttacksPerSecond = 1.50f,
+            baseAttacksPerSecond = 0.520f,
             maximumAttacksPerSecond = 3.75f,
             baseRange = 540f,
             baseProjectileSpeed = 880f,

@@ -41,7 +41,7 @@ object CrossbowDefinition {
                     .PIERCING_PROJECTILE,
 
             baseDamage = 7,
-            baseAttacksPerSecond = 0.8f,
+            baseAttacksPerSecond = 0.323f,
             baseRange = 880f,
             baseProjectileSpeed = 850f,
             baseKnockback = 13f,

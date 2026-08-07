@@ -51,7 +51,7 @@ object TomeOfEryndorDefinition {
                 StatType.HASTE,
 
             baseDamage = 13,
-            baseAttacksPerSecond = 0.69f,
+            baseAttacksPerSecond = 0.239f,
             maximumAttacksPerSecond = 1.75f,
             baseRange = 500f,
             baseProjectileSpeed = 500f,

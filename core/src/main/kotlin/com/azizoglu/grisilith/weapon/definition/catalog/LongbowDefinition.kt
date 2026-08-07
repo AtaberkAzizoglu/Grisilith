@@ -41,7 +41,7 @@ object LongbowDefinition {
                     .STRAIGHT_PROJECTILE,
 
             baseDamage = 4,
-            baseAttacksPerSecond = 1.32f,
+            baseAttacksPerSecond = 0.533f,
             baseRange = 960f,
             baseProjectileSpeed = 920f,
             baseKnockback = 0f,

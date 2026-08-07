@@ -39,11 +39,11 @@ object DoubleSwordsDefinition {
                 WeaponAttackPattern
                     .SHORT_SLASH_LINES,
 
-            baseDamage = 2,
-            baseAttacksPerSecond = 2f,
-            baseRange = 125f,
+            baseDamage = 3,
+            baseAttacksPerSecond = 0.808f,
+            baseRange = 175f,
             baseProjectileSpeed = 0f,
-            baseKnockback = 2f,
+            baseKnockback = 1f,
 
             areaAngleDegrees = 18f,
             areaRadius = 48f,

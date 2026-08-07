@@ -51,7 +51,7 @@ object AmuletOfTrollKingDefinition {
                 StatType.HASTE,
 
             baseDamage = 12,
-            baseAttacksPerSecond = 0.75f,
+            baseAttacksPerSecond = 0.520f,
             maximumAttacksPerSecond = 1.90f,
             baseRange = 530f,
             baseProjectileSpeed = 540f,

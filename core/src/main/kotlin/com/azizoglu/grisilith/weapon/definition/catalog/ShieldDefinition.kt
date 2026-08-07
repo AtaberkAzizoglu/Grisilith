@@ -40,11 +40,11 @@ object ShieldDefinition {
             attackPattern =
                 WeaponAttackPattern.SHIELD_CONE,
 
-            baseDamage = 2,
-            baseAttacksPerSecond = 0.6f,
+            baseDamage = 3,
+            baseAttacksPerSecond = 0.242f,
             baseRange = 80f,
             baseProjectileSpeed = 0f,
-            baseKnockback = 23f,
+            baseKnockback = 31f,
 
             areaAngleDegrees = 45f,
             areaRadius = 80f,

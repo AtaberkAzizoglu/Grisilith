@@ -52,7 +52,7 @@ object IvyStaffDefinition {
                 StatType.HASTE,
 
             baseDamage = 10,
-            baseAttacksPerSecond = 0.90f,
+            baseAttacksPerSecond = 0.312f,
             maximumAttacksPerSecond = 2.25f,
             baseRange = 560f,
             baseProjectileSpeed = 620f,

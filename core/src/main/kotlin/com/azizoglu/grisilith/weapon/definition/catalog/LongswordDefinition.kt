@@ -40,11 +40,11 @@ object LongswordDefinition {
                 WeaponAttackPattern
                     .FORWARD_CONE,
 
-            baseDamage = 4,
-            baseAttacksPerSecond = 1.4f,
-            baseRange = 165f,
+            baseDamage = 6,
+            baseAttacksPerSecond = 0.565f,
+            baseRange = 200f,
             baseProjectileSpeed = 0f,
-            baseKnockback = 5f,
+            baseKnockback = 3f,
 
             areaAngleDegrees = 20f,
             areaRadius = 165f,

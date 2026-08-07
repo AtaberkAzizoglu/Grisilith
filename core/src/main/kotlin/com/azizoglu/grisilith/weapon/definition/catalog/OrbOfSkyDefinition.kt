@@ -51,7 +51,7 @@ object OrbOfSkyDefinition {
                 StatType.HASTE,
 
             baseDamage = 7,
-            baseAttacksPerSecond = 1.29f,
+            baseAttacksPerSecond = 0.447f,
             maximumAttacksPerSecond = 3.20f,
             baseRange = 580f,
             baseProjectileSpeed = 920f,

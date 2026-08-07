@@ -43,7 +43,7 @@ object DaggerDefinition {
                     .MELEE_OR_THROW,
 
             baseDamage = 2,
-            baseAttacksPerSecond = 1.5f,
+            baseAttacksPerSecond = 0.606f,
 
             /*
              * Çok kısa melee menzili.

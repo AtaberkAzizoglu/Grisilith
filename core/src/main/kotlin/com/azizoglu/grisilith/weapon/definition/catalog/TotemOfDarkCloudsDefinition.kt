@@ -51,7 +51,7 @@ object TotemOfDarkCloudsDefinition {
                 StatType.HASTE,
 
             baseDamage = 14,
-            baseAttacksPerSecond = 0.64f,
+            baseAttacksPerSecond = 0.222f,
             maximumAttacksPerSecond = 1.60f,
             baseRange = 490f,
             baseProjectileSpeed = 470f,

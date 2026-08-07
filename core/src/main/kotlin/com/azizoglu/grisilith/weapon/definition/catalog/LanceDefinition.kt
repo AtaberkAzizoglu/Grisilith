@@ -44,11 +44,11 @@ object LanceDefinition {
             attackPattern =
                 WeaponAttackPattern.LONG_PIERCING_LINE,
 
-            baseDamage = 7,
-            baseAttacksPerSecond = 0.9f,
-            baseRange = 215f,
+            baseDamage = 12,
+            baseAttacksPerSecond = 0.363f,
+            baseRange = 245f,
             baseProjectileSpeed = 0f,
-            baseKnockback = 15f,
+            baseKnockback = 12f,
 
             areaRadius = 32f,
 

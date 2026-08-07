@@ -51,7 +51,7 @@ object SteamWandDefinition {
                 StatType.HASTE,
 
             baseDamage = 9,
-            baseAttacksPerSecond = 1.00f,
+            baseAttacksPerSecond = 0.347f,
             maximumAttacksPerSecond = 2.50f,
             baseRange = 550f,
             baseProjectileSpeed = 660f,

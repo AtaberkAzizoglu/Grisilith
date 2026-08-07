@@ -33,13 +33,17 @@ class WeaponDamageCalculator(
     fun calculateForHit(
         weapon: WeaponInstance,
         damageType: DamageType,
-        allowCritical: Boolean = true
+        allowCritical: Boolean = true,
+        primaryPhysicalStatOverride:
+        StatType? = null
     ): WeaponDamageResult {
 
         val nonCriticalDamage =
             calculateNonCriticalDamage(
                 weapon = weapon,
-                damageType = damageType
+                damageType = damageType,
+                primaryPhysicalStatOverride =
+                    primaryPhysicalStatOverride
             )
 
         val isCriticalHit =
@@ -76,6 +80,7 @@ class WeaponDamageCalculator(
                 finalDamage
                     .roundToInt()
                     .coerceAtLeast(1),
+
             isCriticalHit =
                 isCriticalHit
         )
@@ -95,7 +100,8 @@ class WeaponDamageCalculator(
                 }
 
         return isMeleeOrRangedWeapon &&
-            damageType in PHYSICAL_CRITICAL_DAMAGE_TYPES &&
+            damageType in
+            PHYSICAL_CRITICAL_DAMAGE_TYPES &&
             damageType.canCriticallyHit
     }
 
@@ -138,19 +144,18 @@ class WeaponDamageCalculator(
 
     fun calculateNonCriticalDamage(
         weapon: WeaponInstance,
-        damageType: DamageType
+        damageType: DamageType,
+        primaryPhysicalStatOverride:
+        StatType? = null
     ): Int {
 
         val definition =
             weapon.definition
 
-        val levelStats =
-            weapon.currentLevelStats
-
         /*
-         * Spell Focus normal saldırıları ayrı scaling sistemini
-         * kullanır. Attack Speed değil Haste tarafının kullanılması
-         * zaten WeaponRuntime/Definition tarafında çözülüyor.
+         * Spell Focus normal saldırıları kendi
+         * Wisdom + ilgili magical Stat formülünü
+         * kullanmaya devam eder.
          */
         if (
             definition.tags.contains(
@@ -163,28 +168,220 @@ class WeaponDamageCalculator(
             )
         }
 
-        val scalingMultiplier =
-            calculateStatScaling(
-                weapon = weapon
+        val isPhysicalWeapon =
+            definition.tags.any { tag ->
+                tag == ContentTag.MELEE_WEAPON ||
+                    tag == ContentTag.RANGED_WEAPON
+            }
+
+        if (isPhysicalWeapon) {
+            return calculatePhysicalNormalDamage(
+                weapon = weapon,
+                primaryStatOverride =
+                    primaryPhysicalStatOverride
+            )
+        }
+
+        /*
+         * Beklenmedik / özel Weapon türleri için
+         * eski generic scaling güvenli fallback
+         * olarak korunuyor.
+         */
+        return calculateLegacyScaledDamage(
+            weapon = weapon
+        )
+    }
+
+    /*
+     * MELEE / RANGED NORMAL DAMAGE
+     *
+     * Ana sistem:
+     *
+     * Melee:
+     * Base Damage × Strength
+     *
+     * Ranged:
+     * Base Damage × Dexterity
+     *
+     * Level multiplier ayrıca uygulanır.
+     *
+     * Dagger melee/throw ayrımı executor tarafından
+     * primaryStatOverride ile belirtilir.
+     */
+    private fun calculatePhysicalNormalDamage(
+        weapon: WeaponInstance,
+        primaryStatOverride:
+        StatType?
+    ): Int {
+
+        val definition =
+            weapon.definition
+
+        val levelAdjustedBaseDamage =
+            definition.baseDamage *
+                weapon.currentLevelStats
+                    .damageMultiplier
+
+        /*
+         * Shield ayrı bir defensive scaling kullanır.
+         *
+         * Base Damage × Armor Class × 0.45
+         */
+        if (
+            definition.id.value ==
+            SHIELD_ID
+        ) {
+            val armorClass =
+                playerStats
+                    .totalScore(
+                        StatType.ARMOR_CLASS
+                    )
+                    .coerceAtLeast(0)
+
+            return (
+                levelAdjustedBaseDamage *
+                    armorClass *
+                    SHIELD_ARMOR_CLASS_SCALING
+                )
+                .roundToInt()
+                .coerceAtLeast(1)
+        }
+
+        val primaryStat =
+            primaryStatOverride
+                ?: determinePhysicalPrimaryStat(
+                    weapon = weapon
+                )
+
+        val primaryScore =
+            playerStats
+                .totalScore(
+                    primaryStat
+                )
+                .coerceAtLeast(0)
+
+        /*
+         * Strength / Dexterity ana multiplier'dır.
+         *
+         * Örnek:
+         *
+         * Base Damage 16
+         * Strength 12
+         *
+         * 16 × 12 = 192
+         */
+        val primaryDamage =
+            levelAdjustedBaseDamage *
+                primaryScore
+
+        /*
+         * Crossbow / Lance vb. silahlarda
+         * definition.damageScaling içinde bulunan
+         * ikinci Stat'lar tamamen kaybolmasın.
+         *
+         * Ana Strength / Dexterity burada tekrar
+         * hesaplanmaz.
+         */
+        val secondaryMultiplier =
+            calculateSecondaryPhysicalMultiplier(
+                weapon = weapon,
+                primaryStat = primaryStat
             )
 
         return (
-            definition.baseDamage *
-                levelStats.damageMultiplier *
-                scalingMultiplier
+            primaryDamage *
+                secondaryMultiplier
             )
             .roundToInt()
             .coerceAtLeast(1)
     }
 
+    private fun determinePhysicalPrimaryStat(
+        weapon: WeaponInstance
+    ): StatType {
+
+        val tags =
+            weapon.definition.tags
+
+        /*
+         * Saf Ranged Weapon -> Dexterity.
+         *
+         * Dagger hem MELEE hem RANGED olduğu için
+         * gerçek saldırı türü executor tarafından
+         * override edilir.
+         */
+        if (
+            ContentTag.RANGED_WEAPON in tags &&
+            ContentTag.MELEE_WEAPON !in tags
+        ) {
+            return StatType.DEXTERITY
+        }
+
+        return StatType.STRENGTH
+    }
+
+    private fun calculateSecondaryPhysicalMultiplier(
+        weapon: WeaponInstance,
+        primaryStat: StatType
+    ): Float {
+
+        var bonusMultiplier =
+            0f
+
+        weapon.definition
+            .damageScaling
+            .forEach {
+                    statType,
+                    scalingWeight ->
+
+                if (
+                    statType ==
+                    primaryStat
+                ) {
+                    return@forEach
+                }
+
+                /*
+                 * Armor Class Shield tarafından
+                 * özel olarak hesaplandığı için
+                 * burada kullanılmaz.
+                 */
+                if (
+                    weapon.definition.id.value ==
+                    SHIELD_ID
+                ) {
+                    return@forEach
+                }
+
+                val score =
+                    playerStats
+                        .totalScore(
+                            statType
+                        )
+
+                val scoreDifference =
+                    score - 10
+
+                bonusMultiplier +=
+                    scoreDifference *
+                        0.08f *
+                        scalingWeight
+            }
+
+        return (
+            1f +
+                bonusMultiplier
+            )
+            .coerceAtLeast(
+                0.20f
+            )
+    }
+
     /*
      * Spell Focus skill'lerinin ortak damage foundation'ı.
      *
-     * Skill runtime'ları bunun üzerine kendi skill multiplier'larını
-     * uygular: Meteor, Tsunami, Singularity vb.
-     *
-     * Wisdom ve damage type'ın bağlı olduğu secondary Stat birlikte
-     * ölçeklenir.
+     * Skill runtime'ları bunun üzerine kendi skill
+     * multiplier'larını uygular.
      */
     fun calculateSpellSkillDamage(
         weapon: WeaponInstance,
@@ -212,17 +409,6 @@ class WeaponDamageCalculator(
                 )
                 .coerceAtLeast(0)
 
-        /*
-         * Skill Base Damage × Wisdom × ilgili Stat mantığının
-         * kontrollü formu.
-         *
-         * Her iki Stat'ın doğrudan tam integer çarpımı
-         * yüzlerce/binlerce hasara fırlayabileceği için score'lar
-         * nötr 10 çevresinde normalize edilir.
-         *
-         * Skill'lerin asıl güç farkı runtime tarafındaki
-         * özel multiplier'lardan gelir.
-         */
         val wisdomMultiplier =
             wisdom.toFloat() /
                 10f
@@ -267,7 +453,7 @@ class WeaponDamageCalculator(
                 .toFloat()
 
         /*
-         * Onayladığımız Spell Focus formülü:
+         * Spell Focus normal attack:
          *
          * Damage =
          * (Base Damage × Wisdom × 0.7)
@@ -307,17 +493,42 @@ class WeaponDamageCalculator(
             DamageType.POISON ->
                 StatType.SHEPHERD
 
-            /*
-             * Bu method Spell damage için kullanılıyor.
-             * Beklenmedik damage type durumunda Wisdom'a dönerek
-             * crash yerine güvenli bir fallback sağlıyoruz.
-             */
             else ->
                 StatType.WISDOM
         }
     }
 
-    private fun calculateStatScaling(
+    /*
+     * Generic fallback.
+     *
+     * Şu an ana Melee/Ranged/Spell Focus damage
+     * yollarında kullanılmıyor.
+     */
+    private fun calculateLegacyScaledDamage(
+        weapon: WeaponInstance
+    ): Int {
+
+        val definition =
+            weapon.definition
+
+        val levelStats =
+            weapon.currentLevelStats
+
+        val scalingMultiplier =
+            calculateLegacyStatScaling(
+                weapon = weapon
+            )
+
+        return (
+            definition.baseDamage *
+                levelStats.damageMultiplier *
+                scalingMultiplier
+            )
+            .roundToInt()
+            .coerceAtLeast(1)
+    }
+
+    private fun calculateLegacyStatScaling(
         weapon: WeaponInstance
     ): Float {
 
@@ -360,6 +571,12 @@ class WeaponDamageCalculator(
     }
 
     companion object {
+
+        private const val SHIELD_ID =
+            "WPN_SHIELD"
+
+        private const val SHIELD_ARMOR_CLASS_SCALING =
+            0.45f
 
         private val PHYSICAL_CRITICAL_DAMAGE_TYPES =
             setOf(
