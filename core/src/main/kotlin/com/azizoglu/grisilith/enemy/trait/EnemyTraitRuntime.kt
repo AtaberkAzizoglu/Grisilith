@@ -4,6 +4,7 @@ import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.map.MapObstacle
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 
 /*
@@ -31,6 +32,7 @@ class EnemyTraitRuntime private constructor(
         nearbyEnemies: List<Enemy>,
         targetCenterX: Float,
         targetCenterY: Float,
+        targetBounds: Rectangle,
         worldWidth: Float,
         worldHeight: Float,
         obstacles: List<MapObstacle>
@@ -42,6 +44,7 @@ class EnemyTraitRuntime private constructor(
                 delta = delta,
                 targetCenterX = targetCenterX,
                 targetCenterY = targetCenterY,
+                targetBounds = Rectangle(targetBounds),
                 worldWidth = worldWidth,
                 worldHeight = worldHeight,
                 obstacles = obstacles
@@ -133,6 +136,27 @@ class EnemyTraitRuntime private constructor(
                 other = other
             )
         }
+    }
+
+    fun consumePlayerDamage():
+        List<EnemyTraitPlayerDamage> {
+
+        if (
+            traits.isEmpty()
+        ) {
+            return emptyList()
+        }
+
+        val result =
+            mutableListOf<EnemyTraitPlayerDamage>()
+
+        traits.forEach { trait ->
+            result.addAll(
+                trait.consumePlayerDamage()
+            )
+        }
+
+        return result
     }
 
     fun render(

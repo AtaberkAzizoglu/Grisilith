@@ -5,6 +5,7 @@ import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.map.MapObstacle
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 
 data class EnemyTraitUpdateContext(
@@ -13,6 +14,7 @@ data class EnemyTraitUpdateContext(
     val delta: Float,
     val targetCenterX: Float,
     val targetCenterY: Float,
+    val targetBounds: Rectangle,
     val worldWidth: Float,
     val worldHeight: Float,
     val obstacles: List<MapObstacle>
@@ -21,6 +23,15 @@ data class EnemyTraitUpdateContext(
 data class EnemyTraitDamageContext(
     val requestedDamage: Int,
     val damageContext: EnemyDamageContext
+)
+
+/*
+ * Trait tarafından oyuncuya gönderilecek hasar.
+ * sourceName debug/stat ekranlarında kullanılabilsin diye tutulur.
+ */
+data class EnemyTraitPlayerDamage(
+    val amount: Int,
+    val sourceName: String
 )
 
 interface EnemyTrait {
@@ -74,6 +85,11 @@ interface EnemyTrait {
         owner: Enemy,
         other: Enemy
     ) {
+    }
+
+    fun consumePlayerDamage():
+        List<EnemyTraitPlayerDamage> {
+        return emptyList()
     }
 
     fun render(

@@ -302,6 +302,9 @@ class Enemy(
             targetCenterY =
                 targetY,
 
+            targetBounds =
+                targetBounds,
+
             worldWidth =
                 worldWidth,
 
@@ -313,6 +316,19 @@ class Enemy(
         )
 
         synchronizeTraitHealthMultiplier()
+
+        traitRuntime
+            .consumePlayerDamage()
+            .forEach { traitDamage ->
+                if (
+                    traitDamage.amount >
+                    0
+                ) {
+                    onContactDamage(
+                        traitDamage.amount
+                    )
+                }
+            }
 
         combatClock.update(
             delta =
