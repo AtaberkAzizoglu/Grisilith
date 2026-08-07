@@ -18,6 +18,8 @@ import com.azizoglu.grisilith.combat.interaction.CombatInteractionManager
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionTrigger
 import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.map.MapObstacle
+import com.azizoglu.grisilith.enemy.behavior.EnemyBehaviorController
+import com.azizoglu.grisilith.enemy.behavior.EnemyCombatClock
 
 class Enemy(
     startX: Float,
@@ -30,6 +32,21 @@ class Enemy(
     private val position = Vector2(startX, startY)
     private val previousPosition = Vector2(startX, startY)
     private val movementDirection = Vector2()
+
+    private val behaviorController =
+        EnemyBehaviorController(
+            behaviorId =
+                stats.behaviorId,
+
+            preferredAttackRange =
+                stats.attackRange
+        )
+
+    private val combatClock =
+        EnemyCombatClock(
+            attacksPerSecond =
+                stats.attacksPerSecond
+        )
 
     private val knockbackVelocity =
         Vector2()
@@ -75,9 +92,15 @@ class Enemy(
 
     private val collisionBounds = Rectangle()
 
-    private val contactDamageTimer = ContactDamageTimer(
-        hitsPerSecond = 5f
-    )
+    private val contactDamageTimer =
+        ContactDamageTimer(
+            hitsPerSecond =
+                stats.attacksPerSecond
+                    .takeIf { value ->
+                        value > 0f
+                    }
+                    ?: DEFAULT_CONTACT_HITS_PER_SECOND
+        )
 
     val health = HealthComponent(
         maximumHealth = stats.maximumHealth
@@ -106,6 +129,22 @@ class Enemy(
 
     val type: EnemyType
         get() = stats.type
+
+    val kindId
+        get() =
+            stats.kindId
+
+    val behaviorId
+        get() =
+            stats.behaviorId
+
+    val attacksPerSecond: Float
+        get() =
+            stats.attacksPerSecond
+
+    val attackRange: Float
+        get() =
+            stats.attackRange
 
     val ignoresObstacles: Boolean
         get() =
@@ -195,6 +234,11 @@ class Enemy(
             delta = delta
         )
 
+        combatClock.update(
+            delta =
+                delta
+        )
+
         if (isDead) {
             return
         }
@@ -253,10 +297,23 @@ class Enemy(
                     centerY - controlState.sourceY
                 )
             } else {
-                movementDirection.set(
-                    targetX - centerX,
-                    targetY - centerY
-                )
+                behaviorController
+                    .resolveMovementDirection(
+                        enemyCenterX =
+                            centerX,
+
+                        enemyCenterY =
+                            centerY,
+
+                        targetCenterX =
+                            targetX,
+
+                        targetCenterY =
+                            targetY,
+
+                        output =
+                            movementDirection
+                    )
             }
 
             if (!movementDirection.isZero) {
@@ -299,6 +356,18 @@ class Enemy(
         ) {
             onContactDamage(contactDamage)
         }
+    }
+
+    val isGenericAttackReady: Boolean
+        get() =
+            combatClock.isReady
+
+    fun consumeGenericAttack(): Boolean {
+        return combatClock.consume()
+    }
+
+    fun resetGenericAttackCooldown() {
+        combatClock.reset()
     }
 
     fun resolveObstacleCollisions(
@@ -1004,4 +1073,10 @@ class Enemy(
             barHeight
         )
     }
+    companion object {
+
+        private const val DEFAULT_CONTACT_HITS_PER_SECOND =
+            1f
+    }
+
 }
