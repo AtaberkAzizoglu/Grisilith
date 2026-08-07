@@ -227,12 +227,24 @@ class FirstScreen(
                 playerStats
         )
 
-    private val stageController = StageController(
-        normalStageDurationSeconds = 30f,
-        miniBossStageDurationSeconds = 45f,
-        finalBossStageDurationSeconds = 60f,
-        maximumStage = difficulty.maximumStage
-    )
+    private val stageController =
+        StageController(
+            /*
+             * StageController süreleri merkezi Stage tablosundan çözer.
+             * Bu değerler yalnızca eski constructor uyumluluğu içindir.
+             */
+            normalStageDurationSeconds =
+                30f,
+
+            miniBossStageDurationSeconds =
+                90f,
+
+            finalBossStageDurationSeconds =
+                60f,
+
+            maximumStage =
+                difficulty.maximumStage
+        )
 
 
     private val tamgaRuntimeManager =
@@ -3732,41 +3744,45 @@ class FirstScreen(
         }
 
         if (
-            stageController.currentStageType ==
+            stageController.currentStageType !=
             StageType.FINAL_BOSS
         ) {
-            val completedStage =
-                stageController.currentStage
-
-            val completedStageType =
-                stageController.currentStageType
-
-            collectAllGoldPickups()
-
-            grantStageCompletionGold(
-                completedStage =
-                    completedStage,
-
-                completedStageType =
-                    completedStageType
-            )
-
-            chestPickupManager
-                .clearUncollectedChests()
-
-            summonManager.clear()
-            enemyManager.clearAll()
-            projectiles.clear()
-
-            weaponRuntimeManager
-                .prepareForStageTransition()
-
-            stageController.completeCurrentStage()
-
-            return true
+            /*
+             * Mini Boss öldürüldüğünde Stage erken bitmez.
+             * Normal/Unique düşmanlar ve 90 saniyelik Stage süresi
+             * tamamlanana kadar oyun devam eder.
+             */
+            return false
         }
 
-        completeCurrentStage()
+        val completedStage =
+            stageController.currentStage
+
+        val completedStageType =
+            stageController.currentStageType
+
+        collectAllGoldPickups()
+
+        grantStageCompletionGold(
+            completedStage =
+                completedStage,
+
+            completedStageType =
+                completedStageType
+        )
+
+        chestPickupManager
+            .clearUncollectedChests()
+
+        summonManager.clear()
+        enemyManager.clearAll()
+        projectiles.clear()
+
+        weaponRuntimeManager
+            .prepareForStageTransition()
+
+        stageController
+            .completeCurrentStage()
 
         return true
     }

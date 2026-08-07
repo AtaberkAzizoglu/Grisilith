@@ -40,15 +40,25 @@ class EnemySpawner(
     private var bossScheduled =
         false
 
+    private var bossEnteredWorld =
+        false
+
     private var trackedStage =
         -1
 
     private var scheduledRegularEnemiesThisStage =
         0
 
+    /*
+     * true yalnızca 1 saniyelik uyarı tamamlanıp Boss gerçekten
+     * EnemyManager içine eklendikten sonra döner.
+     *
+     * Böylece uyarı sırasında "Boss yaşamıyor" kontrolü Stage'i
+     * yanlışlıkla anında tamamlamaz.
+     */
     val hasSpawnedBoss: Boolean
         get() =
-            bossScheduled
+            bossEnteredWorld
 
     init {
         require(worldWidth > 0f)
@@ -140,6 +150,9 @@ class EnemySpawner(
         bossScheduled =
             false
 
+        bossEnteredWorld =
+            false
+
         trackedStage =
             -1
 
@@ -166,6 +179,9 @@ class EnemySpawner(
             0f
 
         bossScheduled =
+            false
+
+        bossEnteredWorld =
             false
 
         scheduledRegularEnemiesThisStage =
@@ -201,6 +217,16 @@ class EnemySpawner(
             enemyManager.spawn(
                 warning.enemy
             )
+
+            if (
+                warning.enemy.type ==
+                EnemyType.MINI_BOSS ||
+                warning.enemy.type ==
+                EnemyType.FINAL_BOSS
+            ) {
+                bossEnteredWorld =
+                    true
+            }
 
             iterator.remove()
         }
@@ -603,14 +629,14 @@ class EnemySpawner(
                     enemySize /
                     2f
 
-            val dx =
-                centerX - playerCenterX
-
-            val dy =
-                centerY - playerCenterY
-
             val distanceSquared =
-                dx * dx + dy * dy
+                MathUtils
+                    .dst2(
+                        centerX,
+                        centerY,
+                        playerCenterX,
+                        playerCenterY
+                    )
 
             if (
                 distanceSquared <

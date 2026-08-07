@@ -6,88 +6,104 @@ class StageController(
     private val finalBossStageDurationSeconds: Float,
     val maximumStage: Int
 ) {
+
     init {
+        /*
+         * Constructor parameters are kept for source compatibility.
+         * The actual Stage duration table is resolved centrally below.
+         */
         require(normalStageDurationSeconds > 0f)
         require(miniBossStageDurationSeconds > 0f)
         require(finalBossStageDurationSeconds > 0f)
         require(maximumStage > 0)
     }
 
-    var currentStage: Int = 1
+    var currentStage: Int =
+        1
         private set
 
-    var elapsedStageTime: Float = 0f
+    var elapsedStageTime: Float =
+        0f
         private set
 
     val currentStageType: StageType
-        get() = determineStageType(currentStage)
+        get() =
+            determineStageType(
+                currentStage
+            )
 
     val currentStageDuration: Float
-        get() = when (currentStageType) {
-            StageType.NORMAL ->
-                normalStageDurationSeconds
+        get() =
+            durationFor(
+                stage =
+                    currentStage,
 
-            StageType.MINI_BOSS ->
-                miniBossStageDurationSeconds
+                stageType =
+                    currentStageType
+            )
 
-            StageType.FINAL_BOSS ->
-                finalBossStageDurationSeconds
-        }
+    val hasTimeLimit: Boolean
+        get() =
+            currentStageType !=
+                StageType.FINAL_BOSS
 
     val remainingStageTime: Float
-        get() = (
-            currentStageDuration - elapsedStageTime
-            ).coerceAtLeast(0f)
+        get() =
+            if (
+                !hasTimeLimit
+            ) {
+                Float.POSITIVE_INFINITY
+            } else {
+                (
+                    currentStageDuration -
+                        elapsedStageTime
+                    )
+                    .coerceAtLeast(
+                        0f
+                    )
+            }
 
     val isRunComplete: Boolean
-        get() = currentStage > maximumStage
+        get() =
+            currentStage >
+                maximumStage
 
-    /**
-     * Yalnızca normal aşama süre dolduğunda true döndürür.
+    /*
+     * NORMAL ve MINI_BOSS Stage süre dolduğunda tamamlanır.
      *
-     * Boss aşamaları süre dolunca otomatik tamamlanmaz.
+     * MINI_BOSS'un ölmesi Stage'i erken bitirmez.
+     * FINAL_BOSS Stage'in süre sınırı yoktur ve yalnızca
+     * Final Boss öldürüldüğünde dışarıdan tamamlanır.
      */
-    fun update(delta: Float): Boolean {
-        if (isRunComplete) {
+    fun update(
+        delta: Float
+    ): Boolean {
+        if (
+            isRunComplete ||
+            !hasTimeLimit
+        ) {
             return false
         }
 
-        elapsedStageTime += delta
+        elapsedStageTime +=
+            delta.coerceAtLeast(
+                0f
+            )
 
-        if (elapsedStageTime < currentStageDuration) {
-            return false
-        }
-
-        return when (currentStageType) {
-            StageType.NORMAL,
-            StageType.MINI_BOSS -> true
-
-            StageType.FINAL_BOSS -> false
-        }
+        return elapsedStageTime >=
+            currentStageDuration
     }
 
     fun completeCurrentStage() {
-        if (isRunComplete) {
+        if (
+            isRunComplete
+        ) {
             return
         }
 
         currentStage++
-        elapsedStageTime = 0f
-    }
-
-    private fun determineStageType(
-        stage: Int
-    ): StageType {
-        return when {
-            stage == maximumStage ->
-                StageType.FINAL_BOSS
-
-            stage > 0 && stage % 5 == 0 ->
-                StageType.MINI_BOSS
-
-            else ->
-                StageType.NORMAL
-        }
+        elapsedStageTime =
+            0f
     }
 
     fun restoreCheckpointStage(
@@ -105,5 +121,83 @@ class StageController(
 
         elapsedStageTime =
             0f
+    }
+
+    private fun durationFor(
+        stage: Int,
+        stageType: StageType
+    ): Float {
+        return when (
+            stageType
+        ) {
+            StageType.FINAL_BOSS -> {
+                Float.POSITIVE_INFINITY
+            }
+
+            StageType.MINI_BOSS -> {
+                MINI_BOSS_STAGE_DURATION_SECONDS
+            }
+
+            StageType.NORMAL -> {
+                normalDurationForStage(
+                    stage
+                )
+            }
+        }
+    }
+
+    private fun normalDurationForStage(
+        stage: Int
+    ): Float {
+        return when {
+            stage <= 1 -> {
+                30f
+            }
+
+            stage <= 4 -> {
+                30f +
+                    (stage - 1) *
+                    5f
+            }
+
+            stage in 6..9 -> {
+                45f +
+                    (stage - 6) *
+                    5f
+            }
+
+            else -> {
+                60f
+            }
+        }
+    }
+
+    private fun determineStageType(
+        stage: Int
+    ): StageType {
+        return when {
+            stage ==
+                maximumStage -> {
+                StageType.FINAL_BOSS
+            }
+
+            stage >
+                0 &&
+                stage %
+                5 ==
+                0 -> {
+                StageType.MINI_BOSS
+            }
+
+            else -> {
+                StageType.NORMAL
+            }
+        }
+    }
+
+    companion object {
+
+        private const val MINI_BOSS_STAGE_DURATION_SECONDS =
+            90f
     }
 }
