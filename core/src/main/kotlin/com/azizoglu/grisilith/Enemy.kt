@@ -24,6 +24,7 @@ import com.azizoglu.grisilith.enemy.behavior.EnemyCombatClock
 import com.azizoglu.grisilith.enemy.runtime.EnemyRuntimeBundle
 import com.azizoglu.grisilith.enemy.navigation.EnemyNavigationAgent
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitDamageContext
+import com.azizoglu.grisilith.enemy.visual.EnemyVisualState
 import kotlin.math.roundToInt
 
 class Enemy(
@@ -41,6 +42,10 @@ class Enemy(
     private val position = Vector2(startX, startY)
     private val previousPosition = Vector2(startX, startY)
     private val movementDirection = Vector2()
+
+    private val visualState =
+        EnemyVisualState()
+
 
     private val behaviorController =
         EnemyBehaviorController(
@@ -198,6 +203,11 @@ class Enemy(
     val kindId
         get() =
             stats.kindId
+
+    val currentVisualState:
+        EnemyVisualState
+        get() =
+            visualState
 
     val behaviorId
         get() =
@@ -569,6 +579,20 @@ class Enemy(
             knockbackVelocity.setZero()
             knockbackTimeRemaining = 0f
         }
+
+        val visualMovementX =
+            position.x -
+                previousPosition.x
+
+        val visualMovementY =
+            position.y -
+                previousPosition.y
+
+        visualState.update(
+            delta = delta,
+            movementX = visualMovementX,
+            movementY = visualMovementY
+        )
 
         contactDamageTimer.update(
             delta =
