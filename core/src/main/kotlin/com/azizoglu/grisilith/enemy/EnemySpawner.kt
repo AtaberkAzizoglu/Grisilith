@@ -629,14 +629,19 @@ class EnemySpawner(
                     enemySize /
                     2f
 
+            val distanceX =
+                centerX -
+                    playerCenterX
+
+            val distanceY =
+                centerY -
+                    playerCenterY
+
             val distanceSquared =
-                MathUtils
-                    .dst2(
-                        centerX,
-                        centerY,
-                        playerCenterX,
-                        playerCenterY
-                    )
+                distanceX *
+                    distanceX +
+                    distanceY *
+                    distanceY
 
             if (
                 distanceSquared <
