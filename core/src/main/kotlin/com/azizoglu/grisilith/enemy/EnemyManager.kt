@@ -52,6 +52,9 @@ class EnemyManager {
                 mapObstacles =
                     mapObstacles,
 
+                nearbyEnemies =
+                    enemies,
+
                 onContactDamage =
                     onPlayerDamaged
             )
@@ -87,6 +90,21 @@ class EnemyManager {
             ) {
                 val secondEnemy =
                     enemies[secondIndex]
+
+                /*
+                 * Trait contact hook separation'dan önce çalışır.
+                 * Vampire Hunger gibi temas Trait'leri gerçek overlap'i
+                 * bu noktada görür.
+                 */
+                firstEnemy
+                    .resolveTraitContactWith(
+                        secondEnemy
+                    )
+
+                secondEnemy
+                    .resolveTraitContactWith(
+                        firstEnemy
+                    )
 
                 firstEnemy.separateFrom(
                     secondEnemy

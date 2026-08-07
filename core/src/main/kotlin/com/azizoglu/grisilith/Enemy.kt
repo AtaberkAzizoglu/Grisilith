@@ -8,7 +8,6 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import kotlin.math.sqrt
-import kotlin.math.roundToInt
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionRuntime
 import com.azizoglu.grisilith.combat.condition.ConditionControlRules
@@ -22,6 +21,8 @@ import com.azizoglu.grisilith.enemy.behavior.EnemyBehaviorController
 import com.azizoglu.grisilith.enemy.behavior.EnemyCombatClock
 import com.azizoglu.grisilith.enemy.runtime.EnemyRuntimeBundle
 import com.azizoglu.grisilith.enemy.navigation.EnemyNavigationAgent
+import com.azizoglu.grisilith.enemy.trait.EnemyTraitDamageContext
+import kotlin.math.roundToInt
 
 class Enemy(
     startX: Float,
@@ -59,6 +60,13 @@ class Enemy(
             agentSize =
                 stats.size
         )
+
+    private val traitRuntime =
+        runtimeBundle
+            .traitRuntime
+
+    private var lastTraitHealthMultiplier =
+        1f
 
     private val knockbackVelocity =
         Vector2()
@@ -134,7 +142,17 @@ class Enemy(
             )
 
     val contactDamage: Int
-        get() = stats.contactDamage
+        get() =
+            (
+                stats.contactDamage *
+                    traitRuntime
+                        .currentModifiers
+                        .damageMultiplier
+                )
+                .roundToInt()
+                .coerceAtLeast(
+                    1
+                )
 
     val isDead: Boolean
         get() = health.isDead
@@ -213,6 +231,7 @@ class Enemy(
         worldWidth: Float,
         worldHeight: Float,
         mapObstacles: List<MapObstacle>,
+        nearbyEnemies: List<Enemy>,
         onContactDamage: (Int) -> Unit
     ) {
         if (
@@ -266,6 +285,19 @@ class Enemy(
         conditionRuntime.update(
             delta = delta
         )
+
+        traitRuntime.update(
+            delta =
+                delta,
+
+            owner =
+                this,
+
+            nearbyEnemies =
+                nearbyEnemies
+        )
+
+        synchronizeTraitHealthMultiplier()
 
         combatClock.update(
             delta =
@@ -402,7 +434,10 @@ class Enemy(
                 position.mulAdd(
                     movementDirection,
                     controlState.modifiedMovementSpeed(
-                        stats.movementSpeed
+                        stats.movementSpeed *
+                            traitRuntime
+                                .currentModifiers
+                                .movementSpeedMultiplier
                     ) * delta
                 )
             }
@@ -429,12 +464,31 @@ class Enemy(
         }
 
         contactDamageTimer.update(
-            delta = delta,
+            delta =
+                delta *
+                    traitRuntime
+                        .currentModifiers
+                        .attackSpeedMultiplier,
+
             isTouching =
                 isTouchingPlayer &&
                     controlState.canAttack
         ) {
-            onContactDamage(contactDamage)
+            val resolvedContactDamage =
+                contactDamage
+
+            onContactDamage(
+                resolvedContactDamage
+            )
+
+            traitRuntime
+                .onPlayerContact(
+                    owner =
+                        this,
+
+                    dealtDamage =
+                        resolvedContactDamage
+                )
         }
     }
 
@@ -604,6 +658,25 @@ class Enemy(
             return 0
         }
 
+        if (
+            traitRuntime
+                .shouldNegateIncomingDamage(
+                    owner =
+                        this,
+
+                    context =
+                        EnemyTraitDamageContext(
+                            requestedDamage =
+                                amount,
+
+                            damageContext =
+                                damageContext
+                        )
+                )
+        ) {
+            return 0
+        }
+
         val reactionResult =
             SpellReactionResolver
                 .resolveIncomingDamage(
@@ -718,6 +791,90 @@ class Enemy(
         } else {
             null
         }
+
+    fun resolveTraitContactWith(
+        other: Enemy
+    ) {
+        if (
+            other === this ||
+            isDead ||
+            other.isDead ||
+            !bounds.overlaps(
+                other.bounds
+            )
+        ) {
+            return
+        }
+
+        traitRuntime
+            .onEnemyContact(
+                owner =
+                    this,
+
+                other =
+                    other
+            )
+    }
+
+    private fun synchronizeTraitHealthMultiplier() {
+        val resolvedMultiplier =
+            traitRuntime
+                .currentModifiers
+                .maximumHealthMultiplier
+                .coerceAtLeast(
+                    0.10f
+                )
+
+        if (
+            kotlin.math.abs(
+                resolvedMultiplier -
+                    lastTraitHealthMultiplier
+            ) <
+            0.0001f
+        ) {
+            return
+        }
+
+        val previousRatio =
+            health.healthRatio
+
+        val resolvedMaximumHealth =
+            (
+                stats.maximumHealth *
+                    resolvedMultiplier
+                )
+                .roundToInt()
+                .coerceAtLeast(
+                    1
+                )
+
+        health.setMaximumHealth(
+            newMaximumHealth =
+                resolvedMaximumHealth,
+
+            healAddedHealth =
+                false
+        )
+
+        if (
+            !health.isDead
+        ) {
+            health.restoreCurrentHealth(
+                (
+                    resolvedMaximumHealth *
+                        previousRatio
+                    )
+                    .roundToInt()
+                    .coerceIn(
+                        1,
+                        resolvedMaximumHealth
+                    )
+            )
+        }
+
+        lastTraitHealthMultiplier =
+            resolvedMultiplier
+    }
 
     fun markExecuted(
         durationSeconds: Float = 0.45f
