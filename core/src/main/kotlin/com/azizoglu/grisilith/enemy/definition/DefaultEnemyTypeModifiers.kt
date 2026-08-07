@@ -3,11 +3,12 @@ package com.azizoglu.grisilith.enemy.definition
 import com.azizoglu.grisilith.enemy.EnemyType
 
 /*
- * İlk merkezi denge değerleri.
+ * Enemy Kind katalogları Mini Boss ve Final Boss kimliklerini
+ * kendi temel statlarında zaten taşır.
  *
- * Unique, Normal'den belirgin güçlü fakat Mini Boss'tan
- * belirgin zayıf kalacak şekilde ayrılmıştır.
- * Bu değerler ileride test aşamasında tek noktadan değiştirilebilir.
+ * Bu nedenle büyük type çarpanları yalnızca Normal Kind'ın
+ * Unique sürümünü üretirken kullanılır. Mini Boss ve Final Boss
+ * için küçük runtime ayarları bırakılmıştır.
  */
 object DefaultEnemyTypeModifiers {
 
@@ -38,25 +39,25 @@ object DefaultEnemyTypeModifiers {
     val miniBoss =
         EnemyTypeModifier(
             enemyType = EnemyType.MINI_BOSS,
-            healthMultiplier = 7f,
-            armorMultiplier = 1.85f,
-            damageMultiplier = 2.10f,
-            movementSpeedMultiplier = 0.95f,
-            attackSpeedMultiplier = 1.15f,
+            healthMultiplier = 1f,
+            armorMultiplier = 1f,
+            damageMultiplier = 1f,
+            movementSpeedMultiplier = 1f,
+            attackSpeedMultiplier = 1f,
             sizeMultiplier = 1f,
-            rewardMultiplier = 5f
+            rewardMultiplier = 1f
         )
 
     val finalBoss =
         EnemyTypeModifier(
             enemyType = EnemyType.FINAL_BOSS,
-            healthMultiplier = 16f,
-            armorMultiplier = 2.50f,
-            damageMultiplier = 3f,
+            healthMultiplier = 1f,
+            armorMultiplier = 1f,
+            damageMultiplier = 1f,
             movementSpeedMultiplier = 1f,
-            attackSpeedMultiplier = 1.25f,
+            attackSpeedMultiplier = 1f,
             sizeMultiplier = 1f,
-            rewardMultiplier = 12f
+            rewardMultiplier = 1f
         )
 
     val all:
