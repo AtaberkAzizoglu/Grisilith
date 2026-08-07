@@ -6,9 +6,12 @@ import com.azizoglu.grisilith.enemy.EnemyType
 /*
  * İlk Enemy Kind kataloğu.
  *
- * Bu değerler doğrudan final balance değildir. Her Kind'ın
- * göreli kimliğini kurar; Stage, Difficulty, Map ve EnemyType
- * çarpanları runtime/factory paketlerinde ayrıca uygulanacaktır.
+ * Bu değerler Faz 3 Map & Enemy denge tabanıdır.
+ *
+ * Normal Enemy'ler Stage 1'de artık tek vuruşta erimeyecek kadar
+ * dayanıklıdır. Mini Boss ve Final Boss değerleri özellikle yüksek
+ * tutulmuştur; Stage scaling ve EnemyType modifier'ları runtime'da
+ * bunların üzerine uygulanır.
  */
 object DefaultEnemyKinds {
 
@@ -59,11 +62,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.MEDIUM,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 100,
-                    armorClass = 8,
-                    contactDamage = 14,
+                    maximumHealth = 190,
+                    armorClass = 12,
+                    contactDamage = 22,
                     movementSpeed = 150f,
-                    attacksPerSecond = 0.80f,
+                    attacksPerSecond = 0.85f,
                     attackRange = 54f
                 ),
             behaviorId =
@@ -85,11 +88,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.MEDIUM,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 145,
-                    armorClass = 14,
-                    contactDamage = 18,
+                    maximumHealth = 280,
+                    armorClass = 20,
+                    contactDamage = 30,
                     movementSpeed = 92f,
-                    attacksPerSecond = 0.55f,
+                    attacksPerSecond = 0.60f,
                     attackRange = 58f
                 ),
             behaviorId =
@@ -111,11 +114,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.SMALL,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 65,
-                    armorClass = 3,
-                    contactDamage = 8,
+                    maximumHealth = 125,
+                    armorClass = 5,
+                    contactDamage = 15,
                     movementSpeed = 190f,
-                    attacksPerSecond = 1.25f,
+                    attacksPerSecond = 1.30f,
                     attackRange = 44f
                 ),
             behaviorId =
@@ -135,11 +138,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 430,
-                    armorClass = 8,
-                    contactDamage = 30,
+                    maximumHealth = 1750,
+                    armorClass = 24,
+                    contactDamage = 58,
                     movementSpeed = 115f,
-                    attacksPerSecond = 0.60f,
+                    attacksPerSecond = 0.68f,
                     attackRange = 76f
                 ),
             behaviorId =
@@ -161,11 +164,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 470,
-                    armorClass = 4,
-                    contactDamage = 9,
+                    maximumHealth = 1900,
+                    armorClass = 12,
+                    contactDamage = 22,
                     movementSpeed = 122f,
-                    attacksPerSecond = 2.20f,
+                    attacksPerSecond = 2.35f,
                     attackRange = 82f
                 ),
             behaviorId =
@@ -183,11 +186,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.VERY_LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 390,
-                    armorClass = 11,
-                    contactDamage = 38,
+                    maximumHealth = 1650,
+                    armorClass = 28,
+                    contactDamage = 72,
                     movementSpeed = 72f,
-                    attacksPerSecond = 0.42f,
+                    attacksPerSecond = 0.48f,
                     attackRange = 98f
                 ),
             behaviorId =
@@ -209,11 +212,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.VERY_LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 1100,
-                    armorClass = 15,
-                    contactDamage = 45,
+                    maximumHealth = 5200,
+                    armorClass = 34,
+                    contactDamage = 92,
                     movementSpeed = 118f,
-                    attacksPerSecond = 0.78f,
+                    attacksPerSecond = 0.90f,
                     attackRange = 105f
                 ),
             behaviorId =
@@ -235,11 +238,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.MEDIUM,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 82,
-                    armorClass = 12,
-                    contactDamage = 10,
+                    maximumHealth = 170,
+                    armorClass = 18,
+                    contactDamage = 19,
                     movementSpeed = 120f,
-                    attacksPerSecond = 0.85f,
+                    attacksPerSecond = 0.90f,
                     attackRange = 58f
                 ),
             behaviorId =
@@ -268,11 +271,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.MEDIUM,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 66,
-                    armorClass = 5,
-                    contactDamage = 6,
+                    maximumHealth = 135,
+                    armorClass = 8,
+                    contactDamage = 13,
                     movementSpeed = 120f,
-                    attacksPerSecond = 0.72f,
+                    attacksPerSecond = 0.78f,
                     attackRange = 560f
                 ),
             behaviorId =
@@ -301,11 +304,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 350,
-                    armorClass = 22,
-                    contactDamage = 27,
+                    maximumHealth = 1550,
+                    armorClass = 38,
+                    contactDamage = 58,
                     movementSpeed = 105f,
-                    attacksPerSecond = 0.52f,
+                    attacksPerSecond = 0.58f,
                     attackRange = 92f
                 ),
             behaviorId =
@@ -334,11 +337,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.VERY_LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 300,
-                    armorClass = 7,
-                    contactDamage = 18,
+                    maximumHealth = 1450,
+                    armorClass = 18,
+                    contactDamage = 44,
                     movementSpeed = 175f,
-                    attacksPerSecond = 0.95f,
+                    attacksPerSecond = 1.02f,
                     attackRange = 620f
                 ),
             behaviorId =
@@ -367,11 +370,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 900,
-                    armorClass = 3,
-                    contactDamage = 12,
+                    maximumHealth = 4800,
+                    armorClass = 20,
+                    contactDamage = 42,
                     movementSpeed = 145f,
-                    attacksPerSecond = 1f,
+                    attacksPerSecond = 1.10f,
                     attackRange = 680f
                 ),
             behaviorId =
@@ -416,11 +419,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.MEDIUM,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 92,
-                    armorClass = 9,
-                    contactDamage = 12,
+                    maximumHealth = 180,
+                    armorClass = 14,
+                    contactDamage = 20,
                     movementSpeed = 118f,
-                    attacksPerSecond = 1.10f,
+                    attacksPerSecond = 1.15f,
                     attackRange = 55f
                 ),
             behaviorId =
@@ -448,11 +451,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.MEDIUM,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 78,
-                    armorClass = 4,
-                    contactDamage = 6,
+                    maximumHealth = 150,
+                    armorClass = 7,
+                    contactDamage = 14,
                     movementSpeed = 104f,
-                    attacksPerSecond = 0.82f,
+                    attacksPerSecond = 0.88f,
                     attackRange = 600f
                 ),
             behaviorId =
@@ -480,11 +483,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.MEDIUM,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 140,
-                    armorClass = 14,
-                    contactDamage = 11,
+                    maximumHealth = 300,
+                    armorClass = 22,
+                    contactDamage = 22,
                     movementSpeed = 78f,
-                    attacksPerSecond = 0.58f,
+                    attacksPerSecond = 0.62f,
                     attackRange = 52f
                 ),
             behaviorId =
@@ -502,11 +505,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 340,
-                    armorClass = 10,
-                    contactDamage = 25,
+                    maximumHealth = 1500,
+                    armorClass = 20,
+                    contactDamage = 50,
                     movementSpeed = 120f,
-                    attacksPerSecond = 0.62f,
+                    attacksPerSecond = 0.70f,
                     attackRange = 68f
                 ),
             behaviorId =
@@ -530,11 +533,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.VERY_LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 520,
-                    armorClass = 2,
-                    contactDamage = 18,
+                    maximumHealth = 2100,
+                    armorClass = 10,
+                    contactDamage = 42,
                     movementSpeed = 72f,
-                    attacksPerSecond = 0.55f,
+                    attacksPerSecond = 0.62f,
                     attackRange = 88f
                 ),
             behaviorId =
@@ -556,11 +559,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.COLOSSAL,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 1050,
-                    armorClass = 13,
-                    contactDamage = 38,
+                    maximumHealth = 5600,
+                    armorClass = 32,
+                    contactDamage = 82,
                     movementSpeed = 150f,
-                    attacksPerSecond = 0.90f,
+                    attacksPerSecond = 1.00f,
                     attackRange = 82f
                 ),
             behaviorId =

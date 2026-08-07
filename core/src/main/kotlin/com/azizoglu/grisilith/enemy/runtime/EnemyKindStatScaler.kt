@@ -15,6 +15,10 @@ import kotlin.math.roundToInt
  * Kind Base Stats
  * -> Stage Scaling
  * -> EnemyType Modifier
+ *
+ * Scaling bilinçli olarak HP ve Damage tarafında Armor'dan daha hızlıdır.
+ * Böylece ileri Stage'lerde Enemy'ler yalnızca hasar süngeri olmaz;
+ * oyuncuya verdikleri baskı da artar.
  */
 object EnemyKindStatScaler {
 
@@ -168,34 +172,56 @@ object EnemyKindStatScaler {
             )
 
         return StageScaling(
+            /*
+             * Stage 1  = x1.00
+             * Stage 5  ~= x1.68
+             * Stage 10 ~= x2.50
+             * Stage 20 ~= x4.30
+             * Stage 50 ~= x9.02
+             */
             healthMultiplier =
                 1f +
                     (stage - 1) *
-                    0.10f +
+                    0.14f +
                     completedStageBlocks *
-                    0.08f,
+                    0.12f,
 
+            /*
+             * Armor kontrollü büyür; ileri Stage'lerde hasarı tamamen
+             * kapatan bir duvara dönüşmemesi amaçlanır.
+             */
             armorMultiplier =
                 1f +
                     (stage - 1) *
-                    0.025f,
+                    0.04f,
 
+            /*
+             * Stage 1  = x1.00
+             * Stage 5  ~= x1.40
+             * Stage 10 ~= x1.80
+             * Stage 20 ~= x2.68
+             * Stage 50 ~= x5.64
+             */
             damageMultiplier =
                 1f +
                     (stage - 1) *
-                    0.065f +
+                    0.08f +
                     completedStageBlocks *
-                    0.06f,
+                    0.08f,
 
+            /*
+             * Hız artışları düşük tutulur; rota sistemi ve kalabalık
+             * nedeniyle ileri Stage'lerde kontrolsüz hale gelmez.
+             */
             movementSpeedMultiplier =
                 1f +
                     (stage - 1) *
-                    0.004f,
+                    0.0025f,
 
             attackSpeedMultiplier =
                 1f +
                     (stage - 1) *
-                    0.002f
+                    0.005f
         )
     }
 
