@@ -6,6 +6,9 @@ import com.azizoglu.grisilith.enemy.EnemyType
 import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.random.Random
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Vector2
 
 internal object DefaultEnemyTraits {
 
@@ -18,8 +21,14 @@ internal object DefaultEnemyTraits {
             EnemyTraitIds.WOLF_PACK ->
                 WolfPackTrait()
 
+            EnemyTraitIds.BOAR_CHARGE ->
+                BoarChargeTrait()
+
             EnemyTraitIds.GRIZZLY_ANGRY ->
                 GrizzlyAngryTrait()
+
+            EnemyTraitIds.CROCODILE_JUMP ->
+                CrocodileJumpTrait()
 
             EnemyTraitIds.GHOST_INCORPOREAL_EVASION ->
                 GhostIncorporealEvasionTrait()
@@ -391,4 +400,290 @@ private class VampireHungerTrait :
         private const val ALLY_CLEAVE_COOLDOWN_SECONDS =
             0.75f
     }
+}
+
+
+private abstract class LockedRushTrait :
+    EnemyTrait {
+
+    private enum class Phase {
+        COOLDOWN,
+        TELEGRAPH,
+        RUSH
+    }
+
+    private var phase =
+        Phase.COOLDOWN
+
+    private var phaseSeconds =
+        initialCooldownSeconds()
+
+    private val lockedDirection =
+        Vector2()
+
+    private var warningEndX =
+        0f
+
+    private var warningEndY =
+        0f
+
+    protected abstract fun cooldownSeconds(): Float
+    protected abstract fun initialCooldownSeconds(): Float
+    protected abstract fun telegraphSeconds(): Float
+    protected abstract fun rushSeconds(): Float
+    protected abstract fun activationRange(): Float
+    protected abstract fun rushSpeedMultiplier(): Float
+    protected abstract fun baseContactDamageMultiplier(): Float
+
+    override fun update(
+        context: EnemyTraitUpdateContext
+    ) {
+        if (
+            context.owner.isDead
+        ) {
+            return
+        }
+
+        phaseSeconds -=
+            context.delta
+                .coerceAtLeast(
+                    0f
+                )
+
+        when (
+            phase
+        ) {
+            Phase.COOLDOWN -> {
+                if (
+                    phaseSeconds >
+                    0f
+                ) {
+                    return
+                }
+
+                val dx =
+                    context.targetCenterX -
+                        context.owner.centerX
+
+                val dy =
+                    context.targetCenterY -
+                        context.owner.centerY
+
+                if (
+                    dx * dx +
+                    dy * dy >
+                    activationRange() *
+                    activationRange()
+                ) {
+                    phaseSeconds =
+                        0.20f
+
+                    return
+                }
+
+                lockedDirection
+                    .set(
+                        dx,
+                        dy
+                    )
+
+                if (
+                    lockedDirection.isZero
+                ) {
+                    phaseSeconds =
+                        0.20f
+                    return
+                }
+
+                lockedDirection.nor()
+
+                warningEndX =
+                    context.owner.centerX +
+                        lockedDirection.x *
+                        activationRange()
+
+                warningEndY =
+                    context.owner.centerY +
+                        lockedDirection.y *
+                        activationRange()
+
+                phase =
+                    Phase.TELEGRAPH
+
+                phaseSeconds =
+                    telegraphSeconds()
+            }
+
+            Phase.TELEGRAPH -> {
+                if (
+                    phaseSeconds >
+                    0f
+                ) {
+                    return
+                }
+
+                phase =
+                    Phase.RUSH
+
+                phaseSeconds =
+                    rushSeconds()
+            }
+
+            Phase.RUSH -> {
+                if (
+                    phaseSeconds >
+                    0f
+                ) {
+                    return
+                }
+
+                phase =
+                    Phase.COOLDOWN
+
+                phaseSeconds =
+                    cooldownSeconds()
+            }
+        }
+    }
+
+    override fun resolveMovementOverride(
+        owner: Enemy,
+        output: Vector2
+    ): Boolean {
+
+        return when (
+            phase
+        ) {
+            Phase.TELEGRAPH -> {
+                output.setZero()
+                true
+            }
+
+            Phase.RUSH -> {
+                output
+                    .set(
+                        lockedDirection
+                    )
+                    .scl(
+                        rushSpeedMultiplier()
+                    )
+
+                true
+            }
+
+            Phase.COOLDOWN ->
+                false
+        }
+    }
+
+    override fun contactDamageMultiplier(
+        owner: Enemy
+    ): Float {
+
+        if (
+            phase !=
+            Phase.RUSH
+        ) {
+            return 1f
+        }
+
+        val qualityMultiplier =
+            when (
+                owner.type
+            ) {
+                EnemyType.NORMAL ->
+                    1f
+
+                EnemyType.UNIQUE ->
+                    1.18f
+
+                EnemyType.MINI_BOSS ->
+                    1.35f
+
+                EnemyType.FINAL_BOSS ->
+                    1.55f
+            }
+
+        return baseContactDamageMultiplier() *
+            qualityMultiplier
+    }
+
+    override fun render(
+        owner: Enemy,
+        shapeRenderer: ShapeRenderer
+    ) {
+        if (
+            phase !=
+            Phase.TELEGRAPH
+        ) {
+            return
+        }
+
+        shapeRenderer.color =
+            Color.RED
+
+        shapeRenderer.rectLine(
+            owner.centerX,
+            owner.centerY,
+            warningEndX,
+            warningEndY,
+            5f
+        )
+    }
+}
+
+private class BoarChargeTrait :
+    LockedRushTrait() {
+
+    override val id =
+        EnemyTraitIds.BOAR_CHARGE
+
+    override fun cooldownSeconds() =
+        10f
+
+    override fun initialCooldownSeconds() =
+        3f
+
+    override fun telegraphSeconds() =
+        1f
+
+    override fun rushSeconds() =
+        1.15f
+
+    override fun activationRange() =
+        520f
+
+    override fun rushSpeedMultiplier() =
+        4.25f
+
+    override fun baseContactDamageMultiplier() =
+        3.25f
+}
+
+private class CrocodileJumpTrait :
+    LockedRushTrait() {
+
+    override val id =
+        EnemyTraitIds.CROCODILE_JUMP
+
+    override fun cooldownSeconds() =
+        12f
+
+    override fun initialCooldownSeconds() =
+        4f
+
+    override fun telegraphSeconds() =
+        2f
+
+    override fun rushSeconds() =
+        0.55f
+
+    override fun activationRange() =
+        460f
+
+    override fun rushSpeedMultiplier() =
+        7.0f
+
+    override fun baseContactDamageMultiplier() =
+        4.0f
 }

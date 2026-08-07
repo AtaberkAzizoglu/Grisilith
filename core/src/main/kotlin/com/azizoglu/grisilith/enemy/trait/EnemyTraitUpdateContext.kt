@@ -3,11 +3,19 @@ package com.azizoglu.grisilith.enemy.trait
 import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
+import com.azizoglu.grisilith.map.MapObstacle
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Vector2
 
 data class EnemyTraitUpdateContext(
     val owner: Enemy,
     val nearbyEnemies: List<Enemy>,
-    val delta: Float
+    val delta: Float,
+    val targetCenterX: Float,
+    val targetCenterY: Float,
+    val worldWidth: Float,
+    val worldHeight: Float,
+    val obstacles: List<MapObstacle>
 )
 
 data class EnemyTraitDamageContext(
@@ -29,6 +37,26 @@ interface EnemyTrait {
         return EnemyTraitModifiers.IDENTITY
     }
 
+    /*
+     * true dönen aktif Trait, Enemy'nin normal AI hareketinin
+     * yerine kendi hareket yönünü uygular.
+     */
+    fun resolveMovementOverride(
+        owner: Enemy,
+        output: Vector2
+    ): Boolean {
+        return false
+    }
+
+    /*
+     * Aktif Trait sırasında oyuncuya temas hasarı için ek çarpan.
+     */
+    fun contactDamageMultiplier(
+        owner: Enemy
+    ): Float {
+        return 1f
+    }
+
     fun shouldNegateIncomingDamage(
         owner: Enemy,
         context: EnemyTraitDamageContext
@@ -45,6 +73,12 @@ interface EnemyTrait {
     fun onEnemyContact(
         owner: Enemy,
         other: Enemy
+    ) {
+    }
+
+    fun render(
+        owner: Enemy,
+        shapeRenderer: ShapeRenderer
     ) {
     }
 }

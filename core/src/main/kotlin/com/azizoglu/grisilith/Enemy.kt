@@ -294,7 +294,22 @@ class Enemy(
                 this,
 
             nearbyEnemies =
-                nearbyEnemies
+                nearbyEnemies,
+
+            targetCenterX =
+                targetX,
+
+            targetCenterY =
+                targetY,
+
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight,
+
+            obstacles =
+                mapObstacles
         )
 
         synchronizeTraitHealthMultiplier()
@@ -368,7 +383,24 @@ class Enemy(
                 }
             }
         } else if (controlState.canMove) {
-            if (controlState.isFrightened) {
+            val traitOverridesMovement =
+                traitRuntime
+                    .resolveMovementOverride(
+                        owner =
+                            this,
+
+                        output =
+                            movementDirection
+                    )
+
+            if (
+                traitOverridesMovement
+            ) {
+                /*
+                 * Trait'in verdiği vektörün uzunluğu aynı zamanda
+                 * normal Movement Speed'e uygulanan hız çarpanıdır.
+                 */
+            } else if (controlState.isFrightened) {
                 movementDirection.set(
                     centerX - controlState.sourceX,
                     centerY - controlState.sourceY
@@ -429,6 +461,18 @@ class Enemy(
             }
 
             if (!movementDirection.isZero) {
+                val traitSpeedMultiplier =
+                    if (
+                        traitOverridesMovement
+                    ) {
+                        movementDirection.len()
+                            .coerceAtLeast(
+                                1f
+                            )
+                    } else {
+                        1f
+                    }
+
                 movementDirection.nor()
 
                 position.mulAdd(
@@ -437,7 +481,8 @@ class Enemy(
                         stats.movementSpeed *
                             traitRuntime
                                 .currentModifiers
-                                .movementSpeedMultiplier
+                                .movementSpeedMultiplier *
+                            traitSpeedMultiplier
                     ) * delta
                 )
             }
@@ -475,7 +520,17 @@ class Enemy(
                     controlState.canAttack
         ) {
             val resolvedContactDamage =
-                contactDamage
+                (
+                    contactDamage *
+                        traitRuntime
+                            .contactDamageMultiplier(
+                                this
+                            )
+                    )
+                    .roundToInt()
+                    .coerceAtLeast(
+                        1
+                    )
 
             onContactDamage(
                 resolvedContactDamage
@@ -1147,6 +1202,14 @@ class Enemy(
 
             return
         }
+
+        traitRuntime.render(
+            owner =
+                this,
+
+            shapeRenderer =
+                shapeRenderer
+        )
 
         shapeRenderer.color = when (stats.type) {
             EnemyType.NORMAL ->

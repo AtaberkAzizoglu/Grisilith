@@ -2,6 +2,9 @@ package com.azizoglu.grisilith.enemy.trait
 
 import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.map.MapObstacle
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Vector2
 
 /*
  * Enemy Trait'lerin gerçek runtime yöneticisi.
@@ -10,8 +13,6 @@ import com.azizoglu.grisilith.enemy.Enemy
  * 1. ContentId oluştur.
  * 2. EnemyTrait implementasyonu yaz.
  * 3. DefaultEnemyTraits.create(...) içine kaydet.
- *
- * Enemy.kt içine yeni trait'e özel if/when eklemek gerekmez.
  */
 class EnemyTraitRuntime private constructor(
     val activeTraitIds: List<ContentId>,
@@ -27,28 +28,30 @@ class EnemyTraitRuntime private constructor(
     fun update(
         delta: Float,
         owner: Enemy,
-        nearbyEnemies: List<Enemy>
+        nearbyEnemies: List<Enemy>,
+        targetCenterX: Float,
+        targetCenterY: Float,
+        worldWidth: Float,
+        worldHeight: Float,
+        obstacles: List<MapObstacle>
     ) {
         val context =
             EnemyTraitUpdateContext(
-                owner =
-                    owner,
-
-                nearbyEnemies =
-                    nearbyEnemies,
-
-                delta =
-                    delta
+                owner = owner,
+                nearbyEnemies = nearbyEnemies,
+                delta = delta,
+                targetCenterX = targetCenterX,
+                targetCenterY = targetCenterY,
+                worldWidth = worldWidth,
+                worldHeight = worldHeight,
+                obstacles = obstacles
             )
 
         var resolvedModifiers =
             EnemyTraitModifiers.IDENTITY
 
         traits.forEach { trait ->
-            trait.update(
-                context
-            )
-
+            trait.update(context)
             resolvedModifiers =
                 resolvedModifiers
                     .multipliedBy(
@@ -60,17 +63,50 @@ class EnemyTraitRuntime private constructor(
             resolvedModifiers
     }
 
+    fun resolveMovementOverride(
+        owner: Enemy,
+        output: Vector2
+    ): Boolean {
+        traits.forEach { trait ->
+            if (
+                trait.resolveMovementOverride(
+                    owner = owner,
+                    output = output
+                )
+            ) {
+                return true
+            }
+        }
+
+        return false
+    }
+
+    fun contactDamageMultiplier(
+        owner: Enemy
+    ): Float {
+        var multiplier = 1f
+
+        traits.forEach { trait ->
+            multiplier *=
+                trait.contactDamageMultiplier(
+                    owner
+                )
+        }
+
+        return multiplier
+            .coerceAtLeast(
+                1f
+            )
+    }
+
     fun shouldNegateIncomingDamage(
         owner: Enemy,
         context: EnemyTraitDamageContext
     ): Boolean {
         return traits.any { trait ->
             trait.shouldNegateIncomingDamage(
-                owner =
-                    owner,
-
-                context =
-                    context
+                owner = owner,
+                context = context
             )
         }
     }
@@ -81,11 +117,8 @@ class EnemyTraitRuntime private constructor(
     ) {
         traits.forEach { trait ->
             trait.onPlayerContact(
-                owner =
-                    owner,
-
-                dealtDamage =
-                    dealtDamage
+                owner = owner,
+                dealtDamage = dealtDamage
             )
         }
     }
@@ -96,11 +129,20 @@ class EnemyTraitRuntime private constructor(
     ) {
         traits.forEach { trait ->
             trait.onEnemyContact(
-                owner =
-                    owner,
+                owner = owner,
+                other = other
+            )
+        }
+    }
 
-                other =
-                    other
+    fun render(
+        owner: Enemy,
+        shapeRenderer: ShapeRenderer
+    ) {
+        traits.forEach { trait ->
+            trait.render(
+                owner = owner,
+                shapeRenderer = shapeRenderer
             )
         }
     }
@@ -109,14 +151,9 @@ class EnemyTraitRuntime private constructor(
 
         val EMPTY =
             EnemyTraitRuntime(
-                activeTraitIds =
-                    emptyList(),
-
-                passiveTraitIds =
-                    emptyList(),
-
-                traits =
-                    emptyList()
+                activeTraitIds = emptyList(),
+                passiveTraitIds = emptyList(),
+                traits = emptyList()
             )
 
         fun fromIds(
@@ -134,23 +171,13 @@ class EnemyTraitRuntime private constructor(
             val traits =
                 allIds
                     .mapNotNull { id ->
-                        DefaultEnemyTraits
-                            .create(
-                                id
-                            )
+                        DefaultEnemyTraits.create(id)
                     }
 
             return EnemyTraitRuntime(
-                activeTraitIds =
-                    activeTraitIds
-                        .toList(),
-
-                passiveTraitIds =
-                    passiveTraitIds
-                        .toList(),
-
-                traits =
-                    traits
+                activeTraitIds = activeTraitIds.toList(),
+                passiveTraitIds = passiveTraitIds.toList(),
+                traits = traits
             )
         }
     }
