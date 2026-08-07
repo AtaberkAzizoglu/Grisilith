@@ -21,6 +21,7 @@ import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.enemy.behavior.EnemyBehaviorController
 import com.azizoglu.grisilith.enemy.behavior.EnemyCombatClock
 import com.azizoglu.grisilith.enemy.runtime.EnemyRuntimeBundle
+import com.azizoglu.grisilith.enemy.navigation.EnemyNavigationAgent
 
 class Enemy(
     startX: Float,
@@ -51,6 +52,12 @@ class Enemy(
         EnemyCombatClock(
             attacksPerSecond =
                 stats.attacksPerSecond
+        )
+
+    private val navigationAgent =
+        EnemyNavigationAgent(
+            agentSize =
+                stats.size
         )
 
     private val knockbackVelocity =
@@ -203,6 +210,9 @@ class Enemy(
         targetX: Float,
         targetY: Float,
         targetBounds: Rectangle,
+        worldWidth: Float,
+        worldHeight: Float,
+        mapObstacles: List<MapObstacle>,
         onContactDamage: (Int) -> Unit
     ) {
         if (
@@ -275,6 +285,11 @@ class Enemy(
 
         previousPosition.set(position)
 
+        navigationAgent.update(
+            delta =
+                delta
+        )
+
         val controlState =
             ConditionControlRules.resolve(
                 conditions = conditions,
@@ -344,6 +359,41 @@ class Enemy(
                         output =
                             movementDirection
                     )
+
+                if (
+                    !ignoresObstacles &&
+                    !movementDirection.isZero
+                ) {
+                    navigationAgent
+                        .resolveMovementDirection(
+                            enemyCenterX =
+                                centerX,
+
+                            enemyCenterY =
+                                centerY,
+
+                            targetCenterX =
+                                targetX,
+
+                            targetCenterY =
+                                targetY,
+
+                            requestedDirection =
+                                movementDirection,
+
+                            worldWidth =
+                                worldWidth,
+
+                            worldHeight =
+                                worldHeight,
+
+                            obstacles =
+                                mapObstacles,
+
+                            output =
+                                movementDirection
+                        )
+                }
             }
 
             if (!movementDirection.isZero) {

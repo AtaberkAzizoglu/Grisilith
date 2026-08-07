@@ -31,11 +31,29 @@ class EnemyManager {
     ) {
         enemies.forEach { enemy ->
             enemy.update(
-                delta = delta,
-                targetX = targetX,
-                targetY = targetY,
-                targetBounds = targetBounds,
-                onContactDamage = onPlayerDamaged
+                delta =
+                    delta,
+
+                targetX =
+                    targetX,
+
+                targetY =
+                    targetY,
+
+                targetBounds =
+                    targetBounds,
+
+                worldWidth =
+                    worldWidth,
+
+                worldHeight =
+                    worldHeight,
+
+                mapObstacles =
+                    mapObstacles,
+
+                onContactDamage =
+                    onPlayerDamaged
             )
         }
 
