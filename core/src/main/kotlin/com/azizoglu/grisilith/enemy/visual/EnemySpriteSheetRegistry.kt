@@ -8,7 +8,7 @@ object EnemySpriteSheetRegistry {
         DefaultBeastEnemySpriteSheets
             .all
             .associateBy {
-                definition ->
+                    definition ->
                 definition.kindId
             }
 
@@ -39,7 +39,7 @@ object EnemySpriteSheetRegistry {
     val all:
         Collection<
             EnemySpriteSheetDefinition
-        >
+            >
         get() =
             definitions.values
 }
