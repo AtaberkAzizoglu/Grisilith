@@ -17,6 +17,7 @@ import com.azizoglu.grisilith.combat.interaction.CombatInteractionEvent
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionManager
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionTrigger
 import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.map.MapObstacle
 
 class Enemy(
     startX: Float,
@@ -105,6 +106,14 @@ class Enemy(
 
     val type: EnemyType
         get() = stats.type
+
+    val ignoresObstacles: Boolean
+        get() =
+            stats.ignoresObstacles
+
+    val canSpawnInsideObstacles: Boolean
+        get() =
+            stats.canSpawnInsideObstacles
 
     val centerX: Float
         get() = position.x + size / 2f
@@ -289,6 +298,72 @@ class Enemy(
                     controlState.canAttack
         ) {
             onContactDamage(contactDamage)
+        }
+    }
+
+    fun resolveObstacleCollisions(
+        obstacles: List<MapObstacle>
+    ) {
+        if (
+            ignoresObstacles ||
+            isDead ||
+            carriedByHeavyBolt
+        ) {
+            return
+        }
+
+        obstacles.forEach { obstacle ->
+            if (
+                !bounds.overlaps(
+                    obstacle.bounds
+                )
+            ) {
+                return@forEach
+            }
+
+            val currentX =
+                position.x
+
+            val currentY =
+                position.y
+
+            /*
+             * Önce yatay hareketi geri alıp dikey kaymayı koruruz.
+             */
+            position.x =
+                previousPosition.x
+
+            if (
+                !bounds.overlaps(
+                    obstacle.bounds
+                )
+            ) {
+                return@forEach
+            }
+
+            /*
+             * Yatay kayma mümkün değilse dikey hareketi geri alırız.
+             */
+            position.x =
+                currentX
+
+            position.y =
+                previousPosition.y
+
+            if (
+                !bounds.overlaps(
+                    obstacle.bounds
+                )
+            ) {
+                return@forEach
+            }
+
+            /*
+             * İki eksen de kapalıysa önceki güvenli konuma döneriz.
+             */
+            position.set(
+                previousPosition
+            )
         }
     }
 

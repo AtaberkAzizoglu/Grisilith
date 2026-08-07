@@ -10,9 +10,9 @@ object EnemySpawnScaling {
     private const val BASE_MAXIMUM_ENEMY_COUNT = 40
     private const val ENEMY_COUNT_PER_STAGE = 6
 
-    private const val BASE_UNIQUE_CHANCE = 0.5f
-    private const val UNIQUE_CHANCE_PER_STAGE = 0.005f
-    private const val MAXIMUM_UNIQUE_CHANCE = 0.20f
+    private const val BASE_UNIQUE_CHANCE = 0.025f
+    private const val UNIQUE_CHANCE_PER_STAGE = 0f
+    private const val MAXIMUM_UNIQUE_CHANCE = 0.025f
 
     fun settingsForStage(
         stage: Int

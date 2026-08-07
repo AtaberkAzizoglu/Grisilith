@@ -17,7 +17,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.azizoglu.grisilith.util.GameTimeController
 import com.badlogic.gdx.Input
 import com.azizoglu.grisilith.stage.StageController
-import com.azizoglu.grisilith.enemy.EnemyScaling
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.stage.StageType
 import com.azizoglu.grisilith.economy.GoldCoinPickup
@@ -33,6 +32,7 @@ import com.azizoglu.grisilith.config.GameDifficulty
 import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.map.MapObstacleGenerator
+import com.azizoglu.grisilith.map.enemy.MapEnemyRuntimeContext
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.character.CharacterDefinition
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
@@ -315,22 +315,26 @@ class FirstScreen(
     private val hudBatch = SpriteBatch()
     private val hudFont = BitmapFont()
 
-    private val enemyManager = EnemyManager().apply {
-        spawn(
-            Enemy(
-                startX = worldWidth / 2f + 300f,
-                startY = worldHeight / 2f,
-                stats = EnemyScaling.normalEnemyStats(
-                    stage = 1
-                )
-            )
-        )
-    }
+    private val enemyManager =
+        EnemyManager()
 
-    private val enemySpawner = EnemySpawner(
-        worldWidth = worldWidth,
-        worldHeight = worldHeight
-    )
+    private val mapEnemyRuntimeContext =
+        MapEnemyRuntimeContext(
+            gameMap =
+                gameMap
+        )
+
+    private val enemySpawner =
+        EnemySpawner(
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight,
+
+            mapEnemyContext =
+                mapEnemyRuntimeContext
+        )
 
     private var isRunSummaryOpen = false
 
@@ -2625,7 +2629,10 @@ class FirstScreen(
                 worldWidth,
 
             worldHeight =
-                worldHeight
+                worldHeight,
+
+            mapObstacles =
+                mapObstacles
         ) { damage ->
 
             val appliedDamage =
@@ -2942,16 +2949,15 @@ class FirstScreen(
         updateCamera()
 
         enemySpawner.update(
-            delta = delta,
-
-            camera =
-                camera,
+            delta =
+                delta,
 
             enemyManager =
                 enemyManager,
 
             currentStage =
-                stageController.currentStage,
+                stageController
+                    .currentStage,
 
             stageType =
                 stageController
@@ -2963,7 +2969,16 @@ class FirstScreen(
 
             enemyCountMultiplier =
                 playerStats
-                    .enemyCountMultiplier()
+                    .enemyCountMultiplier(),
+
+            playerCenterX =
+                player.centerX,
+
+            playerCenterY =
+                player.centerY,
+
+            mapObstacles =
+                mapObstacles
         )
 
         recordCurrentEnemyEncounters()
@@ -3351,6 +3366,12 @@ class FirstScreen(
                     shapeRenderer =
                         activeShapeRenderer
                 )
+
+                enemySpawner
+                    .renderWarnings(
+                        shapeRenderer =
+                            activeShapeRenderer
+                    )
             }
         )
 

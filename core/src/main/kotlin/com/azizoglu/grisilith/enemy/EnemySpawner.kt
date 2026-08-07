@@ -1,29 +1,54 @@
 package com.azizoglu.grisilith.enemy
 
+import com.azizoglu.grisilith.map.MapObstacle
+import com.azizoglu.grisilith.map.enemy.MapEnemyRuntimeContext
 import com.azizoglu.grisilith.stage.StageType
-import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
+import com.badlogic.gdx.math.Rectangle
 
 class EnemySpawner(
     private val worldWidth: Float,
-    private val worldHeight: Float
+    private val worldHeight: Float,
+    private val mapEnemyContext:
+    MapEnemyRuntimeContext
 ) {
 
     companion object {
-        private const val MINIMUM_DYNAMIC_SPAWN_INTERVAL =
+        private const val MINIMUM_PLAYER_DISTANCE =
+            200f
+
+        private const val WORLD_EDGE_PADDING =
+            20f
+
+        private const val MAXIMUM_POSITION_ATTEMPTS =
+            40
+
+        private const val REGULAR_SPAWN_DEADLINE_RATIO =
+            0.85f
+
+        private const val MINIMUM_SCHEDULE_INTERVAL =
             0.01f
     }
-    private var spawnTimer = 0f
-    private var bossSpawned = false
+
+    private val spawnWarnings =
+        mutableListOf<EnemySpawnWarning>()
+
+    private var spawnTimer =
+        0f
+
+    private var bossScheduled =
+        false
 
     private var trackedStage =
         -1
 
-    private var spawnedRegularEnemiesThisStage =
+    private var scheduledRegularEnemiesThisStage =
         0
 
     val hasSpawnedBoss: Boolean
-        get() = bossSpawned
+        get() =
+            bossScheduled
 
     init {
         require(worldWidth > 0f)
@@ -32,43 +57,96 @@ class EnemySpawner(
 
     fun update(
         delta: Float,
-        camera: OrthographicCamera,
         enemyManager: EnemyManager,
         currentStage: Int,
         stageType: StageType,
         stageDurationSeconds: Float,
-        enemyCountMultiplier: Float
+        enemyCountMultiplier: Float,
+        playerCenterX: Float,
+        playerCenterY: Float,
+        mapObstacles: List<MapObstacle>
     ) {
         synchronizeStage(
             currentStage =
                 currentStage
         )
 
-        spawnBossIfRequired(
-            camera = camera,
-            enemyManager = enemyManager,
-            currentStage = currentStage,
-            stageType = stageType
+        updateWarnings(
+            delta =
+                delta,
+
+            enemyManager =
+                enemyManager
         )
 
-        updateRegularEnemySpawning(
-            delta = delta,
-            camera = camera,
-            enemyManager = enemyManager,
-            currentStage = currentStage,
-            stageType = stageType,
+        scheduleBossIfRequired(
+            currentStage =
+                currentStage,
+
+            stageType =
+                stageType,
+
+            playerCenterX =
+                playerCenterX,
+
+            playerCenterY =
+                playerCenterY,
+
+            mapObstacles =
+                mapObstacles
+        )
+
+        updateRegularEnemyScheduling(
+            delta =
+                delta,
+
+            currentStage =
+                currentStage,
+
+            stageType =
+                stageType,
+
             stageDurationSeconds =
                 stageDurationSeconds,
+
             enemyCountMultiplier =
-                enemyCountMultiplier
+                enemyCountMultiplier,
+
+            playerCenterX =
+                playerCenterX,
+
+            playerCenterY =
+                playerCenterY,
+
+            mapObstacles =
+                mapObstacles
         )
     }
 
+    fun renderWarnings(
+        shapeRenderer: ShapeRenderer
+    ) {
+        spawnWarnings.forEach { warning ->
+            warning.render(
+                shapeRenderer
+            )
+        }
+    }
+
     fun resetTimer() {
-        spawnTimer = 0f
-        bossSpawned = false
-        trackedStage = -1
-        spawnedRegularEnemiesThisStage = 0
+        spawnTimer =
+            0f
+
+        bossScheduled =
+            false
+
+        trackedStage =
+            -1
+
+        scheduledRegularEnemiesThisStage =
+            0
+
+        spawnWarnings.clear()
     }
 
     private fun synchronizeStage(
@@ -87,67 +165,176 @@ class EnemySpawner(
         spawnTimer =
             0f
 
-        bossSpawned =
+        bossScheduled =
             false
 
-        spawnedRegularEnemiesThisStage =
+        scheduledRegularEnemiesThisStage =
             0
+
+        spawnWarnings.clear()
     }
 
-    private fun spawnBossIfRequired(
-        camera: OrthographicCamera,
-        enemyManager: EnemyManager,
+    private fun updateWarnings(
+        delta: Float,
+        enemyManager: EnemyManager
+    ) {
+        val iterator =
+            spawnWarnings.iterator()
+
+        while (
+            iterator.hasNext()
+        ) {
+            val warning =
+                iterator.next()
+
+            warning.update(
+                delta =
+                    delta
+            )
+
+            if (
+                !warning.isReadyToSpawn
+            ) {
+                continue
+            }
+
+            enemyManager.spawn(
+                warning.enemy
+            )
+
+            iterator.remove()
+        }
+    }
+
+    private fun scheduleBossIfRequired(
         currentStage: Int,
-        stageType: StageType
+        stageType: StageType,
+        playerCenterX: Float,
+        playerCenterY: Float,
+        mapObstacles: List<MapObstacle>
     ) {
         if (
-            bossSpawned ||
-            stageType == StageType.NORMAL
+            bossScheduled ||
+            stageType ==
+            StageType.NORMAL
         ) {
             return
         }
 
-        val bossStats = when (stageType) {
-            StageType.MINI_BOSS ->
-                EnemyScaling.miniBossStats(
-                    stage = currentStage
+        val enemyType =
+            when (
+                stageType
+            ) {
+                StageType.MINI_BOSS ->
+                    EnemyType.MINI_BOSS
+
+                StageType.FINAL_BOSS ->
+                    EnemyType.FINAL_BOSS
+
+                StageType.NORMAL ->
+                    return
+            }
+
+        val definition =
+            mapEnemyContext
+                .selectionResolver
+                .choose(
+                    profile =
+                        mapEnemyContext.profile,
+
+                    enemyType =
+                        enemyType
+                )
+                ?: return
+
+        val stats =
+            mapEnemyContext
+                .runtimeFactory
+                .createStats(
+                    definition =
+                        definition,
+
+                    enemyType =
+                        enemyType,
+
+                    stage =
+                        currentStage
                 )
 
-            StageType.FINAL_BOSS ->
-                EnemyScaling.finalBossStats(
-                    stage = currentStage
+        val spawnPosition =
+            findValidSpawnPosition(
+                enemySize =
+                    stats.size,
+
+                canSpawnInsideObstacles =
+                    stats.canSpawnInsideObstacles,
+
+                playerCenterX =
+                    playerCenterX,
+
+                playerCenterY =
+                    playerCenterY,
+
+                mapObstacles =
+                    mapObstacles
+            )
+                ?: return
+
+        val enemy =
+            mapEnemyContext
+                .runtimeFactory
+                .create(
+                    definition =
+                        definition,
+
+                    enemyType =
+                        enemyType,
+
+                    stage =
+                        currentStage,
+
+                    startX =
+                        spawnPosition.first,
+
+                    startY =
+                        spawnPosition.second
                 )
 
-            StageType.NORMAL ->
-                return
-        }
+        spawnWarnings.add(
+            EnemySpawnWarning(
+                bounds =
+                    Rectangle(
+                        spawnPosition.first,
+                        spawnPosition.second,
+                        stats.size,
+                        stats.size
+                    ),
 
-        enemyManager.spawn(
-            createEnemyOutsideCamera(
-                camera = camera,
-                stats = bossStats
+                enemy =
+                    enemy
             )
         )
 
-        bossSpawned = true
+        bossScheduled =
+            true
     }
 
-    private fun updateRegularEnemySpawning(
+    private fun updateRegularEnemyScheduling(
         delta: Float,
-        camera: OrthographicCamera,
-        enemyManager: EnemyManager,
         currentStage: Int,
         stageType: StageType,
         stageDurationSeconds: Float,
-        enemyCountMultiplier: Float
+        enemyCountMultiplier: Float,
+        playerCenterX: Float,
+        playerCenterY: Float,
+        mapObstacles: List<MapObstacle>
     ) {
         val baseSettings =
-            EnemySpawnScaling.settingsForStage(
-                stage = currentStage
-            )
-
-        val isBossStage =
-            stageType != StageType.NORMAL
+            EnemySpawnScaling
+                .settingsForStage(
+                    stage =
+                        currentStage
+                )
 
         val regularEnemyQuota =
             EnemySpawnScaling
@@ -156,36 +343,48 @@ class EnemySpawner(
                         currentStage,
 
                     isBossStage =
-                        isBossStage,
+                        stageType !=
+                            StageType.NORMAL,
 
                     enemyCountMultiplier =
                         enemyCountMultiplier
                 )
 
         if (
-            spawnedRegularEnemiesThisStage >=
+            scheduledRegularEnemiesThisStage >=
             regularEnemyQuota
         ) {
             return
         }
 
-        /*
-         * Stage süresi değişmez.
-         * Kota büyüdükçe spawn aralığı otomatik küçülür;
-         * böylece normal ve unique düşmanların tamamı
-         * aynı Stage süresi içinde gönderilir.
-         */
-        val spawnInterval =
+        val spawnDeadline =
             (
-                stageDurationSeconds
-                    .coerceAtLeast(
-                        0.01f
-                    ) /
+                stageDurationSeconds *
+                    REGULAR_SPAWN_DEADLINE_RATIO
+                )
+                .coerceAtLeast(
+                    EnemySpawnWarning
+                        .WARNING_DURATION_SECONDS
+                )
+
+        val schedulingWindow =
+            (
+                spawnDeadline -
+                    EnemySpawnWarning
+                        .WARNING_DURATION_SECONDS
+                )
+                .coerceAtLeast(
+                    MINIMUM_SCHEDULE_INTERVAL
+                )
+
+        val scheduleInterval =
+            (
+                schedulingWindow /
                     regularEnemyQuota
                         .toFloat()
                 )
                 .coerceAtLeast(
-                    MINIMUM_DYNAMIC_SPAWN_INTERVAL
+                    MINIMUM_SCHEDULE_INTERVAL
                 )
 
         spawnTimer +=
@@ -195,159 +394,257 @@ class EnemySpawner(
 
         while (
             spawnTimer >=
-            spawnInterval &&
-            spawnedRegularEnemiesThisStage <
+            scheduleInterval &&
+            scheduledRegularEnemiesThisStage <
             regularEnemyQuota
         ) {
-            spawnTimer -=
-                spawnInterval
-
-            val enemyStats =
-                chooseRegularEnemyStats(
+            val scheduled =
+                scheduleRegularEnemy(
                     currentStage =
                         currentStage,
 
                     uniqueSpawnChance =
-                        baseSettings
-                            .uniqueSpawnChance
+                        (
+                            baseSettings
+                                .uniqueSpawnChance *
+                                mapEnemyContext
+                                    .profile
+                                    .uniqueSpawnChanceMultiplier
+                            )
+                            .coerceIn(
+                                0f,
+                                1f
+                            ),
+
+                    playerCenterX =
+                        playerCenterX,
+
+                    playerCenterY =
+                        playerCenterY,
+
+                    mapObstacles =
+                        mapObstacles
                 )
 
-            enemyManager.spawn(
-                createEnemyOutsideCamera(
-                    camera =
-                        camera,
-
-                    stats =
-                        enemyStats
-                )
-            )
-
-            spawnedRegularEnemiesThisStage++
-        }
-    }
-
-    private fun chooseRegularEnemyStats(
-        currentStage: Int,
-        uniqueSpawnChance: Float
-    ): EnemyStats {
-        val isUnique =
-            MathUtils.random() <
-                uniqueSpawnChance
-
-        return if (isUnique) {
-            EnemyScaling.uniqueEnemyStats(
-                stage = currentStage
-            )
-        } else {
-            EnemyScaling.normalEnemyStats(
-                stage = currentStage
-            )
-        }
-    }
-
-    private fun createEnemyOutsideCamera(
-        camera: OrthographicCamera,
-        stats: EnemyStats
-    ): Enemy {
-        val enemySize = stats.size
-        val outsidePadding = 80f
-
-        val halfCameraWidth =
-            camera.viewportWidth *
-                camera.zoom / 2f
-
-        val halfCameraHeight =
-            camera.viewportHeight *
-                camera.zoom / 2f
-
-        val visibleLeft =
-            camera.position.x -
-                halfCameraWidth
-
-        val visibleRight =
-            camera.position.x +
-                halfCameraWidth
-
-        val visibleBottom =
-            camera.position.y -
-                halfCameraHeight
-
-        val visibleTop =
-            camera.position.y +
-                halfCameraHeight
-
-        val spawnSide =
-            MathUtils.random(0, 3)
-
-        val spawnPosition =
-            when (spawnSide) {
-                0 -> Pair(
-                    visibleLeft -
-                        outsidePadding -
-                        enemySize,
-
-                    MathUtils.random(
-                        visibleBottom,
-                        visibleTop
-                    )
-                )
-
-                1 -> Pair(
-                    visibleRight +
-                        outsidePadding,
-
-                    MathUtils.random(
-                        visibleBottom,
-                        visibleTop
-                    )
-                )
-
-                2 -> Pair(
-                    MathUtils.random(
-                        visibleLeft,
-                        visibleRight
-                    ),
-
-                    visibleBottom -
-                        outsidePadding -
-                        enemySize
-                )
-
-                else -> Pair(
-                    MathUtils.random(
-                        visibleLeft,
-                        visibleRight
-                    ),
-
-                    visibleTop +
-                        outsidePadding
-                )
+            if (
+                !scheduled
+            ) {
+                /*
+                 * Geçerli konum bulunamadığında zorla spawn edilmez.
+                 * Timer korunur ve sonraki update'te yeniden denenir.
+                 */
+                break
             }
 
+            spawnTimer -=
+                scheduleInterval
+
+            scheduledRegularEnemiesThisStage++
+        }
+    }
+
+    private fun scheduleRegularEnemy(
+        currentStage: Int,
+        uniqueSpawnChance: Float,
+        playerCenterX: Float,
+        playerCenterY: Float,
+        mapObstacles: List<MapObstacle>
+    ): Boolean {
+
+        val definition =
+            mapEnemyContext
+                .selectionResolver
+                .choose(
+                    profile =
+                        mapEnemyContext.profile,
+
+                    enemyType =
+                        EnemyType.NORMAL
+                )
+                ?: return false
+
+        val enemyType =
+            if (
+                MathUtils.random() <
+                uniqueSpawnChance
+            ) {
+                EnemyType.UNIQUE
+            } else {
+                EnemyType.NORMAL
+            }
+
+        val stats =
+            mapEnemyContext
+                .runtimeFactory
+                .createStats(
+                    definition =
+                        definition,
+
+                    enemyType =
+                        enemyType,
+
+                    stage =
+                        currentStage
+                )
+
+        val spawnPosition =
+            findValidSpawnPosition(
+                enemySize =
+                    stats.size,
+
+                canSpawnInsideObstacles =
+                    stats.canSpawnInsideObstacles,
+
+                playerCenterX =
+                    playerCenterX,
+
+                playerCenterY =
+                    playerCenterY,
+
+                mapObstacles =
+                    mapObstacles
+            )
+                ?: return false
+
+        val enemy =
+            mapEnemyContext
+                .runtimeFactory
+                .create(
+                    definition =
+                        definition,
+
+                    enemyType =
+                        enemyType,
+
+                    stage =
+                        currentStage,
+
+                    startX =
+                        spawnPosition.first,
+
+                    startY =
+                        spawnPosition.second
+                )
+
+        spawnWarnings.add(
+            EnemySpawnWarning(
+                bounds =
+                    Rectangle(
+                        spawnPosition.first,
+                        spawnPosition.second,
+                        stats.size,
+                        stats.size
+                    ),
+
+                enemy =
+                    enemy
+            )
+        )
+
+        return true
+    }
+
+    private fun findValidSpawnPosition(
+        enemySize: Float,
+        canSpawnInsideObstacles: Boolean,
+        playerCenterX: Float,
+        playerCenterY: Float,
+        mapObstacles: List<MapObstacle>
+    ): Pair<Float, Float>? {
+
+        val minimumX =
+            WORLD_EDGE_PADDING
+
+        val minimumY =
+            WORLD_EDGE_PADDING
+
         val maximumX =
-            (worldWidth - enemySize)
-                .coerceAtLeast(0f)
+            (
+                worldWidth -
+                    WORLD_EDGE_PADDING -
+                    enemySize
+                )
+                .coerceAtLeast(
+                    minimumX
+                )
 
         val maximumY =
-            (worldHeight - enemySize)
-                .coerceAtLeast(0f)
+            (
+                worldHeight -
+                    WORLD_EDGE_PADDING -
+                    enemySize
+                )
+                .coerceAtLeast(
+                    minimumY
+                )
 
-        val spawnX =
-            spawnPosition.first.coerceIn(
-                0f,
-                maximumX
+        repeat(
+            MAXIMUM_POSITION_ATTEMPTS
+        ) {
+            val spawnX =
+                MathUtils.random(
+                    minimumX,
+                    maximumX
+                )
+
+            val spawnY =
+                MathUtils.random(
+                    minimumY,
+                    maximumY
+                )
+
+            val centerX =
+                spawnX +
+                    enemySize /
+                    2f
+
+            val centerY =
+                spawnY +
+                    enemySize /
+                    2f
+
+            val dx =
+                centerX - playerCenterX
+
+            val dy =
+                centerY - playerCenterY
+
+            val distanceSquared =
+                dx * dx + dy * dy
+
+            if (
+                distanceSquared <
+                MINIMUM_PLAYER_DISTANCE *
+                MINIMUM_PLAYER_DISTANCE
+            ) {
+                return@repeat
+            }
+
+            val candidateBounds =
+                Rectangle(
+                    spawnX,
+                    spawnY,
+                    enemySize,
+                    enemySize
+                )
+
+            if (
+                !canSpawnInsideObstacles &&
+                mapObstacles.any { obstacle ->
+                    candidateBounds.overlaps(
+                        obstacle.bounds
+                    )
+                }
+            ) {
+                return@repeat
+            }
+
+            return Pair(
+                spawnX,
+                spawnY
             )
+        }
 
-        val spawnY =
-            spawnPosition.second.coerceIn(
-                0f,
-                maximumY
-            )
-
-        return Enemy(
-            startX = spawnX,
-            startY = spawnY,
-            stats = stats
-        )
+        return null
     }
 }

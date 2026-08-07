@@ -1,5 +1,7 @@
 package com.azizoglu.grisilith.enemy
 
+import com.azizoglu.grisilith.map.MapObstacle
+
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 
@@ -24,6 +26,7 @@ class EnemyManager {
         targetBounds: Rectangle,
         worldWidth: Float,
         worldHeight: Float,
+        mapObstacles: List<MapObstacle>,
         onPlayerDamaged: (Int) -> Unit
     ) {
         enemies.forEach { enemy ->
@@ -33,6 +36,13 @@ class EnemyManager {
                 targetY = targetY,
                 targetBounds = targetBounds,
                 onContactDamage = onPlayerDamaged
+            )
+        }
+
+        enemies.forEach { enemy ->
+            enemy.resolveObstacleCollisions(
+                obstacles =
+                    mapObstacles
             )
         }
 
