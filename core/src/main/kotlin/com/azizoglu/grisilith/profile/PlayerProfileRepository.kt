@@ -216,6 +216,15 @@ object PlayerProfileRepository {
         return wasUnlocked
     }
 
+    fun resetForBeta() {
+
+        currentProfile =
+            PlayerProfile()
+
+        preferences.clear()
+        preferences.flush()
+    }
+
     fun save() {
         preferences
             .putInteger(

@@ -303,6 +303,15 @@ object HighScoreRepository {
         save()
     }
 
+    fun resetForBeta() {
+
+        currentStatistics =
+            CareerStatistics()
+
+        preferences.clear()
+        preferences.flush()
+    }
+
     private fun save() {
 
         preferences

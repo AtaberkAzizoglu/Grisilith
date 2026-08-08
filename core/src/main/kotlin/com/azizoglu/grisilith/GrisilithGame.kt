@@ -33,8 +33,64 @@ import com.azizoglu.grisilith.character.DefaultCharacters
 import com.azizoglu.grisilith.save.RunSaveLoadResult
 import com.azizoglu.grisilith.save.RunSaveSnapshot
 import com.azizoglu.grisilith.screen.LoadGameScreen
+import com.badlogic.gdx.Preferences
 
 class GrisilithGame : Game() {
+
+    companion object {
+
+        private const val BETA_RESET_PREFERENCES_NAME =
+            "grisilith_beta_migrations"
+
+        private const val BETA_RESET_KEY =
+            "beta_clean_start_v1"
+    }
+
+    private val betaResetPreferences:
+        Preferences
+        get() =
+            Gdx.app.getPreferences(
+                BETA_RESET_PREFERENCES_NAME
+            )
+
+    private fun performOneTimeBetaResetIfNeeded() {
+
+        if (
+            betaResetPreferences
+                .getBoolean(
+                    BETA_RESET_KEY,
+                    false
+                )
+        ) {
+            return
+        }
+
+        /*
+         * Beta clean start:
+         * - High Scores / career statistics
+         * - Unlocks / encounters / Grisilith Coins / purchased stat points
+         * - Active run save
+         *
+         * Intentionally preserved:
+         * - Settings
+         * - Presets
+         */
+        HighScoreRepository
+            .resetForBeta()
+
+        PlayerProfileRepository
+            .resetForBeta()
+
+        RunSaveRepository
+            .delete()
+
+        betaResetPreferences
+            .putBoolean(
+                BETA_RESET_KEY,
+                true
+            )
+            .flush()
+    }
 
     override fun create() {
         setScreen(
@@ -72,6 +128,10 @@ class GrisilithGame : Game() {
             },
 
             {
+                performOneTimeBetaResetIfNeeded()
+            },
+
+            {
                 PlayerProfileRepository.load()
             },
 
@@ -79,19 +139,7 @@ class GrisilithGame : Game() {
                 HighScoreRepository.load()
             },
 
-            {
-                if (
-                    PlayerProfileRepository
-                        .profile
-                        .grisilithCoins < 1000
-                ) {
-                    PlayerProfileRepository
-                        .addGrisilithCoins(
-                            1000
-                        )
-                }
-            }
-        )
+            )
     }
 
     fun showMainMenu() {
