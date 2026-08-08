@@ -16,6 +16,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.azizoglu.grisilith.settings.GameSettings
 import com.azizoglu.grisilith.screen.SettingsScreen
+import com.azizoglu.grisilith.screen.SplashLoadingScreen
 import com.azizoglu.grisilith.preset.PresetRepository
 import com.azizoglu.grisilith.preset.PresetContentResolver
 import com.azizoglu.grisilith.screen.preset.PresetManagerScreen
@@ -36,29 +37,61 @@ import com.azizoglu.grisilith.screen.LoadGameScreen
 class GrisilithGame : Game() {
 
     override fun create() {
-        /*
-         * Registry ilk kez burada oluşturulur.
-         */
-        DefaultContentRegistry.instance
+        setScreen(
+            SplashLoadingScreen(
+                game =
+                    this,
 
-        GameSettings.load()
+                initializationSteps =
+                    startupInitializationSteps(),
 
-        PresetRepository.load()
+                onFinished = {
+                    showMainMenu()
+                }
+            )
+        )
+    }
 
-        PlayerProfileRepository.load()
+    private fun startupInitializationSteps():
+        List<() -> Unit> {
 
-        HighScoreRepository.load()
+        return listOf(
+            {
+                /*
+                 * Registry ilk kez burada oluşturulur.
+                 */
+                DefaultContentRegistry.instance
+            },
 
-        if (
-            PlayerProfileRepository
-                .profile
-                .grisilithCoins < 1000
-        ) {
-            PlayerProfileRepository
-                .addGrisilithCoins(1000)
-        }
+            {
+                GameSettings.load()
+            },
 
-        showMainMenu()
+            {
+                PresetRepository.load()
+            },
+
+            {
+                PlayerProfileRepository.load()
+            },
+
+            {
+                HighScoreRepository.load()
+            },
+
+            {
+                if (
+                    PlayerProfileRepository
+                        .profile
+                        .grisilithCoins < 1000
+                ) {
+                    PlayerProfileRepository
+                        .addGrisilithCoins(
+                            1000
+                        )
+                }
+            }
+        )
     }
 
     fun showMainMenu() {
