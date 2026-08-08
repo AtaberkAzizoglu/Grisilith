@@ -71,13 +71,19 @@ class Player(
     val centerY: Float
         get() = position.y + size / 2f
 
+    /*
+     * position + size visual frame'i temsil eder.
+     * bounds yalnızca alt gövde / ayak gameplay footprint'idir.
+     */
     val bounds: Rectangle
         get() {
             collisionBounds.set(
-                position.x,
-                position.y,
-                size,
-                size
+                position.x +
+                    size * COLLISION_OFFSET_X_RATIO,
+                position.y +
+                    size * COLLISION_OFFSET_Y_RATIO,
+                size * COLLISION_WIDTH_RATIO,
+                size * COLLISION_HEIGHT_RATIO
             )
 
             return collisionBounds
@@ -928,6 +934,22 @@ class Player(
             thickness,
             size + padding * 2f
         )
+    }
+
+
+    companion object {
+
+        private const val COLLISION_WIDTH_RATIO =
+            0.56f
+
+        private const val COLLISION_HEIGHT_RATIO =
+            0.40f
+
+        private const val COLLISION_OFFSET_X_RATIO =
+            0.22f
+
+        private const val COLLISION_OFFSET_Y_RATIO =
+            0.04f
     }
 
 }

@@ -253,13 +253,19 @@ class Enemy(
     val centerY: Float
         get() = position.y + size / 2f
 
+    /*
+     * position + size visual frame'dir.
+     * bounds alt gövde / ayak gameplay footprint'idir.
+     */
     val bounds: Rectangle
         get() {
             collisionBounds.set(
-                position.x,
-                position.y,
-                size,
-                size
+                position.x +
+                    size * COLLISION_OFFSET_X_RATIO,
+                position.y +
+                    size * COLLISION_OFFSET_Y_RATIO,
+                size * COLLISION_WIDTH_RATIO,
+                size * COLLISION_HEIGHT_RATIO
             )
 
             return collisionBounds
@@ -716,15 +722,42 @@ class Enemy(
             return
         }
 
-        var differenceX = centerX - other.centerX
-        var differenceY = centerY - other.centerY
+        val thisBounds =
+            bounds
+
+        val otherBounds =
+            other.bounds
+
+        var differenceX =
+            (
+                thisBounds.x +
+                    thisBounds.width / 2f
+                ) -
+                (
+                    otherBounds.x +
+                        otherBounds.width / 2f
+                    )
+
+        var differenceY =
+            (
+                thisBounds.y +
+                    thisBounds.height / 2f
+                ) -
+                (
+                    otherBounds.y +
+                        otherBounds.height / 2f
+                    )
 
         var distanceSquared =
             differenceX * differenceX +
                 differenceY * differenceY
 
         val minimumDistance =
-            (size + other.size) / 2f
+            (
+                thisBounds.width +
+                    otherBounds.width
+                ) /
+                2f
 
         val minimumDistanceSquared =
             minimumDistance * minimumDistance
@@ -1546,6 +1579,18 @@ class Enemy(
         )
     }
     companion object {
+
+        private const val COLLISION_WIDTH_RATIO =
+            0.58f
+
+        private const val COLLISION_HEIGHT_RATIO =
+            0.42f
+
+        private const val COLLISION_OFFSET_X_RATIO =
+            0.21f
+
+        private const val COLLISION_OFFSET_Y_RATIO =
+            0.04f
 
         private const val DEFAULT_CONTACT_HITS_PER_SECOND =
             1f

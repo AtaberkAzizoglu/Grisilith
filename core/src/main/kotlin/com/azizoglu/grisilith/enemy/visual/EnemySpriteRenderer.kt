@@ -124,12 +124,12 @@ class EnemySpriteRenderer {
                     frame
             )
 
-        val worldSize =
-            enemy.bounds.width
-                .coerceAtLeast(
-                    1f
-                )
-
+        /*
+         * Visual size is independent from the enemy collision hitbox.
+         * Our beast sheets already use the intended in-game canvas sizes
+         * (32 / 48 / 72 / 108), so the frame's largest source side is the
+         * correct world-space visual size.
+         */
         /*
          * Kaynak frame'lerin aspect ratio'sunu koruyoruz.
          * Böylece Crocodile gibi uzun veya Bald Eagle gibi geniş
@@ -146,8 +146,7 @@ class EnemySpriteRenderer {
                 )
 
         val scale =
-            worldSize /
-                sourceLargestSide
+            1f
 
         val drawWidth =
             frame.width *

@@ -13,6 +13,11 @@ import kotlin.math.max
 
 class CharacterSpriteRenderer {
 
+    companion object {
+        private const val CHARACTER_VISUAL_WORLD_SIZE =
+            48f
+    }
+
     private val batch =
         SpriteBatch()
 
@@ -115,11 +120,13 @@ class CharacterSpriteRenderer {
                     frame
             )
 
+        /*
+         * IMPORTANT: visual size is independent from the collision hitbox.
+         * Player.bounds may be a smaller feet/physics footprint, but the
+         * character must keep its original 48 world-unit visual footprint.
+         */
         val worldSize =
-            player.bounds.width
-                .coerceAtLeast(
-                    1f
-                )
+            CHARACTER_VISUAL_WORLD_SIZE
 
         /*
          * Character source frames are not perfect squares.
@@ -159,7 +166,9 @@ class CharacterSpriteRenderer {
                 2f
 
         val drawY =
-            player.bounds.y
+            player.centerY -
+                CHARACTER_VISUAL_WORLD_SIZE /
+                2f
 
         batch.color =
             if (
