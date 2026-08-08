@@ -3,28 +3,38 @@ package com.azizoglu.grisilith.weapon.visual
 import kotlin.math.atan2
 
 /*
- * Column order in the supplied sheet:
- * N, NW, W, SW, S, SE, E, NE
+ * Game movement direction -> source-sheet column.
+ *
+ * The source artwork is visually oriented opposite to the projectile
+ * travel vector used by the game. We therefore map every resolved game
+ * direction to the opposite-facing source frame.
+ *
+ * Source atlas column order:
+ * 0=N, 1=NW, 2=W, 3=SW, 4=S, 5=SE, 6=E, 7=NE
  */
 enum class ProjectileVisualDirection(
     val columnIndex: Int
 ) {
-    NORTH(0),
-    NORTH_WEST(1),
-    WEST(2),
-    SOUTH_WEST(3),
-    SOUTH(4),
-    SOUTH_EAST(5),
-    EAST(6),
-    NORTH_EAST(7);
+    NORTH(4),
+    NORTH_WEST(5),
+    WEST(6),
+    SOUTH_WEST(7),
+    SOUTH(0),
+    SOUTH_EAST(1),
+    EAST(2),
+    NORTH_EAST(3);
 
     companion object {
+
         fun fromVelocity(
             x: Float,
             y: Float
         ): ProjectileVisualDirection {
 
-            if (x == 0f && y == 0f) {
+            if (
+                x == 0f &&
+                y == 0f
+            ) {
                 return EAST
             }
 
@@ -34,14 +44,20 @@ enum class ProjectileVisualDirection(
                         y.toDouble(),
                         x.toDouble()
                     )
-                ).toFloat()
+                )
+                    .toFloat()
 
-            if (degrees < 0f) {
-                degrees += 360f
+            if (
+                degrees <
+                0f
+            ) {
+                degrees +=
+                    360f
             }
 
             return when {
-                degrees >= 337.5f || degrees < 22.5f ->
+                degrees >= 337.5f ||
+                    degrees < 22.5f ->
                     EAST
 
                 degrees < 67.5f ->

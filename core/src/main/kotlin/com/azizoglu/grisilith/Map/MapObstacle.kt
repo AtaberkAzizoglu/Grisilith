@@ -9,9 +9,27 @@ class MapObstacle(
     x: Float,
     y: Float,
     width: Float,
-    height: Float
+    height: Float,
+    val visualVariant: Int = 0
 ) {
-    val bounds =
+    init {
+        require(
+            visualVariant in
+                0..3
+        )
+    }
+
+    /*
+     * visualBounds:
+     * Generator'dan gelen eski obstacle rectangle'ı.
+     * Sprite yerleşimi ve dünya içindeki genel kapladığı alan için korunur.
+     *
+     * bounds:
+     * Gerçek gameplay collision footprint'i.
+     * Görselin tamamına değil, obstacle'ın zemine temas eden fiziksel kısmına
+     * karşılık gelir.
+     */
+    val visualBounds =
         Rectangle(
             x,
             y,
@@ -19,9 +37,116 @@ class MapObstacle(
             height
         )
 
+    private val collisionBounds =
+        Rectangle()
+
+    val bounds: Rectangle
+        get() {
+            val footprint =
+                collisionFootprint()
+
+            val collisionWidth =
+                visualBounds.width *
+                    footprint.widthRatio
+
+            val collisionHeight =
+                visualBounds.height *
+                    footprint.heightRatio
+
+            val collisionX =
+                visualBounds.x +
+                    visualBounds.width *
+                    footprint.offsetXRatio
+
+            val collisionY =
+                visualBounds.y +
+                    visualBounds.height *
+                    footprint.offsetYRatio
+
+            collisionBounds.set(
+                collisionX,
+                collisionY,
+                collisionWidth,
+                collisionHeight
+            )
+
+            return collisionBounds
+        }
+
+    private fun collisionFootprint():
+        CollisionFootprint {
+
+        return when (type) {
+            MapObstacleType.ROCK ->
+                CollisionFootprint(
+                    widthRatio = 0.72f,
+                    heightRatio = 0.55f,
+                    offsetXRatio = 0.14f,
+                    offsetYRatio = 0.05f
+                )
+
+            MapObstacleType.TREE ->
+                CollisionFootprint(
+                    widthRatio = 0.34f,
+                    heightRatio = 0.30f,
+                    offsetXRatio = 0.33f,
+                    offsetYRatio = 0.02f
+                )
+
+            MapObstacleType.WELL ->
+                CollisionFootprint(
+                    widthRatio = 0.78f,
+                    heightRatio = 0.58f,
+                    offsetXRatio = 0.11f,
+                    offsetYRatio = 0.04f
+                )
+
+            MapObstacleType.HAY_BALE ->
+                CollisionFootprint(
+                    widthRatio = 0.82f,
+                    heightRatio = 0.68f,
+                    offsetXRatio = 0.09f,
+                    offsetYRatio = 0.04f
+                )
+
+            MapObstacleType.BROKEN_WAGON ->
+                CollisionFootprint(
+                    widthRatio = 0.82f,
+                    heightRatio = 0.58f,
+                    offsetXRatio = 0.09f,
+                    offsetYRatio = 0.05f
+                )
+
+            /*
+             * Henüz sprite sistemi olmayan obstacle türlerinde eski davranışı
+             * koruyoruz.
+             */
+            MapObstacleType.HOUSE,
+            MapObstacleType.CAVE_ROCK ->
+                CollisionFootprint(
+                    widthRatio = 1f,
+                    heightRatio = 1f,
+                    offsetXRatio = 0f,
+                    offsetYRatio = 0f
+                )
+        }
+    }
+
+    private data class CollisionFootprint(
+        val widthRatio: Float,
+        val heightRatio: Float,
+        val offsetXRatio: Float,
+        val offsetYRatio: Float
+    )
+
     fun render(
-        shapeRenderer: ShapeRenderer
+        shapeRenderer: ShapeRenderer,
+        renderBody: Boolean = true
     ) {
+        if (!renderBody) {
+            return
+        }
+
         shapeRenderer.color =
             when (type) {
                 MapObstacleType.ROCK ->

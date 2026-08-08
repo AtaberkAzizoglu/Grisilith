@@ -7,6 +7,7 @@ import com.azizoglu.grisilith.economy.GoldCoinPickup
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.enemy.visual.EnemySpriteRenderer
 import com.azizoglu.grisilith.map.MapObstacle
+import com.azizoglu.grisilith.map.visual.MapObstacleSpriteRenderer
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.visual.ProjectileSpriteRenderer
@@ -27,6 +28,9 @@ class WorldRenderer(
         private const val GRID_SIZE =
             100f
     }
+
+    private val mapObstacleSpriteRenderer =
+        MapObstacleSpriteRenderer()
 
     private val characterSpriteRenderer =
         CharacterSpriteRenderer()
@@ -84,7 +88,14 @@ class WorldRenderer(
         mapObstacles.forEach {
                 obstacle ->
             obstacle.render(
-                shapeRenderer
+                shapeRenderer =
+                    shapeRenderer,
+
+                renderBody =
+                    !mapObstacleSpriteRenderer
+                        .hasVisualDefinition(
+                            obstacle
+                        )
             )
         }
 
@@ -114,6 +125,18 @@ class WorldRenderer(
 
         /*
          * PASS 2:
+         * Gerçek map obstacle sprite'ları.
+         */
+        mapObstacleSpriteRenderer.render(
+            obstacles =
+                mapObstacles,
+
+            camera =
+                camera
+        )
+
+        /*
+         * PASS 3:
          * Gerçek Character sprite'ı.
          */
         characterSpriteRenderer.render(
@@ -128,7 +151,7 @@ class WorldRenderer(
         )
 
         /*
-         * PASS 3:
+         * PASS 4:
          * Gerçek Enemy sprite'ları.
          */
         enemySpriteRenderer.render(
@@ -140,7 +163,7 @@ class WorldRenderer(
         )
 
         /*
-         * PASS 4:
+         * PASS 5:
          * Gerçek projectile sprite'ları.
          *
          * Sheet'te karşılığı olmayan projectile türlerinde hiçbir şey
@@ -155,7 +178,7 @@ class WorldRenderer(
         )
 
         /*
-         * PASS 5:
+         * PASS 6:
          * Enemy health bar / condition / trait overlay'leri ve
          * görsel tanımı olmayan projectile fallback'leri sprite'ların
          * üzerinde kalır.
@@ -277,6 +300,9 @@ class WorldRenderer(
     }
 
     fun dispose() {
+        mapObstacleSpriteRenderer
+            .dispose()
+
         characterSpriteRenderer
             .dispose()
 

@@ -182,7 +182,12 @@ object MapObstacleGenerator {
                     x = x,
                     y = y,
                     width = width,
-                    height = height
+                    height = height,
+                    visualVariant =
+                        MathUtils.random(
+                            0,
+                            3
+                        )
                 )
             )
 
@@ -226,7 +231,7 @@ object MapObstacleGenerator {
 
         return obstacles.any { obstacle ->
             expandedCandidate.overlaps(
-                obstacle.bounds
+                obstacle.visualBounds
             )
         }
     }
