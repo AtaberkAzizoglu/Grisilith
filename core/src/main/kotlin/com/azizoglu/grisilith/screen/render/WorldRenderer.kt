@@ -9,6 +9,7 @@ import com.azizoglu.grisilith.enemy.visual.EnemySpriteRenderer
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.weapon.Projectile
+import com.azizoglu.grisilith.weapon.visual.ProjectileSpriteRenderer
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -32,6 +33,9 @@ class WorldRenderer(
 
     private val enemySpriteRenderer =
         EnemySpriteRenderer()
+
+    private val projectileSpriteRenderer =
+        ProjectileSpriteRenderer()
 
     fun render(
         mapObstacles:
@@ -137,8 +141,24 @@ class WorldRenderer(
 
         /*
          * PASS 4:
+         * Gerçek projectile sprite'ları.
+         *
+         * Sheet'te karşılığı olmayan projectile türlerinde hiçbir şey
+         * çizilmez; sonraki ShapeRenderer pass'i eski placeholder'ı korur.
+         */
+        projectileSpriteRenderer.render(
+            projectiles =
+                projectiles,
+
+            camera =
+                camera
+        )
+
+        /*
+         * PASS 5:
          * Enemy health bar / condition / trait overlay'leri ve
-         * projectile'lar sprite'ların üzerinde kalır.
+         * görsel tanımı olmayan projectile fallback'leri sprite'ların
+         * üzerinde kalır.
          *
          * Registry'de görseli olmayan enemy'ler için eski renkli
          * placeholder gövde korunur. Böylece başka map'ler bozulmaz.
@@ -165,8 +185,16 @@ class WorldRenderer(
 
         projectiles.forEach {
                 projectile ->
+
             projectile.render(
-                shapeRenderer
+                shapeRenderer =
+                    shapeRenderer,
+
+                renderBody =
+                    !projectileSpriteRenderer
+                        .hasVisualDefinition(
+                            projectile
+                        )
             )
         }
 
@@ -253,6 +281,9 @@ class WorldRenderer(
             .dispose()
 
         enemySpriteRenderer
+            .dispose()
+
+        projectileSpriteRenderer
             .dispose()
     }
 }

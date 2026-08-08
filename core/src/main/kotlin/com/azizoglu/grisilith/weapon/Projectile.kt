@@ -171,6 +171,31 @@ class Projectile(
     var isActive: Boolean = true
         private set
 
+    /*
+     * Projectile sprite renderer only reads these values.
+     * Gameplay/collision ownership remains inside Projectile.
+     */
+    val visualCenterX: Float
+        get() = position.x + size / 2f
+
+    val visualCenterY: Float
+        get() = position.y + size / 2f
+
+    val visualVelocityX: Float
+        get() = velocity.x
+
+    val visualVelocityY: Float
+        get() = velocity.y
+
+    val visualCollisionSize: Float
+        get() = size
+
+    val isVisualRenderable: Boolean
+        get() =
+            isActive &&
+                !ignoresEnemyCollisions &&
+                activationDelayRemaining <= 0f
+
     init {
         if (velocity.isZero) {
             velocity.set(
@@ -933,7 +958,8 @@ class Projectile(
     }
 
     fun render(
-        shapeRenderer: ShapeRenderer
+        shapeRenderer: ShapeRenderer,
+        renderBody: Boolean = true
     ) {
         if (
             !isActive ||
@@ -941,6 +967,10 @@ class Projectile(
             activationDelayRemaining >
             0f
         ) {
+            return
+        }
+
+        if (!renderBody) {
             return
         }
 
