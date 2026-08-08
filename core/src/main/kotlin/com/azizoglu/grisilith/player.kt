@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.player
 
 import com.azizoglu.grisilith.combat.HealthComponent
+import com.azizoglu.grisilith.character.visual.CharacterVisualState
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
 import com.badlogic.gdx.Gdx
@@ -27,6 +28,9 @@ class Player(
 
     private val movementDirection =
         Vector2()
+
+    private val visualState =
+        CharacterVisualState()
 
     private val chargerMovementDirection =
         Vector2()
@@ -78,6 +82,11 @@ class Player(
 
             return collisionBounds
         }
+
+    val currentVisualState:
+        CharacterVisualState
+        get() =
+            visualState
 
     fun update(
         delta:
@@ -634,27 +643,32 @@ class Player(
     }
 
     fun render(
-        shapeRenderer: ShapeRenderer
+        shapeRenderer: ShapeRenderer,
+        renderBody: Boolean = true
     ) {
         renderDefensiveLineGlow(
             shapeRenderer
         )
 
-        shapeRenderer.color =
-            if (health.isDead) {
-                Color.DARK_GRAY
-            } else {
-                Color.BLUE
-            }
+        if (renderBody) {
+            shapeRenderer.color =
+                if (health.isDead) {
+                    Color.DARK_GRAY
+                } else {
+                    Color.BLUE
+                }
 
-        shapeRenderer.rect(
-            position.x,
-            position.y,
-            size,
-            size
+            shapeRenderer.rect(
+                position.x,
+                position.y,
+                size,
+                size
+            )
+        }
+
+        renderHealthBar(
+            shapeRenderer
         )
-
-        renderHealthBar(shapeRenderer)
     }
 
     private fun renderHealthBar(
@@ -796,11 +810,27 @@ class Player(
         delta:
         Float
     ) {
+        val safeDelta =
+            delta.coerceAtLeast(
+                0f
+            )
+
         updateActualMovementSpeed(
             delta =
-                delta.coerceAtLeast(
-                    0f
-                )
+                safeDelta
+        )
+
+        visualState.update(
+            delta =
+                safeDelta,
+
+            movementX =
+                position.x -
+                    previousPosition.x,
+
+            movementY =
+                position.y -
+                    previousPosition.y
         )
     }
 

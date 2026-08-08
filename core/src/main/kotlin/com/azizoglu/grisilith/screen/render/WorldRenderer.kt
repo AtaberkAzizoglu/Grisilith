@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.screen.render
 
 import com.azizoglu.grisilith.chest.ChestPickupManager
+import com.azizoglu.grisilith.character.visual.CharacterSpriteRenderer
+import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.economy.GoldCoinPickup
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.enemy.visual.EnemySpriteRenderer
@@ -16,13 +18,17 @@ class WorldRenderer(
     private val shapeRenderer: ShapeRenderer,
     private val camera: OrthographicCamera,
     private val worldWidth: Float,
-    private val worldHeight: Float
+    private val worldHeight: Float,
+    private val selectedCharacterId: ContentId
 ) {
 
     companion object {
         private const val GRID_SIZE =
             100f
     }
+
+    private val characterSpriteRenderer =
+        CharacterSpriteRenderer()
 
     private val enemySpriteRenderer =
         EnemySpriteRenderer()
@@ -79,7 +85,14 @@ class WorldRenderer(
         }
 
         player.render(
-            shapeRenderer
+            shapeRenderer =
+                shapeRenderer,
+
+            renderBody =
+                !characterSpriteRenderer
+                    .hasVisualDefinition(
+                        selectedCharacterId
+                    )
         )
 
         goldCoinPickups.forEach {
@@ -97,6 +110,21 @@ class WorldRenderer(
 
         /*
          * PASS 2:
+         * Gerçek Character sprite'ı.
+         */
+        characterSpriteRenderer.render(
+            player =
+                player,
+
+            characterId =
+                selectedCharacterId,
+
+            camera =
+                camera
+        )
+
+        /*
+         * PASS 3:
          * Gerçek Enemy sprite'ları.
          */
         enemySpriteRenderer.render(
@@ -108,7 +136,7 @@ class WorldRenderer(
         )
 
         /*
-         * PASS 3:
+         * PASS 4:
          * Enemy health bar / condition / trait overlay'leri ve
          * projectile'lar sprite'ların üzerinde kalır.
          *
@@ -221,6 +249,9 @@ class WorldRenderer(
     }
 
     fun dispose() {
+        characterSpriteRenderer
+            .dispose()
+
         enemySpriteRenderer
             .dispose()
     }

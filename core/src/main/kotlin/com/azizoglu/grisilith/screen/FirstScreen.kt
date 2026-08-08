@@ -144,7 +144,9 @@ class FirstScreen(
             shapeRenderer = shapeRenderer,
             camera = camera,
             worldWidth = worldWidth,
-            worldHeight = worldHeight
+            worldHeight = worldHeight,
+            selectedCharacterId =
+                selectedCharacter.id
         )
 
     private val viewport =
