@@ -3721,6 +3721,7 @@ class FirstScreen(
         marketRenderer.dispose()
         pauseRenderer.dispose()
 
+        worldRenderer.dispose()
         shapeRenderer.dispose()
         hudBatch.dispose()
         hudFont.dispose()

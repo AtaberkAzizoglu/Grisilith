@@ -1,8 +1,9 @@
 package com.azizoglu.grisilith.screen.render
 
-import com.azizoglu.grisilith.economy.GoldCoinPickup
 import com.azizoglu.grisilith.chest.ChestPickupManager
+import com.azizoglu.grisilith.economy.GoldCoinPickup
 import com.azizoglu.grisilith.enemy.EnemyManager
+import com.azizoglu.grisilith.enemy.visual.EnemySpriteRenderer
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.weapon.Projectile
@@ -19,8 +20,12 @@ class WorldRenderer(
 ) {
 
     companion object {
-        private const val GRID_SIZE = 100f
+        private const val GRID_SIZE =
+            100f
     }
+
+    private val enemySpriteRenderer =
+        EnemySpriteRenderer()
 
     fun render(
         mapObstacles:
@@ -52,46 +57,96 @@ class WorldRenderer(
         renderGrid()
         renderWorldBorder()
 
+        /*
+         * PASS 1:
+         * Dünya tabanı ve sprite'lardan önce kalması gereken
+         * ShapeRenderer içerikleri.
+         */
         shapeRenderer.begin(
             ShapeRenderer.ShapeType.Filled
         )
 
-        /*
-         * Aura, alan efekti ve benzeri dünya efektleri
-         * Entity'lerden önce fakat aynı ShapeRenderer
-         * begin/end bloğu içerisinde çizilir.
-         */
         renderBehindEntities
             ?.invoke(
                 shapeRenderer
             )
 
-        mapObstacles.forEach { obstacle ->
-            obstacle.render(shapeRenderer)
+        mapObstacles.forEach {
+                obstacle ->
+            obstacle.render(
+                shapeRenderer
+            )
         }
 
-        player.render(shapeRenderer)
-
-        enemyManager.render(
+        player.render(
             shapeRenderer
         )
 
-        goldCoinPickups.forEach { pickup ->
-            pickup.render(shapeRenderer)
+        goldCoinPickups.forEach {
+                pickup ->
+            pickup.render(
+                shapeRenderer
+            )
         }
 
         chestPickupManager.render(
             shapeRenderer
         )
 
-        projectiles.forEach { projectile ->
-            projectile.render(shapeRenderer)
+        shapeRenderer.end()
+
+        /*
+         * PASS 2:
+         * Gerçek Enemy sprite'ları.
+         */
+        enemySpriteRenderer.render(
+            enemies =
+                enemyManager.allEnemies,
+
+            camera =
+                camera
+        )
+
+        /*
+         * PASS 3:
+         * Enemy health bar / condition / trait overlay'leri ve
+         * projectile'lar sprite'ların üzerinde kalır.
+         *
+         * Registry'de görseli olmayan enemy'ler için eski renkli
+         * placeholder gövde korunur. Böylece başka map'ler bozulmaz.
+         */
+        shapeRenderer.begin(
+            ShapeRenderer.ShapeType.Filled
+        )
+
+        enemyManager.allEnemies
+            .forEach {
+                    enemy ->
+
+                enemy.render(
+                    shapeRenderer =
+                        shapeRenderer,
+
+                    renderBody =
+                        !enemySpriteRenderer
+                            .hasVisualDefinition(
+                                enemy
+                            )
+                )
+            }
+
+        projectiles.forEach {
+                projectile ->
+            projectile.render(
+                shapeRenderer
+            )
         }
 
         shapeRenderer.end()
     }
 
     private fun clearScreen() {
+
         Gdx.gl.glClearColor(
             0.05f,
             0.05f,
@@ -105,13 +160,18 @@ class WorldRenderer(
     }
 
     private fun renderGrid() {
+
         shapeRenderer.begin(
             ShapeRenderer.ShapeType.Line
         )
 
-        var x = 0f
+        var x =
+            0f
 
-        while (x <= worldWidth) {
+        while (
+            x <=
+            worldWidth
+        ) {
             shapeRenderer.line(
                 x,
                 0f,
@@ -119,12 +179,17 @@ class WorldRenderer(
                 worldHeight
             )
 
-            x += GRID_SIZE
+            x +=
+                GRID_SIZE
         }
 
-        var y = 0f
+        var y =
+            0f
 
-        while (y <= worldHeight) {
+        while (
+            y <=
+            worldHeight
+        ) {
             shapeRenderer.line(
                 0f,
                 y,
@@ -132,13 +197,15 @@ class WorldRenderer(
                 y
             )
 
-            y += GRID_SIZE
+            y +=
+                GRID_SIZE
         }
 
         shapeRenderer.end()
     }
 
     private fun renderWorldBorder() {
+
         shapeRenderer.begin(
             ShapeRenderer.ShapeType.Line
         )
@@ -151,5 +218,10 @@ class WorldRenderer(
         )
 
         shapeRenderer.end()
+    }
+
+    fun dispose() {
+        enemySpriteRenderer
+            .dispose()
     }
 }

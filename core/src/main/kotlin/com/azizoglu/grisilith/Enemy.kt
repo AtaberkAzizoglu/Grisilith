@@ -1324,9 +1324,13 @@ class Enemy(
         knockbackTimeRemaining = 0.18f
     }
 
-    fun render(shapeRenderer: ShapeRenderer) {
+    fun render(
+        shapeRenderer: ShapeRenderer,
+        renderBody: Boolean = true
+    ) {
         if (isDead) {
             if (
+                renderBody &&
                 deathFadeAlpha >
                 0f
             ) {
@@ -1376,26 +1380,29 @@ class Enemy(
                 shapeRenderer
         )
 
-        shapeRenderer.color = when (stats.type) {
-            EnemyType.NORMAL ->
-                Color.RED
+        if (renderBody) {
+            shapeRenderer.color =
+                when (stats.type) {
+                    EnemyType.NORMAL ->
+                        Color.RED
 
-            EnemyType.UNIQUE ->
-                Color.PURPLE
+                    EnemyType.UNIQUE ->
+                        Color.PURPLE
 
-            EnemyType.MINI_BOSS ->
-                Color.ORANGE
+                    EnemyType.MINI_BOSS ->
+                        Color.ORANGE
 
-            EnemyType.FINAL_BOSS ->
-                Color.GOLD
+                    EnemyType.FINAL_BOSS ->
+                        Color.GOLD
+                }
+
+            shapeRenderer.rect(
+                position.x,
+                position.y,
+                size,
+                size
+            )
         }
-
-        shapeRenderer.rect(
-            position.x,
-            position.y,
-            size,
-            size
-        )
 
         if (isBurned) {
             renderBurnedEffect(

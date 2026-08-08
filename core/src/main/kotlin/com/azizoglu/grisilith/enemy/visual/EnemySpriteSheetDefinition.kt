@@ -2,33 +2,15 @@ package com.azizoglu.grisilith.enemy.visual
 
 import com.azizoglu.grisilith.content.ContentId
 
-data class EnemySpriteAnimationDefinition(
-    val idleFrame: EnemySpriteFrame,
-    val walkFrames: List<EnemySpriteFrame>,
-    val walkFrameDurationSeconds: Float
-) {
-
-    init {
-        require(
-            walkFrames.isNotEmpty()
-        )
-
-        require(
-            walkFrameDurationSeconds >
-                0f
-        )
-    }
-}
-
 data class EnemySpriteSheetDefinition(
     val kindId: ContentId,
     val texturePath: String,
     val sourceWidth: Int,
     val sourceHeight: Int,
     val animations:
-        Map<
-            EnemyVisualDirection,
-            EnemySpriteAnimationDefinition
+    Map<
+        EnemyVisualDirection,
+        EnemySpriteAnimationDefinition
         >
 ) {
 
@@ -38,13 +20,11 @@ data class EnemySpriteSheetDefinition(
         )
 
         require(
-            sourceWidth >
-                0
+            sourceWidth > 0
         )
 
         require(
-            sourceHeight >
-                0
+            sourceHeight > 0
         )
 
         require(
@@ -55,8 +35,7 @@ data class EnemySpriteSheetDefinition(
     }
 
     fun animationFor(
-        direction:
-        EnemyVisualDirection
+        direction: EnemyVisualDirection
     ): EnemySpriteAnimationDefinition {
         return animations[
             direction
