@@ -32,10 +32,10 @@ object Lwjgl3Launcher {
             setWindowedMode(1280, 720)
 
             setWindowIcon(
-                "libgdx128.png",
-                "libgdx64.png",
-                "libgdx32.png",
-                "libgdx16.png"
+                "icons/grisilith_icon_128.png",
+                "icons/grisilith_icon_64.png",
+                "icons/grisilith_icon_32.png",
+                "icons/grisilith_icon_16.png"
             )
         }
     }
