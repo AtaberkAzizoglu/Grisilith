@@ -8,6 +8,7 @@ import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.enemy.visual.EnemySpriteRenderer
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.map.visual.MapObstacleSpriteRenderer
+import com.azizoglu.grisilith.map.tile.MapGroundTileRenderer
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.visual.ProjectileSpriteRenderer
@@ -27,7 +28,23 @@ class WorldRenderer(
     companion object {
         private const val GRID_SIZE =
             100f
+
+        /*
+         * Grass tile aktifken prototip grid'ini gizliyoruz.
+         * Gerektiğinde debug için true yapılabilir.
+         */
+        private const val SHOW_DEBUG_GRID =
+            false
     }
+
+    private val mapGroundTileRenderer =
+        MapGroundTileRenderer(
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight
+        )
 
     private val mapObstacleSpriteRenderer =
         MapObstacleSpriteRenderer()
@@ -40,6 +57,18 @@ class WorldRenderer(
 
     private val projectileSpriteRenderer =
         ProjectileSpriteRenderer()
+
+    /*
+     * LibGDX world Y ekseni yukarı doğru büyür.
+     *
+     * Top-down depth için kuzeyde/yukarıda kalan obje önce,
+     * güneyde/aşağıda kalan obje sonra çizilmelidir.
+     * Böylece aşağıdaki obje öndeymiş gibi görünür.
+     */
+    private data class DepthRenderEntry(
+        val depthY: Float,
+        val render: () -> Unit
+    )
 
     fun render(
         mapObstacles:
@@ -65,16 +94,31 @@ class WorldRenderer(
     ) {
         clearScreen()
 
+        /*
+         * PASS 0:
+         * Road to Home ground layer.
+         * Şimdilik yalnızca Grass Tile kullanılıyor.
+         */
+        mapGroundTileRenderer.render(
+            camera =
+                camera
+        )
+
         shapeRenderer.projectionMatrix =
             camera.combined
 
-        renderGrid()
+        if (
+            SHOW_DEBUG_GRID
+        ) {
+            renderGrid()
+        }
+
         renderWorldBorder()
 
         /*
          * PASS 1:
-         * Dünya tabanı ve sprite'lardan önce kalması gereken
-         * ShapeRenderer içerikleri.
+         * Dünya tabanı, pickup'lar ve sprite tanımı bulunmayan
+         * placeholder gövdeler.
          */
         shapeRenderer.begin(
             ShapeRenderer.ShapeType.Filled
@@ -87,6 +131,7 @@ class WorldRenderer(
 
         mapObstacles.forEach {
                 obstacle ->
+
             obstacle.render(
                 shapeRenderer =
                     shapeRenderer,
@@ -112,6 +157,7 @@ class WorldRenderer(
 
         goldCoinPickups.forEach {
                 pickup ->
+
             pickup.render(
                 shapeRenderer
             )
@@ -125,49 +171,116 @@ class WorldRenderer(
 
         /*
          * PASS 2:
-         * Gerçek map obstacle sprite'ları.
+         * MAP OBSTACLE + CHARACTER + ENEMY ortak Y-sort.
+         *
+         * depthY olarak entity/obstacle'ın zemine temas eden alt
+         * kenarını kullanıyoruz. Büyük Y önce çizilir; küçük Y sonra
+         * çizildiği için ekranda daha güneyde olan obje öne gelir.
          */
-        mapObstacleSpriteRenderer.render(
-            obstacles =
-                mapObstacles,
+        val depthEntries =
+            mutableListOf<DepthRenderEntry>()
 
-            camera =
-                camera
-        )
+        mapObstacles.forEach {
+                obstacle ->
+
+            if (
+                mapObstacleSpriteRenderer
+                    .hasVisualDefinition(
+                        obstacle
+                    )
+            ) {
+                depthEntries.add(
+                    DepthRenderEntry(
+                        depthY =
+                            obstacle.bounds.y,
+
+                        render = {
+                            mapObstacleSpriteRenderer.render(
+                                obstacles =
+                                    listOf(
+                                        obstacle
+                                    ),
+
+                                camera =
+                                    camera
+                            )
+                        }
+                    )
+                )
+            }
+        }
+
+        if (
+            characterSpriteRenderer
+                .hasVisualDefinition(
+                    selectedCharacterId
+                )
+        ) {
+            depthEntries.add(
+                DepthRenderEntry(
+                    depthY =
+                        player.bounds.y,
+
+                    render = {
+                        characterSpriteRenderer.render(
+                            player =
+                                player,
+
+                            characterId =
+                                selectedCharacterId,
+
+                            camera =
+                                camera
+                        )
+                    }
+                )
+            )
+        }
+
+        enemyManager.allEnemies
+            .forEach {
+                    enemy ->
+
+                if (
+                    enemySpriteRenderer
+                        .hasVisualDefinition(
+                            enemy
+                        )
+                ) {
+                    depthEntries.add(
+                        DepthRenderEntry(
+                            depthY =
+                                enemy.bounds.y,
+
+                            render = {
+                                enemySpriteRenderer.render(
+                                    enemies =
+                                        listOf(
+                                            enemy
+                                        ),
+
+                                    camera =
+                                        camera
+                                )
+                            }
+                        )
+                    )
+                }
+            }
+
+        depthEntries
+            .sortedByDescending {
+                    entry ->
+                entry.depthY
+            }
+            .forEach {
+                    entry ->
+                entry.render()
+            }
 
         /*
          * PASS 3:
-         * Gerçek Character sprite'ı.
-         */
-        characterSpriteRenderer.render(
-            player =
-                player,
-
-            characterId =
-                selectedCharacterId,
-
-            camera =
-                camera
-        )
-
-        /*
-         * PASS 4:
-         * Gerçek Enemy sprite'ları.
-         */
-        enemySpriteRenderer.render(
-            enemies =
-                enemyManager.allEnemies,
-
-            camera =
-                camera
-        )
-
-        /*
-         * PASS 5:
-         * Gerçek projectile sprite'ları.
-         *
-         * Sheet'te karşılığı olmayan projectile türlerinde hiçbir şey
-         * çizilmez; sonraki ShapeRenderer pass'i eski placeholder'ı korur.
+         * Projectile sprite'ları world depth'in üzerinde kalır.
          */
         projectileSpriteRenderer.render(
             projectiles =
@@ -178,13 +291,10 @@ class WorldRenderer(
         )
 
         /*
-         * PASS 6:
-         * Enemy health bar / condition / trait overlay'leri ve
-         * görsel tanımı olmayan projectile fallback'leri sprite'ların
-         * üzerinde kalır.
-         *
-         * Registry'de görseli olmayan enemy'ler için eski renkli
-         * placeholder gövde korunur. Böylece başka map'ler bozulmaz.
+         * PASS 4:
+         * Enemy health bar / condition / trait overlay'leri,
+         * görseli olmayan enemy fallback'leri ve projectile
+         * fallback'leri en üstte kalır.
          */
         shapeRenderer.begin(
             ShapeRenderer.ShapeType.Filled
@@ -300,6 +410,9 @@ class WorldRenderer(
     }
 
     fun dispose() {
+        mapGroundTileRenderer
+            .dispose()
+
         mapObstacleSpriteRenderer
             .dispose()
 
