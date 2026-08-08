@@ -55,7 +55,7 @@ class CharacterVisualState {
 
         if (isMoving) {
             direction =
-                resolveDirection(
+                resolveStableDirection(
                     movementX =
                         movementX,
 
@@ -74,7 +74,7 @@ class CharacterVisualState {
         return animationTime
     }
 
-    private fun resolveDirection(
+    private fun resolveStableDirection(
         movementX: Float,
         movementY: Float
     ): CharacterVisualDirection {
@@ -89,10 +89,7 @@ class CharacterVisualState {
                 movementY
             )
 
-        return if (
-            absoluteX >
-            absoluteY
-        ) {
+        val horizontalDirection =
             if (
                 movementX <
                 0f
@@ -101,7 +98,8 @@ class CharacterVisualState {
             } else {
                 CharacterVisualDirection.RIGHT
             }
-        } else {
+
+        val verticalDirection =
             if (
                 movementY <
                 0f
@@ -109,6 +107,43 @@ class CharacterVisualState {
                 CharacterVisualDirection.DOWN
             } else {
                 CharacterVisualDirection.UP
+            }
+
+        return when (
+            direction
+        ) {
+            CharacterVisualDirection.LEFT,
+            CharacterVisualDirection.RIGHT -> {
+
+                val shouldSwitchToVertical =
+                    absoluteY >
+                        absoluteX *
+                        AXIS_SWITCH_RATIO
+
+                if (
+                    shouldSwitchToVertical
+                ) {
+                    verticalDirection
+                } else {
+                    horizontalDirection
+                }
+            }
+
+            CharacterVisualDirection.UP,
+            CharacterVisualDirection.DOWN -> {
+
+                val shouldSwitchToHorizontal =
+                    absoluteX >
+                        absoluteY *
+                        AXIS_SWITCH_RATIO
+
+                if (
+                    shouldSwitchToHorizontal
+                ) {
+                    horizontalDirection
+                } else {
+                    verticalDirection
+                }
             }
         }
     }
@@ -121,5 +156,17 @@ class CharacterVisualState {
         private const val MOVEMENT_EPSILON_SQUARED =
             MOVEMENT_EPSILON *
                 MOVEMENT_EPSILON
+
+        /*
+         * Direction hysteresis:
+         *
+         * Diagonal movement often has X/Y values that are almost equal.
+         * Without a margin, tiny frame-to-frame differences can make the
+         * sprite alternate between horizontal and vertical directions.
+         *
+         * The new axis must be at least 20% stronger before switching.
+         */
+        private const val AXIS_SWITCH_RATIO =
+            1.20f
     }
 }
