@@ -2407,6 +2407,9 @@ class FirstScreen(
             return
         }
 
+        /*
+         * Klavye kısayolları mevcut davranışı korur.
+         */
         if (
             Gdx.input.isKeyJustPressed(
                 Input.Keys.R
@@ -2424,6 +2427,57 @@ class FirstScreen(
             RunSaveRepository.delete()
 
             game.showMainMenu()
+            return
+        }
+
+        /*
+         * Summary ekranındaki iki görsel buton daha önce yalnızca
+         * çiziliyordu; mouse input'u hiçbir yerde kontrol edilmiyordu.
+         *
+         * Ekran koordinatını viewport üzerinden world/UI koordinatına
+         * çevirip renderer'ın kullandığı gerçek button Rectangle'larıyla
+         * test ediyoruz. Böylece çizim ile tıklama alanı birebir aynı kalır.
+         */
+        if (
+            !Gdx.input.isButtonJustPressed(
+                Input.Buttons.LEFT
+            )
+        ) {
+            return
+        }
+
+        val pointerPosition =
+            Vector2(
+                Gdx.input.x.toFloat(),
+                Gdx.input.y.toFloat()
+            )
+
+        viewport.unproject(
+            pointerPosition
+        )
+
+        val summaryLayout =
+            runSummaryRenderer
+                .currentLayout()
+
+        when {
+            summaryLayout.restartButton
+                .contains(
+                    pointerPosition
+                ) -> {
+
+                restartRun()
+            }
+
+            summaryLayout.mainMenuButton
+                .contains(
+                    pointerPosition
+                ) -> {
+
+                RunSaveRepository.delete()
+
+                game.showMainMenu()
+            }
         }
     }
 

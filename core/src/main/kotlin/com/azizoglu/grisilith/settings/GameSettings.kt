@@ -47,8 +47,15 @@ object GameSettings {
     private const val DEFAULT_SOUND_EFFECTS_VOLUME =
         0.8f
 
+    /*
+     * Beta/PC build varsayılanı:
+     * Oyun ilk kez açıldığında fullscreen başlar.
+     *
+     * Kullanıcı Settings'ten WINDOWED seçerse seçim Preferences'a kaydedilir
+     * ve sonraki açılışlarda kullanıcının tercihi korunur.
+     */
     private const val DEFAULT_FULLSCREEN =
-        false
+        true
 
     private const val DEFAULT_VSYNC =
         true
