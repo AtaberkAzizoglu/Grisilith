@@ -2,50 +2,45 @@ package com.azizoglu.grisilith.weapon.visual
 
 enum class ProjectileVisualKind(
     val rowIndex: Int,
-    val baseWorldSize: Float
+    val baseWorldHeight: Float
 ) {
     ARROW(
         rowIndex = 0,
-        baseWorldSize = 28f
-    ),
-
-    DAGGER(
-        rowIndex = 1,
-        baseWorldSize = 28f
+        baseWorldHeight = 30f
     ),
 
     AIR(
-        rowIndex = 2,
-        baseWorldSize = 32f
+        rowIndex = 1,
+        baseWorldHeight = 32f
     ),
 
     WATER(
-        rowIndex = 3,
-        baseWorldSize = 32f
+        rowIndex = 2,
+        baseWorldHeight = 32f
     ),
 
     FIRE(
-        rowIndex = 4,
-        baseWorldSize = 32f
+        rowIndex = 3,
+        baseWorldHeight = 32f
     ),
 
     POISON(
-        rowIndex = 5,
-        baseWorldSize = 32f
+        rowIndex = 4,
+        baseWorldHeight = 32f
     ),
 
     ACID(
-        rowIndex = 6,
-        baseWorldSize = 32f
+        rowIndex = 5,
+        baseWorldHeight = 32f
     ),
 
     LIGHTNING(
-        rowIndex = 7,
-        baseWorldSize = 32f
+        rowIndex = 6,
+        baseWorldHeight = 34f
     ),
 
     NECROTIC(
-        rowIndex = 8,
-        baseWorldSize = 32f
+        rowIndex = 7,
+        baseWorldHeight = 34f
     )
 }

@@ -7,10 +7,10 @@ object EnemySpawnScaling {
     private const val BASE_SPAWN_INTERVAL = 1.5f
     private const val MINIMUM_SPAWN_INTERVAL = 0.18f
 
-    private const val BASE_MAXIMUM_ENEMY_COUNT = 35
-    private const val ENEMY_COUNT_PER_STAGE = 6
+    private const val BASE_MAXIMUM_ENEMY_COUNT = 45
+    private const val ENEMY_COUNT_PER_STAGE = BASE_MAXIMUM_ENEMY_COUNT * 10 / 100
 
-    private const val BASE_UNIQUE_CHANCE = 0.025f
+    private const val BASE_UNIQUE_CHANCE = 0.031f
     private const val UNIQUE_CHANCE_PER_STAGE = 0f
     private const val MAXIMUM_UNIQUE_CHANCE = 0.025f
 

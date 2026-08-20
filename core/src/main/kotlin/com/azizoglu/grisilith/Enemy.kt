@@ -129,6 +129,21 @@ class Enemy(
 
     private val collisionBounds = Rectangle()
 
+    /*
+     * Projectile hit detection gets its own, more generous rectangle.
+     *
+     * IMPORTANT:
+     * This does NOT change the enemy's physical footprint used by:
+     * - player contact
+     * - enemy separation
+     * - obstacle collision
+     *
+     * It only makes visible enemies easier and more reliable to hit
+     * with fast/small projectiles.
+     */
+    private val projectileCollisionBounds =
+        Rectangle()
+
     private val contactDamageTimer =
         ContactDamageTimer(
             hitsPerSecond =
@@ -269,6 +284,27 @@ class Enemy(
             )
 
             return collisionBounds
+        }
+
+    /*
+     * Wider projectile-only target area.
+     *
+     * The normal bounds stay as the smaller feet/body gameplay footprint.
+     * This rectangle intentionally covers most of the visual body so arrows
+     * and spell projectiles do not appear to pass through the enemy.
+     */
+    val projectileHitBounds: Rectangle
+        get() {
+            projectileCollisionBounds.set(
+                position.x +
+                    size * PROJECTILE_HIT_OFFSET_X_RATIO,
+                position.y +
+                    size * PROJECTILE_HIT_OFFSET_Y_RATIO,
+                size * PROJECTILE_HIT_WIDTH_RATIO,
+                size * PROJECTILE_HIT_HEIGHT_RATIO
+            )
+
+            return projectileCollisionBounds
         }
 
     val goldReward: Float
@@ -1591,6 +1627,23 @@ class Enemy(
 
         private const val COLLISION_OFFSET_Y_RATIO =
             0.04f
+
+        /*
+         * Projectile-only target box.
+         * Much larger than the physical collision footprint but still kept
+         * slightly inside the visual canvas to avoid obviously empty hits.
+         */
+        private const val PROJECTILE_HIT_WIDTH_RATIO =
+            0.88f
+
+        private const val PROJECTILE_HIT_HEIGHT_RATIO =
+            0.80f
+
+        private const val PROJECTILE_HIT_OFFSET_X_RATIO =
+            0.06f
+
+        private const val PROJECTILE_HIT_OFFSET_Y_RATIO =
+            0.06f
 
         private const val DEFAULT_CONTACT_HITS_PER_SECOND =
             1f

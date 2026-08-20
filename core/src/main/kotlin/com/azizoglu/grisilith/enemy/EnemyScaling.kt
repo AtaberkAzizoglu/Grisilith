@@ -117,8 +117,8 @@ object EnemyScaling {
 
         val healthMultiplier =
             1f +
-                (safeStage - 1) * 0.10f +
-                completedStageBlocks * 0.08f
+                (safeStage - 1) * 0.40f +
+                completedStageBlocks * 0.15f
 
         val damageMultiplier =
             1f +
@@ -127,7 +127,7 @@ object EnemyScaling {
 
         val speedMultiplier =
             1f +
-                (safeStage - 1) * 0.004f
+                (safeStage - 1) * 0.01f
 
         return ScaledBaseStats(
             maximumHealth =

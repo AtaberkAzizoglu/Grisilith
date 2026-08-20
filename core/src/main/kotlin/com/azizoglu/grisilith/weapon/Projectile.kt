@@ -118,12 +118,19 @@ class Projectile(
             targetY - startY
         )
 
+    /*
+     * v0.2 / Faz 1.1:
+     * Projectile gameplay hitboxes were too small compared with their
+     * on-screen art, especially for arrows. Increase the real collision
+     * body slightly; visual sizing is still handled separately by the
+     * sprite renderer.
+     */
     private val size =
         (
             if (isCriticalHit) {
-                15f
+                18f
             } else {
-                11f
+                14f
             }
             ) *
             sizeMultiplier
@@ -495,7 +502,7 @@ class Projectile(
                 enemy.isDead ||
                 enemy in hitEnemies ||
                 !collisionBounds.overlaps(
-                    enemy.bounds
+                    enemy.projectileHitBounds
                 )
             ) {
                 continue

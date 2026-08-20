@@ -8,15 +8,15 @@ object DefaultProjectileSpriteSheet {
                 "projectiles/projectile_atlas.png",
 
             tileWidth =
-                64,
+                192,
 
             tileHeight =
-                64,
+                128,
 
             columns =
                 8,
 
             rows =
-                9
+                8
         )
 }

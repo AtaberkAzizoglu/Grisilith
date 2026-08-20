@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import kotlin.math.max
+import kotlin.math.sqrt
 
 class ProjectileSpriteRenderer {
 
@@ -17,6 +18,69 @@ class ProjectileSpriteRenderer {
 
         private const val CROSSBOW_ID =
             "WPN_CROSSBOW"
+
+        /*
+         * Faz 1.1a HOTFIX
+         *
+         * The supplied 1536x1024 image looks like an 8x8 sheet, but the
+         * artwork is not actually locked to exact 192x128 cells.
+         *
+         * For example the Lightning row ends around y=840 while Necrotic
+         * begins around y=845. The previous 128px grid cut Lightning at
+         * y=896, which is why a Lightning projectile could contain part of
+         * the Necrotic artwork.
+         *
+         * These are source-image boundaries, not generated graphics.
+         * The original PNG remains unchanged.
+         */
+        private val COLUMN_BOUNDS =
+            intArrayOf(
+                0,
+                176,
+                358,
+                561,
+                745,
+                904,
+                1098,
+                1314,
+                1536
+            )
+
+        private val ROW_BOUNDS =
+            intArrayOf(
+                0,
+                164,
+                280,
+                390,
+                489,
+                590,
+                696,
+                841,
+                1024
+            )
+
+        /*
+         * All projectile ART is about 30% smaller than Faz 1.1a.
+         * Gameplay collision sizes from Faz 1.1 are intentionally preserved
+         * so the improved hit registration is not lost.
+         */
+        private const val GENERAL_VISUAL_COLLISION_SCALE =
+            1.85f
+
+        private const val LONGBOW_ARROW_MIN_HEIGHT =
+            31f
+
+        private const val CROSSBOW_BOLT_MIN_HEIGHT =
+            28f
+
+        private const val CROSSBOW_LENGTH_SCALE =
+            0.78f
+
+        private const val CROSSBOW_THICKNESS_SCALE =
+            1.18f
+
+        private const val CROSSBOW_EXTRA_THICKNESS_OFFSET =
+            0.90f
     }
 
     private val definition =
@@ -58,6 +122,7 @@ class ProjectileSpriteRenderer {
         batch.projectionMatrix =
             camera.combined
 
+        batch.enableBlending()
         batch.begin()
 
         projectiles.forEach {
@@ -88,43 +153,166 @@ class ProjectileSpriteRenderer {
                                 .visualVelocityY
                     )
 
+            /*
+             * HOTFIX: every visual was facing exactly the opposite direction.
+             *
+             * Source columns are:
+             * 0 N, 1 NW, 2 W, 3 SW, 4 S, 5 SE, 6 E, 7 NE
+             *
+             * Opposite direction in this circular order is always +4.
+             */
+            val correctedColumnIndex =
+                (
+                    direction.columnIndex +
+                        4
+                    ) %
+                    definition.columns
+
             val region =
                 regions[
                     kind.rowIndex
                 ][
-                    direction.columnIndex
+                    correctedColumnIndex
                 ]
 
+            val weaponId =
+                projectile
+                    .sourceWeapon
+                    ?.definition
+                    ?.id
+                    ?.value
+
             /*
-             * Existing collision size remains untouched.
-             * This only controls how large the art appears.
-             *
-             * Heavy/large projectile variants still grow because
-             * Projectile.visualCollisionSize already contains their
-             * size multiplier.
+             * Use the actual custom region ratio. This is important because
+             * the source frames are irregular and should not be forced into
+             * either a square or a fake global 3:2 cell ratio.
              */
-            val renderSize =
+            val regionAspect =
+                region.regionWidth
+                    .toFloat() /
+                    region.regionHeight
+                        .toFloat()
+                        .coerceAtLeast(
+                            1f
+                        )
+
+            val baseHeight =
                 max(
-                    kind.baseWorldSize,
+                    kind.baseWorldHeight,
                     projectile
                         .visualCollisionSize *
-                        2.25f
+                        GENERAL_VISUAL_COLLISION_SCALE
                 )
+
+            var drawHeight =
+                when (weaponId) {
+                    LONGBOW_ID ->
+                        max(
+                            LONGBOW_ARROW_MIN_HEIGHT,
+                            baseHeight
+                        )
+
+                    CROSSBOW_ID ->
+                        max(
+                            CROSSBOW_BOLT_MIN_HEIGHT,
+                            baseHeight *
+                                0.90f
+                        )
+
+                    else ->
+                        baseHeight
+                }
+
+            var drawWidth =
+                drawHeight *
+                    regionAspect
+
+            /*
+             * Crossbow keeps the code-only shorter/thicker bolt treatment.
+             */
+            if (weaponId == CROSSBOW_ID) {
+                when (correctedColumnIndex) {
+                    0,
+                    4 -> {
+                        drawHeight *=
+                            CROSSBOW_LENGTH_SCALE
+
+                        drawWidth *=
+                            CROSSBOW_THICKNESS_SCALE
+                    }
+
+                    2,
+                    6 -> {
+                        drawWidth *=
+                            CROSSBOW_LENGTH_SCALE
+
+                        drawHeight *=
+                            CROSSBOW_THICKNESS_SCALE
+                    }
+
+                    else -> {
+                        drawWidth *=
+                            0.86f
+
+                        drawHeight *=
+                            0.86f
+                    }
+                }
+            }
 
             val drawX =
                 projectile.visualCenterX -
-                    renderSize / 2f
+                    drawWidth / 2f
 
             val drawY =
                 projectile.visualCenterY -
-                    renderSize / 2f
+                    drawHeight / 2f
+
+            if (weaponId == CROSSBOW_ID) {
+                val velocityLength =
+                    sqrt(
+                        projectile.visualVelocityX *
+                            projectile.visualVelocityX +
+                            projectile.visualVelocityY *
+                            projectile.visualVelocityY
+                    )
+                        .coerceAtLeast(
+                            0.001f
+                        )
+
+                val perpendicularX =
+                    -projectile.visualVelocityY /
+                        velocityLength *
+                        CROSSBOW_EXTRA_THICKNESS_OFFSET
+
+                val perpendicularY =
+                    projectile.visualVelocityX /
+                        velocityLength *
+                        CROSSBOW_EXTRA_THICKNESS_OFFSET
+
+                batch.draw(
+                    region,
+                    drawX - perpendicularX,
+                    drawY - perpendicularY,
+                    drawWidth,
+                    drawHeight
+                )
+
+                batch.draw(
+                    region,
+                    drawX + perpendicularX,
+                    drawY + perpendicularY,
+                    drawWidth,
+                    drawHeight
+                )
+            }
 
             batch.draw(
                 region,
                 drawX,
                 drawY,
-                renderSize,
-                renderSize
+                drawWidth,
+                drawHeight
             )
         }
 
@@ -143,25 +331,21 @@ class ProjectileSpriteRenderer {
                 ?.id
                 ?.value
 
-        /*
-         * Ranged physical weapons use the Arrow row regardless
-         * of their PIERCING damage type.
-         */
         if (
             weaponId == LONGBOW_ID ||
             weaponId == CROSSBOW_ID
         ) {
-            return ProjectileVisualKind
-                .ARROW
+            return ProjectileVisualKind.ARROW
         }
 
         /*
-         * Phase 1 scope:
-         * spell/ranged projectiles only.
+         * Spell-focus weapons are intentionally resolved from the projectile's
+         * FINAL selected DamageType. That means weapons such as Orb of Sky,
+         * Steam Wand and Totem of Dark Clouds keep using whatever element the
+         * attack executor actually selected for this specific projectile.
          *
-         * EARTH and COLD do not have rows in the supplied sheet,
-         * so they intentionally keep the old ShapeRenderer fallback.
-         * Dagger is also left for the later melee-weapon pass.
+         * The visual corruption seen in Faz 1.1a was atlas slicing, not this
+         * DamageType mapping.
          */
         return when (
             projectile.damageType
@@ -231,28 +415,43 @@ class ProjectileSpriteRenderer {
                 return it
             }
 
+        require(
+            texture.width == 1536 &&
+                texture.height == 1024
+        ) {
+            "Unexpected projectile atlas size: " +
+                "${texture.width}x${texture.height}; expected 1536x1024"
+        }
+
         val built =
             Array(
                 definition.rows
             ) {
                     row ->
 
+                val top =
+                    ROW_BOUNDS[row]
+
+                val bottom =
+                    ROW_BOUNDS[row + 1]
+
                 Array(
                     definition.columns
                 ) {
                         column ->
 
+                    val left =
+                        COLUMN_BOUNDS[column]
+
+                    val right =
+                        COLUMN_BOUNDS[column + 1]
+
                     TextureRegion(
                         texture,
-
-                        column *
-                            definition.tileWidth,
-
-                        row *
-                            definition.tileHeight,
-
-                        definition.tileWidth,
-                        definition.tileHeight
+                        left,
+                        top,
+                        right - left,
+                        bottom - top
                     )
                 }
             }
