@@ -19,20 +19,6 @@ class ProjectileSpriteRenderer {
         private const val CROSSBOW_ID =
             "WPN_CROSSBOW"
 
-        /*
-         * Faz 1.1a HOTFIX
-         *
-         * The supplied 1536x1024 image looks like an 8x8 sheet, but the
-         * artwork is not actually locked to exact 192x128 cells.
-         *
-         * For example the Lightning row ends around y=840 while Necrotic
-         * begins around y=845. The previous 128px grid cut Lightning at
-         * y=896, which is why a Lightning projectile could contain part of
-         * the Necrotic artwork.
-         *
-         * These are source-image boundaries, not generated graphics.
-         * The original PNG remains unchanged.
-         */
         private val COLUMN_BOUNDS =
             intArrayOf(
                 0,

@@ -2210,23 +2210,44 @@ class FirstScreen(
                             keyCode
                         )
                 ) {
-                    weaponRuntimeManager
-                        .tryActivateAbilityInSlot(
-                            slotIndex =
-                                slotIndex,
+                    val summonActivated =
+                        summonManager
+                            .tryActivateIvyStaffInSlot(
+                                slotIndex =
+                                    slotIndex,
 
-                            player =
-                                player,
+                                playerCenterX =
+                                    player.centerX,
 
-                            enemyManager =
-                                enemyManager,
+                                playerCenterY =
+                                    player.centerY,
 
-                            worldWidth =
-                                worldWidth,
+                                worldWidth =
+                                    worldWidth,
 
-                            worldHeight =
-                                worldHeight
-                        )
+                                worldHeight =
+                                    worldHeight
+                            )
+
+                    if (!summonActivated) {
+                        weaponRuntimeManager
+                            .tryActivateAbilityInSlot(
+                                slotIndex =
+                                    slotIndex,
+
+                                player =
+                                    player,
+
+                                enemyManager =
+                                    enemyManager,
+
+                                worldWidth =
+                                    worldWidth,
+
+                                worldHeight =
+                                    worldHeight
+                            )
+                    }
                 }
             }
 

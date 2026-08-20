@@ -7,6 +7,7 @@ import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
+import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
 import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
@@ -208,30 +209,179 @@ class SummonManager(
                 }
             }
 
+        /*
+         * Faz 1.4a:
+         * summon waves no longer auto-spawn.
+         * Only cooldown timers are advanced here.
+         */
         schedulersByWeaponRuntimeId
             .values
             .forEach {
                     scheduler ->
 
-                scheduler.updateDelay(
+                scheduler.update(
                     delta
                 )
-
-                if (
-                    scheduler.isReadyToSpawn
-                ) {
-                    spawnWave(
-                        scheduler =
-                            scheduler,
-
-                        playerCenterX =
-                            playerCenterX,
-
-                        playerCenterY =
-                            playerCenterY
-                    )
-                }
             }
+    }
+
+    /*
+     * Manual Ivy Staff activation entry point.
+     *
+     * Returns true only when:
+     * - the selected slot contains an eligible Ivy Staff,
+     * - a summon choice exists,
+     * - the lifecycle is READY,
+     * - the wave was actually spawned.
+     */
+    fun tryActivateIvyStaffInSlot(
+        slotIndex: Int,
+        playerCenterX: Float,
+        playerCenterY: Float,
+        worldWidth: Float,
+        worldHeight: Float
+    ): Boolean {
+
+        synchronizeSchedulers()
+
+        val weapon =
+            weaponInventory
+                .weaponAt(
+                    slotIndex
+                )
+                ?: return false
+
+        if (
+            weapon.definition.id.value !=
+            IVY_STAFF_ID ||
+            !weapon.hasWeaponAbility ||
+            weapon.ivySummonChoice ==
+            null
+        ) {
+            return false
+        }
+
+        val scheduler =
+            schedulersByWeaponRuntimeId[
+                weapon.runtimeId
+            ]
+                ?: return false
+
+        if (!scheduler.isReadyToActivate) {
+            return false
+        }
+
+        return spawnWave(
+            scheduler =
+                scheduler,
+
+            playerCenterX =
+                playerCenterX,
+
+            playerCenterY =
+                playerCenterY,
+
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight
+        )
+    }
+
+    /*
+     * Future HUD/slot-rework API.
+     * The current HUD does not need to consume these yet.
+     */
+    fun abilityStateForSlot(
+        slotIndex: Int
+    ): WeaponAbilityState? {
+
+        synchronizeSchedulers()
+
+        val weapon =
+            weaponInventory
+                .weaponAt(
+                    slotIndex
+                )
+                ?: return null
+
+        if (
+            weapon.definition.id.value !=
+            IVY_STAFF_ID ||
+            !weapon.hasWeaponAbility ||
+            weapon.ivySummonChoice ==
+            null
+        ) {
+            return null
+        }
+
+        return schedulersByWeaponRuntimeId[
+            weapon.runtimeId
+        ]
+            ?.state
+    }
+
+    fun remainingActiveSecondsForSlot(
+        slotIndex: Int
+    ): Float {
+
+        val weapon =
+            weaponInventory
+                .weaponAt(
+                    slotIndex
+                )
+                ?: return 0f
+
+        return entities
+            .asSequence()
+            .filter {
+                it.sourceWeaponRuntimeId ==
+                    weapon.runtimeId &&
+                    !it.isExpired
+            }
+            .map {
+                it.remainingLifetimeSeconds
+            }
+            .maxOrNull()
+            ?: 0f
+    }
+
+    fun remainingCooldownSecondsForSlot(
+        slotIndex: Int
+    ): Float {
+
+        synchronizeSchedulers()
+
+        val weapon =
+            weaponInventory
+                .weaponAt(
+                    slotIndex
+                )
+                ?: return 0f
+
+        return schedulersByWeaponRuntimeId[
+            weapon.runtimeId
+        ]
+            ?.remainingCooldownSeconds
+            ?: 0f
+    }
+
+    fun activeChoiceForSlot(
+        slotIndex: Int
+    ): IvySummonChoice? {
+
+        val weapon =
+            weaponInventory
+                .weaponAt(
+                    slotIndex
+                )
+                ?: return null
+
+        return schedulersByWeaponRuntimeId[
+            weapon.runtimeId
+        ]
+            ?.choice
     }
 
     fun render(
@@ -433,8 +583,10 @@ class SummonManager(
     private fun spawnWave(
         scheduler: SummonSpawnScheduler,
         playerCenterX: Float,
-        playerCenterY: Float
-    ) {
+        playerCenterY: Float,
+        worldWidth: Float,
+        worldHeight: Float
+    ): Boolean {
 
         val weapon =
             weaponInventory
@@ -444,7 +596,7 @@ class SummonManager(
                         scheduler
                             .sourceWeaponRuntimeId
                 }
-                ?: return
+                ?: return false
 
         val type =
             summonTypeFor(
@@ -477,9 +629,58 @@ class SummonManager(
                     )
 
             val spawnDistance =
-                62f +
-                    index *
-                    16f
+                when (type) {
+                    SummonType.KNIGHT_SPIRIT ->
+                        KNIGHT_SPAWN_DISTANCE
+
+                    else ->
+                        62f +
+                            index *
+                            16f
+                }
+
+            /*
+             * Knight already follows the requested ~500 px spawn rule.
+             * Obstacle-aware relocation will be hardened in the dedicated
+             * Knight AI phase; for now the point is clamped inside world.
+             */
+            val rawCenterX =
+                playerCenterX +
+                    MathUtils.cos(
+                        angle
+                    ) *
+                    spawnDistance
+
+            val rawCenterY =
+                playerCenterY +
+                    MathUtils.sin(
+                        angle
+                    ) *
+                    spawnDistance
+
+            val startCenterX =
+                rawCenterX.coerceIn(
+                    SUMMON_WORLD_MARGIN,
+                    (
+                        worldWidth -
+                            SUMMON_WORLD_MARGIN
+                        )
+                        .coerceAtLeast(
+                            SUMMON_WORLD_MARGIN
+                        )
+                )
+
+            val startCenterY =
+                rawCenterY.coerceIn(
+                    SUMMON_WORLD_MARGIN,
+                    (
+                        worldHeight -
+                            SUMMON_WORLD_MARGIN
+                        )
+                        .coerceAtLeast(
+                            SUMMON_WORLD_MARGIN
+                        )
+                )
 
             entities.add(
                 SummonedEntity(
@@ -502,27 +703,31 @@ class SummonManager(
                         stats,
 
                     startCenterX =
-                        playerCenterX +
-                            MathUtils.cos(
-                                angle
-                            ) *
-                            spawnDistance,
+                        startCenterX,
 
                     startCenterY =
-                        playerCenterY +
-                            MathUtils.sin(
-                                angle
-                            ) *
-                            spawnDistance,
+                        startCenterY,
 
                     lifetimeSeconds =
-                        SummonSpawnScheduler
-                            .SUMMON_LIFETIME_SECONDS
+                        scheduler
+                            .activeLifetimeSeconds
                 )
             )
         }
 
-        scheduler.markWaveSpawned()
+        val waveRegistered =
+            scheduler.markWaveSpawned()
+
+        if (!waveRegistered) {
+            entities.removeAll {
+                it.sourceWeaponRuntimeId ==
+                    weapon.runtimeId
+            }
+
+            return false
+        }
+
+        return true
     }
 
     private fun summonTypeFor(
@@ -546,6 +751,12 @@ class SummonManager(
 
         private const val IVY_STAFF_ID =
             "WPN_IVY_STAFF"
+
+        private const val KNIGHT_SPAWN_DISTANCE =
+            500f
+
+        private const val SUMMON_WORLD_MARGIN =
+            28f
 
         private const val SUMMON_CONDITION_DURATION_SECONDS =
             3f
