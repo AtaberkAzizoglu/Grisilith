@@ -78,6 +78,9 @@ class SummonManager(
                     enemies =
                         enemies,
 
+                    otherSummons =
+                        entities,
+
                     onCowAttack = {
                             summon,
                             enemy ->
@@ -159,6 +162,54 @@ class SummonManager(
 
                             onEnemyKilled =
                                 onEnemyKilled
+                        )
+                    },
+
+                    onCowSummonAttack = {
+                            summon,
+                            target ->
+
+                        applySummonAttack(
+                            attacker =
+                                summon,
+
+                            target =
+                                target,
+
+                            attackName =
+                                "Summon Animal"
+                        )
+                    },
+
+                    onImpSummonAttack = {
+                            summon,
+                            target ->
+
+                        applySummonAttack(
+                            attacker =
+                                summon,
+
+                            target =
+                                target,
+
+                            attackName =
+                                "Summon Demon"
+                        )
+                    },
+
+                    onKnightSummonAttack = {
+                            summon,
+                            target ->
+
+                        applySummonAttack(
+                            attacker =
+                                summon,
+
+                            target =
+                                target,
+
+                            attackName =
+                                "Call the Knight"
                         )
                     },
 
@@ -399,6 +450,33 @@ class SummonManager(
 
         entities.clear()
         schedulersByWeaponRuntimeId.clear()
+    }
+
+    private fun applySummonAttack(
+        attacker: SummonedEntity,
+        target: SummonedEntity,
+        attackName: String
+    ) {
+
+        if (
+            attacker.isExpired ||
+            target.isExpired ||
+            attacker.runtimeId ==
+            target.runtimeId ||
+            attacker.faction ==
+            target.faction
+        ) {
+            return
+        }
+
+        /*
+         * Faz 1.4b establishes real summon-vs-summon combat.
+         * Status conditions on summoned targets are intentionally deferred
+         * until the projectile/condition phase; direct base damage works now.
+         */
+        target.takeDamage(
+            attacker.stats.baseDamage
+        )
     }
 
     private fun applyEnemyAttack(

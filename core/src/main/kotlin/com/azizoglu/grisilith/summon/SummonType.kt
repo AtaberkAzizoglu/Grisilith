@@ -2,7 +2,7 @@ package com.azizoglu.grisilith.summon
 
 enum class SummonType(
     val displayName: String,
-    val isFriendlyToPlayer: Boolean,
+    val faction: SummonCombatFaction,
     val defaultCount: Int
 ) {
 
@@ -10,8 +10,8 @@ enum class SummonType(
         displayName =
             "Cow",
 
-        isFriendlyToPlayer =
-            true,
+        faction =
+            SummonCombatFaction.PLAYER_ALLY,
 
         defaultCount =
             2
@@ -21,8 +21,8 @@ enum class SummonType(
         displayName =
             "Imp",
 
-        isFriendlyToPlayer =
-            true,
+        faction =
+            SummonCombatFaction.PLAYER_ALLY,
 
         defaultCount =
             1
@@ -32,10 +32,15 @@ enum class SummonType(
         displayName =
             "Knight Spirit",
 
-        isFriendlyToPlayer =
-            false,
+        faction =
+            SummonCombatFaction.ROGUE,
 
         defaultCount =
             1
-    )
+    );
+
+    val isFriendlyToPlayer: Boolean
+        get() =
+            faction ==
+                SummonCombatFaction.PLAYER_ALLY
 }

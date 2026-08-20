@@ -50,6 +50,13 @@ class SummonedEntity(
     private var attackFlashRemainingSeconds =
         0f
 
+    /*
+     * Knight target hysteresis.
+     * Acquire player at <=300 px; keep player target until >=600 px.
+     */
+    private var knightPlayerTargetLocked =
+        false
+
     val health =
         HealthComponent(
             maximumHealth =
@@ -77,6 +84,14 @@ class SummonedEntity(
         get() =
             center.y
 
+    val combatRadius: Float
+        get() =
+            visualRadius()
+
+    val faction: SummonCombatFaction
+        get() =
+            type.faction
+
     fun update(
         delta: Float,
         playerCenterX: Float,
@@ -84,6 +99,7 @@ class SummonedEntity(
         worldWidth: Float,
         worldHeight: Float,
         enemies: List<Enemy>,
+        otherSummons: List<SummonedEntity>,
         onCowAttack: (
             summon: SummonedEntity,
             enemy: Enemy
@@ -95,6 +111,18 @@ class SummonedEntity(
         onKnightEnemyAttack: (
             summon: SummonedEntity,
             enemy: Enemy
+        ) -> Unit,
+        onCowSummonAttack: (
+            summon: SummonedEntity,
+            target: SummonedEntity
+        ) -> Unit,
+        onImpSummonAttack: (
+            summon: SummonedEntity,
+            target: SummonedEntity
+        ) -> Unit,
+        onKnightSummonAttack: (
+            summon: SummonedEntity,
+            target: SummonedEntity
         ) -> Unit,
         onKnightPlayerAttack: (
             summon: SummonedEntity
@@ -151,8 +179,14 @@ class SummonedEntity(
                     enemies =
                         enemies,
 
-                    onAttack =
-                        onCowAttack
+                    otherSummons =
+                        otherSummons,
+
+                    onEnemyAttack =
+                        onCowAttack,
+
+                    onSummonAttack =
+                        onCowSummonAttack
                 )
             }
 
@@ -170,8 +204,14 @@ class SummonedEntity(
                     enemies =
                         enemies,
 
-                    onAttack =
-                        onImpAttack
+                    otherSummons =
+                        otherSummons,
+
+                    onEnemyAttack =
+                        onImpAttack,
+
+                    onSummonAttack =
+                        onImpSummonAttack
                 )
             }
 
@@ -189,8 +229,14 @@ class SummonedEntity(
                     enemies =
                         enemies,
 
+                    otherSummons =
+                        otherSummons,
+
                     onEnemyAttack =
                         onKnightEnemyAttack,
+
+                    onSummonAttack =
+                        onKnightSummonAttack,
 
                     onPlayerAttack =
                         onKnightPlayerAttack
@@ -291,67 +337,126 @@ class SummonedEntity(
         playerCenterX: Float,
         playerCenterY: Float,
         enemies: List<Enemy>,
-        onAttack: (
+        otherSummons: List<SummonedEntity>,
+        onEnemyAttack: (
             summon: SummonedEntity,
             enemy: Enemy
+        ) -> Unit,
+        onSummonAttack: (
+            summon: SummonedEntity,
+            target: SummonedEntity
         ) -> Unit
     ) {
 
-        val target =
+        val enemyTarget =
             nearestLivingEnemy(
                 enemies
             )
 
-        if (target == null) {
-            moveTowardFormationPoint(
-                delta =
-                    delta,
-
-                playerCenterX =
-                    playerCenterX,
-
-                playerCenterY =
-                    playerCenterY,
-
-                distance =
-                    82f
+        val summonTarget =
+            nearestHostileSummon(
+                otherSummons
             )
 
-            return
-        }
-
-        if (
-            isInsideEnemyAttackRange(
-                enemy =
-                    target,
-
-                range =
-                    stats.attackRange
+        val targetKind =
+            chooseCloserTarget(
+                enemyTarget =
+                    enemyTarget,
+                summonTarget =
+                    summonTarget
             )
-        ) {
-            tryAttack(
-                cooldownSeconds =
-                    COW_ATTACK_INTERVAL_SECONDS
-            ) {
-                onAttack(
-                    this,
-                    target
+
+        when (targetKind) {
+            TargetKind.NONE -> {
+                moveTowardFormationPoint(
+                    delta =
+                        delta,
+
+                    playerCenterX =
+                        playerCenterX,
+
+                    playerCenterY =
+                        playerCenterY,
+
+                    distance =
+                        82f
                 )
             }
 
-            return
+            TargetKind.ENEMY -> {
+                val target =
+                    enemyTarget
+                        ?: return
+
+                if (
+                    isInsideEnemyAttackRange(
+                        enemy =
+                            target,
+
+                        range =
+                            stats.attackRange
+                    )
+                ) {
+                    tryAttack(
+                        cooldownSeconds =
+                            COW_ATTACK_INTERVAL_SECONDS
+                    ) {
+                        onEnemyAttack(
+                            this,
+                            target
+                        )
+                    }
+                } else {
+                    moveToward(
+                        targetX =
+                            target.centerX,
+
+                        targetY =
+                            target.centerY,
+
+                        delta =
+                            delta
+                    )
+                }
+            }
+
+            TargetKind.SUMMON -> {
+                val target =
+                    summonTarget
+                        ?: return
+
+                if (
+                    isInsideSummonAttackRange(
+                        target =
+                            target,
+
+                        range =
+                            stats.attackRange
+                    )
+                ) {
+                    tryAttack(
+                        cooldownSeconds =
+                            COW_ATTACK_INTERVAL_SECONDS
+                    ) {
+                        onSummonAttack(
+                            this,
+                            target
+                        )
+                    }
+                } else {
+                    moveToward(
+                        targetX =
+                            target.centerX,
+
+                        targetY =
+                            target.centerY,
+
+                        delta =
+                            delta
+                    )
+                }
+            }
         }
-
-        moveToward(
-            targetX =
-                target.centerX,
-
-            targetY =
-                target.centerY,
-
-            delta =
-                delta
-        )
     }
 
     private fun updateImp(
@@ -359,18 +464,39 @@ class SummonedEntity(
         playerCenterX: Float,
         playerCenterY: Float,
         enemies: List<Enemy>,
-        onAttack: (
+        otherSummons: List<SummonedEntity>,
+        onEnemyAttack: (
             summon: SummonedEntity,
             enemy: Enemy
+        ) -> Unit,
+        onSummonAttack: (
+            summon: SummonedEntity,
+            target: SummonedEntity
         ) -> Unit
     ) {
 
-        val target =
+        val enemyTarget =
             nearestLivingEnemy(
                 enemies
             )
 
-        if (target == null) {
+        val summonTarget =
+            nearestHostileSummon(
+                otherSummons
+            )
+
+        val targetKind =
+            chooseCloserTarget(
+                enemyTarget =
+                    enemyTarget,
+                summonTarget =
+                    summonTarget
+            )
+
+        if (
+            targetKind ==
+            TargetKind.NONE
+        ) {
             moveTowardFormationPoint(
                 delta =
                     delta,
@@ -388,18 +514,63 @@ class SummonedEntity(
             return
         }
 
+        val targetX =
+            if (
+                targetKind ==
+                TargetKind.ENEMY
+            ) {
+                enemyTarget
+                    ?.centerX
+                    ?: return
+            } else {
+                summonTarget
+                    ?.centerX
+                    ?: return
+            }
+
+        val targetY =
+            if (
+                targetKind ==
+                TargetKind.ENEMY
+            ) {
+                enemyTarget
+                    ?.centerY
+                    ?: return
+            } else {
+                summonTarget
+                    ?.centerY
+                    ?: return
+            }
+
+        val targetRadius =
+            if (
+                targetKind ==
+                TargetKind.ENEMY
+            ) {
+                (
+                    enemyTarget
+                        ?.bounds
+                        ?.width
+                        ?: 0f
+                    ) /
+                    2f
+            } else {
+                summonTarget
+                    ?.combatRadius
+                    ?: 0f
+            }
+
         val distanceSquared =
             Vector2.dst2(
                 center.x,
                 center.y,
-                target.centerX,
-                target.centerY
+                targetX,
+                targetY
             )
 
         val attackRange =
             stats.attackRange +
-                target.bounds.width /
-                2f
+                targetRadius
 
         val minimumRange =
             IMP_MINIMUM_COMFORT_DISTANCE
@@ -411,10 +582,10 @@ class SummonedEntity(
 
                 moveToward(
                     targetX =
-                        target.centerX,
+                        targetX,
 
                     targetY =
-                        target.centerY,
+                        targetY,
 
                     delta =
                         delta
@@ -427,10 +598,10 @@ class SummonedEntity(
 
                 moveAwayFrom(
                     targetX =
-                        target.centerX,
+                        targetX,
 
                     targetY =
-                        target.centerY,
+                        targetY,
 
                     delta =
                         delta
@@ -442,10 +613,22 @@ class SummonedEntity(
                     cooldownSeconds =
                         IMP_ATTACK_INTERVAL_SECONDS
                 ) {
-                    onAttack(
-                        this,
-                        target
-                    )
+                    if (
+                        targetKind ==
+                        TargetKind.ENEMY
+                    ) {
+                        onEnemyAttack(
+                            this,
+                            enemyTarget
+                                ?: return@tryAttack
+                        )
+                    } else {
+                        onSummonAttack(
+                            this,
+                            summonTarget
+                                ?: return@tryAttack
+                        )
+                    }
                 }
             }
         }
@@ -456,9 +639,14 @@ class SummonedEntity(
         playerCenterX: Float,
         playerCenterY: Float,
         enemies: List<Enemy>,
+        otherSummons: List<SummonedEntity>,
         onEnemyAttack: (
             summon: SummonedEntity,
             enemy: Enemy
+        ) -> Unit,
+        onSummonAttack: (
+            summon: SummonedEntity,
+            target: SummonedEntity
         ) -> Unit,
         onPlayerAttack: (
             summon: SummonedEntity
@@ -473,12 +661,27 @@ class SummonedEntity(
                 playerCenterY
             )
 
-        val targetsPlayer =
+        if (
+            !knightPlayerTargetLocked &&
             playerDistanceSquared <=
-                KNIGHT_PLAYER_AGGRO_RANGE *
-                KNIGHT_PLAYER_AGGRO_RANGE
+            KNIGHT_PLAYER_ACQUIRE_RANGE *
+            KNIGHT_PLAYER_ACQUIRE_RANGE
+        ) {
+            knightPlayerTargetLocked =
+                true
+        }
 
-        if (targetsPlayer) {
+        if (
+            knightPlayerTargetLocked &&
+            playerDistanceSquared >=
+            KNIGHT_PLAYER_RELEASE_RANGE *
+            KNIGHT_PLAYER_RELEASE_RANGE
+        ) {
+            knightPlayerTargetLocked =
+                false
+        }
+
+        if (knightPlayerTargetLocked) {
             if (
                 playerDistanceSquared <=
                 stats.attackRange *
@@ -513,47 +716,202 @@ class SummonedEntity(
                 enemies
             )
 
-        if (enemyTarget == null) {
-            /*
-             * Knight oyuncunun dostu değildir.
-             * Oyuncu aggro menzili dışındaysa ve Enemy yoksa
-             * mevcut pozisyonunu korur.
-             */
-            return
+        val summonTarget =
+            nearestHostileSummon(
+                otherSummons
+            )
+
+        when (
+            chooseCloserTarget(
+                enemyTarget =
+                    enemyTarget,
+                summonTarget =
+                    summonTarget
+            )
+        ) {
+            TargetKind.NONE -> {
+                /*
+                 * Rogue Knight has no formation behavior.
+                 * It waits until a valid target enters the battlefield.
+                 */
+            }
+
+            TargetKind.ENEMY -> {
+                val target =
+                    enemyTarget
+                        ?: return
+
+                if (
+                    isInsideEnemyAttackRange(
+                        enemy =
+                            target,
+
+                        range =
+                            stats.attackRange
+                    )
+                ) {
+                    tryAttack(
+                        cooldownSeconds =
+                            KNIGHT_ATTACK_INTERVAL_SECONDS
+                    ) {
+                        onEnemyAttack(
+                            this,
+                            target
+                        )
+                    }
+                } else {
+                    moveToward(
+                        targetX =
+                            target.centerX,
+
+                        targetY =
+                            target.centerY,
+
+                        delta =
+                            delta
+                    )
+                }
+            }
+
+            TargetKind.SUMMON -> {
+                val target =
+                    summonTarget
+                        ?: return
+
+                if (
+                    isInsideSummonAttackRange(
+                        target =
+                            target,
+
+                        range =
+                            stats.attackRange
+                    )
+                ) {
+                    tryAttack(
+                        cooldownSeconds =
+                            KNIGHT_ATTACK_INTERVAL_SECONDS
+                    ) {
+                        onSummonAttack(
+                            this,
+                            target
+                        )
+                    }
+                } else {
+                    moveToward(
+                        targetX =
+                            target.centerX,
+
+                        targetY =
+                            target.centerY,
+
+                        delta =
+                            delta
+                    )
+                }
+            }
+        }
+    }
+
+    private enum class TargetKind {
+        NONE,
+        ENEMY,
+        SUMMON
+    }
+
+    private fun nearestHostileSummon(
+        summons: List<SummonedEntity>
+    ): SummonedEntity? {
+
+        return summons
+            .asSequence()
+            .filter {
+                it.runtimeId !=
+                    runtimeId &&
+                    !it.isExpired &&
+                    it.faction !=
+                    faction
+            }
+            .minByOrNull {
+                Vector2.dst2(
+                    center.x,
+                    center.y,
+                    it.centerX,
+                    it.centerY
+                )
+            }
+    }
+
+    private fun chooseCloserTarget(
+        enemyTarget: Enemy?,
+        summonTarget: SummonedEntity?
+    ): TargetKind {
+
+        if (
+            enemyTarget ==
+            null &&
+            summonTarget ==
+            null
+        ) {
+            return TargetKind.NONE
         }
 
         if (
-            isInsideEnemyAttackRange(
-                enemy =
-                    enemyTarget,
-
-                range =
-                    stats.attackRange
-            )
+            enemyTarget ==
+            null
         ) {
-            tryAttack(
-                cooldownSeconds =
-                    KNIGHT_ATTACK_INTERVAL_SECONDS
-            ) {
-                onEnemyAttack(
-                    this,
-                    enemyTarget
-                )
-            }
-
-            return
+            return TargetKind.SUMMON
         }
 
-        moveToward(
-            targetX =
+        if (
+            summonTarget ==
+            null
+        ) {
+            return TargetKind.ENEMY
+        }
+
+        val enemyDistance =
+            Vector2.dst2(
+                center.x,
+                center.y,
                 enemyTarget.centerX,
+                enemyTarget.centerY
+            )
 
-            targetY =
-                enemyTarget.centerY,
+        val summonDistance =
+            Vector2.dst2(
+                center.x,
+                center.y,
+                summonTarget.centerX,
+                summonTarget.centerY
+            )
 
-            delta =
-                delta
-        )
+        return if (
+            summonDistance <
+            enemyDistance
+        ) {
+            TargetKind.SUMMON
+        } else {
+            TargetKind.ENEMY
+        }
+    }
+
+    private fun isInsideSummonAttackRange(
+        target: SummonedEntity,
+        range: Float
+    ): Boolean {
+
+        val effectiveRange =
+            range +
+                target.combatRadius
+
+        return Vector2.dst2(
+            center.x,
+            center.y,
+            target.centerX,
+            target.centerY
+        ) <=
+            effectiveRange *
+            effectiveRange
     }
 
     private fun nearestLivingEnemy(
@@ -897,8 +1255,11 @@ class SummonedEntity(
         private const val KNIGHT_ATTACK_INTERVAL_SECONDS =
             1.20f
 
-        private const val KNIGHT_PLAYER_AGGRO_RANGE =
-            210f
+        private const val KNIGHT_PLAYER_ACQUIRE_RANGE =
+            300f
+
+        private const val KNIGHT_PLAYER_RELEASE_RANGE =
+            600f
 
         private const val ATTACK_FLASH_SECONDS =
             0.10f
