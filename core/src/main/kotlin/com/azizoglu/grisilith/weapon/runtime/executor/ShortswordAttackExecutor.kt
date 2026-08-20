@@ -6,9 +6,12 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.MathUtils
 import kotlin.math.roundToInt
 import com.azizoglu.grisilith.combat.debug.CombatDebugVisualManager
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualKind
+import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualManager
 
 class ShortswordAttackExecutor(
     private val damageCalculator:
@@ -70,6 +73,9 @@ class ShortswordAttackExecutor(
                     effectiveRange
             ) ?: return
 
+        context.weapon
+            .registerNormalAttack()
+
         val playerToTarget =
             Vector2(
                 primaryTarget.centerX -
@@ -88,9 +94,51 @@ class ShortswordAttackExecutor(
 
         playerToTarget.nor()
 
-        if (
+        val attackAngle =
+            MathUtils.atan2(
+                playerToTarget.y,
+                playerToTarget.x
+            ) *
+                MathUtils.radiansToDegrees
+
+        val upgraded =
             context.weapon
                 .hasBasicAttackUpgrade
+
+        val visualSize =
+            if (upgraded) {
+                UPGRADED_LINE_LENGTH *
+                    0.90f
+            } else {
+                NORMAL_LINE_LENGTH *
+                    0.88f
+            }
+
+        MeleeAttackVisualManager.spawn(
+            kind =
+                if (upgraded) {
+                    MeleeAttackVisualKind
+                        .DOUBLE_SLASH_X
+                } else {
+                    MeleeAttackVisualKind
+                        .DOUBLE_SLASH
+                },
+            centerX =
+                primaryTarget.centerX,
+            centerY =
+                primaryTarget.centerY,
+            rotationDegrees =
+                attackAngle,
+            worldWidth =
+                visualSize,
+            worldHeight =
+                visualSize,
+            durationSeconds =
+                0.24f
+        )
+
+        if (
+            upgraded
         ) {
             executeCrossedSlash(
                 context = context,

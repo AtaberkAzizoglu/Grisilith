@@ -13,6 +13,7 @@ import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.visual.ProjectileSpriteRenderer
 import com.azizoglu.grisilith.weapon.visual.carrier.WeaponCarrierRenderer
+import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualRenderer
 import com.azizoglu.grisilith.weapon.visual.carrier.WeaponCarrierVisualSystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
@@ -62,6 +63,9 @@ class WorldRenderer(
 
     private val weaponCarrierRenderer =
         WeaponCarrierRenderer()
+
+    private val meleeAttackVisualRenderer =
+        MeleeAttackVisualRenderer()
 
     private val worldPickupSpriteRenderer =
         WorldPickupSpriteRenderer()
@@ -369,33 +373,13 @@ class WorldRenderer(
             }
 
         /*
-         * Minions only carry the visuals.
-         * Every weapon attack still originates from player-center gameplay
-         * executors, so their attack FX is also emitted at player center.
+         * Completely separate melee FX layer.
+         * Executor-generated events are centered on the actual target.
          */
-        carrierSnapshots
-            .filter {
-                it.slotIndex > 0 &&
-                    it.attackActive
-            }
-            .forEach {
-                    snapshot ->
-
-                weaponCarrierRenderer
-                    .renderAttackEffectAtPlayer(
-                        snapshot =
-                            snapshot,
-
-                        playerCenterX =
-                            player.centerX,
-
-                        playerCenterY =
-                            player.centerY,
-
-                        camera =
-                            camera
-                    )
-            }
+        meleeAttackVisualRenderer
+            .render(
+                camera
+            )
 
         /*
          * PASS 3:
@@ -545,6 +529,9 @@ class WorldRenderer(
             .dispose()
 
         weaponCarrierRenderer
+            .dispose()
+
+        meleeAttackVisualRenderer
             .dispose()
 
         worldPickupSpriteRenderer

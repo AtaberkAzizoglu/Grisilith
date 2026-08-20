@@ -7,6 +7,9 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.MathUtils
+import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualKind
+import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualManager
 
 class LanceAttackExecutor(
     private val damageCalculator:
@@ -54,6 +57,10 @@ class LanceAttackExecutor(
                     effectiveRange
             ) ?: return
 
+        val attackNumber =
+            context.weapon
+                .registerNormalAttack()
+
         val direction =
             Vector2(
                 primaryTarget.centerX -
@@ -68,6 +75,38 @@ class LanceAttackExecutor(
         }
 
         direction.nor()
+
+        val attackAngle =
+            MathUtils.atan2(
+                direction.y,
+                direction.x
+            ) *
+                MathUtils.radiansToDegrees
+
+        MeleeAttackVisualManager.spawn(
+            kind =
+                MeleeAttackVisualKind
+                    .LANCE_THRUST,
+            centerX =
+                primaryTarget.centerX,
+            centerY =
+                primaryTarget.centerY,
+            rotationDegrees =
+                attackAngle,
+            worldWidth =
+                effectiveRange *
+                    1.20f,
+            worldHeight =
+                (
+                    definition.areaRadius *
+                        5.5f
+                    )
+                    .coerceAtLeast(
+                        46f
+                    ),
+            durationSeconds =
+                0.24f
+        )
 
         val startX =
             context.player.centerX
@@ -131,6 +170,80 @@ class LanceAttackExecutor(
                     damageCalculator
             )
         }
+
+        if (
+            context.weapon
+                .hasBasicAttackUpgrade &&
+            attackNumber %
+            5 ==
+            0
+        ) {
+            executeUpgradedSpin(
+                context =
+                    context,
+                effectiveRange =
+                    effectiveRange
+            )
+        }
+    }
+
+    private fun executeUpgradedSpin(
+        context: WeaponAttackContext,
+        effectiveRange: Float
+    ) {
+        /*
+         * Lv.3+ every fifth normal attack:
+         * additional player-centered circular attack.
+         *
+         * Radius = 66% of the normal effective Lance range.
+         * It is an additional full normal-damage hit.
+         */
+        val radius =
+            effectiveRange *
+                0.66f
+
+        MeleeAttackVisualManager.spawn(
+            kind =
+                MeleeAttackVisualKind
+                    .LANCE_SPIN,
+            centerX =
+                context.player.centerX,
+            centerY =
+                context.player.centerY,
+            rotationDegrees =
+                0f,
+            worldWidth =
+                radius *
+                    2f,
+            worldHeight =
+                radius *
+                    2f,
+            durationSeconds =
+                0.42f
+        )
+
+        context.enemyManager
+            .allEnemies
+            .filter { enemy ->
+                !enemy.isDead &&
+                    Vector2.dst(
+                        enemy.centerX,
+                        enemy.centerY,
+                        context.player.centerX,
+                        context.player.centerY
+                    ) <=
+                    radius +
+                    enemy.bounds.width /
+                    2f
+            }
+            .forEach { enemy ->
+                WeaponAreaAttackHelper.damageEnemy(
+                    enemy = enemy,
+                    context = context,
+                    damageCalculator =
+                        damageCalculator
+                )
+            }
     }
 
     private fun isInsideAttackLine(

@@ -12,6 +12,8 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import kotlin.math.roundToInt
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualKind
+import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualManager
 
 class ShieldAttackExecutor(
     private val damageCalculator:
@@ -66,6 +68,9 @@ class ShieldAttackExecutor(
                     effectiveRange
             ) ?: return
 
+        context.weapon
+            .registerNormalAttack()
+
         val attackDirection =
             Vector2(
                 primaryTarget.centerX -
@@ -80,6 +85,41 @@ class ShieldAttackExecutor(
         }
 
         attackDirection.nor()
+
+        val attackAngle =
+            MathUtils.atan2(
+                attackDirection.y,
+                attackDirection.x
+            ) *
+                MathUtils.radiansToDegrees
+
+        val upgraded =
+            context.weapon
+                .hasBasicAttackUpgrade
+
+        MeleeAttackVisualManager.spawn(
+            kind =
+                MeleeAttackVisualKind
+                    .SHIELD_CONE,
+            centerX =
+                primaryTarget.centerX,
+            centerY =
+                primaryTarget.centerY,
+            rotationDegrees =
+                attackAngle,
+            worldWidth =
+                effectiveRange *
+                    0.86f,
+            worldHeight =
+                effectiveRange *
+                    if (upgraded) {
+                        0.66f
+                    } else {
+                        0.56f
+                    },
+            durationSeconds =
+                0.27f
+        )
 
         /*
          * Shield açısı Lv.3'te değişmiyor.

@@ -1759,12 +1759,6 @@ class Enemy(
 
         private const val COLLISION_OFFSET_Y_RATIO =
             0.04f
-
-        /*
-         * Projectile-only target box.
-         * Much larger than the physical collision footprint but still kept
-         * slightly inside the visual canvas to avoid obviously empty hits.
-         */
         private const val PROJECTILE_HIT_WIDTH_RATIO =
             0.88f
 

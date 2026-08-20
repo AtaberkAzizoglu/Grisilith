@@ -230,7 +230,18 @@ class WeaponRuntimeManager(
             damage: Int,
             weaponName: String
         ) -> Unit,
-        onEnemyKilled: (Enemy) -> Unit
+        onEnemyKilled: (Enemy) -> Unit,
+        onNormalAttackPerformed: (
+            weapon: WeaponInstance,
+            attacksPerSecond: Float,
+            targetCenterX: Float,
+            targetCenterY: Float
+        ) -> Unit = {
+                _,
+                _,
+                _,
+                _ ->
+        }
     ) {
         synchronizeWithInventory()
 
@@ -571,7 +582,20 @@ class WeaponRuntimeManager(
                     onDamageDealt =
                         onDamageDealt,
                     onEnemyKilled =
-                        onEnemyKilled
+                        onEnemyKilled,
+                    onNormalAttackPerformed = {
+                            attackedWeapon,
+                            attacksPerSecond,
+                            targetCenterX,
+                            targetCenterY ->
+
+                        onNormalAttackPerformed(
+                            attackedWeapon,
+                            attacksPerSecond,
+                            targetCenterX,
+                            targetCenterY
+                        )
+                    }
                 )
             }
     }

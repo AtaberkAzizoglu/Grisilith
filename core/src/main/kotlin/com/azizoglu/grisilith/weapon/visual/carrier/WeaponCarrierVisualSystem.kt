@@ -40,7 +40,9 @@ class WeaponCarrierVisualSystem(
         val minionIsMoving: Boolean,
         val minionAnimationTime: Float,
         val attackProgress: Float,
-        val attackActive: Boolean
+        val attackActive: Boolean,
+        val attackTargetCenterX: Float,
+        val attackTargetCenterY: Float
     ) {
         val depthY: Float
             get() = centerY - 16f
@@ -61,9 +63,10 @@ class WeaponCarrierVisualSystem(
     )
 
     private data class AttackState(
-        var lastCompletedAttackCount: Int,
         var elapsed: Float = 999f,
-        var duration: Float = 0.12f
+        var duration: Float = 0.12f,
+        var targetCenterX: Float = 0f,
+        var targetCenterY: Float = 0f
     )
 
     private val minions =
@@ -79,6 +82,14 @@ class WeaponCarrierVisualSystem(
     ) {
         val safeDelta =
             delta.coerceAtLeast(0f)
+
+        attackStates.values
+            .forEach {
+                    state ->
+
+                state.elapsed +=
+                    safeDelta
+            }
 
         val activeMinionSlots =
             inventory.weaponSlots
@@ -187,20 +198,10 @@ class WeaponCarrierVisualSystem(
                     state.animationTime = 0f
                 }
 
-                updateAttackState(
-                    weapon = weapon,
-                    runtimeManager = runtimeManager,
-                    delta = safeDelta
-                )
             }
 
         inventory.weaponAt(0)
             ?.let { weapon ->
-                updateAttackState(
-                    weapon = weapon,
-                    runtimeManager = runtimeManager,
-                    delta = safeDelta
-                )
             }
 
         val equippedRuntimeIds =
@@ -237,7 +238,19 @@ class WeaponCarrierVisualSystem(
                         attackProgress =
                             attackProgress(weapon),
                         attackActive =
-                            attackIsActive(weapon)
+                            attackIsActive(weapon),
+                        attackTargetCenterX =
+                            attackStates[
+                                weapon.runtimeId
+                            ]
+                                ?.targetCenterX
+                                ?: player.centerX,
+                        attackTargetCenterY =
+                            attackStates[
+                                weapon.runtimeId
+                            ]
+                                ?.targetCenterY
+                                ?: player.centerY
                     )
             }
 
@@ -269,63 +282,70 @@ class WeaponCarrierVisualSystem(
                         attackProgress =
                             attackProgress(weapon),
                         attackActive =
-                            attackIsActive(weapon)
+                            attackIsActive(weapon),
+                        attackTargetCenterX =
+                            attackStates[
+                                weapon.runtimeId
+                            ]
+                                ?.targetCenterX
+                                ?: player.centerX,
+                        attackTargetCenterY =
+                            attackStates[
+                                weapon.runtimeId
+                            ]
+                                ?.targetCenterY
+                                ?: player.centerY
                     )
             }
 
         return result
     }
 
-    private fun updateAttackState(
+    fun notifyNormalAttack(
         weapon: WeaponInstance,
-        runtimeManager: WeaponRuntimeManager,
-        delta: Float
+        attacksPerSecond: Float,
+        targetCenterX: Float,
+        targetCenterY: Float
     ) {
+        val safeAttacksPerSecond =
+            attacksPerSecond
+                .coerceAtLeast(
+                    0.01f
+                )
+
+        val attackInterval =
+            1f /
+                safeAttacksPerSecond
+
         val state =
             attackStates.getOrPut(
                 weapon.runtimeId
             ) {
-                AttackState(
-                    lastCompletedAttackCount =
-                        weapon.completedNormalAttackCount
-                )
+                AttackState()
             }
 
-        state.elapsed += delta
+        state.duration =
+            (
+                attackInterval *
+                    0.78f
+                )
+                .coerceAtMost(
+                    0.30f
+                )
+                .coerceAtLeast(
+                    0.025f
+                )
 
-        val currentCount =
-            weapon.completedNormalAttackCount
-
-        if (
-            currentCount >
-            state.lastCompletedAttackCount
-        ) {
-            val attacksPerSecond =
-                runtimeManager
-                    .currentAttacksPerSecondFor(
-                        weapon
-                    )
-                    .coerceAtLeast(
-                        0.01f
-                    )
-
-            val attackInterval =
-                1f / attacksPerSecond
-
-            state.duration =
-                (
-                    attackInterval *
-                        0.72f
-                    )
-                    .coerceIn(
-                        0.07f,
-                        0.34f
-                    )
-
-            state.elapsed = 0f
-            state.lastCompletedAttackCount =
-                currentCount
-        }
+        /*
+         * One visual state per weapon. A new real attack restarts it;
+         * nothing is queued or accumulated.
+         */
+        state.targetCenterX =
+            targetCenterX
+        state.targetCenterY =
+            targetCenterY
+        state.elapsed =
+            0f
     }
 
     private fun attackIsActive(

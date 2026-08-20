@@ -112,12 +112,12 @@ class WeaponCarrierRenderer {
             )
         }
 
-        renderAttackEffect(
-            snapshot =
-                snapshot,
-            camera =
-                camera
-        )
+        /*
+         * Legacy carrier-based attack FX intentionally disabled.
+         *
+         * Melee attack visuals are now rendered exclusively by
+         * MeleeAttackVisualRenderer from executor-generated events.
+         */
     }
 
     fun renderMinionCarrier(
@@ -169,24 +169,15 @@ class WeaponCarrierRenderer {
         snapshot: CarrierSnapshot,
         playerCenterX: Float,
         playerCenterY: Float,
+        playerDirection: CharacterVisualDirection,
         camera: OrthographicCamera
     ) {
-        if (!snapshot.attackActive) {
-            return
-        }
-
-        val attackSnapshot =
-            snapshot.copy(
-                centerX = playerCenterX,
-                centerY = playerCenterY
-            )
-
-        renderAttackEffect(
-            snapshot =
-                attackSnapshot,
-            camera =
-                camera
-        )
+        /*
+         * Intentionally empty.
+         *
+         * Retained only for source compatibility with older call sites.
+         * All melee attack FX now come from the independent v3 event renderer.
+         */
     }
 
     private fun renderMinion(
@@ -293,12 +284,19 @@ class WeaponCarrierRenderer {
                 MINION_WEAPON_SIZE
             }
 
+        val progress =
+            snapshot.attackProgress
+                .coerceIn(
+                    0f,
+                    1f
+                )
+
         val phase =
             if (
                 snapshot.attackActive
             ) {
                 sin(
-                    snapshot.attackProgress *
+                    progress *
                         Math.PI
                 )
                     .toFloat()
@@ -306,35 +304,72 @@ class WeaponCarrierRenderer {
                 0f
             }
 
+        val isMelee =
+            definitionId in
+                setOf(
+                    "WPN_DOUBLE_SWORDS",
+                    "WPN_LONGSWORD",
+                    "WPN_LANCE",
+                    "WPN_DAGGER"
+                )
+
         val recoil =
-            phase *
-                when {
+            when {
+                definitionId ==
+                    "WPN_LONGBOW" ||
                     definitionId ==
-                        "WPN_LONGBOW" ||
-                        definitionId ==
-                        "WPN_CROSSBOW" -> {
+                    "WPN_CROSSBOW" -> {
+                    phase *
                         -4f
-                    }
-
-                    isSpellFocus -> {
-                        2.2f
-                    }
-
-                    else -> {
-                        3f
-                    }
                 }
 
-        val pulseScale =
-            if (
-                isSpellFocus &&
-                snapshot.attackActive
-            ) {
-                1f +
+                isSpellFocus -> {
                     phase *
-                    0.10f
-            } else {
-                1f
+                        2.2f
+                }
+
+                definitionId ==
+                    "WPN_LANCE" -> {
+                    phase *
+                        18f
+                }
+
+                definitionId ==
+                    "WPN_DAGGER" -> {
+                    phase *
+                        10f
+                }
+
+                isMelee -> {
+                    phase *
+                        7f
+                }
+
+                else -> {
+                    phase *
+                        3f
+                }
+            }
+
+        val pulseScale =
+            when {
+                isSpellFocus &&
+                    snapshot.attackActive -> {
+                    1f +
+                        phase *
+                        0.10f
+                }
+
+                isMelee &&
+                    snapshot.attackActive -> {
+                    1f +
+                        phase *
+                        0.08f
+                }
+
+                else -> {
+                    1f
+                }
             }
 
         val spellFocusDistance =
@@ -356,6 +391,13 @@ class WeaponCarrierRenderer {
                     recoil +
                         spellFocusDistance
             )
+
+        /*
+         * Held weapon remains readable and stable.
+         * The supplied attack FX image is the animation.
+         */
+        val meleeRotation =
+            0f
 
         drawRegion(
             texturePath =
@@ -384,8 +426,57 @@ class WeaponCarrierRenderer {
                     MINION_GRAY_TINT
                 } else {
                     1f
-                }
+                },
+            rotationDegrees =
+                meleeRotation
         )
+    }
+
+    private fun meleeSwingRotation(
+        direction: CharacterVisualDirection,
+        progress: Float,
+        definitionId: String
+    ): Float {
+        val sweep =
+            (
+                progress *
+                    2f -
+                    1f
+                )
+                .coerceIn(
+                    -1f,
+                    1f
+                )
+
+        val amplitude =
+            when (definitionId) {
+                "WPN_DOUBLE_SWORDS" ->
+                    52f
+
+                "WPN_LONGSWORD" ->
+                    68f
+
+                "WPN_DAGGER" ->
+                    76f
+
+                else ->
+                    55f
+            }
+
+        val sign =
+            when (direction) {
+                CharacterVisualDirection.LEFT,
+                CharacterVisualDirection.UP ->
+                    -1f
+
+                CharacterVisualDirection.RIGHT,
+                CharacterVisualDirection.DOWN ->
+                    1f
+            }
+
+        return sweep *
+            amplitude *
+            sign
     }
 
     private fun spellFocusWorldHeight(
@@ -627,10 +718,80 @@ class WeaponCarrierRenderer {
                 val effect =
                     meleeEffectFrame(
                         id = id,
-                        direction =
-                            snapshot.direction
+                        level =
+                            snapshot.weapon.level
                     )
                         ?: return
+
+                val progress =
+                    snapshot.attackProgress
+                        .coerceIn(
+                            0f,
+                            1f
+                        )
+
+                /*
+                 * Use the supplied attack art directly.
+                 * No procedural swing, no generated geometry.
+                 * Only a short fade-in / fade-out.
+                 */
+                val alpha =
+                    when {
+                        progress < 0.16f ->
+                            (
+                                progress /
+                                    0.16f
+                                )
+                                .coerceIn(
+                                    0f,
+                                    1f
+                                )
+
+                        progress > 0.72f ->
+                            (
+                                (1f - progress) /
+                                    0.28f
+                                )
+                                .coerceIn(
+                                    0f,
+                                    1f
+                                )
+
+                        else ->
+                            1f
+                    }
+
+                val targetX =
+                    snapshot.attackTargetCenterX
+                val targetY =
+                    snapshot.attackTargetCenterY
+
+                val angle =
+                    (
+                        kotlin.math.atan2(
+                            targetY -
+                                snapshot.centerY,
+                            targetX -
+                                snapshot.centerX
+                        ) *
+                            180f /
+                            kotlin.math.PI.toFloat()
+                        )
+                        .toFloat()
+
+                val effectHeight =
+                    when (id) {
+                        "WPN_LANCE" ->
+                            108f
+                        "WPN_LONGSWORD" ->
+                            116f
+                        "WPN_DOUBLE_SWORDS" ->
+                            104f
+                        "WPN_DAGGER" ->
+                            92f
+                        else ->
+                            MELEE_EFFECT_SIZE
+                    }
 
                 drawRegion(
                     texturePath =
@@ -638,17 +799,17 @@ class WeaponCarrierRenderer {
                     rect =
                         effect.second,
                     centerX =
-                        snapshot.centerX,
+                        targetX,
                     centerY =
-                        snapshot.centerY,
+                        targetY,
                     worldHeight =
-                        MELEE_EFFECT_SIZE,
+                        effectHeight,
                     camera =
                         camera,
                     alpha =
-                        1f -
-                            snapshot.attackProgress *
-                            0.60f
+                        alpha,
+                    rotationDegrees =
+                        angle
                 )
             }
 
@@ -657,6 +818,78 @@ class WeaponCarrierRenderer {
              * Their attack feeling is the held-weapon recoil above.
              */
         }
+    }
+
+    private fun attackEffectOffset(
+        direction: CharacterVisualDirection,
+        amount: Float
+    ): Pair<Float, Float> {
+        return when (direction) {
+            CharacterVisualDirection.DOWN ->
+                0f to
+                    -amount
+
+            CharacterVisualDirection.UP ->
+                0f to
+                    amount
+
+            CharacterVisualDirection.LEFT ->
+                -amount to
+                    0f
+
+            CharacterVisualDirection.RIGHT ->
+                amount to
+                    0f
+        }
+    }
+
+    private fun meleeEffectRotation(
+        id: String,
+        direction: CharacterVisualDirection,
+        progress: Float
+    ): Float {
+        val base =
+            when (direction) {
+                CharacterVisualDirection.RIGHT ->
+                    0f
+
+                CharacterVisualDirection.DOWN ->
+                    -90f
+
+                CharacterVisualDirection.LEFT ->
+                    180f
+
+                CharacterVisualDirection.UP ->
+                    90f
+            }
+
+        if (
+            id ==
+            "WPN_LANCE"
+        ) {
+            return base
+        }
+
+        val sweep =
+            progress *
+                2f -
+                1f
+
+        val amount =
+            when (id) {
+                "WPN_DAGGER" ->
+                    48f
+
+                "WPN_DOUBLE_SWORDS" ->
+                    38f
+
+                else ->
+                    44f
+            }
+
+        return base +
+            sweep *
+            amount
     }
 
     private fun heldOffset(
@@ -847,49 +1080,51 @@ class WeaponCarrierRenderer {
 
     private fun meleeEffectFrame(
         id: String,
-        direction:
-        CharacterVisualDirection
+        level: Int
     ): Pair<String, Rect>? {
         return when (id) {
-            "WPN_DOUBLE_SWORDS" ->
+            "WPN_DOUBLE_SWORDS" -> {
+                /*
+                 * Exact requested rule:
+                 * Level 1-2 = first parenthesis-like dual crescent.
+                 * Level 3+  = second X-shaped slash.
+                 */
                 MELEE_TEXTURE to
-                    when (direction) {
-                        CharacterVisualDirection.DOWN ->
-                            Rect(845, 10, 220, 275)
-                        CharacterVisualDirection.UP ->
-                            Rect(1050, 10, 220, 275)
-                        CharacterVisualDirection.LEFT ->
-                            Rect(1180, 10, 340, 275)
-                        CharacterVisualDirection.RIGHT ->
-                            Rect(820, 10, 340, 275)
+                    if (level < 3) {
+                        Rect(
+                            770,
+                            0,
+                            340,
+                            285
+                        )
+                    } else {
+                        Rect(
+                            1110,
+                            0,
+                            426,
+                            285
+                        )
                     }
+            }
 
             "WPN_LONGSWORD",
             "WPN_DAGGER" ->
                 MELEE_TEXTURE to
-                    when (direction) {
-                        CharacterVisualDirection.DOWN ->
-                            Rect(850, 300, 620, 285)
-                        CharacterVisualDirection.UP ->
-                            Rect(850, 300, 620, 285)
-                        CharacterVisualDirection.LEFT ->
-                            Rect(850, 300, 620, 285)
-                        CharacterVisualDirection.RIGHT ->
-                            Rect(850, 300, 620, 285)
-                    }
+                    Rect(
+                        820,
+                        285,
+                        716,
+                        330
+                    )
 
             "WPN_LANCE" ->
                 MELEE_TEXTURE to
-                    when (direction) {
-                        CharacterVisualDirection.DOWN ->
-                            Rect(840, 690, 680, 230)
-                        CharacterVisualDirection.UP ->
-                            Rect(840, 690, 680, 230)
-                        CharacterVisualDirection.LEFT ->
-                            Rect(840, 690, 680, 230)
-                        CharacterVisualDirection.RIGHT ->
-                            Rect(840, 690, 680, 230)
-                    }
+                    Rect(
+                        810,
+                        640,
+                        726,
+                        320
+                    )
 
             else ->
                 null
@@ -920,7 +1155,8 @@ class WeaponCarrierRenderer {
         worldHeight: Float,
         camera: OrthographicCamera,
         alpha: Float = 1f,
-        tint: Float = 1f
+        tint: Float = 1f,
+        rotationDegrees: Float = 0f
     ) {
         val texture =
             textureFor(texturePath)
@@ -1003,8 +1239,13 @@ class WeaponCarrierRenderer {
                 drawWidth / 2f,
             centerY -
                 drawHeight / 2f,
+            drawWidth / 2f,
+            drawHeight / 2f,
             drawWidth,
-            drawHeight
+            drawHeight,
+            1f,
+            1f,
+            rotationDegrees
         )
 
         batch.setColor(

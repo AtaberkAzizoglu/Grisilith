@@ -2668,6 +2668,12 @@ class FirstScreen(
     private fun updateGame(
         delta: Float
     ) {
+        com.azizoglu.grisilith.weapon.visual.attack
+            .MeleeAttackVisualManager
+            .update(
+                delta
+            )
+
         if (
             stageController.currentStage !=
             lastCurrencyTransferStage
@@ -2937,6 +2943,28 @@ class FirstScreen(
                     handleEnemyKilled(
                         killedEnemy
                     )
+                },
+
+                onNormalAttackPerformed = {
+                        weapon,
+                        attacksPerSecond,
+                        targetCenterX,
+                        targetCenterY ->
+
+                    weaponCarrierVisualSystem
+                        .notifyNormalAttack(
+                            weapon =
+                                weapon,
+
+                            attacksPerSecond =
+                                attacksPerSecond,
+
+                            targetCenterX =
+                                targetCenterX,
+
+                            targetCenterY =
+                                targetCenterY
+                        )
                 }
             )
         }
@@ -2986,6 +3014,28 @@ class FirstScreen(
                     handleEnemyKilled(
                         killedEnemy
                     )
+                },
+
+                onNormalAttackPerformed = {
+                        weapon,
+                        attacksPerSecond,
+                        targetCenterX,
+                        targetCenterY ->
+
+                    weaponCarrierVisualSystem
+                        .notifyNormalAttack(
+                            weapon =
+                                weapon,
+
+                            attacksPerSecond =
+                                attacksPerSecond,
+
+                            targetCenterX =
+                                targetCenterX,
+
+                            targetCenterY =
+                                targetCenterY
+                        )
                 }
             )
         }
@@ -3963,6 +4013,10 @@ class FirstScreen(
     }
 
     override fun dispose() {
+        com.azizoglu.grisilith.weapon.visual.attack
+            .MeleeAttackVisualManager
+            .clear()
+
 
         if (
             Gdx.input.inputProcessor ===

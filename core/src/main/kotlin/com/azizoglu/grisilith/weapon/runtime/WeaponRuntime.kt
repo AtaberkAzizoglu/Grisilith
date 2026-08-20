@@ -55,7 +55,18 @@ class WeaponRuntime(
             damage: Int,
             weaponName: String
         ) -> Unit,
-        onEnemyKilled: (Enemy) -> Unit
+        onEnemyKilled: (Enemy) -> Unit,
+        onNormalAttackPerformed: (
+            weapon: WeaponInstance,
+            attacksPerSecond: Float,
+            targetCenterX: Float,
+            targetCenterY: Float
+        ) -> Unit = {
+                _,
+                _,
+                _,
+                _ ->
+        }
     ) {
         abilityRuntime.update(
             delta
@@ -77,14 +88,27 @@ class WeaponRuntime(
             )
                 ?: return
 
+        val currentAttacksPerSecond =
+            calculateAttacksPerSecond()
+                .coerceAtLeast(
+                    0.01f
+                )
+
         attackTimer.update(
             delta = delta,
 
             attacksPerSecond =
-                calculateAttacksPerSecond()
+                currentAttacksPerSecond
         ) {
             val attacksBeforeExecution =
                 weapon.completedNormalAttackCount
+
+            var visualTargetCenterX =
+                player.centerX
+            var visualTargetCenterY =
+                player.centerY
+            var hasVisualTarget =
+                false
 
             executor.execute(
                 WeaponAttackContext(
@@ -168,6 +192,13 @@ class WeaponRuntime(
                 attacksAfterExecution >
                 attacksBeforeExecution
             ) {
+                onNormalAttackPerformed(
+                    weapon,
+                    currentAttacksPerSecond,
+                    visualTargetCenterX,
+                    visualTargetCenterY
+                )
+
                 tamgaRuntimeManager
                     .onWeaponAttack(
                         slotIndex = slotIndex,
