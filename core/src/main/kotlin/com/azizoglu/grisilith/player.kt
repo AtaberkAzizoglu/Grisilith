@@ -94,6 +94,17 @@ class Player(
         get() =
             visualState
 
+    /*
+     * Visual carrier/minion systems need the player's current configured
+     * movement speed even while the player is standing still.
+     *
+     * This is read-only and does not alter player movement.
+     */
+    val followerReferenceMovementSpeed:
+        Float
+        get() =
+            calculatedMovementSpeed()
+
     fun update(
         delta:
         Float

@@ -12,6 +12,8 @@ import com.azizoglu.grisilith.map.tile.MapGroundTileRenderer
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.visual.ProjectileSpriteRenderer
+import com.azizoglu.grisilith.weapon.visual.carrier.WeaponCarrierRenderer
+import com.azizoglu.grisilith.weapon.visual.carrier.WeaponCarrierVisualSystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -58,6 +60,9 @@ class WorldRenderer(
     private val projectileSpriteRenderer =
         ProjectileSpriteRenderer()
 
+    private val weaponCarrierRenderer =
+        WeaponCarrierRenderer()
+
     /*
      * LibGDX world Y ekseni yukarı doğru büyür.
      *
@@ -88,6 +93,9 @@ class WorldRenderer(
 
         projectiles:
         List<Projectile>,
+
+        weaponCarrierVisualSystem:
+        WeaponCarrierVisualSystem,
 
         renderBehindEntities:
         ((ShapeRenderer) -> Unit)? = null
@@ -210,6 +218,18 @@ class WorldRenderer(
             }
         }
 
+        val carrierSnapshots =
+            weaponCarrierVisualSystem
+                .snapshots(
+                    player
+                )
+
+        val playerCarrier =
+            carrierSnapshots
+                .firstOrNull {
+                    it.slotIndex == 0
+                }
+
         if (
             characterSpriteRenderer
                 .hasVisualDefinition(
@@ -222,20 +242,74 @@ class WorldRenderer(
                         player.bounds.y,
 
                     render = {
-                        characterSpriteRenderer.render(
-                            player =
-                                player,
+                        if (
+                            playerCarrier !=
+                            null
+                        ) {
+                            weaponCarrierRenderer
+                                .renderPlayerCarrier(
+                                    snapshot =
+                                        playerCarrier,
 
-                            characterId =
-                                selectedCharacterId,
+                                    camera =
+                                        camera,
 
-                            camera =
-                                camera
-                        )
+                                    renderCharacter = {
+                                        characterSpriteRenderer
+                                            .render(
+                                                player =
+                                                    player,
+
+                                                characterId =
+                                                    selectedCharacterId,
+
+                                                camera =
+                                                    camera
+                                            )
+                                    }
+                                )
+                        } else {
+                            characterSpriteRenderer.render(
+                                player =
+                                    player,
+
+                                characterId =
+                                    selectedCharacterId,
+
+                                camera =
+                                    camera
+                            )
+                        }
                     }
                 )
             )
         }
+
+        carrierSnapshots
+            .filter {
+                it.slotIndex > 0
+            }
+            .forEach {
+                    snapshot ->
+
+                depthEntries.add(
+                    DepthRenderEntry(
+                        depthY =
+                            snapshot.depthY,
+
+                        render = {
+                            weaponCarrierRenderer
+                                .renderMinionCarrier(
+                                    snapshot =
+                                        snapshot,
+
+                                    camera =
+                                        camera
+                                )
+                        }
+                    )
+                )
+            }
 
         enemyManager.allEnemies
             .forEach {
@@ -276,6 +350,35 @@ class WorldRenderer(
             .forEach {
                     entry ->
                 entry.render()
+            }
+
+        /*
+         * Minions only carry the visuals.
+         * Every weapon attack still originates from player-center gameplay
+         * executors, so their attack FX is also emitted at player center.
+         */
+        carrierSnapshots
+            .filter {
+                it.slotIndex > 0 &&
+                    it.attackActive
+            }
+            .forEach {
+                    snapshot ->
+
+                weaponCarrierRenderer
+                    .renderAttackEffectAtPlayer(
+                        snapshot =
+                            snapshot,
+
+                        playerCenterX =
+                            player.centerX,
+
+                        playerCenterY =
+                            player.centerY,
+
+                        camera =
+                            camera
+                    )
             }
 
         /*
@@ -423,6 +526,9 @@ class WorldRenderer(
             .dispose()
 
         projectileSpriteRenderer
+            .dispose()
+
+        weaponCarrierRenderer
             .dispose()
     }
 }

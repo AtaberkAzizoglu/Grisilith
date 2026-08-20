@@ -576,6 +576,22 @@ class WeaponRuntimeManager(
             }
     }
 
+    fun currentAttacksPerSecondFor(
+        weapon: WeaponInstance
+    ): Float {
+        synchronizeWithInventory()
+
+        return runtimesByWeapon[
+            weapon
+        ]
+            ?.currentAttacksPerSecond()
+            ?: weapon.definition
+                .baseAttacksPerSecond
+                .coerceAtLeast(
+                    0.01f
+                )
+    }
+
     private fun synchronizeWithInventory() {
         val equippedWeapons =
             inventory.allWeapons()

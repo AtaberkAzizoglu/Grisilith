@@ -107,6 +107,7 @@ import com.azizoglu.grisilith.screen.glyph.ChooseGlyphSpellPopup
 import com.azizoglu.grisilith.weapon.glyph.ChalkDustSpellChoice
 import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
 import com.azizoglu.grisilith.summon.SummonManager
+import com.azizoglu.grisilith.weapon.visual.carrier.WeaponCarrierVisualSystem
 
 class FirstScreen(
     private val game: GrisilithGame,
@@ -299,6 +300,12 @@ class FirstScreen(
             currentStageProvider = {
                 stageController.currentStage
             }
+        )
+
+    private val weaponCarrierVisualSystem =
+        WeaponCarrierVisualSystem(
+            inventory =
+                weaponInventory
         )
 
     private val mapObstacles: List<MapObstacle> =
@@ -2869,6 +2876,18 @@ class FirstScreen(
             )
         }
 
+        weaponCarrierVisualSystem
+            .update(
+                delta =
+                    delta,
+
+                player =
+                    player,
+
+                runtimeManager =
+                    weaponRuntimeManager
+            )
+
         consumeImpaleAndDragReward()
 
         projectiles.forEach { projectile ->
@@ -3405,6 +3424,9 @@ class FirstScreen(
 
             projectiles =
                 projectiles,
+
+            weaponCarrierVisualSystem =
+                weaponCarrierVisualSystem,
 
             renderBehindEntities = {
                     activeShapeRenderer ->

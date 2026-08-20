@@ -177,6 +177,11 @@ class WeaponRuntime(
         }
     }
 
+    fun currentAttacksPerSecond():
+        Float {
+        return calculateAttacksPerSecond()
+    }
+
     private fun calculateAttacksPerSecond():
         Float {
 
