@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector2
 import com.azizoglu.grisilith.weapon.runtime.WeaponHitEvent
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.azizoglu.grisilith.enemy.EnemyType
+import com.azizoglu.grisilith.summon.SummonedEntity
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.badlogic.gdx.math.MathUtils
 import kotlin.math.roundToInt
@@ -27,6 +28,13 @@ class Projectile(
 
     val sourceWeaponSlotIndex:
     Int = -1,
+
+    /*
+     * Non-null only for summon-owned projectiles.
+     * Player weapon projectiles keep the default null value.
+     */
+    val sourceSummonRuntimeId:
+    String? = null,
 
     private val damage: Int,
 
@@ -806,6 +814,100 @@ class Projectile(
 
             return
         }
+    }
+
+    fun checkSummonCollision(
+        summons: List<SummonedEntity>,
+        onDamageDealt: (
+            damage: Int,
+            sourceName: String
+        ) -> Unit = {
+                _,
+                _ ->
+        }
+    ) {
+        val sourceRuntimeId =
+            sourceSummonRuntimeId
+                ?: return
+
+        if (
+            !isActive ||
+            ignoresEnemyCollisions ||
+            activationDelayRemaining >
+            0f
+        ) {
+            return
+        }
+
+        val sourceSummon =
+            summons.firstOrNull {
+                it.runtimeId ==
+                    sourceRuntimeId
+            }
+                ?: return
+
+        val projectileCenterX =
+            position.x +
+                size /
+                2f
+
+        val projectileCenterY =
+            position.y +
+                size /
+                2f
+
+        val target =
+            summons
+                .asSequence()
+                .filter {
+                    it.runtimeId !=
+                        sourceRuntimeId &&
+                        !it.isExpired &&
+                        it.faction !=
+                        sourceSummon.faction
+                }
+                .firstOrNull {
+                        candidate ->
+
+                    val radius =
+                        size /
+                            2f +
+                            candidate
+                                .combatRadius
+
+                    Vector2.dst2(
+                        projectileCenterX,
+                        projectileCenterY,
+                        candidate.centerX,
+                        candidate.centerY
+                    ) <=
+                        radius *
+                        radius
+                }
+                ?: return
+
+        val appliedDamage =
+            target.takeDamage(
+                damage.coerceAtLeast(
+                    1
+                )
+            )
+
+        if (
+            appliedDamage >
+            0
+        ) {
+            onDamageDealt(
+                appliedDamage,
+                sourceWeaponName
+            )
+        }
+
+        /*
+         * Summon projectile is single-impact.
+         */
+        isActive =
+            false
     }
 
     fun checkObstacleCollision(

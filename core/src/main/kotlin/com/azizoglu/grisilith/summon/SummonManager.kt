@@ -5,8 +5,11 @@ import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
+import com.azizoglu.grisilith.map.MapObstacle
+import com.badlogic.gdx.math.Rectangle
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
+import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
 import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -14,7 +17,9 @@ import com.badlogic.gdx.math.MathUtils
 
 class SummonManager(
     private val weaponInventory: WeaponInventory,
-    private val playerStats: PlayerStats
+    private val playerStats: PlayerStats,
+    private val mapObstacles: List<MapObstacle> =
+        emptyList()
 ) {
 
     private val entities =
@@ -35,6 +40,7 @@ class SummonManager(
         worldWidth: Float,
         worldHeight: Float,
         enemies: List<Enemy>,
+        projectiles: MutableList<Projectile>,
         onDamageDealt: (
             damage: Int,
             sourceName: String
@@ -75,6 +81,9 @@ class SummonManager(
                     worldHeight =
                         worldHeight,
 
+                    mapObstacles =
+                        mapObstacles,
+
                     enemies =
                         enemies,
 
@@ -113,27 +122,18 @@ class SummonManager(
                             summon,
                             enemy ->
 
-                        applyEnemyAttack(
+                        spawnImpFireProjectile(
                             summon =
                                 summon,
 
-                            enemy =
-                                enemy,
+                            targetCenterX =
+                                enemy.centerX,
 
-                            attackName =
-                                "Summon Demon",
+                            targetCenterY =
+                                enemy.centerY,
 
-                            damageType =
-                                DamageType.FIRE,
-
-                            conditionType =
-                                ConditionType.BURNED,
-
-                            onDamageDealt =
-                                onDamageDealt,
-
-                            onEnemyKilled =
-                                onEnemyKilled
+                            projectiles =
+                                projectiles
                         )
                     },
 
@@ -185,15 +185,18 @@ class SummonManager(
                             summon,
                             target ->
 
-                        applySummonAttack(
-                            attacker =
+                        spawnImpFireProjectile(
+                            summon =
                                 summon,
 
-                            target =
-                                target,
+                            targetCenterX =
+                                target.centerX,
 
-                            attackName =
-                                "Summon Demon"
+                            targetCenterY =
+                                target.centerY,
+
+                            projectiles =
+                                projectiles
                         )
                     },
 
@@ -450,6 +453,116 @@ class SummonManager(
 
         entities.clear()
         schedulersByWeaponRuntimeId.clear()
+    }
+
+    private fun spawnImpFireProjectile(
+        summon: SummonedEntity,
+        targetCenterX: Float,
+        targetCenterY: Float,
+        projectiles: MutableList<Projectile>
+    ) {
+        if (
+            summon.isExpired
+        ) {
+            return
+        }
+
+        val sourceName =
+            summon.sourceWeaponDisplayName +
+                " — Summon Demon"
+
+        val burnedApplication =
+            ConditionDamageCalculator
+                .createApplication(
+                    type =
+                        ConditionType.BURNED,
+
+                    playerStats =
+                        playerStats,
+
+                    durationSeconds =
+                        IMP_BURN_DURATION_SECONDS,
+
+                    sourceWeaponRuntimeId =
+                        summon.sourceWeaponRuntimeId,
+
+                    sourceWeaponDefinitionId =
+                        summon.sourceWeaponDefinitionId,
+
+                    sourceName =
+                        sourceName,
+
+                    sourceCenterX =
+                        summon.centerX,
+
+                    sourceCenterY =
+                        summon.centerY
+                )
+
+        /*
+         * This is a normal world Projectile:
+         * - existing FIRE atlas visual
+         * - existing obstacle collision
+         * - existing enemy projectile hitbox
+         * - real travel time instead of instant summon damage
+         *
+         * sourceWeapon stays null so player-only Weapon/Tamga on-hit logic
+         * cannot accidentally trigger from an Imp shot.
+         */
+        projectiles.add(
+            Projectile(
+                startX =
+                    summon.centerX,
+
+                startY =
+                    summon.centerY,
+
+                targetX =
+                    targetCenterX,
+
+                targetY =
+                    targetCenterY,
+
+                sourceWeaponName =
+                    sourceName,
+
+                sourceWeapon =
+                    null,
+
+                sourceWeaponSlotIndex =
+                    -1,
+
+                sourceSummonRuntimeId =
+                    summon.runtimeId,
+
+                damage =
+                    summon.stats.baseDamage,
+
+                isCriticalHit =
+                    false,
+
+                maximumTargets =
+                    1,
+
+                projectileSpeed =
+                    IMP_PROJECTILE_SPEED,
+
+                maximumTravelDistance =
+                    IMP_PROJECTILE_MAXIMUM_TRAVEL_DISTANCE,
+
+                damageType =
+                    DamageType.FIRE,
+
+                knockback =
+                    0f,
+
+                sizeMultiplier =
+                    IMP_PROJECTILE_SIZE_MULTIPLIER,
+
+                conditionApplication =
+                    burnedApplication
+            )
+        )
     }
 
     private fun applySummonAttack(
@@ -717,48 +830,54 @@ class SummonManager(
                             16f
                 }
 
-            /*
-             * Knight already follows the requested ~500 px spawn rule.
-             * Obstacle-aware relocation will be hardened in the dedicated
-             * Knight AI phase; for now the point is clamped inside world.
-             */
-            val rawCenterX =
-                playerCenterX +
-                    MathUtils.cos(
-                        angle
-                    ) *
-                    spawnDistance
+            val resolvedSpawn =
+                if (
+                    type ==
+                    SummonType.KNIGHT_SPIRIT
+                ) {
+                    resolveKnightSpawnPoint(
+                        playerCenterX =
+                            playerCenterX,
 
-            val rawCenterY =
-                playerCenterY +
-                    MathUtils.sin(
-                        angle
-                    ) *
-                    spawnDistance
+                        playerCenterY =
+                            playerCenterY,
+
+                        preferredAngle =
+                            angle,
+
+                        worldWidth =
+                            worldWidth,
+
+                        worldHeight =
+                            worldHeight
+                    )
+                } else {
+                    resolveRegularSummonSpawnPoint(
+                        playerCenterX =
+                            playerCenterX,
+
+                        playerCenterY =
+                            playerCenterY,
+
+                        angle =
+                            angle,
+
+                        distance =
+                            spawnDistance,
+
+                        worldWidth =
+                            worldWidth,
+
+                        worldHeight =
+                            worldHeight
+                    )
+                }
 
             val startCenterX =
-                rawCenterX.coerceIn(
-                    SUMMON_WORLD_MARGIN,
-                    (
-                        worldWidth -
-                            SUMMON_WORLD_MARGIN
-                        )
-                        .coerceAtLeast(
-                            SUMMON_WORLD_MARGIN
-                        )
-                )
+                resolvedSpawn.first
 
             val startCenterY =
-                rawCenterY.coerceIn(
-                    SUMMON_WORLD_MARGIN,
-                    (
-                        worldHeight -
-                            SUMMON_WORLD_MARGIN
-                        )
-                        .coerceAtLeast(
-                            SUMMON_WORLD_MARGIN
-                        )
-                )
+                resolvedSpawn.second
 
             entities.add(
                 SummonedEntity(
@@ -808,6 +927,232 @@ class SummonManager(
         return true
     }
 
+    private fun resolveKnightSpawnPoint(
+        playerCenterX: Float,
+        playerCenterY: Float,
+        preferredAngle: Float,
+        worldWidth: Float,
+        worldHeight: Float
+    ): Pair<Float, Float> {
+
+        /*
+         * Primary rule:
+         * Knight should appear approximately 500 px from the player.
+         *
+         * We first search the exact 500 px ring. If every point is blocked
+         * by an obstacle/world edge, only then do we try nearby fallback
+         * rings. This avoids spawning the Knight inside rocks/trees/wagons.
+         */
+        val searchRadii =
+            floatArrayOf(
+                KNIGHT_SPAWN_DISTANCE,
+                470f,
+                530f,
+                440f,
+                560f
+            )
+
+        searchRadii.forEach {
+                radius ->
+
+            repeat(
+                KNIGHT_SPAWN_ANGLE_ATTEMPTS
+            ) {
+                    attempt ->
+
+                val alternatingStep =
+                    if (
+                        attempt ==
+                        0
+                    ) {
+                        0
+                    } else {
+                        (
+                            (attempt +
+                                1) /
+                                2
+                            ) *
+                            if (
+                                attempt %
+                                2 ==
+                                1
+                            ) {
+                                1
+                            } else {
+                                -1
+                            }
+                    }
+
+                val angle =
+                    preferredAngle +
+                        alternatingStep *
+                        KNIGHT_SPAWN_ANGLE_STEP
+
+                val candidateX =
+                    playerCenterX +
+                        MathUtils.cos(
+                            angle
+                        ) *
+                        radius
+
+                val candidateY =
+                    playerCenterY +
+                        MathUtils.sin(
+                            angle
+                        ) *
+                        radius
+
+                if (
+                    isValidSummonSpawnPoint(
+                        centerX =
+                            candidateX,
+
+                        centerY =
+                            candidateY,
+
+                        radius =
+                            KNIGHT_SPAWN_COLLISION_RADIUS,
+
+                        worldWidth =
+                            worldWidth,
+
+                        worldHeight =
+                            worldHeight
+                    )
+                ) {
+                    return candidateX to
+                        candidateY
+                }
+            }
+        }
+
+        /*
+         * Extremely defensive fallback for cramped maps.
+         * Keep the old behavior rather than failing activation completely.
+         */
+        return resolveRegularSummonSpawnPoint(
+            playerCenterX =
+                playerCenterX,
+
+            playerCenterY =
+                playerCenterY,
+
+            angle =
+                preferredAngle,
+
+            distance =
+                KNIGHT_SPAWN_DISTANCE,
+
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight
+        )
+    }
+
+    private fun resolveRegularSummonSpawnPoint(
+        playerCenterX: Float,
+        playerCenterY: Float,
+        angle: Float,
+        distance: Float,
+        worldWidth: Float,
+        worldHeight: Float
+    ): Pair<Float, Float> {
+
+        val rawCenterX =
+            playerCenterX +
+                MathUtils.cos(
+                    angle
+                ) *
+                distance
+
+        val rawCenterY =
+            playerCenterY +
+                MathUtils.sin(
+                    angle
+                ) *
+                distance
+
+        return rawCenterX.coerceIn(
+            SUMMON_WORLD_MARGIN,
+            (
+                worldWidth -
+                    SUMMON_WORLD_MARGIN
+                )
+                .coerceAtLeast(
+                    SUMMON_WORLD_MARGIN
+                )
+        ) to
+            rawCenterY.coerceIn(
+                SUMMON_WORLD_MARGIN,
+                (
+                    worldHeight -
+                        SUMMON_WORLD_MARGIN
+                    )
+                    .coerceAtLeast(
+                        SUMMON_WORLD_MARGIN
+                    )
+            )
+    }
+
+    private fun isValidSummonSpawnPoint(
+        centerX: Float,
+        centerY: Float,
+        radius: Float,
+        worldWidth: Float,
+        worldHeight: Float
+    ): Boolean {
+
+        if (
+            centerX -
+            radius <
+            SUMMON_WORLD_MARGIN ||
+            centerX +
+            radius >
+            worldWidth -
+            SUMMON_WORLD_MARGIN ||
+            centerY -
+            radius <
+            SUMMON_WORLD_MARGIN ||
+            centerY +
+            radius >
+            worldHeight -
+            SUMMON_WORLD_MARGIN
+        ) {
+            return false
+        }
+
+        val candidate =
+            Rectangle(
+                centerX -
+                    radius -
+                    KNIGHT_SPAWN_OBSTACLE_PADDING,
+
+                centerY -
+                    radius -
+                    KNIGHT_SPAWN_OBSTACLE_PADDING,
+
+                (
+                    radius +
+                        KNIGHT_SPAWN_OBSTACLE_PADDING
+                    ) *
+                    2f,
+
+                (
+                    radius +
+                        KNIGHT_SPAWN_OBSTACLE_PADDING
+                    ) *
+                    2f
+            )
+
+        return mapObstacles.none {
+            candidate.overlaps(
+                it.bounds
+            )
+        }
+    }
+
     private fun summonTypeFor(
         choice: IvySummonChoice
     ): SummonType {
@@ -833,10 +1178,40 @@ class SummonManager(
         private const val KNIGHT_SPAWN_DISTANCE =
             500f
 
+        private const val KNIGHT_SPAWN_COLLISION_RADIUS =
+            22f
+
+        private const val KNIGHT_SPAWN_OBSTACLE_PADDING =
+            18f
+
+        private const val KNIGHT_SPAWN_ANGLE_ATTEMPTS =
+            24
+
+        private val KNIGHT_SPAWN_ANGLE_STEP =
+            MathUtils.PI2 /
+                KNIGHT_SPAWN_ANGLE_ATTEMPTS
+
         private const val SUMMON_WORLD_MARGIN =
             28f
 
         private const val SUMMON_CONDITION_DURATION_SECONDS =
+            3f
+
+        private const val IMP_PROJECTILE_SPEED =
+            420f
+
+        /*
+         * Imp attack range is currently ~235px before scaling.
+         * Leave enough travel distance for moving targets without allowing
+         * a missed fireball to cross the whole map.
+         */
+        private const val IMP_PROJECTILE_MAXIMUM_TRAVEL_DISTANCE =
+            340f
+
+        private const val IMP_PROJECTILE_SIZE_MULTIPLIER =
+            1.05f
+
+        private const val IMP_BURN_DURATION_SECONDS =
             3f
     }
 }

@@ -2,6 +2,9 @@ package com.azizoglu.grisilith.summon
 
 import com.azizoglu.grisilith.combat.HealthComponent
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.navigation.EnemyNavigationAgent
+import com.azizoglu.grisilith.map.MapObstacle
+import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
@@ -35,7 +38,27 @@ class SummonedEntity(
             startCenterY
         )
 
+    /*
+     * Reused rectangle for Enemy target/contact checks.
+     * This is gameplay-only and does not change the summon sprite size.
+     */
+    private val combatBoundsRectangle =
+        Rectangle()
+
     private val movementDirection =
+        Vector2()
+
+    /*
+     * Knight uses the same obstacle-aware A* navigation foundation as Enemy.
+     * Cow/Imp movement is intentionally left unchanged in this phase.
+     */
+    private val knightNavigationAgent =
+        EnemyNavigationAgent(
+            agentSize =
+                KNIGHT_NAVIGATION_AGENT_SIZE
+        )
+
+    private val navigationOutput =
         Vector2()
 
     private val visualPhase =
@@ -88,6 +111,25 @@ class SummonedEntity(
         get() =
             visualRadius()
 
+    val combatBounds: Rectangle
+        get() {
+            val radius =
+                combatRadius
+
+            combatBoundsRectangle.set(
+                center.x -
+                    radius,
+                center.y -
+                    radius,
+                radius *
+                    2f,
+                radius *
+                    2f
+            )
+
+            return combatBoundsRectangle
+        }
+
     val faction: SummonCombatFaction
         get() =
             type.faction
@@ -98,6 +140,7 @@ class SummonedEntity(
         playerCenterY: Float,
         worldWidth: Float,
         worldHeight: Float,
+        mapObstacles: List<MapObstacle>,
         enemies: List<Enemy>,
         otherSummons: List<SummonedEntity>,
         onCowAttack: (
@@ -153,6 +196,16 @@ class SummonedEntity(
                 .coerceAtLeast(
                     0f
                 )
+
+        if (
+            type ==
+            SummonType.KNIGHT_SPIRIT
+        ) {
+            knightNavigationAgent
+                .update(
+                    delta
+                )
+        }
 
         attackFlashRemainingSeconds =
             (
@@ -225,6 +278,15 @@ class SummonedEntity(
 
                     playerCenterY =
                         playerCenterY,
+
+                    worldWidth =
+                        worldWidth,
+
+                    worldHeight =
+                        worldHeight,
+
+                    mapObstacles =
+                        mapObstacles,
 
                     enemies =
                         enemies,
@@ -638,6 +700,9 @@ class SummonedEntity(
         delta: Float,
         playerCenterX: Float,
         playerCenterY: Float,
+        worldWidth: Float,
+        worldHeight: Float,
+        mapObstacles: List<MapObstacle>,
         enemies: List<Enemy>,
         otherSummons: List<SummonedEntity>,
         onEnemyAttack: (
@@ -696,7 +761,7 @@ class SummonedEntity(
                     )
                 }
             } else {
-                moveToward(
+                moveKnightToward(
                     targetX =
                         playerCenterX,
 
@@ -704,7 +769,16 @@ class SummonedEntity(
                         playerCenterY,
 
                     delta =
-                        delta
+                        delta,
+
+                    worldWidth =
+                        worldWidth,
+
+                    worldHeight =
+                        worldHeight,
+
+                    mapObstacles =
+                        mapObstacles
                 )
             }
 
@@ -760,7 +834,7 @@ class SummonedEntity(
                         )
                     }
                 } else {
-                    moveToward(
+                    moveKnightToward(
                         targetX =
                             target.centerX,
 
@@ -768,7 +842,16 @@ class SummonedEntity(
                             target.centerY,
 
                         delta =
-                            delta
+                            delta,
+
+                        worldWidth =
+                            worldWidth,
+
+                        worldHeight =
+                            worldHeight,
+
+                        mapObstacles =
+                            mapObstacles
                     )
                 }
             }
@@ -797,7 +880,7 @@ class SummonedEntity(
                         )
                     }
                 } else {
-                    moveToward(
+                    moveKnightToward(
                         targetX =
                             target.centerX,
 
@@ -805,7 +888,16 @@ class SummonedEntity(
                             target.centerY,
 
                         delta =
-                            delta
+                            delta,
+
+                        worldWidth =
+                            worldWidth,
+
+                        worldHeight =
+                            worldHeight,
+
+                        mapObstacles =
+                            mapObstacles
                     )
                 }
             }
@@ -978,6 +1070,258 @@ class SummonedEntity(
 
         attackFlashRemainingSeconds =
             ATTACK_FLASH_SECONDS
+    }
+
+    private fun moveKnightToward(
+        targetX: Float,
+        targetY: Float,
+        delta: Float,
+        worldWidth: Float,
+        worldHeight: Float,
+        mapObstacles: List<MapObstacle>
+    ) {
+
+        movementDirection.set(
+            targetX -
+                center.x,
+
+            targetY -
+                center.y
+        )
+
+        if (
+            movementDirection.isZero(
+                0.001f
+            )
+        ) {
+            return
+        }
+
+        movementDirection.nor()
+
+        knightNavigationAgent
+            .resolveMovementDirection(
+                enemyCenterX =
+                    center.x,
+
+                enemyCenterY =
+                    center.y,
+
+                targetCenterX =
+                    targetX,
+
+                targetCenterY =
+                    targetY,
+
+                requestedDirection =
+                    movementDirection,
+
+                worldWidth =
+                    worldWidth,
+
+                worldHeight =
+                    worldHeight,
+
+                obstacles =
+                    mapObstacles,
+
+                output =
+                    navigationOutput
+            )
+
+        if (
+            navigationOutput.isZero(
+                0.001f
+            )
+        ) {
+            return
+        }
+
+        navigationOutput.nor()
+
+        moveKnightWithCollision(
+            direction =
+                navigationOutput,
+
+            distance =
+                stats.movementSpeed *
+                    delta,
+
+            worldWidth =
+                worldWidth,
+
+            worldHeight =
+                worldHeight,
+
+            mapObstacles =
+                mapObstacles
+        )
+    }
+
+    private fun moveKnightWithCollision(
+        direction: Vector2,
+        distance: Float,
+        worldWidth: Float,
+        worldHeight: Float,
+        mapObstacles: List<MapObstacle>
+    ) {
+
+        if (
+            distance <=
+            0f
+        ) {
+            return
+        }
+
+        val proposedX =
+            center.x +
+                direction.x *
+                distance
+
+        val proposedY =
+            center.y +
+                direction.y *
+                distance
+
+        if (
+            canKnightOccupy(
+                centerX =
+                    proposedX,
+
+                centerY =
+                    proposedY,
+
+                worldWidth =
+                    worldWidth,
+
+                worldHeight =
+                    worldHeight,
+
+                mapObstacles =
+                    mapObstacles
+            )
+        ) {
+            center.set(
+                proposedX,
+                proposedY
+            )
+
+            return
+        }
+
+        /*
+         * Cheap slide fallback:
+         * if the full diagonal step is blocked, try each axis separately.
+         * This complements A* and prevents the Knight sticking on obstacle
+         * corners when a waypoint sits close to a collision edge.
+         */
+        val proposedOnlyX =
+            center.x +
+                direction.x *
+                distance
+
+        if (
+            canKnightOccupy(
+                centerX =
+                    proposedOnlyX,
+
+                centerY =
+                    center.y,
+
+                worldWidth =
+                    worldWidth,
+
+                worldHeight =
+                    worldHeight,
+
+                mapObstacles =
+                    mapObstacles
+            )
+        ) {
+            center.x =
+                proposedOnlyX
+
+            return
+        }
+
+        val proposedOnlyY =
+            center.y +
+                direction.y *
+                distance
+
+        if (
+            canKnightOccupy(
+                centerX =
+                    center.x,
+
+                centerY =
+                    proposedOnlyY,
+
+                worldWidth =
+                    worldWidth,
+
+                worldHeight =
+                    worldHeight,
+
+                mapObstacles =
+                    mapObstacles
+            )
+        ) {
+            center.y =
+                proposedOnlyY
+        }
+    }
+
+    private fun canKnightOccupy(
+        centerX: Float,
+        centerY: Float,
+        worldWidth: Float,
+        worldHeight: Float,
+        mapObstacles: List<MapObstacle>
+    ): Boolean {
+
+        val radius =
+            KNIGHT_COLLISION_RADIUS
+
+        if (
+            centerX -
+            radius <
+            KNIGHT_WORLD_MARGIN ||
+            centerX +
+            radius >
+            worldWidth -
+            KNIGHT_WORLD_MARGIN ||
+            centerY -
+            radius <
+            KNIGHT_WORLD_MARGIN ||
+            centerY +
+            radius >
+            worldHeight -
+            KNIGHT_WORLD_MARGIN
+        ) {
+            return false
+        }
+
+        val bounds =
+            Rectangle(
+                centerX -
+                    radius,
+
+                centerY -
+                    radius,
+
+                radius *
+                    2f,
+
+                radius *
+                    2f
+            )
+
+        return mapObstacles.none {
+            bounds.overlaps(
+                it.bounds
+            )
+        }
     }
 
     private fun moveToward(
@@ -1260,6 +1604,15 @@ class SummonedEntity(
 
         private const val KNIGHT_PLAYER_RELEASE_RANGE =
             600f
+
+        private const val KNIGHT_NAVIGATION_AGENT_SIZE =
+            40f
+
+        private const val KNIGHT_COLLISION_RADIUS =
+            18f
+
+        private const val KNIGHT_WORLD_MARGIN =
+            20f
 
         private const val ATTACK_FLASH_SECONDS =
             0.10f

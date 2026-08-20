@@ -325,7 +325,10 @@ class FirstScreen(
                 weaponInventory,
 
             playerStats =
-                playerStats
+                playerStats,
+
+            mapObstacles =
+                mapObstacles
         )
 
     private val runStatistics = RunStatistics()
@@ -2794,6 +2797,9 @@ class FirstScreen(
                 enemyManager
                     .allEnemies,
 
+            projectiles =
+                projectiles,
+
             onDamageDealt = {
                     appliedDamage,
                     sourceName ->
@@ -2841,7 +2847,8 @@ class FirstScreen(
         handleChargerEndEvent()
 
         enemyManager.update(
-            delta = delta,
+            delta =
+                delta,
 
             targetX =
                 player.centerX,
@@ -2852,6 +2859,10 @@ class FirstScreen(
             targetBounds =
                 player.bounds,
 
+            summons =
+                summonManager
+                    .activeSummons,
+
             worldWidth =
                 worldWidth,
 
@@ -2859,18 +2870,30 @@ class FirstScreen(
                 worldHeight,
 
             mapObstacles =
-                mapObstacles
-        ) { damage ->
+                mapObstacles,
 
-            val appliedDamage =
-                player.takeDamage(
+            onPlayerDamaged = {
+                    damage ->
+
+                val appliedDamage =
+                    player.takeDamage(
+                        damage
+                    )
+
+                runStatistics.recordDamageTaken(
+                    appliedDamage
+                )
+            },
+
+            onSummonDamaged = {
+                    summon,
+                    damage ->
+
+                summon.takeDamage(
                     damage
                 )
-
-            runStatistics.recordDamageTaken(
-                appliedDamage
-            )
-        }
+            }
+        )
 
 
         consumeEnemyConditionDamageEvents()
@@ -3173,6 +3196,31 @@ class FirstScreen(
 
                             baseDamage =
                                 baseDamage
+                        )
+                }
+            )
+
+            /*
+             * Only summon-owned projectiles react here.
+             * Normal player projectiles return immediately because their
+             * sourceSummonRuntimeId is null.
+             */
+            projectile.checkSummonCollision(
+                summons =
+                    summonManager
+                        .activeSummons,
+
+                onDamageDealt = {
+                        appliedDamage,
+                        sourceName ->
+
+                    runStatistics
+                        .recordDamageDealt(
+                            amount =
+                                appliedDamage,
+
+                            weaponName =
+                                sourceName
                         )
                 }
             )
