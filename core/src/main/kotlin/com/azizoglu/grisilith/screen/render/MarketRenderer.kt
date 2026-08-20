@@ -84,6 +84,9 @@ class MarketRenderer(
     private val glyphLayout =
         GlyphLayout()
 
+    private val goldCoinRenderer =
+        GoldCoinRenderer()
+
     private val weaponDamageCalculator =
         WeaponDamageCalculator(
             playerStats =
@@ -380,15 +383,35 @@ class MarketRenderer(
             if (generalFailure != null) {
                 generalFailure.message
             } else if (rerollPrice <= 0) {
-                "Gold Coin: " +
-                    "${sessionWallet.goldCoins}" +
-                    "    |    Click or press R to Reroll: FREE"
+                "Click or press R to Reroll: FREE"
             } else {
-                "Gold Coin: " +
-                    "${sessionWallet.goldCoins}" +
-                    "    |    Click or press R to Reroll: " +
+                "Click or press R to Reroll: " +
                     "$rerollPrice Gold Coin"
             }
+
+        if (
+            generalFailure ==
+            null
+        ) {
+            goldCoinRenderer.render(
+                batch =
+                    batch,
+                font =
+                    font,
+                amount =
+                    sessionWallet.goldCoins,
+                x =
+                    layout.goldPanel.x +
+                        12f,
+                y =
+                    layout.goldPanel.y +
+                        layout.goldPanel.height /
+                            2f +
+                        7f,
+                iconSize =
+                    24f
+            )
+        }
 
         drawCenteredText(
             text =

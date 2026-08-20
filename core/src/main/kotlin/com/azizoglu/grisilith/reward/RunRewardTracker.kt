@@ -38,6 +38,29 @@ class RunRewardTracker(
                 )
                 .coerceAtLeast(0)
 
+
+    fun discardGrisilithCoins(
+        requestedAmount: Int
+    ): Int {
+        if (
+            requestedAmount <=
+            0
+        ) {
+            return 0
+        }
+
+        val discarded =
+            requestedAmount
+                .coerceAtMost(
+                    grisilithCoinsEarned
+                )
+
+        grisilithCoinsEarned -=
+            discarded
+
+        return discarded
+    }
+
     fun onEnemyKilled(
         enemyType: EnemyType,
         finalBossId: String? = null

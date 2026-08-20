@@ -1,9 +1,9 @@
 package com.azizoglu.grisilith.screen.render
 
-import com.azizoglu.grisilith.chest.ChestPickupManager
+import com.azizoglu.grisilith.chest.ChestWorldVisualManager
+import com.azizoglu.grisilith.economy.CurrencyPickupManager
 import com.azizoglu.grisilith.character.visual.CharacterSpriteRenderer
 import com.azizoglu.grisilith.content.ContentId
-import com.azizoglu.grisilith.economy.GoldCoinPickup
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.enemy.visual.EnemySpriteRenderer
 import com.azizoglu.grisilith.map.MapObstacle
@@ -63,6 +63,9 @@ class WorldRenderer(
     private val weaponCarrierRenderer =
         WeaponCarrierRenderer()
 
+    private val worldPickupSpriteRenderer =
+        WorldPickupSpriteRenderer()
+
     /*
      * LibGDX world Y ekseni yukarı doğru büyür.
      *
@@ -85,11 +88,11 @@ class WorldRenderer(
         enemyManager:
         EnemyManager,
 
-        goldCoinPickups:
-        List<GoldCoinPickup>,
+        currencyPickupManager:
+        CurrencyPickupManager,
 
-        chestPickupManager:
-        ChestPickupManager,
+        chestWorldVisualManager:
+        ChestWorldVisualManager,
 
         projectiles:
         List<Projectile>,
@@ -163,19 +166,32 @@ class WorldRenderer(
                     )
         )
 
-        goldCoinPickups.forEach {
-                pickup ->
-
-            pickup.render(
-                shapeRenderer
-            )
-        }
-
-        chestPickupManager.render(
-            shapeRenderer
-        )
-
         shapeRenderer.end()
+
+        /*
+         * Coins and chests now use their actual pixel-art assets.
+         * They are ground-layer visuals, intentionally rendered before
+         * character/enemy Y-sorted entities.
+         */
+        worldPickupSpriteRenderer
+            .renderCurrencies(
+                pickups =
+                    currencyPickupManager
+                        .allPickups,
+
+                camera =
+                    camera
+            )
+
+        worldPickupSpriteRenderer
+            .renderChests(
+                chests =
+                    chestWorldVisualManager
+                        .allVisuals,
+
+                camera =
+                    camera
+            )
 
         /*
          * PASS 2:
@@ -529,6 +545,9 @@ class WorldRenderer(
             .dispose()
 
         weaponCarrierRenderer
+            .dispose()
+
+        worldPickupSpriteRenderer
             .dispose()
     }
 }

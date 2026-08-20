@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.enemy.visual
 
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.EnemyType
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -125,11 +126,28 @@ class EnemySpriteRenderer {
             )
 
         /*
-         * Visual size is independent from the enemy collision hitbox.
-         * Our beast sheets already use the intended in-game canvas sizes
-         * (32 / 48 / 72 / 108), so the frame's largest source side is the
-         * correct world-space visual size.
+         * Boss scale affects rendering only.
+         * Collision and projectile hitboxes remain unchanged.
          */
+        val visualScale =
+            when (
+                enemy.type
+            ) {
+                EnemyType.MINI_BOSS,
+                EnemyType.FINAL_BOSS ->
+                    1.20f
+
+                else ->
+                    1f
+            }
+
+        val worldSize =
+            enemy.visualSize
+                .coerceAtLeast(
+                    1f
+                ) *
+                visualScale
+
         /*
          * Kaynak frame'lerin aspect ratio'sunu koruyoruz.
          * Böylece Crocodile gibi uzun veya Bald Eagle gibi geniş
@@ -146,7 +164,8 @@ class EnemySpriteRenderer {
                 )
 
         val scale =
-            1f
+            worldSize /
+                sourceLargestSide
 
         val drawWidth =
             frame.width *

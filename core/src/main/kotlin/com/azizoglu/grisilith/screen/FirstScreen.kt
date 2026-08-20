@@ -21,14 +21,15 @@ import com.badlogic.gdx.Input
 import com.azizoglu.grisilith.stage.StageController
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.stage.StageType
-import com.azizoglu.grisilith.economy.GoldCoinPickup
+import com.azizoglu.grisilith.economy.CurrencyPickupManager
+import com.azizoglu.grisilith.economy.GoldEconomyCalculator
+import com.azizoglu.grisilith.economy.PickupRangeController
 import com.azizoglu.grisilith.economy.SessionWallet
 import com.azizoglu.grisilith.economy.MarketOffer
 import com.azizoglu.grisilith.economy.MarketOfferGenerator
 import com.azizoglu.grisilith.economy.MarketProductType
 import com.azizoglu.grisilith.economy.MarketRerollPriceCalculator
 import com.azizoglu.grisilith.economy.MarketSlot
-import com.azizoglu.grisilith.economy.StageGoldRewardCalculator
 import com.azizoglu.grisilith.GrisilithGame
 import com.azizoglu.grisilith.config.GameDifficulty
 import com.azizoglu.grisilith.config.GameMap
@@ -67,6 +68,7 @@ import com.azizoglu.grisilith.chest.ChestDropCalculator
 import com.azizoglu.grisilith.chest.ChestDropSegmentTracker
 import com.azizoglu.grisilith.chest.ChestDropSource
 import com.azizoglu.grisilith.chest.ChestPickupManager
+import com.azizoglu.grisilith.chest.ChestWorldVisualManager
 import com.azizoglu.grisilith.chest.ChestRewardQueue
 import com.azizoglu.grisilith.chest.ChestRewardRoll
 import com.azizoglu.grisilith.chest.ChestRewardRoller
@@ -409,11 +411,37 @@ class FirstScreen(
     private val finalBossRewardId =
         "map:${gameMap.name.lowercase()}"
 
-    private val goldCoinPickups =
-        mutableListOf<GoldCoinPickup>()
+    private val currencyPickupManager =
+        CurrencyPickupManager()
+
+    /*
+     * Shared by coins AND chests. Future items can modify this controller
+     * without changing either pickup implementation.
+     */
+    private val pickupRangeController =
+        PickupRangeController()
 
     private val chestPickupManager =
         ChestPickupManager()
+
+    private val chestWorldVisualManager =
+        ChestWorldVisualManager()
+
+    private var currentStageChestsCollected =
+        0
+
+    private var lastCurrencyTransferStage =
+        stageController.currentStage
+
+
+    /*
+     * A loaded checkpoint already contains the wallet state for its stage.
+     * The first observed stage after restore must therefore NOT receive the
+     * pre-boss growth for a second time.
+     */
+    private var skipFirstBossGrowthAfterRestore =
+        restoredRun !=
+            null
 
     private val chestRewardQueue =
         ChestRewardQueue()
@@ -435,6 +463,16 @@ class FirstScreen(
             sessionWallet = sessionWallet,
             runRewardTracker =
                 runRewardTracker,
+            currencyPickupManager =
+                currencyPickupManager,
+            currentStageChestCollectedProvider = {
+                currentStageChestsCollected
+            },
+            activeWorldChestCountProvider = {
+                chestWorldVisualManager
+                    .allVisuals
+                    .size
+            },
             gameTimeController =
                 gameTimeController,
             weaponInventory =
@@ -1494,10 +1532,14 @@ class FirstScreen(
         enemyManager.clearAll()
         damageNumberManager.clear()
         projectiles.clear()
-        goldCoinPickups.clear()
+        currencyPickupManager
+            .clearAll()
 
-        chestPickupManager
-            .clearUncollectedChests()
+        /*
+         * Uncollected chests intentionally survive stage transitions.
+         * They remain at their world positions until the player picks them up
+         * or the run itself ends/resets.
+         */
 
         chestRewardQueue.clear()
 
@@ -2549,40 +2591,112 @@ class FirstScreen(
         }
     }
 
-    private fun collectAllGoldPickups() {
-        goldCoinPickups.forEach { pickup ->
-            pickup.collectImmediately { collectedGold ->
-                sessionWallet.addGold(collectedGold)
+    private fun bankUncollectedCurrencyForNextStage() {
+        val loss =
+            currencyPickupManager
+                .deferUncollectedForNextStage()
 
-                runStatistics.recordGoldCollected(
-                    collectedGold
+        if (
+            loss.grisilithLost >
+            0
+        ) {
+            runRewardTracker
+                .discardGrisilithCoins(
+                    loss.grisilithLost
                 )
-            }
         }
-
-        goldCoinPickups.clear()
     }
 
-    private fun grantStageCompletionGold(
-        completedStage: Int,
-        completedStageType: StageType
-    ) {
-        val reward =
-            StageGoldRewardCalculator.rewardFor(
-                completedStage = completedStage,
-                stageType = completedStageType
+    private fun applyPreBossStageGoldGrowth() {
+        val currentStage =
+            stageController
+                .currentStage
+
+        if (
+            !GoldEconomyCalculator
+                .isBossStage(
+                    currentStage
+                )
+        ) {
+            return
+        }
+
+        val bonus =
+            GoldEconomyCalculator
+                .preBossStageGrowthBonus(
+                    currentGold =
+                        sessionWallet
+                            .goldCoins,
+
+                    harvestScore =
+                        playerStats
+                            .totalScore(
+                                StatType.HARVEST
+                            ),
+
+                    defeatedMiniBossCount =
+                        runStatistics
+                            .totalBossesDefeated
+                )
+
+        if (
+            bonus <=
+            0
+        ) {
+            return
+        }
+
+        sessionWallet.addGold(
+            bonus.toFloat()
+        )
+
+        runStatistics
+            .recordGoldCollected(
+                bonus.toFloat()
             )
 
-        sessionWallet.addGold(reward)
-
-        runStatistics.recordGoldCollected(
-            reward
-        )
+        /*
+         * Reuse the existing (+N) HUD feedback so the player can see exactly
+         * how much money was added when the boss stage begins.
+         */
+        currencyPickupManager
+            .recordStageStartGoldBonus(
+                bonus
+            )
     }
 
     private fun updateGame(
         delta: Float
     ) {
+        if (
+            stageController.currentStage !=
+            lastCurrencyTransferStage
+        ) {
+            currentStageChestsCollected =
+                0
+
+            currencyPickupManager
+                .transferDeferredAtStageStart(
+                    sessionWallet =
+                        sessionWallet,
+
+                    runStatistics =
+                        runStatistics
+                )
+
+            if (
+                skipFirstBossGrowthAfterRestore
+            ) {
+                skipFirstBossGrowthAfterRestore =
+                    false
+            } else {
+                applyPreBossStageGoldGrowth()
+            }
+
+            lastCurrencyTransferStage =
+                stageController.currentStage
+        }
+
         damageNumberManager.update(
             delta =
                 delta
@@ -2997,57 +3111,78 @@ class FirstScreen(
             !projectile.isActive
         }
 
-        goldCoinPickups.forEach { pickup ->
-            pickup.update(
-                delta = delta,
+        currencyPickupManager.update(
+            delta =
+                delta,
 
-                targetX =
-                    player.centerX,
+            playerX =
+                player.centerX,
 
-                targetY =
-                    player.centerY
-            ) { collectedGold ->
+            playerY =
+                player.centerY,
 
-                sessionWallet.addGold(
-                    collectedGold
-                )
+            pickupRadius =
+                pickupRangeController
+                    .effectiveRadius,
 
-                runStatistics.recordGoldCollected(
-                    collectedGold
-                )
-            }
-        }
+            sessionWallet =
+                sessionWallet,
 
-        goldCoinPickups.removeAll { pickup ->
-            pickup.isCollected
-        }
+            runStatistics =
+                runStatistics
+        )
+
+        chestWorldVisualManager
+            .update(
+                delta
+            )
+
+        /*
+         * Chest uses exactly the same effective pickup radius as currencies.
+         * We expand a temporary player rectangle rather than changing the
+         * existing ChestPickupManager API.
+         */
+        val chestPickupRadius =
+            pickupRangeController
+                .effectiveRadius
+
+        val chestPickupBounds =
+            com.badlogic.gdx.math.Rectangle(
+                player.centerX -
+                    chestPickupRadius,
+
+                player.centerY -
+                    chestPickupRadius,
+
+                chestPickupRadius *
+                    2f,
+
+                chestPickupRadius *
+                    2f
+            )
 
         chestPickupManager.update(
             playerBounds =
-                player.bounds
+                chestPickupBounds
         ) {
+            chestWorldVisualManager
+                .removeNearestTo(
+                    worldX =
+                        player.centerX,
+
+                    worldY =
+                        player.centerY
+                )
+
+            currentStageChestsCollected +=
+                1
+
             chestRewardQueue
                 .addChest()
         }
 
 
-        enemyManager.removeDeadEnemies { enemy ->
-
-            runRewardTracker.onEnemyKilled(
-                enemyType =
-                    enemy.type,
-
-                finalBossId =
-                    if (
-                        enemy.type ==
-                        EnemyType.FINAL_BOSS
-                    ) {
-                        finalBossRewardId
-                    } else {
-                        null
-                    }
-            )
-        }
+        enemyManager.removeDeadEnemies()
 
         if (completeBossStageIfDefeated()) {
             return
@@ -3176,33 +3311,72 @@ class FirstScreen(
             killedEnemy
         )
 
-        runRewardTracker.onEnemyKilled(
-            enemyType = killedEnemy.type,
-            finalBossId =
-                if (killedEnemy.type ==
-                    EnemyType.FINAL_BOSS
-                ) {
-                    finalBossRewardId
-                } else {
-                    null
-                }
-        )
+        val awardedGrisilithCoins =
+            runRewardTracker.onEnemyKilled(
+                enemyType =
+                    killedEnemy.type,
+
+                finalBossId =
+                    if (
+                        killedEnemy.type ==
+                        EnemyType.FINAL_BOSS
+                    ) {
+                        finalBossRewardId
+                    } else {
+                        null
+                    }
+            )
+
+        if (
+            awardedGrisilithCoins >
+            0
+        ) {
+            currencyPickupManager
+                .spawnGrisilithCoins(
+                    worldX =
+                        killedEnemy.centerX,
+
+                    worldY =
+                        killedEnemy.centerY,
+
+                    count =
+                        awardedGrisilithCoins
+                )
+        }
 
         runStatistics.recordEnemyKilled(
             killedEnemy.type
         )
 
-        val harvestedGoldReward =
-            killedEnemy.goldReward *
-                playerStats.harvestGoldMultiplier()
+        val goldDrop =
+            GoldEconomyCalculator
+                .enemyDrop(
+                    enemyType =
+                        killedEnemy.type,
 
-        goldCoinPickups.add(
-            GoldCoinPickup(
-                startX = killedEnemy.centerX,
-                startY = killedEnemy.centerY,
-                value = harvestedGoldReward
-            )
-        )
+                    harvestScore =
+                        playerStats
+                            .totalScore(
+                                StatType.HARVEST
+                            )
+                )
+
+        if (
+            goldDrop >
+            0
+        ) {
+            currencyPickupManager
+                .spawnGoldReward(
+                    worldX =
+                        killedEnemy.centerX,
+
+                    worldY =
+                        killedEnemy.centerY,
+
+                    amount =
+                        goldDrop.toFloat()
+                )
+        }
 
         tryDropChestFromEnemy(killedEnemy)
     }
@@ -3308,6 +3482,14 @@ class FirstScreen(
                 killedEnemy.centerY
         )
 
+        chestWorldVisualManager.spawn(
+            worldX =
+                killedEnemy.centerX,
+
+            worldY =
+                killedEnemy.centerY
+        )
+
         chestDropSegmentTracker
             .recordDroppedChest()
     }
@@ -3359,13 +3541,7 @@ class FirstScreen(
         val completedStageType =
             stageController.currentStageType
 
-        collectAllGoldPickups()
-
-        grantStageCompletionGold(
-            completedStage = completedStage,
-            completedStageType =
-                completedStageType
-        )
+        bankUncollectedCurrencyForNextStage()
 
         summonManager.clear()
         enemyManager.clearAll()
@@ -3378,8 +3554,10 @@ class FirstScreen(
 
         consumeImpaleAndDragReward()
 
-        chestPickupManager
-            .clearUncollectedChests()
+        /*
+         * Chests persist for the entire RUN.
+         * Stage transitions do not remove or auto-open them.
+         */
 
         if (
             completedStageType ==
@@ -3416,11 +3594,11 @@ class FirstScreen(
             enemyManager =
                 enemyManager,
 
-            goldCoinPickups =
-                goldCoinPickups,
+            currencyPickupManager =
+                currencyPickupManager,
 
-            chestPickupManager =
-                chestPickupManager,
+            chestWorldVisualManager =
+                chestWorldVisualManager,
 
             projectiles =
                 projectiles,
@@ -3876,18 +4054,33 @@ class FirstScreen(
         val completedStageType =
             stageController.currentStageType
 
-        collectAllGoldPickups()
+        val finalCurrencyLoss =
+            currencyPickupManager
+                .bankEverythingAtRunEnd(
+                    sessionWallet =
+                        sessionWallet,
 
-        grantStageCompletionGold(
-            completedStage =
-                completedStage,
+                    runStatistics =
+                        runStatistics
+                )
 
-            completedStageType =
-                completedStageType
-        )
+        if (
+            finalCurrencyLoss
+                .grisilithLost >
+            0
+        ) {
+            runRewardTracker
+                .discardGrisilithCoins(
+                    finalCurrencyLoss
+                        .grisilithLost
+                )
+        }
 
         chestPickupManager
             .clearUncollectedChests()
+
+        chestWorldVisualManager
+            .clear()
 
         summonManager.clear()
         enemyManager.clearAll()

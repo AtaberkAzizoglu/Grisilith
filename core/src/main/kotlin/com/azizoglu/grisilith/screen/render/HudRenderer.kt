@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.screen.render
 
 import com.azizoglu.grisilith.economy.SessionWallet
+import com.azizoglu.grisilith.economy.CurrencyPickupManager
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.reward.RunRewardTracker
 import com.azizoglu.grisilith.settings.GameSettings
@@ -28,6 +29,9 @@ class HudRenderer(
     private val stageController: StageController,
     private val sessionWallet: SessionWallet,
     private val runRewardTracker: RunRewardTracker,
+    private val currencyPickupManager: CurrencyPickupManager,
+    private val currentStageChestCollectedProvider: () -> Int,
+    private val activeWorldChestCountProvider: () -> Int,
     private val gameTimeController: GameTimeController,
     private val weaponInventory: WeaponInventory,
     private val weaponRuntimeManager: WeaponRuntimeManager
@@ -42,6 +46,12 @@ class HudRenderer(
 
     private val gameSpeedButtonBounds =
         Rectangle()
+
+    private val goldCoinRenderer =
+        GoldCoinRenderer()
+
+    private val grisilithCoinRenderer =
+        GrisilithCoinRenderer()
 
     fun renderShapes(
         showGameplayHud: Boolean
@@ -521,21 +531,93 @@ class HudRenderer(
                 28f
         )
 
+        val autoGold =
+            currencyPickupManager
+                .displayedAutoGold
+
+        val autoGoldSuffix =
+            if (
+                autoGold >
+                0
+            ) {
+                " (+$autoGold)"
+            } else {
+                ""
+            }
+
         font.draw(
             batch,
-            "Gold ${sessionWallet.goldCoins}",
+            "Gold Coin:",
             left,
             top -
                 82f
         )
 
+        goldCoinRenderer.render(
+            batch =
+                batch,
+            font =
+                font,
+            amount =
+                sessionWallet.goldCoins,
+            x =
+                left +
+                    88f,
+            y =
+                top -
+                    82f,
+            iconSize =
+                20f,
+            suffix =
+                autoGoldSuffix
+        )
+
+        val displayedGrisilith =
+            currencyPickupManager
+                .displayedGrisilithBalance(
+                    runRewardTracker
+                        .grisilithCoinsEarned
+                )
+
+        val autoGrisilith =
+            currencyPickupManager
+                .displayedAutoGrisilith
+
+        val autoGrisilithSuffix =
+            if (
+                autoGrisilith >
+                0
+            ) {
+                " (+$autoGrisilith)"
+            } else {
+                ""
+            }
+
         font.draw(
             batch,
-            "Grisilith " +
-                "${runRewardTracker.grisilithCoinsEarned}",
+            "Grisilith Coin:",
             left,
             top -
                 106f
+        )
+
+        grisilithCoinRenderer.render(
+            batch =
+                batch,
+            font =
+                font,
+            amount =
+                displayedGrisilith,
+            x =
+                left +
+                    100f,
+            y =
+                top -
+                    106f,
+            iconSize =
+                21f,
+            suffix =
+                autoGrisilithSuffix
         )
 
         font.color =
@@ -546,9 +628,21 @@ class HudRenderer(
                 1f
             )
 
+        val stageChestsCollected =
+            currentStageChestCollectedProvider()
+                .coerceAtLeast(
+                    0
+                )
+
+        val activeWorldChests =
+            activeWorldChestCountProvider()
+                .coerceAtLeast(
+                    0
+                )
+
         font.draw(
             batch,
-            "Stage ${remainingStageSeconds}s",
+            "Chest: $stageChestsCollected ($activeWorldChests)",
             left,
             top -
                 130f
@@ -556,10 +650,18 @@ class HudRenderer(
 
         font.draw(
             batch,
-            "Run $formattedGameTime",
+            "Stage ${remainingStageSeconds}s",
             left,
             top -
                 154f
+        )
+
+        font.draw(
+            batch,
+            "Run $formattedGameTime",
+            left,
+            top -
+                178f
         )
     }
 

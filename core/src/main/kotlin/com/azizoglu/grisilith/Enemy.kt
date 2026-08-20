@@ -269,6 +269,16 @@ class Enemy(
         get() = position.y + size / 2f
 
     /*
+     * The enemy's ORIGINAL visual canvas size.
+     *
+     * `bounds` is intentionally a much smaller feet/body collision footprint,
+     * so renderers must never derive sprite size from bounds.width.
+     */
+    val visualSize: Float
+        get() =
+            size
+
+    /*
      * position + size visual frame'dir.
      * bounds alt gövde / ayak gameplay footprint'idir.
      */
@@ -1592,11 +1602,99 @@ class Enemy(
     private fun renderHealthBar(
         shapeRenderer: ShapeRenderer
     ) {
-        val barWidth = size
-        val barHeight = 6f
-        val barY = position.y + size + 7f
+        val barWidth =
+            size
 
-        shapeRenderer.color = Color.DARK_GRAY
+        val barHeight =
+            when (type) {
+                EnemyType.FINAL_BOSS ->
+                    11f
+
+                else ->
+                    6f
+            }
+
+        val barY =
+            position.y +
+                size +
+                7f
+
+        val backgroundColor =
+            Color(
+                0.10f,
+                0.10f,
+                0.12f,
+                0.96f
+            )
+
+        /*
+         * UNIQUE:
+         * Red HP bar with a gold frame.
+         */
+        if (
+            type ==
+            EnemyType.UNIQUE
+        ) {
+            val border =
+                2f
+
+            shapeRenderer.color =
+                Color(
+                    0.96f,
+                    0.69f,
+                    0.08f,
+                    1f
+                )
+
+            shapeRenderer.rect(
+                position.x -
+                    border,
+                barY -
+                    border,
+                barWidth +
+                    border *
+                    2f,
+                barHeight +
+                    border *
+                    2f
+            )
+        }
+
+        /*
+         * FINAL BOSS:
+         * A thicker and more strongly framed purple bar.
+         */
+        if (
+            type ==
+            EnemyType.FINAL_BOSS
+        ) {
+            val border =
+                2f
+
+            shapeRenderer.color =
+                Color(
+                    0.26f,
+                    0.04f,
+                    0.36f,
+                    1f
+                )
+
+            shapeRenderer.rect(
+                position.x -
+                    border,
+                barY -
+                    border,
+                barWidth +
+                    border *
+                    2f,
+                barHeight +
+                    border *
+                    2f
+            )
+        }
+
+        shapeRenderer.color =
+            backgroundColor
 
         shapeRenderer.rect(
             position.x,
@@ -1605,12 +1703,46 @@ class Enemy(
             barHeight
         )
 
-        shapeRenderer.color = Color.GREEN
+        shapeRenderer.color =
+            when (type) {
+                EnemyType.NORMAL ->
+                    Color(
+                        0.84f,
+                        0.07f,
+                        0.09f,
+                        1f
+                    )
+
+                EnemyType.UNIQUE ->
+                    Color(
+                        0.84f,
+                        0.07f,
+                        0.09f,
+                        1f
+                    )
+
+                EnemyType.MINI_BOSS ->
+                    Color(
+                        0.96f,
+                        0.40f,
+                        0.04f,
+                        1f
+                    )
+
+                EnemyType.FINAL_BOSS ->
+                    Color(
+                        0.58f,
+                        0.15f,
+                        0.80f,
+                        1f
+                    )
+            }
 
         shapeRenderer.rect(
             position.x,
             barY,
-            barWidth * health.healthRatio,
+            barWidth *
+                health.healthRatio,
             barHeight
         )
     }

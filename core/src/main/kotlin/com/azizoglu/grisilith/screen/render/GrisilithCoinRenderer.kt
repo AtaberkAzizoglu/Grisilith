@@ -1,26 +1,25 @@
 package com.azizoglu.grisilith.screen.render
 
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 
 class GrisilithCoinRenderer {
 
-    companion object {
-        private const val PLACEHOLDER_SYMBOL =
-            "G"
-
-        private const val SYMBOL_SCALE =
-            1.15f
-
-        private const val AMOUNT_SCALE =
-            1f
-
-        private const val SYMBOL_WIDTH =
-            34f
-
-        private const val AMOUNT_OFFSET_X =
-            42f
+    private val texture by lazy {
+        Texture(
+            Gdx.files.internal(
+                "currency/grisilith_coin.png"
+            ),
+            true
+        ).also {
+            it.setFilter(
+                Texture.TextureFilter.MipMapLinearLinear,
+                Texture.TextureFilter.Linear
+            )
+        }
     }
 
     fun render(
@@ -28,38 +27,23 @@ class GrisilithCoinRenderer {
         font: BitmapFont,
         amount: Int,
         x: Float,
-        y: Float
+        y: Float,
+        iconSize: Float = 27f,
+        suffix: String = ""
     ) {
-        val oldScaleX =
-            font.data.scaleX
-
-        val oldScaleY =
-            font.data.scaleY
-
         val oldColor =
             Color(
                 font.color
             )
 
-        font.data.setScale(
-            SYMBOL_SCALE
-        )
-
-        font.color =
-            Color.GOLD
-
-        font.draw(
-            batch,
-            PLACEHOLDER_SYMBOL,
+        batch.draw(
+            texture,
             x,
-            y,
-            SYMBOL_WIDTH,
-            1,
-            false
-        )
-
-        font.data.setScale(
-            AMOUNT_SCALE
+            y -
+                iconSize +
+                6f,
+            iconSize,
+            iconSize
         )
 
         font.color =
@@ -68,15 +52,15 @@ class GrisilithCoinRenderer {
         font.draw(
             batch,
             amount
-                .coerceAtLeast(0)
-                .toString(),
-            x + AMOUNT_OFFSET_X,
+                .coerceAtLeast(
+                    0
+                )
+                .toString() +
+                suffix,
+            x +
+                iconSize +
+                8f,
             y
-        )
-
-        font.data.setScale(
-            oldScaleX,
-            oldScaleY
         )
 
         font.color =
