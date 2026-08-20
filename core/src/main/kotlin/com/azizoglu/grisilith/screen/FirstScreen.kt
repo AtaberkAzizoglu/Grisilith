@@ -3713,6 +3713,10 @@ class FirstScreen(
             enemyManager =
                 enemyManager,
 
+            summons =
+                summonManager
+                    .activeSummons,
+
             currencyPickupManager =
                 currencyPickupManager,
 

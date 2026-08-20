@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import java.util.UUID
+import com.azizoglu.grisilith.summon.visual.SummonVisualDirection
 
 class SummonedEntity(
     val sourceWeaponRuntimeId: String,
@@ -79,6 +80,23 @@ class SummonedEntity(
      */
     private var knightPlayerTargetLocked =
         false
+
+    /*
+     * Purely visual movement state.
+     * Gameplay collision/hitbox is intentionally NOT derived from sprite size.
+     */
+    var visualDirection:
+        SummonVisualDirection =
+        SummonVisualDirection.SOUTH
+        private set
+
+    var walkAnimationTime: Float =
+        0f
+        private set
+
+    var isVisuallyMoving: Boolean =
+        false
+        private set
 
     val health =
         HealthComponent(
@@ -178,6 +196,12 @@ class SummonedEntity(
         ) {
             return
         }
+
+        val visualStartX =
+            center.x
+
+        val visualStartY =
+            center.y
 
         remainingLifetimeSeconds =
             (
@@ -313,6 +337,17 @@ class SummonedEntity(
             worldHeight =
                 worldHeight
         )
+
+        updateVisualMovementState(
+            delta =
+                delta,
+
+            previousX =
+                visualStartX,
+
+            previousY =
+                visualStartY
+        )
     }
 
     fun takeDamage(
@@ -334,63 +369,16 @@ class SummonedEntity(
     fun render(
         shapeRenderer: ShapeRenderer
     ) {
-
-        val radius =
-            visualRadius()
-
-        shapeRenderer.color =
-            baseColor()
-
-        shapeRenderer.circle(
-            center.x,
-            center.y,
-            radius,
-            24
-        )
-
-        shapeRenderer.color =
-            if (
-                attackFlashRemainingSeconds >
-                0f
-            ) {
-                Color(
-                    1f,
-                    0.92f,
-                    0.46f,
-                    0.96f
-                )
-            } else if (
-                type.isFriendlyToPlayer
-            ) {
-                Color(
-                    0.28f,
-                    0.88f,
-                    0.42f,
-                    0.82f
-                )
-            } else {
-                Color(
-                    0.92f,
-                    0.22f,
-                    0.22f,
-                    0.86f
-                )
-            }
-
-        shapeRenderer.circle(
-            center.x,
-            center.y,
-            radius *
-                0.32f,
-            18
-        )
-
+        /*
+         * Sprite body is rendered by SummonSpriteRenderer.
+         * Keep this method only for health/UI overlay compatibility.
+         */
         renderHealthBar(
             shapeRenderer =
                 shapeRenderer,
 
             radius =
-                radius
+                visualRadius()
         )
     }
 
@@ -1449,6 +1437,68 @@ class SummonedEntity(
         )
     }
 
+    private fun updateVisualMovementState(
+        delta: Float,
+        previousX: Float,
+        previousY: Float
+    ) {
+        val deltaX =
+            center.x -
+                previousX
+
+        val deltaY =
+            center.y -
+                previousY
+
+        val distanceSquared =
+            deltaX *
+                deltaX +
+                deltaY *
+                deltaY
+
+        isVisuallyMoving =
+            distanceSquared >
+                VISUAL_MOVEMENT_EPSILON_SQUARED
+
+        if (!isVisuallyMoving) {
+            walkAnimationTime =
+                0f
+
+            return
+        }
+
+        walkAnimationTime +=
+            delta
+
+        visualDirection =
+            if (
+                kotlin.math.abs(
+                    deltaX
+                ) >
+                kotlin.math.abs(
+                    deltaY
+                )
+            ) {
+                if (
+                    deltaX >=
+                    0f
+                ) {
+                    SummonVisualDirection.EAST
+                } else {
+                    SummonVisualDirection.WEST
+                }
+            } else {
+                if (
+                    deltaY >=
+                    0f
+                ) {
+                    SummonVisualDirection.NORTH
+                } else {
+                    SummonVisualDirection.SOUTH
+                }
+            }
+    }
+
     private fun keepInsideWorld(
         worldWidth: Float,
         worldHeight: Float
@@ -1583,6 +1633,9 @@ class SummonedEntity(
     }
 
     companion object {
+
+        private const val VISUAL_MOVEMENT_EPSILON_SQUARED =
+            0.04f
 
         private const val MINIMUM_ATTACK_INTERVAL_SECONDS =
             0.10f

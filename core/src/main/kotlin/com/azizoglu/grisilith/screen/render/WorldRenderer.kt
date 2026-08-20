@@ -10,6 +10,8 @@ import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.map.visual.MapObstacleSpriteRenderer
 import com.azizoglu.grisilith.map.tile.MapGroundTileRenderer
 import com.azizoglu.grisilith.player.Player
+import com.azizoglu.grisilith.summon.SummonedEntity
+import com.azizoglu.grisilith.summon.visual.SummonSpriteRenderer
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.visual.ProjectileSpriteRenderer
 import com.azizoglu.grisilith.weapon.visual.carrier.WeaponCarrierRenderer
@@ -58,6 +60,9 @@ class WorldRenderer(
     private val enemySpriteRenderer =
         EnemySpriteRenderer()
 
+    private val summonSpriteRenderer =
+        SummonSpriteRenderer()
+
     private val projectileSpriteRenderer =
         ProjectileSpriteRenderer()
 
@@ -91,6 +96,9 @@ class WorldRenderer(
 
         enemyManager:
         EnemyManager,
+
+        summons:
+        List<SummonedEntity>,
 
         currencyPickupManager:
         CurrencyPickupManager,
@@ -362,6 +370,33 @@ class WorldRenderer(
                 }
             }
 
+        summons
+            .filter {
+                !it.isExpired
+            }
+            .forEach {
+                    summon ->
+
+                depthEntries.add(
+                    DepthRenderEntry(
+                        depthY =
+                            summon.centerY -
+                                summon.combatRadius,
+
+                        render = {
+                            summonSpriteRenderer
+                                .render(
+                                    summon =
+                                        summon,
+
+                                    camera =
+                                        camera
+                                )
+                        }
+                    )
+                )
+            }
+
         depthEntries
             .sortedByDescending {
                     entry ->
@@ -523,6 +558,9 @@ class WorldRenderer(
             .dispose()
 
         enemySpriteRenderer
+            .dispose()
+
+        summonSpriteRenderer
             .dispose()
 
         projectileSpriteRenderer
