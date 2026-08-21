@@ -8,6 +8,7 @@ import com.azizoglu.grisilith.tamga.runtime.TamgaRuntimeManager
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
 import com.azizoglu.grisilith.weapon.skill.DefensiveLineRuntime
+import com.azizoglu.grisilith.weapon.skill.DefensiveLineVisualRenderer
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.weapon.skill.IgniteDashRuntime
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -23,7 +24,7 @@ import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.badlogic.gdx.math.MathUtils
-import com.azizoglu.grisilith.weapon.skill.ImpaleAndDragRuntime
+import com.azizoglu.grisilith.weapon.skill.ImpaleRuntime
 import com.azizoglu.grisilith.weapon.skill.ImpaleAndDragReward
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.weapon.skill.ErasingSoulsRuntime
@@ -81,6 +82,9 @@ class WeaponRuntimeManager(
                 currentStageProvider
         )
 
+    private val defensiveLineVisualRenderer =
+        DefensiveLineVisualRenderer()
+
     private val igniteDashRuntime =
         IgniteDashRuntime(
             playerStats =
@@ -99,8 +103,8 @@ class WeaponRuntimeManager(
                 persistentAreaManager
         )
 
-    private val impaleAndDragRuntime =
-        ImpaleAndDragRuntime()
+    private val impaleRuntime =
+        ImpaleRuntime()
 
     private val erasingSoulsRuntime =
         ErasingSoulsRuntime()
@@ -537,16 +541,9 @@ class WeaponRuntimeManager(
             }
         )
 
-        impaleAndDragRuntime.update(
-            delta =
-                delta,
-
+        impaleRuntime.update(
             player =
-                player,
-
-            harvestMultiplier =
-                playerStats
-                    .harvestGoldMultiplier()
+                player
         )
 
         /*
@@ -645,7 +642,25 @@ class WeaponRuntimeManager(
                             executorFactory =
                                 executorFactory,
                             tamgaRuntimeManager =
-                                tamgaRuntimeManager
+                                tamgaRuntimeManager,
+
+                            abilityDamageMultiplierProvider = {
+                                    activeWeapon,
+                                    activePlayer,
+                                    targetEnemy ->
+
+                                impaleRuntime
+                                    .damageMultiplierFor(
+                                        weapon =
+                                            activeWeapon,
+
+                                        player =
+                                            activePlayer,
+
+                                        enemy =
+                                            targetEnemy
+                                    )
+                            }
                         )
                     }
             }
@@ -744,7 +759,7 @@ class WeaponRuntimeManager(
             DefaultWeaponAbilities
                 .IMPALE_AND_DRAG_ID -> {
 
-                impaleAndDragRuntime
+                impaleRuntime
                     .tryBegin(
                         weaponRuntime =
                             runtime,
@@ -1659,17 +1674,20 @@ class WeaponRuntimeManager(
     fun onEnemyKilledForActiveSkills(
         enemy: Enemy
     ) {
-        impaleAndDragRuntime
-            .onEnemyKilled(
-                enemy
-            )
+        /*
+         * Compatibility hook retained for FirstScreen.
+         * Reworked Impale has no corpse-drag/reward behavior.
+         */
     }
 
     fun consumeImpaleAndDragReward():
         ImpaleAndDragReward? {
 
-        return impaleAndDragRuntime
-            .consumeReward()
+        /*
+         * Compatibility API only. Impale no longer creates bonus Gold or
+         * Chest rewards, so there is never anything to consume.
+         */
+        return null
     }
 
     fun updateActiveSkillAim(
@@ -1687,12 +1705,8 @@ class WeaponRuntimeManager(
     }
 
     fun cancelActiveAbilities() {
-        impaleAndDragRuntime
-            .cancelForStageTransition(
-                harvestMultiplier =
-                    playerStats
-                        .harvestGoldMultiplier()
-            )
+        impaleRuntime
+            .cancel()
 
         igniteDashRuntime.cancel()
         vortexPullRuntime.clear()
@@ -1755,12 +1769,16 @@ class WeaponRuntimeManager(
                 shapeRenderer
         )
 
-        impaleAndDragRuntime.render(
+        defensiveLineVisualRenderer.render(
             shapeRenderer =
                 shapeRenderer,
 
             player =
-                player
+                player,
+
+            bonusArmorClass =
+                defensiveLineRuntime
+                    .bonusArmorClass
         )
 
         erasingSoulsRuntime.render(
@@ -1922,7 +1940,7 @@ class WeaponRuntimeManager(
 
         persistentAreaManager.clearAll()
 
-        impaleAndDragRuntime.reset()
+        impaleRuntime.reset()
         erasingSoulsRuntime.clear()
 
         runtimesByWeapon.values

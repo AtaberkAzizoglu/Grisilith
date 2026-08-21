@@ -12,6 +12,17 @@ class DefensiveLineRuntime(
 ) {
     private var stationarySeconds = 0f
     private var currentBonus = 0
+
+    val bonusArmorClass:
+        Int
+        get() =
+            currentBonus
+
+    val isVisualActive:
+        Boolean
+        get() =
+            currentBonus >
+                0
     private var previousStage =
         currentStageProvider().coerceAtLeast(1)
 
@@ -52,21 +63,38 @@ class DefensiveLineRuntime(
         stationarySeconds +=
             delta.coerceAtLeast(0f)
 
+        val startDelay =
+            DefaultWeaponAbilities
+                .DEFENSIVE_LINE_START_DELAY_SECONDS
+
+        val secondsPerPoint =
+            DefaultWeaponAbilities
+                .DEFENSIVE_LINE_SECONDS_PER_POINT
+                .coerceAtLeast(
+                    0.001f
+                )
+
         val earnedBonus =
             if (
                 stationarySeconds <
-                DefaultWeaponAbilities
-                    .DEFENSIVE_LINE_START_DELAY_SECONDS
+                startDelay
             ) {
                 0
             } else {
                 (
                     floor(
-                        stationarySeconds.toDouble()
-                    ).toInt() -
+                        (
+                            stationarySeconds -
+                                startDelay
+                            ) /
+                            secondsPerPoint
+                    )
+                        .toInt() +
                         1
                     )
-                    .coerceAtLeast(0)
+                    .coerceAtLeast(
+                        1
+                    )
             }
 
         setBonus(
@@ -115,8 +143,14 @@ class DefensiveLineRuntime(
             if (currentBonus <= 0) {
                 0f
             } else {
-                (currentBonus + 1)
-                    .toFloat()
+                DefaultWeaponAbilities
+                    .DEFENSIVE_LINE_START_DELAY_SECONDS +
+                    (
+                        currentBonus -
+                            1
+                        ) *
+                    DefaultWeaponAbilities
+                        .DEFENSIVE_LINE_SECONDS_PER_POINT
             }
 
         publishBonus(

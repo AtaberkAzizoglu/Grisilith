@@ -54,8 +54,13 @@ object DefaultWeaponAbilities {
     const val IMPALE_AND_DRAG_ID =
         "WPN_ABILITY_IMPALE_AND_DRAG"
 
+    /*
+     * Legacy constant name is preserved so older save/build code and the
+     * obsolete ImpaleAndDragRuntime class continue to compile.
+     * Gameplay now uses the reworked "Impale" mechanic.
+     */
     const val IMPALE_AND_DRAG_DURATION_SECONDS =
-        5f
+        7f
 
     const val IMPALE_AND_DRAG_COOLDOWN_SECONDS =
         55f
@@ -241,13 +246,22 @@ object DefaultWeaponAbilities {
         1f
 
     const val DEFENSIVE_LINE_START_DELAY_SECONDS =
-        2f
+        3f
 
     const val DEFENSIVE_LINE_BASE_LIMIT =
         15
 
     const val EXECUTIONER_ID =
         "WPN_ABILITY_EXECUTIONER"
+
+    const val RELENTLESS_ID =
+        "WPN_ABILITY_RELENTLESS"
+
+    const val RELENTLESS_DAMAGE_PER_CONSECUTIVE_HIT =
+        0.035f
+
+    const val RELENTLESS_MAXIMUM_DAMAGE_BONUS =
+        0.50f
 
     const val ASSASSINATE_ID =
         "WPN_ABILITY_ASSASSINATE"
@@ -262,7 +276,7 @@ object DefaultWeaponAbilities {
         0.15f
 
     const val EXECUTIONER_COOLDOWN_SECONDS =
-        5f
+        3f
 
     const val ASSASSINATE_DAMAGE_MULTIPLIER =
         2f
@@ -303,7 +317,7 @@ object DefaultWeaponAbilities {
                 IMPALE_AND_DRAG_ID,
 
             displayName =
-                "Impale and Drag",
+                "Impale",
 
             activationType =
                 WeaponAbilityActivationType
@@ -315,6 +329,14 @@ object DefaultWeaponAbilities {
             durationSeconds =
                 IMPALE_AND_DRAG_DURATION_SECONDS
         )
+
+    /*
+     * Clean public name for the reworked ability.
+     * impaleAndDrag remains as a compatibility alias used by existing
+     * catalog definitions.
+     */
+    val impale =
+        impaleAndDrag
 
     val staticClouds =
         WeaponAbilityDefinition(
@@ -432,6 +454,19 @@ object DefaultWeaponAbilities {
             displayName = "Leisurely Shot",
             activationType =
                 WeaponAbilityActivationType.PASSIVE
+        )
+
+    val relentless =
+        WeaponAbilityDefinition(
+            id =
+                RELENTLESS_ID,
+
+            displayName =
+                "Relentless",
+
+            activationType =
+                WeaponAbilityActivationType
+                    .PASSIVE
         )
 
     val executioner =

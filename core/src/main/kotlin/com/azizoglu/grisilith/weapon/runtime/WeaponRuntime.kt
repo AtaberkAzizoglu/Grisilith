@@ -9,7 +9,10 @@ import com.azizoglu.grisilith.tamga.runtime.TamgaRuntimeManager
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.definition.WeaponAttackPattern
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityRuntime
+import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
+
+import kotlin.math.roundToInt
 
 class WeaponRuntime(
     val weapon: WeaponInstance,
@@ -17,7 +20,23 @@ class WeaponRuntime(
     private val executorFactory:
     WeaponAttackExecutorFactory,
     private val tamgaRuntimeManager:
-    TamgaRuntimeManager
+    TamgaRuntimeManager,
+
+    /*
+     * Weapon-specific Level 5 damage modifiers that require world/runtime
+     * context (currently Impale) are supplied by WeaponRuntimeManager.
+     */
+    private val abilityDamageMultiplierProvider:
+        (
+        weapon: WeaponInstance,
+        player: Player,
+        enemy: Enemy
+    ) -> Float = {
+            _,
+            _,
+            _ ->
+        1f
+    }
 ) {
 
     private val attackTimer =
@@ -27,6 +46,18 @@ class WeaponRuntime(
         WeaponAbilityRuntime(
             weapon
         )
+
+    /*
+     * Relentless is tracked per WeaponInstance.
+     * First hit is normal damage. Every successful consecutive targeting of
+     * the same Enemy increases the NEXT hit by 3.5%, clamped to +50%.
+     */
+    private var relentlessTarget:
+        Enemy? =
+        null
+
+    private var relentlessConsecutiveHits =
+        0
 
     val abilityState:
         WeaponAbilityState
@@ -157,12 +188,44 @@ class WeaponRuntime(
                             enemy,
                             baseDamage ->
 
-                        tamgaRuntimeManager
-                            .modifyWeaponDamage(
-                                enemy = enemy,
-                                baseDamage =
-                                    baseDamage
+                        val tamgaModifiedDamage =
+                            tamgaRuntimeManager
+                                .modifyWeaponDamage(
+                                    enemy = enemy,
+                                    baseDamage =
+                                        baseDamage
+                                )
+                                .coerceAtLeast(
+                                    1
+                                )
+
+                        val abilityMultiplier =
+                            abilityDamageMultiplierProvider(
+                                weapon,
+                                player,
+                                enemy
                             )
+                                .coerceAtLeast(
+                                    0f
+                                )
+
+                        val abilityModifiedDamage =
+                            (
+                                tamgaModifiedDamage *
+                                    abilityMultiplier
+                                )
+                                .roundToInt()
+                                .coerceAtLeast(
+                                    1
+                                )
+
+                        applyRelentlessDamage(
+                            enemy =
+                                enemy,
+
+                            baseDamage =
+                                abilityModifiedDamage
+                        )
                     },
 
                     modifyWeaponRange = {
@@ -206,6 +269,78 @@ class WeaponRuntime(
                     )
             }
         }
+    }
+
+    private fun applyRelentlessDamage(
+        enemy: Enemy,
+        baseDamage: Int
+    ): Int {
+        if (
+            weapon.unlockedAbility
+                ?.id !=
+            DefaultWeaponAbilities
+                .RELENTLESS_ID
+        ) {
+            relentlessTarget =
+                null
+
+            relentlessConsecutiveHits =
+                0
+
+            return baseDamage
+        }
+
+        if (
+            relentlessTarget !==
+            enemy
+        ) {
+            relentlessTarget =
+                enemy
+
+            relentlessConsecutiveHits =
+                0
+        }
+
+        val damageBonus =
+            (
+                relentlessConsecutiveHits *
+                    DefaultWeaponAbilities
+                        .RELENTLESS_DAMAGE_PER_CONSECUTIVE_HIT
+                )
+                .coerceAtMost(
+                    DefaultWeaponAbilities
+                        .RELENTLESS_MAXIMUM_DAMAGE_BONUS
+                )
+
+        val modifiedDamage =
+            (
+                baseDamage *
+                    (
+                        1f +
+                            damageBonus
+                        )
+                )
+                .roundToInt()
+                .coerceAtLeast(
+                    1
+                )
+
+        /*
+         * The hit we just calculated becomes one completed step in the
+         * chain. 15 hits would mathematically reach 52.5%, so the actual
+         * damage bonus is hard-clamped to +50%.
+         */
+        relentlessConsecutiveHits++
+
+        return modifiedDamage
+    }
+
+    private fun resetRelentless() {
+        relentlessTarget =
+            null
+
+        relentlessConsecutiveHits =
+            0
     }
 
     fun currentAttacksPerSecond():
@@ -306,10 +441,12 @@ class WeaponRuntime(
 
     fun resetAttackTimer() {
         attackTimer.reset()
+        resetRelentless()
     }
     fun resetTimer() {
         attackTimer.reset()
 
         abilityRuntime.reset()
+        resetRelentless()
     }
 }
