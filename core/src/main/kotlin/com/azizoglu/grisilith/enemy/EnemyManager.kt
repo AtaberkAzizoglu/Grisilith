@@ -80,6 +80,52 @@ class EnemyManager {
                     enemy
                 )
 
+                /*
+                 * IMPORTANT:
+                 * Enemy.update(...) is still required after death.
+                 *
+                 * Enemy itself owns deathFadeRemainingSeconds and only
+                 * decrements it from inside Enemy.update(...). If we skip
+                 * dead enemies here, isDeathFadeComplete can never become
+                 * true and removeDeadEnemies() can never remove the sprite.
+                 *
+                 * Enemy.update() already detects isDead, advances only the
+                 * death fade/cleanup timers and returns before any movement
+                 * or attack logic, so calling it here is safe.
+                 */
+                enemy.update(
+                    delta =
+                        delta,
+
+                    targetX =
+                        targetX,
+
+                    targetY =
+                        targetY,
+
+                    targetBounds =
+                        targetBounds,
+
+                    worldWidth =
+                        worldWidth,
+
+                    worldHeight =
+                        worldHeight,
+
+                    mapObstacles =
+                        mapObstacles,
+
+                    nearbyEnemies =
+                        enemies,
+
+                    onContactDamage = {
+                        /*
+                         * Cannot be reached for a dead Enemy because
+                         * Enemy.update() returns from its isDead branch.
+                         */
+                    }
+                )
+
                 return@forEach
             }
 

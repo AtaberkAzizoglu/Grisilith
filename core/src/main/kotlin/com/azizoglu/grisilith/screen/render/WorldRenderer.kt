@@ -3,6 +3,7 @@ package com.azizoglu.grisilith.screen.render
 import com.azizoglu.grisilith.chest.ChestWorldVisualManager
 import com.azizoglu.grisilith.economy.CurrencyPickupManager
 import com.azizoglu.grisilith.character.visual.CharacterSpriteRenderer
+import com.azizoglu.grisilith.character.visual.MountedCharacterSpriteRenderer
 import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.enemy.visual.EnemySpriteRenderer
@@ -19,6 +20,7 @@ import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualRenderer
 import com.azizoglu.grisilith.weapon.visual.carrier.WeaponCarrierVisualSystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 
@@ -40,6 +42,19 @@ class WorldRenderer(
          */
         private const val SHOW_DEBUG_GRID =
             false
+
+        private const val MOUNTED_HEALTH_BAR_WIDTH =
+            72f
+
+        private const val MOUNTED_HEALTH_BAR_HEIGHT =
+            7f
+
+        /*
+         * Mounted sprite top is roughly 80-82 world units above Player
+         * bounds.y. Put the bar safely above the rider's head.
+         */
+        private const val MOUNTED_VISUAL_TOP_OFFSET =
+            94f
     }
 
     private val mapGroundTileRenderer =
@@ -56,6 +71,9 @@ class WorldRenderer(
 
     private val characterSpriteRenderer =
         CharacterSpriteRenderer()
+
+    private val mountedCharacterSpriteRenderer =
+        MountedCharacterSpriteRenderer()
 
     private val enemySpriteRenderer =
         EnemySpriteRenderer()
@@ -93,6 +111,9 @@ class WorldRenderer(
 
         player:
         Player,
+
+        phantomSteedActive:
+        Boolean,
 
         enemyManager:
         EnemyManager,
@@ -167,16 +188,34 @@ class WorldRenderer(
             )
         }
 
-        player.render(
-            shapeRenderer =
-                shapeRenderer,
-
-            renderBody =
-                !characterSpriteRenderer
+        val shouldRenderMountedCharacter =
+            phantomSteedActive &&
+                mountedCharacterSpriteRenderer
                     .hasVisualDefinition(
                         selectedCharacterId
                     )
-        )
+
+        /*
+         * Mounted character uses a much taller visual than the normal
+         * Player bounds. Player.render() also draws the normal health bar
+         * directly above the normal bounds, which would cut through the
+         * rider/horse sprite.
+         *
+         * Therefore, while mounted, skip Player.render() completely here.
+         * A dedicated mounted health bar is rendered in PASS 4.
+         */
+        if (!shouldRenderMountedCharacter) {
+            player.render(
+                shapeRenderer =
+                    shapeRenderer,
+
+                renderBody =
+                    !characterSpriteRenderer
+                        .hasVisualDefinition(
+                            selectedCharacterId
+                        )
+            )
+        }
 
         shapeRenderer.end()
 
@@ -246,11 +285,28 @@ class WorldRenderer(
             }
         }
 
+        /*
+         * Phantom Steed mounted sheets already contain the complete rider
+         * silhouette. Drawing carried weapon sprites on top looks detached
+         * and visually conflicts with the mounted art.
+         *
+         * This disables ONLY carrier visuals while mounted:
+         * - slot 1 weapon sprite
+         * - visual minions / their carried weapon sprites
+         *
+         * Weapon gameplay, attacks, projectiles and attack FX keep running.
+         */
         val carrierSnapshots =
-            weaponCarrierVisualSystem
-                .snapshots(
-                    player
-                )
+            if (
+                shouldRenderMountedCharacter
+            ) {
+                emptyList()
+            } else {
+                weaponCarrierVisualSystem
+                    .snapshots(
+                        player
+                    )
+            }
 
         val playerCarrier =
             carrierSnapshots
@@ -258,11 +314,18 @@ class WorldRenderer(
                     it.slotIndex == 0
                 }
 
-        if (
+        val hasNormalCharacterVisual =
             characterSpriteRenderer
                 .hasVisualDefinition(
                     selectedCharacterId
                 )
+
+        val hasPlayerVisual =
+            shouldRenderMountedCharacter ||
+                hasNormalCharacterVisual
+
+        if (
+            hasPlayerVisual
         ) {
             depthEntries.add(
                 DepthRenderEntry(
@@ -283,30 +346,62 @@ class WorldRenderer(
                                         camera,
 
                                     renderCharacter = {
-                                        characterSpriteRenderer
-                                            .render(
-                                                player =
-                                                    player,
+                                        if (
+                                            shouldRenderMountedCharacter
+                                        ) {
+                                            mountedCharacterSpriteRenderer
+                                                .render(
+                                                    player =
+                                                        player,
 
-                                                characterId =
-                                                    selectedCharacterId,
+                                                    characterId =
+                                                        selectedCharacterId,
 
-                                                camera =
-                                                    camera
-                                            )
+                                                    camera =
+                                                        camera
+                                                )
+                                        } else {
+                                            characterSpriteRenderer
+                                                .render(
+                                                    player =
+                                                        player,
+
+                                                    characterId =
+                                                        selectedCharacterId,
+
+                                                    camera =
+                                                        camera
+                                                )
+                                        }
                                     }
                                 )
                         } else {
-                            characterSpriteRenderer.render(
-                                player =
-                                    player,
+                            if (
+                                shouldRenderMountedCharacter
+                            ) {
+                                mountedCharacterSpriteRenderer
+                                    .render(
+                                        player =
+                                            player,
 
-                                characterId =
-                                    selectedCharacterId,
+                                        characterId =
+                                            selectedCharacterId,
 
-                                camera =
-                                    camera
-                            )
+                                        camera =
+                                            camera
+                                    )
+                            } else {
+                                characterSpriteRenderer.render(
+                                    player =
+                                        player,
+
+                                    characterId =
+                                        selectedCharacterId,
+
+                                    camera =
+                                        camera
+                                )
+                            }
                         }
                     }
                 )
@@ -469,7 +564,61 @@ class WorldRenderer(
             )
         }
 
+        if (
+            shouldRenderMountedCharacter
+        ) {
+            renderMountedPlayerHealthBar(
+                player =
+                    player
+            )
+        }
+
         shapeRenderer.end()
+    }
+
+    private fun renderMountedPlayerHealthBar(
+        player: Player
+    ) {
+        /*
+         * Keep bar width consistent with the normal player gameplay size,
+         * but place it above the complete horse+rider sprite instead of
+         * above the small Player hitbox.
+         */
+        val barWidth =
+            MOUNTED_HEALTH_BAR_WIDTH
+
+        val barHeight =
+            MOUNTED_HEALTH_BAR_HEIGHT
+
+        val barX =
+            player.centerX -
+                barWidth /
+                2f
+
+        val barY =
+            player.bounds.y +
+                MOUNTED_VISUAL_TOP_OFFSET
+
+        shapeRenderer.color =
+            Color.DARK_GRAY
+
+        shapeRenderer.rect(
+            barX,
+            barY,
+            barWidth,
+            barHeight
+        )
+
+        shapeRenderer.color =
+            Color.GREEN
+
+        shapeRenderer.rect(
+            barX,
+            barY,
+            barWidth *
+                player.health.healthRatio,
+            barHeight
+        )
     }
 
     private fun clearScreen() {
@@ -555,6 +704,9 @@ class WorldRenderer(
             .dispose()
 
         characterSpriteRenderer
+            .dispose()
+
+        mountedCharacterSpriteRenderer
             .dispose()
 
         enemySpriteRenderer

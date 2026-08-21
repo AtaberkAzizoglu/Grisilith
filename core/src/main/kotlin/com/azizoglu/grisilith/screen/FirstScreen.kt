@@ -3710,6 +3710,10 @@ class FirstScreen(
             player =
                 player,
 
+            phantomSteedActive =
+                tamgaRuntimeManager
+                    .isPhantomSteedVisualActive,
+
             enemyManager =
                 enemyManager,
 
@@ -3736,15 +3740,6 @@ class FirstScreen(
                     .renderChargerExplosionFill(
                         shapeRenderer =
                             activeShapeRenderer
-                    )
-
-                tamgaRuntimeManager
-                    .renderPhantomSteed(
-                        shapeRenderer =
-                            activeShapeRenderer,
-
-                        player =
-                            player
                     )
 
                 tamgaRuntimeManager

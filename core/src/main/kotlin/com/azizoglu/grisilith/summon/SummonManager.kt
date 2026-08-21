@@ -347,6 +347,96 @@ class SummonManager(
      * Future HUD/slot-rework API.
      * The current HUD does not need to consume these yet.
      */
+    /*
+     * Preferred API for future HUD / weapon-slot rendering.
+     *
+     * This returns one coherent snapshot instead of forcing UI code to call
+     * state / active time / cooldown / choice separately.
+     */
+    fun slotPresentationState(
+        slotIndex: Int
+    ): SummonSlotPresentationState? {
+
+        synchronizeSchedulers()
+
+        val weapon =
+            weaponInventory
+                .weaponAt(
+                    slotIndex
+                )
+                ?: return null
+
+        if (
+            weapon.definition.id.value !=
+            IVY_STAFF_ID ||
+            !weapon.hasWeaponAbility ||
+            weapon.ivySummonChoice ==
+            null
+        ) {
+            return null
+        }
+
+        val scheduler =
+            schedulersByWeaponRuntimeId[
+                weapon.runtimeId
+            ]
+                ?: return null
+
+        val livingSummons =
+            entities.count {
+                it.sourceWeaponRuntimeId ==
+                    weapon.runtimeId &&
+                    !it.isExpired
+            }
+
+        val expectedWaveCount =
+            summonTypeFor(
+                scheduler.choice
+            )
+                .defaultCount
+
+        val remainingActive =
+            entities
+                .asSequence()
+                .filter {
+                    it.sourceWeaponRuntimeId ==
+                        weapon.runtimeId &&
+                        !it.isExpired
+                }
+                .map {
+                    it.remainingLifetimeSeconds
+                }
+                .maxOrNull()
+                ?: 0f
+
+        return SummonSlotPresentationState(
+            slotIndex =
+                slotIndex,
+
+            weaponRuntimeId =
+                weapon.runtimeId,
+
+            choice =
+                scheduler.choice,
+
+            state =
+                scheduler.state,
+
+            remainingActiveSeconds =
+                remainingActive,
+
+            remainingCooldownSeconds =
+                scheduler
+                    .remainingCooldownSeconds,
+
+            activeSummonCount =
+                livingSummons,
+
+            totalSummonCountForWave =
+                expectedWaveCount
+        )
+    }
+
     fun abilityStateForSlot(
         slotIndex: Int
     ): WeaponAbilityState? {
@@ -436,6 +526,30 @@ class SummonManager(
             weapon.runtimeId
         ]
             ?.choice
+    }
+
+    fun allSlotPresentationStates():
+        List<SummonSlotPresentationState> {
+
+        val result =
+            mutableListOf<SummonSlotPresentationState>()
+
+        for (
+        slotIndex in
+        0 until
+            MAX_WEAPON_SLOTS
+        ) {
+            slotPresentationState(
+                slotIndex
+            )
+                ?.let {
+                    result.add(
+                        it
+                    )
+                }
+        }
+
+        return result
     }
 
     fun render(
@@ -1174,6 +1288,9 @@ class SummonManager(
 
         private const val IVY_STAFF_ID =
             "WPN_IVY_STAFF"
+
+        private const val MAX_WEAPON_SLOTS =
+            6
 
         private const val KNIGHT_SPAWN_DISTANCE =
             500f

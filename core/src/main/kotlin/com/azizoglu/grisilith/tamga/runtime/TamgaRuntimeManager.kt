@@ -10,7 +10,6 @@ import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.tamga.definition.TamgaDefinition
 import com.azizoglu.grisilith.tamga.definition.TamgaEffectId
 import com.azizoglu.grisilith.tamga.render.ChargerExplosionRenderer
-import com.azizoglu.grisilith.tamga.render.PhantomSteedRenderer
 import com.azizoglu.grisilith.tamga.runtime.active.ActiveTamgaState
 import com.azizoglu.grisilith.tamga.runtime.active.ChargerEndEvent
 import com.azizoglu.grisilith.tamga.runtime.active.ChargerExplosionEffect
@@ -75,9 +74,6 @@ class TamgaRuntimeManager(
             playerStats = playerStats,
             currentStageProvider = currentStageProvider
         )
-
-    private val phantomSteedRenderer =
-        PhantomSteedRenderer()
 
     private val chargerExplosionRuntime =
         ChargerExplosionRuntime()
@@ -521,6 +517,16 @@ class TamgaRuntimeManager(
         get() =
             isPhantomSteedEquipped()
 
+    /*
+     * WorldRenderer uses this only to decide which CHARACTER sprite set to
+     * render. No separate Phantom Steed world entity/overlay is created.
+     */
+    val isPhantomSteedVisualActive:
+        Boolean
+        get() =
+            isPhantomSteedEquipped() &&
+                phantomSteedRuntime.isActive
+
     val activeArmorTamgaState:
         ActiveTamgaState?
         get() =
@@ -556,23 +562,18 @@ class TamgaRuntimeManager(
         }
     }
 
+    /*
+     * Legacy compatibility hook.
+     *
+     * Phantom Steed is no longer drawn as an independent overlay.
+     * The normal character sprite is replaced by a mounted sprite in
+     * WorldRenderer while isPhantomSteedVisualActive == true.
+     */
     fun renderPhantomSteed(
         shapeRenderer: ShapeRenderer,
         player: Player
     ) {
-        if (
-            !isPhantomSteedEquipped() ||
-            !phantomSteedRuntime.isActive
-        ) {
-            return
-        }
-
-        phantomSteedRenderer.render(
-            shapeRenderer = shapeRenderer,
-            player = player,
-            activeProgress =
-                phantomSteedRuntime.activeProgress
-        )
+        // Intentionally empty.
     }
 
     private fun isPhantomSteedEquipped(): Boolean {
