@@ -17,6 +17,7 @@ data class EnemyStats(
     val size: Float,
     val goldReward: Float,
     val armorClass: Int = 0,
+    val baseArmor: Int = 0,
 
     val attacksPerSecond: Float = 0f,
     val attackRange: Float = 0f,
@@ -35,6 +36,7 @@ data class EnemyStats(
         require(size > 0f)
         require(goldReward >= 0f)
         require(armorClass >= 0)
+        require(baseArmor >= 0)
         require(attacksPerSecond >= 0f)
         require(attackRange >= 0f)
     }

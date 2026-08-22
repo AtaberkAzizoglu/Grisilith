@@ -63,7 +63,8 @@ object DefaultEnemyKinds {
             baseStats =
                 EnemyBaseStats(
                     maximumHealth = 250,
-                    armorClass = 12,
+                    armorClass = 6,
+                    baseArmor = 3,
                     contactDamage = 22,
                     movementSpeed = 150f,
                     attacksPerSecond = 0.85f,
@@ -89,7 +90,8 @@ object DefaultEnemyKinds {
             baseStats =
                 EnemyBaseStats(
                     maximumHealth = 400,
-                    armorClass = 20,
+                    armorClass = 14,
+                    baseArmor = 3,
                     contactDamage = 30,
                     movementSpeed = 92f,
                     attacksPerSecond = 0.60f,
@@ -116,6 +118,7 @@ object DefaultEnemyKinds {
                 EnemyBaseStats(
                     maximumHealth = 170,
                     armorClass = 5,
+                    baseArmor = 2,
                     contactDamage = 12,
                     movementSpeed = 180f,
                     attacksPerSecond = 1.30f,
@@ -138,8 +141,9 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 8000,
-                    armorClass = 24,
+                    maximumHealth = 5000,
+                    armorClass = 13,
+                    baseArmor = 3,
                     contactDamage = 58,
                     movementSpeed = 145f,
                     attacksPerSecond = 0.68f,
@@ -164,8 +168,9 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 4200,
-                    armorClass = 12,
+                    maximumHealth = 3200,
+                    armorClass = 4,
+                    baseArmor = 1,
                     contactDamage = 22,
                     movementSpeed = 132f,
                     attacksPerSecond = 2.35f,
@@ -186,8 +191,9 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.VERY_LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 11650,
-                    armorClass = 28,
+                    maximumHealth = 6500,
+                    armorClass = 15,
+                    baseArmor = 4,
                     contactDamage = 72,
                     movementSpeed = 72f,
                     attacksPerSecond = 0.48f,
@@ -213,9 +219,10 @@ object DefaultEnemyKinds {
             baseStats =
                 EnemyBaseStats(
                     maximumHealth = 20200,
-                    armorClass = 34,
+                    armorClass = 18,
+                    baseArmor = 3,
                     contactDamage = 92,
-                    movementSpeed = 145f,
+                    movementSpeed = 165f,
                     attacksPerSecond = 0.90f,
                     attackRange = 105f
                 ),
@@ -240,6 +247,7 @@ object DefaultEnemyKinds {
                 EnemyBaseStats(
                     maximumHealth = 170,
                     armorClass = 18,
+                    baseArmor = 2,
                     contactDamage = 19,
                     movementSpeed = 120f,
                     attacksPerSecond = 0.90f,
@@ -273,6 +281,7 @@ object DefaultEnemyKinds {
                 EnemyBaseStats(
                     maximumHealth = 135,
                     armorClass = 8,
+                    baseArmor = 2,
                     contactDamage = 13,
                     movementSpeed = 120f,
                     attacksPerSecond = 0.78f,
@@ -306,6 +315,7 @@ object DefaultEnemyKinds {
                 EnemyBaseStats(
                     maximumHealth = 1550,
                     armorClass = 38,
+                    baseArmor = 2,
                     contactDamage = 58,
                     movementSpeed = 105f,
                     attacksPerSecond = 0.58f,
@@ -339,6 +349,7 @@ object DefaultEnemyKinds {
                 EnemyBaseStats(
                     maximumHealth = 1450,
                     armorClass = 18,
+                    baseArmor = 2,
                     contactDamage = 44,
                     movementSpeed = 175f,
                     attacksPerSecond = 1.02f,
@@ -372,6 +383,7 @@ object DefaultEnemyKinds {
                 EnemyBaseStats(
                     maximumHealth = 4800,
                     armorClass = 20,
+                    baseArmor = 2,
                     contactDamage = 42,
                     movementSpeed = 145f,
                     attacksPerSecond = 1.10f,
@@ -421,6 +433,7 @@ object DefaultEnemyKinds {
                 EnemyBaseStats(
                     maximumHealth = 180,
                     armorClass = 14,
+                    baseArmor = 2,
                     contactDamage = 20,
                     movementSpeed = 118f,
                     attacksPerSecond = 1.15f,
@@ -453,6 +466,7 @@ object DefaultEnemyKinds {
                 EnemyBaseStats(
                     maximumHealth = 150,
                     armorClass = 7,
+                    baseArmor = 2,
                     contactDamage = 14,
                     movementSpeed = 104f,
                     attacksPerSecond = 0.88f,
@@ -485,6 +499,7 @@ object DefaultEnemyKinds {
                 EnemyBaseStats(
                     maximumHealth = 300,
                     armorClass = 22,
+                    baseArmor = 2,
                     contactDamage = 22,
                     movementSpeed = 78f,
                     attacksPerSecond = 0.62f,
@@ -507,6 +522,7 @@ object DefaultEnemyKinds {
                 EnemyBaseStats(
                     maximumHealth = 1500,
                     armorClass = 20,
+                    baseArmor = 2,
                     contactDamage = 50,
                     movementSpeed = 120f,
                     attacksPerSecond = 0.70f,
@@ -535,6 +551,7 @@ object DefaultEnemyKinds {
                 EnemyBaseStats(
                     maximumHealth = 2100,
                     armorClass = 10,
+                    baseArmor = 2,
                     contactDamage = 42,
                     movementSpeed = 72f,
                     attacksPerSecond = 0.62f,
@@ -561,6 +578,7 @@ object DefaultEnemyKinds {
                 EnemyBaseStats(
                     maximumHealth = 5600,
                     armorClass = 32,
+                    baseArmor = 2,
                     contactDamage = 82,
                     movementSpeed = 150f,
                     attacksPerSecond = 1.00f,

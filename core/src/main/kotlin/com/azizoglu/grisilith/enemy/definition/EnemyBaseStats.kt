@@ -7,6 +7,7 @@ package com.azizoglu.grisilith.enemy.definition
 data class EnemyBaseStats(
     val maximumHealth: Int,
     val armorClass: Int,
+    val baseArmor: Int = 0,
     val contactDamage: Int,
     val movementSpeed: Float,
     val attacksPerSecond: Float,
@@ -20,6 +21,10 @@ data class EnemyBaseStats(
 
         require(armorClass >= 0) {
             "Enemy armor class cannot be negative."
+        }
+
+        require(baseArmor >= 0) {
+            "Enemy base armor cannot be negative."
         }
 
         require(contactDamage >= 0) {

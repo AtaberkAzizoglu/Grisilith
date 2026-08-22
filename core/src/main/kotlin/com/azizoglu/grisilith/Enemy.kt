@@ -922,10 +922,24 @@ class Enemy(
                             0.75f
                         )
 
-                val effectiveDamageReduction =
-                    effectiveArmorClass
+                /*
+                 * Player ile aynı fiziksel armor modeli:
+                 *
+                 * Raw Armor Reduction =
+                 * Base Armor × Effective Armor Class
+                 *
+                 * Piercing bu toplam azaltımın bir bölümünü ignore eder.
+                 */
+                val rawArmorReduction =
+                    stats.baseArmor
                         .coerceAtLeast(0)
                         .toFloat() *
+                        effectiveArmorClass
+                            .coerceAtLeast(0)
+                            .toFloat()
+
+                val effectiveDamageReduction =
+                    rawArmorReduction *
                         (1f - safePiercingRatio)
 
                 (
