@@ -36,6 +36,15 @@ class EnemyManager {
     val enemyCount: Int
         get() = enemies.size
 
+    val playerVisionMultiplier: Float
+        get() =
+            enemies
+                .asSequence()
+                .filter { !it.isDead }
+                .map { it.playerVisionMultiplier }
+                .minOrNull()
+                ?: 1f
+
     fun spawn(enemy: Enemy) {
         enemies.add(enemy)
     }

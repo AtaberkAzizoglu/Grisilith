@@ -123,6 +123,11 @@ class Enemy(
     private var armorClassReductionRemainingSeconds =
         0f
 
+    private var temporaryCombatBuffRemainingSeconds = 0f
+    private var temporaryDamageMultiplier = 1f
+    private var temporaryMovementSpeedMultiplier = 1f
+    private var temporaryAttackSpeedMultiplier = 1f
+
     val effectiveArmorClass: Int
         get() =
             stats.armorClass -
@@ -180,7 +185,8 @@ class Enemy(
                 stats.contactDamage *
                     traitRuntime
                         .currentModifiers
-                        .damageMultiplier
+                        .damageMultiplier *
+                    temporaryDamageMultiplier
                 )
                 .roundToInt()
                 .coerceAtLeast(
@@ -236,6 +242,10 @@ class Enemy(
     val attackRange: Float
         get() =
             stats.attackRange
+
+    val playerVisionMultiplier: Float
+        get() =
+            traitRuntime.playerVisionMultiplier(this)
 
     val activeAbilityIds
         get() =
@@ -332,6 +342,8 @@ class Enemy(
         nearbyEnemies: List<Enemy>,
         onContactDamage: (Int) -> Unit
     ) {
+        updateTemporaryCombatBuff(delta)
+
         if (
             armorClassReductionRemainingSeconds >
             0f
@@ -607,6 +619,7 @@ class Enemy(
                             traitRuntime
                                 .currentModifiers
                                 .movementSpeedMultiplier *
+                            temporaryMovementSpeedMultiplier *
                             traitSpeedMultiplier
                     ) * delta
                 )
@@ -652,37 +665,39 @@ class Enemy(
                 delta *
                     traitRuntime
                         .currentModifiers
-                        .attackSpeedMultiplier,
+                        .attackSpeedMultiplier *
+                    temporaryAttackSpeedMultiplier,
 
             isTouching =
                 isTouchingPlayer &&
                     controlState.canAttack
         ) {
-            val resolvedContactDamage =
-                (
-                    contactDamage *
-                        traitRuntime
-                            .contactDamageMultiplier(
-                                this
-                            )
-                    )
-                    .roundToInt()
-                    .coerceAtLeast(
-                        1
+            val traitContactMultiplier =
+                traitRuntime
+                    .contactDamageMultiplier(
+                        this
                     )
 
-            onContactDamage(
-                resolvedContactDamage
-            )
+            if (traitContactMultiplier > 0f) {
+                val criticalMultiplier =
+                    rollContactCriticalMultiplier()
 
-            traitRuntime
-                .onPlayerContact(
-                    owner =
-                        this,
+                val resolvedContactDamage =
+                    (
+                        contactDamage *
+                            traitContactMultiplier *
+                            criticalMultiplier
+                        )
+                        .roundToInt()
+                        .coerceAtLeast(1)
 
-                    dealtDamage =
-                        resolvedContactDamage
+                onContactDamage(resolvedContactDamage)
+
+                traitRuntime.onPlayerContact(
+                    owner = this,
+                    dealtDamage = resolvedContactDamage
                 )
+            }
         }
     }
 
@@ -911,12 +926,30 @@ class Enemy(
                         conditions
                 )
 
+        val traitDamageContext =
+            EnemyTraitDamageContext(
+                requestedDamage = reactionResult.resolvedDamage,
+                damageContext = damageContext
+            )
+
+        val traitModifiedDamage =
+            (
+                reactionResult.resolvedDamage *
+                    traitRuntime.incomingDamageMultiplier(
+                        owner = this,
+                        context = traitDamageContext
+                    )
+                )
+                .roundToInt()
+                .coerceAtLeast(0)
+
+        if (traitModifiedDamage <= 0) return 0
+
         val affinityModifiedDamage =
             DamageAffinityResolver
                 .resolve(
                     requestedDamage =
-                        reactionResult
-                            .resolvedDamage,
+                        traitModifiedDamage,
 
                     damageType =
                         damageContext
@@ -978,9 +1011,21 @@ class Enemy(
                     .coerceAtLeast(1)
             }
 
+        val traitResolvedFinalDamage =
+            traitRuntime.resolveFinalIncomingDamage(
+                owner = this,
+                context = EnemyTraitDamageContext(
+                    requestedDamage = armorModifiedDamage,
+                    damageContext = damageContext
+                ),
+                resolvedDamage = armorModifiedDamage
+            )
+
+        if (traitResolvedFinalDamage <= 0) return 0
+
         val appliedDamage =
             health.takeDamage(
-                armorModifiedDamage
+                traitResolvedFinalDamage
             )
 
         if (
@@ -1270,6 +1315,56 @@ class Enemy(
                 armorClassReductionRemainingSeconds,
                 durationSeconds
             )
+    }
+
+    fun applyTemporaryCombatBuff(
+        durationSeconds: Float,
+        damageMultiplier: Float,
+        movementSpeedMultiplier: Float,
+        attackSpeedMultiplier: Float
+    ) {
+        if (isDead || durationSeconds <= 0f) return
+
+        temporaryCombatBuffRemainingSeconds =
+            maxOf(temporaryCombatBuffRemainingSeconds, durationSeconds)
+
+        temporaryDamageMultiplier =
+            maxOf(temporaryDamageMultiplier, damageMultiplier.coerceAtLeast(1f))
+
+        temporaryMovementSpeedMultiplier =
+            maxOf(temporaryMovementSpeedMultiplier, movementSpeedMultiplier.coerceAtLeast(1f))
+
+        temporaryAttackSpeedMultiplier =
+            maxOf(temporaryAttackSpeedMultiplier, attackSpeedMultiplier.coerceAtLeast(1f))
+    }
+
+    private fun updateTemporaryCombatBuff(delta: Float) {
+        if (temporaryCombatBuffRemainingSeconds <= 0f) return
+
+        temporaryCombatBuffRemainingSeconds =
+            (temporaryCombatBuffRemainingSeconds - delta.coerceAtLeast(0f))
+                .coerceAtLeast(0f)
+
+        if (temporaryCombatBuffRemainingSeconds <= 0f) {
+            temporaryDamageMultiplier = 1f
+            temporaryMovementSpeedMultiplier = 1f
+            temporaryAttackSpeedMultiplier = 1f
+        }
+    }
+
+    private fun rollContactCriticalMultiplier(): Float {
+        val chance =
+            (stats.baseCritRatePercent + stats.critRate * 2f)
+                .coerceIn(0f, 100f) /
+                100f
+
+        if (chance <= 0f || !MathUtils.randomBoolean(chance)) return 1f
+
+        return (
+            (stats.baseCritDamagePercent + stats.critDamage * 3f) /
+                100f
+            )
+            .coerceAtLeast(1f)
     }
 
     fun applyCondition(

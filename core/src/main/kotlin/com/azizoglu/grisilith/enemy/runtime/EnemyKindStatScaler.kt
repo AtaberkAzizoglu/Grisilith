@@ -182,6 +182,14 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .secondaryDamageStat,
 
+            baseCritRatePercent =
+                definition.baseStats
+                    .baseCritRatePercent,
+
+            baseCritDamagePercent =
+                definition.baseStats
+                    .baseCritDamagePercent,
+
             critRate =
                 definition.baseStats
                     .critRate,
@@ -240,23 +248,23 @@ object EnemyKindStatScaler {
             healthMultiplier =
                 1f +
                     (stage - 1) *
-                    0.05f +
+                    0.055f +
                     completedStageBlocks *
-                    0.10f,
+                    0.12f,
 
             armorMultiplier =
                 1f +
                     (stage - 1) *
-                    0.02f +
+                    0.0225f +
                     completedStageBlocks *
-                    0.05f,
+                    0.06f,
 
             damageMultiplier =
                 1f +
                     (stage - 1) *
-                    0.025f +
+                    0.026f +
                     completedStageBlocks *
-                    0.05f,
+                    0.055f,
 
             movementSpeedMultiplier =
                 1f +
@@ -266,7 +274,7 @@ object EnemyKindStatScaler {
             attackSpeedMultiplier =
                 1f +
                     (stage - 1) *
-                    0.0025f
+                    0.00275f
         )
     }
 

@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.enemy.trait
 
 import com.azizoglu.grisilith.content.ContentId
+import com.azizoglu.grisilith.content.ContentTag
+import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyType
 import kotlin.math.max
@@ -31,11 +33,41 @@ internal object DefaultEnemyTraits {
             EnemyTraitIds.CROCODILE_JUMP ->
                 CrocodileJumpTrait()
 
+            EnemyTraitIds.SWARM_BEING ->
+                SwarmBeingTrait()
+
+            EnemyTraitIds.CROCODILE_BURROW ->
+                CrocodileBurrowTrait()
+
+            EnemyTraitIds.GORILLA_THROW ->
+                GorillaThrowTrait()
+
+            EnemyTraitIds.GORILLA_STOMP_THE_EARTH ->
+                GorillaStompTheEarthTrait()
+
+            EnemyTraitIds.SPEARMAN_THROW_THE_LANCE ->
+                SpearmanThrowTheLanceTrait()
+
+            EnemyTraitIds.HORSEMAN_BATTLE_CRY ->
+                HorsemanBattleCryTrait()
+
+            EnemyTraitIds.WITCH_SUMMON_FAMILIARS ->
+                WitchSummonFamiliarsPlaceholderTrait()
+
             EnemyTraitIds.GHOST_INCORPOREAL_EVASION ->
                 GhostIncorporealEvasionTrait()
 
+            EnemyTraitIds.GHOST_HAUNTING_PRESENCE ->
+                GhostHauntingPresenceTrait()
+
             EnemyTraitIds.SLIME_ACIDIC_PATH ->
                 SlimeAcidicPathTrait()
+
+            EnemyTraitIds.SLIME_SPLIT_ON_DEATH ->
+                SlimeSplitOnDeathTrait()
+
+            EnemyTraitIds.VAMPIRE_MISTY_TRANSPORTATION ->
+                VampireMistyEscapeTrait()
 
             EnemyTraitIds.VAMPIRE_HUNGER ->
                 VampireHungerTrait()
@@ -1381,3 +1413,570 @@ private class SlimeAcidicPathTrait :
             1.15f
     }
 }
+
+private class SwarmBeingTrait : EnemyTrait {
+    override val id = EnemyTraitIds.SWARM_BEING
+
+    override fun incomingDamageMultiplier(
+        owner: Enemy,
+        context: EnemyTraitDamageContext
+    ): Float {
+        val damageContext = context.damageContext
+
+        val isMeleeAreaAttack =
+            damageContext.sourceWeaponTags
+                .contains(ContentTag.MELEE_WEAPON)
+
+        val source =
+            damageContext.sourceName
+                ?.lowercase()
+                .orEmpty()
+
+        val isKnownAreaAttack =
+            AREA_SOURCE_HINTS.any { hint ->
+                source.contains(hint)
+            }
+
+        return if (
+            isMeleeAreaAttack ||
+            isKnownAreaAttack
+        ) {
+            AREA_DAMAGE_MULTIPLIER
+        } else {
+            SINGLE_TARGET_DAMAGE_MULTIPLIER
+        }
+    }
+
+    companion object {
+        private const val SINGLE_TARGET_DAMAGE_MULTIPLIER = 0.50f
+        private const val AREA_DAMAGE_MULTIPLIER = 2f
+
+        private val AREA_SOURCE_HINTS =
+            listOf(
+                "static clouds",
+                "ignite dash",
+                "erasing",
+                "vortex",
+                "plague storm",
+                "acidic pool",
+                "vitriolic",
+                "call lightning",
+                "meteor",
+                "tsunami",
+                "singularity",
+                "combustion beam"
+            )
+    }
+}
+
+private class CrocodileBurrowTrait : EnemyTrait {
+    override val id = EnemyTraitIds.CROCODILE_BURROW
+
+    private enum class Phase {
+        COOLDOWN,
+        BURROWING,
+        EMERGING,
+        CHARGE
+    }
+
+    private var phase = Phase.COOLDOWN
+    private var phaseSeconds = INITIAL_COOLDOWN_SECONDS
+    private var targetX = 0f
+    private var targetY = 0f
+    private val lockedChargeDirection = Vector2()
+
+    override fun update(context: EnemyTraitUpdateContext) {
+        if (context.owner.isDead) return
+
+        targetX = context.targetCenterX
+        targetY = context.targetCenterY
+        phaseSeconds = (phaseSeconds - context.delta.coerceAtLeast(0f)).coerceAtLeast(0f)
+
+        val dx = targetX - context.owner.centerX
+        val dy = targetY - context.owner.centerY
+        val distance = kotlin.math.sqrt(dx * dx + dy * dy)
+
+        when (phase) {
+            Phase.COOLDOWN -> {
+                if (phaseSeconds <= 0f && distance >= BURROW_TRIGGER_DISTANCE) {
+                    phase = Phase.BURROWING
+                }
+            }
+
+            Phase.BURROWING -> {
+                if (distance <= CHARGE_TRIGGER_DISTANCE) {
+                    phase = Phase.EMERGING
+                    phaseSeconds = EMERGE_SECONDS
+                    lockedChargeDirection.set(dx, dy)
+                    if (!lockedChargeDirection.isZero) lockedChargeDirection.nor()
+                }
+            }
+
+            Phase.EMERGING -> {
+                if (phaseSeconds <= 0f) {
+                    phase = Phase.CHARGE
+                    phaseSeconds = CHARGE_SECONDS
+                }
+            }
+
+            Phase.CHARGE -> {
+                if (phaseSeconds <= 0f) {
+                    phase = Phase.COOLDOWN
+                    phaseSeconds = COOLDOWN_SECONDS
+                }
+            }
+        }
+    }
+
+    override fun resolveMovementOverride(owner: Enemy, output: Vector2): Boolean {
+        return when (phase) {
+            Phase.BURROWING -> {
+                output.set(targetX - owner.centerX, targetY - owner.centerY)
+                if (!output.isZero) output.nor()
+                true
+            }
+            Phase.EMERGING -> {
+                output.setZero()
+                true
+            }
+            Phase.CHARGE -> {
+                output.set(lockedChargeDirection)
+                true
+            }
+            else -> false
+        }
+    }
+
+    override fun modifiers(): EnemyTraitModifiers {
+        return when (phase) {
+            Phase.BURROWING -> EnemyTraitModifiers(movementSpeedMultiplier = BURROW_SPEED_MULTIPLIER)
+            Phase.CHARGE -> EnemyTraitModifiers(movementSpeedMultiplier = CHARGE_SPEED_MULTIPLIER)
+            else -> EnemyTraitModifiers.IDENTITY
+        }
+    }
+
+    override fun contactDamageMultiplier(owner: Enemy): Float {
+        return when (phase) {
+            Phase.BURROWING, Phase.EMERGING -> 0f
+            Phase.CHARGE -> CHARGE_DAMAGE_MULTIPLIER
+            else -> 1f
+        }
+    }
+
+    override fun shouldNegateIncomingDamage(owner: Enemy, context: EnemyTraitDamageContext): Boolean {
+        return phase == Phase.BURROWING
+    }
+
+    override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
+        if (phase != Phase.BURROWING) return
+        shapeRenderer.color = Color(0.30f, 0.18f, 0.08f, 0.65f)
+        shapeRenderer.ellipse(owner.centerX - 48f, owner.centerY - 18f, 96f, 36f)
+    }
+
+    companion object {
+        private const val INITIAL_COOLDOWN_SECONDS = 12f
+        private const val COOLDOWN_SECONDS = 45f
+        private const val BURROW_TRIGGER_DISTANCE = 650f
+        private const val CHARGE_TRIGGER_DISTANCE = 322f
+        private const val EMERGE_SECONDS = 0.40f
+        private const val CHARGE_SECONDS = 0.65f
+        private const val BURROW_SPEED_MULTIPLIER = 3.50f
+        private const val CHARGE_SPEED_MULTIPLIER = 6.50f
+        private const val CHARGE_DAMAGE_MULTIPLIER = 3.25f
+    }
+}
+
+private class GorillaStompTheEarthTrait : EnemyTrait {
+    override val id = EnemyTraitIds.GORILLA_STOMP_THE_EARTH
+
+    private enum class Phase { COOLDOWN, CASTING }
+    private var phase = Phase.COOLDOWN
+    private var remaining = INITIAL_COOLDOWN_SECONDS
+    private var targetBounds = Rectangle()
+    private val pendingDamage = mutableListOf<EnemyTraitPlayerDamage>()
+
+    override fun update(context: EnemyTraitUpdateContext) {
+        if (context.owner.isDead) return
+        targetBounds.set(context.targetBounds)
+        remaining -= context.delta.coerceAtLeast(0f)
+
+        when (phase) {
+            Phase.COOLDOWN -> if (remaining <= 0f) {
+                phase = Phase.CASTING
+                remaining = CAST_SECONDS
+            }
+            Phase.CASTING -> if (remaining <= 0f) {
+                if (circleOverlapsRectangle(context.owner.centerX, context.owner.centerY, RADIUS, targetBounds)) {
+                    pendingDamage.add(
+                        EnemyTraitPlayerDamage(
+                            amount = (context.owner.contactDamage * DAMAGE_MULTIPLIER).roundToInt().coerceAtLeast(1),
+                            sourceName = "Stomp the Earth"
+                        )
+                    )
+                }
+                phase = Phase.COOLDOWN
+                remaining = COOLDOWN_SECONDS
+            }
+        }
+    }
+
+    override fun resolveMovementOverride(owner: Enemy, output: Vector2): Boolean {
+        if (phase != Phase.CASTING) return false
+        output.setZero()
+        return true
+    }
+
+    override fun consumePlayerDamage(): List<EnemyTraitPlayerDamage> {
+        if (pendingDamage.isEmpty()) return emptyList()
+        return pendingDamage.toList().also { pendingDamage.clear() }
+    }
+
+    override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
+        if (phase != Phase.CASTING) return
+        shapeRenderer.color = Color(1f, 0.08f, 0.04f, 0.65f)
+        shapeRenderer.circle(owner.centerX, owner.centerY, RADIUS, 64)
+    }
+
+    private fun circleOverlapsRectangle(x: Float, y: Float, radius: Float, r: Rectangle): Boolean {
+        val cx = x.coerceIn(r.x, r.x + r.width)
+        val cy = y.coerceIn(r.y, r.y + r.height)
+        val dx = x - cx
+        val dy = y - cy
+        return dx * dx + dy * dy <= radius * radius
+    }
+
+    companion object {
+        private const val INITIAL_COOLDOWN_SECONDS = 7f
+        private const val COOLDOWN_SECONDS = 16f
+        private const val CAST_SECONDS = 1.05f
+        private const val RADIUS = 285f
+        private const val DAMAGE_MULTIPLIER = 3.20f
+    }
+}
+
+private class SpearmanThrowTheLanceTrait : EnemyTrait {
+    override val id = EnemyTraitIds.SPEARMAN_THROW_THE_LANCE
+
+    private data class LanceProjectile(
+        var x: Float,
+        var y: Float,
+        val vx: Float,
+        val vy: Float,
+        val damage: Int,
+        var life: Float = 2.5f
+    )
+
+    private var cooldown = INITIAL_COOLDOWN_SECONDS
+    private var windup = 0f
+    private var lockedX = 0f
+    private var lockedY = 0f
+    private val projectiles = mutableListOf<LanceProjectile>()
+    private val pendingDamage = mutableListOf<EnemyTraitPlayerDamage>()
+
+    override fun update(context: EnemyTraitUpdateContext) {
+        if (context.owner.isDead) return
+        val dt = context.delta.coerceAtLeast(0f)
+
+        if (windup > 0f) {
+            windup -= dt
+            if (windup <= 0f) launch(context)
+        } else {
+            cooldown -= dt
+            if (cooldown <= 0f) {
+                lockedX = context.targetCenterX
+                lockedY = context.targetCenterY
+                windup = WINDUP_SECONDS
+                cooldown = COOLDOWN_SECONDS
+            }
+        }
+
+        val it = projectiles.iterator()
+        while (it.hasNext()) {
+            val p = it.next()
+            p.x += p.vx * dt
+            p.y += p.vy * dt
+            p.life -= dt
+            val hit = Rectangle(p.x - 10f, p.y - 5f, 20f, 10f).overlaps(context.targetBounds)
+            if (hit) {
+                pendingDamage.add(EnemyTraitPlayerDamage(p.damage, "Throw the Lance"))
+                it.remove()
+            } else if (p.life <= 0f || p.x < 0f || p.y < 0f || p.x > context.worldWidth || p.y > context.worldHeight) {
+                it.remove()
+            }
+        }
+    }
+
+    private fun launch(context: EnemyTraitUpdateContext) {
+        val d = Vector2(lockedX - context.owner.centerX, lockedY - context.owner.centerY)
+        if (d.isZero) d.set(1f, 0f)
+        d.nor().scl(PROJECTILE_SPEED)
+        projectiles.add(
+            LanceProjectile(
+                context.owner.centerX,
+                context.owner.centerY,
+                d.x,
+                d.y,
+                (context.owner.contactDamage * DAMAGE_MULTIPLIER).roundToInt().coerceAtLeast(1)
+            )
+        )
+    }
+
+    override fun consumePlayerDamage(): List<EnemyTraitPlayerDamage> {
+        if (pendingDamage.isEmpty()) return emptyList()
+        return pendingDamage.toList().also { pendingDamage.clear() }
+    }
+
+    override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
+        shapeRenderer.color = Color(0.82f, 0.84f, 0.92f, 0.95f)
+        projectiles.forEach { p ->
+            shapeRenderer.rectLine(p.x - 15f, p.y, p.x + 15f, p.y, 4f)
+        }
+    }
+
+    companion object {
+        private const val INITIAL_COOLDOWN_SECONDS = 6f
+        private const val COOLDOWN_SECONDS = 15f
+        private const val WINDUP_SECONDS = 0.55f
+        private const val PROJECTILE_SPEED = 520f
+        private const val DAMAGE_MULTIPLIER = 2.40f
+    }
+}
+
+private class HorsemanBattleCryTrait : EnemyTrait {
+    override val id = EnemyTraitIds.HORSEMAN_BATTLE_CRY
+
+    private var cooldown = INITIAL_COOLDOWN_SECONDS
+    private var castRemaining = 0f
+    private var castElapsed = 0f
+
+    override fun update(context: EnemyTraitUpdateContext) {
+        if (context.owner.isDead) return
+        val dt = context.delta.coerceAtLeast(0f)
+
+        if (castRemaining > 0f) {
+            castRemaining -= dt
+            castElapsed += dt
+            if (castRemaining <= 0f) {
+                applyCry(context)
+                cooldown = COOLDOWN_SECONDS
+                castElapsed = 0f
+            }
+            return
+        }
+
+        cooldown -= dt
+        if (cooldown <= 0f) {
+            castRemaining = CAST_SECONDS
+            castElapsed = 0f
+        }
+    }
+
+    private fun applyCry(context: EnemyTraitUpdateContext) {
+        val all = context.nearbyEnemies
+        all.forEach { enemy ->
+            if (enemy.isDead) return@forEach
+            val dx = enemy.centerX - context.owner.centerX
+            val dy = enemy.centerY - context.owner.centerY
+            if (dx * dx + dy * dy > RADIUS * RADIUS) return@forEach
+            enemy.applyTemporaryCombatBuff(
+                durationSeconds = BUFF_SECONDS,
+                damageMultiplier = DAMAGE_MULTIPLIER,
+                movementSpeedMultiplier = MOVE_MULTIPLIER,
+                attackSpeedMultiplier = ATTACK_SPEED_MULTIPLIER
+            )
+            enemy.removeCondition(ConditionType.FRIGHTENED)
+        }
+    }
+
+    override fun resolveMovementOverride(owner: Enemy, output: Vector2): Boolean {
+        if (castRemaining <= 0f) return false
+        output.setZero()
+        return true
+    }
+
+    override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
+        if (castRemaining <= 0f) return
+        val progress = (castElapsed / CAST_SECONDS).coerceIn(0f, 1f)
+        val pulse = ((progress * 3f) % 1f)
+        shapeRenderer.color = Color(0.85f, 0.04f, 0.04f, 0.72f)
+        shapeRenderer.circle(owner.centerX, owner.centerY, RADIUS * pulse, 64)
+    }
+
+    companion object {
+        private const val INITIAL_COOLDOWN_SECONDS = 10f
+        private const val COOLDOWN_SECONDS = 30f
+        private const val CAST_SECONDS = 1.50f
+        private const val RADIUS = 520f
+        private const val BUFF_SECONDS = 8f
+        private const val DAMAGE_MULTIPLIER = 1.18f
+        private const val MOVE_MULTIPLIER = 1.12f
+        private const val ATTACK_SPEED_MULTIPLIER = 1.12f
+    }
+}
+
+private class WitchSummonFamiliarsPlaceholderTrait : EnemyTrait {
+    override val id = EnemyTraitIds.WITCH_SUMMON_FAMILIARS
+    /*
+     * Intentionally dormant until the Stage Spawn redesign.
+     * The content/runtime hook exists now so the Witch definition is final.
+     */
+}
+
+private class GhostHauntingPresenceTrait : EnemyTrait {
+    override val id = EnemyTraitIds.GHOST_HAUNTING_PRESENCE
+
+    override fun playerVisionMultiplier(owner: Enemy): Float {
+        return if (owner.isDead) 1f else 0.75f
+    }
+}
+
+private class SlimeSplitOnDeathTrait : EnemyTrait {
+    override val id = EnemyTraitIds.SLIME_SPLIT_ON_DEATH
+
+    private var splitActive = false
+    private var partMaximumHealth = 0
+    private val partHealth = IntArray(PART_COUNT)
+
+    override fun resolveFinalIncomingDamage(
+        owner: Enemy,
+        context: EnemyTraitDamageContext,
+        resolvedDamage: Int
+    ): Int {
+        if (resolvedDamage <= 0) return 0
+
+        if (!splitActive) {
+            if (resolvedDamage < owner.health.currentHealth) return resolvedDamage
+
+            splitActive = true
+            partMaximumHealth =
+                (owner.health.maximumHealth * HEALTH_PER_PART_RATIO)
+                    .roundToInt()
+                    .coerceAtLeast(1)
+            for (i in partHealth.indices) partHealth[i] = partMaximumHealth
+            return 0
+        }
+
+        var remainingDamage = resolvedDamage
+        for (i in partHealth.indices) {
+            if (remainingDamage <= 0) break
+            if (partHealth[i] <= 0) continue
+            val applied = minOf(partHealth[i], remainingDamage)
+            partHealth[i] -= applied
+            remainingDamage -= applied
+        }
+
+        return if (partHealth.all { it <= 0 }) {
+            owner.health.currentHealth.coerceAtLeast(1)
+        } else {
+            0
+        }
+    }
+
+    override fun resolveMovementOverride(owner: Enemy, output: Vector2): Boolean {
+        if (!splitActive) return false
+        output.setZero()
+        return true
+    }
+
+    override fun contactDamageMultiplier(owner: Enemy): Float {
+        return if (splitActive) 0f else 1f
+    }
+
+    override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
+        if (!splitActive) return
+        val offsets = arrayOf(-55f to -35f, 55f to -35f, -55f to 35f, 55f to 35f)
+        shapeRenderer.color = Color(0.18f, 0.72f, 0.22f, 0.78f)
+        offsets.forEachIndexed { index, offset ->
+            if (partHealth[index] <= 0) return@forEachIndexed
+            val ratio = partHealth[index].toFloat() / partMaximumHealth.coerceAtLeast(1).toFloat()
+            shapeRenderer.circle(
+                owner.centerX + offset.first,
+                owner.centerY + offset.second,
+                30f + 16f * ratio,
+                24
+            )
+        }
+    }
+
+    companion object {
+        private const val PART_COUNT = 4
+        private const val HEALTH_PER_PART_RATIO = 0.14f
+    }
+}
+
+private class VampireMistyEscapeTrait : EnemyTrait {
+    override val id = EnemyTraitIds.MISTY_ESCAPE
+
+    private var active = false
+    private var cooldown = 0f
+    private var targetX = 0f
+    private var targetY = 0f
+    private var healAccumulator = 0f
+
+    override fun update(context: EnemyTraitUpdateContext) {
+        if (context.owner.isDead) return
+        val dt = context.delta.coerceAtLeast(0f)
+        targetX = context.targetCenterX
+        targetY = context.targetCenterY
+
+        if (!active) {
+            cooldown = (cooldown - dt).coerceAtLeast(0f)
+            if (cooldown <= 0f && context.owner.health.healthRatio <= ACTIVATION_HEALTH_RATIO) {
+                active = true
+                healAccumulator = 0f
+            }
+            return
+        }
+
+        healAccumulator += context.owner.health.maximumHealth * HEAL_RATIO_PER_SECOND * dt
+        val heal = healAccumulator.toInt()
+        if (heal > 0) {
+            context.owner.health.heal(heal)
+            healAccumulator -= heal.toFloat()
+        }
+
+        if (context.owner.health.healthRatio >= TARGET_HEALTH_RATIO) {
+            active = false
+            cooldown = COOLDOWN_SECONDS
+            healAccumulator = 0f
+        }
+    }
+
+    override fun resolveMovementOverride(owner: Enemy, output: Vector2): Boolean {
+        if (!active) return false
+        output.set(owner.centerX - targetX, owner.centerY - targetY)
+        if (!output.isZero) output.nor()
+        return true
+    }
+
+    override fun modifiers(): EnemyTraitModifiers {
+        return if (active) {
+            EnemyTraitModifiers(movementSpeedMultiplier = MIST_SPEED_MULTIPLIER)
+        } else {
+            EnemyTraitModifiers.IDENTITY
+        }
+    }
+
+    override fun shouldNegateIncomingDamage(owner: Enemy, context: EnemyTraitDamageContext): Boolean {
+        return active
+    }
+
+    override fun contactDamageMultiplier(owner: Enemy): Float {
+        return if (active) 0f else 1f
+    }
+
+    override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
+        if (!active) return
+        shapeRenderer.color = Color(0.72f, 0.72f, 0.78f, 0.42f)
+        shapeRenderer.ellipse(owner.centerX - 70f, owner.centerY - 42f, 140f, 84f)
+    }
+
+    companion object {
+        private const val ACTIVATION_HEALTH_RATIO = 0.25f
+        private const val TARGET_HEALTH_RATIO = 0.66f
+        private const val HEAL_RATIO_PER_SECOND = 0.18f
+        private const val MIST_SPEED_MULTIPLIER = 2.40f
+        private const val COOLDOWN_SECONDS = 60f
+    }
+}
+

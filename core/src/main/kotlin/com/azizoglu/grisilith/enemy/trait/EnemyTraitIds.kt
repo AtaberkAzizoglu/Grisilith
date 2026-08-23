@@ -31,6 +31,34 @@ object EnemyTraitIds {
     val SLIME_ACIDIC_PATH =
         EnemyAbilityIds.SLIME_ACIDIC_PATH
 
+    val SWARM_BEING =
+        EnemyAbilityIds.SWARM_BEING
+
+    val CROCODILE_BURROW =
+        EnemyAbilityIds.CROCODILE_BURROW
+
+    val GORILLA_STOMP_THE_EARTH =
+        EnemyAbilityIds.GORILLA_STOMP_THE_EARTH
+
+    val SPEARMAN_THROW_THE_LANCE =
+        EnemyAbilityIds.SPEARMAN_THROW_THE_LANCE
+
+    val HORSEMAN_BATTLE_CRY =
+        EnemyAbilityIds.HORSEMAN_BATTLE_CRY
+
+    val WITCH_SUMMON_FAMILIARS =
+        EnemyAbilityIds.WITCH_SUMMON_FAMILIARS
+
+    val GHOST_HAUNTING_PRESENCE =
+        EnemyAbilityIds.GHOST_HAUNTING_PRESENCE
+
+    val SLIME_SPLIT_ON_DEATH =
+        EnemyAbilityIds.SLIME_SPLIT_ON_DEATH
+
+    /* Legacy content ID; runtime behavior is now Misty Escape. */
+    val MISTY_ESCAPE =
+        EnemyAbilityIds.VAMPIRE_MISTY_TRANSPORTATION
+
     val VAMPIRE_MISTY_TRANSPORTATION =
         EnemyAbilityIds.VAMPIRE_MISTY_TRANSPORTATION
 

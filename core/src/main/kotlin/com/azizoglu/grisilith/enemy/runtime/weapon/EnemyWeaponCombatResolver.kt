@@ -19,8 +19,26 @@ object EnemyWeaponCombatResolver {
             attackSpeedMultiplier = 1f + stats.attackSpeedScore * ATTACK_SPEED_PER_SCORE,
             rangeMultiplier = if (ranged) stats.rangedWeaponRangeMultiplier else stats.meleeWeaponRangeMultiplier,
             projectileSpeedMultiplier = if (ranged) stats.projectileSpeedMultiplier else 1f,
-            criticalChance = (stats.critRate * CRIT_RATE_PER_SCORE).coerceIn(0f, MAXIMUM_CRIT_CHANCE),
-            criticalDamageMultiplier = BASE_CRITICAL_DAMAGE_MULTIPLIER + stats.critDamage * CRIT_DAMAGE_PER_SCORE,
+            criticalChance =
+                (
+                    (
+                        stats.baseCritRatePercent +
+                            stats.critRate *
+                            CRIT_RATE_PERCENT_PER_SCORE
+                        ) /
+                        100f
+                    )
+                    .coerceIn(
+                        0f,
+                        MAXIMUM_CRIT_CHANCE
+                    ),
+            criticalDamageMultiplier =
+                (
+                    stats.baseCritDamagePercent +
+                        stats.critDamage *
+                        CRIT_DAMAGE_PERCENT_PER_SCORE
+                    ) /
+                    100f,
             piercingIgnoreRatio = (stats.piercing * PIERCING_PER_SCORE).coerceIn(0f, MAXIMUM_PIERCING_RATIO)
         )
     }
@@ -40,10 +58,9 @@ object EnemyWeaponCombatResolver {
     )
     private const val DAMAGE_PER_WEIGHTED_STAT = 0.0125f
     private const val ATTACK_SPEED_PER_SCORE = 0.010f
-    private const val CRIT_RATE_PER_SCORE = 0.005f
-    private const val CRIT_DAMAGE_PER_SCORE = 0.010f
+    private const val CRIT_RATE_PERCENT_PER_SCORE = 2f
+    private const val CRIT_DAMAGE_PERCENT_PER_SCORE = 3f
     private const val PIERCING_PER_SCORE = 0.010f
-    private const val BASE_CRITICAL_DAMAGE_MULTIPLIER = 1.50f
-    private const val MAXIMUM_CRIT_CHANCE = 0.50f
+    private const val MAXIMUM_CRIT_CHANCE = 1.00f
     private const val MAXIMUM_PIERCING_RATIO = 0.75f
 }

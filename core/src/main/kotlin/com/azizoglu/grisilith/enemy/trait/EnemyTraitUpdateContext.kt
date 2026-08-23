@@ -68,6 +68,27 @@ interface EnemyTrait {
         return 1f
     }
 
+    fun incomingDamageMultiplier(
+        owner: Enemy,
+        context: EnemyTraitDamageContext
+    ): Float {
+        return 1f
+    }
+
+    fun resolveFinalIncomingDamage(
+        owner: Enemy,
+        context: EnemyTraitDamageContext,
+        resolvedDamage: Int
+    ): Int {
+        return resolvedDamage
+    }
+
+    fun playerVisionMultiplier(
+        owner: Enemy
+    ): Float {
+        return 1f
+    }
+
     fun shouldNegateIncomingDamage(
         owner: Enemy,
         context: EnemyTraitDamageContext

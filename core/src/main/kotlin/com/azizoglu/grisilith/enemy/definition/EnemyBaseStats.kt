@@ -21,6 +21,8 @@ data class EnemyBaseStats(
     val attackSpeedScore: Int = 0,
     val mainDamageStat: Int = 10,
     val secondaryDamageStat: Int = 10,
+    val baseCritRatePercent: Float = 0f,
+    val baseCritDamagePercent: Float = 100f,
     val critRate: Int = 0,
     val critDamage: Int = 0,
     val piercing: Int = 0,
@@ -74,6 +76,8 @@ data class EnemyBaseStats(
         require(attackSpeedScore >= 0)
         require(mainDamageStat >= 0)
         require(secondaryDamageStat >= 0)
+        require(baseCritRatePercent >= 0f)
+        require(baseCritDamagePercent >= 100f)
         require(critRate >= 0)
         require(critDamage >= 0)
         require(piercing >= 0)

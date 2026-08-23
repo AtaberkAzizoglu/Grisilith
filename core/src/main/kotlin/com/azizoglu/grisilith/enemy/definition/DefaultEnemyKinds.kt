@@ -73,8 +73,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 18,
                     mainDamageStat = 18,
                     secondaryDamageStat = 14,
-                    critRate = 8,
-                    critDamage = 12,
+                    baseCritRatePercent = 15f,
+                    baseCritDamagePercent = 125f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 2
                 ),
             behaviorId =
@@ -107,8 +109,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 8,
                     mainDamageStat = 22,
                     secondaryDamageStat = 12,
-                    critRate = 3,
-                    critDamage = 10,
+                    baseCritRatePercent = 5f,
+                    baseCritDamagePercent = 110f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 4
                 ),
             behaviorId =
@@ -141,8 +145,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 24,
                     mainDamageStat = 14,
                     secondaryDamageStat = 22,
-                    critRate = 12,
-                    critDamage = 18,
+                    baseCritRatePercent = 40f,
+                    baseCritDamagePercent = 150f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 4
                 ),
             behaviorId =
@@ -173,8 +179,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 10,
                     mainDamageStat = 30,
                     secondaryDamageStat = 14,
-                    critRate = 6,
-                    critDamage = 18,
+                    baseCritRatePercent = 20f,
+                    baseCritDamagePercent = 150f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 5
                 ),
             behaviorId =
@@ -207,12 +215,18 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 34,
                     mainDamageStat = 12,
                     secondaryDamageStat = 26,
-                    critRate = 5,
-                    critDamage = 8,
+                    baseCritRatePercent = 35f,
+                    baseCritDamagePercent = 120f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 8
                 ),
             behaviorId =
-                EnemyBehaviorIds.SWARM_CHASE
+                EnemyBehaviorIds.SWARM_CHASE,
+            passiveIds =
+                listOf(
+                    EnemyAbilityIds.SWARM_BEING
+                )
         )
 
     val crocodile =
@@ -237,14 +251,17 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 5,
                     mainDamageStat = 34,
                     secondaryDamageStat = 10,
-                    critRate = 4,
-                    critDamage = 20,
+                    baseCritRatePercent = 30f,
+                    baseCritDamagePercent = 150f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 6
                 ),
             behaviorId =
                 EnemyBehaviorIds.SLOW_CHASE_AND_MELEE,
             activeSkillIds =
                 listOf(
+                    EnemyAbilityIds.CROCODILE_BURROW,
                     EnemyAbilityIds.CROCODILE_JUMP
                 )
         )
@@ -271,14 +288,17 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 18,
                     mainDamageStat = 38,
                     secondaryDamageStat = 18,
-                    critRate = 10,
-                    critDamage = 28,
+                    baseCritRatePercent = 35f,
+                    baseCritDamagePercent = 170f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 8
                 ),
             behaviorId =
                 EnemyBehaviorIds.CHASE_AND_MELEE,
             activeSkillIds =
                 listOf(
+                    EnemyAbilityIds.GORILLA_STOMP_THE_EARTH,
                     EnemyAbilityIds.GORILLA_THROW
                 )
         )
@@ -305,8 +325,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 14,
                     mainDamageStat = 18,
                     secondaryDamageStat = 16,
-                    critRate = 7,
-                    critDamage = 14,
+                    baseCritRatePercent = 20f,
+                    baseCritDamagePercent = 130f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 5
                 ),
             behaviorId =
@@ -346,8 +368,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 16,
                     mainDamageStat = 12,
                     secondaryDamageStat = 24,
-                    critRate = 11,
-                    critDamage = 20,
+                    baseCritRatePercent = 30f,
+                    baseCritDamagePercent = 150f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 12
                 ),
             behaviorId =
@@ -387,8 +411,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 8,
                     mainDamageStat = 30,
                     secondaryDamageStat = 16,
-                    critRate = 8,
-                    critDamage = 22,
+                    baseCritRatePercent = 20f,
+                    baseCritDamagePercent = 130f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 18
                 ),
             behaviorId =
@@ -403,6 +429,10 @@ object DefaultEnemyKinds {
                             )
                         ),
                     armorId = ARMOR_PLATE
+                ),
+            activeSkillIds =
+                listOf(
+                    EnemyAbilityIds.SPEARMAN_THROW_THE_LANCE
                 )
         )
 
@@ -428,8 +458,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 22,
                     mainDamageStat = 20,
                     secondaryDamageStat = 30,
-                    critRate = 13,
-                    critDamage = 24,
+                    baseCritRatePercent = 30f,
+                    baseCritDamagePercent = 150f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 14
                 ),
             behaviorId =
@@ -444,6 +476,10 @@ object DefaultEnemyKinds {
                             )
                         ),
                     armorId = ARMOR_LEATHER
+                ),
+            activeSkillIds =
+                listOf(
+                    EnemyAbilityIds.HORSEMAN_BATTLE_CRY
                 )
         )
 
@@ -469,8 +505,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 24,
                     mainDamageStat = 16,
                     secondaryDamageStat = 40,
-                    critRate = 12,
-                    critDamage = 30,
+                    baseCritRatePercent = 5f,
+                    baseCritDamagePercent = 105f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 10
                 ),
             behaviorId =
@@ -501,6 +539,10 @@ object DefaultEnemyKinds {
                             )
                         ),
                     armorId = ARMOR_ROBE_OF_MAGE
+                ),
+            activeSkillIds =
+                listOf(
+                    EnemyAbilityIds.WITCH_SUMMON_FAMILIARS
                 )
         )
 
@@ -526,8 +568,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 20,
                     mainDamageStat = 20,
                     secondaryDamageStat = 14,
-                    critRate = 6,
-                    critDamage = 16,
+                    baseCritRatePercent = 15f,
+                    baseCritDamagePercent = 120f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 5
                 ),
             behaviorId =
@@ -566,8 +610,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 18,
                     mainDamageStat = 12,
                     secondaryDamageStat = 24,
-                    critRate = 10,
-                    critDamage = 20,
+                    baseCritRatePercent = 25f,
+                    baseCritDamagePercent = 130f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 13
                 ),
             behaviorId =
@@ -606,8 +652,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 5,
                     mainDamageStat = 24,
                     secondaryDamageStat = 8,
-                    critRate = 2,
-                    critDamage = 10,
+                    baseCritRatePercent = 5f,
+                    baseCritDamagePercent = 115f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 2
                 ),
             behaviorId =
@@ -636,8 +684,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 16,
                     mainDamageStat = 10,
                     secondaryDamageStat = 32,
-                    critRate = 8,
-                    critDamage = 22,
+                    baseCritRatePercent = 40f,
+                    baseCritDamagePercent = 150f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 8
                 ),
             behaviorId =
@@ -646,6 +696,7 @@ object DefaultEnemyKinds {
                 EnemyTraversalProfile.INCORPOREAL,
             passiveIds =
                 listOf(
+                    EnemyAbilityIds.GHOST_HAUNTING_PRESENCE,
                     EnemyAbilityIds.GHOST_INCORPOREAL_EVASION
                 )
         )
@@ -672,14 +723,17 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 6,
                     mainDamageStat = 22,
                     secondaryDamageStat = 26,
-                    critRate = 2,
-                    critDamage = 10,
+                    baseCritRatePercent = 5f,
+                    baseCritDamagePercent = 110f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 2
                 ),
             behaviorId =
                 EnemyBehaviorIds.SLOW_CHASE_AND_MELEE,
             passiveIds =
                 listOf(
+                    EnemyAbilityIds.SLIME_SPLIT_ON_DEATH,
                     EnemyAbilityIds.SLIME_ACIDIC_PATH
                 )
         )
@@ -706,8 +760,10 @@ object DefaultEnemyKinds {
                     attackSpeedScore = 26,
                     mainDamageStat = 34,
                     secondaryDamageStat = 34,
-                    critRate = 16,
-                    critDamage = 34,
+                    baseCritRatePercent = 50f,
+                    baseCritDamagePercent = 200f,
+                    critRate = 0,
+                    critDamage = 0,
                     piercing = 16
                 ),
             behaviorId =

@@ -84,6 +84,57 @@ class EnemyTraitRuntime private constructor(
         return false
     }
 
+    fun incomingDamageMultiplier(
+        owner: Enemy,
+        context: EnemyTraitDamageContext
+    ): Float {
+        var multiplier = 1f
+
+        traits.forEach { trait ->
+            multiplier *=
+                trait.incomingDamageMultiplier(
+                    owner = owner,
+                    context = context
+                )
+        }
+
+        return multiplier.coerceAtLeast(0f)
+    }
+
+    fun resolveFinalIncomingDamage(
+        owner: Enemy,
+        context: EnemyTraitDamageContext,
+        resolvedDamage: Int
+    ): Int {
+        var damage = resolvedDamage.coerceAtLeast(0)
+
+        traits.forEach { trait ->
+            damage =
+                trait.resolveFinalIncomingDamage(
+                    owner = owner,
+                    context = context,
+                    resolvedDamage = damage
+                )
+                    .coerceAtLeast(0)
+        }
+
+        return damage
+    }
+
+    fun playerVisionMultiplier(
+        owner: Enemy
+    ): Float {
+        var multiplier = 1f
+        traits.forEach { trait ->
+            multiplier =
+                minOf(
+                    multiplier,
+                    trait.playerVisionMultiplier(owner)
+                )
+        }
+        return multiplier.coerceIn(0.05f, 1f)
+    }
+
     fun contactDamageMultiplier(
         owner: Enemy
     ): Float {
@@ -98,7 +149,7 @@ class EnemyTraitRuntime private constructor(
 
         return multiplier
             .coerceAtLeast(
-                1f
+                0f
             )
     }
 
