@@ -14,6 +14,7 @@ import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionRuntime
 import com.azizoglu.grisilith.combat.condition.ConditionControlRules
 import com.azizoglu.grisilith.combat.reaction.SpellReactionResolver
+import com.azizoglu.grisilith.combat.affinity.DamageAffinityResolver
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionEvent
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionManager
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionTrigger
@@ -910,6 +911,29 @@ class Enemy(
                         conditions
                 )
 
+        val affinityModifiedDamage =
+            DamageAffinityResolver
+                .resolve(
+                    requestedDamage =
+                        reactionResult
+                            .resolvedDamage,
+
+                    damageType =
+                        damageContext
+                            .damageType,
+
+                    profile =
+                        stats
+                            .damageAffinities
+                )
+
+        if (
+            affinityModifiedDamage <=
+            0
+        ) {
+            return 0
+        }
+
         val armorModifiedDamage =
             if (
                 damageContext.isPhysicalWeaponDamage
@@ -943,16 +967,14 @@ class Enemy(
                         (1f - safePiercingRatio)
 
                 (
-                    reactionResult
-                        .resolvedDamage
+                    affinityModifiedDamage
                         .toFloat() -
                         effectiveDamageReduction
                     )
                     .roundToInt()
                     .coerceAtLeast(1)
             } else {
-                reactionResult
-                    .resolvedDamage
+                affinityModifiedDamage
                     .coerceAtLeast(1)
             }
 

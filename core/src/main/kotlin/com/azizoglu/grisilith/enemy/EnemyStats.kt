@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.enemy
 
 import com.azizoglu.grisilith.content.ContentId
+import com.azizoglu.grisilith.combat.affinity.DamageAffinityProfile
+import com.azizoglu.grisilith.enemy.combat.EnemyCombatTuning
 import com.azizoglu.grisilith.enemy.definition.EnemyTraversalProfile
 
 /*
@@ -22,6 +24,26 @@ data class EnemyStats(
     val attacksPerSecond: Float = 0f,
     val attackRange: Float = 0f,
 
+    val weaponDamageMultiplier: Float = 1f,
+    val attackSpeedScore: Int = 0,
+    val mainDamageStat: Int = 10,
+    val secondaryDamageStat: Int = 10,
+    val critRate: Int = 0,
+    val critDamage: Int = 0,
+    val piercing: Int = 0,
+
+    val meleeWeaponRangeMultiplier: Float =
+        EnemyCombatTuning.DEFAULT_MELEE_WEAPON_RANGE_MULTIPLIER,
+
+    val rangedWeaponRangeMultiplier: Float =
+        EnemyCombatTuning.DEFAULT_RANGED_WEAPON_RANGE_MULTIPLIER,
+
+    val projectileSpeedMultiplier: Float =
+        EnemyCombatTuning.DEFAULT_PROJECTILE_SPEED_MULTIPLIER,
+
+    val damageAffinities: DamageAffinityProfile =
+        DamageAffinityProfile.NONE,
+
     val kindId: ContentId? = null,
     val behaviorId: ContentId? = null,
 
@@ -39,6 +61,16 @@ data class EnemyStats(
         require(baseArmor >= 0)
         require(attacksPerSecond >= 0f)
         require(attackRange >= 0f)
+        require(weaponDamageMultiplier >= 0f)
+        require(attackSpeedScore >= 0)
+        require(mainDamageStat >= 0)
+        require(secondaryDamageStat >= 0)
+        require(critRate >= 0)
+        require(critDamage >= 0)
+        require(piercing >= 0)
+        require(meleeWeaponRangeMultiplier >= 0f)
+        require(rangedWeaponRangeMultiplier >= 0f)
+        require(projectileSpeedMultiplier >= 0f)
     }
 
     val ignoresObstacles: Boolean

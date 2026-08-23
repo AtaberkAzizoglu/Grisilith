@@ -4,6 +4,7 @@ import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.statistics.PlayerStats
+import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.tamga.runtime.TamgaRuntimeManager
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
@@ -391,6 +392,14 @@ class WeaponRuntimeManager(
 
             currentStage =
                 currentStageProvider(),
+
+            plagueMoveSpeedPixelsPerSecond =
+                45f +
+                    playerStats
+                        .totalScore(
+                            StatType.HASTE
+                        )
+                        .toFloat(),
 
             onPullEnemy = {
                     enemy,
@@ -1023,10 +1032,13 @@ class WeaponRuntimeManager(
             val explosionDamage =
                 (
                     activeSkillDamageCalculator
-                        .calculate(
-                            weapon
-                        )
-                        .damage *
+                        .calculateSpellSkillDamage(
+                            weapon =
+                                weapon,
+
+                            damageType =
+                                DamageType.FIRE
+                        ) *
                         VITRIOLIC_IGNITION_DAMAGE_MULTIPLIER
                     )
                     .roundToInt()
@@ -1035,8 +1047,7 @@ class WeaponRuntimeManager(
                     )
 
             val explosionRadius =
-                pool.radius *
-                    VITRIOLIC_IGNITION_RADIUS_MULTIPLIER
+                VITRIOLIC_IGNITION_RADIUS
 
             enemyManager
                 .allEnemies
@@ -1161,19 +1172,18 @@ class WeaponRuntimeManager(
             return
         }
 
-        val activeSkillDamage =
-            activeSkillDamageCalculator
-                .calculate(
-                    weapon
-                )
-                .damage
-
         val rawTickDamage =
             (
-                activeSkillDamage *
+                activeSkillDamageCalculator
+                    .calculateSpellSkillDamage(
+                        weapon =
+                            weapon,
+
+                        damageType =
+                            DamageType.ACID
+                    ) *
                     DefaultWeaponAbilities
-                        .ACIDIC_POOL_DAMAGE_PER_SECOND_MULTIPLIER *
-                    tickIntervalSeconds
+                        .ACIDIC_POOL_DAMAGE_PER_SECOND_MULTIPLIER
                 )
                 .roundToInt()
                 .coerceAtLeast(
@@ -1334,19 +1344,18 @@ class WeaponRuntimeManager(
             return
         }
 
-        val normalDamage =
-            activeSkillDamageCalculator
-                .calculate(
-                    weapon
-                )
-                .damage
-
         val lightningDamage =
             (
-                normalDamage *
+                activeSkillDamageCalculator
+                    .calculateSpellSkillDamage(
+                        weapon =
+                            weapon,
+
+                        damageType =
+                            DamageType.LIGHTNING
+                    ) *
                     DefaultWeaponAbilities
-                        .STATIC_CLOUDS_LIGHTNING_DPS_MULTIPLIER *
-                    tickIntervalSeconds
+                        .STATIC_CLOUDS_LIGHTNING_DPS_MULTIPLIER
                 )
                 .roundToInt()
                 .coerceAtLeast(
@@ -1371,7 +1380,24 @@ class WeaponRuntimeManager(
 
         val appliedDamage =
             enemy.takeDamage(
-                modifiedDamage
+                amount =
+                    modifiedDamage,
+
+                damageContext =
+                    EnemyDamageContext(
+                        damageType =
+                            DamageType.LIGHTNING,
+
+                        sourceWeaponRuntimeId =
+                            weapon.runtimeId,
+
+                        sourceWeaponDefinitionId =
+                            weapon.definition.id.value,
+
+                        sourceName =
+                            weapon.displayName +
+                                " — Static Clouds"
+                    )
             )
 
         if (
@@ -1450,72 +1476,120 @@ class WeaponRuntimeManager(
             return
         }
 
-        val calculatedDamage =
-            activeSkillDamageCalculator
-                .calculate(
-                    weapon
-                )
-                .damage
+        val wasAlive =
+            !enemy.isDead
 
-        /*
-         * Sabit tick aralığı kullandığımız için multiplier
-         * DPS olarak değerlendirilir.
-         *
-         * Örnek:
-         * normal damage 20,
-         * DPS multiplier 0.85,
-         * tick 0.25 sn
-         * -> tick başına yaklaşık 4 damage.
-         */
-        val rawTickDamage =
+        val vortexRawDamage =
             (
-                calculatedDamage *
+                activeSkillDamageCalculator
+                    .calculateSpellSkillDamage(
+                        weapon =
+                            weapon,
+
+                        damageType =
+                            DamageType.AIR
+                    ) *
                     DefaultWeaponAbilities
-                        .VORTEX_PULL_DAMAGE_PER_SECOND_MULTIPLIER *
-                    if (
-                        vortexPullRuntime
-                            .isPlagueStormActive
-                    ) {
-                        PLAGUE_STORM_DAMAGE_MULTIPLIER
-                    } else {
-                        1f
-                    } *
-                    tickIntervalSeconds
+                        .VORTEX_PULL_DAMAGE_PER_SECOND_MULTIPLIER
                 )
                 .roundToInt()
                 .coerceAtLeast(
                     1
                 )
 
-        val modifiedDamage =
+        val vortexDamage =
             tamgaRuntimeManager
                 .modifyWeaponDamage(
                     enemy =
                         enemy,
 
                     baseDamage =
-                        rawTickDamage
+                        vortexRawDamage
                 )
                 .coerceAtLeast(
                     1
                 )
 
-        val wasAlive =
-            !enemy.isDead
-
-        val appliedDamage =
+        var totalAppliedDamage =
             enemy.takeDamage(
-                modifiedDamage
+                amount =
+                    vortexDamage,
+
+                damageContext =
+                    EnemyDamageContext(
+                        damageType =
+                            DamageType.AIR,
+
+                        sourceWeaponRuntimeId =
+                            weapon.runtimeId,
+
+                        sourceWeaponDefinitionId =
+                            weapon.definition.id.value,
+
+                        sourceName =
+                            weapon.displayName +
+                                " — Vortex Pull"
+                    )
             )
 
         if (
-            appliedDamage >
-            0
+            vortexPullRuntime
+                .isPlagueStormActive &&
+            !enemy.isDead
         ) {
-            if (
-                vortexPullRuntime
-                    .isPlagueStormActive
-            ) {
+            val plagueRawDamage =
+                (
+                    activeSkillDamageCalculator
+                        .calculateSpellSkillDamage(
+                            weapon =
+                                weapon,
+
+                            damageType =
+                                DamageType.NECROTIC
+                        ) *
+                        PLAGUE_STORM_NECROTIC_TICK_MULTIPLIER
+                    )
+                    .roundToInt()
+                    .coerceAtLeast(
+                        1
+                    )
+
+            val plagueDamage =
+                tamgaRuntimeManager
+                    .modifyWeaponDamage(
+                        enemy =
+                            enemy,
+
+                        baseDamage =
+                            plagueRawDamage
+                    )
+                    .coerceAtLeast(
+                        1
+                    )
+
+            totalAppliedDamage +=
+                enemy.takeDamage(
+                    amount =
+                        plagueDamage,
+
+                    damageContext =
+                        EnemyDamageContext(
+                            damageType =
+                                DamageType.NECROTIC,
+
+                            sourceWeaponRuntimeId =
+                                weapon.runtimeId,
+
+                            sourceWeaponDefinitionId =
+                                weapon.definition.id.value,
+
+                            sourceName =
+                                weapon.displayName +
+                                    " — Plague Storm"
+                        )
+                )
+
+            if (!enemy.isDead) {
                 enemy.applyCondition(
                     ConditionDamageCalculator
                         .createApplication(
@@ -1552,9 +1626,14 @@ class WeaponRuntimeManager(
                         )
                 )
             }
+        }
 
+        if (
+            totalAppliedDamage >
+            0
+        ) {
             onDamageDealt(
-                appliedDamage,
+                totalAppliedDamage,
                 if (
                     vortexPullRuntime
                         .isPlagueStormActive
@@ -1562,7 +1641,8 @@ class WeaponRuntimeManager(
                     weapon.displayName +
                         " — Plague Storm"
                 } else {
-                    weapon.displayName
+                    weapon.displayName +
+                        " — Vortex Pull"
                 }
             )
         }
@@ -1619,13 +1699,22 @@ class WeaponRuntimeManager(
             } ?: activeTomes.first()
 
         val explosionDamage =
-            (activeSkillDamageCalculator
-                .calculate(sourceWeapon)
-                .damage *
-                DefaultWeaponAbilities
-                    .ERASING_SOULS_DAMAGE_MULTIPLIER)
+            (
+                activeSkillDamageCalculator
+                    .calculateSpellSkillDamage(
+                        weapon =
+                            sourceWeapon,
+
+                        damageType =
+                            DamageType.NECROTIC
+                    ) *
+                    DefaultWeaponAbilities
+                        .ERASING_SOULS_DAMAGE_MULTIPLIER
+                )
                 .roundToInt()
-                .coerceAtLeast(1)
+                .coerceAtLeast(
+                    1
+                )
 
         return erasingSoulsRuntime.resolveChain(
             initialDeadEnemy = initialDeadEnemy,
@@ -1969,14 +2058,14 @@ class WeaponRuntimeManager(
         private const val VORTEX_BASE_PULL_SPEED =
             235f
 
-        private const val VITRIOLIC_IGNITION_RADIUS_MULTIPLIER =
-            2f
+        private const val VITRIOLIC_IGNITION_RADIUS =
+            280f
 
         private const val VITRIOLIC_IGNITION_DAMAGE_MULTIPLIER =
-            2.40f
+            7.77f
 
-        private const val PLAGUE_STORM_DAMAGE_MULTIPLIER =
-            1.75f
+        private const val PLAGUE_STORM_NECROTIC_TICK_MULTIPLIER =
+            0.95f
 
         private const val PLAGUE_STORM_NECROSIS_SECONDS =
             2f

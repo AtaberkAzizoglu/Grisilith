@@ -388,10 +388,17 @@ class WeaponDamageCalculator(
         damageType: DamageType
     ): Int {
 
-        val levelAdjustedBaseDamage =
-            weapon.definition.baseDamage *
-                weapon.currentLevelStats
-                    .damageMultiplier
+        /*
+         * Spell ability foundation:
+         *
+         * Base Damage × (Wisdom + damage-type secondary stat)
+         *
+         * Ability-specific coefficient is applied by the ability runtime.
+         * Weapon level damageMultiplier is intentionally NOT applied here;
+         * Lv.5 spell formulas use the weapon's raw Base Damage.
+         */
+        val baseDamage =
+            weapon.definition.baseDamage
 
         val wisdom =
             playerStats
@@ -409,20 +416,10 @@ class WeaponDamageCalculator(
                 )
                 .coerceAtLeast(0)
 
-        val wisdomMultiplier =
-            wisdom.toFloat() /
-                10f
-
-        val relatedStatMultiplier =
-            relatedStat.toFloat() /
-                10f
-
         return (
-            levelAdjustedBaseDamage *
-                wisdomMultiplier *
-                relatedStatMultiplier
+            baseDamage *
+                (wisdom + relatedStat)
             )
-            .roundToInt()
             .coerceAtLeast(1)
     }
 

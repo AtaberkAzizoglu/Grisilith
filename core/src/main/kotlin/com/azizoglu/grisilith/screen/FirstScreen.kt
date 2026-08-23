@@ -4,6 +4,7 @@ import com.azizoglu.grisilith.combat.damage.DamageNumberManager
 
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyManager
+import com.azizoglu.grisilith.enemy.runtime.EnemyAdaptiveScalingRuntime
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.glyph.GlyphFeedbackRenderer
@@ -184,6 +185,22 @@ class FirstScreen(
 
     private val weaponInventory =
         WeaponInventory()
+
+    /*
+     * Enemy adaptive scaling başlangıç baseline'ını burada yakalar.
+     * Character'ın başlangıç dağılımı ekstra difficulty üretmez;
+     * run sırasında kazanılan güç enemy scaling'e kontrollü biçimde yansır.
+     */
+    init {
+        EnemyAdaptiveScalingRuntime
+            .bind(
+                playerStats =
+                    playerStats,
+
+                weaponInventory =
+                    weaponInventory
+            )
+    }
 
     private val weaponStatBonusSynchronizer =
         WeaponStatBonusSynchronizer(

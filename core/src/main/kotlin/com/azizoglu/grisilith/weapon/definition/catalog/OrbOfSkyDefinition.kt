@@ -50,7 +50,7 @@ object OrbOfSkyDefinition {
             normalAttackSpeedStat =
                 StatType.HASTE,
 
-            baseDamage = 7,
+            baseDamage = 14,
             baseAttacksPerSecond = 0.447f,
             maximumAttacksPerSecond = 3.20f,
             baseRange = 580f,
@@ -73,10 +73,10 @@ object OrbOfSkyDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.55f,
-                        level3Damage = 2.65f,
-                        level4Damage = 3.45f,
-                        level5Damage = 4.85f,
+                        level2Damage = 1.10f,
+                        level3Damage = 1.20f,
+                        level4Damage = 1.35f,
+                        level5Damage = 1.50f,
 
                         level2AttackSpeed = 1.15f,
                         level3AttackSpeed = 1.22f,

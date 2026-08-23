@@ -50,7 +50,7 @@ object SteamWandDefinition {
             normalAttackSpeedStat =
                 StatType.HASTE,
 
-            baseDamage = 9,
+            baseDamage = 18,
             baseAttacksPerSecond = 0.347f,
             maximumAttacksPerSecond = 2.50f,
             baseRange = 550f,
@@ -72,10 +72,10 @@ object SteamWandDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.55f,
-                        level3Damage = 2.65f,
-                        level4Damage = 3.45f,
-                        level5Damage = 4.85f,
+                        level2Damage = 1.10f,
+                        level3Damage = 1.20f,
+                        level4Damage = 1.35f,
+                        level5Damage = 1.50f,
 
                         level2AttackSpeed = 1.15f,
                         level3AttackSpeed = 1.22f,

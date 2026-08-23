@@ -40,7 +40,7 @@ object LongbowDefinition {
                 WeaponAttackPattern
                     .STRAIGHT_PROJECTILE,
 
-            baseDamage = 4,
+            baseDamage = 12,
             baseAttacksPerSecond = 0.533f,
             baseRange = 960f,
             baseProjectileSpeed = 920f,
@@ -60,10 +60,10 @@ object LongbowDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.55f,
-                        level3Damage = 2.65f,
-                        level4Damage = 3.45f,
-                        level5Damage = 4.85f,
+                        level2Damage = 1.10f,
+                        level3Damage = 1.20f,
+                        level4Damage = 1.35f,
+                        level5Damage = 1.50f,
 
                         level2AttackSpeed = 1.15f,
                         level3AttackSpeed = 1.22f,

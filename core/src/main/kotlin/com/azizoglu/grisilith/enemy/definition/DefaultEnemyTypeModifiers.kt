@@ -9,14 +9,15 @@ import com.azizoglu.grisilith.enemy.EnemyType
  * NORMAL < UNIQUE << MINI_BOSS << FINAL_BOSS
  *
  * Unique boyutu tasarım gereği her zaman Normal'in %50 fazlasıdır.
+ * Bu hotfix saldırı gücüne dokunmadan Enemy Type dayanıklılık farkını büyütür.
  */
 object DefaultEnemyTypeModifiers {
 
     val normal =
         EnemyTypeModifier(
             enemyType = EnemyType.NORMAL,
-            healthMultiplier = 1f,
-            armorMultiplier = 1f,
+            healthMultiplier = 1.25f,
+            armorMultiplier = 1.05f,
             damageMultiplier = 1f,
             movementSpeedMultiplier = 1f,
             attackSpeedMultiplier = 1f,
@@ -27,8 +28,8 @@ object DefaultEnemyTypeModifiers {
     val unique =
         EnemyTypeModifier(
             enemyType = EnemyType.UNIQUE,
-            healthMultiplier = 2.60f,
-            armorMultiplier = 1.50f,
+            healthMultiplier = 3.25f,
+            armorMultiplier = 1.70f,
             damageMultiplier = 1.55f,
             movementSpeedMultiplier = 1.06f,
             attackSpeedMultiplier = 1.12f,
@@ -44,8 +45,8 @@ object DefaultEnemyTypeModifiers {
     val miniBoss =
         EnemyTypeModifier(
             enemyType = EnemyType.MINI_BOSS,
-            healthMultiplier = 1.15f,
-            armorMultiplier = 1.10f,
+            healthMultiplier = 1.60f,
+            armorMultiplier = 1.30f,
             damageMultiplier = 1.15f,
             movementSpeedMultiplier = 1f,
             attackSpeedMultiplier = 1.05f,
@@ -61,8 +62,8 @@ object DefaultEnemyTypeModifiers {
     val finalBoss =
         EnemyTypeModifier(
             enemyType = EnemyType.FINAL_BOSS,
-            healthMultiplier = 1.35f,
-            armorMultiplier = 1.20f,
+            healthMultiplier = 2.00f,
+            armorMultiplier = 1.50f,
             damageMultiplier = 1.25f,
             movementSpeedMultiplier = 1.02f,
             attackSpeedMultiplier = 1.10f,

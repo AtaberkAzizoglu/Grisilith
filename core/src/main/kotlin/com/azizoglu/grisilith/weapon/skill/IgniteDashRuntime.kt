@@ -345,6 +345,15 @@ class IgniteDashRuntime(
                 explosionCenter.x,
                 explosionCenter.y,
                 DefaultWeaponAbilities
+                    .IGNITE_DASH_OUTER_EXPLOSION_RADIUS *
+                    progress,
+                56
+            )
+
+            shapeRenderer.circle(
+                explosionCenter.x,
+                explosionCenter.y,
+                DefaultWeaponAbilities
                     .IGNITE_DASH_EXPLOSION_RADIUS *
                     progress,
                 48
@@ -543,11 +552,22 @@ class IgniteDashRuntime(
                         DamageType.FIRE
                 )
 
-        val explosionDamage =
+        val innerExplosionDamage =
             (
                 baseDamage *
                     DefaultWeaponAbilities
                         .IGNITE_DASH_DAMAGE_MULTIPLIER
+                )
+                .roundToInt()
+                .coerceAtLeast(
+                    1
+                )
+
+        val outerExplosionDamage =
+            (
+                innerExplosionDamage *
+                    DefaultWeaponAbilities
+                        .IGNITE_DASH_OUTER_DAMAGE_RATIO
                 )
                 .roundToInt()
                 .coerceAtLeast(
@@ -559,19 +579,33 @@ class IgniteDashRuntime(
             .forEach {
                     enemy ->
 
-                if (
-                    enemy.isDead ||
+                val distance =
                     Vector2.dst(
                         explosionCenter.x,
                         explosionCenter.y,
                         enemy.centerX,
                         enemy.centerY
-                    ) >
+                    )
+
+                if (
+                    enemy.isDead ||
+                    distance >
                     DefaultWeaponAbilities
-                        .IGNITE_DASH_EXPLOSION_RADIUS
+                        .IGNITE_DASH_OUTER_EXPLOSION_RADIUS
                 ) {
                     return@forEach
                 }
+
+                val damageForDistance =
+                    if (
+                        distance <=
+                        DefaultWeaponAbilities
+                            .IGNITE_DASH_EXPLOSION_RADIUS
+                    ) {
+                        innerExplosionDamage
+                    } else {
+                        outerExplosionDamage
+                    }
 
                 val wasAlive =
                     !enemy.isDead
@@ -579,7 +613,7 @@ class IgniteDashRuntime(
                 val appliedDamage =
                     enemy.takeDamage(
                         amount =
-                            explosionDamage,
+                            damageForDistance,
 
                         damageContext =
                             EnemyDamageContext(

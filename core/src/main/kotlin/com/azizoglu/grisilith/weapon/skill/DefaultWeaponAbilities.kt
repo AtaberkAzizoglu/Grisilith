@@ -40,13 +40,13 @@ object DefaultWeaponAbilities {
         "WPN_ABILITY_ERASING_SOULS"
 
     const val ERASING_SOULS_TRIGGER_RADIUS =
-        640f
+        600f
 
     const val ERASING_SOULS_EXPLOSION_RADIUS =
-        92f
+        100f
 
     const val ERASING_SOULS_DAMAGE_MULTIPLIER =
-        1f
+        2.25f
 
     const val ERASING_SOULS_NECROSIS_DURATION_SECONDS =
         2f
@@ -90,7 +90,7 @@ object DefaultWeaponAbilities {
         "WPN_ABILITY_STATIC_CLOUDS"
 
     const val STATIC_CLOUDS_DURATION_SECONDS =
-        5f
+        12f
 
     /*
      * Kaynak tasarım 30-45 saniye aralığı veriyor.
@@ -103,10 +103,10 @@ object DefaultWeaponAbilities {
         145f
 
     const val STATIC_CLOUDS_TICK_SECONDS =
-        0.50f
+        0.33333334f
 
     const val STATIC_CLOUDS_LIGHTNING_DPS_MULTIPLIER =
-        0.55f
+        1.19f
 
     const val STATIC_CLOUDS_STUN_CHANCE =
         0.05f
@@ -130,19 +130,19 @@ object DefaultWeaponAbilities {
         "WPN_ABILITY_ACIDIC_POOL"
 
     const val ACIDIC_POOL_DURATION_SECONDS =
-        6f
+        15f
 
     const val ACIDIC_POOL_COOLDOWN_SECONDS =
-        45f
+        44f
 
     const val ACIDIC_POOL_PLACEMENT_RANGE =
-        360f
+        660f
 
     const val ACIDIC_POOL_RADIUS =
-        155f
+        165f
 
     const val ACIDIC_POOL_TICK_SECONDS =
-        0.50f
+        0.25f
 
     /*
      * Değer DPS çarpanıdır.
@@ -151,7 +151,7 @@ object DefaultWeaponAbilities {
      * Active Skill Damage × 0.90 × 0.50
      */
     const val ACIDIC_POOL_DAMAGE_PER_SECOND_MULTIPLIER =
-        0.90f
+        1.65f
 
     const val ACIDIC_POOL_CORRODING_DURATION_SECONDS =
         3f
@@ -164,22 +164,22 @@ object DefaultWeaponAbilities {
      * cooldown verilmediği için test edilebilir orta değerler seçildi.
      */
     const val VORTEX_PULL_DURATION_SECONDS =
-        5f
+        13f
 
     const val VORTEX_PULL_COOLDOWN_SECONDS =
-        45f
+        42f
 
     const val VORTEX_PULL_PLACEMENT_RANGE =
-        340f
+        650f
 
     const val VORTEX_PULL_RADIUS =
-        150f
+        195f
 
     const val VORTEX_PULL_DAMAGE_TICK_SECONDS =
-        0.25f
+        0.16666667f
 
     const val VORTEX_PULL_DAMAGE_PER_SECOND_MULTIPLIER =
-        0.85f
+        1.90f
 
     const val VORTEX_PULL_NORMAL_PULL_MULTIPLIER =
         1f
@@ -204,16 +204,22 @@ object DefaultWeaponAbilities {
      * olarak tarif edildiği için ilk denge değeri 75 saniyedir.
      */
     const val IGNITE_DASH_COOLDOWN_SECONDS =
-        75f
+        45f
 
     const val IGNITE_DASH_MAXIMUM_RANGE =
-        430f
+        450f
 
     const val IGNITE_DASH_EXPLOSION_RADIUS =
         120f
 
+    const val IGNITE_DASH_OUTER_EXPLOSION_RADIUS =
+        250f
+
+    const val IGNITE_DASH_OUTER_DAMAGE_RATIO =
+        0.40f
+
     const val IGNITE_DASH_DAMAGE_MULTIPLIER =
-        3f
+        10.55f
 
     const val IGNITE_DASH_BURN_DURATION_SECONDS =
         3f

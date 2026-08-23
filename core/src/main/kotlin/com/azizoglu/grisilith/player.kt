@@ -1,6 +1,9 @@
 package com.azizoglu.grisilith.player
 
 import com.azizoglu.grisilith.combat.HealthComponent
+import com.azizoglu.grisilith.combat.affinity.DamageAffinityProfile
+import com.azizoglu.grisilith.combat.affinity.DamageAffinityResolver
+import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.character.visual.CharacterVisualState
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
@@ -58,6 +61,9 @@ class Player(
         Rectangle()
 
     private var accumulatedRegeneration = 0f
+
+    private var damageAffinityProfile =
+        DamageAffinityProfile.NONE
 
     val health =
         HealthComponent(
@@ -571,10 +577,55 @@ class Player(
     fun takeDamage(
         amount: Int
     ): Int {
+        return takeDamage(
+            amount =
+                amount,
+
+            damageType =
+                DamageType.NONE
+        )
+    }
+
+    fun takeDamage(
+        amount: Int,
+        damageType: DamageType
+    ): Int {
+        val affinityResolvedDamage =
+            DamageAffinityResolver
+                .resolve(
+                    requestedDamage =
+                        amount,
+
+                    damageType =
+                        damageType,
+
+                    profile =
+                        damageAffinityProfile
+                )
+
+        if (
+            affinityResolvedDamage <=
+            0
+        ) {
+            return 0
+        }
+
         return health.takeDamage(
             amount =
-                amount.coerceAtLeast(0)
+                affinityResolvedDamage
         )
+    }
+
+    fun setDamageAffinityProfile(
+        profile: DamageAffinityProfile
+    ) {
+        damageAffinityProfile =
+            profile
+    }
+
+    fun damageAffinityProfile():
+        DamageAffinityProfile {
+        return damageAffinityProfile
     }
 
     /*
@@ -584,9 +635,31 @@ class Player(
     fun takePhysicalWeaponDamage(
         amount: Int,
         attackerPiercingIgnoreRatio:
-        Float
+        Float,
+        damageType: DamageType =
+            DamageType.SLASHING
     ): Int {
         if (amount <= 0) {
+            return 0
+        }
+
+        val affinityResolvedDamage =
+            DamageAffinityResolver
+                .resolve(
+                    requestedDamage =
+                        amount,
+
+                    damageType =
+                        damageType,
+
+                    profile =
+                        damageAffinityProfile
+                )
+
+        if (
+            affinityResolvedDamage <=
+            0
+        ) {
             return 0
         }
 
@@ -598,7 +671,8 @@ class Player(
 
         val reducedDamage =
             (
-                amount.toFloat() -
+                affinityResolvedDamage
+                    .toFloat() -
                     damageReduction
                 )
                 .roundToInt()

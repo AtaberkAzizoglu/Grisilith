@@ -144,11 +144,8 @@ class ErasingSoulsRuntime {
                         target === deadEnemy ||
                         target.isDead ||
                         !isInsideExplosion(
-                            centerX =
-                                deadEnemy.centerX,
-
-                            centerY =
-                                deadEnemy.centerY,
+                            sourceEnemy =
+                                deadEnemy,
 
                             target =
                                 target
@@ -371,23 +368,25 @@ class ErasingSoulsRuntime {
     }
 
     private fun isInsideExplosion(
-        centerX: Float,
-        centerY: Float,
+        sourceEnemy: Enemy,
         target: Enemy
     ): Boolean {
 
-        val targetRadius =
-            target.bounds.width /
+        val sourceRadius =
+            maxOf(
+                sourceEnemy.bounds.width,
+                sourceEnemy.bounds.height
+            ) /
                 2f
 
         val effectiveRadius =
-            DefaultWeaponAbilities
-                .ERASING_SOULS_EXPLOSION_RADIUS +
-                targetRadius
+            sourceRadius +
+                DefaultWeaponAbilities
+                    .ERASING_SOULS_EXPLOSION_RADIUS
 
         return Vector2.dst2(
-            centerX,
-            centerY,
+            sourceEnemy.centerX,
+            sourceEnemy.centerY,
             target.centerX,
             target.centerY
         ) <=

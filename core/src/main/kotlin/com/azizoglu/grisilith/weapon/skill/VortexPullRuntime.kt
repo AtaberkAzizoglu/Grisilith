@@ -89,6 +89,39 @@ class VortexPullRuntime {
             return false
         }
 
+        val currentField =
+            areaRuntime.field
+                ?: return false
+
+        val centerX =
+            currentField.center.x
+
+        val centerY =
+            currentField.center.y
+
+        val radius =
+            currentField.radius
+
+        /*
+         * Plague Storm başladığında mevcut Vortex süresi bırakılır
+         * ve merkez/radius korunarak 12 saniyelik yeni süre başlatılır.
+         */
+        areaRuntime.clear()
+
+        areaRuntime.begin(
+            centerX =
+                centerX,
+
+            centerY =
+                centerY,
+
+            radius =
+                radius,
+
+            durationSeconds =
+                PLAGUE_STORM_DURATION_SECONDS
+        )
+
         plagueStormActive =
             true
 
@@ -272,6 +305,7 @@ class VortexPullRuntime {
         delta: Float,
         enemies: List<Enemy>,
         currentStage: Int,
+        plagueMoveSpeedPixelsPerSecond: Float,
         onPullEnemy: (
             enemy: Enemy,
             centerX: Float,
@@ -374,7 +408,7 @@ class VortexPullRuntime {
                                     movement
                                         .nor()
                                         .scl(
-                                            PLAGUE_STORM_MOVE_SPEED *
+                                            plagueMoveSpeedPixelsPerSecond *
                                                 frameDelta
                                         )
 
@@ -753,8 +787,8 @@ class VortexPullRuntime {
         private const val CENTER_MARKER_RADIUS =
             9f
 
-        private const val PLAGUE_STORM_MOVE_SPEED =
-            34f
+        private const val PLAGUE_STORM_DURATION_SECONDS =
+            12f
 
         private const val PLAGUE_ACTIVATION_VISUAL_SECONDS =
             0.60f

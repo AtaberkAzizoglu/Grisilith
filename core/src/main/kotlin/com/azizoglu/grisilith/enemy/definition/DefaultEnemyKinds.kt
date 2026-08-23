@@ -68,7 +68,14 @@ object DefaultEnemyKinds {
                     contactDamage = 22,
                     movementSpeed = 150f,
                     attacksPerSecond = 0.85f,
-                    attackRange = 54f
+                    attackRange = 54f,
+                    weaponDamageMultiplier = 0.90f,
+                    attackSpeedScore = 18,
+                    mainDamageStat = 18,
+                    secondaryDamageStat = 14,
+                    critRate = 8,
+                    critDamage = 12,
+                    piercing = 2
                 ),
             behaviorId =
                 EnemyBehaviorIds.FAST_CHASE_AND_MELEE,
@@ -95,7 +102,14 @@ object DefaultEnemyKinds {
                     contactDamage = 30,
                     movementSpeed = 92f,
                     attacksPerSecond = 0.60f,
-                    attackRange = 58f
+                    attackRange = 58f,
+                    weaponDamageMultiplier = 1.00f,
+                    attackSpeedScore = 8,
+                    mainDamageStat = 22,
+                    secondaryDamageStat = 12,
+                    critRate = 3,
+                    critDamage = 10,
+                    piercing = 4
                 ),
             behaviorId =
                 EnemyBehaviorIds.SLOW_CHASE_AND_MELEE,
@@ -122,7 +136,14 @@ object DefaultEnemyKinds {
                     contactDamage = 12,
                     movementSpeed = 180f,
                     attacksPerSecond = 1.30f,
-                    attackRange = 44f
+                    attackRange = 44f,
+                    weaponDamageMultiplier = 0.82f,
+                    attackSpeedScore = 24,
+                    mainDamageStat = 14,
+                    secondaryDamageStat = 22,
+                    critRate = 12,
+                    critDamage = 18,
+                    piercing = 4
                 ),
             behaviorId =
                 EnemyBehaviorIds.FAST_CHASE_AND_MELEE,
@@ -147,7 +168,14 @@ object DefaultEnemyKinds {
                     contactDamage = 58,
                     movementSpeed = 145f,
                     attacksPerSecond = 0.68f,
-                    attackRange = 76f
+                    attackRange = 76f,
+                    weaponDamageMultiplier = 1.15f,
+                    attackSpeedScore = 10,
+                    mainDamageStat = 30,
+                    secondaryDamageStat = 14,
+                    critRate = 6,
+                    critDamage = 18,
+                    piercing = 5
                 ),
             behaviorId =
                 EnemyBehaviorIds.CHASE_AND_MELEE,
@@ -174,7 +202,14 @@ object DefaultEnemyKinds {
                     contactDamage = 22,
                     movementSpeed = 132f,
                     attacksPerSecond = 2.35f,
-                    attackRange = 82f
+                    attackRange = 82f,
+                    weaponDamageMultiplier = 0.72f,
+                    attackSpeedScore = 34,
+                    mainDamageStat = 12,
+                    secondaryDamageStat = 26,
+                    critRate = 5,
+                    critDamage = 8,
+                    piercing = 8
                 ),
             behaviorId =
                 EnemyBehaviorIds.SWARM_CHASE
@@ -197,7 +232,14 @@ object DefaultEnemyKinds {
                     contactDamage = 72,
                     movementSpeed = 72f,
                     attacksPerSecond = 0.48f,
-                    attackRange = 98f
+                    attackRange = 98f,
+                    weaponDamageMultiplier = 1.20f,
+                    attackSpeedScore = 5,
+                    mainDamageStat = 34,
+                    secondaryDamageStat = 10,
+                    critRate = 4,
+                    critDamage = 20,
+                    piercing = 6
                 ),
             behaviorId =
                 EnemyBehaviorIds.SLOW_CHASE_AND_MELEE,
@@ -224,7 +266,14 @@ object DefaultEnemyKinds {
                     contactDamage = 92,
                     movementSpeed = 165f,
                     attacksPerSecond = 0.90f,
-                    attackRange = 105f
+                    attackRange = 105f,
+                    weaponDamageMultiplier = 1.28f,
+                    attackSpeedScore = 18,
+                    mainDamageStat = 38,
+                    secondaryDamageStat = 18,
+                    critRate = 10,
+                    critDamage = 28,
+                    piercing = 8
                 ),
             behaviorId =
                 EnemyBehaviorIds.CHASE_AND_MELEE,
@@ -251,7 +300,14 @@ object DefaultEnemyKinds {
                     contactDamage = 19,
                     movementSpeed = 120f,
                     attacksPerSecond = 0.90f,
-                    attackRange = 58f
+                    attackRange = 58f,
+                    weaponDamageMultiplier = 0.95f,
+                    attackSpeedScore = 14,
+                    mainDamageStat = 18,
+                    secondaryDamageStat = 16,
+                    critRate = 7,
+                    critDamage = 14,
+                    piercing = 5
                 ),
             behaviorId =
                 EnemyBehaviorIds.CHASE_AND_MELEE,
@@ -285,7 +341,14 @@ object DefaultEnemyKinds {
                     contactDamage = 13,
                     movementSpeed = 120f,
                     attacksPerSecond = 0.78f,
-                    attackRange = 560f
+                    attackRange = 560f,
+                    weaponDamageMultiplier = 0.90f,
+                    attackSpeedScore = 16,
+                    mainDamageStat = 12,
+                    secondaryDamageStat = 24,
+                    critRate = 11,
+                    critDamage = 20,
+                    piercing = 12
                 ),
             behaviorId =
                 EnemyBehaviorIds.KEEP_DISTANCE_AND_SHOOT,
@@ -319,7 +382,14 @@ object DefaultEnemyKinds {
                     contactDamage = 58,
                     movementSpeed = 105f,
                     attacksPerSecond = 0.58f,
-                    attackRange = 92f
+                    attackRange = 92f,
+                    weaponDamageMultiplier = 1.12f,
+                    attackSpeedScore = 8,
+                    mainDamageStat = 30,
+                    secondaryDamageStat = 16,
+                    critRate = 8,
+                    critDamage = 22,
+                    piercing = 18
                 ),
             behaviorId =
                 EnemyBehaviorIds.CHASE_AND_MELEE,
@@ -353,7 +423,14 @@ object DefaultEnemyKinds {
                     contactDamage = 44,
                     movementSpeed = 175f,
                     attacksPerSecond = 1.02f,
-                    attackRange = 620f
+                    attackRange = 620f,
+                    weaponDamageMultiplier = 1.05f,
+                    attackSpeedScore = 22,
+                    mainDamageStat = 20,
+                    secondaryDamageStat = 30,
+                    critRate = 13,
+                    critDamage = 24,
+                    piercing = 14
                 ),
             behaviorId =
                 EnemyBehaviorIds.KEEP_DISTANCE_AND_SHOOT,
@@ -387,7 +464,14 @@ object DefaultEnemyKinds {
                     contactDamage = 42,
                     movementSpeed = 145f,
                     attacksPerSecond = 1.10f,
-                    attackRange = 680f
+                    attackRange = 680f,
+                    weaponDamageMultiplier = 1.18f,
+                    attackSpeedScore = 24,
+                    mainDamageStat = 16,
+                    secondaryDamageStat = 40,
+                    critRate = 12,
+                    critDamage = 30,
+                    piercing = 10
                 ),
             behaviorId =
                 EnemyBehaviorIds.MULTI_WEAPON_CASTER,
@@ -437,7 +521,14 @@ object DefaultEnemyKinds {
                     contactDamage = 20,
                     movementSpeed = 118f,
                     attacksPerSecond = 1.15f,
-                    attackRange = 55f
+                    attackRange = 55f,
+                    weaponDamageMultiplier = 0.98f,
+                    attackSpeedScore = 20,
+                    mainDamageStat = 20,
+                    secondaryDamageStat = 14,
+                    critRate = 6,
+                    critDamage = 16,
+                    piercing = 5
                 ),
             behaviorId =
                 EnemyBehaviorIds.CHASE_AND_MELEE,
@@ -470,7 +561,14 @@ object DefaultEnemyKinds {
                     contactDamage = 14,
                     movementSpeed = 104f,
                     attacksPerSecond = 0.88f,
-                    attackRange = 600f
+                    attackRange = 600f,
+                    weaponDamageMultiplier = 0.92f,
+                    attackSpeedScore = 18,
+                    mainDamageStat = 12,
+                    secondaryDamageStat = 24,
+                    critRate = 10,
+                    critDamage = 20,
+                    piercing = 13
                 ),
             behaviorId =
                 EnemyBehaviorIds.KEEP_DISTANCE_AND_SHOOT,
@@ -503,7 +601,14 @@ object DefaultEnemyKinds {
                     contactDamage = 22,
                     movementSpeed = 78f,
                     attacksPerSecond = 0.62f,
-                    attackRange = 52f
+                    attackRange = 52f,
+                    weaponDamageMultiplier = 0.92f,
+                    attackSpeedScore = 5,
+                    mainDamageStat = 24,
+                    secondaryDamageStat = 8,
+                    critRate = 2,
+                    critDamage = 10,
+                    piercing = 2
                 ),
             behaviorId =
                 EnemyBehaviorIds.SLOW_CHASE_AND_MELEE
@@ -526,7 +631,14 @@ object DefaultEnemyKinds {
                     contactDamage = 50,
                     movementSpeed = 120f,
                     attacksPerSecond = 0.70f,
-                    attackRange = 68f
+                    attackRange = 68f,
+                    weaponDamageMultiplier = 1.08f,
+                    attackSpeedScore = 16,
+                    mainDamageStat = 10,
+                    secondaryDamageStat = 32,
+                    critRate = 8,
+                    critDamage = 22,
+                    piercing = 8
                 ),
             behaviorId =
                 EnemyBehaviorIds.INCORPOREAL_CHASE,
@@ -555,7 +667,14 @@ object DefaultEnemyKinds {
                     contactDamage = 42,
                     movementSpeed = 72f,
                     attacksPerSecond = 0.62f,
-                    attackRange = 88f
+                    attackRange = 88f,
+                    weaponDamageMultiplier = 1.00f,
+                    attackSpeedScore = 6,
+                    mainDamageStat = 22,
+                    secondaryDamageStat = 26,
+                    critRate = 2,
+                    critDamage = 10,
+                    piercing = 2
                 ),
             behaviorId =
                 EnemyBehaviorIds.SLOW_CHASE_AND_MELEE,
@@ -582,7 +701,14 @@ object DefaultEnemyKinds {
                     contactDamage = 82,
                     movementSpeed = 150f,
                     attacksPerSecond = 1.00f,
-                    attackRange = 82f
+                    attackRange = 82f,
+                    weaponDamageMultiplier = 1.25f,
+                    attackSpeedScore = 26,
+                    mainDamageStat = 34,
+                    secondaryDamageStat = 34,
+                    critRate = 16,
+                    critDamage = 34,
+                    piercing = 16
                 ),
             behaviorId =
                 EnemyBehaviorIds.CHASE_AND_MELEE,

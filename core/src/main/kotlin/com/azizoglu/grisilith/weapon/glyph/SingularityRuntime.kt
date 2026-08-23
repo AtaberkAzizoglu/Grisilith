@@ -11,7 +11,6 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
-import kotlin.math.ln
 import kotlin.math.roundToInt
 
 class SingularityRuntime(
@@ -453,33 +452,19 @@ class SingularityRuntime(
                     return@forEach
                 }
 
-                if (
-                    distance >
-                    BASE_RADIUS
-                ) {
-                    return@forEach
-                }
-
-                val normalizedDistance =
-                    (
-                        distance /
-                            BASE_RADIUS
-                        )
-                        .coerceIn(
-                            0f,
-                            1f
-                        )
-
                 val pullStrength =
-                    ENEMY_MINIMUM_PULL_SPEED +
-                        (
-                            ENEMY_MAXIMUM_PULL_SPEED -
-                                ENEMY_MINIMUM_PULL_SPEED
-                            ) *
-                        (
-                            1f -
-                                normalizedDistance
-                            )
+                    when {
+                        distance <=
+                            BASE_RADIUS ->
+                            INNER_ENEMY_PULL_SPEED
+
+                        distance <=
+                            OUTER_PULL_RADIUS ->
+                            OUTER_ENEMY_PULL_SPEED
+
+                        else ->
+                            return@forEach
+                    }
 
                 enemy.pullToward(
                     targetCenterX =
@@ -601,34 +586,27 @@ class SingularityRuntime(
             )
 
         if (
-            distance >
-            BASE_RADIUS ||
             distance <=
             1f
         ) {
             return
         }
 
-        val normalizedDistance =
-            (
-                distance /
-                    BASE_RADIUS
-                )
-                .coerceIn(
-                    0f,
-                    1f
-                )
-
         val pullSpeed =
-            PLAYER_MINIMUM_PULL_SPEED +
-                (
-                    PLAYER_MAXIMUM_PULL_SPEED -
-                        PLAYER_MINIMUM_PULL_SPEED
-                    ) *
-                (
-                    1f -
-                        normalizedDistance
-                    )
+            when {
+                distance <=
+                    BASE_RADIUS ->
+                    INNER_ENEMY_PULL_SPEED *
+                        PLAYER_PULL_RATIO
+
+                distance <=
+                    OUTER_PULL_RADIUS ->
+                    OUTER_ENEMY_PULL_SPEED *
+                        PLAYER_PULL_RATIO
+
+                else ->
+                    return
+            }
 
         val direction =
             Vector2(
@@ -690,8 +668,7 @@ class SingularityRuntime(
                         damageType =
                             DamageType.NECROTIC
                     ) *
-                    DPS_MULTIPLIER *
-                    DAMAGE_TICK_SECONDS
+                    TICK_DAMAGE_MULTIPLIER
                 )
                 .roundToInt()
                 .coerceAtLeast(
@@ -761,32 +738,20 @@ class SingularityRuntime(
                 .countedDeadEnemies
                 .size
 
-        val logarithmicGrowth =
-            ln(
-                1.0 +
-                    deathCount
-                        .toDouble()
-            )
-                .toFloat()
+        val effectiveDeathCount =
+            deathCount
+                .coerceAtLeast(
+                    1
+                )
 
         val explosionRadius =
             (
                 BASE_EXPLOSION_RADIUS +
-                    logarithmicGrowth *
-                    EXPLOSION_RADIUS_GROWTH
+                    deathCount *
+                    EXPLOSION_RADIUS_GROWTH_PER_DEATH
                 )
                 .coerceAtMost(
                     MAXIMUM_EXPLOSION_RADIUS
-                )
-
-        val explosionMultiplier =
-            (
-                BASE_EXPLOSION_DAMAGE_MULTIPLIER +
-                    logarithmicGrowth *
-                    EXPLOSION_DAMAGE_GROWTH
-                )
-                .coerceAtMost(
-                    MAXIMUM_EXPLOSION_DAMAGE_MULTIPLIER
                 )
 
         val explosionDamage =
@@ -801,7 +766,8 @@ class SingularityRuntime(
                         damageType =
                             DamageType.NECROTIC
                     ) *
-                    explosionMultiplier
+                    effectiveDeathCount *
+                    EXPLOSION_DAMAGE_PER_DEATH_MULTIPLIER
                 )
                 .roundToInt()
                 .coerceAtLeast(
@@ -959,49 +925,43 @@ class SingularityRuntime(
     companion object {
 
         private const val ACTIVE_DURATION_SECONDS =
-            6f
+            13f
 
         private const val COLLAPSE_DURATION_SECONDS =
-            0.40f
+            1.20f
 
         private const val DAMAGE_TICK_SECONDS =
-            0.50f
+            0.25f
 
         private const val BASE_RADIUS =
-            180f
+            222f
 
-        private const val ENEMY_MINIMUM_PULL_SPEED =
-            95f
+        private const val OUTER_PULL_RADIUS =
+            300f
 
-        private const val ENEMY_MAXIMUM_PULL_SPEED =
+        private const val INNER_ENEMY_PULL_SPEED =
             310f
 
-        private const val PLAYER_MINIMUM_PULL_SPEED =
-            22f
+        private const val OUTER_ENEMY_PULL_SPEED =
+            125f
 
-        private const val PLAYER_MAXIMUM_PULL_SPEED =
-            92f
+        private const val PLAYER_PULL_RATIO =
+            0.40f
 
-        private const val DPS_MULTIPLIER =
-            1.10f
+        private const val TICK_DAMAGE_MULTIPLIER =
+            4.11f
 
         private const val BASE_EXPLOSION_RADIUS =
-            180f
+            300f
 
-        private const val EXPLOSION_RADIUS_GROWTH =
-            62f
+        private const val EXPLOSION_RADIUS_GROWTH_PER_DEATH =
+            33f
 
         private const val MAXIMUM_EXPLOSION_RADIUS =
-            330f
+            1500f
 
-        private const val BASE_EXPLOSION_DAMAGE_MULTIPLIER =
-            2.40f
-
-        private const val EXPLOSION_DAMAGE_GROWTH =
-            0.82f
-
-        private const val MAXIMUM_EXPLOSION_DAMAGE_MULTIPLIER =
-            4.60f
+        private const val EXPLOSION_DAMAGE_PER_DEATH_MULTIPLIER =
+            1.55f
 
         private const val PROJECTILE_BEND_RADIUS =
             280f

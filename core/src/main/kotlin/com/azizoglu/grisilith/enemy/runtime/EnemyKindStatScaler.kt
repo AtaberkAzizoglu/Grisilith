@@ -15,6 +15,10 @@ import kotlin.math.roundToInt
  * Kind Base Stats
  * -> Stage Scaling
  * -> EnemyType Modifier
+ * -> Adaptive Player / Weapon Scaling
+ *
+ * Base HP ve BaseArmor hiçbir zaman değiştirilmez; yalnız çözülmüş
+ * runtime değerleri bunların üstünden hesaplanır.
  */
 object EnemyKindStatScaler {
 
@@ -46,12 +50,17 @@ object EnemyKindStatScaler {
                     enemyType
                 )
 
+        val adaptiveScaling =
+            EnemyAdaptiveScalingRuntime
+                .current()
+
         val scaledHealth =
             (
                 definition.baseStats
                     .maximumHealth *
                     stageScaling.healthMultiplier *
-                    typeModifier.healthMultiplier
+                    typeModifier.healthMultiplier *
+                    adaptiveScaling.healthMultiplier
                 )
                 .roundToInt()
                 .coerceAtLeast(1)
@@ -61,7 +70,8 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .armorClass *
                     stageScaling.armorMultiplier *
-                    typeModifier.armorMultiplier
+                    typeModifier.armorMultiplier *
+                    adaptiveScaling.armorClassMultiplier
                 )
                 .roundToInt()
                 .coerceAtLeast(0)
@@ -71,7 +81,8 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .contactDamage *
                     stageScaling.damageMultiplier *
-                    typeModifier.damageMultiplier
+                    typeModifier.damageMultiplier *
+                    adaptiveScaling.damageMultiplier
                 )
                 .roundToInt()
                 .coerceAtLeast(0)
@@ -81,7 +92,8 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .movementSpeed *
                     stageScaling.movementSpeedMultiplier *
-                    typeModifier.movementSpeedMultiplier
+                    typeModifier.movementSpeedMultiplier *
+                    adaptiveScaling.movementSpeedMultiplier
                 )
                 .coerceAtLeast(0f)
 
@@ -90,7 +102,8 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .attacksPerSecond *
                     stageScaling.attackSpeedMultiplier *
-                    typeModifier.attackSpeedMultiplier
+                    typeModifier.attackSpeedMultiplier *
+                    adaptiveScaling.attackSpeedMultiplier
                 )
                 .coerceAtLeast(0f)
 
@@ -150,6 +163,53 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .attackRange,
 
+            weaponDamageMultiplier =
+                definition.baseStats
+                    .weaponDamageMultiplier *
+                    stageScaling.damageMultiplier *
+                    typeModifier.damageMultiplier *
+                    adaptiveScaling.damageMultiplier,
+
+            attackSpeedScore =
+                definition.baseStats
+                    .attackSpeedScore,
+
+            mainDamageStat =
+                definition.baseStats
+                    .mainDamageStat,
+
+            secondaryDamageStat =
+                definition.baseStats
+                    .secondaryDamageStat,
+
+            critRate =
+                definition.baseStats
+                    .critRate,
+
+            critDamage =
+                definition.baseStats
+                    .critDamage,
+
+            piercing =
+                definition.baseStats
+                    .piercing,
+
+            meleeWeaponRangeMultiplier =
+                definition.baseStats
+                    .meleeWeaponRangeMultiplier,
+
+            rangedWeaponRangeMultiplier =
+                definition.baseStats
+                    .rangedWeaponRangeMultiplier,
+
+            projectileSpeedMultiplier =
+                definition.baseStats
+                    .projectileSpeedMultiplier,
+
+            damageAffinities =
+                definition.baseStats
+                    .damageAffinities,
+
             kindId =
                 definition.id,
 
@@ -172,34 +232,41 @@ object EnemyKindStatScaler {
             )
 
         return StageScaling(
+            /*
+             * Her stage küçük ve sürekli artış verir.
+             * Tamamlanan her 5-stage bloğu ayrıca daha belirgin bir
+             * dayanıklılık / offense sıçraması ekler.
+             */
             healthMultiplier =
                 1f +
                     (stage - 1) *
-                    0.10f +
+                    0.05f +
                     completedStageBlocks *
-                    0.08f,
+                    0.10f,
 
             armorMultiplier =
                 1f +
                     (stage - 1) *
-                    0.025f,
+                    0.02f +
+                    completedStageBlocks *
+                    0.05f,
 
             damageMultiplier =
                 1f +
                     (stage - 1) *
-                    0.065f +
+                    0.025f +
                     completedStageBlocks *
-                    0.06f,
+                    0.05f,
 
             movementSpeedMultiplier =
                 1f +
                     (stage - 1) *
-                    0.004f,
+                    0.001f,
 
             attackSpeedMultiplier =
                 1f +
                     (stage - 1) *
-                    0.002f
+                    0.0025f
         )
     }
 

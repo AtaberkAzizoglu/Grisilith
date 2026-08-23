@@ -330,7 +330,7 @@ class GlyphSpellRuntime(
 
         val outerDamage =
             (
-                baseDamage *
+                innerDamage *
                     LIGHTNING_OUTER_DAMAGE_MULTIPLIER
                 )
                 .roundToInt()
@@ -340,7 +340,7 @@ class GlyphSpellRuntime(
 
         val chainDamage =
             (
-                baseDamage *
+                outerDamage *
                     LIGHTNING_CHAIN_DAMAGE_MULTIPLIER
                 )
                 .roundToInt()
@@ -930,28 +930,28 @@ class GlyphSpellRuntime(
             0.55f
 
         private const val LIGHTNING_INNER_RADIUS =
-            86f
+            115f
 
         private const val LIGHTNING_OUTER_RADIUS =
-            178f
+            240f
 
         private const val LIGHTNING_INNER_DAMAGE_MULTIPLIER =
-            2.15f
+            10.45f
 
         private const val LIGHTNING_OUTER_DAMAGE_MULTIPLIER =
-            0.82f
+            0.72f
 
         private const val LIGHTNING_CHAIN_DAMAGE_MULTIPLIER =
-            0.48f
+            0.31f
 
         private const val LIGHTNING_CHAIN_RANGE =
             240f
 
         private const val METEOR_RADIUS =
-            155f
+            185f
 
         private const val METEOR_DAMAGE_MULTIPLIER =
-            2.45f
+            15.55f
 
         private const val METEOR_BURNED_SECONDS =
             5f
@@ -966,12 +966,12 @@ class GlyphSpellRuntime(
             118f
 
         private const val TSUNAMI_DAMAGE_MULTIPLIER =
-            1.28f
+            11.11f
 
         private const val TSUNAMI_WET_SECONDS =
             5f
 
         private const val TSUNAMI_KNOCKBACK_STRENGTH =
-            8f
+            30f
     }
 }

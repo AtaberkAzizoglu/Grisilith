@@ -259,7 +259,7 @@ private class GhostIncorporealEvasionTrait :
     companion object {
 
         private const val EVADE_CHANCE =
-            0.50f
+            0.35f
     }
 }
 
@@ -387,13 +387,13 @@ private class VampireHungerTrait :
     companion object {
 
         private const val PLAYER_CONTACT_HEAL_RATIO =
-            0.0075f
+            0.0060f
 
         private const val PLAYER_CONTACT_MINIMUM_HEAL =
             35
 
         private const val ALLY_CONTACT_HEAL_RATIO =
-            0.0040f
+            0.0030f
 
         private const val ALLY_CONTACT_MINIMUM_HEAL =
             20
@@ -661,7 +661,7 @@ private class BoarChargeTrait :
         4.25f
 
     override fun baseContactDamageMultiplier() =
-        3.25f
+        2.75f
 }
 
 private class CrocodileJumpTrait :
@@ -689,7 +689,7 @@ private class CrocodileJumpTrait :
         7.0f
 
     override fun baseContactDamageMultiplier() =
-        4.0f
+        3.50f
 }
 
 
@@ -1028,7 +1028,7 @@ private class GorillaThrowTrait :
             460f
 
         private const val BASE_DAMAGE_MULTIPLIER =
-            4.75f
+            3.75f
     }
 }
 
