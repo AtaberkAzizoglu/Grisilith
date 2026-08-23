@@ -1,6 +1,6 @@
 package com.azizoglu.grisilith.combat.interaction
 
-import com.badlogic.gdx.math.MathUtils
+import com.azizoglu.grisilith.content.DamageType
 
 class PlagueStormRule(
     private val isInsideVortex: (
@@ -13,10 +13,23 @@ class PlagueStormRule(
     override fun handle(
         event: CombatInteractionEvent
     ) {
-
+        /*
+         * Plague Storm:
+         * Active Vortex Pull içindeki bir Enemy başarılı NECROTIC
+         * damage aldığında tetiklenir.
+         *
+         * Kaynağın ne olduğu önemli değildir. Bu nedenle hem Vortex
+         * alanındaki hedefe başka bir Necrotic saldırı verilmesi hem de
+         * Vortex ile ilişkili bir Necrotic damage event'i aynı pipeline'ı
+         * kullanır.
+         */
         if (
             event.trigger !=
-            CombatInteractionTrigger.ERASING_SOULS_EXPLOSION ||
+            CombatInteractionTrigger.DAMAGE_APPLIED ||
+            event.damageType !=
+            DamageType.NECROTIC ||
+            event.appliedDamage <=
+            0 ||
             !isInsideVortex(
                 event.worldX,
                 event.worldY
@@ -25,17 +38,6 @@ class PlagueStormRule(
             return
         }
 
-        if (
-            MathUtils.random() <=
-            TRIGGER_CHANCE
-        ) {
-            activatePlagueStorm()
-        }
-    }
-
-    companion object {
-
-        const val TRIGGER_CHANCE =
-            0.33f
+        activatePlagueStorm()
     }
 }

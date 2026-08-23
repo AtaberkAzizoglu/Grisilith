@@ -42,6 +42,55 @@ class AcidicPoolRuntime(
         get() =
             areaRuntime.isActive
 
+    val visualCenterX: Float
+        get() =
+            areaRuntime.area
+                ?.center
+                ?.x
+                ?: 0f
+
+    val visualCenterY: Float
+        get() =
+            areaRuntime.area
+                ?.center
+                ?.y
+                ?: 0f
+
+    val visualRadius: Float
+        get() =
+            areaRuntime.area
+                ?.radius
+                ?: 0f
+
+    val visualAnimationSeconds: Float
+        get() =
+            surfaceAnimationSeconds
+
+    val ignitionVisualProgress: Float
+        get() {
+            if (
+                ignitionVisualRemainingSeconds <=
+                0f
+            ) {
+                return 1f
+            }
+
+            return (
+                1f -
+                    ignitionVisualRemainingSeconds /
+                    IGNITION_VISUAL_SECONDS
+                )
+                .coerceIn(
+                    0f,
+                    1f
+                )
+        }
+
+    val isIgnitionBurstVisible: Boolean
+        get() =
+            ignitionVisualRemainingSeconds >
+                0f
+
     fun tryBegin(
         playerCenterX: Float,
         playerCenterY: Float,
@@ -245,255 +294,11 @@ class AcidicPoolRuntime(
         )
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun render(
         shapeRenderer: ShapeRenderer
     ) {
-
-        val area =
-            areaRuntime.area
-                ?: return
-
-        val pulse =
-            (
-                MathUtils.sin(
-                    surfaceAnimationSeconds *
-                        SURFACE_PULSE_SPEED
-                ) +
-                    1f
-                ) /
-                2f
-
-        val primaryColor =
-            if (
-                vitriolicIgnitionActive
-            ) {
-                Color(
-                    0.72f,
-                    0.22f,
-                    0.05f,
-                    0.34f +
-                        pulse *
-                        0.10f
-                )
-            } else {
-                Color(
-                    0.22f,
-                    0.58f,
-                    0.10f,
-                    0.26f +
-                        pulse *
-                        0.08f
-                )
-            }
-
-        val secondaryColor =
-            if (
-                vitriolicIgnitionActive
-            ) {
-                Color(
-                    0.96f,
-                    0.48f,
-                    0.08f,
-                    0.20f +
-                        pulse *
-                        0.12f
-                )
-            } else {
-                Color(
-                    0.42f,
-                    0.78f,
-                    0.16f,
-                    0.18f +
-                        pulse *
-                        0.08f
-                )
-            }
-
-        shapeRenderer.color =
-            primaryColor
-
-        shapeRenderer.circle(
-            area.center.x,
-            area.center.y,
-            area.radius *
-                (
-                    0.96f +
-                        pulse *
-                        0.04f
-                    ),
-            52
-        )
-
-        shapeRenderer.color =
-            secondaryColor
-
-        shapeRenderer.circle(
-            area.center.x -
-                area.radius *
-                0.18f,
-            area.center.y +
-                area.radius *
-                0.08f,
-            area.radius *
-                (
-                    0.74f +
-                        pulse *
-                        0.05f
-                    ),
-            44
-        )
-
-        shapeRenderer.circle(
-            area.center.x +
-                area.radius *
-                0.21f,
-            area.center.y -
-                area.radius *
-                0.12f,
-            area.radius *
-                (
-                    0.63f +
-                        (
-                            1f -
-                                pulse
-                            ) *
-                        0.05f
-                    ),
-            42
-        )
-
-        repeat(
-            BUBBLE_COUNT
-        ) {
-                index ->
-
-            val angle =
-                surfaceAnimationSeconds *
-                    BUBBLE_ROTATION_SPEED +
-                    index *
-                    (
-                        MathUtils.PI2 /
-                            BUBBLE_COUNT
-                        )
-
-            val distance =
-                area.radius *
-                    (
-                        0.24f +
-                            index %
-                            3 *
-                            0.13f
-                        )
-
-            val bubbleRadius =
-                3f +
-                    (
-                        index %
-                            3
-                        ) *
-                    1.6f +
-                    pulse *
-                    1.2f
-
-            shapeRenderer.color =
-                if (
-                    vitriolicIgnitionActive
-                ) {
-                    Color(
-                        1f,
-                        0.62f,
-                        0.12f,
-                        0.58f
-                    )
-                } else {
-                    Color(
-                        0.66f,
-                        0.94f,
-                        0.22f,
-                        0.48f
-                    )
-                }
-
-            shapeRenderer.circle(
-                area.center.x +
-                    MathUtils.cos(
-                        angle
-                    ) *
-                    distance,
-
-                area.center.y +
-                    MathUtils.sin(
-                        angle
-                    ) *
-                    distance,
-
-                bubbleRadius,
-                16
-            )
-        }
-
-        if (
-            ignitionVisualRemainingSeconds >
-            0f
-        ) {
-            val progress =
-                1f -
-                    (
-                        ignitionVisualRemainingSeconds /
-                            IGNITION_VISUAL_SECONDS
-                        )
-                        .coerceIn(
-                            0f,
-                            1f
-                        )
-
-            val explosionRadius =
-                area.radius *
-                    (
-                        1f +
-                            progress
-                        ) *
-                    1.02f
-
-            val alpha =
-                (
-                    1f -
-                        progress
-                    ) *
-                    0.72f
-
-            shapeRenderer.color =
-                Color(
-                    1f,
-                    0.54f,
-                    0.08f,
-                    alpha
-                )
-
-            shapeRenderer.circle(
-                area.center.x,
-                area.center.y,
-                explosionRadius,
-                64
-            )
-
-            shapeRenderer.color =
-                Color(
-                    1f,
-                    0.88f,
-                    0.42f,
-                    alpha *
-                        0.72f
-                )
-
-            shapeRenderer.circle(
-                area.center.x,
-                area.center.y,
-                explosionRadius *
-                    0.62f,
-                56
-            )
-        }
+        // Sprite visual is rendered by SpellFocusEffectSpriteRenderer.
     }
 
     fun clear() {
@@ -515,7 +320,7 @@ class AcidicPoolRuntime(
             "AREA_ACIDIC_POOL"
 
         private const val IGNITION_VISUAL_SECONDS =
-            0.55f
+            0.78f
 
         private const val SURFACE_PULSE_SPEED =
             3.8f

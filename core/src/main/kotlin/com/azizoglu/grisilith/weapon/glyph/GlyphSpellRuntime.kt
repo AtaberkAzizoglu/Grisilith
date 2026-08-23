@@ -20,6 +20,23 @@ class GlyphSpellRuntime(
     private val playerStats: PlayerStats
 ) {
 
+    data class PulseVisualSnapshot(
+        val type: GlyphType,
+        val centerX: Float,
+        val centerY: Float,
+        val radius: Float,
+        val progress: Float
+    )
+
+    data class TsunamiVisualSnapshot(
+        val centerX: Float,
+        val centerY: Float,
+        val rotationDegrees: Float,
+        val animationSeconds: Float,
+        val worldWidth: Float,
+        val worldHeight: Float
+    )
+
     private val damageCalculator =
         WeaponDamageCalculator(
             playerStats
@@ -46,6 +63,7 @@ class GlyphSpellRuntime(
         val start: Vector2,
         val totalDistance: Float,
         var travelledDistance: Float = 0f,
+        var visualAnimationSeconds: Float = 0f,
         val hitEnemies: MutableSet<Enemy> =
             mutableSetOf()
     )
@@ -179,116 +197,92 @@ class GlyphSpellRuntime(
         )
     }
 
+    fun pulseVisualSnapshots():
+        List<PulseVisualSnapshot> {
+
+        return pulses
+            .map { pulse ->
+
+                PulseVisualSnapshot(
+                    type =
+                        pulse.type,
+
+                    centerX =
+                        pulse.centerX,
+
+                    centerY =
+                        pulse.centerY,
+
+                    radius =
+                        pulse.radius,
+
+                    progress =
+                        (
+                            1f -
+                                pulse.remainingSeconds /
+                                PULSE_DURATION_SECONDS
+                            )
+                            .coerceIn(
+                                0f,
+                                1f
+                            )
+                )
+            }
+    }
+
+    fun tsunamiVisualSnapshot():
+        TsunamiVisualSnapshot? {
+
+        val wave =
+            tsunamiWave
+                ?: return null
+
+        val center =
+            currentTsunamiCenter(
+                wave
+            )
+
+        return TsunamiVisualSnapshot(
+            centerX =
+                center.x,
+
+            centerY =
+                center.y,
+
+            rotationDegrees =
+                wave.direction.angleDeg(),
+
+            animationSeconds =
+                wave.visualAnimationSeconds,
+
+            worldWidth =
+                TSUNAMI_FRONT_THICKNESS *
+                    2.20f,
+
+            worldHeight =
+                TSUNAMI_FRONT_LENGTH
+        )
+    }
+
+    fun singularityVisualSnapshot():
+        SingularityRuntime.VisualSnapshot? {
+
+        return singularityRuntime
+            .visualSnapshot()
+    }
+
+    fun singularityExplosionVisualSnapshot():
+        SingularityRuntime.ExplosionVisualSnapshot? {
+
+        return singularityRuntime
+            .explosionVisualSnapshot()
+    }
+
+    @Suppress("UNUSED_PARAMETER")
     fun render(
         shapeRenderer: ShapeRenderer
     ) {
-
-        pulses.forEach {
-                pulse ->
-
-            val alpha =
-                (
-                    pulse.remainingSeconds /
-                        PULSE_DURATION_SECONDS
-                    )
-                    .coerceIn(
-                        0f,
-                        1f
-                    )
-
-            shapeRenderer.color =
-                when (
-                    pulse.type
-                ) {
-                    GlyphType.CALL_LIGHTNING ->
-                        Color(
-                            0.72f,
-                            0.88f,
-                            1f,
-                            0.34f *
-                                alpha
-                        )
-
-                    GlyphType.METEOR ->
-                        Color(
-                            1f,
-                            0.30f,
-                            0.10f,
-                            0.38f *
-                                alpha
-                        )
-
-                    else ->
-                        Color(
-                            0.75f,
-                            0.75f,
-                            0.90f,
-                            0.25f *
-                                alpha
-                        )
-                }
-
-            shapeRenderer.circle(
-                pulse.centerX,
-                pulse.centerY,
-                pulse.radius,
-                48
-            )
-        }
-
-        tsunamiWave
-            ?.let {
-                    wave ->
-
-                val center =
-                    currentTsunamiCenter(
-                        wave
-                    )
-
-                shapeRenderer.color =
-                    Color(
-                        0.20f,
-                        0.60f,
-                        0.92f,
-                        0.42f
-                    )
-
-                val halfLength =
-                    TSUNAMI_FRONT_LENGTH /
-                        2f
-
-                val startX =
-                    center.x -
-                        wave.perpendicular.x *
-                        halfLength
-
-                val startY =
-                    center.y -
-                        wave.perpendicular.y *
-                        halfLength
-
-                val endX =
-                    center.x +
-                        wave.perpendicular.x *
-                        halfLength
-
-                val endY =
-                    center.y +
-                        wave.perpendicular.y *
-                        halfLength
-
-                shapeRenderer.rectLine(
-                    startX,
-                    startY,
-                    endX,
-                    endY,
-                    TSUNAMI_FRONT_THICKNESS
-                )
-            }
-
-        singularityRuntime.render(
-            shapeRenderer
-        )
+        // Sprite visual is rendered by SpellFocusEffectSpriteRenderer.
     }
 
     fun clear() {
@@ -683,6 +677,9 @@ class GlyphSpellRuntime(
             TSUNAMI_SPEED *
                 delta
 
+        wave.visualAnimationSeconds +=
+            delta
+
         val center =
             currentTsunamiCenter(
                 wave
@@ -927,7 +924,7 @@ class GlyphSpellRuntime(
     companion object {
 
         private const val PULSE_DURATION_SECONDS =
-            0.55f
+            0.86f
 
         private const val LIGHTNING_INNER_RADIUS =
             115f

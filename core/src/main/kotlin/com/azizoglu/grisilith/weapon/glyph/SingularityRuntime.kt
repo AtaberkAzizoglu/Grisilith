@@ -18,6 +18,23 @@ class SingularityRuntime(
     WeaponDamageCalculator
 ) {
 
+    data class VisualSnapshot(
+        val centerX: Float,
+        val centerY: Float,
+        val radius: Float,
+        val elapsedSeconds: Float,
+        val openingProgress: Float,
+        val collapseProgress: Float,
+        val isCollapsing: Boolean
+    )
+
+    data class ExplosionVisualSnapshot(
+        val centerX: Float,
+        val centerY: Float,
+        val radius: Float,
+        val progress: Float
+    )
+
     private data class ActiveSingularity(
         val request: GlyphCastRequest,
         var remainingActiveSeconds: Float,
@@ -187,192 +204,116 @@ class SingularityRuntime(
         }
     }
 
+    fun visualSnapshot():
+        VisualSnapshot? {
+
+        val singularity =
+            active
+                ?: return null
+
+        val collapseProgress =
+            if (
+                singularity.phase ==
+                Phase.COLLAPSE
+            ) {
+                (
+                    1f -
+                        singularity.collapseRemainingSeconds /
+                        COLLAPSE_DURATION_SECONDS
+                    )
+                    .coerceIn(
+                        0f,
+                        1f
+                    )
+            } else {
+                0f
+            }
+
+        return VisualSnapshot(
+            centerX =
+                singularity.request.centerX,
+
+            centerY =
+                singularity.request.centerY,
+
+            radius =
+                BASE_RADIUS,
+
+            elapsedSeconds =
+                singularity.elapsedSeconds,
+
+            openingProgress =
+                (
+                    singularity.elapsedSeconds /
+                        OPENING_VISUAL_SECONDS
+                    )
+                    .coerceIn(
+                        0f,
+                        1f
+                    ),
+
+            collapseProgress =
+                collapseProgress,
+
+            isCollapsing =
+                singularity.phase ==
+                    Phase.COLLAPSE
+        )
+    }
+
+    fun explosionVisualSnapshot():
+        ExplosionVisualSnapshot? {
+
+        if (
+            explosionVisualRemainingSeconds <=
+            0f
+        ) {
+            return null
+        }
+
+        return ExplosionVisualSnapshot(
+            centerX =
+                explosionVisualCenter.x,
+
+            centerY =
+                explosionVisualCenter.y,
+
+            radius =
+                explosionVisualRadius,
+
+            progress =
+                (
+                    1f -
+                        explosionVisualRemainingSeconds /
+                        EXPLOSION_VISUAL_SECONDS
+                    )
+                    .coerceIn(
+                        0f,
+                        1f
+                    )
+        )
+    }
+
+    @Suppress("UNUSED_PARAMETER")
     fun render(
         shapeRenderer: ShapeRenderer
     ) {
-
-        active
-            ?.let {
-                    singularity ->
-
-                val collapseScale =
-                    if (
-                        singularity.phase ==
-                        Phase.COLLAPSE
-                    ) {
-                        (
-                            singularity
-                                .collapseRemainingSeconds /
-                                COLLAPSE_DURATION_SECONDS
-                            )
-                            .coerceIn(
-                                0.08f,
-                                1f
-                            )
-                    } else {
-                        1f
-                    }
-
-                val pulse =
-                    0.92f +
-                        MathUtils.sin(
-                            singularity
-                                .elapsedSeconds *
-                                5.5f
-                        ) *
-                        0.08f
-
-                val renderedRadius =
-                    BASE_RADIUS *
-                        collapseScale *
-                        pulse
-
-                shapeRenderer.color =
-                    Color(
-                        0.08f,
-                        0.02f,
-                        0.12f,
-                        0.80f
-                    )
-
-                shapeRenderer.circle(
-                    singularity
-                        .request
-                        .centerX,
-
-                    singularity
-                        .request
-                        .centerY,
-
-                    renderedRadius,
-                    64
-                )
-
-                shapeRenderer.color =
-                    Color(
-                        0.44f,
-                        0.12f,
-                        0.64f,
-                        0.34f
-                    )
-
-                shapeRenderer.circle(
-                    singularity
-                        .request
-                        .centerX,
-
-                    singularity
-                        .request
-                        .centerY,
-
-                    renderedRadius *
-                        0.72f,
-                    56
-                )
-
-                shapeRenderer.color =
-                    Color(
-                        0.70f,
-                        0.42f,
-                        0.90f,
-                        0.30f
-                    )
-
-                repeat(
-                    12
-                ) {
-                        index ->
-
-                    val angle =
-                        (
-                            MathUtils.PI2 /
-                                12f
-                            ) *
-                            index +
-                            singularity
-                                .elapsedSeconds *
-                            0.85f
-
-                    val outerX =
-                        singularity
-                            .request
-                            .centerX +
-                            MathUtils.cos(
-                                angle
-                            ) *
-                            renderedRadius
-
-                    val outerY =
-                        singularity
-                            .request
-                            .centerY +
-                            MathUtils.sin(
-                                angle
-                            ) *
-                            renderedRadius
-
-                    shapeRenderer.rectLine(
-                        outerX,
-                        outerY,
-                        singularity
-                            .request
-                            .centerX,
-                        singularity
-                            .request
-                            .centerY,
-                        1.5f
-                    )
-                }
-            }
-
-        if (
-            explosionVisualRemainingSeconds >
-            0f
-        ) {
-            val progress =
-                1f -
-                    (
-                        explosionVisualRemainingSeconds /
-                            EXPLOSION_VISUAL_SECONDS
-                        )
-                        .coerceIn(
-                            0f,
-                            1f
-                        )
-
-            shapeRenderer.color =
-                Color(
-                    0.62f,
-                    0.26f,
-                    0.84f,
-                    (
-                        1f -
-                            progress
-                        ) *
-                        0.55f
-                )
-
-            shapeRenderer.circle(
-                explosionVisualCenter.x,
-                explosionVisualCenter.y,
-                explosionVisualRadius *
-                    progress.coerceAtLeast(
-                        0.08f
-                    ),
-                72
-            )
-        }
+        // Sprite visual is rendered by SpellFocusEffectSpriteRenderer.
     }
 
     fun clear() {
-
         active =
             null
 
-        explosionVisualRemainingSeconds =
+        explosionVisualCenter.set(
+            0f,
             0f
+        )
 
         explosionVisualRadius =
+            0f
+
+        explosionVisualRemainingSeconds =
             0f
     }
 
@@ -970,6 +911,9 @@ class SingularityRuntime(
             0.82f
 
         private const val EXPLOSION_VISUAL_SECONDS =
-            0.55f
+            0.90f
+
+        private const val OPENING_VISUAL_SECONDS =
+            0.78f
     }
 }

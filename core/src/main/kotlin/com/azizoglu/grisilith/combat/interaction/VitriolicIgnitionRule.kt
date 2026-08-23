@@ -16,7 +16,11 @@ class VitriolicIgnitionRule(
     override fun handle(
         event: CombatInteractionEvent
     ) {
-
+        /*
+         * Vitriolic Ignition:
+         * Active Acidic Pool içindeki bir Enemy başarılı FIRE damage
+         * aldığında deterministik olarak tetiklenir.
+         */
         if (
             event.trigger !=
             CombatInteractionTrigger.DAMAGE_APPLIED ||

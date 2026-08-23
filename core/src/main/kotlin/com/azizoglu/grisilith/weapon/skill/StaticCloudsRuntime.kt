@@ -25,6 +25,9 @@ class StaticCloudsRuntime(
     private var visualRotationDegrees =
         0f
 
+    private var visualTimeSeconds =
+        0f
+
     private var lightningFlashRemainingSeconds =
         0f
 
@@ -35,6 +38,30 @@ class StaticCloudsRuntime(
         Boolean
         get() =
             areaRuntime.isActive
+
+    val visualCenterX: Float
+        get() =
+            areaRuntime.area
+                ?.center
+                ?.x
+                ?: 0f
+
+    val visualCenterY: Float
+        get() =
+            areaRuntime.area
+                ?.center
+                ?.y
+                ?: 0f
+
+    val visualRadius: Float
+        get() =
+            areaRuntime.area
+                ?.radius
+                ?: 0f
+
+    val visualAnimationSeconds: Float
+        get() =
+            visualTimeSeconds
 
     fun tryBegin(
         player: Player
@@ -88,6 +115,11 @@ class StaticCloudsRuntime(
                     VISUAL_ROTATION_SPEED
                 ) %
                 360f
+
+        visualTimeSeconds +=
+            delta.coerceAtLeast(
+                0f
+            )
 
         lightningFlashRemainingSeconds =
             (
@@ -158,233 +190,20 @@ class StaticCloudsRuntime(
         )
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun render(
         shapeRenderer: ShapeRenderer
     ) {
-        val area =
-            areaRuntime.area
-                ?: return
-
-        val centerX =
-            area.center.x
-
-        val centerY =
-            area.center.y
-
-        val radius =
-            area.radius
-
-        shapeRenderer.color =
-            Color(
-                0.30f,
-                0.28f,
-                0.42f,
-                0.30f
-            )
-
-        shapeRenderer.circle(
-            centerX,
-            centerY,
-            radius,
-            64
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.50f,
-                0.50f,
-                0.66f,
-                0.75f
-            )
-
-        repeat(
-            CLOUD_PARTICLE_COUNT
-        ) {
-                index ->
-
-            val angle =
-                visualRotationDegrees +
-                    index *
-                    (
-                        360f /
-                            CLOUD_PARTICLE_COUNT
-                        )
-
-            val orbitRadius =
-                radius *
-                    (
-                        0.34f +
-                            0.08f *
-                            (
-                                index %
-                                    3
-                                )
-                        )
-
-            val particleX =
-                centerX +
-                    MathUtils.cosDeg(
-                        angle
-                    ) *
-                    orbitRadius
-
-            val particleY =
-                centerY +
-                    MathUtils.sinDeg(
-                        angle
-                    ) *
-                    orbitRadius
-
-            shapeRenderer.circle(
-                particleX,
-                particleY,
-                10f +
-                    (
-                        index %
-                            2
-                        ) *
-                    3f,
-                20
-            )
-        }
-
-        shapeRenderer.color =
-            Color(
-                0.64f,
-                0.72f,
-                0.94f,
-                0.90f
-            )
-
-        repeat(
-            LIGHTNING_PLACEHOLDER_COUNT
-        ) {
-                index ->
-
-            val angle =
-                visualRotationDegrees *
-                    -1f +
-                    index *
-                    (
-                        360f /
-                            LIGHTNING_PLACEHOLDER_COUNT
-                        )
-
-            val innerRadius =
-                radius *
-                    0.18f
-
-            val outerRadius =
-                radius *
-                    0.70f
-
-            shapeRenderer.rectLine(
-                centerX +
-                    MathUtils.cosDeg(
-                        angle
-                    ) *
-                    innerRadius,
-
-                centerY +
-                    MathUtils.sinDeg(
-                        angle
-                    ) *
-                    innerRadius,
-
-                centerX +
-                    MathUtils.cosDeg(
-                        angle +
-                            18f
-                    ) *
-                    outerRadius,
-
-                centerY +
-                    MathUtils.sinDeg(
-                        angle +
-                            18f
-                    ) *
-                    outerRadius,
-
-                2f
-            )
-        }
-
-        if (
-            lightningFlashRemainingSeconds >
-            0f
-        ) {
-            val alpha =
-                (
-                    lightningFlashRemainingSeconds /
-                        LIGHTNING_FLASH_SECONDS
-                    )
-                    .coerceIn(
-                        0f,
-                        1f
-                    )
-
-            shapeRenderer.color =
-                Color(
-                    0.82f,
-                    0.92f,
-                    1f,
-                    alpha
-                )
-
-            val cloudX =
-                centerX +
-                    MathUtils.cosDeg(
-                        visualRotationDegrees
-                    ) *
-                    radius *
-                    0.28f
-
-            val cloudY =
-                centerY +
-                    MathUtils.sinDeg(
-                        visualRotationDegrees
-                    ) *
-                    radius *
-                    0.28f
-
-            val middleX =
-                (
-                    cloudX +
-                        lightningTarget.x
-                    ) /
-                    2f +
-                    12f
-
-            val middleY =
-                (
-                    cloudY +
-                        lightningTarget.y
-                    ) /
-                    2f -
-                    8f
-
-            shapeRenderer.rectLine(
-                cloudX,
-                cloudY,
-                middleX,
-                middleY,
-                4f
-            )
-
-            shapeRenderer.rectLine(
-                middleX,
-                middleY,
-                lightningTarget.x,
-                lightningTarget.y,
-                4f
-            )
-        }
+        // Sprite visual is rendered by SpellFocusEffectSpriteRenderer.
     }
 
     fun clear() {
         areaRuntime.clear()
 
         visualRotationDegrees =
+            0f
+
+        visualTimeSeconds =
             0f
 
         lightningFlashRemainingSeconds =

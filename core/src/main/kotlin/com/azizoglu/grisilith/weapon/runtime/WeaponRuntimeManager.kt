@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
 import com.azizoglu.grisilith.weapon.skill.VortexPullRuntime
+import com.azizoglu.grisilith.weapon.visual.spell.SpellFocusEffectSpriteRenderer
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import kotlin.math.roundToInt
 import com.azizoglu.grisilith.weapon.skill.StaticCloudsRuntime
@@ -94,6 +95,9 @@ class WeaponRuntimeManager(
 
     private val vortexPullRuntime =
         VortexPullRuntime()
+
+    private val spellFocusEffectSpriteRenderer =
+        SpellFocusEffectSpriteRenderer()
 
     private val persistentAreaManager =
         PersistentAreaManager()
@@ -1873,6 +1877,73 @@ class WeaponRuntimeManager(
         erasingSoulsRuntime.render(
             shapeRenderer
         )
+
+        if (
+            spellFocusEffectSpriteRenderer
+                .hasAnythingToRender(
+                    staticCloudsRuntime =
+                        staticCloudsRuntime,
+
+                    igniteDashRuntime =
+                        igniteDashRuntime,
+
+                    erasingSoulsRuntime =
+                        erasingSoulsRuntime,
+
+                    vortexPullRuntime =
+                        vortexPullRuntime,
+
+                    acidicPoolRuntime =
+                        acidicPoolRuntime,
+
+                    glyphSpellRuntime =
+                        glyphSpellRuntime
+                )
+        ) {
+            val projectionMatrix =
+                shapeRenderer
+                    .projectionMatrix
+                    .cpy()
+
+            /*
+             * renderActiveSkillEffects is called inside WorldRenderer's
+             * Filled ShapeRenderer pass. Close it briefly for SpriteBatch,
+             * then restore the same pass so the caller can continue safely.
+             */
+            shapeRenderer.end()
+
+            spellFocusEffectSpriteRenderer
+                .render(
+                    projectionMatrix =
+                        projectionMatrix,
+
+                    staticCloudsRuntime =
+                        staticCloudsRuntime,
+
+                    igniteDashRuntime =
+                        igniteDashRuntime,
+
+                    erasingSoulsRuntime =
+                        erasingSoulsRuntime,
+
+                    vortexPullRuntime =
+                        vortexPullRuntime,
+
+                    acidicPoolRuntime =
+                        acidicPoolRuntime,
+
+                    glyphSpellRuntime =
+                        glyphSpellRuntime
+                )
+
+            shapeRenderer
+                .projectionMatrix =
+                projectionMatrix
+
+            shapeRenderer.begin(
+                ShapeRenderer.ShapeType.Filled
+            )
+        }
 
         glyphMotionRuntime.render(
             shapeRenderer

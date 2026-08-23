@@ -11,6 +11,8 @@ import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.azizoglu.grisilith.weapon.runtime.WeaponRuntime
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
@@ -40,6 +42,9 @@ class IgniteDashRuntime(
     private var executionRequested =
         false
 
+    private var mouseConfirmBlockedUntilRelease =
+        false
+
     private val requestedAimPosition =
         Vector2()
 
@@ -60,6 +65,47 @@ class IgniteDashRuntime(
         get() =
             activeWeapon !=
                 null
+
+    val hasExplosionVisual: Boolean
+        get() =
+            explosionRemainingSeconds >
+                0f
+
+    val explosionVisualCenterX: Float
+        get() =
+            explosionCenter.x
+
+    val explosionVisualCenterY: Float
+        get() =
+            explosionCenter.y
+
+    val aimVisualCenterX: Float
+        get() =
+            resolvedTargetPosition.x
+
+    val aimVisualCenterY: Float
+        get() =
+            resolvedTargetPosition.y
+
+    val explosionVisualProgress: Float
+        get() {
+            if (
+                explosionRemainingSeconds <=
+                0f
+            ) {
+                return 1f
+            }
+
+            return (
+                1f -
+                    explosionRemainingSeconds /
+                    EXPLOSION_VISUAL_SECONDS
+                )
+                .coerceIn(
+                    0f,
+                    1f
+                )
+        }
 
     fun updateAimPosition(
         worldX: Float,
@@ -129,6 +175,12 @@ class IgniteDashRuntime(
         executionRequested =
             false
 
+        mouseConfirmBlockedUntilRelease =
+            Gdx.input
+                .isButtonPressed(
+                    Input.Buttons.LEFT
+                )
+
         hasAimPosition =
             false
 
@@ -189,6 +241,28 @@ class IgniteDashRuntime(
         )
 
         if (
+            mouseConfirmBlockedUntilRelease
+        ) {
+            if (
+                !Gdx.input
+                    .isButtonPressed(
+                        Input.Buttons.LEFT
+                    )
+            ) {
+                mouseConfirmBlockedUntilRelease =
+                    false
+            }
+        } else if (
+            Gdx.input
+                .isButtonJustPressed(
+                    Input.Buttons.LEFT
+                )
+        ) {
+            executionRequested =
+                true
+        }
+
+        if (
             executionRequested ||
             remainingAimSeconds <=
             0f
@@ -231,6 +305,9 @@ class IgniteDashRuntime(
         executionRequested =
             false
 
+        mouseConfirmBlockedUntilRelease =
+            false
+
         hasAimPosition =
             false
     }
@@ -246,6 +323,9 @@ class IgniteDashRuntime(
             0f
 
         executionRequested =
+            false
+
+        mouseConfirmBlockedUntilRelease =
             false
 
         hasAimPosition =
@@ -275,90 +355,12 @@ class IgniteDashRuntime(
                 resolvedTargetPosition.y,
                 4f
             )
-
-            shapeRenderer.circle(
-                resolvedTargetPosition.x,
-                resolvedTargetPosition.y,
-                AIM_MARKER_RADIUS,
-                32
-            )
-
-            val remainingRatio =
-                (
-                    remainingAimSeconds /
-                        DefaultWeaponAbilities
-                            .IGNITE_DASH_AIM_DURATION_SECONDS
-                    )
-                    .coerceIn(
-                        0f,
-                        1f
-                    )
-
-            shapeRenderer.color =
-                Color(
-                    1f,
-                    0.72f,
-                    0.16f,
-                    0.86f
-                )
-
-            shapeRenderer.circle(
-                resolvedTargetPosition.x,
-                resolvedTargetPosition.y,
-                AIM_MARKER_RADIUS *
-                    remainingRatio,
-                32
-            )
         }
 
-        if (
-            explosionRemainingSeconds >
-            0f
-        ) {
-            val progress =
-                1f -
-                    (
-                        explosionRemainingSeconds /
-                            EXPLOSION_VISUAL_SECONDS
-                        )
-                        .coerceIn(
-                            0f,
-                            1f
-                        )
-
-            shapeRenderer.color =
-                Color(
-                    1f,
-                    0.22f,
-                    0.04f,
-                    (
-                        1f -
-                            progress
-                        )
-                        .coerceIn(
-                            0f,
-                            1f
-                        )
-                )
-
-            shapeRenderer.circle(
-                explosionCenter.x,
-                explosionCenter.y,
-                DefaultWeaponAbilities
-                    .IGNITE_DASH_OUTER_EXPLOSION_RADIUS *
-                    progress,
-                56
-            )
-
-            shapeRenderer.circle(
-                explosionCenter.x,
-                explosionCenter.y,
-                DefaultWeaponAbilities
-                    .IGNITE_DASH_EXPLOSION_RADIUS *
-                    progress,
-                48
-            )
-        }
+        /*
+         * Full 250 px damage-area casting marker and the destination
+         * explosion are rendered by SpellFocusEffectSpriteRenderer.
+         */
     }
 
     private fun resolveTargetPosition(
@@ -725,6 +727,6 @@ class IgniteDashRuntime(
             24f
 
         private const val EXPLOSION_VISUAL_SECONDS =
-            0.42f
+            0.78f
     }
 }

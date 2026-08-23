@@ -17,7 +17,15 @@ class ErasingSoulsRuntime {
     private data class ExplosionVisual(
         val centerX: Float,
         val centerY: Float,
+        val radius: Float,
         var remainingSeconds: Float
+    )
+
+    data class VisualSnapshot(
+        val centerX: Float,
+        val centerY: Float,
+        val radius: Float,
+        val progress: Float
     )
 
     private val explosionVisuals =
@@ -118,12 +126,24 @@ class ErasingSoulsRuntime {
                 continue
             }
 
+            val explosionVisualRadius =
+                maxOf(
+                    deadEnemy.bounds.width,
+                    deadEnemy.bounds.height
+                ) /
+                    2f +
+                    DefaultWeaponAbilities
+                        .ERASING_SOULS_EXPLOSION_RADIUS
+
             addExplosionVisual(
                 centerX =
                     deadEnemy.centerX,
 
                 centerY =
-                    deadEnemy.centerY
+                    deadEnemy.centerY,
+
+                radius =
+                    explosionVisualRadius
             )
 
             onExplosionStarted(
@@ -277,70 +297,41 @@ class ErasingSoulsRuntime {
         }
     }
 
+    fun visualSnapshots():
+        List<VisualSnapshot> {
+
+        return explosionVisuals
+            .map { visual ->
+
+                VisualSnapshot(
+                    centerX =
+                        visual.centerX,
+
+                    centerY =
+                        visual.centerY,
+
+                    radius =
+                        visual.radius,
+
+                    progress =
+                        (
+                            1f -
+                                visual.remainingSeconds /
+                                EXPLOSION_VISUAL_SECONDS
+                            )
+                            .coerceIn(
+                                0f,
+                                1f
+                            )
+                )
+            }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
     fun render(
         shapeRenderer: ShapeRenderer
     ) {
-
-        explosionVisuals.forEach {
-                visual ->
-
-            val lifetimeRatio =
-                (
-                    visual.remainingSeconds /
-                        EXPLOSION_VISUAL_SECONDS
-                    )
-                    .coerceIn(
-                        0f,
-                        1f
-                    )
-
-            val radius =
-                DefaultWeaponAbilities
-                    .ERASING_SOULS_EXPLOSION_RADIUS *
-                    (
-                        1f +
-                            (
-                                1f -
-                                    lifetimeRatio
-                                ) *
-                            0.15f
-                        )
-
-            shapeRenderer.color =
-                Color(
-                    0.48f,
-                    0.10f,
-                    0.64f,
-                    0.22f +
-                        0.46f *
-                        lifetimeRatio
-                )
-
-            shapeRenderer.circle(
-                visual.centerX,
-                visual.centerY,
-                radius,
-                40
-            )
-
-            shapeRenderer.color =
-                Color(
-                    0.82f,
-                    0.42f,
-                    0.98f,
-                    0.35f +
-                        0.50f *
-                        lifetimeRatio
-                )
-
-            shapeRenderer.circle(
-                visual.centerX,
-                visual.centerY,
-                radius *
-                    0.42f,
-                28
-            )
-        }
+        // Sprite visual is rendered by SpellFocusEffectSpriteRenderer.
     }
 
     fun clear() {
@@ -396,7 +387,8 @@ class ErasingSoulsRuntime {
 
     private fun addExplosionVisual(
         centerX: Float,
-        centerY: Float
+        centerY: Float,
+        radius: Float
     ) {
 
         explosionVisuals.add(
@@ -407,6 +399,9 @@ class ErasingSoulsRuntime {
                 centerY =
                     centerY,
 
+                radius =
+                    radius,
+
                 remainingSeconds =
                     EXPLOSION_VISUAL_SECONDS
             )
@@ -416,6 +411,6 @@ class ErasingSoulsRuntime {
     companion object {
 
         private const val EXPLOSION_VISUAL_SECONDS =
-            0.24f
+            0.65f
     }
 }

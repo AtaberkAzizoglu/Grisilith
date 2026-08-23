@@ -3,7 +3,6 @@ package com.azizoglu.grisilith.weapon.skill
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.weapon.skill.area.AreaSkillField
 import com.azizoglu.grisilith.weapon.skill.area.AreaSkillRuntime
-import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -17,6 +16,9 @@ class VortexPullRuntime {
         Vector2()
 
     private var visualRotationDegrees =
+        0f
+
+    private var visualTimeSeconds =
         0f
 
     private var plagueStormActive =
@@ -47,6 +49,10 @@ class VortexPullRuntime {
         get() =
             areaRuntime
                 .remainingDurationSeconds
+
+    val visualAnimationSeconds: Float
+        get() =
+            visualTimeSeconds
 
     val durationRatio:
         Float
@@ -173,40 +179,25 @@ class VortexPullRuntime {
         }
 
         /*
-         * Rastgele bir uygun düşman seçilir; alanın merkezi düşmanın
-         * tam üzerinde değil, yakınındaki rastgele bir noktadadır.
-         * Böylece skill her kullanımda aynı görünmez fakat boş alana
-         * düşmesi de engellenir.
+         * Vortex Pull artık menzil içindeki EN YAKIN yaşayan Enemy'yi
+         * hedefler ve alan merkezini doğrudan o Enemy'nin merkezine koyar.
+         * Rastgele anchor / random offset yoktur.
          */
         val anchor =
-            livingCandidates.random()
-
-        val randomAngle =
-            MathUtils.random(
-                0f,
-                360f
-            )
-
-        val randomDistance =
-            MathUtils.random(
-                0f,
-                DefaultWeaponAbilities
-                    .VORTEX_PULL_RADIUS *
-                    0.42f
-            )
+            livingCandidates
+                .minByOrNull { enemy ->
+                    Vector2.dst2(
+                        playerCenterX,
+                        playerCenterY,
+                        enemy.centerX,
+                        enemy.centerY
+                    )
+                }
+                ?: return false
 
         selectedCenter.set(
-            anchor.centerX +
-                MathUtils.cosDeg(
-                    randomAngle
-                ) *
-                randomDistance,
-
-            anchor.centerY +
-                MathUtils.sinDeg(
-                    randomAngle
-                ) *
-                randomDistance
+            anchor.centerX,
+            anchor.centerY
         )
 
         val radius =
@@ -328,6 +319,11 @@ class VortexPullRuntime {
                     VISUAL_ROTATION_SPEED_DEGREES
                 ) %
                 360f
+
+        visualTimeSeconds +=
+            delta.coerceAtLeast(
+                0f
+            )
 
         plaguePulseSeconds +=
             delta.coerceAtLeast(
@@ -485,283 +481,20 @@ class VortexPullRuntime {
         )
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun render(
         shapeRenderer: ShapeRenderer
     ) {
-        val activeField =
-            areaRuntime.field
-                ?: return
-
-        val centerX =
-            activeField.center.x
-
-        val centerY =
-            activeField.center.y
-
-        val radius =
-            activeField.radius
-
-        val durationRatio =
-            (
-                remainingDurationSeconds /
-                    activeField.durationSeconds
-                )
-                .coerceIn(
-                    0f,
-                    1f
-                )
-
-        shapeRenderer.color =
-            if (
-                plagueStormActive
-            ) {
-                Color(
-                    0.52f,
-                    0.12f,
-                    0.68f,
-                    0.44f
-                )
-            } else {
-                Color(
-                    0.42f,
-                    0.74f,
-                    1f,
-                    0.34f
-                )
-            }
-
-        shapeRenderer.circle(
-            centerX,
-            centerY,
-            radius,
-            64
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.18f,
-                0.34f,
-                0.56f,
-                0.96f
-            )
-
-        shapeRenderer.circle(
-            centerX,
-            centerY,
-            radius *
-                0.68f,
-            48
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.72f,
-                0.90f,
-                1f,
-                0.92f
-            )
-
-        repeat(
-            VISUAL_ARM_COUNT
-        ) {
-                armIndex ->
-
-            val angle =
-                visualRotationDegrees +
-                    armIndex *
-                    (
-                        360f /
-                            VISUAL_ARM_COUNT
-                        )
-
-            val innerRadius =
-                radius *
-                    0.18f
-
-            val outerRadius =
-                radius *
-                    (
-                        0.58f +
-                            0.18f *
-                            durationRatio
-                        )
-
-            val startX =
-                centerX +
-                    MathUtils.cosDeg(
-                        angle
-                    ) *
-                    innerRadius
-
-            val startY =
-                centerY +
-                    MathUtils.sinDeg(
-                        angle
-                    ) *
-                    innerRadius
-
-            val endX =
-                centerX +
-                    MathUtils.cosDeg(
-                        angle +
-                            VISUAL_ARM_CURVE_DEGREES
-                    ) *
-                    outerRadius
-
-            val endY =
-                centerY +
-                    MathUtils.sinDeg(
-                        angle +
-                            VISUAL_ARM_CURVE_DEGREES
-                    ) *
-                    outerRadius
-
-            shapeRenderer.rectLine(
-                startX,
-                startY,
-                endX,
-                endY,
-                3f
-            )
-        }
-
-        if (
-            plagueStormActive
-        ) {
-            val plaguePulse =
-                (
-                    MathUtils.sin(
-                        plaguePulseSeconds *
-                            PLAGUE_PULSE_SPEED
-                    ) +
-                        1f
-                    ) /
-                    2f
-
-            shapeRenderer.color =
-                Color(
-                    0.88f,
-                    0.22f,
-                    1f,
-                    0.32f +
-                        plaguePulse *
-                        0.20f
-                )
-
-            repeat(
-                PLAGUE_ORBITAL_COUNT
-            ) {
-                    index ->
-
-                val angle =
-                    visualRotationDegrees *
-                        -1.4f +
-                        index *
-                        (
-                            360f /
-                                PLAGUE_ORBITAL_COUNT
-                            )
-
-                val orbitalDistance =
-                    radius *
-                        (
-                            0.42f +
-                                plaguePulse *
-                                0.08f
-                            )
-
-                shapeRenderer.circle(
-                    centerX +
-                        MathUtils.cosDeg(
-                            angle
-                        ) *
-                        orbitalDistance,
-
-                    centerY +
-                        MathUtils.sinDeg(
-                            angle
-                        ) *
-                        orbitalDistance,
-
-                    4.5f +
-                        plaguePulse *
-                        2f,
-                    18
-                )
-            }
-
-            if (
-                plagueActivationVisualRemainingSeconds >
-                0f
-            ) {
-                val progress =
-                    1f -
-                        (
-                            plagueActivationVisualRemainingSeconds /
-                                PLAGUE_ACTIVATION_VISUAL_SECONDS
-                            )
-                            .coerceIn(
-                                0f,
-                                1f
-                            )
-
-                shapeRenderer.color =
-                    Color(
-                        0.94f,
-                        0.36f,
-                        1f,
-                        (
-                            1f -
-                                progress
-                            ) *
-                            0.76f
-                    )
-
-                shapeRenderer.circle(
-                    centerX,
-                    centerY,
-                    radius *
-                        (
-                            0.55f +
-                                progress *
-                                0.75f
-                            ),
-                    64
-                )
-            }
-        }
-
-        shapeRenderer.color =
-            if (
-                plagueStormActive
-            ) {
-                Color(
-                    0.98f,
-                    0.70f,
-                    1f,
-                    1f
-                )
-            } else {
-                Color(
-                    0.88f,
-                    0.96f,
-                    1f,
-                    1f
-                )
-            }
-
-        shapeRenderer.circle(
-            centerX,
-            centerY,
-            CENTER_MARKER_RADIUS,
-            24
-        )
+        // Sprite visual is rendered by SpellFocusEffectSpriteRenderer.
     }
 
     fun clear() {
         areaRuntime.clear()
 
         visualRotationDegrees =
+            0f
+
+        visualTimeSeconds =
             0f
 
         plagueStormActive =
