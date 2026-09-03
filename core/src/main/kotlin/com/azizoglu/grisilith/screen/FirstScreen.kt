@@ -3685,7 +3685,6 @@ class FirstScreen(
 
         bankUncollectedCurrencyForNextStage()
 
-        summonManager.clear()
         enemyManager.clearAll()
         damageNumberManager.clear()
         projectiles.clear()
@@ -4227,7 +4226,6 @@ class FirstScreen(
         chestWorldVisualManager
             .clear()
 
-        summonManager.clear()
         enemyManager.clearAll()
         damageNumberManager.clear()
         projectiles.clear()
