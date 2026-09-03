@@ -1,6 +1,9 @@
 package com.azizoglu.grisilith.player
 
 import com.azizoglu.grisilith.combat.HealthComponent
+import com.azizoglu.grisilith.combat.condition.ConditionApplication
+import com.azizoglu.grisilith.combat.condition.ConditionContainer
+import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.combat.affinity.DamageAffinityProfile
 import com.azizoglu.grisilith.combat.affinity.DamageAffinityResolver
 import com.azizoglu.grisilith.content.DamageType
@@ -71,6 +74,10 @@ class Player(
                 stats.calculatedMaximumHealth()
         )
 
+    /** Active gameplay conditions, also consumed by ConditionVisualRenderer. */
+    val conditions =
+        ConditionContainer()
+
     val centerX: Float
         get() = position.x + size / 2f
 
@@ -129,6 +136,10 @@ class Player(
             delta.coerceAtLeast(
                 0f
             )
+
+        conditions.update(
+            delta = safeDelta
+        )
 
         previousPosition.set(
             position
@@ -733,6 +744,18 @@ class Player(
         )
     }
 
+    fun applyCondition(application: ConditionApplication) {
+        if (!health.isDead) conditions.apply(application)
+    }
+
+    fun applyCondition(type: ConditionType, durationSeconds: Float? = null) {
+        if (!health.isDead) conditions.apply(type, durationSeconds)
+    }
+
+    fun hasCondition(type: ConditionType): Boolean = conditions.contains(type)
+
+    fun removeCondition(type: ConditionType): Boolean = conditions.remove(type)
+
     fun render(
         shapeRenderer: ShapeRenderer,
         renderBody: Boolean = true
@@ -906,6 +929,10 @@ class Player(
                 0f
             )
 
+        conditions.update(
+            delta = safeDelta
+        )
+
         updateActualMovementSpeed(
             delta =
                 safeDelta
@@ -1038,3 +1065,4 @@ class Player(
     }
 
 }
+

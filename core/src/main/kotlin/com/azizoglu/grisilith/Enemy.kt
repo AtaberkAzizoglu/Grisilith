@@ -1614,12 +1614,6 @@ class Enemy(
             )
         }
 
-        if (isBurned) {
-            renderBurnedEffect(
-                shapeRenderer = shapeRenderer
-            )
-        }
-
         renderHealthBar(
             shapeRenderer = shapeRenderer
         )
@@ -1910,3 +1904,4 @@ class Enemy(
     }
 
 }
+

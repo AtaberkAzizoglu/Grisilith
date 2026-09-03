@@ -1,6 +1,9 @@
 package com.azizoglu.grisilith.summon
 
 import com.azizoglu.grisilith.combat.HealthComponent
+import com.azizoglu.grisilith.combat.condition.ConditionApplication
+import com.azizoglu.grisilith.combat.condition.ConditionContainer
+import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.navigation.EnemyNavigationAgent
 import com.azizoglu.grisilith.map.MapObstacle
@@ -104,6 +107,10 @@ class SummonedEntity(
                 stats.maximumHealth
         )
 
+    /** Active gameplay conditions, shared with the world condition VFX layer. */
+    val conditions =
+        ConditionContainer()
+
     var remainingLifetimeSeconds: Float =
         lifetimeSeconds
             .coerceAtLeast(
@@ -196,6 +203,10 @@ class SummonedEntity(
         ) {
             return
         }
+
+        conditions.update(
+            delta = delta
+        )
 
         val visualStartX =
             center.x
@@ -349,6 +360,18 @@ class SummonedEntity(
                 visualStartY
         )
     }
+
+    fun applyCondition(application: ConditionApplication) {
+        if (!isExpired) conditions.apply(application)
+    }
+
+    fun applyCondition(type: ConditionType, durationSeconds: Float? = null) {
+        if (!isExpired) conditions.apply(type, durationSeconds)
+    }
+
+    fun hasCondition(type: ConditionType): Boolean = conditions.contains(type)
+
+    fun removeCondition(type: ConditionType): Boolean = conditions.remove(type)
 
     fun takeDamage(
         amount: Int

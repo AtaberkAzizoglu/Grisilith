@@ -18,6 +18,7 @@ import com.badlogic.gdx.math.MathUtils
 class SummonManager(
     private val weaponInventory: WeaponInventory,
     private val playerStats: PlayerStats,
+    private val currentStageProvider: () -> Int,
     private val mapObstacles: List<MapObstacle> =
         emptyList()
 ) {
@@ -914,7 +915,10 @@ class SummonManager(
                     type,
 
                 playerStats =
-                    playerStats
+                    playerStats,
+
+                stage =
+                    currentStageProvider()
             )
 
         repeat(

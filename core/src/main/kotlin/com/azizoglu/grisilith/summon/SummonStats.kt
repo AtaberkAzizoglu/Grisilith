@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.summon
 
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.enemy.EnemyScaling
 import kotlin.math.roundToInt
 
 data class SummonStats(
@@ -36,7 +37,8 @@ data class SummonStats(
 
         fun create(
             type: SummonType,
-            playerStats: PlayerStats
+            playerStats: PlayerStats,
+            stage: Int
         ): SummonStats {
 
             val shepherd =
@@ -69,56 +71,48 @@ data class SummonStats(
                     shepherd *
                     MOVEMENT_SPEED_BONUS_PER_SHEPHERD
 
-            return when (type) {
+            val safeStage = stage.coerceAtLeast(1)
 
+            return when (type) {
                 SummonType.COW -> {
+                    val baseline = EnemyScaling.normalEnemyStats(safeStage)
                     createScaled(
-                        baseHealth = 95,
-                        baseDamage = 5,
-                        baseMovementSpeed = 76f,
+                        baseHealth = (baseline.maximumHealth * 1.65f).roundToInt(),
+                        baseDamage = (baseline.contactDamage * 0.72f).roundToInt().coerceAtLeast(1),
+                        baseMovementSpeed = baseline.movementSpeed * 0.72f,
                         attackRange = 54f,
-                        healthMultiplier =
-                            healthMultiplier,
-                        damageMultiplier =
-                            damageMultiplier,
-                        movementSpeedMultiplier =
-                            movementSpeedMultiplier,
-                        attackSpeedMultiplier =
-                            attackSpeedMultiplier
+                        healthMultiplier = healthMultiplier,
+                        damageMultiplier = damageMultiplier,
+                        movementSpeedMultiplier = movementSpeedMultiplier,
+                        attackSpeedMultiplier = attackSpeedMultiplier * 0.88f
                     )
                 }
 
                 SummonType.IMP -> {
+                    val baseline = EnemyScaling.uniqueEnemyStats(safeStage)
                     createScaled(
-                        baseHealth = 58,
-                        baseDamage = 9,
-                        baseMovementSpeed = 105f,
+                        baseHealth = (baseline.maximumHealth * 0.55f).roundToInt().coerceAtLeast(1),
+                        baseDamage = (baseline.contactDamage * 1.55f).roundToInt().coerceAtLeast(1),
+                        baseMovementSpeed = baseline.movementSpeed * 1.08f,
                         attackRange = 235f,
-                        healthMultiplier =
-                            healthMultiplier,
-                        damageMultiplier =
-                            damageMultiplier,
-                        movementSpeedMultiplier =
-                            movementSpeedMultiplier,
-                        attackSpeedMultiplier =
-                            attackSpeedMultiplier
+                        healthMultiplier = healthMultiplier,
+                        damageMultiplier = damageMultiplier,
+                        movementSpeedMultiplier = movementSpeedMultiplier,
+                        attackSpeedMultiplier = attackSpeedMultiplier * 1.18f
                     )
                 }
 
                 SummonType.KNIGHT_SPIRIT -> {
+                    val baseline = EnemyScaling.miniBossStats(safeStage)
                     createScaled(
-                        baseHealth = 82,
-                        baseDamage = 12,
-                        baseMovementSpeed = 98f,
+                        baseHealth = baseline.maximumHealth,
+                        baseDamage = baseline.contactDamage,
+                        baseMovementSpeed = baseline.movementSpeed,
                         attackRange = 72f,
-                        healthMultiplier =
-                            healthMultiplier,
-                        damageMultiplier =
-                            damageMultiplier,
-                        movementSpeedMultiplier =
-                            movementSpeedMultiplier,
-                        attackSpeedMultiplier =
-                            attackSpeedMultiplier
+                        healthMultiplier = healthMultiplier,
+                        damageMultiplier = damageMultiplier,
+                        movementSpeedMultiplier = movementSpeedMultiplier,
+                        attackSpeedMultiplier = attackSpeedMultiplier
                     )
                 }
             }

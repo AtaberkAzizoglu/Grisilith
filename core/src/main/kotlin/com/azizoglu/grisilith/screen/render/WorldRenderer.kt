@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.screen.render
 
 import com.azizoglu.grisilith.chest.ChestWorldVisualManager
+import com.azizoglu.grisilith.combat.condition.visual.ConditionVisualRenderer
 import com.azizoglu.grisilith.economy.CurrencyPickupManager
 import com.azizoglu.grisilith.character.visual.CharacterSpriteRenderer
 import com.azizoglu.grisilith.character.visual.MountedCharacterSpriteRenderer
@@ -42,6 +43,17 @@ class WorldRenderer(
          */
         private const val SHOW_DEBUG_GRID =
             false
+
+        /*
+         * Normal character sheets use the 48 world-unit character standard.
+         * Mounted character is taller/wider, so give its condition VFX the
+         * mounted visual scale instead.
+         */
+        private const val PLAYER_CONDITION_VISUAL_WIDTH =
+            48f
+
+        private const val MOUNTED_CONDITION_VISUAL_WIDTH =
+            86f
 
         private const val MOUNTED_HEALTH_BAR_WIDTH =
             72f
@@ -89,6 +101,9 @@ class WorldRenderer(
 
     private val meleeAttackVisualRenderer =
         MeleeAttackVisualRenderer()
+
+    private val conditionVisualRenderer =
+        ConditionVisualRenderer()
 
     private val worldPickupSpriteRenderer =
         WorldPickupSpriteRenderer()
@@ -333,6 +348,21 @@ class WorldRenderer(
                         player.bounds.y,
 
                     render = {
+                        conditionVisualRenderer.renderGroundVisuals(
+                            conditions = player.conditions,
+                            centerX = player.centerX,
+                            feetY = player.bounds.y,
+                            targetVisualWidth =
+                                if (
+                                    shouldRenderMountedCharacter
+                                ) {
+                                    MOUNTED_CONDITION_VISUAL_WIDTH
+                                } else {
+                                    PLAYER_CONDITION_VISUAL_WIDTH
+                                },
+                            camera = camera
+                        )
+
                         if (
                             playerCarrier !=
                             null
@@ -450,6 +480,15 @@ class WorldRenderer(
                                 enemy.bounds.y,
 
                             render = {
+                                conditionVisualRenderer.renderGroundVisuals(
+                                    conditions = enemy.conditions,
+                                    centerX = enemy.centerX,
+                                    feetY = enemy.bounds.y,
+                                    targetVisualWidth =
+                                        enemy.visualSize,
+                                    camera = camera
+                                )
+
                                 enemySpriteRenderer.render(
                                     enemies =
                                         listOf(
@@ -479,6 +518,24 @@ class WorldRenderer(
                                 summon.combatRadius,
 
                         render = {
+                            conditionVisualRenderer.renderGroundVisuals(
+                                conditions = summon.conditions,
+                                centerX = summon.centerX,
+                                feetY =
+                                    summon.centerY -
+                                        summon.combatRadius,
+                                /*
+                                 * SummonedEntity currently exposes its visual
+                                 * radius through combatRadius/visualRadius().
+                                 * Use the full diameter as the render-width
+                                 * reference for condition effects.
+                                 */
+                                targetVisualWidth =
+                                    summon.combatRadius *
+                                        2f,
+                                camera = camera
+                            )
+
                             summonSpriteRenderer
                                 .render(
                                     summon =
@@ -574,6 +631,44 @@ class WorldRenderer(
         }
 
         shapeRenderer.end()
+
+        // Condition symbols are a sprite pass above health bars.
+        val playerSymbolY =
+            if (shouldRenderMountedCharacter) {
+                player.bounds.y + MOUNTED_VISUAL_TOP_OFFSET + MOUNTED_HEALTH_BAR_HEIGHT + 5f
+            } else {
+                player.bounds.y + 48f + 8f + 7f + 5f
+            }
+
+        conditionVisualRenderer.renderSymbols(
+            conditions = player.conditions,
+            centerX = player.centerX,
+            symbolY = playerSymbolY,
+            camera = camera
+        )
+
+        enemyManager.allEnemies
+            .filter { !it.isDead }
+            .forEach { enemy ->
+                val enemyBarHeight = if (enemy.type == com.azizoglu.grisilith.enemy.EnemyType.FINAL_BOSS) 11f else 6f
+                conditionVisualRenderer.renderSymbols(
+                    conditions = enemy.conditions,
+                    centerX = enemy.centerX,
+                    symbolY = enemy.centerY + enemy.visualSize / 2f + 7f + enemyBarHeight + 5f,
+                    camera = camera
+                )
+            }
+
+        summons
+            .filter { !it.isExpired }
+            .forEach { summon ->
+                conditionVisualRenderer.renderSymbols(
+                    conditions = summon.conditions,
+                    centerX = summon.centerX,
+                    symbolY = summon.centerY + summon.combatRadius + 5f + 3f + 4f,
+                    camera = camera
+                )
+            }
     }
 
     private fun renderMountedPlayerHealthBar(
@@ -724,7 +819,11 @@ class WorldRenderer(
         meleeAttackVisualRenderer
             .dispose()
 
+        conditionVisualRenderer
+            .dispose()
+
         worldPickupSpriteRenderer
             .dispose()
     }
 }
+

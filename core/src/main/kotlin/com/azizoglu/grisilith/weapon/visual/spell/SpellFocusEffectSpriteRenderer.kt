@@ -243,6 +243,36 @@ class SpellFocusEffectSpriteRenderer {
             alpha =
                 0.36f
         )
+
+        /*
+         * Second supplied cast marker:
+         * centered on the same destination but sized exactly to the
+         * inner full-damage radius.
+         */
+        val innerDiameter =
+            DefaultWeaponAbilities
+                .IGNITE_DASH_EXPLOSION_RADIUS *
+                2f
+
+        drawCentered(
+            path =
+                IGNITE_AIM_INNER_MARKER_PATH,
+
+            centerX =
+                runtime.aimVisualCenterX,
+
+            centerY =
+                runtime.aimVisualCenterY,
+
+            worldWidth =
+                innerDiameter,
+
+            worldHeight =
+                innerDiameter,
+
+            alpha =
+                0.56f
+        )
     }
 
     private fun renderIgniteDash(
@@ -957,6 +987,9 @@ class SpellFocusEffectSpriteRenderer {
 
         private const val IGNITE_AIM_MARKER_PATH =
             "effects/spell_focus/ignite_dash_cast_area.png"
+
+        private const val IGNITE_AIM_INNER_MARKER_PATH =
+            "effects/spell_focus/ignite_dash_cast_inner.png"
 
         private const val ERASING_PREFIX =
             "erasing_souls"

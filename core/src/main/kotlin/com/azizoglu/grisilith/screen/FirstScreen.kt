@@ -344,6 +344,10 @@ class FirstScreen(
             playerStats =
                 playerStats,
 
+            currentStageProvider = {
+                stageController.currentStage
+            },
+
             mapObstacles =
                 mapObstacles
         )
@@ -498,7 +502,9 @@ class FirstScreen(
             weaponInventory =
                 weaponInventory,
             weaponRuntimeManager =
-                weaponRuntimeManager
+                weaponRuntimeManager,
+            summonManager =
+                summonManager
         )
 
     private val glyphFeedbackRenderer =

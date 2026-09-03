@@ -14,6 +14,10 @@ import com.azizoglu.grisilith.summon.SummonedEntity
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.badlogic.gdx.math.MathUtils
 import kotlin.math.roundToInt
+import com.azizoglu.grisilith.combat.interaction.CombatInteractionEvent
+import com.azizoglu.grisilith.combat.interaction.CombatInteractionManager
+import com.azizoglu.grisilith.combat.interaction.CombatInteractionSource
+import com.azizoglu.grisilith.combat.interaction.CombatInteractionTrigger
 
 class Projectile(
     startX: Float,
@@ -264,6 +268,55 @@ class Projectile(
             movementX,
             movementY
         )
+
+        /*
+     * Area-interaction probe. This is intentionally emitted while the
+     * projectile is travelling, not only when it damages an Enemy.
+     *
+     * FIRE crossing Acidic Pool -> Vitriolic Ignition
+     * NECROTIC crossing Vortex Pull -> Plague Storm
+     */
+        if (
+            damageType == DamageType.FIRE ||
+            damageType == DamageType.NECROTIC
+        ) {
+            CombatInteractionManager.notifyGlobal(
+                CombatInteractionEvent(
+                    trigger =
+                        CombatInteractionTrigger.PROJECTILE_PASSED,
+
+                    source =
+                        CombatInteractionSource.PROJECTILE,
+
+                    damageType =
+                        damageType,
+
+                    worldX =
+                        position.x +
+                            size / 2f,
+
+                    worldY =
+                        position.y +
+                            size / 2f,
+
+                    appliedDamage =
+                        0,
+
+                    sourceWeaponRuntimeId =
+                        sourceWeapon?.runtimeId,
+
+                    sourceWeaponDefinitionId =
+                        sourceWeapon
+                            ?.definition
+                            ?.id
+                            ?.value,
+
+                    sourceName =
+                        sourceWeaponName
+                )
+            )
+        }
+
 
         carriedEnemy
             ?.let { enemy ->

@@ -11,6 +11,7 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
 import com.azizoglu.grisilith.weapon.runtime.WeaponRuntimeManager
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityActivationType
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
+import com.azizoglu.grisilith.summon.SummonManager
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
@@ -34,7 +35,8 @@ class HudRenderer(
     private val activeWorldChestCountProvider: () -> Int,
     private val gameTimeController: GameTimeController,
     private val weaponInventory: WeaponInventory,
-    private val weaponRuntimeManager: WeaponRuntimeManager
+    private val weaponRuntimeManager: WeaponRuntimeManager,
+    private val summonManager: SummonManager
 ) {
 
     private val weaponSlotBounds =
@@ -296,11 +298,13 @@ class HudRenderer(
                     weapon
                         ?.unlockedAbility
 
+                val summonPresentation =
+                    summonManager.slotPresentationState(slotIndex)
+
                 val state =
-                    weaponRuntimeManager
-                        .abilityStateInSlot(
-                            slotIndex
-                        )
+                    summonPresentation?.state
+                        ?: weaponRuntimeManager
+                            .abilityStateInSlot(slotIndex)
 
                 shapeRenderer.color =
                     iconBackgroundColor(
@@ -371,18 +375,19 @@ class HudRenderer(
                     WeaponAbilityState.COOLDOWN
                 ) {
                     val remaining =
-                        weaponRuntimeManager
-                            .abilityRemainingCooldownSecondsInSlot(
-                                slotIndex
-                            )
+                        summonPresentation?.remainingCooldownSeconds
+                            ?: weaponRuntimeManager
+                                .abilityRemainingCooldownSecondsInSlot(slotIndex)
 
                     val total =
-                        ability
-                            ?.cooldownSeconds
-                            ?.coerceAtLeast(
-                                0.01f
-                            )
-                            ?: 1f
+                        if (summonPresentation != null) {
+                            com.azizoglu.grisilith.summon.SummonSpawnScheduler(
+                                sourceWeaponRuntimeId = summonPresentation.weaponRuntimeId,
+                                choice = summonPresentation.choice
+                            ).cooldownSeconds.coerceAtLeast(0.01f)
+                        } else {
+                            ability?.cooldownSeconds?.coerceAtLeast(0.01f) ?: 1f
+                        }
 
                     val ratio =
                         (
