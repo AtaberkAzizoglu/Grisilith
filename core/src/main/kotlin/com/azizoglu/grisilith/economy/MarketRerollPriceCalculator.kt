@@ -6,7 +6,7 @@ object MarketRerollPriceCalculator {
 
     private const val BASE_REROLL_PRICE = 8
     private const val STAGE_GROWTH = 0.035f
-    private const val REROLL_GROWTH = 0.50f
+    private const val REROLL_GROWTH = 0.25f
 
     fun calculatePrice(
         currentStage: Int,

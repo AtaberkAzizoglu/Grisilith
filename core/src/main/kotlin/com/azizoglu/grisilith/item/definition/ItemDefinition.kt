@@ -27,12 +27,18 @@ data class ItemDefinition(
      */
     val statModifiers: List<StatModifier>,
 
+    val effectId: ItemEffectId? = null,
+
     /*
      * Aynı Item'dan kaç kopya taşınabileceği.
      *
      * null = sınırsız.
      */
     val maximumInventoryCopies: Int? = null,
+
+    val sharedCopyLimitGroup: String? = null,
+
+    val sharedCopyLimit: Int? = null,
 
     override val initialUnlockState:
     ContentUnlockState =
@@ -57,9 +63,10 @@ data class ItemDefinition(
         }
 
         require(
-            statModifiers.isNotEmpty()
+            statModifiers.isNotEmpty() ||
+                effectId != null
         ) {
-            "Item $id must have at least one stat modifier."
+            "Item $id must have a stat modifier or runtime effect."
         }
 
         maximumInventoryCopies?.let { maximumCopies ->
@@ -67,6 +74,19 @@ data class ItemDefinition(
                 maximumCopies > 0
             ) {
                 "Maximum inventory copies must be positive."
+            }
+        }
+
+        require(
+            (sharedCopyLimitGroup == null) ==
+                (sharedCopyLimit == null)
+        ) {
+            "Shared copy-limit group and limit must be declared together for $id."
+        }
+
+        sharedCopyLimit?.let { limit ->
+            require(limit > 0) {
+                "Shared copy limit must be positive for $id."
             }
         }
     }

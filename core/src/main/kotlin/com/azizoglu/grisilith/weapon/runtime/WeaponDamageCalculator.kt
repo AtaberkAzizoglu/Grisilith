@@ -4,6 +4,7 @@ import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 import com.badlogic.gdx.math.MathUtils
 import kotlin.math.roundToInt
 
@@ -53,7 +54,7 @@ class WeaponDamageCalculator(
                     damageType = damageType
                 ) &&
                 MathUtils.randomBoolean(
-                    criticalHitChance()
+                    criticalHitChance(weapon)
                 )
 
         val finalDamage =
@@ -105,10 +106,13 @@ class WeaponDamageCalculator(
             damageType.canCriticallyHit
     }
 
-    fun criticalHitChance(): Float {
+    fun criticalHitChance(
+        weapon: WeaponInstance? = null
+    ): Float {
 
-        return playerStats
-            .criticalHitChance()
+        return (playerStats
+            .criticalHitChance() +
+            ActiveItemEffects.oddityCriticalChanceBonus(weapon))
             .coerceIn(
                 0f,
                 1f

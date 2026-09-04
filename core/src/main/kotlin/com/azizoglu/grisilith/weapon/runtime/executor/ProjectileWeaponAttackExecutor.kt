@@ -937,7 +937,9 @@ class ProjectileWeaponAttackExecutor(
 
                 criticalHitChance =
                     damageCalculator
-                        .criticalHitChance(),
+                        .criticalHitChance(
+                            context.weapon
+                        ),
 
                 criticalDamageMultiplier =
                     damageCalculator

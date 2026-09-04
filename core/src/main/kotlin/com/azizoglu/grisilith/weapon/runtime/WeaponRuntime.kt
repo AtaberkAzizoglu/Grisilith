@@ -11,6 +11,7 @@ import com.azizoglu.grisilith.weapon.definition.WeaponAttackPattern
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityRuntime
 import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 
 import kotlin.math.roundToInt
 
@@ -165,6 +166,10 @@ class WeaponRuntime(
                     onWeaponHit = {
                             hitEvent ->
 
+                        if (hitEvent.isCriticalHit) {
+                            ActiveItemEffects.onCriticalHit()
+                        }
+
                         player.tryLifeSteal(
                             isEligibleHit =
                                 hitEvent
@@ -207,7 +212,9 @@ class WeaponRuntime(
                             )
                                 .coerceAtLeast(
                                     0f
-                                )
+                                ) *
+                                ActiveItemEffects
+                                    .abilityDamageMultiplier(weapon)
 
                         val abilityModifiedDamage =
                             (
@@ -231,9 +238,10 @@ class WeaponRuntime(
                     modifyWeaponRange = {
                             baseRange ->
 
-                        baseRange +
+                        (baseRange +
                             tamgaRuntimeManager
-                                .weaponRangeBonusPixels()
+                                .weaponRangeBonusPixels()) *
+                            ActiveItemEffects.weaponRangeMultiplier()
                     },
 
                     tryTriggerAutomaticAbility = {
@@ -413,7 +421,8 @@ class WeaponRuntime(
         return (
             statBasedAttacksPerSecond *
                 levelStats.attackSpeedMultiplier *
-                externalAttackSpeedMultiplier
+                externalAttackSpeedMultiplier *
+                ActiveItemEffects.oddityAttackSpeedMultiplier(weapon)
             )
             .coerceAtLeast(
                 0.01f

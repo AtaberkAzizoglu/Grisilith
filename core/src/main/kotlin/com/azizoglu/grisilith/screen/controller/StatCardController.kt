@@ -6,6 +6,7 @@ import com.azizoglu.grisilith.screen.render.ChestCharacterStatRow
 import com.azizoglu.grisilith.screen.render.StageStatRewardRenderer
 import com.azizoglu.grisilith.stage.StageController
 import com.azizoglu.grisilith.statistics.PlayerStats
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 import com.azizoglu.grisilith.statistics.StatCard
 import com.azizoglu.grisilith.statistics.StatCardGenerator
 import com.azizoglu.grisilith.statistics.StatUpgradeType
@@ -101,8 +102,10 @@ class StatCardController(
                             upgradeType
                                 .statType
                         ) <
-                        PlayerStats
-                            .RUN_MAXIMUM_SCORE
+                        ActiveItemEffects.scoreMaximum(
+                            playerStats = playerStats,
+                            statType = upgradeType.statType
+                        )
                 }
 
         pendingCards =

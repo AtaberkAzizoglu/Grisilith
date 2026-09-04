@@ -4,16 +4,30 @@ import kotlin.random.Random
 
 object ChestRewardTypeCalculator {
 
-    private const val BASE_ITEM_CHANCE = 0.50f
-    private const val MAXIMUM_ITEM_CHANCE = 0.80f
-    private const val MAXIMUM_LUCK = 50
+    /*
+     * 0 Luck:
+     *   Item 20%
+     *   Stat 80%
+     *
+     * Her Luck:
+     *   Item chance +1 yüzde puan
+     *
+     * 50 Luck:
+     *   Item 70%
+     *   Stat 30%
+     */
+    private const val BASE_ITEM_CHANCE =
+        0.20f
 
     private const val ITEM_CHANCE_PER_LUCK =
-        (MAXIMUM_ITEM_CHANCE - BASE_ITEM_CHANCE) /
-            MAXIMUM_LUCK
+        0.01f
+
+    private const val MAXIMUM_LUCK =
+        50
 
     fun calculateItemChance(
-        luckScore: Int
+        luckScore:
+        Int
     ): Float {
         val safeLuck =
             luckScore.coerceIn(
@@ -28,12 +42,13 @@ object ChestRewardTypeCalculator {
             )
             .coerceIn(
                 BASE_ITEM_CHANCE,
-                MAXIMUM_ITEM_CHANCE
+                0.70f
             )
     }
 
     fun calculateStatChance(
-        luckScore: Int
+        luckScore:
+        Int
     ): Float {
         return 1f -
             calculateItemChance(
@@ -42,14 +57,20 @@ object ChestRewardTypeCalculator {
     }
 
     fun rollRewardType(
-        luckScore: Int,
-        random: Random = Random.Default
+        luckScore:
+        Int,
+
+        random:
+        Random = Random.Default
     ): ChestRewardType {
-        return if (
-            random.nextFloat() <
+        val itemChance =
             calculateItemChance(
                 luckScore
             )
+
+        return if (
+            random.nextFloat() <
+            itemChance
         ) {
             ChestRewardType.ITEM
         } else {

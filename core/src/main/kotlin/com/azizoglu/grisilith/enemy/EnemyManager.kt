@@ -58,7 +58,7 @@ class EnemyManager {
         worldWidth: Float,
         worldHeight: Float,
         mapObstacles: List<MapObstacle>,
-        onPlayerDamaged: (Int) -> Unit,
+        onPlayerDamaged: (Enemy, Int) -> Unit,
         onSummonDamaged: (
             summon: SummonedEntity,
             damage: Int
@@ -183,7 +183,9 @@ class EnemyManager {
                         enemies,
 
                     onContactDamage =
-                        onPlayerDamaged
+                        { damage ->
+                            onPlayerDamaged(enemy, damage)
+                        }
                 )
             } else {
                 enemy.update(

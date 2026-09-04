@@ -10,6 +10,7 @@ import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.character.visual.CharacterVisualState
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
@@ -353,7 +354,9 @@ class Player(
 
         val healedAmount =
             health.heal(
-                wholeHealthPoints
+                (wholeHealthPoints *
+                    ActiveItemEffects.healingMultiplier())
+                    .toInt()
             )
 
         if (
@@ -601,11 +604,15 @@ class Player(
         amount: Int,
         damageType: DamageType
     ): Int {
+        val itemModifiedDamage =
+            (amount * ActiveItemEffects.incomingDamageMultiplier())
+                .roundToInt()
+
         val affinityResolvedDamage =
             DamageAffinityResolver
                 .resolve(
                     requestedDamage =
-                        amount,
+                        itemModifiedDamage,
 
                     damageType =
                         damageType,
@@ -623,7 +630,9 @@ class Player(
 
         return health.takeDamage(
             amount =
-                affinityResolvedDamage
+                ActiveItemEffects.resolveDamageBeforeHealth(
+                    affinityResolvedDamage
+                )
         )
     }
 
@@ -654,11 +663,15 @@ class Player(
             return 0
         }
 
+        val itemModifiedDamage =
+            (amount * ActiveItemEffects.incomingDamageMultiplier())
+                .roundToInt()
+
         val affinityResolvedDamage =
             DamageAffinityResolver
                 .resolve(
                     requestedDamage =
-                        amount,
+                        itemModifiedDamage,
 
                     damageType =
                         damageType,
@@ -690,7 +703,17 @@ class Player(
                 .coerceAtLeast(1)
 
         return health.takeDamage(
-            reducedDamage
+            ActiveItemEffects.resolveDamageBeforeHealth(
+                reducedDamage
+            )
+        )
+    }
+
+    fun sacrificeHalfCurrentHealth() {
+        val current = health.currentHealth
+        if (current <= 1) return
+        health.takeDamage(
+            (current / 2).coerceIn(1, current - 1)
         )
     }
 
@@ -740,7 +763,9 @@ class Player(
             }
 
         health.heal(
-            healingAmount
+            (healingAmount *
+                ActiveItemEffects.healingMultiplier())
+                .toInt()
         )
     }
 

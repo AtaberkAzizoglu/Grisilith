@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.enemy
 
 import kotlin.math.roundToInt
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 
 object EnemySpawnScaling {
 
@@ -34,11 +35,12 @@ object EnemySpawnScaling {
 
         val uniqueSpawnChance =
             (
-                BASE_UNIQUE_CHANCE +
-                    (safeStage - 1) *
-                    UNIQUE_CHANCE_PER_STAGE
+                (BASE_UNIQUE_CHANCE +
+                    (safeStage - 1) * UNIQUE_CHANCE_PER_STAGE)
+                    .coerceAtMost(MAXIMUM_UNIQUE_CHANCE) +
+                    ActiveItemEffects.uniqueChanceBonus()
                 ).coerceAtMost(
-                    MAXIMUM_UNIQUE_CHANCE
+                    MAXIMUM_UNIQUE_CHANCE + 0.025f
                 )
 
         return EnemySpawnSettings(

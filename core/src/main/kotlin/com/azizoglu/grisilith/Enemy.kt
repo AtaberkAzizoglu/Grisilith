@@ -26,6 +26,7 @@ import com.azizoglu.grisilith.enemy.runtime.EnemyRuntimeBundle
 import com.azizoglu.grisilith.enemy.navigation.EnemyNavigationAgent
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitDamageContext
 import com.azizoglu.grisilith.enemy.visual.EnemyVisualState
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 import kotlin.math.roundToInt
 
 class Enemy(
@@ -894,6 +895,18 @@ class Enemy(
             return 0
         }
 
+        val resolvedDamageContext =
+            ActiveItemEffects.resolveDamageContext(damageContext)
+
+        val itemModifiedAmount =
+            ActiveItemEffects.modifyOutgoingDamage(
+                amount = amount,
+                enemy = this,
+                context = resolvedDamageContext
+            )
+
+        if (itemModifiedAmount <= 0) return 0
+
         if (
             traitRuntime
                 .shouldNegateIncomingDamage(
@@ -903,10 +916,10 @@ class Enemy(
                     context =
                         EnemyTraitDamageContext(
                             requestedDamage =
-                                amount,
+                                itemModifiedAmount,
 
                             damageContext =
-                                damageContext
+                                resolvedDamageContext
                         )
                 )
         ) {
@@ -917,10 +930,10 @@ class Enemy(
             SpellReactionResolver
                 .resolveIncomingDamage(
                     baseDamage =
-                        amount,
+                        itemModifiedAmount,
 
                     damageContext =
-                        damageContext,
+                        resolvedDamageContext,
 
                     conditions =
                         conditions
@@ -929,7 +942,7 @@ class Enemy(
         val traitDamageContext =
             EnemyTraitDamageContext(
                 requestedDamage = reactionResult.resolvedDamage,
-                damageContext = damageContext
+                damageContext = resolvedDamageContext
             )
 
         val traitModifiedDamage =
@@ -952,7 +965,7 @@ class Enemy(
                         traitModifiedDamage,
 
                     damageType =
-                        damageContext
+                        resolvedDamageContext
                             .damageType,
 
                     profile =
@@ -969,10 +982,10 @@ class Enemy(
 
         val armorModifiedDamage =
             if (
-                damageContext.isPhysicalWeaponDamage
+                resolvedDamageContext.isPhysicalWeaponDamage
             ) {
                 val safePiercingRatio =
-                    damageContext
+                    resolvedDamageContext
                         .attackerPiercingIgnoreRatio
                         .coerceIn(
                             0f,
@@ -1016,7 +1029,7 @@ class Enemy(
                 owner = this,
                 context = EnemyTraitDamageContext(
                     requestedDamage = armorModifiedDamage,
-                    damageContext = damageContext
+                    damageContext = resolvedDamageContext
                 ),
                 resolvedDamage = armorModifiedDamage
             )
@@ -1033,7 +1046,12 @@ class Enemy(
             0
         ) {
             latestDamageContext =
-                damageContext
+                resolvedDamageContext
+
+            ActiveItemEffects.recordDamage(
+                context = resolvedDamageContext,
+                appliedDamage = appliedDamage
+            )
 
             pendingDamageNumberEvents.add(
                 DamageNumberEvent(
@@ -1056,7 +1074,7 @@ class Enemy(
                                 .DAMAGE_APPLIED,
 
                         damageType =
-                            damageContext
+                            resolvedDamageContext
                                 .damageType,
 
                         enemy =
@@ -1072,15 +1090,15 @@ class Enemy(
                             appliedDamage,
 
                         sourceWeaponRuntimeId =
-                            damageContext
+                            resolvedDamageContext
                                 .sourceWeaponRuntimeId,
 
                         sourceWeaponDefinitionId =
-                            damageContext
+                            resolvedDamageContext
                                 .sourceWeaponDefinitionId,
 
                         sourceName =
-                            damageContext
+                            resolvedDamageContext
                                 .sourceName
                     )
                 )
@@ -1516,6 +1534,7 @@ class Enemy(
 
         val impulseSpeed =
             strength *
+                ActiveItemEffects.knockbackMultiplier() *
                 12f *
                 knockbackResistance
 

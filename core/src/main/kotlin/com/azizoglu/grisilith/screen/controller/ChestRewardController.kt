@@ -27,6 +27,9 @@ class ChestRewardController(
     private val currentStageProvider: () -> Int,
     private val luckScoreProvider: () -> Int,
 
+    private val preferredStatTypesProvider:
+        () -> Set<StatType>,
+
     private val availableStatTypesProvider:
         () -> List<StatType>,
 
@@ -419,6 +422,9 @@ class ChestRewardController(
 
                     luckScore =
                         luckScoreProvider(),
+
+                    preferredStatTypes =
+                        preferredStatTypesProvider(),
 
                     availableStatTypes =
                         availableStatTypesProvider(),

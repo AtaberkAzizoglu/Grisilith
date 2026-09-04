@@ -59,6 +59,7 @@ import com.azizoglu.grisilith.item.runtime.ItemStatBonusSynchronizer
 import com.azizoglu.grisilith.item.definition.DefaultItems
 import com.azizoglu.grisilith.item.runtime.ItemInstance
 import com.azizoglu.grisilith.item.runtime.ItemInventoryResult
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
 import com.azizoglu.grisilith.screen.market.MarketInputController
 import com.azizoglu.grisilith.screen.market.MarketInteractionState
@@ -444,6 +445,34 @@ class FirstScreen(
      */
     private val pickupRangeController =
         PickupRangeController()
+
+    init {
+        ActiveItemEffects.bind(
+            inventory = itemInventory,
+            weaponInventory = weaponInventory,
+            playerStats = playerStats,
+            player = player,
+            enemyProvider = { enemyManager.allEnemies },
+            summonProvider = { summonManager.activeSummons },
+            currentStageProvider = { stageController.currentStage },
+            goldProvider = { sessionWallet.goldCoins },
+            mainStatProvider = {
+                listOf(
+                    StatType.STRENGTH,
+                    StatType.DEXTERITY,
+                    StatType.WISDOM
+                ).firstOrNull {
+                    it in selectedCharacter.preferredMarketStats
+                } ?: StatType.STRENGTH
+            },
+            tamgaCountProvider = {
+                listOfNotNull(
+                    selectedPreset?.weaponTamga,
+                    selectedPreset?.armorTamga
+                ).size
+            }
+        )
+    }
 
     private val chestPickupManager =
         ChestPickupManager()
@@ -1365,6 +1394,11 @@ class FirstScreen(
                     .luckScore()
             },
 
+            preferredStatTypesProvider = {
+                selectedCharacter
+                    .preferredMarketStats
+            },
+
             availableStatTypesProvider = {
                 StatType.entries
                     .filter {
@@ -1374,31 +1408,16 @@ class FirstScreen(
                             .totalScore(
                                 statType
                             ) <
-                            PlayerStats
-                                .RUN_MAXIMUM_SCORE
+                            ActiveItemEffects.scoreMaximum(
+                                playerStats = playerStats,
+                                statType = statType
+                            )
                     }
             },
 
             availableItemDefinitionsProvider = {
                 DefaultItems.all
-                    .filter {
-                            definition ->
-
-                        val maximumCopies =
-                            definition
-                                .maximumInventoryCopies
-                                ?: definition
-                                    .rarity
-                                    .maximumInventoryCopies
-
-                        maximumCopies ==
-                            null ||
-                            itemInventory
-                                .countByDefinitionId(
-                                    definition.id
-                                ) <
-                            maximumCopies
-                    }
+                    .filter(itemInventory::canAddDefinition)
             },
 
             camera =
@@ -1732,6 +1751,14 @@ class FirstScreen(
         itemStatSynchronizer
             .synchronize()
 
+        ActiveItemEffects.restoreSaveState(
+            snapshot.itemEffectState
+        )
+
+        pickupRangeController.setMultiplier(
+            ActiveItemEffects.pickupRangeMultiplier()
+        )
+
         player
             .synchronizeMaximumHealthWithStats(
                 healAddedHealth =
@@ -1803,12 +1830,16 @@ class FirstScreen(
 
         preset.item
             ?.let { item ->
-                itemInventory.addItem(
+                val result = itemInventory.addItem(
                     ItemInstance(
                         definition =
                             item
                     )
                 )
+
+                if (result == ItemInventoryResult.ADDED) {
+                    ActiveItemEffects.applyAcquisition(item)
+                }
             }
 
         armorStatBonusSynchronizer
@@ -1825,6 +1856,10 @@ class FirstScreen(
 
         itemStatSynchronizer
             .synchronize()
+
+        pickupRangeController.setMultiplier(
+            ActiveItemEffects.pickupRangeMultiplier()
+        )
 
         player
             .synchronizeMaximumHealthWithStats(
@@ -2800,6 +2835,8 @@ class FirstScreen(
                 delta
         )
 
+        ActiveItemEffects.update(delta)
+
         summonManager.update(
             delta =
                 delta,
@@ -2896,12 +2933,19 @@ class FirstScreen(
                 mapObstacles,
 
             onPlayerDamaged = {
+                    sourceEnemy,
                     damage ->
 
                 val appliedDamage =
                     player.takeDamage(
                         damage
                     )
+
+                if (appliedDamage > 0) {
+                    if (ActiveItemEffects.reflectContactDamage(sourceEnemy)) {
+                        handleEnemyKilled(sourceEnemy)
+                    }
+                }
 
                 runStatistics.recordDamageTaken(
                     appliedDamage
@@ -3167,6 +3211,8 @@ class FirstScreen(
                     if (
                         hitEvent.isCriticalHit
                     ) {
+                        ActiveItemEffects.onCriticalHit()
+
                         hitEvent.enemy
                             .markLatestDamageNumberCritical(
                                 hitEvent.appliedDamage
@@ -3319,6 +3365,8 @@ class FirstScreen(
             currentStageChestsCollected +=
                 1
 
+            ActiveItemEffects.healFromChest()
+
             chestRewardQueue
                 .addChest()
         }
@@ -3449,6 +3497,8 @@ class FirstScreen(
     private fun recordEnemyDeath(
         killedEnemy: Enemy
     ) {
+        ActiveItemEffects.onEnemyKilled(killedEnemy)
+
         weaponRuntimeManager.onEnemyKilledForActiveSkills(
             killedEnemy
         )
@@ -3491,8 +3541,9 @@ class FirstScreen(
         )
 
         val goldDrop =
-            GoldEconomyCalculator
-                .enemyDrop(
+            ActiveItemEffects.modifyGoldReward(
+                GoldEconomyCalculator
+                    .enemyDrop(
                     enemyType =
                         killedEnemy.type,
 
@@ -3501,7 +3552,9 @@ class FirstScreen(
                             .totalScore(
                                 StatType.HARVEST
                             )
-                )
+                    ),
+                enemyType = killedEnemy.type
+            )
 
         if (
             goldDrop >
@@ -3577,6 +3630,14 @@ class FirstScreen(
 
                 itemStatSynchronizer
                     .synchronize()
+
+                if (ActiveItemEffects.applyAcquisition(itemDefinition)) {
+                    itemStatSynchronizer.synchronize()
+                }
+
+                pickupRangeController.setMultiplier(
+                    ActiveItemEffects.pickupRangeMultiplier()
+                )
 
                 player
                     .synchronizeMaximumHealthWithStats(
@@ -3781,6 +3842,10 @@ class FirstScreen(
                         player =
                             player
                     )
+
+                ActiveItemEffects.renderLegacyZones(
+                    activeShapeRenderer
+                )
 
                 weaponRuntimeManager
                     .renderActiveSkillEffects(
@@ -4103,6 +4168,8 @@ class FirstScreen(
     }
 
     override fun dispose() {
+        ActiveItemEffects.unbind(playerStats)
+
         com.azizoglu.grisilith.weapon.visual.attack
             .MeleeAttackVisualManager
             .clear()
@@ -4312,7 +4379,10 @@ class FirstScreen(
                         selectedCharacter,
 
                     ownedWeaponIds =
-                        ownedWeaponDefinitionIds()
+                        ownedWeaponDefinitionIds(),
+
+                    itemEligibility =
+                        itemInventory::canAddDefinition
                 )
 
         var generatedOfferIndex =
@@ -5553,6 +5623,14 @@ class FirstScreen(
 
         itemStatSynchronizer.synchronize()
 
+        if (ActiveItemEffects.applyAcquisition(itemDefinition)) {
+            itemStatSynchronizer.synchronize()
+        }
+
+        pickupRangeController.setMultiplier(
+            ActiveItemEffects.pickupRangeMultiplier()
+        )
+
 
         player
             .synchronizeMaximumHealthWithStats(
@@ -5646,7 +5724,10 @@ class FirstScreen(
                         selectedCharacter,
 
                     ownedWeaponIds =
-                        ownedWeaponDefinitionIds()
+                        ownedWeaponDefinitionIds(),
+
+                    itemEligibility =
+                        itemInventory::canAddDefinition
                 )
 
         var newOfferIndex =
@@ -5737,6 +5818,9 @@ class FirstScreen(
 
             itemInventory =
                 itemInventory,
+
+            itemEffectState =
+                ActiveItemEffects.exportSaveState(),
 
             sessionWallet =
                 sessionWallet,

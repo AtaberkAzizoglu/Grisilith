@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.statistics
 
 import com.azizoglu.grisilith.save.RunSaveStatLayers
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 import kotlin.math.roundToInt
 import java.util.HashMap
 
@@ -207,10 +208,12 @@ class PlayerStats(
     fun totalScore(
         statType: StatType
     ): Int {
-        return (
-            totalScoreWithoutTamga(
-                statType
-            ) +
+        val rawScore =
+            baseScore(statType) +
+                gearBonus(statType) +
+                weaponBonus(statType) +
+                itemBonus(statType) +
+                runBonus(statType) +
                 tamgaBonus(
                     statType
                 ) +
@@ -219,11 +222,26 @@ class PlayerStats(
                 ) +
                 weaponSkillBonus(
                     statType
+                ) +
+                ActiveItemEffects.conditionalScoreBonus(
+                    playerStats = this,
+                    statType = statType
+                )
+
+        return (
+            rawScore *
+                ActiveItemEffects.scoreMultiplier(
+                    playerStats = this,
+                    statType = statType
                 )
             )
+            .roundToInt()
             .coerceIn(
                 MINIMUM_SCORE,
-                RUN_MAXIMUM_SCORE
+                ActiveItemEffects.scoreMaximum(
+                    playerStats = this,
+                    statType = statType
+                )
             )
     }
 
@@ -235,16 +253,28 @@ class PlayerStats(
         statType: StatType
     ): Int {
 
-        return (
+        return ((
             baseScore(statType) +
                 gearBonus(statType) +
                 weaponBonus(statType) +
                 itemBonus(statType) +
-                runBonus(statType)
-            )
+                runBonus(statType) +
+                ActiveItemEffects.conditionalScoreBonus(
+                    playerStats = this,
+                    statType = statType
+                )
+            ) *
+            ActiveItemEffects.scoreMultiplier(
+                playerStats = this,
+                statType = statType
+            ))
+            .roundToInt()
             .coerceIn(
                 MINIMUM_SCORE,
-                RUN_MAXIMUM_SCORE
+                ActiveItemEffects.scoreMaximum(
+                    playerStats = this,
+                    statType = statType
+                )
             )
     }
 
@@ -287,6 +317,15 @@ class PlayerStats(
         if (amount <= 0) {
             return 0
         }
+
+        return adjustRunBonus(statType, amount)
+    }
+
+    fun adjustRunBonus(
+        statType: StatType,
+        amount: Int
+    ): Int {
+        if (amount == 0) return 0
 
         val previousTotal =
             totalScore(statType)
@@ -433,8 +472,10 @@ class PlayerStats(
 
         return (
             armorBaseHealth *
-                maxHpScore
+                maxHpScore *
+                ActiveItemEffects.maximumHealthMultiplier(this)
             )
+            .roundToInt()
             .coerceAtLeast(1)
     }
 

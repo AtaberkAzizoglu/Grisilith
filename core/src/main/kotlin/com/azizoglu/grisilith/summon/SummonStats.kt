@@ -3,6 +3,7 @@ package com.azizoglu.grisilith.summon
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.enemy.EnemyScaling
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 import kotlin.math.roundToInt
 
 data class SummonStats(
@@ -61,6 +62,9 @@ data class SummonStats(
                     shepherd *
                     HEALTH_BONUS_PER_SHEPHERD
 
+            val itemHealthMultiplier =
+                ActiveItemEffects.summonHealthMultiplier(playerStats)
+
             val attackSpeedMultiplier =
                 1f +
                     shepherd *
@@ -81,7 +85,7 @@ data class SummonStats(
                         baseDamage = (baseline.contactDamage * 0.72f).roundToInt().coerceAtLeast(1),
                         baseMovementSpeed = baseline.movementSpeed * 0.72f,
                         attackRange = 54f,
-                        healthMultiplier = healthMultiplier,
+                        healthMultiplier = healthMultiplier * itemHealthMultiplier,
                         damageMultiplier = damageMultiplier,
                         movementSpeedMultiplier = movementSpeedMultiplier,
                         attackSpeedMultiplier = attackSpeedMultiplier * 0.88f
@@ -95,7 +99,7 @@ data class SummonStats(
                         baseDamage = (baseline.contactDamage * 1.55f).roundToInt().coerceAtLeast(1),
                         baseMovementSpeed = baseline.movementSpeed * 1.08f,
                         attackRange = 235f,
-                        healthMultiplier = healthMultiplier,
+                        healthMultiplier = healthMultiplier * itemHealthMultiplier,
                         damageMultiplier = damageMultiplier,
                         movementSpeedMultiplier = movementSpeedMultiplier,
                         attackSpeedMultiplier = attackSpeedMultiplier * 1.18f
@@ -109,7 +113,7 @@ data class SummonStats(
                         baseDamage = baseline.contactDamage,
                         baseMovementSpeed = baseline.movementSpeed,
                         attackRange = 72f,
-                        healthMultiplier = healthMultiplier,
+                        healthMultiplier = healthMultiplier * itemHealthMultiplier,
                         damageMultiplier = damageMultiplier,
                         movementSpeedMultiplier = movementSpeedMultiplier,
                         attackSpeedMultiplier = attackSpeedMultiplier

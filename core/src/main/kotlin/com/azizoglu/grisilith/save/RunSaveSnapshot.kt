@@ -26,12 +26,13 @@ data class RunSaveSnapshot(
     val itemStacks:
     ArrayList<RunSaveItemStack> =
         arrayListOf(),
+    val itemEffectState: RunSaveItemEffectState = RunSaveItemEffectState(),
     val statistics: RunSaveStatistics = RunSaveStatistics(),
     val rewardState: RunSaveRewardState = RunSaveRewardState(),
     val preview: RunSavePreview = RunSavePreview()
 ) {
     companion object {
-        const val CURRENT_VERSION: Int = 4
+        const val CURRENT_VERSION: Int = 5
     }
 
     fun validationErrors(): List<String> {

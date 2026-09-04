@@ -6,6 +6,7 @@ import com.azizoglu.grisilith.profile.PlayerProfileRepository
 import com.badlogic.gdx.math.MathUtils
 import com.azizoglu.grisilith.save.RunSaveRewardState
 import java.util.HashSet
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 
 class RunRewardTracker(
     private val difficulty: GameDifficulty
@@ -107,7 +108,11 @@ class RunRewardTracker(
             return 0
         }
 
-        if (!MathUtils.randomBoolean(MINI_BOSS_COIN_CHANCE)) {
+        if (!MathUtils.randomBoolean(
+                (MINI_BOSS_COIN_CHANCE +
+                    ActiveItemEffects.miniBossCoinChanceBonus())
+                    .coerceAtMost(1f)
+            )) {
             return 0
         }
 

@@ -14,6 +14,7 @@ import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
 import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 
 class SummonManager(
     private val weaponInventory: WeaponInventory,
@@ -239,6 +240,10 @@ class SummonManager(
                     it.sourceWeaponRuntimeId
                 }
                 .toSet()
+
+        entities
+            .filter { it.health.isDead }
+            .forEach(ActiveItemEffects::onSummonDied)
 
         entities.removeAll {
             it.isExpired
@@ -752,7 +757,10 @@ class SummonManager(
                             summon.sourceWeaponDefinitionId,
 
                         sourceName =
-                            sourceName
+                            sourceName,
+
+                        sourceIsSummon =
+                            true
                     )
             )
 

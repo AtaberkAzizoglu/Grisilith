@@ -18,6 +18,9 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
+import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.enemy.EnemyType
 
 class HudRenderer(
     private val camera: OrthographicCamera,
@@ -74,6 +77,7 @@ class HudRenderer(
 
         renderHealthBar()
         renderWeaponSlots()
+        renderItemTrackerIcons()
 
         if (
             GameSettings
@@ -668,6 +672,56 @@ class HudRenderer(
             top -
                 178f
         )
+
+        ActiveItemEffects.predestinationLabel()?.let { label ->
+            font.draw(batch, "Empowered: $label", left + 25f, top - 205f)
+        }
+
+        ActiveItemEffects.bountyLabel()?.let { label ->
+            font.draw(batch, "Bounty: $label", left + 25f, top - 229f)
+        }
+    }
+
+    private fun renderItemTrackerIcons() {
+        val left = camera.position.x - cameraWidth / 2f + HUD_MARGIN
+        val top = camera.position.y + cameraHeight / 2f - HUD_MARGIN
+
+        ActiveItemEffects.predestinationType()?.let { type ->
+            shapeRenderer.color = damageTypeColor(type)
+            shapeRenderer.rect(left, top - 218f, 18f, 10f)
+            shapeRenderer.triangle(
+                left + 18f, top - 221f,
+                left + 18f, top - 205f,
+                left + 25f, top - 213f
+            )
+        }
+
+        ActiveItemEffects.bountyType()?.let { type ->
+            shapeRenderer.color = when (type) {
+                EnemyType.NORMAL -> Color(0.75f, 0.75f, 0.78f, 1f)
+                EnemyType.UNIQUE -> Color(0.35f, 0.80f, 0.45f, 1f)
+                EnemyType.MINI_BOSS -> Color(0.90f, 0.55f, 0.18f, 1f)
+                EnemyType.FINAL_BOSS -> Color(0.85f, 0.18f, 0.20f, 1f)
+            }
+            shapeRenderer.triangle(
+                left + 4f, top - 229f,
+                left + 18f, top - 229f,
+                left + 11f, top - 240f
+            )
+        }
+    }
+
+    private fun damageTypeColor(type: DamageType): Color = when (type) {
+        DamageType.FIRE -> Color(1f, 0.28f, 0.08f, 1f)
+        DamageType.WATER, DamageType.COLD -> Color(0.20f, 0.62f, 1f, 1f)
+        DamageType.AIR -> Color(0.72f, 0.92f, 0.90f, 1f)
+        DamageType.LIGHTNING -> Color(1f, 0.90f, 0.16f, 1f)
+        DamageType.ACID, DamageType.POISON -> Color(0.45f, 0.90f, 0.18f, 1f)
+        DamageType.NECROTIC -> Color(0.58f, 0.24f, 0.72f, 1f)
+        DamageType.EARTH -> Color(0.55f, 0.36f, 0.18f, 1f)
+        DamageType.SLASHING, DamageType.PIERCING, DamageType.BLUDGEONING ->
+            Color(0.82f, 0.82f, 0.86f, 1f)
+        DamageType.NONE -> Color.GRAY
     }
 
     private fun renderWeaponSlotTexts() {

@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.weapon.skill
 
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 
 class WeaponAbilityRuntime(
     private val weapon: WeaponInstance
@@ -11,6 +12,8 @@ class WeaponAbilityRuntime(
 
     private var cooldownRemainingSeconds =
         0f
+
+    private var skipNextCooldown = false
 
     val definition:
         WeaponAbilityDefinition?
@@ -85,6 +88,12 @@ class WeaponAbilityRuntime(
             return
         }
 
+        ActiveItemEffects.onAbilityState(
+            weapon = weapon,
+            isReady = state == WeaponAbilityState.READY,
+            delta = delta
+        )
+
         if (
             activeRemainingSeconds >
             0f
@@ -153,6 +162,11 @@ class WeaponAbilityRuntime(
             )
         }
 
+        if (ActiveItemEffects.onAbilityActivated(weapon)) {
+            skipNextCooldown = ability.durationSeconds > 0f
+            cooldownRemainingSeconds = 0f
+        }
+
         return true
     }
 
@@ -182,6 +196,11 @@ class WeaponAbilityRuntime(
             beginCooldown(
                 ability
             )
+        }
+
+        if (ActiveItemEffects.onAbilityActivated(weapon)) {
+            skipNextCooldown = ability.durationSeconds > 0f
+            cooldownRemainingSeconds = 0f
         }
 
         return true
@@ -214,12 +233,20 @@ class WeaponAbilityRuntime(
 
         cooldownRemainingSeconds =
             0f
+
+        skipNextCooldown = false
     }
 
     private fun beginCooldown(
         ability:
         WeaponAbilityDefinition
     ) {
+        if (skipNextCooldown) {
+            skipNextCooldown = false
+            cooldownRemainingSeconds = 0f
+            return
+        }
+
         cooldownRemainingSeconds =
             ability.cooldownSeconds
                 .coerceAtLeast(

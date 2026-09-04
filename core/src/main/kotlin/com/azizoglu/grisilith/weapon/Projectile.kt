@@ -18,6 +18,7 @@ import com.azizoglu.grisilith.combat.interaction.CombatInteractionEvent
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionManager
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionSource
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionTrigger
+import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 
 class Projectile(
     startX: Float,
@@ -107,6 +108,8 @@ class Projectile(
     private val criticalDamageMultiplierProvider:
     (() -> Float)? = null
 ) {
+    private val ignoresObstaclesFromItem =
+        ActiveItemEffects.rollGhostProjectile(sourceWeapon)
 
     private val position =
         Vector2(
@@ -688,7 +691,14 @@ class Projectile(
                                     ?: emptySet(),
 
                             attackerPiercingIgnoreRatio =
-                                attackerPiercingIgnoreRatio
+                                attackerPiercingIgnoreRatio,
+
+                            projectileTravelProgress =
+                                if (safeMaximumTravelDistance > 0f) {
+                                    travelledDistance / safeMaximumTravelDistance
+                                } else {
+                                    0f
+                                }
                         )
                 )
 
@@ -974,6 +984,8 @@ class Projectile(
         ) {
             return
         }
+
+        if (ignoresObstaclesFromItem) return
 
         collisionBounds.set(
             position.x,

@@ -503,7 +503,9 @@ class DaggerAttackExecutor(
 
                 criticalHitChance =
                     damageCalculator
-                        .criticalHitChance(),
+                        .criticalHitChance(
+                            context.weapon
+                        ),
 
                 criticalDamageMultiplier =
                     damageCalculator

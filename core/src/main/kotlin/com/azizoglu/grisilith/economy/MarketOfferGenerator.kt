@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.economy
 
+import com.azizoglu.grisilith.chest.ChestItemRarityCalculator
 import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.content.ContentUnlockResolver
 import com.azizoglu.grisilith.item.definition.DefaultItems
@@ -26,23 +27,18 @@ object MarketOfferGenerator {
 
     /*
      * Sahip olunan her farklı Weapon için:
-     * Her Luck başına doğrudan +%0,1 puan.
+     * Her Luck başına doğrudan +%0,2 puan.
      *
-     * 50 Luck → +%5 puan.
+     * 50 Luck → +%10 puan.
      */
     private const val OWNED_WEAPON_CHANCE_PER_LUCK =
-        0.001f
+        0.002f
 
     /*
-     * Item rarity bonusu:
-     *
-     * 50 Luck:
-     * Uncommon  ×1,05
-     * Rare      ×1,10
-     * Legendary ×1,15
-     * Artifact  ×1,20
+     * Elde bulunan bir Weapon'ın ait olduğu market grubu,
+     * 50 Luck'ta en fazla +5 yüzde puanı kazanır.
      */
-    private const val ITEM_RARITY_WEIGHT_PER_LUCK =
+    private const val OWNED_WEAPON_GROUP_CHANCE_PER_LUCK =
         0.001f
 
     private enum class WeaponMarketGroup {
@@ -65,7 +61,11 @@ object MarketOfferGenerator {
          */
         ownedWeaponIds:
         Set<String> =
-            emptySet()
+            emptySet(),
+
+        itemEligibility:
+        (ItemDefinition) -> Boolean =
+            { true }
     ): List<MarketOffer> {
         if (offerCount <= 0) {
             return emptyList()
@@ -94,7 +94,10 @@ object MarketOfferGenerator {
                     selectedCharacter,
 
                 ownedWeaponIds =
-                    ownedWeaponIds
+                    ownedWeaponIds,
+
+                itemEligibility =
+                    itemEligibility
             )
         }
     }
@@ -105,7 +108,9 @@ object MarketOfferGenerator {
         selectedCharacter:
         CharacterDefinition,
         ownedWeaponIds:
-        Set<String>
+        Set<String>,
+        itemEligibility:
+        (ItemDefinition) -> Boolean
     ): MarketOffer {
 
         val weaponOffer =
@@ -133,19 +138,13 @@ object MarketOfferGenerator {
                         currentStage,
 
                     luckScore =
-                        luckScore
+                        luckScore,
+
+                    itemEligibility =
+                        itemEligibility
                 )
             }
 
-        /*
-         * Ana kategori seçimi Luck'tan etkilenmez:
-         *
-         * %50 Weapon
-         * %50 Item
-         *
-         * Seçilen kategori boşsa diğer kategori
-         * güvenli fallback olarak kullanılır.
-         */
         return if (
             Random.nextBoolean()
         ) {
@@ -194,7 +193,13 @@ object MarketOfferGenerator {
                     luckScore,
 
                 preferredGroup =
-                    preferredGroup
+                    preferredGroup,
+
+                availableWeapons =
+                    availableWeapons,
+
+                ownedWeaponIds =
+                    ownedWeaponIds
             )
 
         val groupedWeapons =
@@ -245,26 +250,16 @@ object MarketOfferGenerator {
     private fun selectWeaponMarketGroup(
         luckScore: Int,
         preferredGroup:
-        CharacterWeaponPreference?
+        CharacterWeaponPreference?,
+
+        availableWeapons:
+        List<WeaponDefinition>,
+
+        ownedWeaponIds:
+        Set<String>
     ): WeaponMarketGroup {
         val groups =
             WeaponMarketGroup.entries
-
-        if (preferredGroup == null) {
-            return groups.random()
-        }
-
-        val preferredMarketGroup =
-            when (preferredGroup) {
-                CharacterWeaponPreference.MELEE ->
-                    WeaponMarketGroup.MELEE
-
-                CharacterWeaponPreference.RANGED ->
-                    WeaponMarketGroup.RANGED
-
-                CharacterWeaponPreference.SPELL_FOCUS ->
-                    WeaponMarketGroup.SPELL_FOCUS
-            }
 
         val safeLuck =
             luckScore.coerceIn(
@@ -279,35 +274,118 @@ object MarketOfferGenerator {
             safeLuck.toFloat() /
                 MAXIMUM_LUCK.toFloat()
 
-        val preferredChance =
-            baseGroupChance +
-                (
-                    PREFERRED_GROUP_CHANCE_AT_MAX_LUCK -
-                        baseGroupChance
-                    ) *
-                luckProgress
+        val preferredMarketGroup =
+            preferredGroup?.let {
+                when (it) {
+                    CharacterWeaponPreference.MELEE ->
+                        WeaponMarketGroup.MELEE
 
-        val otherGroupChance =
-            (
-                1f -
-                    preferredChance
-                ) /
-                (
-                    groups.size -
-                        1
-                    )
+                    CharacterWeaponPreference.RANGED ->
+                        WeaponMarketGroup.RANGED
 
-        val weightedGroups =
-            groups.map { group ->
-                group to
-                    if (
-                        group ==
-                        preferredMarketGroup
-                    ) {
+                    CharacterWeaponPreference.SPELL_FOCUS ->
+                        WeaponMarketGroup.SPELL_FOCUS
+                }
+            }
+
+        val baseWeights =
+            if (preferredMarketGroup == null) {
+                groups.associateWith {
+                    baseGroupChance
+                }
+            } else {
+                val preferredChance =
+                    baseGroupChance +
+                        (
+                            PREFERRED_GROUP_CHANCE_AT_MAX_LUCK -
+                                baseGroupChance
+                            ) *
+                        luckProgress
+
+                val otherGroupChance =
+                    (
+                        1f -
+                            preferredChance
+                        ) /
+                        (groups.size - 1)
+
+                groups.associateWith { group ->
+                    if (group == preferredMarketGroup) {
                         preferredChance
                     } else {
                         otherGroupChance
                     }
+                }
+            }
+
+        val ownedGroups =
+            groups.filter { group ->
+                availableWeapons.any { weapon ->
+                    weapon.id.value in ownedWeaponIds &&
+                        belongsToWeaponGroup(
+                            weapon = weapon,
+                            group = group
+                        )
+                }
+            }
+
+        val unownedGroups =
+            groups.filterNot {
+                it in ownedGroups
+            }
+
+        val weightedGroups =
+            if (
+                safeLuck <= 0 ||
+                ownedGroups.isEmpty() ||
+                unownedGroups.isEmpty()
+            ) {
+                groups.map { group ->
+                    group to baseWeights.getValue(group)
+                }
+            } else {
+                val requestedBonusPerOwnedGroup =
+                    safeLuck *
+                        OWNED_WEAPON_GROUP_CHANCE_PER_LUCK
+
+                val requestedTotalBonus =
+                    requestedBonusPerOwnedGroup *
+                        ownedGroups.size
+
+                val maximumTotalBonus =
+                    unownedGroups.sumOf { group ->
+                        baseWeights
+                            .getValue(group)
+                            .toDouble()
+                    }
+                        .toFloat()
+
+                val appliedTotalBonus =
+                    requestedTotalBonus.coerceAtMost(
+                        maximumTotalBonus
+                    )
+
+                val bonusPerOwnedGroup =
+                    appliedTotalBonus /
+                        ownedGroups.size
+
+                val deductionPerUnownedGroup =
+                    appliedTotalBonus /
+                        unownedGroups.size
+
+                groups.map { group ->
+                    val adjustedChance =
+                        if (group in ownedGroups) {
+                            baseWeights.getValue(group) +
+                                bonusPerOwnedGroup
+                        } else {
+                            baseWeights.getValue(group) -
+                                deductionPerUnownedGroup
+                        }
+
+                    group to
+                        adjustedChance.coerceAtLeast(0f)
+                }
             }
 
         return selectWeighted(
@@ -498,14 +576,15 @@ object MarketOfferGenerator {
 
     private fun createRandomItemOffer(
         currentStage: Int,
-        luckScore: Int
+        luckScore: Int,
+        itemEligibility: (ItemDefinition) -> Boolean
     ): MarketOffer? {
         val availableItems =
             DefaultItems.all
                 .filter { item ->
                     ContentUnlockResolver.isUnlocked(
                         item
-                    )
+                    ) && itemEligibility(item)
                 }
 
         if (availableItems.isEmpty()) {
@@ -518,7 +597,10 @@ object MarketOfferGenerator {
                     availableItems,
 
                 luckScore =
-                    luckScore
+                    luckScore,
+
+                currentStage =
+                    currentStage
             )
 
         val productLevel = 1
@@ -569,54 +651,39 @@ object MarketOfferGenerator {
         List<ItemDefinition>,
 
         luckScore:
+        Int,
+
+        currentStage:
         Int
     ): ItemDefinition {
-        val safeLuck =
-            luckScore.coerceIn(
-                0,
-                MAXIMUM_LUCK
-            )
-
-        val weightedItems =
-            availableItems.map { item ->
-                val rarityTier =
-                    when (item.rarity) {
-                        ItemRarity.COMMON ->
-                            0
-
-                        ItemRarity.UNCOMMON ->
-                            1
-
-                        ItemRarity.RARE ->
-                            2
-
-                        ItemRarity.LEGENDARY ->
-                            3
-
-                        ItemRarity.ARTIFACT ->
-                            4
-                    }
-
-                val luckMultiplier =
-                    1f +
-                        safeLuck *
-                        ITEM_RARITY_WEIGHT_PER_LUCK *
-                        rarityTier
-
-                item to
-                    (
-                        item.rarity.marketWeight *
-                            luckMultiplier
-                        )
-                        .coerceAtLeast(
-                            0.001f
-                        )
+        val itemsByRarity =
+            availableItems.groupBy {
+                it.rarity
             }
 
-        return selectWeighted(
-            weightedValues =
-                weightedItems
-        )
+        val distribution =
+            ChestItemRarityCalculator.distribution(
+                luckScore = luckScore,
+                currentStage = currentStage
+            )
+
+        val rarityWeights =
+            ItemRarity.entries.mapNotNull { rarity ->
+                if (itemsByRarity[rarity].isNullOrEmpty()) {
+                    null
+                } else {
+                    rarity to distribution.weightFor(rarity)
+                }
+            }
+
+        val selectedRarity =
+            selectWeighted(
+                weightedValues = rarityWeights
+            )
+
+        return itemsByRarity
+            .getValue(selectedRarity)
+            .random()
     }
 
     private fun itemBasePrice(
@@ -625,10 +692,6 @@ object MarketOfferGenerator {
         return when (
             item.rarity
         ) {
-            com.azizoglu.grisilith.item
-                .definition.ItemRarity.COMMON ->
-                12
-
             com.azizoglu.grisilith.item
                 .definition.ItemRarity.UNCOMMON ->
                 20
@@ -659,10 +722,12 @@ object MarketOfferGenerator {
                         "+${modifier.amount}"
                 }
 
-        return (
-            "${item.rarity.displayName} Item | " +
-                modifierText
-            )
+        val effectText =
+            if (modifierText.isBlank()) item.description
+            else if (item.effectId == null) modifierText
+            else "$modifierText | ${item.description}"
+
+        return "${item.rarity.displayName} Item | $effectText"
     }
 
 

@@ -32,7 +32,6 @@ object CollectionFilterRegistry {
             )
 
             ContentCategory.ITEM -> listOf(
-                rarity(ItemRarity.COMMON, Color.LIGHT_GRAY),
                 rarity(ItemRarity.UNCOMMON, Color(0.35f, 0.85f, 0.40f, 1f)),
                 rarity(ItemRarity.RARE, Color(0.30f, 0.55f, 1f, 1f)),
                 rarity(ItemRarity.LEGENDARY, Color(0.75f, 0.35f, 0.95f, 1f)),

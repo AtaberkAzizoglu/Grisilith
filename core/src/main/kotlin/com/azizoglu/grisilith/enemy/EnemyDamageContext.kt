@@ -20,7 +20,11 @@ data class EnemyDamageContext(
         emptySet(),
 
     val attackerPiercingIgnoreRatio: Float =
-        0f
+        0f,
+
+    val sourceIsSummon: Boolean = false,
+
+    val projectileTravelProgress: Float = 0f
 ) {
 
     val isPhysicalWeaponDamage: Boolean

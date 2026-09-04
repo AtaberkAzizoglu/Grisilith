@@ -20,26 +20,9 @@ class ItemInventory {
         item: ItemInstance
     ): ItemInventoryResult {
 
-        val maximumCopies =
-            item.definition
-                .maximumInventoryCopies
-                ?: item.definition
-                    .rarity
-                    .maximumInventoryCopies
-
-        if (maximumCopies != null) {
-            val existingCopyCount =
-                countByDefinitionId(
-                    item.definition.id
-                )
-
-            if (
-                existingCopyCount >=
-                maximumCopies
-            ) {
-                return ItemInventoryResult
-                    .MAXIMUM_COPIES_REACHED
-            }
+        if (!canAddDefinition(item.definition)) {
+            return ItemInventoryResult
+                .MAXIMUM_COPIES_REACHED
         }
 
         items.add(
@@ -47,6 +30,56 @@ class ItemInventory {
         )
 
         return ItemInventoryResult.ADDED
+    }
+
+    fun canAddDefinition(
+        definition:
+        com.azizoglu.grisilith.item.definition.ItemDefinition
+    ): Boolean {
+
+        val maximumCopies =
+            definition
+                .maximumInventoryCopies
+                ?: definition
+                    .rarity
+                    .maximumInventoryCopies
+
+        if (maximumCopies != null) {
+            val existingCopyCount =
+                countByDefinitionId(
+                    definition.id
+                )
+
+            if (
+                existingCopyCount >=
+                maximumCopies
+            ) {
+                return false
+            }
+        }
+
+        val sharedGroup =
+            definition.sharedCopyLimitGroup
+
+        val sharedLimit =
+            definition.sharedCopyLimit
+
+        if (
+            sharedGroup != null &&
+            sharedLimit != null
+        ) {
+            val sharedCount =
+                items.count { existing ->
+                    existing.definition.sharedCopyLimitGroup ==
+                        sharedGroup
+                }
+
+            if (sharedCount >= sharedLimit) {
+                return false
+            }
+        }
+
+        return true
     }
 
     fun removeItem(

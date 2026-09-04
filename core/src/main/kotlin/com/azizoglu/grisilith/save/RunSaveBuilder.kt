@@ -32,6 +32,7 @@ object RunSaveBuilder {
         weaponInventory: WeaponInventory,
         equippedArmor: EquippedArmor,
         itemInventory: ItemInventory,
+        itemEffectState: RunSaveItemEffectState = RunSaveItemEffectState(),
         sessionWallet: SessionWallet,
         runStatistics: RunStatistics,
         runRewardTracker: RunRewardTracker,
@@ -165,6 +166,9 @@ object RunSaveBuilder {
                     itemInventory
                         .exportSaveStacks()
                 ),
+
+            itemEffectState =
+                itemEffectState,
 
             statistics =
                 runStatistics
