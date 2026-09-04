@@ -13,7 +13,7 @@ class ChargerExplosionEffect(
     companion object {
 
         const val DURATION_SECONDS =
-            0.38f
+            1.32f
     }
 
     val damageType:

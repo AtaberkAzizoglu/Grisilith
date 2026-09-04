@@ -9,10 +9,9 @@ import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.tamga.definition.TamgaDefinition
 import com.azizoglu.grisilith.tamga.definition.TamgaEffectId
-import com.azizoglu.grisilith.tamga.render.ChargerExplosionRenderer
+import com.azizoglu.grisilith.tamga.render.TamgaWorldVisualRenderer
 import com.azizoglu.grisilith.tamga.runtime.active.ActiveTamgaState
 import com.azizoglu.grisilith.tamga.runtime.active.ChargerEndEvent
-import com.azizoglu.grisilith.tamga.runtime.active.ChargerExplosionEffect
 import com.azizoglu.grisilith.tamga.runtime.active.ChargerExplosionRuntime
 import com.azizoglu.grisilith.tamga.runtime.active.ChargerRuntime
 import com.azizoglu.grisilith.tamga.runtime.active.PhantomSteedRuntime
@@ -20,7 +19,10 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponHitEvent
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.graphics.OrthographicCamera
+import kotlin.math.atan2
 import kotlin.math.roundToInt
+import kotlin.math.sqrt
 
 class TamgaRuntimeManager(
     private val weaponInventory:
@@ -78,8 +80,21 @@ class TamgaRuntimeManager(
     private val chargerExplosionRuntime =
         ChargerExplosionRuntime()
 
-    private val chargerExplosionRenderer =
-        ChargerExplosionRenderer()
+    private val worldVisualRenderer =
+        TamgaWorldVisualRenderer()
+
+    private val chargerFootsteps =
+        mutableListOf<ChargerFootstepVisual>()
+
+    private val panicPulses =
+        mutableListOf<PanicPulseVisual>()
+
+    private var attachedPlayer: Player? = null
+    private var visualAnimationSeconds = 0f
+    private var chargerTrailWasActive = false
+    private var chargerTrailAnchorX = 0f
+    private var chargerTrailAnchorY = 0f
+    private var panicCooldownSeconds = 0f
     companion object {
 
         private const val FIRST_WEAPON_SLOT_INDEX =
@@ -120,6 +135,15 @@ class TamgaRuntimeManager(
 
         private const val FLAME_BLADES_BURN_DURATION_SECONDS =
             5f
+
+        private const val CHARGER_FOOTSTEP_DISTANCE = 24f
+        private const val CHARGER_FOOTSTEP_BACK_OFFSET = 17f
+
+        private const val PANIC_TRIGGER_RADIUS = 160f
+        private const val PANIC_PULSE_RADIUS = 220f
+        private const val PANIC_ENEMY_THRESHOLD = 8
+        private const val PANIC_COOLDOWN_SECONDS = 22f
+        private const val PANIC_KNOCKBACK_STRENGTH = 760f
     }
 
     /*
@@ -153,12 +177,15 @@ class TamgaRuntimeManager(
                 )
 
     fun update(
-        delta: Float
+        delta: Float,
+        player: Player,
+        enemies: List<Enemy>
     ) {
         if (delta <= 0f) {
             return
         }
 
+        visualAnimationSeconds += delta
         synchronizeFirstWeaponSlot()
 
         if (!isQuickShotActive()) {
@@ -191,6 +218,13 @@ class TamgaRuntimeManager(
             .update(
                 delta
             )
+
+        updateChargerFootsteps(delta)
+        updatePanic(
+            delta = delta,
+            player = player,
+            enemies = enemies
+        )
     }
 
     fun triggerChargerExplosion(
@@ -362,41 +396,27 @@ class TamgaRuntimeManager(
         )
     }
 
-    fun renderChargerExplosionFill(
-        shapeRenderer:
-        ShapeRenderer
+    fun renderWorldVisuals(
+        camera: OrthographicCamera,
+        player: Player
     ) {
-        chargerExplosionRenderer
-            .render(
-                shapeRenderer =
-                    shapeRenderer,
-
-                effects =
-                    chargerExplosionRuntime
-                        .effects
-            )
+        worldVisualRenderer.render(
+            camera = camera,
+            player = player,
+            animationSeconds = visualAnimationSeconds,
+            holyLightsMode =
+                holyLightsRuntime.currentMode
+                    .takeIf { isHolyLightsActive() },
+            holyLightsRange = holyLightsRuntime.auraRange,
+            arcaneAuraMode =
+                arcaneAuraRuntime.currentMode
+                    .takeIf { isArcaneAuraActive() },
+            arcaneAuraRange = arcaneAuraRuntime.auraRange,
+            footsteps = chargerFootsteps,
+            chargerExplosions = chargerExplosionRuntime.effects,
+            panicPulses = panicPulses
+        )
     }
-
-    fun renderChargerExplosionRings(
-        shapeRenderer:
-        ShapeRenderer
-    ) {
-        chargerExplosionRenderer
-            .renderRings(
-                shapeRenderer =
-                    shapeRenderer,
-
-                effects =
-                    chargerExplosionRuntime
-                        .effects
-            )
-    }
-
-    val chargerExplosionEffects:
-        List<ChargerExplosionEffect>
-        get() =
-            chargerExplosionRuntime
-                .effects
 
     private fun isHolyLightsActive():
         Boolean {
@@ -418,6 +438,10 @@ class TamgaRuntimeManager(
         player:
         Player
     ) {
+        attachedPlayer = player
+        chargerTrailAnchorX = player.centerX
+        chargerTrailAnchorY = player.centerY
+
         chargerRuntime
             .attachPlayer(
                 player
@@ -593,6 +617,124 @@ class TamgaRuntimeManager(
         return weaponTamga
             ?.effectId ==
             TamgaEffectId.CHARGER
+    }
+
+    private fun updateChargerFootsteps(delta: Float) {
+        chargerFootsteps.forEach { it.update(delta) }
+        chargerFootsteps.removeAll { it.isFinished }
+
+        val player = attachedPlayer ?: return
+        if (!isChargerEquipped() || !chargerRuntime.isActive) {
+            chargerTrailWasActive = false
+            return
+        }
+
+        if (!chargerTrailWasActive) {
+            chargerTrailWasActive = true
+            chargerTrailAnchorX = player.centerX
+            chargerTrailAnchorY = player.centerY
+            return
+        }
+
+        val dx = player.centerX - chargerTrailAnchorX
+        val dy = player.centerY - chargerTrailAnchorY
+        val distance = sqrt(dx * dx + dy * dy)
+        if (distance < CHARGER_FOOTSTEP_DISTANCE) return
+
+        val normalX = dx / distance
+        val normalY = dy / distance
+        chargerFootsteps.add(
+            ChargerFootstepVisual(
+                x = player.centerX - normalX * CHARGER_FOOTSTEP_BACK_OFFSET,
+                y = player.centerY - normalY * CHARGER_FOOTSTEP_BACK_OFFSET,
+                direction = footstepDirection(dx, dy)
+            )
+        )
+        chargerTrailAnchorX = player.centerX
+        chargerTrailAnchorY = player.centerY
+    }
+
+    private fun footstepDirection(dx: Float, dy: Float): FootstepDirection {
+        val degrees = Math.toDegrees(atan2(dy.toDouble(), dx.toDouble()))
+        return when {
+            degrees >= -22.5 && degrees < 22.5 -> FootstepDirection.EAST
+            degrees >= 22.5 && degrees < 67.5 -> FootstepDirection.NORTH_EAST
+            degrees >= 67.5 && degrees < 112.5 -> FootstepDirection.NORTH
+            degrees >= 112.5 && degrees < 157.5 -> FootstepDirection.NORTH_WEST
+            degrees >= 157.5 || degrees < -157.5 -> FootstepDirection.WEST
+            degrees >= -157.5 && degrees < -112.5 -> FootstepDirection.SOUTH_WEST
+            degrees >= -112.5 && degrees < -67.5 -> FootstepDirection.SOUTH
+            else -> FootstepDirection.SOUTH_EAST
+        }
+    }
+
+    private fun updatePanic(
+        delta: Float,
+        player: Player,
+        enemies: List<Enemy>
+    ) {
+        panicPulses.forEach { it.update(delta) }
+        panicPulses.removeAll { it.isFinished }
+
+        if (!hasTamgaEffect(TamgaEffectId.PANIC)) {
+            panicCooldownSeconds = 0f
+            panicPulses.clear()
+            return
+        }
+
+        panicCooldownSeconds =
+            (panicCooldownSeconds - delta)
+                .coerceAtLeast(0f)
+        if (panicCooldownSeconds > 0f || player.health.isDead) return
+
+        val triggerRadiusSquared = PANIC_TRIGGER_RADIUS * PANIC_TRIGGER_RADIUS
+        val nearbyEnemies = enemies.filter { enemy ->
+            !enemy.isDead &&
+                squaredDistance(
+                    player.centerX,
+                    player.centerY,
+                    enemy.centerX,
+                    enemy.centerY
+                ) <= triggerRadiusSquared
+        }
+        if (nearbyEnemies.size < PANIC_ENEMY_THRESHOLD) return
+
+        panicPulses.add(
+            PanicPulseVisual(
+                x = player.centerX,
+                y = player.centerY
+            )
+        )
+        val pulseRadiusSquared = PANIC_PULSE_RADIUS * PANIC_PULSE_RADIUS
+        enemies.forEach { enemy ->
+            if (
+                !enemy.isDead &&
+                squaredDistance(
+                    player.centerX,
+                    player.centerY,
+                    enemy.centerX,
+                    enemy.centerY
+                ) <= pulseRadiusSquared
+            ) {
+                enemy.applyKnockback(
+                    directionX = enemy.centerX - player.centerX,
+                    directionY = enemy.centerY - player.centerY,
+                    strength = PANIC_KNOCKBACK_STRENGTH
+                )
+            }
+        }
+        panicCooldownSeconds = PANIC_COOLDOWN_SECONDS
+    }
+
+    private fun squaredDistance(
+        x1: Float,
+        y1: Float,
+        x2: Float,
+        y2: Float
+    ): Float {
+        val dx = x1 - x2
+        val dy = y1 - y2
+        return dx * dx + dy * dy
     }
 
     fun modifyWeaponDamage(
@@ -867,6 +1009,15 @@ class TamgaRuntimeManager(
         chargerRuntime.reset()
         phantomSteedRuntime.reset()
         chargerExplosionRuntime.reset()
+        chargerFootsteps.clear()
+        panicPulses.clear()
+        visualAnimationSeconds = 0f
+        chargerTrailWasActive = false
+        panicCooldownSeconds = 0f
+    }
+
+    fun dispose() {
+        worldVisualRenderer.dispose()
     }
 
     private fun applyFlameBladesBonusDamage(

@@ -20,5 +20,7 @@ enum class TamgaEffectId {
 
     FLAME_BLADES,
 
-    QUICK_SHOT
+    QUICK_SHOT,
+
+    PANIC
 }

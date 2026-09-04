@@ -3070,7 +3070,9 @@ class FirstScreen(
          * Tamga runtime güncellemeleri.
          */
         tamgaRuntimeManager.update(
-            delta = delta
+            delta = delta,
+            player = player,
+            enemies = enemyManager.allEnemies
         )
 
         /*
@@ -3942,34 +3944,15 @@ class FirstScreen(
                     snapshot = worldItemRuntime.visualSnapshot(),
                     camera = camera
                 )
+
+                tamgaRuntimeManager.renderWorldVisuals(
+                    camera = camera,
+                    player = player
+                )
             },
 
             renderBehindEntities = {
                     activeShapeRenderer ->
-
-                tamgaRuntimeManager
-                    .renderChargerExplosionFill(
-                        shapeRenderer =
-                            activeShapeRenderer
-                    )
-
-                tamgaRuntimeManager
-                    .renderHolyLights(
-                        shapeRenderer =
-                            activeShapeRenderer,
-
-                        player =
-                            player
-                    )
-
-                tamgaRuntimeManager
-                    .renderArcaneAura(
-                        shapeRenderer =
-                            activeShapeRenderer,
-
-                        player =
-                            player
-                    )
 
                 ActiveItemEffects.renderLegacyZones(
                     activeShapeRenderer
@@ -4007,27 +3990,6 @@ class FirstScreen(
             enemies = enemyManager.allEnemies,
             camera = camera
         )
-
-        if (
-            tamgaRuntimeManager
-                .chargerExplosionEffects
-                .isNotEmpty()
-        ) {
-            shapeRenderer.projectionMatrix =
-                camera.combined
-
-            shapeRenderer.begin(
-                ShapeRenderer.ShapeType.Line
-            )
-
-            tamgaRuntimeManager
-                .renderChargerExplosionRings(
-                    shapeRenderer =
-                        shapeRenderer
-                )
-
-            shapeRenderer.end()
-        }
 
         Gdx.gl.glDisable(
             GL20.GL_BLEND
@@ -4327,6 +4289,7 @@ class FirstScreen(
         marketRenderer.dispose()
         pauseRenderer.dispose()
 
+        tamgaRuntimeManager.dispose()
         worldRenderer.dispose()
         worldItemRenderer.dispose()
         shapeRenderer.dispose()

@@ -315,6 +315,39 @@ object DefaultTamgas {
                 ContentUnlockState.UNLOCKED
         )
 
+    val panic =
+        TamgaDefinition(
+            id =
+                ContentId(
+                    "TMG_PANIC"
+                ),
+
+            displayName =
+                "Panic",
+
+            description =
+                "When at least 8 living enemies enter a 160 px radius, " +
+                    "release a powerful knockback pulse. The pulse deals no " +
+                    "damage and has a 22-second cooldown.",
+
+            slotType =
+                TamgaSlotType.GENERAL,
+
+            activationType =
+                TamgaActivationType.PASSIVE,
+
+            effectId =
+                TamgaEffectId.PANIC,
+
+            additionalTags =
+                setOf(
+                    ContentTag.SPECIAL
+                ),
+
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
     val all:
         List<TamgaDefinition> =
         listOf(
@@ -324,6 +357,7 @@ object DefaultTamgas {
             holyLights,
             arcaneAura,
             flameBlades,
-            quickShot
+            quickShot,
+            panic
         )
 }
