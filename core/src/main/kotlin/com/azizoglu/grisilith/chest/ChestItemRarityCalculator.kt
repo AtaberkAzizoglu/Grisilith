@@ -234,14 +234,19 @@ object ChestItemRarityCalculator {
         val commonShareOfLowTier = lerp(0.65f, 0.35f, luckProgress)
 
         /*
-         * Erken oyunda Legendary ve özellikle Artifact baskılanır. Stage 30'da
-         * eski oranlara tamamen ulaşılır; kesilen pay Common'a aktarılır.
+         * Erken oyunda Legendary ve özellikle Artifact baskılanır. Artifact,
+         * ilk beş stage boyunca çıkamaz; Stage 6'dan itibaren açılıp Stage 30'da
+         * eski oranına ulaşır. Legendary de Stage 1'de eski oranının %35'iyle
+         * başlayıp Stage 30'da tam oranına ulaşır. Kesilen pay Common'a aktarılır.
          */
         val stageMaturity =
             ((currentStage.coerceAtLeast(1) - 1) / 29f)
                 .coerceIn(0f, 1f)
-        val legendary = base.legendary * lerp(0.50f, 1f, stageMaturity)
-        val artifact = base.artifact * lerp(0.20f, 1f, stageMaturity)
+        val artifactMaturity =
+            ((currentStage.coerceAtLeast(1) - 5) / 25f)
+                .coerceIn(0f, 1f)
+        val legendary = base.legendary * lerp(0.35f, 1f, stageMaturity)
+        val artifact = base.artifact * artifactMaturity
         val suppressedHighRarity =
             (base.legendary - legendary) +
                 (base.artifact - artifact)
