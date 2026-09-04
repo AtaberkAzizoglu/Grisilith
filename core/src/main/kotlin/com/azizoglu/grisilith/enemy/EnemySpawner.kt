@@ -162,6 +162,38 @@ class EnemySpawner(
         spawnWarnings.clear()
     }
 
+    fun spawnBonusMiniBoss(
+        enemyManager: EnemyManager,
+        currentStage: Int,
+        playerCenterX: Float,
+        playerCenterY: Float,
+        mapObstacles: List<MapObstacle>
+    ): Enemy? {
+        val definition = mapEnemyContext.selectionResolver.choose(
+            profile = mapEnemyContext.profile,
+            enemyType = EnemyType.MINI_BOSS
+        ) ?: return null
+        val stats = mapEnemyContext.runtimeFactory.createStats(
+            definition = definition,
+            enemyType = EnemyType.MINI_BOSS,
+            stage = currentStage
+        )
+        val position = findValidSpawnPosition(
+            enemySize = stats.size,
+            canSpawnInsideObstacles = stats.canSpawnInsideObstacles,
+            playerCenterX = playerCenterX,
+            playerCenterY = playerCenterY,
+            mapObstacles = mapObstacles
+        ) ?: return null
+        return mapEnemyContext.runtimeFactory.create(
+            definition = definition,
+            enemyType = EnemyType.MINI_BOSS,
+            stage = currentStage,
+            startX = position.first,
+            startY = position.second
+        ).also(enemyManager::spawn)
+    }
+
     private fun synchronizeStage(
         currentStage: Int
     ) {

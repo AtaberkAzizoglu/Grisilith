@@ -62,6 +62,9 @@ class RunRewardTracker(
         return discarded
     }
 
+    fun awardBonusGrisilithCoin(): Int =
+        addCoinsRespectingRunLimit(1)
+
     fun onEnemyKilled(
         enemyType: EnemyType,
         finalBossId: String? = null

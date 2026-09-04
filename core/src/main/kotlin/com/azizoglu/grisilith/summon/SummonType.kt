@@ -37,6 +37,12 @@ enum class SummonType(
 
         defaultCount =
             1
+    ),
+
+    TOAD(
+        displayName = "Toad",
+        faction = SummonCombatFaction.PLAYER_ALLY,
+        defaultCount = 1
     );
 
     val isFriendlyToPlayer: Boolean

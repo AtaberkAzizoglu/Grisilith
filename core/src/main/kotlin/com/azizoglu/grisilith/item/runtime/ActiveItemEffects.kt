@@ -147,6 +147,9 @@ object ActiveItemEffects {
             ?.count { it.definition.effectId == effectId }
             ?: 0
 
+    fun currentShepherdScore(): Int =
+        stats?.totalScore(StatType.SHEPHERD) ?: 0
+
     fun resolveDamageContext(context: EnemyDamageContext): EnemyDamageContext {
         val copies = count(ItemEffectId.CHAOS_THEORY)
         if (copies <= 0 || context.damageType !in magicalDamageTypes) return context
@@ -166,6 +169,7 @@ object ActiveItemEffects {
         if (amount <= 0 || inventory == null) return amount
 
         var multiplier = 1.0
+        multiplier *= 1.0 + 0.06 * count(ItemEffectId.BLIND_FAITH)
         val sourceWeapon = weapon(context.sourceWeaponRuntimeId)
         val sourceTags =
             context.sourceWeaponTags.ifEmpty {

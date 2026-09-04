@@ -176,6 +176,10 @@ class SummonedEntity(
             summon: SummonedEntity,
             enemy: Enemy
         ) -> Unit,
+        onToadAttack: (
+            summon: SummonedEntity,
+            enemy: Enemy
+        ) -> Unit,
         onKnightEnemyAttack: (
             summon: SummonedEntity,
             enemy: Enemy
@@ -339,6 +343,18 @@ class SummonedEntity(
                         onKnightPlayerAttack
                 )
             }
+
+            SummonType.TOAD -> {
+                updateImp(
+                    delta = delta,
+                    playerCenterX = playerCenterX,
+                    playerCenterY = playerCenterY,
+                    enemies = enemies,
+                    otherSummons = otherSummons,
+                    onEnemyAttack = onToadAttack,
+                    onSummonAttack = onImpSummonAttack
+                )
+            }
         }
 
         keepInsideWorld(
@@ -387,6 +403,20 @@ class SummonedEntity(
         return health.takeDamage(
             amount
         )
+    }
+
+    fun resolveObstacleCollision(obstacleBounds: Rectangle) {
+        if (type == SummonType.IMP || !combatBounds.overlaps(obstacleBounds)) return
+        val bounds = combatBounds
+        val left = bounds.x + bounds.width - obstacleBounds.x
+        val right = obstacleBounds.x + obstacleBounds.width - bounds.x
+        val bottom = bounds.y + bounds.height - obstacleBounds.y
+        val top = obstacleBounds.y + obstacleBounds.height - bounds.y
+        if (minOf(left, right) < minOf(bottom, top)) {
+            center.x += if (center.x < obstacleBounds.x + obstacleBounds.width / 2f) -left else right
+        } else {
+            center.y += if (center.y < obstacleBounds.y + obstacleBounds.height / 2f) -bottom else top
+        }
     }
 
     fun render(
@@ -1564,6 +1594,9 @@ class SummonedEntity(
 
             SummonType.KNIGHT_SPIRIT ->
                 20f
+
+            SummonType.TOAD ->
+                13f
         }
     }
 
@@ -1593,6 +1626,14 @@ class SummonedEntity(
                     0.58f,
                     0.76f,
                     0.84f
+                )
+
+            SummonType.TOAD ->
+                Color(
+                    0.45f,
+                    0.34f,
+                    0.16f,
+                    0.92f
                 )
         }
     }

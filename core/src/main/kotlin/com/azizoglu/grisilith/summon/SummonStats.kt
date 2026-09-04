@@ -119,6 +119,20 @@ data class SummonStats(
                         attackSpeedMultiplier = attackSpeedMultiplier
                     )
                 }
+
+                SummonType.TOAD -> {
+                    val baseline = EnemyScaling.normalEnemyStats(safeStage)
+                    createScaled(
+                        baseHealth = (baseline.maximumHealth * 0.42f).roundToInt().coerceAtLeast(1),
+                        baseDamage = (baseline.contactDamage * 0.48f).roundToInt().coerceAtLeast(1),
+                        baseMovementSpeed = baseline.movementSpeed * 0.92f,
+                        attackRange = 220f,
+                        healthMultiplier = healthMultiplier * itemHealthMultiplier,
+                        damageMultiplier = damageMultiplier,
+                        movementSpeedMultiplier = movementSpeedMultiplier,
+                        attackSpeedMultiplier = attackSpeedMultiplier * 0.82f
+                    )
+                }
             }
         }
 

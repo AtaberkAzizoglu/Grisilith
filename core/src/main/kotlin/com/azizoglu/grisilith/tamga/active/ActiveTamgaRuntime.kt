@@ -249,6 +249,16 @@ abstract class ActiveTamgaRuntime(
         onReset()
     }
 
+    fun reduceCooldown(seconds: Float) {
+        if (seconds <= 0f || state != ActiveTamgaState.COOLDOWN) return
+        cooldownRemainingSeconds =
+            (cooldownRemainingSeconds - seconds).coerceAtLeast(0f)
+        if (cooldownRemainingSeconds == 0f) {
+            state = ActiveTamgaState.READY
+            onCooldownFinished()
+        }
+    }
+
     protected open fun onActivated() {
         /*
          * Alt runtime isterse uygular.

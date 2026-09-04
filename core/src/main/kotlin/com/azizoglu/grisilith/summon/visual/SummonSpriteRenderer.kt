@@ -159,6 +159,9 @@ class SummonSpriteRenderer {
 
             SummonType.KNIGHT_SPIRIT ->
                 KNIGHT
+
+            SummonType.TOAD ->
+                TOAD
         }
     }
 
@@ -244,6 +247,16 @@ class SummonSpriteRenderer {
 
                 centerAnchorRatio =
                     0.44f
+            )
+
+        private val TOAD =
+            VisualDefinition(
+                root = "summon_visuals/toad/",
+                prefix = "toad",
+                frameCount = 4,
+                secondsPerFrame = 0.16f,
+                worldHeight = 38f,
+                centerAnchorRatio = 0.45f
             )
     }
 }

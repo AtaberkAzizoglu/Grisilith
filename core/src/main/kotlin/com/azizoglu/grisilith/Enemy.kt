@@ -1555,7 +1555,8 @@ class Enemy(
 
     fun render(
         shapeRenderer: ShapeRenderer,
-        renderBody: Boolean = true
+        renderBody: Boolean = true,
+        renderHealthBar: Boolean = true
     ) {
         if (isDead) {
             if (
@@ -1633,9 +1634,46 @@ class Enemy(
             )
         }
 
-        renderHealthBar(
-            shapeRenderer = shapeRenderer
-        )
+        if (renderHealthBar) {
+            renderHealthBar(
+                shapeRenderer = shapeRenderer
+            )
+        }
+    }
+
+    fun resolveCircularExclusion(
+        centerX: Float,
+        centerY: Float,
+        radius: Float
+    ) {
+        if (isDead || ignoresObstacles || radius <= 0f) return
+
+        val dx = this.centerX - centerX
+        val dy = this.centerY - centerY
+        val distanceSquared = dx * dx + dy * dy
+        val requiredDistance = radius + size * 0.5f
+        if (distanceSquared >= requiredDistance * requiredDistance) return
+
+        val distance = kotlin.math.sqrt(distanceSquared).coerceAtLeast(0.001f)
+        val push = requiredDistance - distance
+        position.x += dx / distance * push
+        position.y += dy / distance * push
+    }
+
+    fun constrainCenterToCircle(
+        circleCenterX: Float,
+        circleCenterY: Float,
+        radius: Float
+    ) {
+        if (isDead || radius <= 0f) return
+        val dx = centerX - circleCenterX
+        val dy = centerY - circleCenterY
+        val distanceSquared = dx * dx + dy * dy
+        val maximumDistance = (radius - size * 0.5f).coerceAtLeast(0f)
+        if (distanceSquared <= maximumDistance * maximumDistance) return
+        val distance = kotlin.math.sqrt(distanceSquared).coerceAtLeast(0.001f)
+        position.x += circleCenterX + dx / distance * maximumDistance - centerX
+        position.y += circleCenterY + dy / distance * maximumDistance - centerY
     }
 
     private fun renderBurnedEffect(

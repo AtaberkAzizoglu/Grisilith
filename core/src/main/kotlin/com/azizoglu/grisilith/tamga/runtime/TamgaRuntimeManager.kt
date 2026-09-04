@@ -451,6 +451,11 @@ class TamgaRuntimeManager(
             .tryActivate()
     }
 
+    fun reduceAllActiveCooldowns(seconds: Float) {
+        chargerRuntime.reduceCooldown(seconds)
+        phantomSteedRuntime.reduceCooldown(seconds)
+    }
+
     fun updateChargerAfterMovement(
         delta:
         Float

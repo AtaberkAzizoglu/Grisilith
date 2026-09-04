@@ -129,6 +129,12 @@ class SummonSpawnScheduler(
             0f
     }
 
+    fun reduceCooldown(seconds: Float) {
+        if (seconds <= 0f || hasLivingWave) return
+        remainingCooldownSeconds =
+            (remainingCooldownSeconds - seconds).coerceAtLeast(0f)
+    }
+
     companion object {
         const val COW_ACTIVE_SECONDS =
             15f

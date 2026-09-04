@@ -77,6 +77,10 @@ class WeaponRuntime(
             abilityRuntime
                 .remainingCooldownSeconds
 
+    fun reduceAbilityCooldown(seconds: Float) {
+        abilityRuntime.reduceCooldown(seconds)
+    }
+
     fun update(
         delta: Float,
         slotIndex: Int,

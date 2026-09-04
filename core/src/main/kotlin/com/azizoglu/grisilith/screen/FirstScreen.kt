@@ -112,6 +112,8 @@ import com.azizoglu.grisilith.weapon.glyph.ChalkDustSpellChoice
 import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
 import com.azizoglu.grisilith.summon.SummonManager
 import com.azizoglu.grisilith.weapon.visual.carrier.WeaponCarrierVisualSystem
+import com.azizoglu.grisilith.item.world.WorldItemRuntime
+import com.azizoglu.grisilith.item.world.WorldItemRenderer
 
 class FirstScreen(
     private val game: GrisilithGame,
@@ -242,6 +244,21 @@ class FirstScreen(
 
     private val itemInventory =
         ItemInventory()
+
+    private val worldItemRuntime =
+        WorldItemRuntime(
+            inventory = itemInventory,
+            worldWidth = worldWidth,
+            worldHeight = worldHeight
+        )
+
+    private val worldItemRenderer =
+        WorldItemRenderer()
+
+    private var portalStageCompletionRequested = false
+
+    private val noLootTotemMiniBosses =
+        mutableSetOf<Enemy>()
 
     private val itemStatSynchronizer =
         ItemStatBonusSynchronizer(
@@ -2837,6 +2854,77 @@ class FirstScreen(
 
         ActiveItemEffects.update(delta)
 
+        worldItemRuntime.update(
+            delta = delta,
+            stage = stageController.currentStage,
+            stageType = stageController.currentStageType,
+            elapsedStageSeconds = stageController.elapsedStageTime,
+            stageDurationSeconds = stageController.currentStageDuration,
+            player = player,
+            enemies = enemyManager.allEnemies,
+            mapObstacles = mapObstacles,
+            pickupRadius = pickupRangeController.effectiveRadius,
+            collectCurrency = { x, y, radius ->
+                currencyPickupManager.collectNearestTo(
+                    worldX = x,
+                    worldY = y,
+                    radius = radius,
+                    sessionWallet = sessionWallet,
+                    runStatistics = runStatistics
+                )
+            },
+            nearestCurrency = currencyPickupManager::nearestPickupPosition,
+            onPortalEntered = {
+                portalStageCompletionRequested = true
+            },
+            onPitEnemyKilled = { enemy ->
+                val gold = goldRewardFor(enemy)
+                recordEnemyDeath(enemy, suppressGold = true)
+                gold
+            },
+            onTrapGoldReleased = { x, y, gold ->
+                currencyPickupManager.spawnGoldReward(x, y, gold.toFloat())
+            },
+            onHalfGold = {
+                sessionWallet.spendGold(sessionWallet.goldCoins / 2)
+            },
+            onSpawnRiskMiniBoss = {
+                enemySpawner.spawnBonusMiniBoss(
+                    enemyManager = enemyManager,
+                    currentStage = stageController.currentStage,
+                    playerCenterX = player.centerX,
+                    playerCenterY = player.centerY,
+                    mapObstacles = mapObstacles
+                )?.let(noLootTotemMiniBosses::add)
+            },
+            onHourglass = {
+                val reduction = runStatistics.totalBossesDefeated * 5f
+                weaponRuntimeManager.reduceAllAbilityCooldowns(reduction)
+                tamgaRuntimeManager.reduceAllActiveCooldowns(reduction)
+                summonManager.reduceAllCooldowns(reduction)
+            },
+            onTreasure = { x, y ->
+                val lower = runStatistics.totalBossesDefeated.coerceAtLeast(0)
+                val upper = stageController.currentStage.coerceAtLeast(lower)
+                val count = if (upper == lower) lower else kotlin.random.Random.nextInt(lower, upper + 1)
+                val grisilith = count > 0 && kotlin.random.Random.nextFloat() < 0.01f &&
+                    runRewardTracker.awardBonusGrisilithCoin() > 0
+                currencyPickupManager.spawnGoldReward(x, y, (count - if (grisilith) 1 else 0).toFloat())
+                if (grisilith) currencyPickupManager.spawnGrisilithCoins(x, y, 1)
+            },
+            onToads = { count, x, y ->
+                summonManager.spawnBoneTotemToads(count, x, y, worldWidth, worldHeight)
+            },
+            hasLivingToads = summonManager::hasLivingBoneTotemToads,
+            onAuraEnemyKilled = ::handleEnemyKilled
+        )
+
+        if (portalStageCompletionRequested) {
+            portalStageCompletionRequested = false
+            completeCurrentStage()
+            return
+        }
+
         summonManager.update(
             delta =
                 delta,
@@ -2897,6 +2985,12 @@ class FirstScreen(
                     )
             }
         )
+
+        worldItemRuntime.totemCollisionBounds()?.let { obstacle ->
+            summonManager.activeSummons.forEach {
+                it.resolveObstacleCollision(obstacle)
+            }
+        }
 
         tamgaRuntimeManager
             .updateChargerAfterMovement(
@@ -2960,6 +3054,10 @@ class FirstScreen(
                     damage
                 )
             }
+        )
+
+        worldItemRuntime.resolveEnemyExclusions(
+            enemyManager.allEnemies
         )
 
 
@@ -3176,7 +3274,10 @@ class FirstScreen(
                 obstacleBounds =
                     mapObstacles.map {
                         it.bounds
-                    }
+                    } +
+                        listOfNotNull(
+                            worldItemRuntime.totemCollisionBounds()
+                        )
             )
 
             projectile.checkCollision(
@@ -3495,7 +3596,8 @@ class FirstScreen(
     }
 
     private fun recordEnemyDeath(
-        killedEnemy: Enemy
+        killedEnemy: Enemy,
+        suppressGold: Boolean = false
     ) {
         ActiveItemEffects.onEnemyKilled(killedEnemy)
 
@@ -3503,8 +3605,17 @@ class FirstScreen(
             killedEnemy
         )
 
+        val isNoLootTotemMiniBoss =
+            noLootTotemMiniBosses.remove(killedEnemy)
+
+        if (!isNoLootTotemMiniBoss) {
+            worldItemRuntime.onEnemyKilled(killedEnemy)
+        }
+
         val awardedGrisilithCoins =
-            runRewardTracker.onEnemyKilled(
+            if (isNoLootTotemMiniBoss) {
+                0
+            } else runRewardTracker.onEnemyKilled(
                 enemyType =
                     killedEnemy.type,
 
@@ -3541,20 +3652,8 @@ class FirstScreen(
         )
 
         val goldDrop =
-            ActiveItemEffects.modifyGoldReward(
-                GoldEconomyCalculator
-                    .enemyDrop(
-                    enemyType =
-                        killedEnemy.type,
-
-                    harvestScore =
-                        playerStats
-                            .totalScore(
-                                StatType.HARVEST
-                            )
-                    ),
-                enemyType = killedEnemy.type
-            )
+            if (suppressGold || isNoLootTotemMiniBoss) 0
+            else goldRewardFor(killedEnemy)
 
         if (
             goldDrop >
@@ -3573,8 +3672,19 @@ class FirstScreen(
                 )
         }
 
-        tryDropChestFromEnemy(killedEnemy)
+        if (!isNoLootTotemMiniBoss) {
+            tryDropChestFromEnemy(killedEnemy)
+        }
     }
+
+    private fun goldRewardFor(enemy: Enemy): Int =
+        ActiveItemEffects.modifyGoldReward(
+            GoldEconomyCalculator.enemyDrop(
+                enemyType = enemy.type,
+                harvestScore = playerStats.totalScore(StatType.HARVEST)
+            ),
+            enemyType = enemy.type
+        )
 
     private fun applyChestReward(
         reward:
@@ -3744,6 +3854,11 @@ class FirstScreen(
         val completedStageType =
             stageController.currentStageType
 
+        val merchantShouldOpenMarket =
+            worldItemRuntime.merchantGuaranteesMarket
+
+        worldItemRuntime.onStageEnded()
+
         bankUncollectedCurrencyForNextStage()
 
         enemyManager.clearAll()
@@ -3772,7 +3887,8 @@ class FirstScreen(
         chestRewardController.begin(
             shouldOpenMarketAfterStatSelection =
                 completedStageType ==
-                    StageType.MINI_BOSS
+                    StageType.MINI_BOSS ||
+                    merchantShouldOpenMarket
         )
     }
 
@@ -3815,6 +3931,9 @@ class FirstScreen(
 
             weaponCarrierVisualSystem =
                 weaponCarrierVisualSystem,
+
+            showEnemyHealthBars =
+                !worldItemRuntime.hidesEnemyHealthBars,
 
             renderBehindEntities = {
                     activeShapeRenderer ->
@@ -3867,6 +3986,11 @@ class FirstScreen(
                             activeShapeRenderer
                     )
             }
+        )
+
+        worldItemRenderer.render(
+            snapshot = worldItemRuntime.visualSnapshot(),
+            camera = camera
         )
 
         if (
@@ -4189,6 +4313,7 @@ class FirstScreen(
         pauseRenderer.dispose()
 
         worldRenderer.dispose()
+        worldItemRenderer.dispose()
         shapeRenderer.dispose()
         hudBatch.dispose()
         hudFont.dispose()
@@ -4292,6 +4417,8 @@ class FirstScreen(
 
         chestWorldVisualManager
             .clear()
+
+        worldItemRuntime.clearForRunEnd()
 
         enemyManager.clearAll()
         damageNumberManager.clear()

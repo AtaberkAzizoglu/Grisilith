@@ -148,6 +148,8 @@ class WorldRenderer(
         weaponCarrierVisualSystem:
         WeaponCarrierVisualSystem,
 
+        showEnemyHealthBars: Boolean = true,
+
         renderBehindEntities:
         ((ShapeRenderer) -> Unit)? = null
     ) {
@@ -602,7 +604,10 @@ class WorldRenderer(
                         !enemySpriteRenderer
                             .hasVisualDefinition(
                                 enemy
-                            )
+                            ),
+
+                    renderHealthBar =
+                        showEnemyHealthBars
                 )
             }
 
@@ -826,4 +831,3 @@ class WorldRenderer(
             .dispose()
     }
 }
-

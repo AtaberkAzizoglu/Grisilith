@@ -237,6 +237,12 @@ class WeaponAbilityRuntime(
         skipNextCooldown = false
     }
 
+    fun reduceCooldown(seconds: Float) {
+        if (seconds <= 0f) return
+        cooldownRemainingSeconds =
+            (cooldownRemainingSeconds - seconds).coerceAtLeast(0f)
+    }
+
     private fun beginCooldown(
         ability:
         WeaponAbilityDefinition

@@ -709,6 +709,24 @@ class Player(
         )
     }
 
+    fun constrainCenterToCircle(
+        circleCenterX: Float,
+        circleCenterY: Float,
+        radius: Float
+    ) {
+        if (radius <= 0f) return
+        val dx = centerX - circleCenterX
+        val dy = centerY - circleCenterY
+        val distanceSquared = dx * dx + dy * dy
+        val maximumDistance = (radius - bounds.width * 0.5f).coerceAtLeast(0f)
+        if (distanceSquared <= maximumDistance * maximumDistance) return
+        val distance = kotlin.math.sqrt(distanceSquared).coerceAtLeast(0.001f)
+        val targetCenterX = circleCenterX + dx / distance * maximumDistance
+        val targetCenterY = circleCenterY + dy / distance * maximumDistance
+        position.x += targetCenterX - centerX
+        position.y += targetCenterY - centerY
+    }
+
     fun sacrificeHalfCurrentHealth() {
         val current = health.currentHealth
         if (current <= 1) return

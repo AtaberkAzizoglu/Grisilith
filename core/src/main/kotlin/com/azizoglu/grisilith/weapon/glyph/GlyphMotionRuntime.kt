@@ -72,6 +72,12 @@ class GlyphMotionRuntime(
         get() =
             sharedCooldownRemainingSeconds
 
+    fun reduceCooldown(seconds: Float) {
+        if (seconds <= 0f) return
+        sharedCooldownRemainingSeconds =
+            (sharedCooldownRemainingSeconds - seconds).coerceAtLeast(0f)
+    }
+
     val remainingDrawingSeconds: Float
         get() =
             if (

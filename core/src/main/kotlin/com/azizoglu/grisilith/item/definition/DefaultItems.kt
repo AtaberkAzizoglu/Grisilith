@@ -785,6 +785,87 @@ object DefaultItems {
         ItemRarity.RARE, ItemEffectId.LITTLE_RISK
     )
 
+    val blindFaith = effectItem(
+        "ITEM_BLIND_FAITH", "Blind Faith",
+        "Deals 6% more damage per copy and hides enemy health bars. Mist begins at two copies and grows with further copies.",
+        ItemRarity.RARE, ItemEffectId.BLIND_FAITH,
+        maximumInventoryCopies = 5
+    )
+
+    val animatedBroom = effectItem(
+        "ITEM_ANIMATED_BROOM", "Animated Broom",
+        "Animates one untargetable broom per copy to collect Gold and Grisilith Coins.",
+        ItemRarity.RARE, ItemEffectId.ANIMATED_BROOM
+    )
+
+    val callThePortal = effectItem(
+        "ITEM_CALL_THE_PORTAL", "Call the Portal",
+        "Adds a 1% chance per copy for an exit portal to appear halfway through a normal stage.",
+        ItemRarity.LEGENDARY, ItemEffectId.CALL_THE_PORTAL
+    )
+
+    val isItMerchant = effectItem(
+        "ITEM_IS_IT_MERCHANT", "Is It Merchant?",
+        "Has a 5% chance per copy each stage to reveal a merchant that guarantees a market after the stage.",
+        ItemRarity.LEGENDARY, ItemEffectId.IS_IT_MERCHANT
+    )
+
+    val pitTrap = effectItem(
+        "ITEM_PIT_TRAP", "Pit Trap",
+        "Standing still prepares a pit that executes up to four grounded normal enemies and releases their Gold when full.",
+        ItemRarity.LEGENDARY, ItemEffectId.PIT_TRAP
+    )
+
+    val lootTheEnemies = effectItem(
+        "ITEM_LOOT_THE_ENEMIES", "Loot the Enemies",
+        "Enemies have a 5% loot chance per copy. Loot heals 10% maximum health, but Movement Speed is reduced by 1 per copy.",
+        ItemRarity.RARE, ItemEffectId.LOOT_THE_ENEMIES,
+        statModifiers = listOf(StatModifier(StatType.MOVEMENT_SPEED, -1)),
+        maximumInventoryCopies = 5
+    )
+
+    val boneTotems = effectItem(
+        "ITEM_BONE_TOTEMS", "Bone Totems",
+        "Stages have a 35% chance to contain a chargeable Bone Totem that rolls one reward from the owned Totem List.",
+        ItemRarity.RARE, ItemEffectId.BONE_TOTEMS,
+        maximumInventoryCopies = 1
+    )
+
+    val boneTotemHealingAura = effectItem(
+        "ITEM_BONE_TOTEM_HEALING_AURA", "Bone Totems List: Healing Aura",
+        "Adds Healing Aura to the Bone Totem reward pool.",
+        ItemRarity.RARE, ItemEffectId.BONE_TOTEM_HEALING_AURA,
+        maximumInventoryCopies = 1
+    )
+
+    val boneTotemProtectersArea = effectItem(
+        "ITEM_BONE_TOTEM_PROTECTERS_AREA", "Bone Totems List: Protecters Area",
+        "Adds Protecters Area to the Bone Totem reward pool.",
+        ItemRarity.RARE, ItemEffectId.BONE_TOTEM_PROTECTERS_AREA,
+        maximumInventoryCopies = 1
+    )
+
+    val boneTotemBurriedTreasure = effectItem(
+        "ITEM_BONE_TOTEM_BURRIED_TREASURE", "Bone Totems List: Burried Treasure",
+        "Adds Burried Treasure to the Bone Totem reward pool.",
+        ItemRarity.RARE, ItemEffectId.BONE_TOTEM_BURRIED_TREASURE,
+        maximumInventoryCopies = 1
+    )
+
+    val boneTotemHourglass = effectItem(
+        "ITEM_BONE_TOTEM_HOURGLASS", "Bone Totems List: Hourglass",
+        "Adds Hourglass to the Bone Totem reward pool.",
+        ItemRarity.RARE, ItemEffectId.BONE_TOTEM_HOURGLASS,
+        maximumInventoryCopies = 1
+    )
+
+    val boneTotemToads = effectItem(
+        "ITEM_BONE_TOTEM_TOADS", "Bone Totems List: Toads",
+        "Adds Toads to the Bone Totem reward pool.",
+        ItemRarity.RARE, ItemEffectId.BONE_TOTEM_TOADS,
+        maximumInventoryCopies = 1
+    )
+
     val all:
         List<ItemDefinition> =
         listOf(
@@ -863,6 +944,18 @@ object DefaultItems {
             bounty,
             bestiaryHunter,
             bossTrophy,
-            littleRisk
+            littleRisk,
+            blindFaith,
+            animatedBroom,
+            callThePortal,
+            isItMerchant,
+            pitTrap,
+            lootTheEnemies,
+            boneTotems,
+            boneTotemHealingAura,
+            boneTotemProtectersArea,
+            boneTotemBurriedTreasure,
+            boneTotemHourglass,
+            boneTotemToads
         )
 }

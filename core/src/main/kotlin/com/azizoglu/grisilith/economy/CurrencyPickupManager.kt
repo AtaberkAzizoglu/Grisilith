@@ -278,6 +278,52 @@ class CurrencyPickupManager {
         }
     }
 
+    fun collectNearestTo(
+        worldX: Float,
+        worldY: Float,
+        radius: Float,
+        sessionWallet: SessionWallet,
+        runStatistics: RunStatistics
+    ): Boolean {
+        val radiusSquared = radius * radius
+        val pickup = pickups
+            .asSequence()
+            .filter { !it.isCollected }
+            .filter {
+                val dx = it.centerX - worldX
+                val dy = it.centerY - worldY
+                dx * dx + dy * dy <= radiusSquared
+            }
+            .minByOrNull {
+                val dx = it.centerX - worldX
+                val dy = it.centerY - worldY
+                dx * dx + dy * dy
+            }
+            ?: return false
+
+        pickup.collectImmediately()
+        if (pickup.type == CurrencyPickupType.GOLD) {
+            sessionWallet.addGold(1f)
+            runStatistics.recordGoldCollected(1f)
+        }
+        pickups.remove(pickup)
+        return true
+    }
+
+    fun nearestPickupPosition(
+        worldX: Float,
+        worldY: Float
+    ): Pair<Float, Float>? =
+        pickups
+            .asSequence()
+            .filter { !it.isCollected }
+            .minByOrNull {
+                val dx = it.centerX - worldX
+                val dy = it.centerY - worldY
+                dx * dx + dy * dy
+            }
+            ?.let { it.centerX to it.centerY }
+
     fun deferUncollectedForNextStage():
         CurrencyStageLoss {
 

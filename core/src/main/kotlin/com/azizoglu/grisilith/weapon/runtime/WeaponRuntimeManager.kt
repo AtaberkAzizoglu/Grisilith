@@ -2082,6 +2082,12 @@ class WeaponRuntimeManager(
             }
     }
 
+    fun reduceAllAbilityCooldowns(seconds: Float) {
+        if (seconds <= 0f) return
+        runtimesByWeapon.values.forEach { it.reduceAbilityCooldown(seconds) }
+        glyphMotionRuntime.reduceCooldown(seconds)
+    }
+
     fun resetAllTimers() {
         defensiveLineRuntime.reset()
         igniteDashRuntime.reset()

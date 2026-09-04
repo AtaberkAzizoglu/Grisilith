@@ -139,6 +139,18 @@ class SummonManager(
                         )
                     },
 
+                    onToadAttack = {
+                            summon,
+                            enemy ->
+
+                        spawnToadPoisonProjectile(
+                            summon = summon,
+                            targetCenterX = enemy.centerX,
+                            targetCenterY = enemy.centerY,
+                            projectiles = projectiles
+                        )
+                    },
+
                     onKnightEnemyAttack = {
                             summon,
                             enemy ->
@@ -575,6 +587,47 @@ class SummonManager(
         schedulersByWeaponRuntimeId.clear()
     }
 
+    fun spawnBoneTotemToads(
+        count: Int,
+        centerX: Float,
+        centerY: Float,
+        worldWidth: Float,
+        worldHeight: Float
+    ) {
+        val stats = SummonStats.create(
+            type = SummonType.TOAD,
+            playerStats = playerStats,
+            stage = currentStageProvider()
+        )
+
+        repeat(count.coerceAtLeast(0)) { index ->
+            val angle = MathUtils.PI2 * index / count.coerceAtLeast(1)
+            entities.add(
+                SummonedEntity(
+                    sourceWeaponRuntimeId = BONE_TOTEM_SOURCE_ID,
+                    sourceWeaponDefinitionId = BONE_TOTEM_SOURCE_ID,
+                    sourceWeaponDisplayName = "Bone Totem",
+                    type = SummonType.TOAD,
+                    stats = stats,
+                    startCenterX = (centerX + MathUtils.cos(angle) * 46f).coerceIn(12f, worldWidth - 12f),
+                    startCenterY = (centerY + MathUtils.sin(angle) * 46f).coerceIn(12f, worldHeight - 12f),
+                    lifetimeSeconds = BONE_TOTEM_TOAD_LIFETIME_SECONDS
+                )
+            )
+        }
+    }
+
+    fun hasLivingBoneTotemToads(): Boolean =
+        entities.any {
+            it.sourceWeaponRuntimeId == BONE_TOTEM_SOURCE_ID && !it.isExpired
+        }
+
+    fun reduceAllCooldowns(seconds: Float) {
+        schedulersByWeaponRuntimeId.values.forEach {
+            it.reduceCooldown(seconds)
+        }
+    }
+
     private fun spawnImpFireProjectile(
         summon: SummonedEntity,
         targetCenterX: Float,
@@ -681,6 +734,47 @@ class SummonManager(
 
                 conditionApplication =
                     burnedApplication
+            )
+        )
+    }
+
+    private fun spawnToadPoisonProjectile(
+        summon: SummonedEntity,
+        targetCenterX: Float,
+        targetCenterY: Float,
+        projectiles: MutableList<Projectile>
+    ) {
+        if (summon.isExpired) return
+        val sourceName = "Bone Totem — Toad"
+        val poison = ConditionDamageCalculator.createApplication(
+            type = ConditionType.POISONED,
+            playerStats = playerStats,
+            durationSeconds = TOAD_POISON_DURATION_SECONDS,
+            sourceWeaponRuntimeId = summon.sourceWeaponRuntimeId,
+            sourceWeaponDefinitionId = summon.sourceWeaponDefinitionId,
+            sourceName = sourceName,
+            sourceCenterX = summon.centerX,
+            sourceCenterY = summon.centerY
+        )
+        projectiles.add(
+            Projectile(
+                startX = summon.centerX,
+                startY = summon.centerY,
+                targetX = targetCenterX,
+                targetY = targetCenterY,
+                sourceWeaponName = sourceName,
+                sourceWeapon = null,
+                sourceWeaponSlotIndex = -1,
+                sourceSummonRuntimeId = summon.runtimeId,
+                damage = summon.stats.baseDamage,
+                isCriticalHit = false,
+                maximumTargets = 1,
+                projectileSpeed = TOAD_PROJECTILE_SPEED,
+                maximumTravelDistance = TOAD_PROJECTILE_MAXIMUM_TRAVEL_DISTANCE,
+                damageType = DamageType.POISON,
+                knockback = 0f,
+                sizeMultiplier = TOAD_PROJECTILE_SIZE_MULTIPLIER,
+                conditionApplication = poison
             )
         )
     }
@@ -1304,6 +1398,12 @@ class SummonManager(
         private const val MAX_WEAPON_SLOTS =
             6
 
+        private const val BONE_TOTEM_SOURCE_ID =
+            "BONE_TOTEM_TOADS"
+
+        private const val BONE_TOTEM_TOAD_LIFETIME_SECONDS =
+            40f
+
         private const val KNIGHT_SPAWN_DISTANCE =
             500f
 
@@ -1341,6 +1441,18 @@ class SummonManager(
             1.05f
 
         private const val IMP_BURN_DURATION_SECONDS =
+            3f
+
+        private const val TOAD_PROJECTILE_SPEED =
+            360f
+
+        private const val TOAD_PROJECTILE_MAXIMUM_TRAVEL_DISTANCE =
+            300f
+
+        private const val TOAD_PROJECTILE_SIZE_MULTIPLIER =
+            0.72f
+
+        private const val TOAD_POISON_DURATION_SECONDS =
             3f
     }
 }
