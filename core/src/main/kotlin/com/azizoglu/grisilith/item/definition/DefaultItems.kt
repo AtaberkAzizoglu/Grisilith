@@ -8,7 +8,7 @@ import com.azizoglu.grisilith.statistics.StatType
 
 object DefaultItems {
 
-    private fun uncommonStatItem(
+    private fun commonStatItem(
         id: String,
         displayName: String,
         description: String,
@@ -30,7 +30,7 @@ object DefaultItems {
                 ),
 
             rarity =
-                ItemRarity.UNCOMMON,
+                ItemRarity.COMMON,
 
             statModifiers =
                 listOf(
@@ -43,7 +43,7 @@ object DefaultItems {
                 ),
 
             initialUnlockState =
-                ContentUnlockState.LOCKED
+                ContentUnlockState.UNLOCKED
         )
     }
 
@@ -70,7 +70,7 @@ object DefaultItems {
     )
 
     val spellScroll =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_SPELL_SCROLL",
 
@@ -85,7 +85,7 @@ object DefaultItems {
         )
 
     val windBoots =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_WIND_BOOTS",
 
@@ -100,7 +100,7 @@ object DefaultItems {
         )
 
     val vampireFangs =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_VAMPIRE_FANGS",
 
@@ -115,7 +115,7 @@ object DefaultItems {
         )
 
     val luckyDice =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_LUCKY_DICE",
 
@@ -130,7 +130,7 @@ object DefaultItems {
         )
 
     val gladiatorsLocket =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_GLADIATORS_LOCKET",
 
@@ -145,7 +145,7 @@ object DefaultItems {
         )
 
     val lordBledasBanner =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_LORD_BLEDAS_BANNER",
 
@@ -160,7 +160,7 @@ object DefaultItems {
         )
 
     val hourglass =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_HOURGLASS",
 
@@ -175,7 +175,7 @@ object DefaultItems {
         )
 
     val hillGiantsBelt =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_HILL_GIANTS_BELT",
 
@@ -190,7 +190,7 @@ object DefaultItems {
         )
 
     val chainMail =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_CHAIN_MAIL",
 
@@ -205,7 +205,7 @@ object DefaultItems {
         )
 
     val sandals =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_SANDALS",
 
@@ -220,7 +220,7 @@ object DefaultItems {
         )
 
     val kepenek =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_KEPENEK",
 
@@ -235,7 +235,7 @@ object DefaultItems {
         )
 
     val whetstone =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_WHETSTONE",
 
@@ -250,7 +250,7 @@ object DefaultItems {
         )
 
     val warHorn =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_WAR_HORN",
 
@@ -265,7 +265,7 @@ object DefaultItems {
         )
 
     val goddessSelinusAmulet =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_GODDESS_SELINUS_AMULET",
 
@@ -280,7 +280,7 @@ object DefaultItems {
         )
 
     val copperRod =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_COPPER_ROD",
 
@@ -295,7 +295,7 @@ object DefaultItems {
         )
 
     val amuletOfAzuth =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_AMULET_OF_AZUTH",
 
@@ -310,7 +310,7 @@ object DefaultItems {
         )
 
     val griffinFeather =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_GRIFFIN_FEATHER",
 
@@ -325,7 +325,7 @@ object DefaultItems {
         )
 
     val warmastersOrder =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_WARMASTERS_ORDER",
 
@@ -340,7 +340,7 @@ object DefaultItems {
         )
 
     val heavyArrow =
-        uncommonStatItem(
+        commonStatItem(
             id =
                 "ITEM_HEAVY_ARROW",
 
@@ -411,7 +411,7 @@ object DefaultItems {
     val chaosTheory = effectItem(
         "ITEM_CHAOS_THEORY",
         "Chaos Theory",
-        "Magical damage has a 20% chance to change into another magical damage type.",
+        "Magical damage has a stacking 20% chance per copy to change into another magical damage type.",
         ItemRarity.RARE,
         ItemEffectId.CHAOS_THEORY
     )
@@ -653,8 +653,18 @@ object DefaultItems {
 
     val secondHeart = effectItem(
         "ITEM_SECOND_HEART", "Second Heart",
-        "Once per stage, lethal damage leaves you at 1 health and grants 3 seconds of invulnerability.",
-        ItemRarity.LEGENDARY, ItemEffectId.SECOND_HEART
+        "Lethal damage consumes one copy, leaves you at 1 health and grants 3 seconds of invulnerability.",
+        ItemRarity.LEGENDARY, ItemEffectId.SECOND_HEART,
+        sharedCopyLimitGroup = "SECOND_HEART",
+        sharedCopyLimit = 3
+    )
+
+    val brokenHeart = effectItem(
+        "ITEM_BROKEN_HEART", "Broken Heart",
+        "A spent Second Heart. It has no effect and cannot appear as a reward.",
+        ItemRarity.LEGENDARY, ItemEffectId.BROKEN_HEART,
+        sharedCopyLimitGroup = "SECOND_HEART",
+        sharedCopyLimit = 3
     )
 
     val crowdHunger = effectItem(
@@ -720,7 +730,7 @@ object DefaultItems {
 
     val fearOfDeath = effectItem(
         "ITEM_FEAR_OF_DEATH", "Fear of Death",
-        "Elite or Boss deaths have a 30% chance to Frighten nearby normal enemies for 3 seconds.",
+        "Elite or Boss deaths have a stacking 30% chance per copy to Frighten nearby normal enemies for 3 seconds.",
         ItemRarity.LEGENDARY, ItemEffectId.FEAR_OF_DEATH
     )
 
@@ -764,7 +774,8 @@ object DefaultItems {
     val bounty = effectItem(
         "ITEM_BOUNTY", "Bounty",
         "Each stage marks one Enemy Type; its Gold reward is multiplied by 1.5, or by 3 for bosses.",
-        ItemRarity.LEGENDARY, ItemEffectId.BOUNTY
+        ItemRarity.LEGENDARY, ItemEffectId.BOUNTY,
+        maximumInventoryCopies = 1
     )
 
     val bestiaryHunter = effectItem(
@@ -924,6 +935,7 @@ object DefaultItems {
             bloodSacrifice,
             deepWounds,
             secondHeart,
+            brokenHeart,
             crowdHunger,
             huntersReward,
             ghostProjectile,

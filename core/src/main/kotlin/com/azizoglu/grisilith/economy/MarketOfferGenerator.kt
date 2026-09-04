@@ -18,28 +18,22 @@ object MarketOfferGenerator {
     private const val MAXIMUM_LUCK =
         50
 
-    /*
-     * 50 Luck'ta tercih edilen Weapon grubu:
-     * %33,33 → %42
-     */
-    private const val PREFERRED_GROUP_CHANCE_AT_MAX_LUCK =
-        0.42f
+    /** Karakterin tercih ettiği Weapon grubu Luck 0'da %36, Luck 50'de %45. */
+    private const val PREFERRED_GROUP_CHANCE_AT_ZERO_LUCK = 0.36f
+    private const val PREFERRED_GROUP_CHANCE_AT_MAX_LUCK = 0.45f
 
-    /*
-     * Sahip olunan her farklı Weapon için:
-     * Her Luck başına doğrudan +%0,2 puan.
-     *
-     * 50 Luck → +%10 puan.
-     */
-    private const val OWNED_WEAPON_CHANCE_PER_LUCK =
-        0.002f
+    private const val WEAPON_OFFER_CHANCE = 0.60f
 
-    /*
-     * Elde bulunan bir Weapon'ın ait olduğu market grubu,
-     * 50 Luck'ta en fazla +5 yüzde puanı kazanır.
-     */
-    private const val OWNED_WEAPON_GROUP_CHANCE_PER_LUCK =
-        0.001f
+    /** Sahip olunan Weapon, Luck 0'da +%0,5; Luck 50'de +%5 puan kazanır. */
+    private const val OWNED_WEAPON_CHANCE_AT_ZERO_LUCK = 0.005f
+    private const val OWNED_WEAPON_CHANCE_AT_MAX_LUCK = 0.05f
+
+    /** Sahip olunan Weapon grubu Luck 0'da +%1; Luck 50'de +%6 puan kazanır. */
+    private const val OWNED_WEAPON_GROUP_CHANCE_AT_ZERO_LUCK = 0.01f
+    private const val OWNED_WEAPON_GROUP_CHANCE_AT_MAX_LUCK = 0.06f
+
+    private const val CHARACTER_ITEM_WEIGHT_AT_ZERO_LUCK = 1.08f
+    private const val CHARACTER_ITEM_WEIGHT_AT_MAX_LUCK = 1.30f
 
     private enum class WeaponMarketGroup {
         MELEE,
@@ -49,7 +43,7 @@ object MarketOfferGenerator {
 
     fun generateOffers(
         currentStage: Int,
-        offerCount: Int = 4,
+        offerCount: Int = 5,
         luckScore: Int = 10,
 
         selectedCharacter:
@@ -60,6 +54,10 @@ object MarketOfferGenerator {
          * Level ve kopya sayısı hesaba katılmaz.
          */
         ownedWeaponIds:
+        Set<String> =
+            emptySet(),
+
+        ownedItemIds:
         Set<String> =
             emptySet(),
 
@@ -96,6 +94,9 @@ object MarketOfferGenerator {
                 ownedWeaponIds =
                     ownedWeaponIds,
 
+                ownedItemIds =
+                    ownedItemIds,
+
                 itemEligibility =
                     itemEligibility
             )
@@ -108,6 +109,8 @@ object MarketOfferGenerator {
         selectedCharacter:
         CharacterDefinition,
         ownedWeaponIds:
+        Set<String>,
+        ownedItemIds:
         Set<String>,
         itemEligibility:
         (ItemDefinition) -> Boolean
@@ -140,13 +143,19 @@ object MarketOfferGenerator {
                     luckScore =
                         luckScore,
 
+                    selectedCharacter =
+                        selectedCharacter,
+
+                    ownedItemIds =
+                        ownedItemIds,
+
                     itemEligibility =
                         itemEligibility
                 )
             }
 
         return if (
-            Random.nextBoolean()
+            Random.nextFloat() < WEAPON_OFFER_CHANCE
         ) {
 
             weaponOffer()
@@ -295,12 +304,11 @@ object MarketOfferGenerator {
                 }
             } else {
                 val preferredChance =
-                    baseGroupChance +
+                    PREFERRED_GROUP_CHANCE_AT_ZERO_LUCK +
                         (
                             PREFERRED_GROUP_CHANCE_AT_MAX_LUCK -
-                                baseGroupChance
-                            ) *
-                        luckProgress
+                                PREFERRED_GROUP_CHANCE_AT_ZERO_LUCK
+                            ) * luckProgress
 
                 val otherGroupChance =
                     (
@@ -336,7 +344,6 @@ object MarketOfferGenerator {
 
         val weightedGroups =
             if (
-                safeLuck <= 0 ||
                 ownedGroups.isEmpty() ||
                 unownedGroups.isEmpty()
             ) {
@@ -345,8 +352,11 @@ object MarketOfferGenerator {
                 }
             } else {
                 val requestedBonusPerOwnedGroup =
-                    safeLuck *
-                        OWNED_WEAPON_GROUP_CHANCE_PER_LUCK
+                    OWNED_WEAPON_GROUP_CHANCE_AT_ZERO_LUCK +
+                        (
+                            OWNED_WEAPON_GROUP_CHANCE_AT_MAX_LUCK -
+                                OWNED_WEAPON_GROUP_CHANCE_AT_ZERO_LUCK
+                            ) * luckProgress
 
                 val requestedTotalBonus =
                     requestedBonusPerOwnedGroup *
@@ -438,8 +448,7 @@ object MarketOfferGenerator {
          */
         if (
             ownedWeapons.isEmpty() ||
-            unownedWeapons.isEmpty() ||
-            safeLuck <= 0
+            unownedWeapons.isEmpty()
         ) {
             return availableWeapons.random()
         }
@@ -448,9 +457,13 @@ object MarketOfferGenerator {
             1f /
                 availableWeapons.size
 
+        val luckProgress = safeLuck / MAXIMUM_LUCK.toFloat()
         val requestedBonusPerOwnedWeapon =
-            safeLuck *
-                OWNED_WEAPON_CHANCE_PER_LUCK
+            OWNED_WEAPON_CHANCE_AT_ZERO_LUCK +
+                (
+                    OWNED_WEAPON_CHANCE_AT_MAX_LUCK -
+                        OWNED_WEAPON_CHANCE_AT_ZERO_LUCK
+                    ) * luckProgress
 
         /*
          * Unowned tarafın ihtimali sıfırın altına
@@ -577,6 +590,8 @@ object MarketOfferGenerator {
     private fun createRandomItemOffer(
         currentStage: Int,
         luckScore: Int,
+        selectedCharacter: CharacterDefinition,
+        ownedItemIds: Set<String>,
         itemEligibility: (ItemDefinition) -> Boolean
     ): MarketOffer? {
         val availableItems =
@@ -584,7 +599,11 @@ object MarketOfferGenerator {
                 .filter { item ->
                     ContentUnlockResolver.isUnlocked(
                         item
-                    ) && itemEligibility(item)
+                    ) &&
+                        item.effectId !=
+                            com.azizoglu.grisilith.item.definition.ItemEffectId.BROKEN_HEART &&
+                        isBoneTotemListEligible(item, ownedItemIds) &&
+                        itemEligibility(item)
                 }
 
         if (availableItems.isEmpty()) {
@@ -598,6 +617,9 @@ object MarketOfferGenerator {
 
                 luckScore =
                     luckScore,
+
+                selectedCharacter =
+                    selectedCharacter,
 
                 currentStage =
                     currentStage
@@ -653,6 +675,9 @@ object MarketOfferGenerator {
         luckScore:
         Int,
 
+        selectedCharacter:
+        CharacterDefinition,
+
         currentStage:
         Int
     ): ItemDefinition {
@@ -681,9 +706,27 @@ object MarketOfferGenerator {
                 weightedValues = rarityWeights
             )
 
-        return itemsByRarity
-            .getValue(selectedRarity)
-            .random()
+        val rarityItems = itemsByRarity.getValue(selectedRarity)
+        val luckProgress =
+            luckScore.coerceIn(0, MAXIMUM_LUCK) /
+                MAXIMUM_LUCK.toFloat()
+        val affinityWeight =
+            CHARACTER_ITEM_WEIGHT_AT_ZERO_LUCK +
+                (
+                    CHARACTER_ITEM_WEIGHT_AT_MAX_LUCK -
+                        CHARACTER_ITEM_WEIGHT_AT_ZERO_LUCK
+                    ) * luckProgress
+
+        return selectWeighted(
+            rarityItems.map { item ->
+                item to if (
+                    isCharacterRelevantItem(
+                        item,
+                        selectedCharacter.preferredMarketStats
+                    )
+                ) affinityWeight else 1f
+            }
+        )
     }
 
     private fun itemBasePrice(
@@ -692,6 +735,10 @@ object MarketOfferGenerator {
         return when (
             item.rarity
         ) {
+            com.azizoglu.grisilith.item
+                .definition.ItemRarity.COMMON ->
+                14
+
             com.azizoglu.grisilith.item
                 .definition.ItemRarity.UNCOMMON ->
                 20
@@ -708,6 +755,56 @@ object MarketOfferGenerator {
                 .definition.ItemRarity.ARTIFACT ->
                 85
         }
+    }
+
+    private fun isBoneTotemListEligible(
+        item: ItemDefinition,
+        ownedItemIds: Set<String>
+    ): Boolean {
+        val isListItem = item.effectId in setOf(
+            com.azizoglu.grisilith.item.definition.ItemEffectId.BONE_TOTEM_HEALING_AURA,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.BONE_TOTEM_PROTECTERS_AREA,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.BONE_TOTEM_BURRIED_TREASURE,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.BONE_TOTEM_HOURGLASS,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.BONE_TOTEM_TOADS
+        )
+        return !isListItem || DefaultItems.boneTotems.id.value in ownedItemIds
+    }
+
+    private fun isCharacterRelevantItem(
+        item: ItemDefinition,
+        preferredStats: Set<StatType>
+    ): Boolean {
+        if (item.statModifiers.any { it.amount > 0 && it.statType in preferredStats }) {
+            return true
+        }
+
+        val affinityStats = when (item.effectId) {
+            com.azizoglu.grisilith.item.definition.ItemEffectId.LONG_SHOT,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.GHOST_PROJECTILE,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.CRITICAL_MOMENTUM,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.CLOSE_CALL,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.BLOOD_SCENT ->
+                setOf(StatType.DEXTERITY, StatType.CRIT_RATE, StatType.MOVEMENT_SPEED)
+
+            com.azizoglu.grisilith.item.definition.ItemEffectId.SPECIALIST,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.CHAOS_THEORY ->
+                setOf(StatType.WISDOM, StatType.ELEMENTAL_DAMAGE, StatType.MIGHT_OF_NATURE)
+
+            com.azizoglu.grisilith.item.definition.ItemEffectId.SUMMONERS_PACT,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.SHARED_BLOOD,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.SHARED_FURY,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.SUMMONED_LEGACY ->
+                setOf(StatType.SHEPHERD, StatType.WISDOM)
+
+            com.azizoglu.grisilith.item.definition.ItemEffectId.EXECUTIONERS_MARK,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.THORNS,
+            com.azizoglu.grisilith.item.definition.ItemEffectId.CROWD_HUNGER ->
+                setOf(StatType.STRENGTH, StatType.ARMOR_CLASS, StatType.MAX_HP)
+
+            else -> emptySet()
+        }
+        return affinityStats.any { it in preferredStats }
     }
 
     private fun buildItemDescription(

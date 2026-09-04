@@ -100,6 +100,24 @@ class ItemInventory {
         )
     }
 
+    fun replaceOneDefinition(
+        from: com.azizoglu.grisilith.item.definition.ItemDefinition,
+        to: com.azizoglu.grisilith.item.definition.ItemDefinition
+    ): Boolean {
+        val index = items.indexOfFirst { it.definition.id == from.id }
+        if (index < 0) return false
+        items[index] = ItemInstance(definition = to)
+        return true
+    }
+
+    fun removeAllExceptDefinition(
+        definition: com.azizoglu.grisilith.item.definition.ItemDefinition
+    ): Int {
+        val previousSize = items.size
+        items.removeAll { it.definition.id != definition.id }
+        return previousSize - items.size
+    }
+
     fun itemAt(
         index: Int
     ): ItemInstance? {

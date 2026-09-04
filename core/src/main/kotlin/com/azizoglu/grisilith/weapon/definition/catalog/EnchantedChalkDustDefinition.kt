@@ -112,6 +112,6 @@ object EnchantedChalkDustDefinition {
                     .glyphCasting,
 
             initialUnlockState =
-                ContentUnlockState.LOCKED
+                ContentUnlockState.UNLOCKED
         )
 }

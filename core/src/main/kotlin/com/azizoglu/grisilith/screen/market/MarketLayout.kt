@@ -150,7 +150,7 @@ data class MarketLayout(
                 )
 
             /*
-             * Dört market kartı.
+             * Beş market kartı.
              */
             val offerAreaY =
                 topBarY -
@@ -163,11 +163,11 @@ data class MarketLayout(
             val offerCardWidth =
                 (
                     mainColumnWidth -
-                        offerCardGap * 3f
-                    ) / 4f
+                        offerCardGap * 4f
+                    ) / 5f
 
             val offerCards =
-                List(4) { index ->
+                List(5) { index ->
                     Rectangle(
                         mainColumnX +
                             index *

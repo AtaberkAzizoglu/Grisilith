@@ -42,6 +42,7 @@ object ChestItemRarityCalculator {
         15
 
     data class Distribution(
+        val common: Float,
         val uncommon: Float,
         val rare: Float,
         val legendary: Float,
@@ -52,6 +53,9 @@ object ChestItemRarityCalculator {
             ItemRarity
         ): Float {
             return when (rarity) {
+                ItemRarity.COMMON ->
+                    common
+
                 ItemRarity.UNCOMMON ->
                     uncommon
 
@@ -83,6 +87,7 @@ object ChestItemRarityCalculator {
      */
     private val ZERO =
         Distribution(
+            common = 0f,
             uncommon = 0.85f,
             rare = 0.10f,
             legendary = 0.045f,
@@ -91,6 +96,7 @@ object ChestItemRarityCalculator {
 
     private val MID =
         Distribution(
+            common = 0f,
             uncommon = 0.40f,
             rare = 0.35f,
             legendary = 0.20f,
@@ -99,6 +105,7 @@ object ChestItemRarityCalculator {
 
     private val MAX =
         Distribution(
+            common = 0f,
             uncommon = 0.10f,
             rare = 0.30f,
             legendary = 0.40f,
@@ -179,7 +186,7 @@ object ChestItemRarityCalculator {
                     currentStage
             )
 
-        return if (
+        val base = if (
             effective <=
             25
         ) {
@@ -216,6 +223,38 @@ object ChestItemRarityCalculator {
                     t
             )
         }
+
+        /*
+         * Common yalnızca temel stat itemlerini taşır. Eski Uncommon payını
+         * Common/Uncommon arasında bölerek üst rarity anchor'larını koruruz.
+         * Luck yükseldikçe Common payı azalır fakat düşük Luck'ta build'in
+         * temel statlarına erişim güvenilir kalır.
+         */
+        val luckProgress = effective / MAXIMUM_LUCK.toFloat()
+        val commonShareOfLowTier = lerp(0.65f, 0.35f, luckProgress)
+
+        /*
+         * Erken oyunda Legendary ve özellikle Artifact baskılanır. Stage 30'da
+         * eski oranlara tamamen ulaşılır; kesilen pay Common'a aktarılır.
+         */
+        val stageMaturity =
+            ((currentStage.coerceAtLeast(1) - 1) / 29f)
+                .coerceIn(0f, 1f)
+        val legendary = base.legendary * lerp(0.50f, 1f, stageMaturity)
+        val artifact = base.artifact * lerp(0.20f, 1f, stageMaturity)
+        val suppressedHighRarity =
+            (base.legendary - legendary) +
+                (base.artifact - artifact)
+
+        return Distribution(
+            common =
+                base.uncommon * commonShareOfLowTier +
+                    suppressedHighRarity,
+            uncommon = base.uncommon * (1f - commonShareOfLowTier),
+            rare = base.rare,
+            legendary = legendary,
+            artifact = artifact
+        )
     }
 
     private fun interpolate(
@@ -235,6 +274,13 @@ object ChestItemRarityCalculator {
             )
 
         return Distribution(
+            common =
+                lerp(
+                    from.common,
+                    to.common,
+                    safeT
+                ),
+
             uncommon =
                 lerp(
                     from.uncommon,

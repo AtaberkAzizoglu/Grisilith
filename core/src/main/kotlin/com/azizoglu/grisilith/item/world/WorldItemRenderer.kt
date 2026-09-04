@@ -8,6 +8,12 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Vector2
+import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.EnemyType
+import com.azizoglu.grisilith.enemy.definition.EnemyKindIds
+import kotlin.math.abs
+import kotlin.math.min
 
 class WorldItemRenderer {
     private val batch = SpriteBatch()
@@ -15,13 +21,30 @@ class WorldItemRenderer {
     private val shapes = ShapeRenderer()
     private val textures = mutableMapOf<String, Texture>()
 
+    fun renderGround(snapshot: WorldItemVisualSnapshot, camera: OrthographicCamera) {
+        batch.projectionMatrix = camera.combined
+        batch.begin()
+        snapshot.traps.forEach {
+            val frame =
+                if (it.stateIndex >= 0) it.stateIndex
+                else (it.constructionProgress * 3.999f).toInt().coerceIn(0, 3)
+            drawFrame(
+                "item_world/pit_trap_sheet.png",
+                5,
+                1,
+                frame,
+                it.x,
+                it.y,
+                112f,
+                115f
+            )
+        }
+        batch.end()
+    }
+
     fun render(snapshot: WorldItemVisualSnapshot, camera: OrthographicCamera) {
         batch.projectionMatrix = camera.combined
         batch.begin()
-
-        snapshot.traps.filter { it.stateIndex >= 0 }.forEach {
-            drawFrame("item_world/pit_trap_sheet.png", 5, 1, it.stateIndex, it.x, it.y, 100f, 102f)
-        }
         snapshot.loot.forEach {
             val path = when (it.kind) {
                 LootDropKind.BEEF -> "item_world/beef.png"
@@ -52,11 +75,11 @@ class WorldItemRenderer {
         }
 
         snapshot.portal?.let {
-            val frame = (it.animationSeconds / 0.12f).toInt().mod(8)
+            val frame = (it.animationSeconds / 0.24f).toInt().mod(8)
             drawFrame("item_world/portal_sheet.png", 4, 2, frame, it.x, it.y + 54f, 112f, 150f)
         }
         snapshot.merchant?.let {
-            val frame = (it.animationSeconds / 0.32f).toInt().mod(6)
+            val frame = (it.animationSeconds / 0.64f).toInt().mod(6)
             drawFrame("item_world/merchant_sheet.png", 3, 2, frame, it.x, it.y + 42f, 84f, 121f)
         }
         snapshot.brooms.forEach {
@@ -70,6 +93,7 @@ class WorldItemRenderer {
         batch.end()
 
         renderConstructionAndBoundaries(snapshot, camera)
+        renderProgressBars(snapshot, camera)
         renderTotemUi(snapshot, camera)
         renderBlindFaith(snapshot, camera)
     }
@@ -77,10 +101,6 @@ class WorldItemRenderer {
     private fun renderConstructionAndBoundaries(snapshot: WorldItemVisualSnapshot, camera: OrthographicCamera) {
         shapes.projectionMatrix = camera.combined
         shapes.begin(ShapeRenderer.ShapeType.Line)
-        snapshot.traps.filter { it.stateIndex < 0 }.forEach {
-            shapes.color = Color(0.72f, 0.52f, 0.22f, 0.85f)
-            shapes.circle(it.x, it.y, 100f, 64)
-        }
         snapshot.totem?.takeIf { it.showChargeArea }?.let {
             shapes.color = Color(0.9f, 0.94f, 1f, 0.9f)
             shapes.circle(it.x, it.y, 150f, 72)
@@ -90,6 +110,124 @@ class WorldItemRenderer {
             shapes.circle(snapshot.shrinkCenterX, snapshot.shrinkCenterY, snapshot.shrinkRadius, 120)
         }
         shapes.end()
+    }
+
+    private fun renderProgressBars(snapshot: WorldItemVisualSnapshot, camera: OrthographicCamera) {
+        val bars = mutableListOf<Triple<Float, Float, Float>>()
+        snapshot.traps.filter { it.stateIndex < 0 }.forEach {
+            bars.add(Triple(it.x, it.y + 66f, it.constructionProgress))
+        }
+        snapshot.totem?.takeIf { it.showChargeArea }?.let {
+            bars.add(Triple(it.x, it.y + 156f, it.chargeProgress))
+        }
+        if (bars.isEmpty()) return
+
+        shapes.projectionMatrix = camera.combined
+        shapes.begin(ShapeRenderer.ShapeType.Filled)
+        bars.forEach { (centerX, y, progress) ->
+            shapes.color = Color(0.04f, 0.04f, 0.05f, 0.92f)
+            shapes.rect(centerX - 47f, y, 94f, 10f)
+            shapes.color = Color(0.78f, 0.88f, 1f, 0.96f)
+            shapes.rect(centerX - 44f, y + 3f, 88f * progress.coerceIn(0f, 1f), 4f)
+        }
+        shapes.end()
+        shapes.begin(ShapeRenderer.ShapeType.Line)
+        shapes.color = Color.WHITE
+        bars.forEach { (centerX, y, _) -> shapes.rect(centerX - 47f, y, 94f, 10f) }
+        shapes.end()
+    }
+
+    fun renderEdgeIndicators(
+        snapshot: WorldItemVisualSnapshot,
+        enemies: List<Enemy>,
+        camera: OrthographicCamera
+    ) {
+        data class Target(
+            val x: Float,
+            val y: Float,
+            val path: String?,
+            val fallbackColor: Color
+        )
+
+        val targets = mutableListOf<Target>()
+        enemies.filter {
+            !it.isDead &&
+                (it.type == EnemyType.MINI_BOSS || it.type == EnemyType.FINAL_BOSS)
+        }.forEach { enemy ->
+            val path = when (enemy.kindId) {
+                EnemyKindIds.GRIZZLY_BEAR -> availableTokenPath("item_world/indicators/bear_token.png")
+                EnemyKindIds.BEE_SWARM -> availableTokenPath("item_world/indicators/bee_token.png")
+                EnemyKindIds.CROCODILE -> availableTokenPath("item_world/indicators/crocodile_token.png")
+                EnemyKindIds.SILVERBACK_GORILLA -> availableTokenPath("item_world/indicators/gorilla_token.png")
+                else -> null
+            }
+            targets.add(
+                Target(
+                    enemy.centerX,
+                    enemy.centerY,
+                    path,
+                    Color(0.72f, 0.06f, 0.08f, 0.96f)
+                )
+            )
+        }
+        snapshot.merchant?.let {
+            targets.add(
+                Target(
+                    it.x,
+                    it.y,
+                    availableTokenPath("item_world/indicators/merchant_token.png"),
+                    Color(0.08f, 0.68f, 0.28f, 0.96f)
+                )
+            )
+        }
+        snapshot.totem?.let {
+            targets.add(
+                Target(
+                    it.x,
+                    it.y,
+                    availableTokenPath("item_world/indicators/bone_totem_token.png"),
+                    Color(0.12f, 0.66f, 0.78f, 0.96f)
+                )
+            )
+        }
+
+        val halfWidth = camera.viewportWidth * camera.zoom / 2f
+        val halfHeight = camera.viewportHeight * camera.zoom / 2f
+        val margin = 27f * camera.zoom
+        val size = 34f * camera.zoom
+        val indicators = targets.mapNotNull { target ->
+            val dx = target.x - camera.position.x
+            val dy = target.y - camera.position.y
+            if (abs(dx) <= halfWidth - margin && abs(dy) <= halfHeight - margin) {
+                null
+            } else {
+                val xScale = if (abs(dx) < 0.001f) Float.POSITIVE_INFINITY else (halfWidth - margin) / abs(dx)
+                val yScale = if (abs(dy) < 0.001f) Float.POSITIVE_INFINITY else (halfHeight - margin) / abs(dy)
+                val scale = min(xScale, yScale)
+                target to Vector2(
+                    camera.position.x + dx * scale,
+                    camera.position.y + dy * scale
+                )
+            }
+        }
+
+        if (indicators.isEmpty()) return
+        shapes.projectionMatrix = camera.combined
+        shapes.begin(ShapeRenderer.ShapeType.Filled)
+        indicators.filter { it.first.path == null }.forEach { (target, position) ->
+            shapes.color = target.fallbackColor
+            shapes.circle(position.x, position.y, size / 2f, 24)
+            shapes.color = Color(0.20f, 0.02f, 0.03f, 1f)
+            shapes.circle(position.x, position.y, size * 0.28f, 20)
+        }
+        shapes.end()
+
+        batch.projectionMatrix = camera.combined
+        batch.begin()
+        indicators.filter { it.first.path != null }.forEach { (target, position) ->
+            drawTexture(target.path!!, position.x, position.y, size, size)
+        }
+        batch.end()
     }
 
     private fun renderTotemUi(snapshot: WorldItemVisualSnapshot, camera: OrthographicCamera) {
@@ -157,6 +295,9 @@ class WorldItemRenderer {
             it.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest)
         }
     }
+
+    private fun availableTokenPath(path: String): String? =
+        path.takeIf { Gdx.files.internal(it).exists() }
 
     fun dispose() {
         textures.values.forEach(Texture::dispose)

@@ -114,6 +114,7 @@ import com.azizoglu.grisilith.summon.SummonManager
 import com.azizoglu.grisilith.weapon.visual.carrier.WeaponCarrierVisualSystem
 import com.azizoglu.grisilith.item.world.WorldItemRuntime
 import com.azizoglu.grisilith.item.world.WorldItemRenderer
+import com.azizoglu.grisilith.item.definition.ItemEffectId
 
 class FirstScreen(
     private val game: GrisilithGame,
@@ -424,7 +425,7 @@ class FirstScreen(
 
     private var lockedSlotsForNextMarket:
         List<MarketSlot?> =
-        List(4) {
+        List(5) {
             null
         }
 
@@ -1434,6 +1435,7 @@ class FirstScreen(
 
             availableItemDefinitionsProvider = {
                 DefaultItems.all
+                    .filter { it.effectId != ItemEffectId.BROKEN_HEART }
                     .filter(itemInventory::canAddDefinition)
             },
 
@@ -3935,6 +3937,13 @@ class FirstScreen(
             showEnemyHealthBars =
                 !worldItemRuntime.hidesEnemyHealthBars,
 
+            renderGroundLayer = {
+                worldItemRenderer.renderGround(
+                    snapshot = worldItemRuntime.visualSnapshot(),
+                    camera = camera
+                )
+            },
+
             renderBehindEntities = {
                     activeShapeRenderer ->
 
@@ -3990,6 +3999,12 @@ class FirstScreen(
 
         worldItemRenderer.render(
             snapshot = worldItemRuntime.visualSnapshot(),
+            camera = camera
+        )
+
+        worldItemRenderer.renderEdgeIndicators(
+            snapshot = worldItemRuntime.visualSnapshot(),
+            enemies = enemyManager.allEnemies,
             camera = camera
         )
 
@@ -4453,6 +4468,11 @@ class FirstScreen(
             .toSet()
     }
 
+    private fun ownedItemDefinitionIds(): Set<String> =
+        itemInventory.allItems()
+            .map { it.definition.id.value }
+            .toSet()
+
     private fun openMarket() {
         isMarketOpen = true
         marketRerollsUsed = 0
@@ -4467,7 +4487,7 @@ class FirstScreen(
             marketInputController
 
         val marketSlotCount =
-            4
+            5
 
         /*
          * Önce korunmayan slotların kaç tane
@@ -4507,6 +4527,9 @@ class FirstScreen(
 
                     ownedWeaponIds =
                         ownedWeaponDefinitionIds(),
+
+                    ownedItemIds =
+                        ownedItemDefinitionIds(),
 
                     itemEligibility =
                         itemInventory::canAddDefinition
@@ -4585,7 +4608,7 @@ class FirstScreen(
 
     private fun closeMarket() {
         val marketSlotCount =
-            4
+            5
 
         /*
          * Her pozisyon ayrı ayrı kaydedilir.
@@ -5852,6 +5875,9 @@ class FirstScreen(
 
                     ownedWeaponIds =
                         ownedWeaponDefinitionIds(),
+
+                    ownedItemIds =
+                        ownedItemDefinitionIds(),
 
                     itemEligibility =
                         itemInventory::canAddDefinition

@@ -105,6 +105,6 @@ object CrossbowDefinition {
                     .heavyBolts,
 
             initialUnlockState =
-                ContentUnlockState.LOCKED
+                ContentUnlockState.UNLOCKED
         )
 }

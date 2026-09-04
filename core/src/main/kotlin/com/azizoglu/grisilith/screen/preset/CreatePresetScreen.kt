@@ -132,7 +132,10 @@ class CreatePresetScreen(
         DefaultArmors.all
 
     private val items =
-        DefaultItems.all
+        DefaultItems.all.filter {
+            it.effectId !=
+                com.azizoglu.grisilith.item.definition.ItemEffectId.BROKEN_HEART
+        }
 
     private val tamgas =
         DefaultTamgas.all

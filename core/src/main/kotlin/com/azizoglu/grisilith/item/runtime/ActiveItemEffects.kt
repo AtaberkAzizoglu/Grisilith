@@ -7,6 +7,7 @@ import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.item.definition.ItemDefinition
 import com.azizoglu.grisilith.item.definition.ItemEffectId
+import com.azizoglu.grisilith.item.definition.DefaultItems
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.player.Player
@@ -154,7 +155,7 @@ object ActiveItemEffects {
         val copies = count(ItemEffectId.CHAOS_THEORY)
         if (copies <= 0 || context.damageType !in magicalDamageTypes) return context
 
-        val conversionChance = 1.0 - 0.8.pow(copies)
+        val conversionChance = (0.20 * copies).coerceAtMost(1.0)
         if (Random.nextDouble() >= conversionChance) return context
 
         val alternatives = magicalDamageTypes - context.damageType
@@ -540,11 +541,14 @@ object ActiveItemEffects {
 
         val currentHealth = player?.health?.currentHealth ?: Int.MAX_VALUE
         if (
-            secondHeartAvailable &&
             count(ItemEffectId.SECOND_HEART) > 0 &&
             playerDamage >= currentHealth
         ) {
-            secondHeartAvailable = false
+            inventory?.replaceOneDefinition(
+                from = DefaultItems.secondHeart,
+                to = DefaultItems.brokenHeart
+            )
+            secondHeartAvailable = count(ItemEffectId.SECOND_HEART) > 0
             invulnerabilityRemaining = 3f
             playerDamage = (currentHealth - 1).coerceAtLeast(0)
         }
@@ -585,7 +589,7 @@ object ActiveItemEffects {
         }
 
         if ((enemy.type == EnemyType.UNIQUE || isBoss) && count(ItemEffectId.FEAR_OF_DEATH) > 0) {
-            val chance = 1.0 - 0.7.pow(count(ItemEffectId.FEAR_OF_DEATH))
+            val chance = (0.30 * count(ItemEffectId.FEAR_OF_DEATH)).coerceAtMost(0.90)
             if (Random.nextDouble() < chance) {
                 enemyProvider().filter { nearby ->
                     !nearby.isDead && nearby.type == EnemyType.NORMAL &&
@@ -701,11 +705,12 @@ object ActiveItemEffects {
 
         if (definition.effectId == ItemEffectId.CASH_OUT) {
             val activeInventory = inventory ?: return false
-            val removedCount = (activeInventory.itemCount - 1).coerceAtLeast(0)
+            val removedCount =
+                activeInventory.removeAllExceptDefinition(
+                    definition
+                )
             cashOutConsumedItems += removedCount
-            activeInventory.clear()
-            activeInventory.addItem(ItemInstance(definition = definition))
-            return true
+            return removedCount > 0
         }
 
         val conversion = when (definition.effectId) {

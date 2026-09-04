@@ -150,6 +150,9 @@ class WorldRenderer(
 
         showEnemyHealthBars: Boolean = true,
 
+        renderGroundLayer:
+        (() -> Unit)? = null,
+
         renderBehindEntities:
         ((ShapeRenderer) -> Unit)? = null
     ) {
@@ -164,6 +167,8 @@ class WorldRenderer(
             camera =
                 camera
         )
+
+        renderGroundLayer?.invoke()
 
         shapeRenderer.projectionMatrix =
             camera.combined

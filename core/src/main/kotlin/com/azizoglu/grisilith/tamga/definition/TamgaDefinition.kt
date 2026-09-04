@@ -98,7 +98,7 @@ data class TamgaDefinition(
 
     override val initialUnlockState:
     ContentUnlockState =
-        ContentUnlockState.LOCKED
+        ContentUnlockState.UNLOCKED
 ) : ContentDefinition {
 
     override val category:

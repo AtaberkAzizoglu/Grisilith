@@ -14,6 +14,12 @@ enum class ItemRarity(
      */
     val maximumInventoryCopies: Int
 ) {
+    COMMON(
+        displayName = "Common",
+        statMultiplier = 1f,
+        maximumInventoryCopies = 7
+    ),
+
     UNCOMMON(
         displayName = "Uncommon",
         statMultiplier = 1.50f,

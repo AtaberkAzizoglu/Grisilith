@@ -10,6 +10,7 @@ import com.azizoglu.grisilith.item.runtime.ItemInventory
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.stage.StageType
+import com.azizoglu.grisilith.character.visual.CharacterVisualDirection
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
@@ -31,7 +32,12 @@ enum class TotemResult(val label: String) {
 }
 
 data class WorldPointSnapshot(val x: Float, val y: Float, val animationSeconds: Float)
-data class TrapSnapshot(val x: Float, val y: Float, val stateIndex: Int)
+data class TrapSnapshot(
+    val x: Float,
+    val y: Float,
+    val stateIndex: Int,
+    val constructionProgress: Float = 0f
+)
 data class LootSnapshot(val x: Float, val y: Float, val kind: LootDropKind, val ageSeconds: Float)
 data class TotemSnapshot(
     val x: Float,
@@ -67,7 +73,13 @@ class WorldItemRuntime(
     private val worldHeight: Float
 ) {
     private data class Broom(var x: Float, var y: Float, var phase: Float = MathUtils.random(0f, 10f))
-    private data class Trap(var x: Float, var y: Float, var victims: Int = 0, var storedGold: Int = 0)
+    private data class Trap(
+        var x: Float,
+        var y: Float,
+        var victims: Int = 0,
+        var storedGold: Int = 0,
+        var finishedSeconds: Float = 0f
+    )
     private data class Loot(var x: Float, var y: Float, val kind: LootDropKind, var age: Float = 0f)
     private data class Totem(var x: Float, var y: Float, val variant: Int, var charge: Float = 0f)
 
@@ -230,17 +242,17 @@ class WorldItemRuntime(
                 val dx = target.first - broom.x
                 val dy = target.second - broom.y
                 val distance = kotlin.math.sqrt(dx * dx + dy * dy).coerceAtLeast(0.001f)
-                val step = (175f * delta).coerceAtMost(distance)
+                val step = (90f * delta).coerceAtMost(distance)
                 broom.x += dx / distance * step
                 broom.y += dy / distance * step
             } else {
                 val angle = broom.phase * 0.7f + index * 2.1f
-                broom.x += MathUtils.cos(angle) * 95f * delta
-                broom.y += MathUtils.sin(angle * 1.13f) * 95f * delta
+                broom.x += MathUtils.cos(angle) * 50f * delta
+                broom.y += MathUtils.sin(angle * 1.13f) * 50f * delta
             }
             broom.x = broom.x.coerceIn(24f, worldWidth - 24f)
             broom.y = broom.y.coerceIn(24f, worldHeight - 24f)
-            collectCurrency(broom.x, broom.y, 52f)
+            collectCurrency(broom.x, broom.y, 15f)
         }
     }
 
@@ -297,7 +309,7 @@ class WorldItemRuntime(
         pitCooldownSeconds = (pitCooldownSeconds - delta).coerceAtLeast(0f)
         if (count(ItemEffectId.PIT_TRAP) <= 0) return
 
-        val moved = distanceSquared(player.centerX, player.centerY, lastPlayerX, lastPlayerY) > 1.5f * 1.5f
+        val moved = distanceSquared(player.centerX, player.centerY, lastPlayerX, lastPlayerY) > 0.25f * 0.25f
         lastPlayerX = player.centerX
         lastPlayerY = player.centerY
         val maxTraps = count(ItemEffectId.PIT_TRAP)
@@ -305,16 +317,26 @@ class WorldItemRuntime(
         if (setupCenter == null && traps.size < maxTraps && pitCooldownSeconds <= 0f) {
             stillSeconds = if (moved) 0f else stillSeconds + delta
             if (stillSeconds >= 2f) {
-                setupCenter = Vector2(player.centerX, player.centerY)
+                val offset = when (player.currentVisualState.direction) {
+                    CharacterVisualDirection.DOWN -> Vector2(0f, -50f)
+                    CharacterVisualDirection.LEFT -> Vector2(-50f, 0f)
+                    CharacterVisualDirection.RIGHT -> Vector2(50f, 0f)
+                    CharacterVisualDirection.UP -> Vector2(0f, 50f)
+                }
+                setupCenter = Vector2(
+                    (player.centerX + offset.x).coerceIn(55f, worldWidth - 55f),
+                    (player.centerY + offset.y).coerceIn(55f, worldHeight - 55f)
+                )
                 setupSeconds = 0f
             }
         }
 
         setupCenter?.let { center ->
-            if (distanceSquared(player.centerX, player.centerY, center.x, center.y) > 100f * 100f) {
+            if (moved) {
                 setupCenter = null
                 setupSeconds = 0f
                 stillSeconds = 0f
+                pitCooldownSeconds = 5f
             } else {
                 setupSeconds += delta
                 if (setupSeconds >= 3f) {
@@ -327,9 +349,15 @@ class WorldItemRuntime(
         }
 
         traps.toList().forEach { trap ->
+            if (trap.finishedSeconds > 0f) {
+                trap.finishedSeconds += delta
+                if (trap.finishedSeconds >= 3f) traps.remove(trap)
+                return@forEach
+            }
+
             val victim = enemies.firstOrNull {
                 !it.isDead && it.type == EnemyType.NORMAL && !it.ignoresObstacles &&
-                    distanceSquared(it.centerX, it.centerY, trap.x, trap.y) <= 42f * 42f
+                    distanceSquared(it.centerX, it.centerY, trap.x, trap.y) <= 50f * 50f
             } ?: return@forEach
 
             victim.takeDamage(victim.health.currentHealth.coerceAtLeast(1) * 100)
@@ -339,7 +367,7 @@ class WorldItemRuntime(
             }
             if (trap.victims >= 4) {
                 onTrapGoldReleased(trap.x, trap.y, trap.storedGold)
-                traps.remove(trap)
+                trap.finishedSeconds = delta.coerceAtLeast(0.0001f)
                 pitCooldownSeconds = 30f
             }
         }
@@ -493,8 +521,14 @@ class WorldItemRuntime(
                 .forEach { it.resolveCircularExclusion(point.x, point.y, 150f) }
         }
         totemCollisionBounds()?.let { player.resolveObstacleCollision(it) }
+        traps.forEach { trap ->
+            player.resolveObstacleCollision(
+                Rectangle(trap.x - 44f, trap.y - 32f, 88f, 64f)
+            )
+        }
         totem?.let { point ->
-            enemies.forEach { it.resolveCircularExclusion(point.x, point.y, 30f) }
+            enemies.filterNot { it.ignoresObstacles }
+                .forEach { it.resolveCircularExclusion(point.x, point.y, 30f) }
         }
     }
 
@@ -534,8 +568,22 @@ class WorldItemRuntime(
             brooms = brooms.map { WorldPointSnapshot(it.x, it.y, animationSeconds + it.phase) },
             portal = portal?.let { WorldPointSnapshot(it.x, it.y, animationSeconds) },
             merchant = merchant?.let { WorldPointSnapshot(it.x, it.y, animationSeconds) },
-            traps = traps.map { TrapSnapshot(it.x, it.y, it.victims.coerceIn(0, 4)) } +
-                listOfNotNull(setup?.let { TrapSnapshot(it.x, it.y, -1) }),
+            traps = traps.map {
+                TrapSnapshot(
+                    it.x,
+                    it.y,
+                    if (it.finishedSeconds > 0f) 4 else it.victims.coerceIn(0, 3)
+                )
+            } + listOfNotNull(
+                setup?.let {
+                    TrapSnapshot(
+                        it.x,
+                        it.y,
+                        -1,
+                        (setupSeconds / 3f).coerceIn(0f, 1f)
+                    )
+                }
+            ),
             loot = loot.map { LootSnapshot(it.x, it.y, it.kind, it.age) },
             totem = activeTotem?.let {
                 TotemSnapshot(
@@ -568,7 +616,8 @@ class WorldItemRuntime(
                 .forEach { it.resolveCircularExclusion(point.x, point.y, 150f) }
         }
         totem?.let { point ->
-            enemies.forEach { it.resolveCircularExclusion(point.x, point.y, 30f) }
+            enemies.filterNot { it.ignoresObstacles }
+                .forEach { it.resolveCircularExclusion(point.x, point.y, 30f) }
         }
         shrinkCenter?.let { center ->
             enemies.forEach { it.constrainCenterToCircle(center.x, center.y, 1000f) }
@@ -589,6 +638,7 @@ class WorldItemRuntime(
         shrinkCenter = null
         shrinkStage = -1
         curseStage = -1
+        loot.clear()
     }
 
     private fun count(effectId: ItemEffectId): Int =

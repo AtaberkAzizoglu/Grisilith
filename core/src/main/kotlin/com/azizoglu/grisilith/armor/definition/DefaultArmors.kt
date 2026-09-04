@@ -97,7 +97,7 @@ object DefaultArmors {
                     )
                 ),
             initialUnlockState =
-                ContentUnlockState.LOCKED
+                ContentUnlockState.UNLOCKED
         )
 
     val robeOfMage =

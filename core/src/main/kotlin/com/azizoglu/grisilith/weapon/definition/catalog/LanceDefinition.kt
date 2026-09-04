@@ -106,6 +106,6 @@ object LanceDefinition {
                     .impaleAndDrag,
 
             initialUnlockState =
-                ContentUnlockState.LOCKED
+                ContentUnlockState.UNLOCKED
         )
 }
