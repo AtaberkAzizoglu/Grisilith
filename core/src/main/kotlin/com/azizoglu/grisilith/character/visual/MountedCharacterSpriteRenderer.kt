@@ -197,6 +197,12 @@ class MountedCharacterSpriteRenderer {
             "CHR_LAVENA_VOL" ->
                 LAVENA_VOL
 
+            "CHR_KOBA" ->
+                KOBA
+
+            "CHR_LINLOS_DUSTMAN" ->
+                LINLOS_DUSTMAN
+
             else ->
                 null
         }
@@ -261,6 +267,36 @@ class MountedCharacterSpriteRenderer {
 
                 prefix =
                     "lavena_vol",
+
+                worldHeight =
+                    86f,
+
+                bottomOffset =
+                    -4f
+            )
+
+        private val KOBA =
+            MountedDefinition(
+                assetRoot =
+                    "characters/mounted_phantom_steed/koba/",
+
+                prefix =
+                    "koba",
+
+                worldHeight =
+                    90f,
+
+                bottomOffset =
+                    -4f
+            )
+
+        private val LINLOS_DUSTMAN =
+            MountedDefinition(
+                assetRoot =
+                    "characters/mounted_phantom_steed/linlos_dustman/",
+
+                prefix =
+                    "linlos_dustman",
 
                 worldHeight =
                     86f,

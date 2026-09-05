@@ -3,7 +3,9 @@ package com.azizoglu.grisilith.character.trait
 enum class CharacterTraitId {
     NECROMANCY,
     THE_HYPOCRISY,
-    HURRY
+    HURRY,
+    BLOODWEIGHT,
+    THE_TOAD_CYCLE
 }
 
 data class CharacterTraitDefinition(

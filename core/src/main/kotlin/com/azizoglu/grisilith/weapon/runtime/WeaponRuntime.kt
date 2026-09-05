@@ -243,13 +243,16 @@ class WeaponRuntime(
                                     1
                                 )
 
-                        applyRelentlessDamage(
-                            enemy =
-                                enemy,
+                        val relentlessModifiedDamage =
+                            applyRelentlessDamage(
+                                enemy = enemy,
+                                baseDamage = abilityModifiedDamage
+                            )
 
-                            baseDamage =
-                                abilityModifiedDamage
-                        )
+                        characterTraitRuntime
+                            .modifyAttackDamage(
+                                relentlessModifiedDamage
+                            )
                     },
 
                     modifyWeaponRange = {

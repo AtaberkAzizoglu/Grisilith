@@ -617,6 +617,54 @@ class SummonManager(
         }
     }
 
+    fun trySpawnToadCycleToad(
+        centerX: Float,
+        centerY: Float,
+        worldWidth: Float,
+        worldHeight: Float
+    ): Boolean {
+        val livingCycleToads =
+            entities.count {
+                it.sourceWeaponRuntimeId == TOAD_CYCLE_SOURCE_ID &&
+                    !it.isExpired
+            }
+
+        if (livingCycleToads >= TOAD_CYCLE_MAXIMUM_TOADS) {
+            return false
+        }
+
+        val stats =
+            SummonStats.create(
+                type = SummonType.TOAD,
+                playerStats = playerStats,
+                stage = currentStageProvider()
+            )
+
+        val angle =
+            MathUtils.PI2 *
+                livingCycleToads /
+                TOAD_CYCLE_MAXIMUM_TOADS
+
+        entities.add(
+            SummonedEntity(
+                sourceWeaponRuntimeId = TOAD_CYCLE_SOURCE_ID,
+                sourceWeaponDefinitionId = TOAD_CYCLE_SOURCE_ID,
+                sourceWeaponDisplayName = "The Toad Cycle",
+                type = SummonType.TOAD,
+                stats = stats,
+                startCenterX =
+                    (centerX + MathUtils.cos(angle) * 40f)
+                        .coerceIn(12f, worldWidth - 12f),
+                startCenterY =
+                    (centerY + MathUtils.sin(angle) * 40f)
+                        .coerceIn(12f, worldHeight - 12f),
+                lifetimeSeconds = Float.MAX_VALUE
+            )
+        )
+
+        return true
+    }
+
     fun hasLivingBoneTotemToads(): Boolean =
         entities.any {
             it.sourceWeaponRuntimeId == BONE_TOTEM_SOURCE_ID && !it.isExpired
@@ -745,7 +793,9 @@ class SummonManager(
         projectiles: MutableList<Projectile>
     ) {
         if (summon.isExpired) return
-        val sourceName = "Bone Totem — Toad"
+        val sourceName =
+            summon.sourceWeaponDisplayName +
+                " — Toad"
         val poison = ConditionDamageCalculator.createApplication(
             type = ConditionType.POISONED,
             playerStats = playerStats,
@@ -1404,6 +1454,12 @@ class SummonManager(
         private const val BONE_TOTEM_TOAD_LIFETIME_SECONDS =
             40f
 
+        private const val TOAD_CYCLE_SOURCE_ID =
+            "CHARACTER_TRAIT_TOAD_CYCLE"
+
+        private const val TOAD_CYCLE_MAXIMUM_TOADS =
+            4
+
         private const val KNIGHT_SPAWN_DISTANCE =
             500f
 
@@ -1447,7 +1503,7 @@ class SummonManager(
             360f
 
         private const val TOAD_PROJECTILE_MAXIMUM_TRAVEL_DISTANCE =
-            300f
+            145f
 
         private const val TOAD_PROJECTILE_SIZE_MULTIPLIER =
             0.72f

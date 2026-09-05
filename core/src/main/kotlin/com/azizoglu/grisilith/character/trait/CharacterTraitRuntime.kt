@@ -42,6 +42,66 @@ class CharacterTraitRuntime(
         )
     }
 
+    fun modifyAttackDamage(
+        baseDamage: Int
+    ): Int {
+        if (
+            traitId != CharacterTraitId.BLOODWEIGHT ||
+            baseDamage <= 0 ||
+            player.health.isDead
+        ) {
+            return baseDamage
+        }
+
+        val currentHealthDamage =
+            (
+                player.health.currentHealth *
+                    CURRENT_HEALTH_DAMAGE_RATIO
+                )
+                .roundToInt()
+                .coerceAtLeast(0)
+
+        return baseDamage +
+            currentHealthDamage
+    }
+
+    fun updateToadCycle(
+        delta: Float,
+        trySpawnToad: () -> Boolean
+    ) {
+        if (
+            traitId != CharacterTraitId.THE_TOAD_CYCLE ||
+            delta <= 0f
+        ) {
+            return
+        }
+
+        toadCycleRemainingSeconds -=
+            delta
+
+        if (
+            toadCycleRemainingSeconds <= 0f &&
+            trySpawnToad()
+        ) {
+            toadCycleRemainingSeconds =
+                TOAD_CYCLE_INTERVAL_SECONDS
+        }
+    }
+
+    fun onEnemyKilled(
+        enemy: Enemy
+    ) {
+        if (
+            traitId == CharacterTraitId.THE_TOAD_CYCLE &&
+            enemy.hasCondition(
+                ConditionType.POISONED
+            )
+        ) {
+            toadCycleRemainingSeconds -=
+                POISONED_KILL_REDUCTION_SECONDS
+        }
+    }
+
     fun onWeaponHit(
         event: WeaponHitEvent,
         onDamageDealt: (
@@ -118,6 +178,15 @@ class CharacterTraitRuntime(
     }
 
     companion object {
+        private const val CURRENT_HEALTH_DAMAGE_RATIO =
+            0.05f
+
+        private const val TOAD_CYCLE_INTERVAL_SECONDS =
+            15f
+
+        private const val POISONED_KILL_REDUCTION_SECONDS =
+            2f
+
         private const val FIRE_BASE_DAMAGE =
             1f
 
@@ -127,4 +196,7 @@ class CharacterTraitRuntime(
         private const val BURNED_DURATION_SECONDS =
             3f
     }
+
+    private var toadCycleRemainingSeconds =
+        TOAD_CYCLE_INTERVAL_SECONDS
 }

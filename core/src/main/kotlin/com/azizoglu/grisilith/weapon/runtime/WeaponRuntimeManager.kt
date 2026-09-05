@@ -717,6 +717,44 @@ class WeaponRuntimeManager(
         )
     }
 
+    fun modifyWeaponDamage(
+        enemy: Enemy,
+        baseDamage: Int
+    ): Int {
+        val tamgaModifiedDamage =
+            tamgaRuntimeManager
+                .modifyWeaponDamage(
+                    enemy = enemy,
+                    baseDamage = baseDamage
+                )
+
+        return characterTraitRuntime
+            .modifyAttackDamage(
+                tamgaModifiedDamage
+            )
+            .coerceAtLeast(1)
+    }
+
+    fun updateCharacterTrait(
+        delta: Float,
+        trySpawnToad: () -> Boolean
+    ) {
+        characterTraitRuntime
+            .updateToadCycle(
+                delta = delta,
+                trySpawnToad = trySpawnToad
+            )
+    }
+
+    fun notifyCharacterTraitEnemyKilled(
+        enemy: Enemy
+    ) {
+        characterTraitRuntime
+            .onEnemyKilled(
+                enemy
+            )
+    }
+
     fun tryActivateAbilityInSlot(
         slotIndex: Int,
         player: Player,
@@ -1233,17 +1271,10 @@ class WeaponRuntimeManager(
                 )
 
         val modifiedDamage =
-            tamgaRuntimeManager
-                .modifyWeaponDamage(
-                    enemy =
-                        enemy,
-
-                    baseDamage =
-                        rawTickDamage
-                )
-                .coerceAtLeast(
-                    1
-                )
+            modifyWeaponDamage(
+                enemy = enemy,
+                baseDamage = rawTickDamage
+            )
 
         val wasAlive =
             !enemy.isDead
@@ -1405,17 +1436,10 @@ class WeaponRuntimeManager(
                 )
 
         val modifiedDamage =
-            tamgaRuntimeManager
-                .modifyWeaponDamage(
-                    enemy =
-                        enemy,
-
-                    baseDamage =
-                        lightningDamage
-                )
-                .coerceAtLeast(
-                    1
-                )
+            modifyWeaponDamage(
+                enemy = enemy,
+                baseDamage = lightningDamage
+            )
 
         val wasAlive =
             !enemy.isDead
@@ -1540,17 +1564,10 @@ class WeaponRuntimeManager(
                 )
 
         val vortexDamage =
-            tamgaRuntimeManager
-                .modifyWeaponDamage(
-                    enemy =
-                        enemy,
-
-                    baseDamage =
-                        vortexRawDamage
-                )
-                .coerceAtLeast(
-                    1
-                )
+            modifyWeaponDamage(
+                enemy = enemy,
+                baseDamage = vortexRawDamage
+            )
 
         var totalAppliedDamage =
             enemy.takeDamage(
@@ -1597,17 +1614,10 @@ class WeaponRuntimeManager(
                     )
 
             val plagueDamage =
-                tamgaRuntimeManager
-                    .modifyWeaponDamage(
-                        enemy =
-                            enemy,
-
-                        baseDamage =
-                            plagueRawDamage
-                    )
-                    .coerceAtLeast(
-                        1
-                    )
+                modifyWeaponDamage(
+                    enemy = enemy,
+                    baseDamage = plagueRawDamage
+                )
 
             totalAppliedDamage +=
                 enemy.takeDamage(

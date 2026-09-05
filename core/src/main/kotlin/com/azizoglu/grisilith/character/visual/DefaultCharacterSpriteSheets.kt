@@ -581,6 +581,28 @@ object DefaultCharacterSpriteSheets {
                 )
         )
 
+    val koba =
+        gridSpriteSheet(
+            characterId = "CHR_KOBA",
+            texturePath = "characters/koba.png",
+            sourceWidth = 1389,
+            sourceHeight = 998,
+            frameXs = listOf(160, 445, 720, 1000),
+            frameWidth = 250,
+            walkFrameDurationSeconds = 0.12f
+        )
+
+    val linlosDustman =
+        gridSpriteSheet(
+            characterId = "CHR_LINLOS_DUSTMAN",
+            texturePath = "characters/linlos_dustman.png",
+            sourceWidth = 1536,
+            sourceHeight = 1024,
+            frameXs = listOf(80, 430, 795, 1165),
+            frameWidth = 260,
+            walkFrameDurationSeconds = 0.13f
+        )
+
     val all:
         List<
             CharacterSpriteSheetDefinition
@@ -588,6 +610,52 @@ object DefaultCharacterSpriteSheets {
         listOf(
             sirImbert,
             ywalethYoster,
-            lavenaVol
+            lavenaVol,
+            koba,
+            linlosDustman
         )
+
+    private fun gridSpriteSheet(
+        characterId: String,
+        texturePath: String,
+        sourceWidth: Int,
+        sourceHeight: Int,
+        frameXs: List<Int>,
+        frameWidth: Int,
+        walkFrameDurationSeconds: Float
+    ): CharacterSpriteSheetDefinition {
+        fun animation(row: Int): CharacterSpriteAnimationDefinition {
+            val y = row * sourceHeight / 4
+            val bottom = (row + 1) * sourceHeight / 4
+            val frames =
+                frameXs.map { x ->
+                    CharacterSpriteFrame(
+                        x = x,
+                        y = y,
+                        width = frameWidth,
+                        height = bottom - y
+                    )
+                }
+
+            return CharacterSpriteAnimationDefinition(
+                idleFrame = frames.first(),
+                walkFrames = frames,
+                walkFrameDurationSeconds = walkFrameDurationSeconds
+            )
+        }
+
+        return CharacterSpriteSheetDefinition(
+            characterId = ContentId(characterId),
+            texturePath = texturePath,
+            sourceWidth = sourceWidth,
+            sourceHeight = sourceHeight,
+            animations =
+                mapOf(
+                    CharacterVisualDirection.DOWN to animation(0),
+                    CharacterVisualDirection.LEFT to animation(1),
+                    CharacterVisualDirection.RIGHT to animation(2),
+                    CharacterVisualDirection.UP to animation(3)
+                )
+        )
+    }
 }

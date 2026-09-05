@@ -146,7 +146,7 @@ object DefaultCharacters {
                 "One of the greatest wizard of the time specialized in forbidden spells for the approaching danger. Now the approaching danger is her.",
 
             minionDescription =
-                "No minions. Equipped weapons float around the character.",
+                "Small mage weapon bearers.",
 
             trait =
                 DefaultCharacterTraits.necromancy,
@@ -197,12 +197,120 @@ object DefaultCharacters {
                 ContentUnlockState.UNLOCKED
         )
 
+    val koba =
+        CharacterDefinition(
+            id =
+                ContentId("CHR_KOBA"),
+            displayName =
+                "Koba",
+            description =
+                "A half-orc barbarian who fights almost bare-skinned, " +
+                    "turning his remaining vitality into savage force.",
+            minionDescription =
+                "Half-naked barbarian weapon bearers.",
+            trait =
+                DefaultCharacterTraits.bloodweight,
+            baseStats =
+                createStats(
+                    maxHp = 18,
+                    armorClass = 8,
+                    strength = 15,
+                    dexterity = 5,
+                    wisdom = 1,
+                    haste = 2,
+                    attackSpeed = 8,
+                    critRate = 5,
+                    critDamage = 9,
+                    movementSpeed = 7,
+                    luck = 2,
+                    harvest = 4,
+                    elementalDamage = 0,
+                    mightOfNature = 0,
+                    shepherd = 0,
+                    piercing = 9,
+                    enemyCount = 7,
+                    hpRegeneration = 8,
+                    lifeSteal = 6
+                ),
+            baseCritRatePercent =
+                10,
+            baseCritDamagePercent =
+                135,
+            preferredMarketStats =
+                setOf(
+                    StatType.MAX_HP,
+                    StatType.STRENGTH,
+                    StatType.HP_REGENERATION,
+                    StatType.LIFE_STEAL,
+                    StatType.ARMOR_CLASS
+                ),
+            preferredMarketWeaponGroup =
+                CharacterWeaponPreference.MELEE,
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
+    val linlosDustman =
+        CharacterDefinition(
+            id =
+                ContentId("CHR_LINLOS_DUSTMAN"),
+            displayName =
+                "Linlos Dustman",
+            description =
+                "A halfling druid who lets poison, dust and fragile Toads " +
+                    "fight in his place.",
+            minionDescription =
+                "Small druids carrying weapons among leaves and spores.",
+            trait =
+                DefaultCharacterTraits.theToadCycle,
+            baseStats =
+                createStats(
+                    maxHp = 8,
+                    armorClass = 5,
+                    strength = 2,
+                    dexterity = 8,
+                    wisdom = 13,
+                    haste = 9,
+                    attackSpeed = 5,
+                    critRate = 4,
+                    critDamage = 3,
+                    movementSpeed = 9,
+                    luck = 7,
+                    harvest = 9,
+                    elementalDamage = 3,
+                    mightOfNature = 7,
+                    shepherd = 14,
+                    piercing = 2,
+                    enemyCount = 6,
+                    hpRegeneration = 0,
+                    lifeSteal = 0
+                ),
+            baseCritRatePercent =
+                10,
+            baseCritDamagePercent =
+                110,
+            preferredMarketStats =
+                setOf(
+                    StatType.SHEPHERD,
+                    StatType.WISDOM,
+                    StatType.HASTE,
+                    StatType.ENEMY_COUNT,
+                    StatType.MIGHT_OF_NATURE
+                ),
+            preferredMarketWeaponGroup =
+                CharacterWeaponPreference.SPELL_FOCUS,
+            initialUnlockState =
+                ContentUnlockState.UNLOCKED
+        )
+
     val all:
         List<CharacterDefinition> =
         listOf(
             SirImbert,
             ywalethYoster,
-            lavenaVol
+            lavenaVol,
+            koba,
+            linlosDustman
         )
 
     private fun createStats(

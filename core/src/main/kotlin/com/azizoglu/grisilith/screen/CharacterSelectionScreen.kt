@@ -67,14 +67,14 @@ class CharacterSelectionScreen(
                         character.displayName,
 
                 x =
-                    60f +
-                        index * 405f,
+                    28f +
+                        index * 245f,
 
                 y =
                     75f,
 
                 width =
-                    350f,
+                    228f,
 
                 height =
                     65f
@@ -215,8 +215,8 @@ class CharacterSelectionScreen(
                 character ->
 
             val startX =
-                60f +
-                    index * 405f
+                28f +
+                    index * 245f
 
             renderCharacter(
                 number = index + 1,
@@ -251,6 +251,8 @@ class CharacterSelectionScreen(
         startX: Float,
         startY: Float
     ) {
+        font.data.setScale(0.70f)
+
         var currentY =
             startY
 
@@ -274,7 +276,7 @@ class CharacterSelectionScreen(
             character.description,
             startX,
             currentY,
-            350f,
+            228f,
             -1,
             true
         )
@@ -289,7 +291,7 @@ class CharacterSelectionScreen(
                 character.trait.description,
             startX,
             currentY - 62f,
-            350f,
+            228f,
             -1,
             true
         )
@@ -301,10 +303,10 @@ class CharacterSelectionScreen(
             startX
 
         val rightColumnX =
-            startX + 180f
+            startX + 114f
 
         val rowSpacing =
-            25f
+            22f
 
         val leftColumnStats =
             listOf(
@@ -402,6 +404,8 @@ class CharacterSelectionScreen(
                         index * rowSpacing
             )
         }
+
+        font.data.setScale(1f)
     }
 
     private fun drawStat(

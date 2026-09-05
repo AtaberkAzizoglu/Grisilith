@@ -351,8 +351,8 @@ class FirstScreen(
 
     private val weaponCarrierVisualSystem =
         WeaponCarrierVisualSystem(
-            inventory =
-                weaponInventory
+            inventory = weaponInventory,
+            characterId = selectedCharacter.id.value
         )
 
     private val mapObstacles: List<MapObstacle> =
@@ -2945,6 +2945,18 @@ class FirstScreen(
             return
         }
 
+        weaponRuntimeManager.updateCharacterTrait(
+            delta = delta,
+            trySpawnToad = {
+                summonManager.trySpawnToadCycleToad(
+                    centerX = player.centerX,
+                    centerY = player.centerY,
+                    worldWidth = worldWidth,
+                    worldHeight = worldHeight
+                )
+            }
+        )
+
         summonManager.update(
             delta =
                 delta,
@@ -3403,13 +3415,10 @@ class FirstScreen(
                         enemy,
                         baseDamage ->
 
-                    tamgaRuntimeManager
+                    weaponRuntimeManager
                         .modifyWeaponDamage(
-                            enemy =
-                                enemy,
-
-                            baseDamage =
-                                baseDamage
+                            enemy = enemy,
+                            baseDamage = baseDamage
                         )
                 }
             )
@@ -3643,6 +3652,11 @@ class FirstScreen(
         killedEnemy: Enemy,
         suppressGold: Boolean = false
     ) {
+        weaponRuntimeManager
+            .notifyCharacterTraitEnemyKilled(
+                killedEnemy
+            )
+
         ActiveItemEffects.onEnemyKilled(killedEnemy)
 
         weaponRuntimeManager.onEnemyKilledForActiveSkills(

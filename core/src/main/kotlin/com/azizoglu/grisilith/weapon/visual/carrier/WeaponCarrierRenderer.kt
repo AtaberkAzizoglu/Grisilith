@@ -38,6 +38,9 @@ class WeaponCarrierRenderer {
         private const val MINION_TEXTURE =
             "weapon_visuals/minions.png"
 
+        private const val NEW_MINION_TEXTURE =
+            "weapon_visuals/minions_2.png"
+
         private const val MELEE_TEXTURE =
             "weapon_visuals/melee_weapons.png"
 
@@ -206,8 +209,8 @@ class WeaponCarrierRenderer {
                 -1
             }
 
-        val rect =
-            minionRect(
+        val frame =
+            minionFrame(
                 type = type,
                 direction = direction,
                 walkFrame = walkFrame
@@ -215,14 +218,17 @@ class WeaponCarrierRenderer {
 
         drawRegion(
             texturePath =
-                MINION_TEXTURE,
-            rect = rect,
+                frame.first,
+            rect = frame.second,
             centerX =
                 snapshot.centerX,
             centerY =
                 snapshot.centerY,
             worldHeight =
-                MINION_WORLD_HEIGHT,
+                when (type) {
+                    MinionType.BARBARIAN -> 32f
+                    else -> MINION_WORLD_HEIGHT
+                },
             camera =
                 camera,
             alpha =
@@ -918,7 +924,32 @@ class WeaponCarrierRenderer {
         }
     }
 
-    private fun minionRect(
+    private fun minionFrame(
+        type: MinionType,
+        direction: MinionVisualDirection,
+        walkFrame: Int
+    ): Pair<String, Rect> {
+        return when (type) {
+            MinionType.BARBARIAN,
+            MinionType.DRUID ->
+                NEW_MINION_TEXTURE to
+                    newCharacterMinionRect(
+                        type = type,
+                        direction = direction,
+                        walkFrame = walkFrame
+                    )
+
+            else ->
+                MINION_TEXTURE to
+                    originalMinionRect(
+                        type = type,
+                        direction = direction,
+                        walkFrame = walkFrame
+                    )
+        }
+    }
+
+    private fun originalMinionRect(
         type: MinionType,
         direction: MinionVisualDirection,
         walkFrame: Int
@@ -936,6 +967,7 @@ class WeaponCarrierRenderer {
                 MinionType.SOLDIER -> 0
                 MinionType.SCOUT -> 512
                 MinionType.MAGE_APPRENTICE -> 1024
+                else -> error("New minion type cannot use the original sheet")
             }
 
         val localX =
@@ -973,6 +1005,74 @@ class WeaponCarrierRenderer {
             y = y,
             w = width,
             h = 79
+        )
+    }
+
+    private fun newCharacterMinionRect(
+        type: MinionType,
+        direction: MinionVisualDirection,
+        walkFrame: Int
+    ): Rect {
+        val frameIndex =
+            if (walkFrame < 0) 0 else walkFrame.mod(4)
+
+        val panelX =
+            when (type) {
+                MinionType.BARBARIAN -> 0
+                MinionType.DRUID -> 768
+                else -> error("Original minion type cannot use the character sheet")
+            }
+
+        val localX =
+            when (type) {
+                MinionType.BARBARIAN ->
+                    intArrayOf(20, 185, 350, 515)[frameIndex]
+
+                MinionType.DRUID ->
+                    intArrayOf(15, 180, 345, 510)[frameIndex]
+
+                else -> 0
+            }
+
+        val width =
+            if (type == MinionType.BARBARIAN) 160 else 170
+
+        val cardinalDirection =
+            when (direction) {
+                MinionVisualDirection.SOUTH,
+                MinionVisualDirection.SOUTH_EAST -> CharacterVisualDirection.DOWN
+
+                MinionVisualDirection.SOUTH_WEST,
+                MinionVisualDirection.WEST -> CharacterVisualDirection.LEFT
+
+                MinionVisualDirection.NORTH_EAST,
+                MinionVisualDirection.EAST -> CharacterVisualDirection.RIGHT
+
+                MinionVisualDirection.NORTH,
+                MinionVisualDirection.NORTH_WEST -> CharacterVisualDirection.UP
+            }
+
+        val y =
+            when (cardinalDirection) {
+                CharacterVisualDirection.DOWN -> 285
+                CharacterVisualDirection.LEFT -> 465
+                CharacterVisualDirection.RIGHT -> 640
+                CharacterVisualDirection.UP -> 805
+            }
+
+        val height =
+            when (cardinalDirection) {
+                CharacterVisualDirection.DOWN -> 180
+                CharacterVisualDirection.LEFT -> 175
+                CharacterVisualDirection.RIGHT -> 165
+                CharacterVisualDirection.UP -> 210
+            }
+
+        return Rect(
+            x = panelX + localX,
+            y = y,
+            w = width,
+            h = height
         )
     }
 

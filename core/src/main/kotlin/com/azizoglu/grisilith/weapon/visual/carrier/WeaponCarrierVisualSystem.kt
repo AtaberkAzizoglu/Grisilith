@@ -9,13 +9,16 @@ import kotlin.math.abs
 import kotlin.math.sqrt
 
 class WeaponCarrierVisualSystem(
-    private val inventory: WeaponInventory
+    private val inventory: WeaponInventory,
+    private val characterId: String
 ) {
 
     enum class MinionType {
         SOLDIER,
         SCOUT,
-        MAGE_APPRENTICE
+        MAGE_APPRENTICE,
+        BARBARIAN,
+        DRUID
     }
 
     enum class MinionVisualDirection {
@@ -131,7 +134,7 @@ class WeaponCarrierVisualSystem(
                                     player.currentVisualState.direction
                                 ),
                             type =
-                                typeFor(slot.index)
+                                typeForCharacter()
                         )
                     }
 
@@ -622,16 +625,14 @@ class WeaponCarrierVisualSystem(
         }
     }
 
-    private fun typeFor(
-        slotIndex: Int
-    ): MinionType {
-        return when (
-            (slotIndex - 1)
-                .mod(3)
-        ) {
-            0 -> MinionType.SOLDIER
-            1 -> MinionType.SCOUT
-            else -> MinionType.MAGE_APPRENTICE
+    private fun typeForCharacter(): MinionType {
+        return when (characterId) {
+            "CHR_SIR_IMBERT" -> MinionType.SOLDIER
+            "CHR_YWALETH_YOSTER" -> MinionType.SCOUT
+            "CHR_LAVENA_VOL" -> MinionType.MAGE_APPRENTICE
+            "CHR_KOBA" -> MinionType.BARBARIAN
+            "CHR_LINLOS_DUSTMAN" -> MinionType.DRUID
+            else -> MinionType.SOLDIER
         }
     }
 
