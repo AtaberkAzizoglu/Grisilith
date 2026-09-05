@@ -40,6 +40,8 @@ import com.azizoglu.grisilith.combat.interaction.CombatInteractionTrigger
 import com.azizoglu.grisilith.combat.interaction.VitriolicIgnitionRule
 import com.azizoglu.grisilith.combat.interaction.PlagueStormRule
 import com.badlogic.gdx.math.Vector2
+import com.azizoglu.grisilith.character.trait.CharacterTraitDefinition
+import com.azizoglu.grisilith.character.trait.CharacterTraitRuntime
 
 class WeaponRuntimeManager(
     private val inventory:
@@ -50,6 +52,12 @@ class WeaponRuntimeManager(
 
     private val tamgaRuntimeManager:
     TamgaRuntimeManager,
+
+    characterTrait:
+    CharacterTraitDefinition,
+
+    traitPlayer:
+    Player,
 
     private val currentStageProvider:
         () -> Int = { 1 }
@@ -164,6 +172,13 @@ class WeaponRuntimeManager(
     private val combatInteractionManager =
         CombatInteractionManager()
 
+    private val characterTraitRuntime =
+        CharacterTraitRuntime(
+            traitId = characterTrait.id,
+            player = traitPlayer,
+            playerStats = playerStats
+        )
+
     private data class PendingVitriolicIgnition(
         val centerX: Float,
         val centerY: Float
@@ -173,6 +188,11 @@ class WeaponRuntimeManager(
         ArrayDeque<PendingVitriolicIgnition>()
 
     init {
+        combatInteractionManager
+            .register(
+                characterTraitRuntime
+            )
+
         combatInteractionManager
             .register(
                 VitriolicIgnitionRule(
@@ -657,6 +677,9 @@ class WeaponRuntimeManager(
                             tamgaRuntimeManager =
                                 tamgaRuntimeManager,
 
+                            characterTraitRuntime =
+                                characterTraitRuntime,
+
                             abilityDamageMultiplierProvider = {
                                     activeWeapon,
                                     activePlayer,
@@ -677,6 +700,21 @@ class WeaponRuntimeManager(
                         )
                     }
             }
+    }
+
+    fun applyCharacterTraitOnWeaponHit(
+        event: WeaponHitEvent,
+        onDamageDealt: (
+            damage: Int,
+            sourceName: String
+        ) -> Unit,
+        onEnemyKilled: (Enemy) -> Unit
+    ) {
+        characterTraitRuntime.onWeaponHit(
+            event = event,
+            onDamageDealt = onDamageDealt,
+            onEnemyKilled = onEnemyKilled
+        )
     }
 
     fun tryActivateAbilityInSlot(

@@ -3,6 +3,7 @@ package com.azizoglu.grisilith.character
 import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.content.ContentUnlockState
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.character.trait.DefaultCharacterTraits
 
 object DefaultCharacters {
 
@@ -19,6 +20,9 @@ object DefaultCharacters {
 
             minionDescription =
                 "Small armored weapon bearers.",
+
+            trait =
+                DefaultCharacterTraits.theHypocrisy,
 
             baseStats =
                 createStats(
@@ -53,6 +57,7 @@ object DefaultCharacters {
                 setOf(
                     StatType.STRENGTH,
                     StatType.ATTACK_SPEED,
+                    StatType.ELEMENTAL_DAMAGE,
                     StatType.PIERCING,
                     StatType.ARMOR_CLASS,
                     StatType.MAX_HP
@@ -80,6 +85,9 @@ object DefaultCharacters {
 
             minionDescription =
                 "Small hooded weapon bearers wearing dark cloaks.",
+
+            trait =
+                DefaultCharacterTraits.hurry,
 
             baseStats =
                 createStats(
@@ -140,6 +148,9 @@ object DefaultCharacters {
             minionDescription =
                 "No minions. Equipped weapons float around the character.",
 
+            trait =
+                DefaultCharacterTraits.necromancy,
+
             baseStats =
                 createStats(
                     maxHp = 4,
@@ -153,14 +164,14 @@ object DefaultCharacters {
                     critDamage = 1,
                     movementSpeed = 9,
                     luck = 8,
-                    harvest = 6,
-                    elementalDamage = 11,
-                    mightOfNature = 11,
-                    shepherd = 10,
+                    harvest = 7,
+                    elementalDamage = 10,
+                    mightOfNature = 15,
+                    shepherd = 4,
                     piercing = 0,
-                    enemyCount = 2,
+                    enemyCount = 3,
                     hpRegeneration = 0,
-                    lifeSteal = 2
+                    lifeSteal = 3
                 ),
 
             baseCritRatePercent =
@@ -175,7 +186,8 @@ object DefaultCharacters {
                     StatType.HASTE,
                     StatType.ELEMENTAL_DAMAGE,
                     StatType.MIGHT_OF_NATURE,
-                    StatType.SHEPHERD
+                    StatType.SHEPHERD,
+                    StatType.LIFE_STEAL
                 ),
 
             preferredMarketWeaponGroup =

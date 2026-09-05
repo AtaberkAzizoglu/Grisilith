@@ -6,6 +6,7 @@ import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.content.ContentUnlockState
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.character.trait.CharacterTraitDefinition
 
 data class CharacterDefinition(
     override val id: ContentId,
@@ -13,6 +14,8 @@ data class CharacterDefinition(
     override val description: String,
     val minionDescription: String,
     val baseStats: Map<StatType, Int>,
+
+    val trait: CharacterTraitDefinition,
 
     /*
      * Karaktere özgü ham kritik değerleri.

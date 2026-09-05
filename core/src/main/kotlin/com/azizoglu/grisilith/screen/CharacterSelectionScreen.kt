@@ -279,8 +279,23 @@ class CharacterSelectionScreen(
             true
         )
 
+        font.color =
+            Color.GOLD
+
+        font.draw(
+            batch,
+            character.trait.displayName +
+                ": " +
+                character.trait.description,
+            startX,
+            currentY - 62f,
+            350f,
+            -1,
+            true
+        )
+
         val statStartY =
-            currentY - 75f
+            currentY - 130f
 
         val leftColumnX =
             startX

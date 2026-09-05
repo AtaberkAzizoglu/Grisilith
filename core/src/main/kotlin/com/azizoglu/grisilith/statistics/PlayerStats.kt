@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.statistics
 
 import com.azizoglu.grisilith.save.RunSaveStatLayers
 import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
+import com.azizoglu.grisilith.character.trait.CharacterTraitId
 import kotlin.math.roundToInt
 import java.util.HashMap
 
@@ -13,7 +14,10 @@ class PlayerStats(
     Int = 0,
 
     private val baseCritDamagePercent:
-    Int = 100
+    Int = 100,
+
+    private val characterTraitId:
+    CharacterTraitId? = null
 ) {
     companion object {
         const val MINIMUM_SCORE = 0
@@ -228,19 +232,27 @@ class PlayerStats(
                     statType = statType
                 )
 
+        val characterTraitBonus =
+            characterTraitScoreBonus(
+                statType = statType,
+                includeTamga = true
+            )
+
         return (
             rawScore *
                 ActiveItemEffects.scoreMultiplier(
                     playerStats = this,
                     statType = statType
-                )
+                ) +
+                characterTraitBonus
             )
             .roundToInt()
             .coerceIn(
                 MINIMUM_SCORE,
-                ActiveItemEffects.scoreMaximum(
-                    playerStats = this,
-                    statType = statType
+                scoreMaximum(
+                    statType = statType,
+                    characterTraitBonus =
+                        characterTraitBonus
                 )
             )
     }
@@ -252,6 +264,12 @@ class PlayerStats(
     fun totalScoreWithoutTamga(
         statType: StatType
     ): Int {
+
+        val characterTraitBonus =
+            characterTraitScoreBonus(
+                statType = statType,
+                includeTamga = false
+            )
 
         return ((
             baseScore(statType) +
@@ -267,15 +285,89 @@ class PlayerStats(
             ActiveItemEffects.scoreMultiplier(
                 playerStats = this,
                 statType = statType
-            ))
+            ) +
+            characterTraitBonus)
             .roundToInt()
             .coerceIn(
                 MINIMUM_SCORE,
-                ActiveItemEffects.scoreMaximum(
-                    playerStats = this,
-                    statType = statType
+                scoreMaximum(
+                    statType = statType,
+                    characterTraitBonus =
+                        characterTraitBonus
                 )
             )
+    }
+
+    fun maximumScore(
+        statType: StatType
+    ): Int {
+        val characterTraitBonus =
+            characterTraitScoreBonus(
+                statType = statType,
+                includeTamga = true
+            )
+
+        return scoreMaximum(
+            statType = statType,
+            characterTraitBonus =
+                characterTraitBonus
+        )
+    }
+
+    fun characterTraitBonus(
+        statType: StatType
+    ): Int {
+        return characterTraitScoreBonus(
+            statType = statType,
+            includeTamga = true
+        )
+    }
+
+    private fun characterTraitScoreBonus(
+        statType: StatType,
+        includeTamga: Boolean
+    ): Int {
+        if (
+            characterTraitId != CharacterTraitId.HURRY ||
+            statType != StatType.ATTACK_SPEED
+        ) {
+            return 0
+        }
+
+        val movementSpeed =
+            if (includeTamga) {
+                totalScore(
+                    StatType.MOVEMENT_SPEED
+                )
+            } else {
+                totalScoreWithoutTamga(
+                    StatType.MOVEMENT_SPEED
+                )
+            }
+
+        return movementSpeed
+            .coerceAtLeast(0) / 5
+    }
+
+    private fun scoreMaximum(
+        statType: StatType,
+        characterTraitBonus: Int
+    ): Int {
+        val normalMaximum =
+            ActiveItemEffects.scoreMaximum(
+                playerStats = this,
+                statType = statType
+            )
+
+        return if (
+            characterTraitId == CharacterTraitId.HURRY &&
+            statType == StatType.ATTACK_SPEED
+        ) {
+            normalMaximum +
+                characterTraitBonus
+        } else {
+            normalMaximum
+        }
     }
 
     fun setTamgaBonuses(
@@ -517,12 +609,18 @@ class PlayerStats(
     }
 
     fun attackSpeedProgress(): Float {
+        val maximum =
+            maximumScore(
+                StatType.ATTACK_SPEED
+            )
+                .coerceAtLeast(1)
+
         return (
             totalScore(
                 StatType.ATTACK_SPEED
             )
                 .toFloat() /
-                RUN_MAXIMUM_SCORE.toFloat()
+                maximum.toFloat()
             )
             .coerceIn(
                 0f,

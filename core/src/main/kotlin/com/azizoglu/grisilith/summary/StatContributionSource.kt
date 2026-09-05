@@ -19,6 +19,10 @@ enum class StatContributionSource(
         "Weapons"
     ),
 
+    CHARACTER_TRAIT(
+        "Character Trait"
+    ),
+
     /*
      * PlayerStats şu anda Armor ve Tamga bonuslarını
      * tek gearBonuses katmanında saklıyor.

@@ -476,7 +476,8 @@ object ActiveItemEffects {
         repeat(gamblerCopies) {
             val playerStats = stats ?: return@repeat
             val increaseCandidates = StatType.entries.filter { stat ->
-                playerStats.totalScore(stat) < scoreMaximum(playerStats, stat)
+                playerStats.totalScore(stat) <
+                    playerStats.maximumScore(stat)
             }
             val increase = increaseCandidates.randomOrNull() ?: return@repeat
             val decreaseCandidates = StatType.entries.filter { stat ->

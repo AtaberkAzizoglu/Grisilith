@@ -177,7 +177,10 @@ class FirstScreen(
 
             baseCritDamagePercent =
                 selectedCharacter
-                    .baseCritDamagePercent
+                    .baseCritDamagePercent,
+
+            characterTraitId =
+                selectedCharacter.trait.id
         ).apply {
             selectedPreset
                 ?.let { preset ->
@@ -334,6 +337,12 @@ class FirstScreen(
 
             tamgaRuntimeManager =
                 tamgaRuntimeManager,
+
+            characterTrait =
+                selectedCharacter.trait,
+
+            traitPlayer =
+                player,
 
             currentStageProvider = {
                 stageController.currentStage
@@ -1041,6 +1050,12 @@ class FirstScreen(
                             statType
                         )
 
+                val characterTrait =
+                    playerStats
+                        .characterTraitBonus(
+                            statType
+                        )
+
                 val rawContributions =
                     listOf(
                         StatContributionSource
@@ -1058,6 +1073,10 @@ class FirstScreen(
                         StatContributionSource
                             .WEAPONS to
                             weapon,
+
+                        StatContributionSource
+                            .CHARACTER_TRAIT to
+                            characterTrait,
 
                         StatContributionSource
                             .ARMOR_AND_TAMGAS to
@@ -1426,9 +1445,8 @@ class FirstScreen(
                             .totalScore(
                                 statType
                             ) <
-                            ActiveItemEffects.scoreMaximum(
-                                playerStats = playerStats,
-                                statType = statType
+                            playerStats.maximumScore(
+                                statType
                             )
                     }
             },
@@ -3328,6 +3346,28 @@ class FirstScreen(
                         isEligibleHit =
                             hitEvent.isLifeStealEligible
                     )
+
+                    weaponRuntimeManager
+                        .applyCharacterTraitOnWeaponHit(
+                            event = hitEvent,
+                            onDamageDealt = {
+                                    bonusDamage,
+                                    sourceName ->
+
+                                runStatistics
+                                    .recordDamageDealt(
+                                        amount = bonusDamage,
+                                        weaponName = sourceName
+                                    )
+                            },
+                            onEnemyKilled = {
+                                    killedEnemy ->
+
+                                handleEnemyKilled(
+                                    killedEnemy
+                                )
+                            }
+                        )
 
                     tamgaRuntimeManager
                         .onWeaponHit(

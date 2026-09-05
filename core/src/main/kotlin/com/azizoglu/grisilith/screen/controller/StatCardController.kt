@@ -102,9 +102,8 @@ class StatCardController(
                             upgradeType
                                 .statType
                         ) <
-                        ActiveItemEffects.scoreMaximum(
-                            playerStats = playerStats,
-                            statType = upgradeType.statType
+                        playerStats.maximumScore(
+                            upgradeType.statType
                         )
                 }
 

@@ -2352,7 +2352,10 @@ class PresetManagerScreen(
 
         return PlayerStats(
             initialBaseScores =
-                preRunBaseStats
+                preRunBaseStats,
+
+            characterTraitId =
+                preset.character.trait.id
         ).apply {
             setGearBonuses(
                 preset.gearBonuses

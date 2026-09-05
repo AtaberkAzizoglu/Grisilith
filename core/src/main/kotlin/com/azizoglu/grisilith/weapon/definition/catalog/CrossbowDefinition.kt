@@ -40,7 +40,7 @@ object CrossbowDefinition {
                 WeaponAttackPattern
                     .PIERCING_PROJECTILE,
 
-            baseDamage = 14,
+            baseDamage = 15,
             baseAttacksPerSecond = 0.323f,
             baseRange = 880f,
             baseProjectileSpeed = 850f,
@@ -48,8 +48,7 @@ object CrossbowDefinition {
 
             damageScaling =
                 mapOf(
-                    StatType.DEXTERITY to 1f,
-                    StatType.PIERCING to 0.25f
+                    StatType.DEXTERITY to 1f
                 ),
 
             passiveStatModifiers =

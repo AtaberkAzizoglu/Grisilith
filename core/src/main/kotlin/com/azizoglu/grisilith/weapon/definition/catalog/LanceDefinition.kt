@@ -44,7 +44,7 @@ object LanceDefinition {
             attackPattern =
                 WeaponAttackPattern.LONG_PIERCING_LINE,
 
-            baseDamage = 11,
+            baseDamage = 12,
             baseAttacksPerSecond = 0.363f,
             baseRange = 245f,
             baseProjectileSpeed = 0f,
@@ -54,8 +54,7 @@ object LanceDefinition {
 
             damageScaling =
                 mapOf(
-                    StatType.STRENGTH to 1f,
-                    StatType.PIERCING to 0.20f
+                    StatType.STRENGTH to 1f
                 ),
 
             passiveStatModifiers =

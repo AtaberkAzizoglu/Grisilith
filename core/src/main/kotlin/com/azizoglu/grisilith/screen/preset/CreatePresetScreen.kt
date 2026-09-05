@@ -2146,7 +2146,10 @@ class CreatePresetScreen(
 
         return PlayerStats(
             initialBaseScores =
-                finalBaseStats
+                finalBaseStats,
+
+            characterTraitId =
+                character.trait.id
         ).also {
                 previewStats ->
 

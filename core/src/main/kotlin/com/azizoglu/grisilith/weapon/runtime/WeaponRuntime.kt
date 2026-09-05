@@ -12,6 +12,7 @@ import com.azizoglu.grisilith.weapon.skill.WeaponAbilityRuntime
 import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
 import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
+import com.azizoglu.grisilith.character.trait.CharacterTraitRuntime
 
 import kotlin.math.roundToInt
 
@@ -22,6 +23,9 @@ class WeaponRuntime(
     WeaponAttackExecutorFactory,
     private val tamgaRuntimeManager:
     TamgaRuntimeManager,
+
+    private val characterTraitRuntime:
+    CharacterTraitRuntime,
 
     /*
      * Weapon-specific Level 5 damage modifiers that require world/runtime
@@ -179,6 +183,15 @@ class WeaponRuntime(
                                 hitEvent
                                     .isLifeStealEligible
                         )
+
+                        characterTraitRuntime
+                            .onWeaponHit(
+                                event = hitEvent,
+                                onDamageDealt =
+                                    onDamageDealt,
+                                onEnemyKilled =
+                                    onEnemyKilled
+                            )
 
                         tamgaRuntimeManager
                             .onWeaponHit(
