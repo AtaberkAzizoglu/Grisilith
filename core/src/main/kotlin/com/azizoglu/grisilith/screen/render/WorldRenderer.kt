@@ -11,6 +11,7 @@ import com.azizoglu.grisilith.enemy.visual.EnemySpriteRenderer
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.map.visual.MapObstacleSpriteRenderer
 import com.azizoglu.grisilith.map.tile.MapGroundTileRenderer
+import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.summon.SummonedEntity
 import com.azizoglu.grisilith.summon.visual.SummonSpriteRenderer
@@ -28,6 +29,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 class WorldRenderer(
     private val shapeRenderer: ShapeRenderer,
     private val camera: OrthographicCamera,
+    private val gameMap: GameMap,
     private val worldWidth: Float,
     private val worldHeight: Float,
     private val selectedCharacterId: ContentId
@@ -71,6 +73,9 @@ class WorldRenderer(
 
     private val mapGroundTileRenderer =
         MapGroundTileRenderer(
+            gameMap =
+                gameMap,
+
             worldWidth =
                 worldWidth,
 
@@ -79,7 +84,9 @@ class WorldRenderer(
         )
 
     private val mapObstacleSpriteRenderer =
-        MapObstacleSpriteRenderer()
+        MapObstacleSpriteRenderer(
+            gameMap
+        )
 
     private val characterSpriteRenderer =
         CharacterSpriteRenderer()
@@ -160,8 +167,7 @@ class WorldRenderer(
 
         /*
          * PASS 0:
-         * Road to Home ground layer.
-         * Şimdilik yalnızca Grass Tile kullanılıyor.
+         * Selected Map ground layer.
          */
         mapGroundTileRenderer.render(
             camera =

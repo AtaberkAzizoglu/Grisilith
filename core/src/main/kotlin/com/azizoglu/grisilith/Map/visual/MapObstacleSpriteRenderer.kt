@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.map.visual
 
+import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.map.MapObstacle
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -8,25 +9,23 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import kotlin.math.max
 
-class MapObstacleSpriteRenderer {
+class MapObstacleSpriteRenderer(
+    private val gameMap: GameMap
+) {
 
     private val batch =
         SpriteBatch()
 
-    private var texture:
-        Texture? =
-        null
-
-    private var regions:
-        Array<Array<TextureRegion>>? =
-        null
+    private val textures =
+        mutableMapOf<String, Texture>()
 
     fun hasVisualDefinition(
         obstacle: MapObstacle
     ): Boolean {
         return MapObstacleSpriteRegistry
             .contains(
-                obstacle.type
+                gameMap = gameMap,
+                type = obstacle.type
             )
     }
 
@@ -34,15 +33,6 @@ class MapObstacleSpriteRenderer {
         obstacles: List<MapObstacle>,
         camera: OrthographicCamera
     ) {
-        val texture =
-            ensureTexture()
-                ?: return
-
-        val regions =
-            ensureRegions(
-                texture
-            )
-
         batch.projectionMatrix =
             camera.combined
 
@@ -54,59 +44,64 @@ class MapObstacleSpriteRenderer {
             val definition =
                 MapObstacleSpriteRegistry
                     .find(
-                        obstacle.type
+                        gameMap = gameMap,
+                        type = obstacle.type
                     )
                     ?: return@forEach
 
-            val variant =
-                obstacle.visualVariant
-                    .coerceIn(
-                        0,
-                        3
-                    )
+            val texture =
+                ensureTexture(
+                    definition.texturePath
+                ) ?: return@forEach
 
-            val region =
-                regions[
-                    definition.rowIndex
-                ][
-                    variant
+            val source =
+                definition.sourceRegions[
+                    obstacle.visualVariant
+                        .mod(
+                            definition.sourceRegions.size
+                        )
                 ]
 
-            /*
-             * Collision bounds are intentionally untouched.
-             * The sprite is a visual layer that can extend beyond them.
-             */
+            val region =
+                TextureRegion(texture)
+                    .apply {
+                        setRegion(
+                            (source.x + 0.5f) /
+                                texture.width,
+                            (source.y + 0.5f) /
+                                texture.height,
+                            (source.x + source.width - 0.5f) /
+                                texture.width,
+                            (source.y + source.height - 0.5f) /
+                                texture.height
+                        )
+                    }
+
             val baseSize =
                 max(
                     obstacle.visualBounds.width,
                     obstacle.visualBounds.height
                 )
 
-            val drawWidth =
-                baseSize *
-                    definition.widthMultiplier
-
             val drawHeight =
                 baseSize *
                     definition.heightMultiplier
 
+            val drawWidth =
+                drawHeight *
+                    source.width /
+                    source.height *
+                    definition.widthMultiplier
+
             val drawX =
                 obstacle.visualBounds.x +
-                    obstacle.visualBounds.width /
-                    2f -
-                    drawWidth /
-                    2f
+                    obstacle.visualBounds.width / 2f -
+                    drawWidth / 2f
 
-            /*
-             * Bottom/feet style pivot:
-             * artwork grows mostly upward from the obstacle bounds.
-             */
             val drawY =
                 obstacle.visualBounds.y +
-                    obstacle.visualBounds.height /
-                    2f -
-                    drawHeight /
-                    2f +
+                    obstacle.visualBounds.height / 2f -
+                    drawHeight / 2f +
                     obstacle.visualBounds.height *
                     definition.verticalOffsetMultiplier
 
@@ -122,18 +117,17 @@ class MapObstacleSpriteRenderer {
         batch.end()
     }
 
-    private fun ensureTexture():
-        Texture? {
-
-        texture
+    private fun ensureTexture(
+        path: String
+    ): Texture? {
+        textures[path]
             ?.let {
                 return it
             }
 
         val handle =
             Gdx.files.internal(
-                MapObstacleSpriteRegistry
-                    .TEXTURE_PATH
+                path
             )
 
         if (!handle.exists()) {
@@ -143,66 +137,24 @@ class MapObstacleSpriteRenderer {
         return Texture(handle)
             .also {
                     texture ->
+
                 texture.setFilter(
-                    Texture.TextureFilter.Nearest,
-                    Texture.TextureFilter.Nearest
+                    Texture.TextureFilter.Linear,
+                    Texture.TextureFilter.Linear
                 )
 
-                this.texture =
+                textures[path] =
                     texture
             }
     }
 
-    private fun ensureRegions(
-        texture: Texture
-    ): Array<Array<TextureRegion>> {
-
-        regions
-            ?.let {
-                return it
-            }
-
-        val cellSize =
-            MapObstacleSpriteRegistry
-                .CELL_SIZE
-
-        val built =
-            Array(
-                5
-            ) {
-                    row ->
-                Array(
-                    4
-                ) {
-                        column ->
-                    TextureRegion(
-                        texture,
-                        column *
-                            cellSize,
-                        row *
-                            cellSize,
-                        cellSize,
-                        cellSize
-                    )
-                }
-            }
-
-        regions =
-            built
-
-        return built
-    }
-
     fun dispose() {
-        texture
-            ?.dispose()
+        textures.values
+            .forEach(
+                Texture::dispose
+            )
 
-        texture =
-            null
-
-        regions =
-            null
-
+        textures.clear()
         batch.dispose()
     }
 }

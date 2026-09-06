@@ -8,6 +8,10 @@ enum class MapObstacleType {
     HOUSE,
     WELL,
     HAY_BALE,
+    CRATE,
+    BARREL,
+    LOG_PILE,
+    BUSH,
 
     CAVE_ROCK
 }

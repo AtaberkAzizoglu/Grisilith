@@ -80,54 +80,89 @@ class MapObstacle(
             MapObstacleType.ROCK ->
                 CollisionFootprint(
                     widthRatio = 0.72f,
-                    heightRatio = 0.55f,
+                    heightRatio = 0.38f,
                     offsetXRatio = 0.14f,
-                    offsetYRatio = 0.05f
+                    offsetYRatio = 0.04f
                 )
 
             MapObstacleType.TREE ->
                 CollisionFootprint(
-                    widthRatio = 0.34f,
-                    heightRatio = 0.30f,
-                    offsetXRatio = 0.33f,
+                    widthRatio = 0.30f,
+                    heightRatio = 0.22f,
+                    offsetXRatio = 0.35f,
                     offsetYRatio = 0.02f
                 )
 
             MapObstacleType.WELL ->
                 CollisionFootprint(
-                    widthRatio = 0.78f,
-                    heightRatio = 0.58f,
-                    offsetXRatio = 0.11f,
+                    widthRatio = 0.76f,
+                    heightRatio = 0.45f,
+                    offsetXRatio = 0.12f,
                     offsetYRatio = 0.04f
                 )
 
             MapObstacleType.HAY_BALE ->
                 CollisionFootprint(
                     widthRatio = 0.82f,
-                    heightRatio = 0.68f,
+                    heightRatio = 0.55f,
                     offsetXRatio = 0.09f,
                     offsetYRatio = 0.04f
                 )
 
             MapObstacleType.BROKEN_WAGON ->
                 CollisionFootprint(
-                    widthRatio = 0.82f,
-                    heightRatio = 0.58f,
-                    offsetXRatio = 0.09f,
-                    offsetYRatio = 0.05f
+                    widthRatio = 0.78f,
+                    heightRatio = 0.48f,
+                    offsetXRatio = 0.11f,
+                    offsetYRatio = 0.04f
                 )
 
-            /*
-             * Henüz sprite sistemi olmayan obstacle türlerinde eski davranışı
-             * koruyoruz.
-             */
-            MapObstacleType.HOUSE,
+            MapObstacleType.HOUSE ->
+                CollisionFootprint(
+                    widthRatio = 0.78f,
+                    heightRatio = 0.23f,
+                    offsetXRatio = 0.11f,
+                    offsetYRatio = 0.03f
+                )
+
             MapObstacleType.CAVE_ROCK ->
                 CollisionFootprint(
-                    widthRatio = 1f,
-                    heightRatio = 1f,
-                    offsetXRatio = 0f,
-                    offsetYRatio = 0f
+                    widthRatio = 0.72f,
+                    heightRatio = 0.38f,
+                    offsetXRatio = 0.14f,
+                    offsetYRatio = 0.04f
+                )
+
+            MapObstacleType.CRATE ->
+                CollisionFootprint(
+                    widthRatio = 0.76f,
+                    heightRatio = 0.68f,
+                    offsetXRatio = 0.12f,
+                    offsetYRatio = 0.03f
+                )
+
+            MapObstacleType.BARREL ->
+                CollisionFootprint(
+                    widthRatio = 0.72f,
+                    heightRatio = 0.66f,
+                    offsetXRatio = 0.14f,
+                    offsetYRatio = 0.03f
+                )
+
+            MapObstacleType.LOG_PILE ->
+                CollisionFootprint(
+                    widthRatio = 0.78f,
+                    heightRatio = 0.42f,
+                    offsetXRatio = 0.11f,
+                    offsetYRatio = 0.04f
+                )
+
+            MapObstacleType.BUSH ->
+                CollisionFootprint(
+                    widthRatio = 0.55f,
+                    heightRatio = 0.22f,
+                    offsetXRatio = 0.225f,
+                    offsetYRatio = 0.03f
                 )
         }
     }
@@ -166,6 +201,14 @@ class MapObstacle(
 
                 MapObstacleType.HAY_BALE ->
                     Color.GOLDENROD
+
+                MapObstacleType.CRATE,
+                MapObstacleType.BARREL,
+                MapObstacleType.LOG_PILE ->
+                    Color.BROWN
+
+                MapObstacleType.BUSH ->
+                    Color.FOREST
 
                 MapObstacleType.CAVE_ROCK ->
                     Color.DARK_GRAY

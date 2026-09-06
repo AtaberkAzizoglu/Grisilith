@@ -179,7 +179,7 @@ class CharacterTraitRuntime(
 
     companion object {
         private const val CURRENT_HEALTH_DAMAGE_RATIO =
-            0.05f
+            0.01f
 
         private const val TOAD_CYCLE_INTERVAL_SECONDS =
             15f

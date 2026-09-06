@@ -35,7 +35,7 @@ enum class GameMap(
             "A small village occupied by dangerous bandits.",
         worldWidth = 2500f,
         worldHeight = 2000f,
-        isInitiallyUnlocked = false,
+        isInitiallyUnlocked = true,
         enemyTags =
             setOf(
                 EnemyTag.HUMANOID
@@ -48,7 +48,7 @@ enum class GameMap(
             "A wide underground chamber filled with undead.",
         worldWidth = 1750f,
         worldHeight = 1250f,
-        isInitiallyUnlocked = false,
+        isInitiallyUnlocked = true,
         enemyTags =
             setOf(
                 EnemyTag.UNDEAD

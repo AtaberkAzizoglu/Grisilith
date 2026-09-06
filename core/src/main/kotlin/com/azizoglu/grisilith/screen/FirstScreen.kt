@@ -151,6 +151,7 @@ class FirstScreen(
         WorldRenderer(
             shapeRenderer = shapeRenderer,
             camera = camera,
+            gameMap = gameMap,
             worldWidth = worldWidth,
             worldHeight = worldHeight,
             selectedCharacterId =

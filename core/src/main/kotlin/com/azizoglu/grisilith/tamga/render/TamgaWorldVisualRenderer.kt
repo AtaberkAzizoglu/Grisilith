@@ -79,20 +79,16 @@ class TamgaWorldVisualRenderer {
 
         chargerExplosions.forEach { effect ->
             val frame =
-                (effect.progress * 12f)
+                (effect.progress * CHARGER_EXPLOSION_FRAMES.size)
                     .toInt()
-                    .coerceIn(0, 11)
-            drawAnimatedGridFrame(
-                path = "tamga_visuals/charger_explosion_sheet.png",
-                columns = 6,
-                rows = 2,
-                frame = frame.mod(6),
-                row = frame / 6,
-                centerX = effect.centerX,
-                centerY = effect.centerY,
-                width = effect.radius * 2f,
-                height = effect.radius * 2f,
-                alpha = 1f
+                    .coerceIn(
+                        0,
+                        CHARGER_EXPLOSION_FRAMES.lastIndex
+                    )
+
+            drawPackedChargerExplosionFrame(
+                effect = effect,
+                frame = CHARGER_EXPLOSION_FRAMES[frame]
             )
         }
 
@@ -203,6 +199,61 @@ class TamgaWorldVisualRenderer {
         )
     }
 
+    /*
+     * Charger artwork is a tightly packed 11-frame sequence rather than a
+     * regular 6 x 2 grid. The growing frames use progressively wider source
+     * areas, then the second row contracts again. Keeping those source areas
+     * and drawing them at one shared pixel scale preserves the intended
+     * expansion while preventing neighbouring frames from being sliced into
+     * one another.
+     */
+    private fun drawPackedChargerExplosionFrame(
+        effect: ChargerExplosionEffect,
+        frame: PackedSpriteFrame
+    ) {
+        val texture =
+            texture(
+                "tamga_visuals/charger_explosion_sheet.png"
+            )
+
+        val region =
+            TextureRegion(
+                texture,
+                frame.x,
+                frame.y,
+                frame.width,
+                frame.height
+            )
+
+        val diameter =
+            effect.radius * 2f
+
+        val drawWidth =
+            diameter *
+                frame.width /
+                CHARGER_EXPLOSION_REFERENCE_SIZE
+
+        val drawHeight =
+            diameter *
+                frame.height /
+                CHARGER_EXPLOSION_REFERENCE_SIZE
+
+        batch.setColor(
+            1f,
+            1f,
+            1f,
+            1f
+        )
+
+        batch.draw(
+            region,
+            effect.centerX - drawWidth / 2f,
+            effect.centerY - drawHeight / 2f,
+            drawWidth,
+            drawHeight
+        )
+    }
+
     private fun texture(path: String): Texture =
         textures.getOrPut(path) {
             Texture(Gdx.files.internal(path)).also { texture ->
@@ -220,6 +271,36 @@ class TamgaWorldVisualRenderer {
     }
 
     private companion object {
+        data class PackedSpriteFrame(
+            val x: Int,
+            val y: Int,
+            val width: Int,
+            val height: Int
+        )
+
+        /*
+         * Boundaries sit in the transparent gaps between the irregularly
+         * packed artwork: six expanding frames above, five contracting
+         * frames below.
+         */
+        val CHARGER_EXPLOSION_FRAMES =
+            arrayOf(
+                PackedSpriteFrame(0, 0, 287, 362),
+                PackedSpriteFrame(287, 0, 286, 362),
+                PackedSpriteFrame(573, 0, 349, 362),
+                PackedSpriteFrame(922, 0, 376, 362),
+                PackedSpriteFrame(1298, 0, 399, 362),
+                PackedSpriteFrame(1697, 0, 475, 362),
+                PackedSpriteFrame(0, 362, 481, 362),
+                PackedSpriteFrame(481, 362, 467, 362),
+                PackedSpriteFrame(948, 362, 422, 362),
+                PackedSpriteFrame(1370, 362, 442, 362),
+                PackedSpriteFrame(1812, 362, 360, 362)
+            )
+
+        const val CHARGER_EXPLOSION_REFERENCE_SIZE =
+            481f
+
         const val FOOTSTEP_SOURCE_WIDTH = 150
         const val FOOTSTEP_TOP_INSET = 85
         const val FOOTSTEP_BOTTOM_INSET = 53

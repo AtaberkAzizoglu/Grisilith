@@ -4,8 +4,30 @@ import com.azizoglu.grisilith.map.MapObstacleType
 
 data class MapObstacleSpriteDefinition(
     val type: MapObstacleType,
-    val rowIndex: Int,
+    val texturePath: String,
+    val sourceRegions: List<MapObstacleSourceRegion>,
     val widthMultiplier: Float,
     val heightMultiplier: Float,
     val verticalOffsetMultiplier: Float = 0f
-)
+) {
+    init {
+        require(texturePath.isNotBlank())
+        require(sourceRegions.isNotEmpty())
+        require(widthMultiplier > 0f)
+        require(heightMultiplier > 0f)
+    }
+}
+
+data class MapObstacleSourceRegion(
+    val x: Int,
+    val y: Int,
+    val width: Int,
+    val height: Int
+) {
+    init {
+        require(x >= 0)
+        require(y >= 0)
+        require(width > 0)
+        require(height > 0)
+    }
+}

@@ -212,25 +212,25 @@ object DefaultCharacters {
                 DefaultCharacterTraits.bloodweight,
             baseStats =
                 createStats(
-                    maxHp = 18,
-                    armorClass = 8,
-                    strength = 15,
+                    maxHp = 15,
+                    armorClass = 6,
+                    strength = 13,
                     dexterity = 5,
-                    wisdom = 1,
+                    wisdom = 2,
                     haste = 2,
-                    attackSpeed = 8,
-                    critRate = 5,
-                    critDamage = 9,
+                    attackSpeed = 7,
+                    critRate = 4,
+                    critDamage = 8,
                     movementSpeed = 7,
                     luck = 2,
                     harvest = 4,
-                    elementalDamage = 0,
-                    mightOfNature = 0,
-                    shepherd = 0,
+                    elementalDamage = 3,
+                    mightOfNature = 2,
+                    shepherd = 4,
                     piercing = 9,
                     enemyCount = 7,
                     hpRegeneration = 8,
-                    lifeSteal = 6
+                    lifeSteal = 3
                 ),
             baseCritRatePercent =
                 10,
@@ -265,7 +265,7 @@ object DefaultCharacters {
                 DefaultCharacterTraits.theToadCycle,
             baseStats =
                 createStats(
-                    maxHp = 8,
+                    maxHp = 4,
                     armorClass = 5,
                     strength = 2,
                     dexterity = 8,

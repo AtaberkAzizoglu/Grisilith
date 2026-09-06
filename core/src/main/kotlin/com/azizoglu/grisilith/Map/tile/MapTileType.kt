@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.map.tile
 
 enum class MapTileType {
-    GRASS
+    GRASS,
+    DUNGEON_FLOOR
 }

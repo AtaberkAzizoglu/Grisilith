@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.map.tile
 
+import com.azizoglu.grisilith.config.GameMap
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
@@ -9,43 +10,53 @@ import kotlin.math.ceil
 import kotlin.math.floor
 
 class MapGroundTileRenderer(
+    private val gameMap: GameMap,
     private val worldWidth: Float,
     private val worldHeight: Float
 ) {
 
-    private val definition =
-        MapTileSpriteRegistry.grass
+    private companion object {
+        const val TILE_SEAM_OVERLAP =
+            0.5f
+    }
+
+    private val groundDefinition =
+        MapTileSpriteRegistry
+            .groundFor(
+                gameMap
+            )
 
     private val batch =
         SpriteBatch()
 
-    private var texture:
-        Texture? =
-        null
+    private val textures =
+        mutableMapOf<String, Texture>()
 
-    private var regions:
-        Array<TextureRegion>? =
-        null
+    private val regions =
+        mutableMapOf<
+            MapTileSpriteDefinition,
+            Array<TextureRegion>
+            >()
 
     fun render(
         camera: OrthographicCamera
     ) {
-        val texture =
-            ensureTexture()
-                ?: return
+        renderGround(
+            camera
+        )
+    }
 
-        val regions =
+    private fun renderGround(
+        camera: OrthographicCamera
+    ) {
+        val groundRegions =
             ensureRegions(
-                texture
-            )
+                groundDefinition
+            ) ?: return
 
         val tileSize =
-            definition.worldTileSize
+            groundDefinition.worldTileSize
 
-        /*
-         * Sadece kameranın görebildiği tile'ları çiziyoruz.
-         * Map tamamını her frame çizmek yerine viewport'a göre cull ediyoruz.
-         */
         val viewportWidth =
             camera.viewportWidth *
                 camera.zoom
@@ -76,9 +87,7 @@ class MapGroundTileRenderer(
                     tileSize
             )
                 .toInt()
-                .coerceAtLeast(
-                    0
-                )
+                .coerceAtLeast(0)
 
         val maxColumn =
             ceil(
@@ -100,9 +109,7 @@ class MapGroundTileRenderer(
                     tileSize
             )
                 .toInt()
-                .coerceAtLeast(
-                    0
-                )
+                .coerceAtLeast(0)
 
         val maxRow =
             ceil(
@@ -139,29 +146,22 @@ class MapGroundTileRenderer(
             ) {
                 val variation =
                     deterministicVariation(
-                        column =
-                            column,
-
-                        row =
-                            row,
-
+                        column = column,
+                        row = row,
                         variationCount =
-                            regions.size
+                            groundRegions.size
                     )
 
                 batch.draw(
-                    regions[
-                        variation
-                    ],
-
-                    column *
-                        tileSize,
-
-                    row *
-                        tileSize,
-
-                    tileSize,
-                    tileSize
+                    groundRegions[variation],
+                    column * tileSize -
+                        TILE_SEAM_OVERLAP,
+                    row * tileSize -
+                        TILE_SEAM_OVERLAP,
+                    tileSize +
+                        TILE_SEAM_OVERLAP * 2f,
+                    tileSize +
+                        TILE_SEAM_OVERLAP * 2f
                 )
 
                 column +=
@@ -175,17 +175,11 @@ class MapGroundTileRenderer(
         batch.end()
     }
 
-    /*
-     * Random çağrısı kullanmıyoruz.
-     * Aynı tile koordinatı her frame aynı variation'ı döndürür;
-     * bu yüzden hareket ederken texture titreşmez/değişmez.
-     */
     private fun deterministicVariation(
         column: Int,
         row: Int,
         variationCount: Int
     ): Int {
-
         var hash =
             column *
                 73856093
@@ -211,83 +205,83 @@ class MapGroundTileRenderer(
             variationCount
     }
 
-    private fun ensureTexture():
-        Texture? {
+    private fun ensureRegions(
+        definition: MapTileSpriteDefinition
+    ): Array<TextureRegion>? {
+        regions[definition]
+            ?.let {
+                return it
+            }
 
-        texture
+        val texture =
+            ensureTexture(
+                definition.texturePath
+            ) ?: return null
+
+        return definition.sourceRegions
+            .map {
+                    source ->
+
+                TextureRegion(texture)
+                    .apply {
+                        setRegion(
+                            (source.x + 0.5f) /
+                                texture.width,
+                            (source.y + 0.5f) /
+                                texture.height,
+                            (source.x + source.width - 0.5f) /
+                                texture.width,
+                            (source.y + source.height - 0.5f) /
+                                texture.height
+                        )
+                    }
+            }
+            .toTypedArray()
+            .also {
+                regions[definition] =
+                    it
+            }
+    }
+
+    private fun ensureTexture(
+        path: String
+    ): Texture? {
+        textures[path]
             ?.let {
                 return it
             }
 
         val handle =
             Gdx.files.internal(
-                definition.texturePath
+                path
             )
 
         if (!handle.exists()) {
             return null
         }
 
-        return Texture(
-            handle
-        )
+        return Texture(handle)
             .also {
-                    loadedTexture ->
+                    texture ->
 
-                loadedTexture.setFilter(
-                    Texture.TextureFilter.Nearest,
-                    Texture.TextureFilter.Nearest
+                texture.setFilter(
+                    Texture.TextureFilter.Linear,
+                    Texture.TextureFilter.Linear
                 )
 
-                texture =
-                    loadedTexture
+                textures[path] =
+                    texture
             }
-    }
-
-    private fun ensureRegions(
-        texture: Texture
-    ): Array<TextureRegion> {
-
-        regions
-            ?.let {
-                return it
-            }
-
-        val sourceSize =
-            definition.sourceTileSize
-
-        val built =
-            Array(
-                definition.variationCount
-            ) {
-                    index ->
-
-                TextureRegion(
-                    texture,
-                    index *
-                        sourceSize,
-                    0,
-                    sourceSize,
-                    sourceSize
-                )
-            }
-
-        regions =
-            built
-
-        return built
     }
 
     fun dispose() {
-        texture
-            ?.dispose()
+        textures.values
+            .forEach(
+                Texture::dispose
+            )
 
-        texture =
-            null
-
-        regions =
-            null
-
+        textures.clear()
+        regions.clear()
         batch.dispose()
     }
 }

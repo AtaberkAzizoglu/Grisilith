@@ -6,17 +6,26 @@ import com.badlogic.gdx.math.Rectangle
 
 object MapObstacleGenerator {
 
-    private const val WORLD_EDGE_PADDING = 80f
+    private const val WORLD_EDGE_PADDING =
+        80f
 
-    /*
-     * Player size şu an 48f.
-     * 48 × 2.5 = 120f güvenli yarıçap.
-     */
-    private const val PLAYER_SAFE_RADIUS = 120f
+    private const val PLAYER_SAFE_RADIUS =
+        120f
 
-    private const val OBSTACLE_SPACING = 45f
+    private const val OBSTACLE_SPACING =
+        45f
 
-    private const val MAX_GENERATION_ATTEMPTS = 500
+    private const val MAX_GENERATION_ATTEMPTS =
+        500
+
+    private data class GenerationRule(
+        val type: MapObstacleType,
+        val count: Int,
+        val minimumWidth: Float,
+        val maximumWidth: Float,
+        val minimumHeight: Float,
+        val maximumHeight: Float
+    )
 
     fun generate(
         gameMap: GameMap,
@@ -25,88 +34,100 @@ object MapObstacleGenerator {
     ): List<MapObstacle> {
         return when (gameMap) {
             GameMap.ROAD_TO_HOME ->
-                generateRoadToHome(
+                generateRandomLayout(
+                    gameMap = gameMap,
+                    playerStartX = playerStartX,
+                    playerStartY = playerStartY,
+                    initialObstacles = emptyList(),
+                    rules = roadRules
+                )
+
+            GameMap.TROUBLE_AT_HOME ->
+                generateRandomLayout(
+                    gameMap = gameMap,
+                    playerStartX = playerStartX,
+                    playerStartY = playerStartY,
+                    initialObstacles =
+                        listOf(
+                            fixedVillageHouse(
+                                gameMap
+                            )
+                        ),
+                    rules = villageRules
+                )
+
+            GameMap.FOLLOWING_THE_DUNGEON_DELVER ->
+                generateRandomLayout(
+                    gameMap = gameMap,
+                    playerStartX = playerStartX,
+                    playerStartY = playerStartY,
+                    initialObstacles = emptyList(),
+                    rules = dungeonRules
+                )
+        }
+    }
+
+    private fun generateRandomLayout(
+        gameMap: GameMap,
+        playerStartX: Float,
+        playerStartY: Float,
+        initialObstacles: List<MapObstacle>,
+        rules: List<GenerationRule>
+    ): List<MapObstacle> {
+        val obstacles =
+            initialObstacles
+                .toMutableList()
+
+        rules.forEach {
+                rule ->
+
+            repeat(
+                rule.count
+            ) {
+                tryAddRandomObstacle(
+                    obstacles = obstacles,
+                    type = rule.type,
+                    width =
+                        MathUtils.random(
+                            rule.minimumWidth,
+                            rule.maximumWidth
+                        ),
+                    height =
+                        MathUtils.random(
+                            rule.minimumHeight,
+                            rule.maximumHeight
+                        ),
                     worldWidth = gameMap.worldWidth,
                     worldHeight = gameMap.worldHeight,
                     playerStartX = playerStartX,
                     playerStartY = playerStartY
                 )
-
-            GameMap.TROUBLE_AT_HOME ->
-                emptyList()
-
-            GameMap.FOLLOWING_THE_DUNGEON_DELVER ->
-                emptyList()
-        }
-    }
-
-    private fun generateRoadToHome(
-        worldWidth: Float,
-        worldHeight: Float,
-        playerStartX: Float,
-        playerStartY: Float
-    ): List<MapObstacle> {
-        val obstacles =
-            mutableListOf<MapObstacle>()
-
-        repeat(6) {
-            tryAddRandomObstacle(
-                obstacles = obstacles,
-                type = MapObstacleType.ROCK,
-                width = MathUtils.random(
-                    70f,
-                    115f
-                ),
-                height = MathUtils.random(
-                    60f,
-                    105f
-                ),
-                worldWidth = worldWidth,
-                worldHeight = worldHeight,
-                playerStartX = playerStartX,
-                playerStartY = playerStartY
-            )
-        }
-
-        repeat(5) {
-            tryAddRandomObstacle(
-                obstacles = obstacles,
-                type = MapObstacleType.TREE,
-                width = MathUtils.random(
-                    65f,
-                    90f
-                ),
-                height = MathUtils.random(
-                    90f,
-                    135f
-                ),
-                worldWidth = worldWidth,
-                worldHeight = worldHeight,
-                playerStartX = playerStartX,
-                playerStartY = playerStartY
-            )
-        }
-
-        repeat(2) {
-            tryAddRandomObstacle(
-                obstacles = obstacles,
-                type = MapObstacleType.BROKEN_WAGON,
-                width = MathUtils.random(
-                    120f,
-                    165f
-                ),
-                height = MathUtils.random(
-                    70f,
-                    105f
-                ),
-                worldWidth = worldWidth,
-                worldHeight = worldHeight,
-                playerStartX = playerStartX,
-                playerStartY = playerStartY
-            )
+            }
         }
 
         return obstacles
+    }
+
+    private fun fixedVillageHouse(
+        gameMap: GameMap
+    ): MapObstacle {
+        val width =
+            520f
+
+        val height =
+            360f
+
+        return MapObstacle(
+            type = MapObstacleType.HOUSE,
+            x = 90f,
+            y =
+                gameMap.worldHeight -
+                    height -
+                    110f,
+            width = width,
+            height = height,
+            visualVariant = 0
+        )
     }
 
     private fun tryAddRandomObstacle(
@@ -119,7 +140,9 @@ object MapObstacleGenerator {
         playerStartX: Float,
         playerStartY: Float
     ) {
-        repeat(MAX_GENERATION_ATTEMPTS) {
+        repeat(
+            MAX_GENERATION_ATTEMPTS
+        ) {
             val maximumX =
                 worldWidth -
                     WORLD_EDGE_PADDING -
@@ -131,8 +154,10 @@ object MapObstacleGenerator {
                     height
 
             if (
-                maximumX <= WORLD_EDGE_PADDING ||
-                maximumY <= WORLD_EDGE_PADDING
+                maximumX <=
+                WORLD_EDGE_PADDING ||
+                maximumY <=
+                WORLD_EDGE_PADDING
             ) {
                 return
             }
@@ -162,12 +187,7 @@ object MapObstacleGenerator {
                     bounds = candidateBounds,
                     playerStartX = playerStartX,
                     playerStartY = playerStartY
-                )
-            ) {
-                return@repeat
-            }
-
-            if (
+                ) ||
                 overlapsExistingObstacle(
                     candidateBounds = candidateBounds,
                     obstacles = obstacles
@@ -176,7 +196,7 @@ object MapObstacleGenerator {
                 return@repeat
             }
 
-            obstacles.add(
+            obstacles +=
                 MapObstacle(
                     type = type,
                     x = x,
@@ -189,7 +209,6 @@ object MapObstacleGenerator {
                             3
                         )
                 )
-            )
 
             return
         }
@@ -210,7 +229,9 @@ object MapObstacleGenerator {
                 PLAYER_SAFE_RADIUS * 2f
             )
 
-        return safeArea.overlaps(bounds)
+        return safeArea.overlaps(
+            bounds
+        )
     }
 
     private fun overlapsExistingObstacle(
@@ -229,10 +250,120 @@ object MapObstacleGenerator {
                     OBSTACLE_SPACING * 2f
             )
 
-        return obstacles.any { obstacle ->
+        return obstacles.any {
+                obstacle ->
+
             expandedCandidate.overlaps(
                 obstacle.visualBounds
             )
         }
     }
+
+    private val roadRules =
+        listOf(
+            GenerationRule(
+                MapObstacleType.ROCK,
+                6,
+                70f,
+                115f,
+                60f,
+                105f
+            ),
+            GenerationRule(
+                MapObstacleType.TREE,
+                5,
+                65f,
+                90f,
+                90f,
+                135f
+            ),
+            GenerationRule(
+                MapObstacleType.BROKEN_WAGON,
+                2,
+                120f,
+                165f,
+                70f,
+                105f
+            )
+        )
+
+    private val villageRules =
+        listOf(
+            GenerationRule(
+                MapObstacleType.TREE,
+                4,
+                75f,
+                105f,
+                100f,
+                145f
+            ),
+            GenerationRule(
+                MapObstacleType.WELL,
+                2,
+                105f,
+                135f,
+                80f,
+                110f
+            ),
+            GenerationRule(
+                MapObstacleType.HAY_BALE,
+                4,
+                66f,
+                96f,
+                48f,
+                68f
+            ),
+            GenerationRule(
+                MapObstacleType.BROKEN_WAGON,
+                2,
+                125f,
+                170f,
+                75f,
+                110f
+            ),
+            GenerationRule(
+                MapObstacleType.CRATE,
+                4,
+                48f,
+                66f,
+                50f,
+                70f
+            ),
+            GenerationRule(
+                MapObstacleType.BARREL,
+                3,
+                44f,
+                62f,
+                50f,
+                68f
+            ),
+            GenerationRule(
+                MapObstacleType.LOG_PILE,
+                3,
+                105f,
+                145f,
+                70f,
+                100f
+            ),
+            GenerationRule(
+                MapObstacleType.BUSH,
+                5,
+                80f,
+                120f,
+                58f,
+                82f
+            )
+        )
+
+    private val dungeonRules =
+        listOf(
+            GenerationRule(
+                MapObstacleType.CAVE_ROCK,
+                20,
+                75f,
+                125f,
+                65f,
+                110f
+            )
+        )
 }

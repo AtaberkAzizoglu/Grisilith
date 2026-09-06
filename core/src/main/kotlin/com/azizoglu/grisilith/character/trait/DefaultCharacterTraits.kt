@@ -33,7 +33,7 @@ object DefaultCharacterTraits {
             id = CharacterTraitId.BLOODWEIGHT,
             displayName = "Bloodweight",
             description =
-                "Every attack gains bonus damage equal to 5% of current HP."
+                "Every attack gains bonus damage equal to 1% of current HP."
         )
 
     val theToadCycle =

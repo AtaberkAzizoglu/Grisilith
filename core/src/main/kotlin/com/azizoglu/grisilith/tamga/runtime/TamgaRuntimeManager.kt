@@ -136,7 +136,7 @@ class TamgaRuntimeManager(
         private const val FLAME_BLADES_BURN_DURATION_SECONDS =
             5f
 
-        private const val CHARGER_FOOTSTEP_DISTANCE = 24f
+        private const val CHARGER_FOOTSTEP_DISTANCE = 30f
         private const val CHARGER_FOOTSTEP_BACK_OFFSET = 17f
 
         private const val PANIC_TRIGGER_RADIUS = 160f
