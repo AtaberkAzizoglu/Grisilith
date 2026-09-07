@@ -9,6 +9,7 @@ import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.enemy.visual.EnemySpriteRenderer
 import com.azizoglu.grisilith.map.MapObstacle
+import com.azizoglu.grisilith.map.TroubleAtHomeDefenseRuntime
 import com.azizoglu.grisilith.map.visual.MapObstacleSpriteRenderer
 import com.azizoglu.grisilith.map.tile.MapGroundTileRenderer
 import com.azizoglu.grisilith.config.GameMap
@@ -155,6 +156,9 @@ class WorldRenderer(
         weaponCarrierVisualSystem:
         WeaponCarrierVisualSystem,
 
+        troubleAtHomeDefenseRuntime:
+        TroubleAtHomeDefenseRuntime? = null,
+
         showEnemyHealthBars: Boolean = true,
 
         renderGroundLayer:
@@ -172,6 +176,12 @@ class WorldRenderer(
         mapGroundTileRenderer.render(
             camera =
                 camera
+        )
+
+        mapObstacleSpriteRenderer.render(
+            obstacles =
+                mapObstacles.filter(MapObstacle::isGroundLayer),
+            camera = camera
         )
 
         renderGroundLayer?.invoke()
@@ -203,6 +213,10 @@ class WorldRenderer(
 
         mapObstacles.forEach {
                 obstacle ->
+
+            if (obstacle.isGroundLayer) {
+                return@forEach
+            }
 
             obstacle.render(
                 shapeRenderer =
@@ -286,6 +300,10 @@ class WorldRenderer(
         mapObstacles.forEach {
                 obstacle ->
 
+            if (obstacle.isGroundLayer) {
+                return@forEach
+            }
+
             if (
                 mapObstacleSpriteRenderer
                     .hasVisualDefinition(
@@ -361,21 +379,6 @@ class WorldRenderer(
                         player.bounds.y,
 
                     render = {
-                        conditionVisualRenderer.renderGroundVisuals(
-                            conditions = player.conditions,
-                            centerX = player.centerX,
-                            feetY = player.bounds.y,
-                            targetVisualWidth =
-                                if (
-                                    shouldRenderMountedCharacter
-                                ) {
-                                    MOUNTED_CONDITION_VISUAL_WIDTH
-                                } else {
-                                    PLAYER_CONDITION_VISUAL_WIDTH
-                                },
-                            camera = camera
-                        )
-
                         if (
                             playerCarrier !=
                             null
@@ -446,6 +449,19 @@ class WorldRenderer(
                                 )
                             }
                         }
+
+                        conditionVisualRenderer.renderGroundVisuals(
+                            conditions = player.conditions,
+                            centerX = player.centerX,
+                            feetY = player.bounds.y,
+                            targetVisualWidth =
+                                if (shouldRenderMountedCharacter) {
+                                    MOUNTED_CONDITION_VISUAL_WIDTH
+                                } else {
+                                    PLAYER_CONDITION_VISUAL_WIDTH
+                                },
+                            camera = camera
+                        )
                     }
                 )
             )
@@ -493,15 +509,6 @@ class WorldRenderer(
                                 enemy.bounds.y,
 
                             render = {
-                                conditionVisualRenderer.renderGroundVisuals(
-                                    conditions = enemy.conditions,
-                                    centerX = enemy.centerX,
-                                    feetY = enemy.bounds.y,
-                                    targetVisualWidth =
-                                        enemy.visualSize,
-                                    camera = camera
-                                )
-
                                 enemySpriteRenderer.render(
                                     enemies =
                                         listOf(
@@ -510,6 +517,14 @@ class WorldRenderer(
 
                                     camera =
                                         camera
+                                )
+
+                                conditionVisualRenderer.renderGroundVisuals(
+                                    conditions = enemy.conditions,
+                                    centerX = enemy.centerX,
+                                    feetY = enemy.bounds.y,
+                                    targetVisualWidth = enemy.visualSize,
+                                    camera = camera
                                 )
                             }
                         )
@@ -531,24 +546,6 @@ class WorldRenderer(
                                 summon.combatRadius,
 
                         render = {
-                            conditionVisualRenderer.renderGroundVisuals(
-                                conditions = summon.conditions,
-                                centerX = summon.centerX,
-                                feetY =
-                                    summon.centerY -
-                                        summon.combatRadius,
-                                /*
-                                 * SummonedEntity currently exposes its visual
-                                 * radius through combatRadius/visualRadius().
-                                 * Use the full diameter as the render-width
-                                 * reference for condition effects.
-                                 */
-                                targetVisualWidth =
-                                    summon.combatRadius *
-                                        2f,
-                                camera = camera
-                            )
-
                             summonSpriteRenderer
                                 .render(
                                     summon =
@@ -557,6 +554,14 @@ class WorldRenderer(
                                     camera =
                                         camera
                                 )
+
+                            conditionVisualRenderer.renderGroundVisuals(
+                                conditions = summon.conditions,
+                                centerX = summon.centerX,
+                                feetY = summon.centerY - summon.combatRadius,
+                                targetVisualWidth = summon.combatRadius * 2f,
+                                camera = camera
+                            )
                         }
                     )
                 )
@@ -637,6 +642,10 @@ class WorldRenderer(
             )
         }
 
+        summons
+            .filter { !it.isExpired }
+            .forEach { it.renderAttackVisual(shapeRenderer) }
+
         if (
             shouldRenderMountedCharacter
         ) {
@@ -645,6 +654,11 @@ class WorldRenderer(
                     player
             )
         }
+
+        troubleAtHomeDefenseRuntime
+            ?.renderHealthBar(
+                shapeRenderer
+            )
 
         shapeRenderer.end()
 

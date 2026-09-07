@@ -773,7 +773,7 @@ object DefaultItems {
 
     val bounty = effectItem(
         "ITEM_BOUNTY", "Bounty",
-        "Each stage marks one Enemy Type; its Gold reward is multiplied by 1.5, or by 3 for bosses.",
+        "Each stage marks one enemy native to the current map; its Gold reward is multiplied by 1.5, or by 3 for bosses.",
         ItemRarity.LEGENDARY, ItemEffectId.BOUNTY,
         maximumInventoryCopies = 1
     )

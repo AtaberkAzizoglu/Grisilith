@@ -10,7 +10,7 @@ class MapObstacle(
     y: Float,
     width: Float,
     height: Float,
-    val visualVariant: Int = 0
+    visualVariant: Int = 0
 ) {
     init {
         require(
@@ -18,6 +18,21 @@ class MapObstacle(
                 0..3
         )
     }
+
+    var visualVariant: Int =
+        visualVariant
+        set(value) {
+            require(value in 0..3)
+            field = value
+        }
+
+    val blocksMovement: Boolean
+        get() =
+            type != MapObstacleType.LAKE
+
+    val isGroundLayer: Boolean
+        get() =
+            type == MapObstacleType.LAKE
 
     /*
      * visualBounds:
@@ -117,14 +132,6 @@ class MapObstacle(
                     offsetYRatio = 0.04f
                 )
 
-            MapObstacleType.HOUSE ->
-                CollisionFootprint(
-                    widthRatio = 0.78f,
-                    heightRatio = 0.23f,
-                    offsetXRatio = 0.11f,
-                    offsetYRatio = 0.03f
-                )
-
             MapObstacleType.CAVE_ROCK ->
                 CollisionFootprint(
                     widthRatio = 0.72f,
@@ -164,7 +171,59 @@ class MapObstacle(
                     offsetXRatio = 0.225f,
                     offsetYRatio = 0.03f
                 )
+
+            MapObstacleType.LAKE ->
+                CollisionFootprint(
+                    widthRatio = 0.76f,
+                    heightRatio = 0.64f,
+                    offsetXRatio = 0.12f,
+                    offsetYRatio = 0.17f
+                )
+
+            MapObstacleType.CITY_WALL ->
+                CollisionFootprint(
+                    widthRatio = 1f,
+                    heightRatio = 0.24f,
+                    offsetXRatio = 0f,
+                    offsetYRatio = 0f
+                )
+
+            MapObstacleType.CITY_GATE ->
+                CollisionFootprint(
+                    widthRatio = 0.66f,
+                    heightRatio = 0.24f,
+                    offsetXRatio = 0.17f,
+                    offsetYRatio = 0f
+                )
         }
+    }
+
+    fun containsEffectPoint(
+        worldX: Float,
+        worldY: Float
+    ): Boolean {
+        if (type != MapObstacleType.LAKE) {
+            return false
+        }
+
+        val area = bounds
+        val radiusX = area.width / 2f
+        val radiusY = area.height / 2f
+
+        if (radiusX <= 0f || radiusY <= 0f) {
+            return false
+        }
+
+        val normalizedX =
+            (worldX - (area.x + radiusX)) /
+                radiusX
+
+        val normalizedY =
+            (worldY - (area.y + radiusY)) /
+                radiusY
+
+        return normalizedX * normalizedX +
+            normalizedY * normalizedY <= 1f
     }
 
     private data class CollisionFootprint(
@@ -193,9 +252,6 @@ class MapObstacle(
                 MapObstacleType.BROKEN_WAGON ->
                     Color.BROWN
 
-                MapObstacleType.HOUSE ->
-                    Color.SLATE
-
                 MapObstacleType.WELL ->
                     Color.DARK_GRAY
 
@@ -212,6 +268,13 @@ class MapObstacle(
 
                 MapObstacleType.CAVE_ROCK ->
                     Color.DARK_GRAY
+
+                MapObstacleType.LAKE ->
+                    Color.CYAN
+
+                MapObstacleType.CITY_WALL,
+                MapObstacleType.CITY_GATE ->
+                    Color.BROWN
             }
 
         shapeRenderer.rect(

@@ -4,6 +4,7 @@ import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
 import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.EnemyStats
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.map.MapObstacle
 import com.badlogic.gdx.math.Rectangle
@@ -29,6 +30,9 @@ class SummonManager(
 
     private val schedulersByWeaponRuntimeId =
         linkedMapOf<String, SummonSpawnScheduler>()
+
+    private var villageGuardDeathsSinceLastCheck =
+        0
 
     val activeSummons:
         List<SummonedEntity>
@@ -151,6 +155,21 @@ class SummonManager(
                         )
                     },
 
+                    onGuardAttack = {
+                            summon,
+                            enemy ->
+
+                        applyEnemyAttack(
+                            summon = summon,
+                            enemy = enemy,
+                            attackName = "Village Guard — Lance",
+                            damageType = DamageType.PIERCING,
+                            conditionType = null,
+                            onDamageDealt = onDamageDealt,
+                            onEnemyKilled = onEnemyKilled
+                        )
+                    },
+
                     onKnightEnemyAttack = {
                             summon,
                             enemy ->
@@ -256,6 +275,12 @@ class SummonManager(
         entities
             .filter { it.health.isDead }
             .forEach(ActiveItemEffects::onSummonDied)
+
+        villageGuardDeathsSinceLastCheck +=
+            entities.count {
+                it.type == SummonType.GUARD &&
+                    it.health.isDead
+            }
 
         entities.removeAll {
             it.isExpired
@@ -585,6 +610,62 @@ class SummonManager(
 
         entities.clear()
         schedulersByWeaponRuntimeId.clear()
+        villageGuardDeathsSinceLastCheck = 0
+    }
+
+    val livingVillageGuardCount: Int
+        get() =
+            entities.count {
+                it.type == SummonType.GUARD &&
+                    !it.isExpired
+            }
+
+    fun consumeVillageGuardDeaths(): Int {
+        val deaths = villageGuardDeathsSinceLastCheck
+        villageGuardDeathsSinceLastCheck = 0
+        return deaths
+    }
+
+    fun spawnVillageGuard(
+        stage: Int,
+        sourceEnemyName: String,
+        sourceEnemyStats: EnemyStats,
+        centerX: Float,
+        centerY: Float,
+        leashCenterX: Float,
+        leashCenterY: Float,
+        maximumLeashDistance: Float
+    ): Boolean {
+        if (livingVillageGuardCount >= MAXIMUM_VILLAGE_GUARDS) {
+            return false
+        }
+
+        val lanceLevel =
+            (stage.coerceAtLeast(1) / 10 + 1)
+                .coerceIn(1, 5)
+
+        entities.add(
+            SummonedEntity(
+                sourceWeaponRuntimeId = "TROUBLE_AT_HOME_GUARD",
+                sourceWeaponDefinitionId = "WPN_LANCE",
+                sourceWeaponDisplayName =
+                    "Village Guard — $sourceEnemyName (Lance Lv.$lanceLevel)",
+                type = SummonType.GUARD,
+                stats =
+                    SummonStats.createGuard(
+                        sourceStats = sourceEnemyStats,
+                        lanceLevel = lanceLevel
+                    ),
+                startCenterX = centerX,
+                startCenterY = centerY,
+                lifetimeSeconds = Float.POSITIVE_INFINITY,
+                leashCenterX = leashCenterX,
+                leashCenterY = leashCenterY,
+                maximumLeashDistance = maximumLeashDistance
+            )
+        )
+
+        return true
     }
 
     fun spawnBoneTotemToads(
@@ -1441,6 +1522,9 @@ class SummonManager(
     }
 
     companion object {
+
+        private const val MAXIMUM_VILLAGE_GUARDS =
+            5
 
         private const val IVY_STAFF_ID =
             "WPN_IVY_STAFF"

@@ -39,6 +39,9 @@ object RunSaveBuilder {
 
         remainingChestDiscards: Int,
 
+        troubleAtHomeGateHealth: Int = 1000,
+        villageGuardCount: Int = 0,
+
         weaponTamgaDefinitionId: String?,
         armorTamgaDefinitionId: String?,
 
@@ -126,6 +129,13 @@ object RunSaveBuilder {
                     .coerceAtLeast(
                         0
                     ),
+
+            troubleAtHomeGateHealth =
+                troubleAtHomeGateHealth
+                    .coerceIn(1, 1000),
+
+            villageGuardCount =
+                villageGuardCount.coerceIn(0, 5),
 
             statLayers =
                 playerStats

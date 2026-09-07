@@ -66,6 +66,9 @@ class Player(
 
     private var accumulatedRegeneration = 0f
 
+    private var terrainMovementSpeedMultiplier =
+        1f
+
     private var damageAffinityProfile =
         DamageAffinityProfile.NONE
 
@@ -292,7 +295,13 @@ class Player(
     }
 
     private fun calculatedMovementSpeed(): Float {
-        return stats.calculatedMovementSpeed()
+        return stats.calculatedMovementSpeed() *
+            terrainMovementSpeedMultiplier
+    }
+
+    fun setTerrainMovementSpeedMultiplier(multiplier: Float) {
+        terrainMovementSpeedMultiplier =
+            multiplier.coerceIn(0f, 1f)
     }
 
     private fun updateActualMovementSpeed(

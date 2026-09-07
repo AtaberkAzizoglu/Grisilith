@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.enemy
 
 import com.azizoglu.grisilith.map.MapObstacle
+import com.azizoglu.grisilith.map.TroubleAtHomeLayout
+import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.map.enemy.MapEnemyRuntimeContext
 import com.azizoglu.grisilith.stage.StageType
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -628,9 +630,19 @@ class EnemySpawner(
 
         val maximumY =
             (
-                worldHeight -
-                    WORLD_EDGE_PADDING -
-                    enemySize
+                if (
+                    mapEnemyContext.gameMap ==
+                    GameMap.TROUBLE_AT_HOME
+                ) {
+                    TroubleAtHomeLayout.enemyMaximumSpawnY(
+                        worldHeight = worldHeight,
+                        enemySize = enemySize
+                    )
+                } else {
+                    worldHeight -
+                        WORLD_EDGE_PADDING -
+                        enemySize
+                }
                 )
                 .coerceAtLeast(
                     minimumY
@@ -694,7 +706,8 @@ class EnemySpawner(
             if (
                 !canSpawnInsideObstacles &&
                 mapObstacles.any { obstacle ->
-                    candidateBounds.overlaps(
+                    obstacle.blocksMovement &&
+                        candidateBounds.overlaps(
                         obstacle.bounds
                     )
                 }

@@ -5,13 +5,16 @@ enum class MapObstacleType {
     TREE,
     BROKEN_WAGON,
 
-    HOUSE,
     WELL,
     HAY_BALE,
     CRATE,
     BARREL,
     LOG_PILE,
     BUSH,
+
+    LAKE,
+    CITY_WALL,
+    CITY_GATE,
 
     CAVE_ROCK
 }

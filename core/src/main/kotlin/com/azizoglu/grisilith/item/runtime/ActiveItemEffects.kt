@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.item.runtime
 
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.content.ContentTag
+import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.enemy.EnemyType
@@ -39,6 +40,8 @@ object ActiveItemEffects {
     private var enemyProvider: () -> List<Enemy> = { emptyList() }
     private var summonProvider: () -> List<SummonedEntity> = { emptyList() }
     private var currentStageProvider: () -> Int = { 1 }
+    private var bountyCandidateProvider: () -> List<BountyCandidate> =
+        { emptyList() }
 
     private var lastStage = -1
     private var secondHeartAvailable = true
@@ -50,7 +53,7 @@ object ActiveItemEffects {
     private var cashOutConsumedItems = 0
     private var hitMeHarderStacks = 0
     private var predestinationDamageType: DamageType? = null
-    private var bountyEnemyType: EnemyType? = null
+    private var bountyTarget: BountyCandidate? = null
     private val bestiaryKinds = mutableSetOf<String>()
     private val abilityReadySeconds = mutableMapOf<String, Float>()
     private val abilityDamageBonuses = mutableMapOf<String, Float>()
@@ -65,6 +68,12 @@ object ActiveItemEffects {
         val x: Float,
         val y: Float,
         var remainingSeconds: Float
+    )
+
+    data class BountyCandidate(
+        val kindId: ContentId,
+        val displayName: String,
+        val enemyType: EnemyType
     )
 
     private val magicalDamageTypes =
@@ -92,6 +101,7 @@ object ActiveItemEffects {
         enemyProvider: () -> List<Enemy>,
         summonProvider: () -> List<SummonedEntity>,
         currentStageProvider: () -> Int,
+        bountyCandidateProvider: () -> List<BountyCandidate>,
         goldProvider: () -> Int,
         mainStatProvider: () -> StatType,
         tamgaCountProvider: () -> Int
@@ -103,6 +113,7 @@ object ActiveItemEffects {
         this.enemyProvider = enemyProvider
         this.summonProvider = summonProvider
         this.currentStageProvider = currentStageProvider
+        this.bountyCandidateProvider = bountyCandidateProvider
         this.goldProvider = goldProvider
         this.mainStatProvider = mainStatProvider
         this.tamgaCountProvider = tamgaCountProvider
@@ -119,7 +130,7 @@ object ActiveItemEffects {
         cashOutConsumedItems = 0
         hitMeHarderStacks = 0
         predestinationDamageType = null
-        bountyEnemyType = null
+        bountyTarget = null
         bestiaryKinds.clear()
         abilityReadySeconds.clear()
         abilityDamageBonuses.clear()
@@ -136,6 +147,7 @@ object ActiveItemEffects {
         weapons = null
         stats = null
         player = null
+        bountyCandidateProvider = { emptyList() }
         magicalDamageDealt.clear()
     }
 
@@ -382,14 +394,19 @@ object ActiveItemEffects {
 
     fun modifyGoldReward(
         amount: Int,
-        enemyType: EnemyType? = null
+        enemyType: EnemyType? = null,
+        enemyKindId: ContentId? = null
     ): Int {
         val copies = count(ItemEffectId.BLOOD_MONEY)
         val chance = 1.0 - 0.9.pow(copies)
         var result =
             if (copies > 0 && Random.nextDouble() < chance) amount * 2 else amount
 
-        if (enemyType != null && enemyType == bountyEnemyType) {
+        if (
+            enemyType != null &&
+            enemyKindId != null &&
+            enemyKindId == bountyTarget?.kindId
+        ) {
             val bountyMultiplier =
                 if (enemyType == EnemyType.MINI_BOSS || enemyType == EnemyType.FINAL_BOSS) 3f else 1.5f
             result = (result * bountyMultiplier).roundToInt()
@@ -469,8 +486,13 @@ object ActiveItemEffects {
             if (count(ItemEffectId.PREDESTINATION) > 0) {
                 DamageType.entries.filter { it != DamageType.NONE }.random()
             } else null
-        bountyEnemyType =
-            if (count(ItemEffectId.BOUNTY) > 0) EnemyType.entries.random() else null
+        bountyTarget =
+            if (count(ItemEffectId.BOUNTY) > 0) {
+                bountyCandidateProvider()
+                    .randomOrNull()
+            } else {
+                null
+            }
 
         val gamblerCopies = count(ItemEffectId.GAMBLER)
         repeat(gamblerCopies) {
@@ -655,11 +677,11 @@ object ActiveItemEffects {
 
     fun predestinationLabel(): String? = predestinationDamageType?.displayName
 
-    fun bountyLabel(): String? = bountyEnemyType?.name
+    fun bountyLabel(): String? = bountyTarget?.displayName
 
     fun predestinationType(): DamageType? = predestinationDamageType
 
-    fun bountyType(): EnemyType? = bountyEnemyType
+    fun bountyType(): EnemyType? = bountyTarget?.enemyType
 
     fun renderLegacyZones(shapeRenderer: ShapeRenderer) {
         if (legacyZones.isEmpty()) return
@@ -677,7 +699,9 @@ object ActiveItemEffects {
             hitMeHarderStacks = hitMeHarderStacks,
             bestiaryKinds = HashSet(bestiaryKinds),
             predestinationDamageTypeName = predestinationDamageType?.name,
-            bountyEnemyTypeName = bountyEnemyType?.name,
+            bountyEnemyTypeName = bountyTarget?.enemyType?.name,
+            bountyEnemyKindId = bountyTarget?.kindId?.value,
+            bountyEnemyDisplayName = bountyTarget?.displayName,
             secondHeartAvailable = secondHeartAvailable
         )
 
@@ -692,10 +716,37 @@ object ActiveItemEffects {
             state.predestinationDamageTypeName?.let { name ->
                 DamageType.entries.firstOrNull { it.name == name }
             }
-        bountyEnemyType =
+        val savedBountyType =
             state.bountyEnemyTypeName?.let { name ->
                 EnemyType.entries.firstOrNull { it.name == name }
             }
+
+        bountyTarget =
+            state.bountyEnemyKindId?.let { savedKindId ->
+                bountyCandidateProvider()
+                    .firstOrNull { candidate ->
+                        candidate.kindId.value == savedKindId &&
+                            (
+                                savedBountyType == null ||
+                                    candidate.enemyType == savedBountyType
+                                )
+                    }
+                    ?: savedBountyType?.let { enemyType ->
+                        BountyCandidate(
+                            kindId = ContentId(savedKindId),
+                            displayName =
+                                state.bountyEnemyDisplayName
+                                    ?: savedKindId,
+                            enemyType = enemyType
+                        )
+                    }
+            }
+                ?: if (count(ItemEffectId.BOUNTY) > 0) {
+                    bountyCandidateProvider()
+                        .randomOrNull()
+                } else {
+                    null
+                }
         secondHeartAvailable = state.secondHeartAvailable
     }
 

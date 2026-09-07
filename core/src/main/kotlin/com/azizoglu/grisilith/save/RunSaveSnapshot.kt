@@ -14,6 +14,8 @@ data class RunSaveSnapshot(
     val currentHealth: Int = 1,
     val sessionGold: Int = 0,
     val remainingChestDiscards: Int = 0,
+    val troubleAtHomeGateHealth: Int = 1000,
+    val villageGuardCount: Int = 0,
     val statLayers: RunSaveStatLayers = RunSaveStatLayers(),
     val weaponSlots:
     ArrayList<RunSaveWeaponSlot> =
@@ -49,6 +51,8 @@ data class RunSaveSnapshot(
         if (currentHealth <= 0) errors.add("Checkpoint health must be positive.")
         if (sessionGold < 0) errors.add("Session Gold cannot be negative.")
         if (remainingChestDiscards < 0) errors.add("Remaining chest discards cannot be negative.")
+        if (troubleAtHomeGateHealth <= 0) errors.add("Gate health must be positive.")
+        if (villageGuardCount !in 0..5) errors.add("Village Guard count must be between 0 and 5.")
 
         weaponSlots.forEach { slot ->
             if (slot.slotIndex < 0) errors.add("Weapon slot index cannot be negative.")

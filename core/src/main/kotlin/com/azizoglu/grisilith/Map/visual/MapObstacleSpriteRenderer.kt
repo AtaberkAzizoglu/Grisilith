@@ -49,14 +49,25 @@ class MapObstacleSpriteRenderer(
                     )
                     ?: return@forEach
 
-            val texture =
-                ensureTexture(
+            val variantIndex =
+                obstacle.visualVariant
+
+            val texturePath =
+                if (definition.variantTexturePaths.isNotEmpty()) {
+                    definition.variantTexturePaths[
+                        variantIndex.mod(definition.variantTexturePaths.size)
+                    ]
+                } else {
                     definition.texturePath
-                ) ?: return@forEach
+                }
+
+            val texture =
+                ensureTexture(texturePath)
+                    ?: return@forEach
 
             val source =
                 definition.sourceRegions[
-                    obstacle.visualVariant
+                    variantIndex
                         .mod(
                             definition.sourceRegions.size
                         )
@@ -84,14 +95,19 @@ class MapObstacleSpriteRenderer(
                 )
 
             val drawHeight =
-                baseSize *
-                    definition.heightMultiplier
+                if (definition.stretchToVisualBounds) {
+                    obstacle.visualBounds.height
+                } else {
+                    baseSize * definition.heightMultiplier
+                }
 
             val drawWidth =
-                drawHeight *
-                    source.width /
-                    source.height *
-                    definition.widthMultiplier
+                if (definition.stretchToVisualBounds) {
+                    obstacle.visualBounds.width
+                } else {
+                    drawHeight * source.width / source.height *
+                        definition.widthMultiplier
+                }
 
             val drawX =
                 obstacle.visualBounds.x +

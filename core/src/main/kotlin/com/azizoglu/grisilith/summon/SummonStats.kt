@@ -3,7 +3,9 @@ package com.azizoglu.grisilith.summon
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.enemy.EnemyScaling
+import com.azizoglu.grisilith.enemy.EnemyStats
 import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
+import com.azizoglu.grisilith.weapon.definition.catalog.LanceDefinition
 import kotlin.math.roundToInt
 
 data class SummonStats(
@@ -133,7 +135,51 @@ data class SummonStats(
                         attackSpeedMultiplier = attackSpeedMultiplier * 0.88f
                     )
                 }
+
+                SummonType.GUARD ->
+                    createGuard(
+                        sourceStats =
+                            EnemyScaling
+                                .normalEnemyStats(safeStage),
+                        lanceLevel =
+                            (safeStage / 10 + 1)
+                                .coerceIn(1, 5)
+                    )
             }
+        }
+
+        fun createGuard(
+            sourceStats: EnemyStats,
+            lanceLevel: Int
+        ): SummonStats {
+            val safeLevel = lanceLevel.coerceIn(1, 5)
+
+            val lance = LanceDefinition.definition
+            val levelStats = lance.statsForLevel(safeLevel)
+            val levelDamageMultiplier =
+                1f +
+                    (safeLevel - 1) *
+                    0.20f
+
+            return SummonStats(
+                maximumHealth =
+                    sourceStats.maximumHealth,
+                baseDamage =
+                    (
+                        sourceStats.contactDamage *
+                            levelDamageMultiplier
+                        )
+                        .roundToInt()
+                        .coerceAtLeast(1),
+                movementSpeed =
+                    sourceStats.movementSpeed,
+                attackRange =
+                    lance.baseRange *
+                        levelStats.rangeMultiplier *
+                        0.58f,
+                attackSpeedMultiplier =
+                    levelStats.attackSpeedMultiplier
+            )
         }
 
         private fun createScaled(

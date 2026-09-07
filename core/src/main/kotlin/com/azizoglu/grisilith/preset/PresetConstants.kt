@@ -10,10 +10,10 @@ object PresetConstants {
 
     /*
      * Preset düzenlemesiyle Character base Stat'ı
-     * en fazla 25'e çıkarılabilir.
+     * en fazla 20'ye çıkarılabilir.
      */
     const val MAXIMUM_PRE_RUN_STAT_SCORE =
-        25
+        20
 
     const val MAXIMUM_PRESET_NAME_LENGTH =
         30

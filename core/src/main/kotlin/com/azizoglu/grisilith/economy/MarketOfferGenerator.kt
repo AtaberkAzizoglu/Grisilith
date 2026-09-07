@@ -11,6 +11,7 @@ import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 import com.azizoglu.grisilith.character.CharacterDefinition
 import com.azizoglu.grisilith.character.CharacterWeaponPreference
 import com.azizoglu.grisilith.item.definition.ItemRarity
+import com.azizoglu.grisilith.item.definition.ItemPoolEligibility
 import kotlin.random.Random
 
 object MarketOfferGenerator {
@@ -602,7 +603,7 @@ object MarketOfferGenerator {
                     ) &&
                         item.effectId !=
                             com.azizoglu.grisilith.item.definition.ItemEffectId.BROKEN_HEART &&
-                        isBoneTotemListEligible(item, ownedItemIds) &&
+                        ItemPoolEligibility.isEligible(item, ownedItemIds) &&
                         itemEligibility(item)
                 }
 
@@ -757,19 +758,6 @@ object MarketOfferGenerator {
         }
     }
 
-    private fun isBoneTotemListEligible(
-        item: ItemDefinition,
-        ownedItemIds: Set<String>
-    ): Boolean {
-        val isListItem = item.effectId in setOf(
-            com.azizoglu.grisilith.item.definition.ItemEffectId.BONE_TOTEM_HEALING_AURA,
-            com.azizoglu.grisilith.item.definition.ItemEffectId.BONE_TOTEM_PROTECTERS_AREA,
-            com.azizoglu.grisilith.item.definition.ItemEffectId.BONE_TOTEM_BURRIED_TREASURE,
-            com.azizoglu.grisilith.item.definition.ItemEffectId.BONE_TOTEM_HOURGLASS,
-            com.azizoglu.grisilith.item.definition.ItemEffectId.BONE_TOTEM_TOADS
-        )
-        return !isListItem || DefaultItems.boneTotems.id.value in ownedItemIds
-    }
 
     private fun isCharacterRelevantItem(
         item: ItemDefinition,

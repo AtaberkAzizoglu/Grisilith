@@ -14,21 +14,23 @@ class EnemyManager {
     private val enemies = mutableListOf<Enemy>()
 
     /*
-     * Per-enemy target lock.
-     *
-     * null summonRuntimeId = Player.
-     * non-null = that active Ivy summon.
-     *
-     * The lock is intentionally sticky so an Enemy does not visibly flip
-     * between Player/Cow/Imp/Knight every frame when distances are similar.
+     * Trouble at Home adds the gate as a third combat target family.
+     * Every living Enemy chooses the physically closest valid target among
+     * Player, friendly summons and the gate.
      */
-    private data class CombatTargetLock(
-        var summonRuntimeId: String? =
-            null
-    )
+    private enum class CombatTargetType {
+        PLAYER,
+        SUMMON,
+        GATE
+    }
 
-    private val targetLocks =
-        mutableMapOf<Enemy, CombatTargetLock>()
+    private data class CombatTarget(
+        val type: CombatTargetType,
+        val centerX: Float,
+        val centerY: Float,
+        val bounds: Rectangle,
+        val summon: SummonedEntity? = null
+    )
 
     val allEnemies: List<Enemy>
         get() = enemies
@@ -55,6 +57,9 @@ class EnemyManager {
         targetY: Float,
         targetBounds: Rectangle,
         summons: List<SummonedEntity>,
+        gateCenterX: Float? = null,
+        gateCenterY: Float? = null,
+        gateBounds: Rectangle? = null,
         worldWidth: Float,
         worldHeight: Float,
         mapObstacles: List<MapObstacle>,
@@ -69,7 +74,8 @@ class EnemyManager {
             summon.takeDamage(
                 damage
             )
-        }
+        },
+        onGateDamaged: (Enemy, Int) -> Unit = { _, _ -> }
     ) {
         /*
          * Only living/active Ivy summons are candidate targets.
@@ -85,10 +91,6 @@ class EnemyManager {
                 enemy ->
 
             if (enemy.isDead) {
-                targetLocks.remove(
-                    enemy
-                )
-
                 /*
                  * IMPORTANT:
                  * Enemy.update(...) is still required after death.
@@ -138,8 +140,8 @@ class EnemyManager {
                 return@forEach
             }
 
-            val selectedSummon =
-                resolveSummonTarget(
+            val selectedTarget =
+                resolveClosestTarget(
                     enemy =
                         enemy,
 
@@ -149,84 +151,48 @@ class EnemyManager {
                     playerCenterY =
                         targetY,
 
-                    summons =
-                        targetableSummons
-                )
-
-            if (
-                selectedSummon ==
-                null
-            ) {
-                enemy.update(
-                    delta =
-                        delta,
-
-                    targetX =
-                        targetX,
-
-                    targetY =
-                        targetY,
-
-                    targetBounds =
+                    playerBounds =
                         targetBounds,
 
-                    worldWidth =
-                        worldWidth,
+                    summons =
+                        targetableSummons,
 
-                    worldHeight =
-                        worldHeight,
+                    gateCenterX =
+                        gateCenterX,
 
-                    mapObstacles =
-                        mapObstacles,
+                    gateCenterY =
+                        gateCenterY,
 
-                    nearbyEnemies =
-                        enemies,
+                    gateBounds =
+                        gateBounds
+                )
 
-                    onContactDamage =
-                        { damage ->
+            enemy.update(
+                delta = delta,
+                targetX = selectedTarget.centerX,
+                targetY = selectedTarget.centerY,
+                targetBounds = selectedTarget.bounds,
+                worldWidth = worldWidth,
+                worldHeight = worldHeight,
+                mapObstacles = mapObstacles,
+                nearbyEnemies = enemies,
+                onContactDamage = { damage ->
+                    when (selectedTarget.type) {
+                        CombatTargetType.PLAYER ->
                             onPlayerDamaged(enemy, damage)
-                        }
-                )
-            } else {
-                enemy.update(
-                    delta =
-                        delta,
 
-                    targetX =
-                        selectedSummon.centerX,
+                        CombatTargetType.SUMMON ->
+                            selectedTarget.summon
+                                ?.takeIf { !it.isExpired }
+                                ?.let {
+                                    onSummonDamaged(it, damage)
+                                }
 
-                    targetY =
-                        selectedSummon.centerY,
-
-                    targetBounds =
-                        selectedSummon.combatBounds,
-
-                    worldWidth =
-                        worldWidth,
-
-                    worldHeight =
-                        worldHeight,
-
-                    mapObstacles =
-                        mapObstacles,
-
-                    nearbyEnemies =
-                        enemies,
-
-                    onContactDamage = {
-                            damage ->
-
-                        if (
-                            !selectedSummon.isExpired
-                        ) {
-                            onSummonDamaged(
-                                selectedSummon,
-                                damage
-                            )
-                        }
+                        CombatTargetType.GATE ->
+                            onGateDamaged(enemy, damage)
                     }
-                )
-            }
+                }
+            )
         }
 
         enemies.forEach {
@@ -253,182 +219,59 @@ class EnemyManager {
         }
     }
 
-    private fun resolveSummonTarget(
+    private fun resolveClosestTarget(
         enemy: Enemy,
         playerCenterX: Float,
         playerCenterY: Float,
-        summons: List<SummonedEntity>
-    ): SummonedEntity? {
-
-        val lock =
-            targetLocks.getOrPut(
-                enemy
-            ) {
-                CombatTargetLock()
-            }
-
-        val nearestSummon =
-            summons.minByOrNull {
-                distanceSquared(
-                    enemyX =
-                        enemy.centerX,
-
-                    enemyY =
-                        enemy.centerY,
-
-                    targetX =
-                        it.centerX,
-
-                    targetY =
-                        it.centerY
+        playerBounds: Rectangle,
+        summons: List<SummonedEntity>,
+        gateCenterX: Float?,
+        gateCenterY: Float?,
+        gateBounds: Rectangle?
+    ): CombatTarget {
+        val candidates =
+            mutableListOf(
+                CombatTarget(
+                    type = CombatTargetType.PLAYER,
+                    centerX = playerCenterX,
+                    centerY = playerCenterY,
+                    bounds = playerBounds
                 )
-            }
-
-        val playerDistanceSquared =
-            distanceSquared(
-                enemyX =
-                    enemy.centerX,
-
-                enemyY =
-                    enemy.centerY,
-
-                targetX =
-                    playerCenterX,
-
-                targetY =
-                    playerCenterY
             )
 
-        /*
-         * Existing summon lock is valid only while that summon still exists.
-         */
-        val lockedSummon =
-            lock.summonRuntimeId
-                ?.let {
-                        runtimeId ->
-
-                    summons.firstOrNull {
-                        it.runtimeId ==
-                            runtimeId
-                    }
-                }
-
-        if (
-            lock.summonRuntimeId !=
-            null &&
-            lockedSummon ==
-            null
-        ) {
-            lock.summonRuntimeId =
-                null
-        }
-
-        val currentTargetDistanceSquared =
-            if (
-                lockedSummon !=
-                null
-            ) {
-                distanceSquared(
-                    enemyX =
-                        enemy.centerX,
-
-                    enemyY =
-                        enemy.centerY,
-
-                    targetX =
-                        lockedSummon.centerX,
-
-                    targetY =
-                        lockedSummon.centerY
+        summons.forEach { summon ->
+            candidates +=
+                CombatTarget(
+                    type = CombatTargetType.SUMMON,
+                    centerX = summon.centerX,
+                    centerY = summon.centerY,
+                    bounds = summon.combatBounds,
+                    summon = summon
                 )
-            } else {
-                playerDistanceSquared
-            }
-
-        val nearestSummonDistanceSquared =
-            nearestSummon
-                ?.let {
-                    distanceSquared(
-                        enemyX =
-                            enemy.centerX,
-
-                        enemyY =
-                            enemy.centerY,
-
-                        targetX =
-                            it.centerX,
-
-                        targetY =
-                            it.centerY
-                    )
-                }
-
-        /*
-         * Hysteresis:
-         * a challenger must be meaningfully closer than the current target.
-         *
-         * TARGET_SWITCH_DISTANCE_RATIO = 0.85 means its linear distance
-         * must be about 15% shorter before the Enemy visibly changes aggro.
-         */
-        val switchThresholdSquared =
-            currentTargetDistanceSquared *
-                TARGET_SWITCH_DISTANCE_RATIO *
-                TARGET_SWITCH_DISTANCE_RATIO
-
-        if (
-            lockedSummon !=
-            null
-        ) {
-            if (
-                playerDistanceSquared <
-                switchThresholdSquared
-            ) {
-                lock.summonRuntimeId =
-                    null
-
-                return null
-            }
-
-            if (
-                nearestSummon !=
-                null &&
-                nearestSummon.runtimeId !=
-                lockedSummon.runtimeId &&
-                nearestSummonDistanceSquared !=
-                null &&
-                nearestSummonDistanceSquared <
-                switchThresholdSquared
-            ) {
-                lock.summonRuntimeId =
-                    nearestSummon.runtimeId
-
-                return nearestSummon
-            }
-
-            return lockedSummon
         }
 
         if (
-            nearestSummon !=
-            null &&
-            nearestSummonDistanceSquared !=
-            null &&
-            nearestSummonDistanceSquared <
-            playerDistanceSquared *
-            TARGET_SWITCH_DISTANCE_RATIO *
-            TARGET_SWITCH_DISTANCE_RATIO
+            gateCenterX != null &&
+            gateCenterY != null &&
+            gateBounds != null
         ) {
-            lock.summonRuntimeId =
-                nearestSummon.runtimeId
-
-            return nearestSummon
+            candidates +=
+                CombatTarget(
+                    type = CombatTargetType.GATE,
+                    centerX = gateCenterX,
+                    centerY = gateCenterY,
+                    bounds = gateBounds
+                )
         }
 
-        /*
-         * When there is no strong hysteresis reason to switch, Player stays
-         * the target. This preserves the original game feel.
-         */
-        return null
+        return candidates.minBy {
+            distanceSquared(
+                enemyX = enemy.centerX,
+                enemyY = enemy.centerY,
+                targetX = it.centerX,
+                targetY = it.centerY
+            )
+        }
     }
 
     private fun distanceSquared(
@@ -545,10 +388,6 @@ class EnemyManager {
                 continue
             }
 
-            targetLocks.remove(
-                enemy
-            )
-
             onEnemyRemoved(enemy)
             iterator.remove()
         }
@@ -556,7 +395,6 @@ class EnemyManager {
 
     fun clearAll() {
         enemies.clear()
-        targetLocks.clear()
     }
 
     fun render(shapeRenderer: ShapeRenderer) {
@@ -582,13 +420,5 @@ class EnemyManager {
         Gdx.gl.glDisable(
             GL20.GL_BLEND
         )
-    }
-    companion object {
-        /*
-         * Candidate must be ~15% closer in linear distance to steal aggro.
-         * This will be revisited in Stat & Mechanic Balancing.
-         */
-        private const val TARGET_SWITCH_DISTANCE_RATIO =
-            0.85f
     }
 }

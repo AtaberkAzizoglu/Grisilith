@@ -10,5 +10,7 @@ data class RunSaveItemEffectState(
     val bestiaryKinds: HashSet<String> = hashSetOf(),
     val predestinationDamageTypeName: String? = null,
     val bountyEnemyTypeName: String? = null,
+    val bountyEnemyKindId: String? = null,
+    val bountyEnemyDisplayName: String? = null,
     val secondHeartAvailable: Boolean = true
 )

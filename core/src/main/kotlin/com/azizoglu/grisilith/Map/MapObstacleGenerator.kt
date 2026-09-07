@@ -48,10 +48,8 @@ object MapObstacleGenerator {
                     playerStartX = playerStartX,
                     playerStartY = playerStartY,
                     initialObstacles =
-                        listOf(
-                            fixedVillageHouse(
-                                gameMap
-                            )
+                        fixedVillageDefenses(
+                            gameMap
                         ),
                     rules = villageRules
                 )
@@ -108,25 +106,26 @@ object MapObstacleGenerator {
         return obstacles
     }
 
-    private fun fixedVillageHouse(
+    private fun fixedVillageDefenses(
         gameMap: GameMap
-    ): MapObstacle {
-        val width =
-            520f
-
-        val height =
-            360f
-
-        return MapObstacle(
-            type = MapObstacleType.HOUSE,
-            x = 90f,
-            y =
-                gameMap.worldHeight -
-                    height -
-                    110f,
-            width = width,
-            height = height,
-            visualVariant = 0
+    ): List<MapObstacle> {
+        return listOf(
+            MapObstacle(
+                type = MapObstacleType.CITY_WALL,
+                x = 0f,
+                y = TroubleAtHomeLayout.wallY(gameMap.worldHeight),
+                width = gameMap.worldWidth,
+                height = TroubleAtHomeLayout.WALL_HEIGHT,
+                visualVariant = 0
+            ),
+            MapObstacle(
+                type = MapObstacleType.CITY_GATE,
+                x = TroubleAtHomeLayout.gateX(gameMap.worldWidth),
+                y = TroubleAtHomeLayout.gateY(gameMap.worldHeight),
+                width = TroubleAtHomeLayout.GATE_WIDTH,
+                height = TroubleAtHomeLayout.GATE_HEIGHT,
+                visualVariant = 0
+            )
         )
     }
 
@@ -140,6 +139,13 @@ object MapObstacleGenerator {
         playerStartX: Float,
         playerStartY: Float
     ) {
+        if (
+            type == MapObstacleType.LAKE &&
+            obstacles.any { it.type == MapObstacleType.LAKE }
+        ) {
+            return
+        }
+
         repeat(
             MAX_GENERATION_ATTEMPTS
         ) {
@@ -262,6 +268,14 @@ object MapObstacleGenerator {
     private val roadRules =
         listOf(
             GenerationRule(
+                MapObstacleType.LAKE,
+                1,
+                520f,
+                680f,
+                330f,
+                440f
+            ),
+            GenerationRule(
                 MapObstacleType.ROCK,
                 6,
                 70f,
@@ -290,6 +304,14 @@ object MapObstacleGenerator {
     private val villageRules =
         listOf(
             GenerationRule(
+                MapObstacleType.LAKE,
+                1,
+                560f,
+                720f,
+                350f,
+                470f
+            ),
+            GenerationRule(
                 MapObstacleType.TREE,
                 4,
                 75f,
@@ -299,7 +321,7 @@ object MapObstacleGenerator {
             ),
             GenerationRule(
                 MapObstacleType.WELL,
-                2,
+                1,
                 105f,
                 135f,
                 80f,

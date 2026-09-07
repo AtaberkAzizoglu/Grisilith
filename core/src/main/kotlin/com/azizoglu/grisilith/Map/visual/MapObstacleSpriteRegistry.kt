@@ -14,8 +14,25 @@ object MapObstacleSpriteRegistry {
     private const val TREE_TEXTURE =
         "map/obstacles/tree_obstacles.png"
 
-    private const val HOUSE_TEXTURE =
-        "map/obstacles/trouble_at_home_house.png"
+    private const val WAGON_TEXTURE =
+        "map/obstacles/wagon_obstacles.png"
+
+    private const val LAKE_TEXTURE =
+        "map/obstacles/lake_obstacle.png"
+
+    private const val CITY_WALL_TEXTURE =
+        "map/obstacles/wooden_city_wall.png"
+
+    private const val CITY_GATE_TEXTURE =
+        "map/obstacles/city_gate_closed.png"
+
+    private val CITY_GATE_TEXTURES =
+        listOf(
+            "map/obstacles/city_gate_closed.png",
+            "map/obstacles/city_gate_opening_1.png",
+            "map/obstacles/city_gate_opening_2.png",
+            "map/obstacles/city_gate_open.png"
+        )
 
     /*
      * Use the original, non-resampled sheet and the complete alpha bounds of
@@ -78,16 +95,58 @@ object MapObstacleSpriteRegistry {
         )
 
     private val wagonDefinition =
-        legacyDefinition(
+        MapObstacleSpriteDefinition(
             type = MapObstacleType.BROKEN_WAGON,
+            texturePath = WAGON_TEXTURE,
             sourceRegions =
                 listOf(
-                    MapObstacleSourceRegion(55, 355, 125, 85),
-                    MapObstacleSourceRegion(180, 355, 115, 85),
-                    MapObstacleSourceRegion(293, 355, 128, 85),
-                    MapObstacleSourceRegion(420, 355, 134, 85)
+                    MapObstacleSourceRegion(0, 26, 444, 418),
+                    MapObstacleSourceRegion(444, 33, 443, 385),
+                    MapObstacleSourceRegion(0, 444, 444, 413),
+                    MapObstacleSourceRegion(887, 444, 442, 413)
                 ),
-            heightMultiplier = 0.72f
+            widthMultiplier = 1f,
+            heightMultiplier = 0.82f
+        )
+
+    private val lakeDefinition =
+        MapObstacleSpriteDefinition(
+            type = MapObstacleType.LAKE,
+            texturePath = LAKE_TEXTURE,
+            sourceRegions =
+                listOf(
+                    MapObstacleSourceRegion(0, 0, 1536, 1024)
+                ),
+            widthMultiplier = 1f,
+            heightMultiplier = 1f,
+            stretchToVisualBounds = true
+        )
+
+    private val cityWallDefinition =
+        MapObstacleSpriteDefinition(
+            type = MapObstacleType.CITY_WALL,
+            texturePath = CITY_WALL_TEXTURE,
+            sourceRegions =
+                listOf(
+                    MapObstacleSourceRegion(0, 0, 2079, 756)
+                ),
+            widthMultiplier = 1f,
+            heightMultiplier = 1f,
+            stretchToVisualBounds = true
+        )
+
+    private val cityGateDefinition =
+        MapObstacleSpriteDefinition(
+            type = MapObstacleType.CITY_GATE,
+            texturePath = CITY_GATE_TEXTURE,
+            variantTexturePaths = CITY_GATE_TEXTURES,
+            sourceRegions =
+                listOf(
+                    MapObstacleSourceRegion(0, 0, 1536, 1024)
+                ),
+            widthMultiplier = 1f,
+            heightMultiplier = 1f,
+            stretchToVisualBounds = true
         )
 
     private val roadDefinitions =
@@ -159,19 +218,6 @@ object MapObstacleSpriteRegistry {
             heightMultiplier = 0.62f
         )
 
-    private val houseDefinition =
-        MapObstacleSpriteDefinition(
-            type = MapObstacleType.HOUSE,
-            texturePath = HOUSE_TEXTURE,
-            sourceRegions =
-                listOf(
-                    MapObstacleSourceRegion(188, 0, 1232, 875)
-                ),
-            widthMultiplier = 1f,
-            heightMultiplier = 0.72f,
-            verticalOffsetMultiplier = 0.02f
-        )
-
     private val troubleAtHomeDefinitions =
         roadDefinitions +
             mapOf(
@@ -179,7 +225,9 @@ object MapObstacleSpriteRegistry {
                 MapObstacleType.BARREL to barrelDefinition,
                 MapObstacleType.LOG_PILE to logPileDefinition,
                 MapObstacleType.BUSH to bushDefinition,
-                MapObstacleType.HOUSE to houseDefinition
+                MapObstacleType.LAKE to lakeDefinition,
+                MapObstacleType.CITY_WALL to cityWallDefinition,
+                MapObstacleType.CITY_GATE to cityGateDefinition
             )
 
     private val dungeonDefinitions =

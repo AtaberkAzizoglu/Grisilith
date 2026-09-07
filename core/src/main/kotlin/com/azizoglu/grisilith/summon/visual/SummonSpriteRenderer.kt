@@ -6,6 +6,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 
 class SummonSpriteRenderer {
 
@@ -20,6 +21,11 @@ class SummonSpriteRenderer {
         camera: OrthographicCamera
     ) {
         if (summon.isExpired) {
+            return
+        }
+
+        if (summon.type == SummonType.GUARD) {
+            renderGuard(summon, camera)
             return
         }
 
@@ -162,7 +168,80 @@ class SummonSpriteRenderer {
 
             SummonType.TOAD ->
                 TOAD
+
+            SummonType.GUARD ->
+                GUARD
         }
+    }
+
+    private fun renderGuard(
+        summon: SummonedEntity,
+        camera: OrthographicCamera
+    ) {
+        val definition = GUARD
+        val frameIndex =
+            if (summon.isVisuallyMoving) {
+                (summon.walkAnimationTime / definition.secondsPerFrame)
+                    .toInt()
+                    .mod(definition.frameCount)
+            } else {
+                0
+            }
+
+        val texture =
+            textures.getOrPut(GUARD_SHEET_PATH) {
+                Texture(
+                    Gdx.files.internal(GUARD_SHEET_PATH)
+                ).also {
+                    it.setFilter(
+                        Texture.TextureFilter.Nearest,
+                        Texture.TextureFilter.Nearest
+                    )
+                }
+            }
+
+        val row =
+            when (summon.visualDirection) {
+                SummonVisualDirection.SOUTH -> 0
+                SummonVisualDirection.EAST -> 1
+                SummonVisualDirection.NORTH -> 2
+                SummonVisualDirection.WEST -> 3
+            }
+
+        val sourceX =
+            GUARD_FIRST_FRAME_X +
+                frameIndex * GUARD_FRAME_WIDTH
+
+        val sourceY =
+            row * GUARD_FRAME_HEIGHT
+
+        val region =
+            TextureRegion(
+                texture,
+                sourceX,
+                sourceY,
+                GUARD_FRAME_WIDTH,
+                GUARD_FRAME_HEIGHT
+            )
+
+        val worldHeight = definition.worldHeight
+        val worldWidth =
+            worldHeight *
+                GUARD_FRAME_WIDTH.toFloat() /
+                GUARD_FRAME_HEIGHT.toFloat()
+
+        batch.projectionMatrix = camera.combined
+        batch.begin()
+        batch.setColor(1f, 1f, 1f, 1f)
+        batch.draw(
+            region,
+            summon.centerX - worldWidth / 2f,
+            summon.centerY -
+                worldHeight * definition.centerAnchorRatio,
+            worldWidth,
+            worldHeight
+        )
+        batch.end()
     }
 
     fun dispose() {
@@ -258,5 +337,27 @@ class SummonSpriteRenderer {
                 worldHeight = 38f,
                 centerAnchorRatio = 0.45f
             )
+
+        private val GUARD =
+            VisualDefinition(
+                root = "",
+                prefix = "",
+                frameCount = 5,
+                secondsPerFrame = 0.14f,
+                worldHeight = 76f,
+                centerAnchorRatio = 0.46f
+            )
+
+        private const val GUARD_SHEET_PATH =
+            "summon_visuals/guard_sheet.png"
+
+        private const val GUARD_FIRST_FRAME_X =
+            400
+
+        private const val GUARD_FRAME_WIDTH =
+            220
+
+        private const val GUARD_FRAME_HEIGHT =
+            256
     }
 }

@@ -36,6 +36,8 @@ import com.azizoglu.grisilith.config.GameDifficulty
 import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.map.MapObstacleGenerator
+import com.azizoglu.grisilith.map.MapEnvironmentEffects
+import com.azizoglu.grisilith.map.TroubleAtHomeDefenseRuntime
 import com.azizoglu.grisilith.map.enemy.MapEnemyRuntimeContext
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.character.CharacterDefinition
@@ -57,6 +59,7 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponInventoryResult
 import com.azizoglu.grisilith.item.runtime.ItemInventory
 import com.azizoglu.grisilith.item.runtime.ItemStatBonusSynchronizer
 import com.azizoglu.grisilith.item.definition.DefaultItems
+import com.azizoglu.grisilith.item.definition.ItemPoolEligibility
 import com.azizoglu.grisilith.item.runtime.ItemInstance
 import com.azizoglu.grisilith.item.runtime.ItemInventoryResult
 import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
@@ -363,6 +366,9 @@ class FirstScreen(
             playerStartY = player.centerY
         )
 
+    private val blockingMapObstacles: List<MapObstacle> =
+        mapObstacles.filter(MapObstacle::blocksMovement)
+
     private val projectiles = mutableListOf<Projectile>()
 
     private val summonManager =
@@ -378,7 +384,13 @@ class FirstScreen(
             },
 
             mapObstacles =
-                mapObstacles
+                blockingMapObstacles
+        )
+
+    private val troubleAtHomeDefenseRuntime =
+        TroubleAtHomeDefenseRuntime(
+            gameMap = gameMap,
+            obstacles = mapObstacles
         )
 
     private val runStatistics = RunStatistics()
@@ -483,6 +495,43 @@ class FirstScreen(
             enemyProvider = { enemyManager.allEnemies },
             summonProvider = { summonManager.activeSummons },
             currentStageProvider = { stageController.currentStage },
+            bountyCandidateProvider = {
+                val eligibleTypes =
+                    when (stageController.currentStageType) {
+                        StageType.NORMAL ->
+                            listOf(EnemyType.NORMAL)
+
+                        StageType.MINI_BOSS ->
+                            listOf(
+                                EnemyType.NORMAL,
+                                EnemyType.MINI_BOSS
+                            )
+
+                        StageType.FINAL_BOSS ->
+                            listOf(
+                                EnemyType.NORMAL,
+                                EnemyType.FINAL_BOSS
+                            )
+                    }
+
+                eligibleTypes.flatMap { enemyType ->
+                    mapEnemyRuntimeContext.registry
+                        .eligibleKinds(
+                            enemyTags =
+                                mapEnemyRuntimeContext
+                                    .profile
+                                    .enemyTags,
+                            enemyType = enemyType
+                        )
+                        .map { definition ->
+                            ActiveItemEffects.BountyCandidate(
+                                kindId = definition.id,
+                                displayName = definition.displayName,
+                                enemyType = enemyType
+                            )
+                        }
+                }
+            },
             goldProvider = { sessionWallet.goldCoins },
             mainStatProvider = {
                 listOf(
@@ -1453,8 +1502,19 @@ class FirstScreen(
             },
 
             availableItemDefinitionsProvider = {
+                val ownedItemIds =
+                    ownedItemDefinitionIds()
+
                 DefaultItems.all
                     .filter { it.effectId != ItemEffectId.BROKEN_HEART }
+                    .filter {
+                            item ->
+
+                        ItemPoolEligibility.isEligible(
+                            item = item,
+                            ownedItemIds = ownedItemIds
+                        )
+                    }
                     .filter(itemInventory::canAddDefinition)
             },
 
@@ -1814,6 +1874,14 @@ class FirstScreen(
             .resetAllTimers()
 
         enemySpawner.resetTimer()
+
+        troubleAtHomeDefenseRuntime.restoreCheckpoint(
+            gateCurrentHealth = snapshot.troubleAtHomeGateHealth,
+            guardCount = snapshot.villageGuardCount,
+            currentStage = snapshot.checkpointStage,
+            summonManager = summonManager,
+            guardProfileProvider = ::randomVillageGuardProfile
+        )
 
         updateCamera()
     }
@@ -2844,11 +2912,20 @@ class FirstScreen(
             return
         }
 
+        MapEnvironmentEffects.apply(
+            obstacles = mapObstacles,
+            player = player,
+            playerIsAirborne =
+                tamgaRuntimeManager.isPhantomSteedVisualActive,
+            enemies = enemyManager.allEnemies,
+            summons = summonManager.activeSummons
+        )
+
         player.update(
             delta
         )
 
-        mapObstacles.forEach { obstacle ->
+        blockingMapObstacles.forEach { obstacle ->
             player.resolveObstacleCollision(
                 obstacle.bounds
             )
@@ -2915,7 +2992,7 @@ class FirstScreen(
                     currentStage = stageController.currentStage,
                     playerCenterX = player.centerX,
                     playerCenterY = player.centerY,
-                    mapObstacles = mapObstacles
+                    mapObstacles = blockingMapObstacles
                 )?.let(noLootTotemMiniBosses::add)
             },
             onHourglass = {
@@ -3019,6 +3096,21 @@ class FirstScreen(
             }
         )
 
+        blockingMapObstacles.forEach { obstacle ->
+            summonManager.activeSummons.forEach { summon ->
+                summon.resolveObstacleCollision(
+                    obstacle.bounds
+                )
+            }
+        }
+
+        troubleAtHomeDefenseRuntime.update(
+            delta = delta,
+            currentStage = stageController.currentStage,
+            summonManager = summonManager,
+            guardProfileProvider = ::randomVillageGuardProfile
+        )
+
         worldItemRuntime.totemCollisionBounds()?.let { obstacle ->
             summonManager.activeSummons.forEach {
                 it.resolveObstacleCollision(obstacle)
@@ -3050,6 +3142,23 @@ class FirstScreen(
                 summonManager
                     .activeSummons,
 
+            gateCenterX =
+                troubleAtHomeDefenseRuntime
+                    .targetBounds
+                    ?.let {
+                        troubleAtHomeDefenseRuntime.targetCenterX
+                    },
+
+            gateCenterY =
+                troubleAtHomeDefenseRuntime
+                    .targetBounds
+                    ?.let {
+                        troubleAtHomeDefenseRuntime.targetCenterY
+                    },
+
+            gateBounds =
+                troubleAtHomeDefenseRuntime.targetBounds,
+
             worldWidth =
                 worldWidth,
 
@@ -3057,7 +3166,7 @@ class FirstScreen(
                 worldHeight,
 
             mapObstacles =
-                mapObstacles,
+                blockingMapObstacles,
 
             onPlayerDamaged = {
                     sourceEnemy,
@@ -3086,6 +3195,24 @@ class FirstScreen(
                 summon.takeDamage(
                     damage
                 )
+            },
+
+            onGateDamaged = {
+                    _,
+                    damage ->
+
+                troubleAtHomeDefenseRuntime
+                    .takeDamage(damage)
+
+                if (
+                    troubleAtHomeDefenseRuntime
+                        .gateHealth
+                        .isDead
+                ) {
+                    player.health.takeDamage(
+                        player.health.currentHealth
+                    )
+                }
             }
         )
 
@@ -3159,7 +3286,7 @@ class FirstScreen(
 
                 projectiles =
                     projectiles,                        mapObstacles =
-                    mapObstacles,
+                    blockingMapObstacles,
 
                 worldWidth =
                     worldWidth,
@@ -3230,7 +3357,7 @@ class FirstScreen(
 
                 projectiles =
                     projectiles,                        mapObstacles =
-                    mapObstacles,
+                    blockingMapObstacles,
 
                 worldWidth =
                     worldWidth,
@@ -3307,9 +3434,10 @@ class FirstScreen(
 
             projectile.checkObstacleCollision(
                 obstacleBounds =
-                    mapObstacles.map {
-                        it.bounds
-                    } +
+                    blockingMapObstacles
+                        .map {
+                            it.bounds
+                        } +
                         listOfNotNull(
                             worldItemRuntime.totemCollisionBounds()
                         )
@@ -3742,7 +3870,8 @@ class FirstScreen(
                 enemyType = enemy.type,
                 harvestScore = playerStats.totalScore(StatType.HARVEST)
             ),
-            enemyType = enemy.type
+            enemyType = enemy.type,
+            enemyKindId = enemy.kindId
         )
 
     private fun applyChestReward(
@@ -3918,6 +4047,10 @@ class FirstScreen(
 
         worldItemRuntime.onStageEnded()
 
+        troubleAtHomeDefenseRuntime.onStageEnded(
+            completedStage
+        )
+
         bankUncollectedCurrencyForNextStage()
 
         enemyManager.clearAll()
@@ -3991,6 +4124,9 @@ class FirstScreen(
             weaponCarrierVisualSystem =
                 weaponCarrierVisualSystem,
 
+            troubleAtHomeDefenseRuntime =
+                troubleAtHomeDefenseRuntime,
+
             showEnemyHealthBars =
                 !worldItemRuntime.hidesEnemyHealthBars,
 
@@ -4043,6 +4179,12 @@ class FirstScreen(
         worldItemRenderer.renderEdgeIndicators(
             snapshot = worldItemRuntime.visualSnapshot(),
             enemies = enemyManager.allEnemies,
+            camera = camera
+        )
+
+        troubleAtHomeDefenseRuntime.renderTexts(
+            batch = hudBatch,
+            font = hudFont,
             camera = camera
         )
 
@@ -4272,6 +4414,29 @@ class FirstScreen(
         }
         chooseToSummonPopup.render()
         chooseGlyphSpellPopup.render()
+    }
+
+    private fun randomVillageGuardProfile(
+        stage: Int
+    ): Pair<String, com.azizoglu.grisilith.enemy.EnemyStats>? {
+        val definition =
+            mapEnemyRuntimeContext.registry
+                .eligibleKinds(
+                    enemyTags = mapEnemyRuntimeContext.profile.enemyTags,
+                    enemyType = EnemyType.NORMAL
+                )
+                .randomOrNull()
+                ?: return null
+
+        val stats =
+            mapEnemyRuntimeContext.runtimeFactory
+                .createStats(
+                    definition = definition,
+                    enemyType = EnemyType.NORMAL,
+                    stage = stage
+                )
+
+        return definition.displayName to stats
     }
 
     private fun updateCamera() {
@@ -6004,6 +6169,14 @@ class FirstScreen(
 
             remainingChestDiscards =
                 remainingRunChestDiscards,
+
+            troubleAtHomeGateHealth =
+                troubleAtHomeDefenseRuntime
+                    .gateHealth
+                    .currentHealth,
+
+            villageGuardCount =
+                summonManager.livingVillageGuardCount,
 
             weaponTamgaDefinitionId =
                 selectedPreset

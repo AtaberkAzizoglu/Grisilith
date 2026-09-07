@@ -332,6 +332,14 @@ class Enemy(
     val goldReward: Float
         get() = stats.goldReward
 
+    private var terrainMovementSpeedMultiplier =
+        1f
+
+    fun setTerrainMovementSpeedMultiplier(multiplier: Float) {
+        terrainMovementSpeedMultiplier =
+            multiplier.coerceIn(0f, 1f)
+    }
+
     fun update(
         delta: Float,
         targetX: Float,
@@ -617,6 +625,7 @@ class Enemy(
                     movementDirection,
                     controlState.modifiedMovementSpeed(
                         stats.movementSpeed *
+                            terrainMovementSpeedMultiplier *
                             traitRuntime
                                 .currentModifiers
                                 .movementSpeedMultiplier *

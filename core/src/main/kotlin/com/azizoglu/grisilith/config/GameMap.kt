@@ -32,7 +32,7 @@ enum class GameMap(
     TROUBLE_AT_HOME(
         displayName = "Trouble at Home",
         description =
-            "A small village occupied by dangerous bandits.",
+            "Defend the village gate against relentless bandits.",
         worldWidth = 2500f,
         worldHeight = 2000f,
         isInitiallyUnlocked = true,

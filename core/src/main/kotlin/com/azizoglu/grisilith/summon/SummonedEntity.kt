@@ -23,7 +23,10 @@ class SummonedEntity(
     val stats: SummonStats,
     startCenterX: Float,
     startCenterY: Float,
-    lifetimeSeconds: Float
+    lifetimeSeconds: Float,
+    private val leashCenterX: Float? = null,
+    private val leashCenterY: Float? = null,
+    private val maximumLeashDistance: Float? = null
 ) {
 
     enum class KnightTargetType {
@@ -76,6 +79,15 @@ class SummonedEntity(
 
     private var attackFlashRemainingSeconds =
         0f
+
+    private var guardAttackVisualRemainingSeconds =
+        0f
+
+    private val guardAttackVisualTarget =
+        Vector2()
+
+    private var terrainMovementSpeedMultiplier =
+        1f
 
     /*
      * Knight target hysteresis.
@@ -180,6 +192,10 @@ class SummonedEntity(
             summon: SummonedEntity,
             enemy: Enemy
         ) -> Unit,
+        onGuardAttack: (
+            summon: SummonedEntity,
+            enemy: Enemy
+        ) -> Unit,
         onKnightEnemyAttack: (
             summon: SummonedEntity,
             enemy: Enemy
@@ -238,7 +254,8 @@ class SummonedEntity(
 
         if (
             type ==
-            SummonType.KNIGHT_SPIRIT
+            SummonType.KNIGHT_SPIRIT ||
+            type == SummonType.GUARD
         ) {
             knightNavigationAgent
                 .update(
@@ -254,6 +271,10 @@ class SummonedEntity(
                 .coerceAtLeast(
                     0f
                 )
+
+        guardAttackVisualRemainingSeconds =
+            (guardAttackVisualRemainingSeconds - delta)
+                .coerceAtLeast(0f)
 
         when (type) {
 
@@ -355,7 +376,20 @@ class SummonedEntity(
                     onSummonAttack = onImpSummonAttack
                 )
             }
+
+            SummonType.GUARD -> {
+                updateGuard(
+                    delta = delta,
+                    worldWidth = worldWidth,
+                    worldHeight = worldHeight,
+                    mapObstacles = mapObstacles,
+                    enemies = enemies,
+                    onEnemyAttack = onGuardAttack
+                )
+            }
         }
+
+        constrainToLeash()
 
         keepInsideWorld(
             worldWidth =
@@ -388,6 +422,11 @@ class SummonedEntity(
     fun hasCondition(type: ConditionType): Boolean = conditions.contains(type)
 
     fun removeCondition(type: ConditionType): Boolean = conditions.remove(type)
+
+    fun setTerrainMovementSpeedMultiplier(multiplier: Float) {
+        terrainMovementSpeedMultiplier =
+            multiplier.coerceIn(0f, 1f)
+    }
 
     fun takeDamage(
         amount: Int
@@ -945,6 +984,191 @@ class SummonedEntity(
         }
     }
 
+    private fun updateGuard(
+        delta: Float,
+        worldWidth: Float,
+        worldHeight: Float,
+        mapObstacles: List<MapObstacle>,
+        enemies: List<Enemy>,
+        onEnemyAttack: (
+            summon: SummonedEntity,
+            enemy: Enemy
+        ) -> Unit
+    ) {
+        val target = nearestLivingEnemy(enemies)
+
+        if (target == null) {
+            returnToLeashCenter(
+                delta = delta,
+                worldWidth = worldWidth,
+                worldHeight = worldHeight,
+                mapObstacles = mapObstacles
+            )
+            return
+        }
+
+        val insideAttackRange =
+            isInsideEnemyAttackRange(
+                enemy = target,
+                range = stats.attackRange
+            )
+
+        if (insideAttackRange) {
+            val attacked = tryAttack(
+                cooldownSeconds =
+                    GUARD_LANCE_ATTACK_INTERVAL_SECONDS
+            ) {
+                onEnemyAttack(this, target)
+            }
+
+            if (attacked) {
+                guardAttackVisualTarget.set(
+                    target.centerX,
+                    target.centerY
+                )
+                guardAttackVisualRemainingSeconds =
+                    GUARD_ATTACK_VISUAL_SECONDS
+            }
+        }
+
+        val centerDistance =
+            kotlin.math.sqrt(
+                Vector2.dst2(
+                    center.x,
+                    center.y,
+                    target.centerX,
+                    target.centerY
+                )
+            )
+
+        val clearance =
+            centerDistance -
+                combatRadius -
+                target.bounds.width / 2f
+
+        if (clearance <= GUARD_RETREAT_DISTANCE) {
+            moveKnightAwayFrom(
+                targetX = target.centerX,
+                targetY = target.centerY,
+                delta = delta,
+                worldWidth = worldWidth,
+                worldHeight = worldHeight,
+                mapObstacles = mapObstacles
+            )
+        } else if (!insideAttackRange) {
+            moveKnightToward(
+                targetX = target.centerX,
+                targetY = target.centerY,
+                delta = delta,
+                worldWidth = worldWidth,
+                worldHeight = worldHeight,
+                mapObstacles = mapObstacles
+            )
+        }
+    }
+
+    private fun returnToLeashCenter(
+        delta: Float,
+        worldWidth: Float,
+        worldHeight: Float,
+        mapObstacles: List<MapObstacle>
+    ) {
+        val homeX = leashCenterX ?: return
+        val homeY = leashCenterY ?: return
+
+        if (
+            Vector2.dst2(center.x, center.y, homeX, homeY) <=
+            GUARD_IDLE_RETURN_DISTANCE * GUARD_IDLE_RETURN_DISTANCE
+        ) {
+            return
+        }
+
+        moveKnightToward(
+            targetX = homeX,
+            targetY = homeY,
+            delta = delta,
+            worldWidth = worldWidth,
+            worldHeight = worldHeight,
+            mapObstacles = mapObstacles
+        )
+    }
+
+    fun renderAttackVisual(
+        shapeRenderer: ShapeRenderer
+    ) {
+        if (
+            type != SummonType.GUARD ||
+            guardAttackVisualRemainingSeconds <= 0f
+        ) {
+            return
+        }
+
+        val deltaX = guardAttackVisualTarget.x - center.x
+        val deltaY = guardAttackVisualTarget.y - center.y
+        val distance =
+            kotlin.math.sqrt(deltaX * deltaX + deltaY * deltaY)
+
+        if (distance <= 0.001f) {
+            return
+        }
+
+        val directionX = deltaX / distance
+        val directionY = deltaY / distance
+        val endX = guardAttackVisualTarget.x
+        val endY = guardAttackVisualTarget.y
+        val arrowBaseX = endX - directionX * GUARD_ARROW_LENGTH
+        val arrowBaseY = endY - directionY * GUARD_ARROW_LENGTH
+        val perpendicularX = -directionY * GUARD_ARROW_HALF_WIDTH
+        val perpendicularY = directionX * GUARD_ARROW_HALF_WIDTH
+        val alpha =
+            (guardAttackVisualRemainingSeconds / GUARD_ATTACK_VISUAL_SECONDS)
+                .coerceIn(0f, 1f)
+
+        shapeRenderer.color =
+            Color(0.66f, 0.68f, 0.72f, alpha)
+
+        shapeRenderer.rectLine(
+            center.x,
+            center.y,
+            arrowBaseX,
+            arrowBaseY,
+            GUARD_ATTACK_LINE_WIDTH
+        )
+
+        shapeRenderer.triangle(
+            endX,
+            endY,
+            arrowBaseX + perpendicularX,
+            arrowBaseY + perpendicularY,
+            arrowBaseX - perpendicularX,
+            arrowBaseY - perpendicularY
+        )
+    }
+
+    private fun constrainToLeash() {
+        val homeX = leashCenterX ?: return
+        val homeY = leashCenterY ?: return
+        val maximumDistance = maximumLeashDistance ?: return
+        val differenceX = center.x - homeX
+        val differenceY = center.y - homeY
+        val distanceSquared =
+            differenceX * differenceX +
+                differenceY * differenceY
+
+        if (distanceSquared <= maximumDistance * maximumDistance) {
+            return
+        }
+
+        val distance =
+            kotlin.math.sqrt(distanceSquared)
+                .coerceAtLeast(0.001f)
+
+        center.set(
+            homeX + differenceX / distance * maximumDistance,
+            homeY + differenceY / distance * maximumDistance
+        )
+    }
+
     private enum class TargetKind {
         NONE,
         ENEMY,
@@ -1089,13 +1313,13 @@ class SummonedEntity(
     private fun tryAttack(
         cooldownSeconds: Float,
         action: () -> Unit
-    ) {
+    ): Boolean {
 
         if (
             attackCooldownRemainingSeconds >
             0f
         ) {
-            return
+            return false
         }
 
         action()
@@ -1111,6 +1335,38 @@ class SummonedEntity(
 
         attackFlashRemainingSeconds =
             ATTACK_FLASH_SECONDS
+
+        return true
+    }
+
+    private fun moveKnightAwayFrom(
+        targetX: Float,
+        targetY: Float,
+        delta: Float,
+        worldWidth: Float,
+        worldHeight: Float,
+        mapObstacles: List<MapObstacle>
+    ) {
+        movementDirection.set(
+            center.x - targetX,
+            center.y - targetY
+        )
+
+        if (movementDirection.isZero(0.001f)) {
+            movementDirection.set(1f, 0f)
+        }
+
+        movementDirection.nor()
+        moveKnightWithCollision(
+            direction = movementDirection,
+            distance =
+                stats.movementSpeed *
+                    terrainMovementSpeedMultiplier *
+                    delta,
+            worldWidth = worldWidth,
+            worldHeight = worldHeight,
+            mapObstacles = mapObstacles
+        )
     }
 
     private fun moveKnightToward(
@@ -1186,6 +1442,7 @@ class SummonedEntity(
 
             distance =
                 stats.movementSpeed *
+                    terrainMovementSpeedMultiplier *
                     delta,
 
             worldWidth =
@@ -1392,6 +1649,7 @@ class SummonedEntity(
         center.mulAdd(
             movementDirection,
             stats.movementSpeed *
+                terrainMovementSpeedMultiplier *
                 delta
         )
     }
@@ -1426,6 +1684,7 @@ class SummonedEntity(
         center.mulAdd(
             movementDirection,
             stats.movementSpeed *
+                terrainMovementSpeedMultiplier *
                 delta
         )
     }
@@ -1471,6 +1730,7 @@ class SummonedEntity(
 
         val maximumMovement =
             stats.movementSpeed *
+                terrainMovementSpeedMultiplier *
                 delta
 
         val remainingDistance =
@@ -1597,6 +1857,9 @@ class SummonedEntity(
 
             SummonType.TOAD ->
                 13f
+
+            SummonType.GUARD ->
+                20f
         }
     }
 
@@ -1634,6 +1897,14 @@ class SummonedEntity(
                     0.34f,
                     0.16f,
                     0.92f
+                )
+
+            SummonType.GUARD ->
+                Color(
+                    0.48f,
+                    0.42f,
+                    0.34f,
+                    0.95f
                 )
         }
     }
@@ -1715,6 +1986,18 @@ class SummonedEntity(
 
         private const val KNIGHT_ATTACK_INTERVAL_SECONDS =
             1.20f
+
+        private const val GUARD_LANCE_ATTACK_INTERVAL_SECONDS =
+            2.755f
+
+        private const val GUARD_IDLE_RETURN_DISTANCE =
+            120f
+
+        private const val GUARD_RETREAT_DISTANCE = 50f
+        private const val GUARD_ATTACK_VISUAL_SECONDS = 0.20f
+        private const val GUARD_ATTACK_LINE_WIDTH = 3f
+        private const val GUARD_ARROW_LENGTH = 15f
+        private const val GUARD_ARROW_HALF_WIDTH = 7f
 
         private const val KNIGHT_PLAYER_ACQUIRE_RANGE =
             300f
