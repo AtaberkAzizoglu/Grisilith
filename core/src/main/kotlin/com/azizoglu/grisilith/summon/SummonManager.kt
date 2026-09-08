@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.summon
 
 import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
+import com.azizoglu.grisilith.combat.damage.DamageNumberEvent
 import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
@@ -16,6 +17,7 @@ import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
 import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
+import kotlin.math.roundToInt
 
 class SummonManager(
     private val weaponInventory: WeaponInventory,
@@ -34,10 +36,42 @@ class SummonManager(
     private var villageGuardDeathsSinceLastCheck =
         0
 
+    private val removedSummonDamageNumberEvents =
+        mutableListOf<DamageNumberEvent>()
+
     val activeSummons:
         List<SummonedEntity>
         get() =
             entities.toList()
+
+    fun resolvePlayerCollisions(
+        resolveCollision: (Rectangle) -> Boolean
+    ) {
+        entities.forEach { summon ->
+            if (!summon.isExpired) {
+                resolveCollision(summon.combatBounds)
+            }
+        }
+    }
+
+    fun resolveBodyCollisions(
+        playerBounds: Rectangle
+    ) {
+        val active =
+            entities.filterNot(SummonedEntity::isExpired)
+
+        repeat(COLLISION_SOLVER_PASSES) {
+            active.forEach { summon ->
+                summon.separateFromPlayer(playerBounds)
+            }
+
+            for (firstIndex in active.indices) {
+                for (secondIndex in firstIndex + 1 until active.size) {
+                    active[firstIndex].separateFrom(active[secondIndex])
+                }
+            }
+        }
+    }
 
     fun update(
         delta: Float,
@@ -280,6 +314,13 @@ class SummonManager(
             entities.count {
                 it.type == SummonType.GUARD &&
                     it.health.isDead
+            }
+
+        entities
+            .filter { it.isExpired }
+            .forEach {
+                removedSummonDamageNumberEvents +=
+                    it.consumeDamageNumberEvents()
             }
 
         entities.removeAll {
@@ -611,6 +652,35 @@ class SummonManager(
         entities.clear()
         schedulersByWeaponRuntimeId.clear()
         villageGuardDeathsSinceLastCheck = 0
+        removedSummonDamageNumberEvents.clear()
+    }
+
+    fun consumeDamageNumberEvents(): List<DamageNumberEvent> {
+        val result =
+            buildList {
+                addAll(removedSummonDamageNumberEvents)
+                entities.forEach {
+                    addAll(it.consumeDamageNumberEvents())
+                }
+            }
+
+        removedSummonDamageNumberEvents.clear()
+        return result
+    }
+
+    fun healVillageGuards(healthRatio: Float) {
+        entities
+            .filter {
+                it.type == SummonType.GUARD &&
+                    !it.isExpired
+            }
+            .forEach {
+                it.heal(
+                    (it.health.maximumHealth * healthRatio)
+                        .roundToInt()
+                        .coerceAtLeast(1)
+                )
+            }
     }
 
     val livingVillageGuardCount: Int
@@ -1523,8 +1593,11 @@ class SummonManager(
 
     companion object {
 
+        private const val COLLISION_SOLVER_PASSES =
+            3
+
         private const val MAXIMUM_VILLAGE_GUARDS =
-            5
+            3
 
         private const val IVY_STAFF_ID =
             "WPN_IVY_STAFF"

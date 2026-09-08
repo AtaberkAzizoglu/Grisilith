@@ -10,7 +10,8 @@ class MapObstacle(
     y: Float,
     width: Float,
     height: Float,
-    visualVariant: Int = 0
+    visualVariant: Int = 0,
+    val rendersVisual: Boolean = true
 ) {
     init {
         require(
@@ -28,11 +29,13 @@ class MapObstacle(
 
     val blocksMovement: Boolean
         get() =
-            type != MapObstacleType.LAKE
+            type != MapObstacleType.LAKE &&
+                type != MapObstacleType.PATHWAY
 
     val isGroundLayer: Boolean
         get() =
-            type == MapObstacleType.LAKE
+            type == MapObstacleType.LAKE ||
+                type == MapObstacleType.PATHWAY
 
     /*
      * visualBounds:
@@ -180,6 +183,14 @@ class MapObstacle(
                     offsetYRatio = 0.17f
                 )
 
+            MapObstacleType.PATHWAY ->
+                CollisionFootprint(
+                    widthRatio = 1f,
+                    heightRatio = 1f,
+                    offsetXRatio = 0f,
+                    offsetYRatio = 0f
+                )
+
             MapObstacleType.CITY_WALL ->
                 CollisionFootprint(
                     widthRatio = 1f,
@@ -190,9 +201,9 @@ class MapObstacle(
 
             MapObstacleType.CITY_GATE ->
                 CollisionFootprint(
-                    widthRatio = 0.66f,
-                    heightRatio = 0.24f,
-                    offsetXRatio = 0.17f,
+                    widthRatio = TroubleAtHomeLayout.GATE_COLLISION_WIDTH_RATIO,
+                    heightRatio = TroubleAtHomeLayout.GATE_COLLISION_HEIGHT_RATIO,
+                    offsetXRatio = TroubleAtHomeLayout.GATE_COLLISION_OFFSET_X_RATIO,
                     offsetYRatio = 0f
                 )
         }
@@ -237,7 +248,7 @@ class MapObstacle(
         shapeRenderer: ShapeRenderer,
         renderBody: Boolean = true
     ) {
-        if (!renderBody) {
+        if (!renderBody || !rendersVisual) {
             return
         }
 
@@ -271,6 +282,9 @@ class MapObstacle(
 
                 MapObstacleType.LAKE ->
                     Color.CYAN
+
+                MapObstacleType.PATHWAY ->
+                    Color.TAN
 
                 MapObstacleType.CITY_WALL,
                 MapObstacleType.CITY_GATE ->

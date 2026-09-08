@@ -167,7 +167,8 @@ data class SummonStats(
                 baseDamage =
                     (
                         sourceStats.contactDamage *
-                            levelDamageMultiplier
+                            levelDamageMultiplier *
+                            GUARD_DAMAGE_MULTIPLIER
                         )
                         .roundToInt()
                         .coerceAtLeast(1),
@@ -225,5 +226,8 @@ data class SummonStats(
                         .coerceAtLeast(0.10f)
             )
         }
+
+        private const val GUARD_DAMAGE_MULTIPLIER =
+            1.25f
     }
 }

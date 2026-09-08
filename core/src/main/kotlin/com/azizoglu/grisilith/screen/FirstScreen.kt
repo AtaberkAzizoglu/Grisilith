@@ -2939,6 +2939,14 @@ class FirstScreen(
             )
         }
 
+        summonManager.resolvePlayerCollisions {
+                summonBounds ->
+
+            player.resolveCollision(
+                summonBounds
+            )
+        }
+
         /*
          * Player.update() sonrasında obstacle ve Enemy
          * collision çözümü konumu değiştirebilir.
@@ -2960,6 +2968,7 @@ class FirstScreen(
             stageDurationSeconds = stageController.currentStageDuration,
             player = player,
             enemies = enemyManager.allEnemies,
+            summons = summonManager.activeSummons,
             mapObstacles = mapObstacles,
             pickupRadius = pickupRangeController.effectiveRadius,
             collectCurrency = { x, y, radius ->
@@ -3104,6 +3113,10 @@ class FirstScreen(
             }
         }
 
+        summonManager.resolveBodyCollisions(
+            playerBounds = player.bounds
+        )
+
         troubleAtHomeDefenseRuntime.update(
             delta = delta,
             currentStage = stageController.currentStage,
@@ -3198,11 +3211,18 @@ class FirstScreen(
             },
 
             onGateDamaged = {
-                    _,
+                    sourceEnemy,
                     damage ->
 
+                val resolvedGateDamage =
+                    kotlin.math.round(
+                        damage * sourceEnemy.gateDamageMultiplier
+                    )
+                        .toInt()
+                        .coerceAtLeast(1)
+
                 troubleAtHomeDefenseRuntime
-                    .takeDamage(damage)
+                    .takeDamage(resolvedGateDamage)
 
                 if (
                     troubleAtHomeDefenseRuntime
@@ -4047,8 +4067,10 @@ class FirstScreen(
 
         worldItemRuntime.onStageEnded()
 
-        troubleAtHomeDefenseRuntime.onStageEnded(
-            completedStage
+        troubleAtHomeDefenseRuntime.onStageEnded()
+
+        summonManager.healVillageGuards(
+            0.03f
         )
 
         bankUncollectedCurrencyForNextStage()
@@ -4283,6 +4305,14 @@ class FirstScreen(
 
         damageNumberManager.collectFrom(
             enemyManager.allEnemies
+        )
+
+        damageNumberManager.collectFromSummons(
+            summonManager
+        )
+
+        damageNumberManager.collectFromGate(
+            troubleAtHomeDefenseRuntime
         )
 
         damageNumberManager.render(

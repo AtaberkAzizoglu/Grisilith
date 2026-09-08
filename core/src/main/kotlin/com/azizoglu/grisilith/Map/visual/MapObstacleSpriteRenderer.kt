@@ -41,6 +41,10 @@ class MapObstacleSpriteRenderer(
         obstacles.forEach {
                 obstacle ->
 
+            if (!obstacle.rendersVisual) {
+                return@forEach
+            }
+
             val definition =
                 MapObstacleSpriteRegistry
                     .find(
@@ -121,16 +125,63 @@ class MapObstacleSpriteRenderer(
                     obstacle.visualBounds.height *
                     definition.verticalOffsetMultiplier
 
-            batch.draw(
-                region,
-                drawX,
-                drawY,
-                drawWidth,
-                drawHeight
-            )
+            if (definition.tileVertically) {
+                renderVerticalTiles(
+                    region = region,
+                    x = obstacle.visualBounds.x,
+                    y = obstacle.visualBounds.y,
+                    width = obstacle.visualBounds.width,
+                    height = obstacle.visualBounds.height,
+                    sourceAspectRatio = source.height.toFloat() / source.width
+                )
+            } else {
+                batch.draw(
+                    region,
+                    drawX,
+                    drawY,
+                    drawWidth,
+                    drawHeight
+                )
+            }
         }
 
         batch.end()
+    }
+
+    private fun renderVerticalTiles(
+        region: TextureRegion,
+        x: Float,
+        y: Float,
+        width: Float,
+        height: Float,
+        sourceAspectRatio: Float
+    ) {
+        val tileHeight = width * sourceAspectRatio
+        var drawY = y
+
+        while (drawY < y + height) {
+            val remainingHeight = y + height - drawY
+            val currentHeight = tileHeight.coerceAtMost(remainingHeight)
+            val visibleRatio = currentHeight / tileHeight
+            val clippedRegion = TextureRegion(region)
+
+            if (visibleRatio < 1f) {
+                clippedRegion.regionHeight =
+                    (region.regionHeight * visibleRatio)
+                        .toInt()
+                        .coerceAtLeast(1)
+            }
+
+            batch.draw(
+                clippedRegion,
+                x,
+                drawY,
+                width,
+                currentHeight
+            )
+
+            drawY += currentHeight
+        }
     }
 
     private fun ensureTexture(

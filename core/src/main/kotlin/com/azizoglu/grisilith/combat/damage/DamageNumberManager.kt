@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.combat.damage
 
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.map.TroubleAtHomeDefenseRuntime
+import com.azizoglu.grisilith.summon.SummonManager
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -23,23 +25,35 @@ class DamageNumberManager {
 
     fun collectFrom(enemies: List<Enemy>) {
         enemies.forEach { enemy ->
-            enemy.consumeDamageNumberEvents().forEach { event ->
-                activeNumbers.add(
-                    ActiveDamageNumber(
-                        amount = event.amount,
-                        startX = event.worldX,
-                        startY = event.worldY,
-                        isCriticalHit = event.isCriticalHit,
-                        horizontalOffset = when (sequence++ % 5) {
-                            0 -> -10f
-                            1 -> 8f
-                            2 -> -4f
-                            3 -> 12f
-                            else -> 0f
-                        }
-                    )
+            collectEvents(enemy.consumeDamageNumberEvents())
+        }
+    }
+
+    fun collectFromSummons(summonManager: SummonManager) {
+        collectEvents(summonManager.consumeDamageNumberEvents())
+    }
+
+    fun collectFromGate(runtime: TroubleAtHomeDefenseRuntime) {
+        collectEvents(runtime.consumeDamageNumberEvents())
+    }
+
+    private fun collectEvents(events: List<DamageNumberEvent>) {
+        events.forEach { event ->
+            activeNumbers.add(
+                ActiveDamageNumber(
+                    amount = event.amount,
+                    startX = event.worldX,
+                    startY = event.worldY,
+                    isCriticalHit = event.isCriticalHit,
+                    horizontalOffset = when (sequence++ % 5) {
+                        0 -> -10f
+                        1 -> 8f
+                        2 -> -4f
+                        3 -> 12f
+                        else -> 0f
+                    }
                 )
-            }
+            )
         }
     }
 

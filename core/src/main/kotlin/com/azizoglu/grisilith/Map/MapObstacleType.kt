@@ -12,6 +12,7 @@ enum class MapObstacleType {
     LOG_PILE,
     BUSH,
 
+    PATHWAY,
     LAKE,
     CITY_WALL,
     CITY_GATE,

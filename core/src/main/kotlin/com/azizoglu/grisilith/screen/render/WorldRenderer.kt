@@ -657,7 +657,8 @@ class WorldRenderer(
 
         troubleAtHomeDefenseRuntime
             ?.renderHealthBar(
-                shapeRenderer
+                shapeRenderer = shapeRenderer,
+                camera = camera
             )
 
         shapeRenderer.end()

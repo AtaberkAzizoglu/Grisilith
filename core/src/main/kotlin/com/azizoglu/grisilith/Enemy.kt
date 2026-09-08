@@ -19,6 +19,7 @@ import com.azizoglu.grisilith.combat.interaction.CombatInteractionEvent
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionManager
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionTrigger
 import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.enemy.behavior.EnemyBehaviorController
 import com.azizoglu.grisilith.enemy.behavior.EnemyCombatClock
@@ -27,6 +28,7 @@ import com.azizoglu.grisilith.enemy.navigation.EnemyNavigationAgent
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitDamageContext
 import com.azizoglu.grisilith.enemy.visual.EnemyVisualState
 import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
+import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
 import kotlin.math.roundToInt
 
 class Enemy(
@@ -265,6 +267,23 @@ class Enemy(
             runtimeBundle
                 .weaponRuntime
                 .allWeapons
+
+    val gateDamageMultiplier: Float
+        get() {
+            val usesProjectileOrMagic =
+                weaponRuntimes.any { runtime ->
+                    val definition =
+                        DefaultWeapons.findById(runtime.weaponId.value)
+
+                    definition != null &&
+                        (
+                            ContentTag.RANGED_WEAPON in definition.tags ||
+                                ContentTag.SPELL_FOCUS in definition.tags
+                            )
+                }
+
+            return if (usesProjectileOrMagic) 0.5f else 1f
+        }
 
     val ignoresObstacles: Boolean
         get() =
@@ -889,6 +908,34 @@ class Enemy(
             0f,
             maximumY
         )
+    }
+
+    fun keepSouthOfBarrier(
+        barrierY: Float,
+        contactOverlap: Float = 1f
+    ) {
+        if (isDead || carriedByHeavyBolt) {
+            return
+        }
+
+        val maximumY =
+            barrierY - size +
+                contactOverlap.coerceAtLeast(0f)
+
+        if (position.y <= maximumY) {
+            return
+        }
+
+        position.y = maximumY
+        previousPosition.y = maximumY
+
+        if (knockbackVelocity.y > 0f) {
+            knockbackVelocity.y = 0f
+
+            if (knockbackVelocity.isZero) {
+                knockbackTimeRemaining = 0f
+            }
+        }
     }
 
     fun takeDamage(

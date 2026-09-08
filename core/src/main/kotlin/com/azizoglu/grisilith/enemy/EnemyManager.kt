@@ -167,6 +167,12 @@ class EnemyManager {
                         gateBounds
                 )
 
+            gateBounds?.let {
+                enemy.keepSouthOfBarrier(
+                    barrierY = it.y
+                )
+            }
+
             enemy.update(
                 delta = delta,
                 targetX = selectedTarget.centerX,
@@ -193,6 +199,12 @@ class EnemyManager {
                     }
                 }
             )
+
+            gateBounds?.let {
+                enemy.keepSouthOfBarrier(
+                    barrierY = it.y
+                )
+            }
         }
 
         enemies.forEach {

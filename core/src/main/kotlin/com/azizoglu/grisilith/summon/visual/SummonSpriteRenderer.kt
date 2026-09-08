@@ -200,7 +200,7 @@ class SummonSpriteRenderer {
                 }
             }
 
-        val row =
+        val rowIndex =
             when (summon.visualDirection) {
                 SummonVisualDirection.SOUTH -> 0
                 SummonVisualDirection.EAST -> 1
@@ -208,12 +208,9 @@ class SummonSpriteRenderer {
                 SummonVisualDirection.WEST -> 3
             }
 
-        val sourceX =
-            GUARD_FIRST_FRAME_X +
-                frameIndex * GUARD_FRAME_WIDTH
-
-        val sourceY =
-            row * GUARD_FRAME_HEIGHT
+        val sourceX = GUARD_FRAME_X[frameIndex]
+        val sourceY = GUARD_ROW_Y[rowIndex]
+        val sourceHeight = GUARD_ROW_HEIGHT[rowIndex]
 
         val region =
             TextureRegion(
@@ -221,14 +218,20 @@ class SummonSpriteRenderer {
                 sourceX,
                 sourceY,
                 GUARD_FRAME_WIDTH,
-                GUARD_FRAME_HEIGHT
+                sourceHeight
             )
 
-        val worldHeight = definition.worldHeight
+        val worldHeight =
+            sourceHeight * GUARD_PIXEL_TO_WORLD_SCALE
+
         val worldWidth =
-            worldHeight *
-                GUARD_FRAME_WIDTH.toFloat() /
-                GUARD_FRAME_HEIGHT.toFloat()
+            GUARD_FRAME_WIDTH * GUARD_PIXEL_TO_WORLD_SCALE
+
+        val drawY =
+            summon.centerY -
+                GUARD_FEET_OFFSET_FROM_CENTER -
+                GUARD_BOTTOM_PADDING[rowIndex] *
+                    GUARD_PIXEL_TO_WORLD_SCALE
 
         batch.projectionMatrix = camera.combined
         batch.begin()
@@ -236,8 +239,7 @@ class SummonSpriteRenderer {
         batch.draw(
             region,
             summon.centerX - worldWidth / 2f,
-            summon.centerY -
-                worldHeight * definition.centerAnchorRatio,
+            drawY,
             worldWidth,
             worldHeight
         )
@@ -351,13 +353,25 @@ class SummonSpriteRenderer {
         private const val GUARD_SHEET_PATH =
             "summon_visuals/guard_sheet.png"
 
-        private const val GUARD_FIRST_FRAME_X =
-            400
-
         private const val GUARD_FRAME_WIDTH =
-            220
+            196
 
-        private const val GUARD_FRAME_HEIGHT =
-            256
+        private val GUARD_FRAME_X =
+            intArrayOf(438, 632, 836, 1034, 1233)
+
+        private val GUARD_ROW_Y =
+            intArrayOf(0, 277, 525, 772)
+
+        private val GUARD_ROW_HEIGHT =
+            intArrayOf(277, 248, 247, 252)
+
+        private val GUARD_BOTTOM_PADDING =
+            intArrayOf(9, 4, 0, 28)
+
+        private const val GUARD_PIXEL_TO_WORLD_SCALE =
+            0.274f
+
+        private const val GUARD_FEET_OFFSET_FROM_CENTER =
+            18f
     }
 }

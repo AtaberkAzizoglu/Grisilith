@@ -10,6 +10,7 @@ import com.azizoglu.grisilith.item.runtime.ItemInventory
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.stage.StageType
+import com.azizoglu.grisilith.summon.SummonedEntity
 import com.azizoglu.grisilith.character.visual.CharacterVisualDirection
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
@@ -156,6 +157,7 @@ class WorldItemRuntime(
         stageDurationSeconds: Float,
         player: Player,
         enemies: List<Enemy>,
+        summons: List<SummonedEntity>,
         mapObstacles: List<MapObstacle>,
         pickupRadius: Float,
         collectCurrency: (Float, Float, Float) -> Boolean,
@@ -181,7 +183,7 @@ class WorldItemRuntime(
         updateLoot(dt, player, pickupRadius)
         updatePitTrap(dt, player, enemies, onPitEnemyKilled, onTrapGoldReleased)
         updateTotem(
-            dt, stage, elapsedStageSeconds, player, enemies, onHalfGold,
+            dt, stage, elapsedStageSeconds, player, enemies, summons, onHalfGold,
             onSpawnRiskMiniBoss, onHourglass, onTreasure, onToads, hasLivingToads,
             onAuraEnemyKilled, mapObstacles
         )
@@ -379,6 +381,7 @@ class WorldItemRuntime(
         elapsed: Float,
         player: Player,
         enemies: List<Enemy>,
+        summons: List<SummonedEntity>,
         onHalfGold: () -> Unit,
         onSpawnRiskMiniBoss: () -> Unit,
         onHourglass: () -> Unit,
@@ -430,6 +433,24 @@ class WorldItemRuntime(
                 if (distanceSquared(player.centerX, player.centerY, activeTotem.x, activeTotem.y) <= 170f * 170f) {
                     player.health.heal((player.health.maximumHealth * 0.015f).roundToInt().coerceAtLeast(1))
                 }
+
+                summons
+                    .filter {
+                        !it.isExpired &&
+                            distanceSquared(
+                                it.centerX,
+                                it.centerY,
+                                activeTotem.x,
+                                activeTotem.y
+                            ) <= 170f * 170f
+                    }
+                    .forEach {
+                        it.heal(
+                            (it.health.maximumHealth * 0.015f)
+                                .roundToInt()
+                                .coerceAtLeast(1)
+                        )
+                    }
             }
         } else if (displayedResult == TotemResult.HEALING_AURA) displayedResult = null
 

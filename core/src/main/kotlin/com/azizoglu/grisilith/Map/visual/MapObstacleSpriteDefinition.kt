@@ -10,7 +10,8 @@ data class MapObstacleSpriteDefinition(
     val widthMultiplier: Float,
     val heightMultiplier: Float,
     val verticalOffsetMultiplier: Float = 0f,
-    val stretchToVisualBounds: Boolean = false
+    val stretchToVisualBounds: Boolean = false,
+    val tileVertically: Boolean = false
 ) {
     init {
         require(texturePath.isNotBlank())

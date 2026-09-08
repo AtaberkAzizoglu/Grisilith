@@ -15,6 +15,12 @@ object MapObstacleGenerator {
     private const val OBSTACLE_SPACING =
         45f
 
+    private const val WALL_VISUAL_OVERLAP =
+        12f
+
+    private const val PATHWAY_WIDTH =
+        280f
+
     private const val MAX_GENERATION_ATTEMPTS =
         500
 
@@ -79,6 +85,13 @@ object MapObstacleGenerator {
         rules.forEach {
                 rule ->
 
+            if (
+                rule.type == MapObstacleType.LAKE &&
+                MathUtils.random() >= lakeGenerationChance(gameMap)
+            ) {
+                return@forEach
+            }
+
             repeat(
                 rule.count
             ) {
@@ -109,24 +122,95 @@ object MapObstacleGenerator {
     private fun fixedVillageDefenses(
         gameMap: GameMap
     ): List<MapObstacle> {
-        return listOf(
-            MapObstacle(
-                type = MapObstacleType.CITY_WALL,
-                x = 0f,
-                y = TroubleAtHomeLayout.wallY(gameMap.worldHeight),
-                width = gameMap.worldWidth,
-                height = TroubleAtHomeLayout.WALL_HEIGHT,
-                visualVariant = 0
-            ),
-            MapObstacle(
+        val gateX = TroubleAtHomeLayout.gateX(gameMap.worldWidth)
+        val wallY = TroubleAtHomeLayout.wallY(gameMap.worldHeight)
+
+        return buildList {
+            add(
+                MapObstacle(
+                    type = MapObstacleType.PATHWAY,
+                    x =
+                        gateX + TroubleAtHomeLayout.GATE_WIDTH / 2f -
+                            PATHWAY_WIDTH / 2f,
+                    y = 0f,
+                    width = PATHWAY_WIDTH,
+                    height = wallY,
+                    visualVariant = 0
+                )
+            )
+
+            var wallX = 0f
+
+            while (wallX < gameMap.worldWidth) {
+                val width =
+                    TroubleAtHomeLayout.GATE_WIDTH
+                        .coerceAtMost(gameMap.worldWidth - wallX)
+
+                if (
+                    wallX + width <= gateX ||
+                    wallX >= gateX + TroubleAtHomeLayout.GATE_WIDTH
+                ) {
+                    val drawX =
+                        (wallX - WALL_VISUAL_OVERLAP)
+                            .coerceAtLeast(0f)
+                    val drawRight =
+                        (wallX + width + WALL_VISUAL_OVERLAP)
+                            .coerceAtMost(gameMap.worldWidth)
+
+                    add(
+                        MapObstacle(
+                            type = MapObstacleType.CITY_WALL,
+                            x = drawX,
+                            y = wallY,
+                            width = drawRight - drawX,
+                            height = TroubleAtHomeLayout.WALL_HEIGHT,
+                            visualVariant = 0
+                        )
+                    )
+                }
+
+                wallX += TroubleAtHomeLayout.GATE_WIDTH
+            }
+
+            add(
+                MapObstacle(
                 type = MapObstacleType.CITY_GATE,
-                x = TroubleAtHomeLayout.gateX(gameMap.worldWidth),
+                x = gateX,
                 y = TroubleAtHomeLayout.gateY(gameMap.worldHeight),
                 width = TroubleAtHomeLayout.GATE_WIDTH,
                 height = TroubleAtHomeLayout.GATE_HEIGHT,
                 visualVariant = 0
+                )
             )
-        )
+
+            val gateCollisionWidth =
+                TroubleAtHomeLayout.GATE_WIDTH *
+                    TroubleAtHomeLayout.GATE_COLLISION_WIDTH_RATIO
+            val sideBarrierWidth =
+                (TroubleAtHomeLayout.GATE_WIDTH - gateCollisionWidth) / 2f
+
+            add(
+                MapObstacle(
+                    type = MapObstacleType.CITY_WALL,
+                    x = gateX,
+                    y = wallY,
+                    width = sideBarrierWidth,
+                    height = TroubleAtHomeLayout.WALL_HEIGHT,
+                    rendersVisual = false
+                )
+            )
+
+            add(
+                MapObstacle(
+                    type = MapObstacleType.CITY_WALL,
+                    x = gateX + TroubleAtHomeLayout.GATE_WIDTH - sideBarrierWidth,
+                    y = wallY,
+                    width = sideBarrierWidth,
+                    height = TroubleAtHomeLayout.WALL_HEIGHT,
+                    rendersVisual = false
+                )
+            )
+        }
     }
 
     private fun tryAddRandomObstacle(
@@ -259,6 +343,10 @@ object MapObstacleGenerator {
         return obstacles.any {
                 obstacle ->
 
+            if (obstacle.type == MapObstacleType.PATHWAY) {
+                return@any expandedCandidate.overlaps(obstacle.visualBounds)
+            }
+
             expandedCandidate.overlaps(
                 obstacle.visualBounds
             )
@@ -388,4 +476,14 @@ object MapObstacleGenerator {
                 110f
             )
         )
+
+    private fun lakeGenerationChance(
+        gameMap: GameMap
+    ): Float {
+        return when (gameMap) {
+            GameMap.ROAD_TO_HOME -> 0.70f
+            GameMap.TROUBLE_AT_HOME -> 0.40f
+            else -> 0f
+        }
+    }
 }

@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.map
 
 import com.azizoglu.grisilith.combat.HealthComponent
+import com.azizoglu.grisilith.combat.damage.DamageNumberEvent
 import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.enemy.EnemyStats
 import com.azizoglu.grisilith.summon.SummonManager
@@ -11,6 +12,9 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Vector2
+import kotlin.math.abs
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 class TroubleAtHomeDefenseRuntime(
@@ -38,14 +42,17 @@ class TroubleAtHomeDefenseRuntime(
     private var pendingGuardSpawns =
         0
 
-    private var animationSeconds =
+    private var animationPhaseSeconds =
         0f
 
-    private var animationActive =
-        false
+    private var openSpawnCooldownSeconds =
+        0f
 
-    private var guardSpawnedDuringAnimation =
-        false
+    private var gateAnimationState =
+        GateAnimationState.CLOSED
+
+    private val pendingDamageNumberEvents =
+        mutableListOf<DamageNumberEvent>()
 
     private var introMessageRemainingSeconds =
         if (isEnabled) INTRO_MESSAGE_DURATION_SECONDS else 0f
@@ -132,46 +139,71 @@ class TroubleAtHomeDefenseRuntime(
                 requestedSpawns
         }
 
-        if (!animationActive && pendingGuardSpawns > 0) {
-            animationActive = true
-            animationSeconds = 0f
-            guardSpawnedDuringAnimation = false
-        }
+        when (gateAnimationState) {
+            GateAnimationState.CLOSED -> {
+                gateObstacle?.visualVariant = 0
 
-        if (!animationActive) {
-            gateObstacle?.visualVariant = 0
-            return
-        }
-
-        animationSeconds += delta.coerceAtLeast(0f)
-        gateObstacle?.visualVariant =
-            animationFrame(animationSeconds)
-
-        if (
-            !guardSpawnedDuringAnimation &&
-            animationSeconds >= GUARD_SPAWN_TIME_SECONDS
-        ) {
-            guardSpawnedDuringAnimation = true
-
-            if (
-                spawnGuard(
-                    summonManager = summonManager,
-                    stage = currentStage,
-                    guardProfileProvider = guardProfileProvider
-                )
-            ) {
-                pendingGuardSpawns =
-                    (pendingGuardSpawns - 1)
-                        .coerceAtLeast(0)
-            } else {
-                pendingGuardSpawns = 0
+                if (pendingGuardSpawns > 0) {
+                    gateAnimationState = GateAnimationState.OPENING
+                    animationPhaseSeconds = 0f
+                }
             }
-        }
 
-        if (animationSeconds >= GATE_ANIMATION_SECONDS) {
-            animationActive = false
-            animationSeconds = 0f
-            gateObstacle?.visualVariant = 0
+            GateAnimationState.OPENING -> {
+                animationPhaseSeconds += delta.coerceAtLeast(0f)
+                gateObstacle?.visualVariant =
+                    if (animationPhaseSeconds < 0.38f) 1 else 2
+
+                if (animationPhaseSeconds >= GATE_OPENING_SECONDS) {
+                    gateAnimationState = GateAnimationState.OPEN
+                    animationPhaseSeconds = 0f
+                    openSpawnCooldownSeconds = 0f
+                    gateObstacle?.visualVariant = 3
+                }
+            }
+
+            GateAnimationState.OPEN -> {
+                gateObstacle?.visualVariant = 3
+                openSpawnCooldownSeconds =
+                    (openSpawnCooldownSeconds - delta.coerceAtLeast(0f))
+                        .coerceAtLeast(0f)
+
+                if (
+                    pendingGuardSpawns > 0 &&
+                    openSpawnCooldownSeconds <= 0f
+                ) {
+                    if (
+                        spawnGuard(
+                            summonManager = summonManager,
+                            stage = currentStage,
+                            guardProfileProvider = guardProfileProvider
+                        )
+                    ) {
+                        pendingGuardSpawns--
+                        openSpawnCooldownSeconds =
+                            GUARD_SPAWN_INTERVAL_SECONDS
+                    } else {
+                        pendingGuardSpawns = 0
+                    }
+                }
+
+                if (pendingGuardSpawns <= 0) {
+                    gateAnimationState = GateAnimationState.CLOSING
+                    animationPhaseSeconds = 0f
+                }
+            }
+
+            GateAnimationState.CLOSING -> {
+                animationPhaseSeconds += delta.coerceAtLeast(0f)
+                gateObstacle?.visualVariant =
+                    if (animationPhaseSeconds < 0.38f) 2 else 1
+
+                if (animationPhaseSeconds >= GATE_CLOSING_SECONDS) {
+                    gateAnimationState = GateAnimationState.CLOSED
+                    animationPhaseSeconds = 0f
+                    gateObstacle?.visualVariant = 0
+                }
+            }
         }
     }
 
@@ -180,24 +212,34 @@ class TroubleAtHomeDefenseRuntime(
             return 0
         }
 
-        return gateHealth.takeDamage(amount)
+        val appliedDamage = gateHealth.takeDamage(amount)
+
+        if (appliedDamage > 0) {
+            val gate = gateObstacle
+            pendingDamageNumberEvents +=
+                DamageNumberEvent(
+                    amount = appliedDamage,
+                    worldX = gate?.visualBounds?.let { it.x + it.width / 2f } ?: 0f,
+                    worldY = gate?.visualBounds?.y ?: 0f
+                )
+        }
+
+        return appliedDamage
     }
 
-    fun onStageEnded(completedStage: Int) {
+    fun consumeDamageNumberEvents(): List<DamageNumberEvent> {
+        val result = pendingDamageNumberEvents.toList()
+        pendingDamageNumberEvents.clear()
+        return result
+    }
+
+    fun onStageEnded() {
         if (!isEnabled || gateHealth.isDead) {
             return
         }
 
-        val progress =
-            ((completedStage.coerceIn(1, 40) - 1) / 39f)
-
-        val healRatio =
-            MINIMUM_STAGE_HEAL_RATIO +
-                (MAXIMUM_STAGE_HEAL_RATIO - MINIMUM_STAGE_HEAL_RATIO) *
-                progress
-
         gateHealth.heal(
-            (GATE_MAXIMUM_HEALTH * healRatio)
+            (GATE_MAXIMUM_HEALTH * STAGE_HEAL_RATIO)
                 .roundToInt()
         )
     }
@@ -220,6 +262,10 @@ class TroubleAtHomeDefenseRuntime(
         observedStage = currentStage
         pendingGuardSpawns = 0
         replacementDueStages.clear()
+        gateAnimationState = GateAnimationState.CLOSED
+        animationPhaseSeconds = 0f
+        openSpawnCooldownSeconds = 0f
+        gateObstacle?.visualVariant = 0
         introMessageRemainingSeconds = 0f
 
         repeat(guardCount.coerceIn(0, MAXIMUM_GUARDS)) {
@@ -231,17 +277,25 @@ class TroubleAtHomeDefenseRuntime(
         }
     }
 
-    fun renderHealthBar(shapeRenderer: ShapeRenderer) {
+    fun renderHealthBar(
+        shapeRenderer: ShapeRenderer,
+        camera: OrthographicCamera
+    ) {
         val gate = gateObstacle ?: return
 
         if (!isEnabled) {
             return
         }
 
-        val width = GATE_HEALTH_BAR_WIDTH
-        val height = GATE_HEALTH_BAR_HEIGHT
-        val x = healthBarX(gate)
-        val y = healthBarY(gate)
+        val worldBarVisible = isWorldHealthBarVisible(gate, camera)
+        val width =
+            if (worldBarVisible) GATE_HEALTH_BAR_WIDTH else EDGE_HEALTH_BAR_WIDTH
+        val height =
+            if (worldBarVisible) GATE_HEALTH_BAR_HEIGHT else EDGE_HEALTH_BAR_HEIGHT
+        val edgePosition =
+            if (worldBarVisible) null else edgeHealthBarPosition(gate, camera)
+        val x = edgePosition?.x ?: healthBarX(gate)
+        val y = edgePosition?.y ?: healthBarY(gate)
 
         shapeRenderer.color = Color(0.08f, 0.05f, 0.04f, 0.95f)
         shapeRenderer.rect(x - 3f, y - 3f, width + 6f, height + 6f)
@@ -271,15 +325,30 @@ class TroubleAtHomeDefenseRuntime(
         gateObstacle?.let { gate ->
             val healthText =
                 "${gateHealth.currentHealth}/${gateHealth.maximumHealth}"
-
-            val layout = GlyphLayout(font, healthText)
             font.color = Color.WHITE
-            font.draw(
-                batch,
-                healthText,
-                healthBarX(gate) + GATE_HEALTH_BAR_WIDTH / 2f - layout.width / 2f,
-                healthBarY(gate) + GATE_HEALTH_BAR_HEIGHT - 4f
-            )
+
+            if (isWorldHealthBarVisible(gate, camera)) {
+                val layout = GlyphLayout(font, healthText)
+                font.draw(
+                    batch,
+                    healthText,
+                    healthBarX(gate) + GATE_HEALTH_BAR_WIDTH / 2f - layout.width / 2f,
+                    healthBarY(gate) + GATE_HEALTH_BAR_HEIGHT - 4f
+                )
+            } else {
+                val edgePosition = edgeHealthBarPosition(gate, camera)
+                val previousScaleX = font.data.scaleX
+                val previousScaleY = font.data.scaleY
+                font.data.setScale(0.72f)
+                val layout = GlyphLayout(font, healthText)
+                font.draw(
+                    batch,
+                    healthText,
+                    edgePosition.x + EDGE_HEALTH_BAR_WIDTH / 2f - layout.width / 2f,
+                    edgePosition.y + EDGE_HEALTH_BAR_HEIGHT - 1f
+                )
+                font.data.setScale(previousScaleX, previousScaleY)
+            }
         }
 
         if (introMessageRemainingSeconds > 0f) {
@@ -344,33 +413,102 @@ class TroubleAtHomeDefenseRuntime(
 
     private fun healthBarY(gate: MapObstacle): Float =
         gate.visualBounds.y -
-            GATE_HEALTH_BAR_OFFSET_Y
+            GATE_HEALTH_BAR_OFFSET_Y +
+            gate.visualBounds.height
 
-    private fun animationFrame(seconds: Float): Int {
-        return when {
-            seconds < 0.35f -> 1
-            seconds < 0.75f -> 2
-            seconds < 1.55f -> 3
-            seconds < 1.95f -> 2
-            seconds < GATE_ANIMATION_SECONDS -> 1
-            else -> 0
+    private fun edgeHealthBarPosition(
+        gate: MapObstacle,
+        camera: OrthographicCamera
+    ): Vector2 {
+        val halfWidth = camera.viewportWidth * camera.zoom / 2f
+        val halfHeight = camera.viewportHeight * camera.zoom / 2f
+        val targetX = gate.visualBounds.x + gate.visualBounds.width / 2f
+        val targetY = gate.visualBounds.y + gate.visualBounds.height / 2f
+        val dx = targetX - camera.position.x
+        val dy = targetY - camera.position.y
+
+        if (abs(dx) < 0.001f && abs(dy) < 0.001f) {
+            return Vector2(
+                camera.position.x - EDGE_HEALTH_BAR_WIDTH / 2f,
+                camera.position.y + halfHeight -
+                    EDGE_HEALTH_BAR_HEIGHT - EDGE_INDICATOR_PADDING
+            )
         }
+
+        val horizontalLimit =
+            halfWidth - EDGE_HEALTH_BAR_WIDTH / 2f - EDGE_INDICATOR_PADDING
+        val verticalLimit =
+            halfHeight - EDGE_HEALTH_BAR_HEIGHT / 2f - EDGE_INDICATOR_PADDING
+        val xScale =
+            if (abs(dx) < 0.001f) {
+                Float.POSITIVE_INFINITY
+            } else {
+                horizontalLimit / abs(dx)
+            }
+        val yScale =
+            if (abs(dy) < 0.001f) {
+                Float.POSITIVE_INFINITY
+            } else {
+                verticalLimit / abs(dy)
+            }
+        val scale = min(xScale, yScale)
+        val centerX = camera.position.x + dx * scale
+        val centerY = camera.position.y + dy * scale
+
+        return Vector2(
+            centerX - EDGE_HEALTH_BAR_WIDTH / 2f,
+            centerY - EDGE_HEALTH_BAR_HEIGHT / 2f
+        )
+    }
+
+    private fun isWorldHealthBarVisible(
+        gate: MapObstacle,
+        camera: OrthographicCamera
+    ): Boolean {
+        val visibleWidth = camera.viewportWidth * camera.zoom
+        val visibleHeight = camera.viewportHeight * camera.zoom
+        val cameraBounds =
+            Rectangle(
+                camera.position.x - visibleWidth / 2f,
+                camera.position.y - visibleHeight / 2f,
+                visibleWidth,
+                visibleHeight
+            )
+        val healthBarBounds =
+            Rectangle(
+                healthBarX(gate) - 3f,
+                healthBarY(gate) - 3f,
+                GATE_HEALTH_BAR_WIDTH + 6f,
+                GATE_HEALTH_BAR_HEIGHT + 6f
+            )
+
+        return cameraBounds.overlaps(healthBarBounds)
+    }
+
+    private enum class GateAnimationState {
+        CLOSED,
+        OPENING,
+        OPEN,
+        CLOSING
     }
 
     companion object {
         const val GATE_MAXIMUM_HEALTH = 1000
 
-        private const val MAXIMUM_GUARDS = 5
+        private const val MAXIMUM_GUARDS = 3
         private const val REGULAR_GUARD_STAGE_INTERVAL = 2
         private const val REPLACEMENT_STAGE_DELAY = 2
-        private const val GUARD_MAXIMUM_GATE_DISTANCE = 1000f
-        private const val GUARD_SPAWN_TIME_SECONDS = 0.90f
-        private const val GATE_ANIMATION_SECONDS = 2.30f
+        private const val GUARD_MAXIMUM_GATE_DISTANCE = 750f
+        private const val GUARD_SPAWN_INTERVAL_SECONDS = 0.32f
+        private const val GATE_OPENING_SECONDS = 0.76f
+        private const val GATE_CLOSING_SECONDS = 0.76f
         private const val GATE_HEALTH_BAR_WIDTH = 260f
         private const val GATE_HEALTH_BAR_HEIGHT = 22f
-        private const val GATE_HEALTH_BAR_OFFSET_Y = 42f
-        private const val MINIMUM_STAGE_HEAL_RATIO = 0.05f
-        private const val MAXIMUM_STAGE_HEAL_RATIO = 0.15f
+        private const val GATE_HEALTH_BAR_OFFSET_Y = 36f
+        private const val EDGE_HEALTH_BAR_WIDTH = 145f
+        private const val EDGE_HEALTH_BAR_HEIGHT = 12f
+        private const val EDGE_INDICATOR_PADDING = 20f
+        private const val STAGE_HEAL_RATIO = 0.05f
         private const val INTRO_MESSAGE = "Defend your home, and survive."
         private const val INTRO_MESSAGE_DURATION_SECONDS = 4.5f
         private const val INTRO_MESSAGE_FADE_SECONDS = 1.5f

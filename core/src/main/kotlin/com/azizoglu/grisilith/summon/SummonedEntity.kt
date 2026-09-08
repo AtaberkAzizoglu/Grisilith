@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.summon
 
 import com.azizoglu.grisilith.combat.HealthComponent
+import com.azizoglu.grisilith.combat.damage.DamageNumberEvent
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionContainer
 import com.azizoglu.grisilith.content.ConditionType
@@ -85,6 +86,18 @@ class SummonedEntity(
 
     private val guardAttackVisualTarget =
         Vector2()
+
+    private var guardTarget: Enemy? =
+        null
+
+    private var guardRetreatRemainingSeconds =
+        0f
+
+    private var previousGuardHealthRatio =
+        1f
+
+    private val pendingDamageNumberEvents =
+        mutableListOf<DamageNumberEvent>()
 
     private var terrainMovementSpeedMultiplier =
         1f
@@ -276,6 +289,10 @@ class SummonedEntity(
             (guardAttackVisualRemainingSeconds - delta)
                 .coerceAtLeast(0f)
 
+        guardRetreatRemainingSeconds =
+            (guardRetreatRemainingSeconds - delta)
+                .coerceAtLeast(0f)
+
         when (type) {
 
             SummonType.COW -> {
@@ -439,9 +456,32 @@ class SummonedEntity(
             return 0
         }
 
-        return health.takeDamage(
-            amount
-        )
+        val appliedDamage =
+            health.takeDamage(amount)
+
+        if (appliedDamage > 0) {
+            pendingDamageNumberEvents +=
+                DamageNumberEvent(
+                    amount = appliedDamage,
+                    worldX = center.x,
+                    worldY = center.y + combatRadius
+                )
+        }
+
+        return appliedDamage
+    }
+
+    fun heal(amount: Int): Int =
+        health.heal(amount)
+
+    fun consumeDamageNumberEvents(): List<DamageNumberEvent> {
+        if (pendingDamageNumberEvents.isEmpty()) {
+            return emptyList()
+        }
+
+        val result = pendingDamageNumberEvents.toList()
+        pendingDamageNumberEvents.clear()
+        return result
     }
 
     fun resolveObstacleCollision(obstacleBounds: Rectangle) {
@@ -455,6 +495,113 @@ class SummonedEntity(
             center.x += if (center.x < obstacleBounds.x + obstacleBounds.width / 2f) -left else right
         } else {
             center.y += if (center.y < obstacleBounds.y + obstacleBounds.height / 2f) -bottom else top
+        }
+    }
+
+    fun separateFromPlayer(
+        playerBounds: Rectangle
+    ) {
+        if (isExpired || !combatBounds.overlaps(playerBounds)) {
+            return
+        }
+
+        moveOutside(
+            ownBounds = combatBounds,
+            otherBounds = playerBounds,
+            ownCenterX = center.x,
+            ownCenterY = center.y,
+            moveFraction = 1f
+        )
+    }
+
+    fun separateFrom(
+        other: SummonedEntity
+    ) {
+        if (
+            other === this ||
+            isExpired ||
+            other.isExpired
+        ) {
+            return
+        }
+
+        val ownBounds = combatBounds
+        val otherBounds = other.combatBounds
+
+        if (!ownBounds.overlaps(otherBounds)) {
+            return
+        }
+
+        val overlapLeft =
+            ownBounds.x + ownBounds.width - otherBounds.x
+        val overlapRight =
+            otherBounds.x + otherBounds.width - ownBounds.x
+        val overlapBottom =
+            ownBounds.y + ownBounds.height - otherBounds.y
+        val overlapTop =
+            otherBounds.y + otherBounds.height - ownBounds.y
+        val horizontalOverlap = minOf(overlapLeft, overlapRight)
+        val verticalOverlap = minOf(overlapBottom, overlapTop)
+
+        if (horizontalOverlap < verticalOverlap) {
+            val direction =
+                if (
+                    center.x < other.center.x ||
+                    center.x == other.center.x && runtimeId < other.runtimeId
+                ) {
+                    -1f
+                } else {
+                    1f
+                }
+            val push = horizontalOverlap / 2f + COLLISION_EPSILON
+            center.x += direction * push
+            other.center.x -= direction * push
+        } else {
+            val direction =
+                if (
+                    center.y < other.center.y ||
+                    center.y == other.center.y && runtimeId < other.runtimeId
+                ) {
+                    -1f
+                } else {
+                    1f
+                }
+            val push = verticalOverlap / 2f + COLLISION_EPSILON
+            center.y += direction * push
+            other.center.y -= direction * push
+        }
+    }
+
+    private fun moveOutside(
+        ownBounds: Rectangle,
+        otherBounds: Rectangle,
+        ownCenterX: Float,
+        ownCenterY: Float,
+        moveFraction: Float
+    ) {
+        val overlapLeft =
+            ownBounds.x + ownBounds.width - otherBounds.x
+        val overlapRight =
+            otherBounds.x + otherBounds.width - ownBounds.x
+        val overlapBottom =
+            ownBounds.y + ownBounds.height - otherBounds.y
+        val overlapTop =
+            otherBounds.y + otherBounds.height - ownBounds.y
+        val horizontalOverlap = minOf(overlapLeft, overlapRight)
+        val verticalOverlap = minOf(overlapBottom, overlapTop)
+
+        if (horizontalOverlap < verticalOverlap) {
+            val direction =
+                if (ownCenterX < otherBounds.x + otherBounds.width / 2f) -1f else 1f
+            center.x +=
+                direction *
+                    (horizontalOverlap * moveFraction + COLLISION_EPSILON)
+        } else {
+            val direction =
+                if (ownCenterY < otherBounds.y + otherBounds.height / 2f) -1f else 1f
+            center.y +=
+                direction *
+                    (verticalOverlap * moveFraction + COLLISION_EPSILON)
         }
     }
 
@@ -995,7 +1142,62 @@ class SummonedEntity(
             enemy: Enemy
         ) -> Unit
     ) {
-        val target = nearestLivingEnemy(enemies)
+        val currentHealthRatio = health.healthRatio
+        val crossedRetreatThreshold =
+            GUARD_RETREAT_HEALTH_THRESHOLDS.any { threshold ->
+                previousGuardHealthRatio >= threshold &&
+                    currentHealthRatio < threshold
+            }
+
+        if (crossedRetreatThreshold) {
+            guardRetreatRemainingSeconds =
+                GUARD_RETREAT_DURATION_SECONDS
+        }
+
+        previousGuardHealthRatio = currentHealthRatio
+
+        val homeX = leashCenterX ?: center.x
+        val homeY = leashCenterY ?: center.y
+
+        val retainedTarget =
+            guardTarget?.takeIf {
+                !it.isDead &&
+                    it in enemies &&
+                    Vector2.dst2(
+                        homeX,
+                        homeY,
+                        it.centerX,
+                        it.centerY
+                    ) <=
+                    GUARD_TARGET_RELEASE_DISTANCE *
+                    GUARD_TARGET_RELEASE_DISTANCE
+            }
+
+        val target =
+            retainedTarget
+                ?: enemies
+                    .asSequence()
+                    .filter { !it.isDead }
+                    .filter {
+                        Vector2.dst2(
+                            homeX,
+                            homeY,
+                            it.centerX,
+                            it.centerY
+                        ) <=
+                            GUARD_TARGET_ACQUIRE_DISTANCE *
+                            GUARD_TARGET_ACQUIRE_DISTANCE
+                    }
+                    .minByOrNull {
+                        Vector2.dst2(
+                            center.x,
+                            center.y,
+                            it.centerX,
+                            it.centerY
+                        )
+                    }
+
+        guardTarget = target
 
         if (target == null) {
             returnToLeashCenter(
@@ -1031,22 +1233,7 @@ class SummonedEntity(
             }
         }
 
-        val centerDistance =
-            kotlin.math.sqrt(
-                Vector2.dst2(
-                    center.x,
-                    center.y,
-                    target.centerX,
-                    target.centerY
-                )
-            )
-
-        val clearance =
-            centerDistance -
-                combatRadius -
-                target.bounds.width / 2f
-
-        if (clearance <= GUARD_RETREAT_DISTANCE) {
+        if (guardRetreatRemainingSeconds > 0f) {
             moveKnightAwayFrom(
                 targetX = target.centerX,
                 targetY = target.centerY,
@@ -1055,7 +1242,7 @@ class SummonedEntity(
                 worldHeight = worldHeight,
                 mapObstacles = mapObstacles
             )
-        } else if (!insideAttackRange) {
+        } else {
             moveKnightToward(
                 targetX = target.centerX,
                 targetY = target.centerY,
@@ -1969,6 +2156,9 @@ class SummonedEntity(
 
     companion object {
 
+        private const val COLLISION_EPSILON =
+            0.05f
+
         private const val VISUAL_MOVEMENT_EPSILON_SQUARED =
             0.04f
 
@@ -1993,7 +2183,12 @@ class SummonedEntity(
         private const val GUARD_IDLE_RETURN_DISTANCE =
             120f
 
-        private const val GUARD_RETREAT_DISTANCE = 50f
+        private val GUARD_RETREAT_HEALTH_THRESHOLDS =
+            floatArrayOf(0.50f, 0.25f, 0.10f)
+
+        private const val GUARD_RETREAT_DURATION_SECONDS = 2f
+        private const val GUARD_TARGET_ACQUIRE_DISTANCE = 500f
+        private const val GUARD_TARGET_RELEASE_DISTANCE = 750f
         private const val GUARD_ATTACK_VISUAL_SECONDS = 0.20f
         private const val GUARD_ATTACK_LINE_WIDTH = 3f
         private const val GUARD_ARROW_LENGTH = 15f

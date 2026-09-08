@@ -20,6 +20,9 @@ object MapObstacleSpriteRegistry {
     private const val LAKE_TEXTURE =
         "map/obstacles/lake_obstacle.png"
 
+    private const val PATHWAY_TEXTURE =
+        "map/tiles/trouble_at_home_pathway.png"
+
     private const val CITY_WALL_TEXTURE =
         "map/obstacles/wooden_city_wall.png"
 
@@ -120,6 +123,20 @@ object MapObstacleSpriteRegistry {
             widthMultiplier = 1f,
             heightMultiplier = 1f,
             stretchToVisualBounds = true
+        )
+
+    private val pathwayDefinition =
+        MapObstacleSpriteDefinition(
+            type = MapObstacleType.PATHWAY,
+            texturePath = PATHWAY_TEXTURE,
+            sourceRegions =
+                listOf(
+                    MapObstacleSourceRegion(0, 0, 1254, 1254)
+                ),
+            widthMultiplier = 1f,
+            heightMultiplier = 1f,
+            stretchToVisualBounds = true,
+            tileVertically = true
         )
 
     private val cityWallDefinition =
@@ -225,6 +242,7 @@ object MapObstacleSpriteRegistry {
                 MapObstacleType.BARREL to barrelDefinition,
                 MapObstacleType.LOG_PILE to logPileDefinition,
                 MapObstacleType.BUSH to bushDefinition,
+                MapObstacleType.PATHWAY to pathwayDefinition,
                 MapObstacleType.LAKE to lakeDefinition,
                 MapObstacleType.CITY_WALL to cityWallDefinition,
                 MapObstacleType.CITY_GATE to cityGateDefinition

@@ -6,10 +6,19 @@ object TroubleAtHomeLayout {
         360f
 
     const val GATE_WIDTH =
-        540f
+        500f
 
     const val GATE_HEIGHT =
         360f
+
+    const val GATE_COLLISION_WIDTH_RATIO =
+        0.66f
+
+    const val GATE_COLLISION_HEIGHT_RATIO =
+        0.24f
+
+    const val GATE_COLLISION_OFFSET_X_RATIO =
+        0.17f
 
     const val ENEMY_WALL_PADDING =
         85f
@@ -21,7 +30,11 @@ object TroubleAtHomeLayout {
         worldHeight - WALL_HEIGHT
 
     fun gateX(worldWidth: Float): Float =
-        worldWidth / 2f - GATE_WIDTH / 2f
+        (
+            (worldWidth / GATE_WIDTH).toInt() / 2 *
+                GATE_WIDTH
+            )
+            .coerceIn(0f, worldWidth - GATE_WIDTH)
 
     fun gateY(worldHeight: Float): Float =
         wallY(worldHeight)
