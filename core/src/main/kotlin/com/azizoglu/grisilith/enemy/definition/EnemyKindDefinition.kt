@@ -32,6 +32,14 @@ data class EnemyKindDefinition(
     val equipment: EnemyEquipmentDefinition =
         EnemyEquipmentDefinition(),
 
+    /*
+     * Equipment is kept as content metadata, but current enemies no longer
+     * derive their combat actions from player items. A future enemy can opt
+     * back into the old runtime without restoring deleted data.
+     */
+    val usesEquipmentWeaponsInCombat: Boolean =
+        false,
+
     val activeSkillIds: List<ContentId> =
         emptyList(),
 

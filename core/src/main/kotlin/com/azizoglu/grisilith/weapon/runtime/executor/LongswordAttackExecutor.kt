@@ -48,6 +48,9 @@ class LongswordAttackExecutor(
                 enemyManager =
                     context.enemyManager,
 
+
+                originX = context.attackOriginX,
+                originY = context.attackOriginY,
                 maximumRange =
                     effectiveRange
             ) ?: return
@@ -58,10 +61,10 @@ class LongswordAttackExecutor(
         val attackDirection =
             Vector2(
                 primaryTarget.centerX -
-                    context.player.centerX,
+                    context.attackOriginX,
 
                 primaryTarget.centerY -
-                    context.player.centerY
+                    context.attackOriginY
             )
 
         if (attackDirection.isZero) {
@@ -90,9 +93,9 @@ class LongswordAttackExecutor(
                 MeleeAttackVisualKind
                     .LONGSWORD_CONE,
             centerX =
-                primaryTarget.centerX,
+                context.attackOriginX + attackDirection.x * effectiveRange * 0.42f,
             centerY =
-                primaryTarget.centerY,
+                context.attackOriginY + attackDirection.y * effectiveRange * 0.42f,
             rotationDegrees =
                 attackAngle,
             worldWidth =
@@ -128,10 +131,10 @@ class LongswordAttackExecutor(
 
         CombatDebugVisualManager.addCone(
             originX =
-                context.player.centerX,
+                context.attackOriginX,
 
             originY =
-                context.player.centerY,
+                context.attackOriginY,
 
             directionX =
                 attackDirection.x,
@@ -190,10 +193,10 @@ class LongswordAttackExecutor(
         val directionToEnemy =
             Vector2(
                 enemy.centerX -
-                    context.player.centerX,
+                    context.attackOriginX,
 
                 enemy.centerY -
-                    context.player.centerY
+                    context.attackOriginY
             )
 
         val distance =

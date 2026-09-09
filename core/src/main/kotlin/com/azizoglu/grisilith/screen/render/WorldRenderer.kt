@@ -598,6 +598,11 @@ class WorldRenderer(
                 camera
         )
 
+        projectileSpriteRenderer.renderEnemyProjectiles(
+            enemies = enemyManager.allEnemies,
+            camera = camera
+        )
+
         /*
          * PASS 4:
          * Enemy health bar / condition / trait overlay'leri,

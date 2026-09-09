@@ -4,6 +4,12 @@ import com.azizoglu.grisilith.content.ContentId
 
 object EnemyAbilityIds {
 
+    val AIMED_ARROW =
+        ContentId("ENEMY_SKILL_AIMED_ARROW")
+
+    val WITCH_ELEMENTAL_PROJECTILE =
+        ContentId("ENEMY_SKILL_WITCH_ELEMENTAL_PROJECTILE")
+
     val WOLF_PACK =
         ContentId("ENEMY_PASSIVE_WOLF_PACK")
 

@@ -123,6 +123,9 @@ class TotemOfDarkCloudsAttackExecutor(
                 enemyManager =
                     context.enemyManager,
 
+
+                originX = context.attackOriginX,
+                originY = context.attackOriginY,
                 maximumRange =
                     effectiveRange
             ) ?: return
@@ -184,8 +187,8 @@ class TotemOfDarkCloudsAttackExecutor(
                     sourceWeaponRuntimeId = context.weapon.runtimeId,
                     sourceWeaponDefinitionId = context.weapon.definition.id.value,
                     sourceName = context.weapon.displayName,
-                    sourceCenterX = context.player.centerX,
-                    sourceCenterY = context.player.centerY
+                    sourceCenterX = context.attackOriginX,
+                    sourceCenterY = context.attackOriginY
                 )
             )
 
@@ -229,10 +232,10 @@ class TotemOfDarkCloudsAttackExecutor(
         startY: Float
     ) {
         val playerX =
-            context.player.centerX
+            context.attackOriginX
 
         val playerY =
-            context.player.centerY
+            context.attackOriginY
 
         CombatDebugVisualManager.addLine(
             startX = startX,

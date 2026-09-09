@@ -5,6 +5,9 @@ import com.badlogic.gdx.graphics.GL20
 
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.summon.SummonedEntity
+import com.azizoglu.grisilith.enemy.trait.EnemyTraitCombatTarget
+import com.azizoglu.grisilith.enemy.trait.EnemyTraitTargetType
+import com.azizoglu.grisilith.enemy.runtime.EnemyRuntimeFactory
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
@@ -86,6 +89,17 @@ class EnemyManager {
             summons.filter {
                 !it.isExpired
             }
+
+        val traitTargets =
+            buildTraitTargets(
+                playerCenterX = targetX,
+                playerCenterY = targetY,
+                playerBounds = targetBounds,
+                summons = targetableSummons,
+                gateCenterX = gateCenterX,
+                gateCenterY = gateCenterY,
+                gateBounds = gateBounds
+            )
 
         enemies.forEach {
                 enemy ->
@@ -182,6 +196,7 @@ class EnemyManager {
                 worldHeight = worldHeight,
                 mapObstacles = mapObstacles,
                 nearbyEnemies = enemies,
+                combatTargets = traitTargets,
                 onContactDamage = { damage ->
                     when (selectedTarget.type) {
                         CombatTargetType.PLAYER ->
@@ -196,6 +211,30 @@ class EnemyManager {
 
                         CombatTargetType.GATE ->
                             onGateDamaged(enemy, damage)
+                    }
+                },
+                onTraitTargetDamage = { event ->
+                    if (event.amount > 0) when (event.targetType) {
+                        EnemyTraitTargetType.PLAYER ->
+                            onPlayerDamaged(enemy, event.amount)
+
+                        EnemyTraitTargetType.SUMMON ->
+                            targetableSummons
+                                .getOrNull(event.targetIndex)
+                                ?.takeIf { !it.isExpired }
+                                ?.let { onSummonDamaged(it, event.amount) }
+
+                        EnemyTraitTargetType.GATE -> {
+                            val amount =
+                                if (event.projectileOrMagic) {
+                                    (event.amount * 0.5f)
+                                        .toInt()
+                                        .coerceAtLeast(1)
+                                } else {
+                                    event.amount
+                                }
+                            onGateDamaged(enemy, amount)
+                        }
                     }
                 }
             )
@@ -229,6 +268,43 @@ class EnemyManager {
                     worldHeight
             )
         }
+    }
+
+    private fun buildTraitTargets(
+        playerCenterX: Float,
+        playerCenterY: Float,
+        playerBounds: Rectangle,
+        summons: List<SummonedEntity>,
+        gateCenterX: Float?,
+        gateCenterY: Float?,
+        gateBounds: Rectangle?
+    ): List<EnemyTraitCombatTarget> {
+        val result = mutableListOf(
+            EnemyTraitCombatTarget(
+                type = EnemyTraitTargetType.PLAYER,
+                centerX = playerCenterX,
+                centerY = playerCenterY,
+                bounds = Rectangle(playerBounds)
+            )
+        )
+        summons.forEachIndexed { index, summon ->
+            result += EnemyTraitCombatTarget(
+                type = EnemyTraitTargetType.SUMMON,
+                index = index,
+                centerX = summon.centerX,
+                centerY = summon.centerY,
+                bounds = Rectangle(summon.combatBounds)
+            )
+        }
+        if (gateCenterX != null && gateCenterY != null && gateBounds != null) {
+            result += EnemyTraitCombatTarget(
+                type = EnemyTraitTargetType.GATE,
+                centerX = gateCenterX,
+                centerY = gateCenterY,
+                bounds = Rectangle(gateBounds)
+            )
+        }
+        return result
     }
 
     private fun resolveClosestTarget(
@@ -403,6 +479,34 @@ class EnemyManager {
             onEnemyRemoved(enemy)
             iterator.remove()
         }
+    }
+
+    fun spawnPendingSlimeFragments(
+        runtimeFactory: EnemyRuntimeFactory,
+        worldWidth: Float,
+        worldHeight: Float
+    ) {
+        val additions = mutableListOf<Enemy>()
+        enemies.toList().forEach { parent ->
+            if (!parent.consumeSlimeSplitRequest()) return@forEach
+            val offsets = arrayOf(
+                -0.65f to -0.45f,
+                0.65f to -0.45f,
+                -0.65f to 0.45f,
+                0.65f to 0.45f
+            )
+            offsets.forEach { offset ->
+                val child = runtimeFactory.createSlimeFragment(
+                    parent = parent,
+                    startX = (parent.centerX + parent.visualSize * offset.first)
+                        .coerceIn(0f, worldWidth - parent.visualSize * 0.55f),
+                    startY = (parent.centerY + parent.visualSize * offset.second)
+                        .coerceIn(0f, worldHeight - parent.visualSize * 0.55f)
+                )
+                additions += child
+            }
+        }
+        enemies.addAll(additions)
     }
 
     fun clearAll() {

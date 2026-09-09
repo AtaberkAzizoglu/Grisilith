@@ -89,6 +89,8 @@ class WeaponRuntime(
         delta: Float,
         slotIndex: Int,
         player: Player,
+        attackOriginX: Float,
+        attackOriginY: Float,
         enemyManager: EnemyManager,
         projectiles: MutableList<Projectile>,
         onDamageDealt: (
@@ -158,6 +160,10 @@ class WeaponRuntime(
                         slotIndex,
 
                     player = player,
+
+                    attackOriginX = attackOriginX,
+
+                    attackOriginY = attackOriginY,
 
                     enemyManager =
                         enemyManager,

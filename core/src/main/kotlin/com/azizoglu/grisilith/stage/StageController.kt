@@ -176,6 +176,11 @@ class StageController(
         stage: Int
     ): StageType {
         return when {
+            /* Temporary visual-test schedule; disable before Faz 3 ends. */
+            BOSS_VISUAL_TEST_MODE && stage == 1 -> StageType.MINI_BOSS
+
+            BOSS_VISUAL_TEST_MODE && stage == 2 -> StageType.FINAL_BOSS
+
             stage ==
                 maximumStage -> {
                 StageType.FINAL_BOSS
@@ -196,6 +201,8 @@ class StageController(
     }
 
     companion object {
+
+        private const val BOSS_VISUAL_TEST_MODE = true
 
         private const val MINI_BOSS_STAGE_DURATION_SECONDS =
             90f

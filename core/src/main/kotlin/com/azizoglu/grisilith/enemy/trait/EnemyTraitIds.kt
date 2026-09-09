@@ -10,6 +10,12 @@ import com.azizoglu.grisilith.enemy.definition.EnemyAbilityIds
  */
 object EnemyTraitIds {
 
+    val AIMED_ARROW =
+        EnemyAbilityIds.AIMED_ARROW
+
+    val WITCH_ELEMENTAL_PROJECTILE =
+        EnemyAbilityIds.WITCH_ELEMENTAL_PROJECTILE
+
     val WOLF_PACK =
         EnemyAbilityIds.WOLF_PACK
 

@@ -143,11 +143,11 @@ object WeaponAreaAttackHelper {
             enemy.applyKnockback(
                 directionX =
                     enemy.centerX -
-                        context.player.centerX,
+                        context.attackOriginX,
 
                 directionY =
                     enemy.centerY -
-                        context.player.centerY,
+                        context.attackOriginY,
 
                 strength =
                     definition.baseKnockback *

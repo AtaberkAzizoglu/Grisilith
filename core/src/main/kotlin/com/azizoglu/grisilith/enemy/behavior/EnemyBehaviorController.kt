@@ -89,11 +89,6 @@ class EnemyBehaviorController(
                 profile
                     .preferredRangeMultiplier
 
-        val retreatDistance =
-            preferredAttackRange *
-                profile
-                    .retreatRangeMultiplier
-
         return when {
             distanceSquared >
                 preferredDistance *
@@ -102,16 +97,6 @@ class EnemyBehaviorController(
                 output.set(
                     towardTargetX,
                     towardTargetY
-                )
-            }
-
-            distanceSquared <
-                retreatDistance *
-                retreatDistance -> {
-
-                output.set(
-                    -towardTargetX,
-                    -towardTargetY
                 )
             }
 

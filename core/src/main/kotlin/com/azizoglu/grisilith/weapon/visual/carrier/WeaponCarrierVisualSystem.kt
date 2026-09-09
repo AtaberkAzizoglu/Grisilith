@@ -304,6 +304,16 @@ class WeaponCarrierVisualSystem(
         return result
     }
 
+    fun attackOriginForSlot(slotIndex: Int, player: Player): Pair<Float, Float> {
+        if (slotIndex <= 0) return player.centerX to player.centerY
+        val minion = minions[slotIndex]
+        return if (minion != null) {
+            minion.x to minion.y
+        } else {
+            player.centerX to player.centerY
+        }
+    }
+
     fun notifyNormalAttack(
         weapon: WeaponInstance,
         attacksPerSecond: Float,

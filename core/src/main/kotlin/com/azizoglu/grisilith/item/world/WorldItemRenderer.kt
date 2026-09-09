@@ -159,6 +159,9 @@ class WorldItemRenderer {
                 EnemyKindIds.BEE_SWARM -> availableTokenPath("item_world/indicators/bee_token.png")
                 EnemyKindIds.CROCODILE -> availableTokenPath("item_world/indicators/crocodile_token.png")
                 EnemyKindIds.SILVERBACK_GORILLA -> availableTokenPath("item_world/indicators/gorilla_token.png")
+                EnemyKindIds.SPEARMAN -> availableTokenPath("item_world/indicators/spearman_token.png")
+                EnemyKindIds.HORSEMAN -> availableTokenPath("item_world/indicators/horseman_token.png")
+                EnemyKindIds.WITCH -> availableTokenPath("item_world/indicators/witch_token.png")
                 else -> null
             }
             targets.add(

@@ -3236,6 +3236,12 @@ class FirstScreen(
             }
         )
 
+        enemyManager.spawnPendingSlimeFragments(
+            runtimeFactory = mapEnemyRuntimeContext.runtimeFactory,
+            worldWidth = worldWidth,
+            worldHeight = worldHeight
+        )
+
         worldItemRuntime.resolveEnemyExclusions(
             enemyManager.allEnemies
         )
@@ -3294,6 +3300,12 @@ class FirstScreen(
                 }
             )
 
+        weaponCarrierVisualSystem.update(
+            delta = delta,
+            player = player,
+            runtimeManager = weaponRuntimeManager
+        )
+
         if (!player.health.isDead) {
             weaponRuntimeManager.update(
                 delta = delta,
@@ -3313,6 +3325,10 @@ class FirstScreen(
 
                 worldHeight =
                     worldHeight,
+
+                attackOriginForSlot = { slotIndex ->
+                    weaponCarrierVisualSystem.attackOriginForSlot(slotIndex, player)
+                },
 
                 onDamageDealt = {
                         appliedDamage,
@@ -3359,89 +3375,6 @@ class FirstScreen(
                 }
             )
         }
-
-        /*
-         * Aura hasarı oyuncuyu öldürmez ama
-         * genel güvenlik için Weapon update'i
-         * yalnızca oyuncu hayattaysa çalışır.
-         */
-        if (!player.health.isDead) {
-            weaponRuntimeManager.update(
-                delta = delta,
-
-                player =
-                    player,
-
-                enemyManager =
-                    enemyManager,
-
-                projectiles =
-                    projectiles,                        mapObstacles =
-                    blockingMapObstacles,
-
-                worldWidth =
-                    worldWidth,
-
-                worldHeight =
-                    worldHeight,
-
-                onDamageDealt = {
-                        appliedDamage,
-                        weaponName ->
-
-                    runStatistics
-                        .recordDamageDealt(
-                            amount =
-                                appliedDamage,
-
-                            weaponName =
-                                weaponName
-                        )
-                },
-
-                onEnemyKilled = {
-                        killedEnemy ->
-
-                    handleEnemyKilled(
-                        killedEnemy
-                    )
-                },
-
-                onNormalAttackPerformed = {
-                        weapon,
-                        attacksPerSecond,
-                        targetCenterX,
-                        targetCenterY ->
-
-                    weaponCarrierVisualSystem
-                        .notifyNormalAttack(
-                            weapon =
-                                weapon,
-
-                            attacksPerSecond =
-                                attacksPerSecond,
-
-                            targetCenterX =
-                                targetCenterX,
-
-                            targetCenterY =
-                                targetCenterY
-                        )
-                }
-            )
-        }
-
-        weaponCarrierVisualSystem
-            .update(
-                delta =
-                    delta,
-
-                player =
-                    player,
-
-                runtimeManager =
-                    weaponRuntimeManager
-            )
 
         consumeImpaleAndDragReward()
 

@@ -12,12 +12,15 @@ class WeaponTargetSelector {
         targetingType: WeaponTargetingType,
         player: Player,
         enemyManager: EnemyManager,
-        maximumRange: Float
+        maximumRange: Float,
+        originX: Float = player.centerX,
+        originY: Float = player.centerY
     ): Enemy? {
         return when (targetingType) {
             WeaponTargetingType.NEAREST_ENEMY -> {
                 selectNearestEnemy(
-                    player = player,
+                    originX = originX,
+                    originY = originY,
                     enemyManager = enemyManager,
                     maximumRange = maximumRange
                 )
@@ -26,7 +29,8 @@ class WeaponTargetSelector {
     }
 
     private fun selectNearestEnemy(
-        player: Player,
+        originX: Float,
+        originY: Float,
         enemyManager: EnemyManager,
         maximumRange: Float
     ): Enemy? {
@@ -36,14 +40,14 @@ class WeaponTargetSelector {
 
         val target =
             enemyManager.nearestEnemy(
-                x = player.centerX,
-                y = player.centerY
+                x = originX,
+                y = originY
             ) ?: return null
 
         val distance =
             Vector2.dst(
-                player.centerX,
-                player.centerY,
+                originX,
+                originY,
                 target.centerX,
                 target.centerY
             )

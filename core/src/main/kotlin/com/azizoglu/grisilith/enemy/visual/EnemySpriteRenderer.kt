@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.enemy.visual
 
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyType
+import com.azizoglu.grisilith.enemy.trait.EnemyTraitSpecialVisualKind
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -88,33 +89,47 @@ class EnemySpriteRenderer {
         val visualState =
             enemy.currentVisualState
 
-        val animation =
-            definition.animationFor(
-                visualState.direction
+        val specialVisual = enemy.traitSpecialVisual
+        val spearmanThrow = specialVisual
+            ?.takeIf { it.kind == EnemyTraitSpecialVisualKind.SPEARMAN_THROW }
+
+        val frame: EnemySpriteFrame
+        val texture: Texture
+        val flipX: Boolean
+        if (spearmanThrow != null) {
+            val row = visualState.direction.ordinal
+            /*
+             * The charge owns the first three clean wind-up frames.
+             * The projectile itself is rendered separately at release, so
+             * airborne-spear/recovery cells cannot leak into adjacent cells.
+             */
+            val column = (spearmanThrow.progress * 3f).toInt().coerceIn(0, 2)
+            frame = EnemySpriteFrame(
+                x = SPEARMAN_THROW_X[column],
+                y = SPEARMAN_THROW_Y[row],
+                width = SPEARMAN_THROW_X[column + 1] - SPEARMAN_THROW_X[column],
+                height = SPEARMAN_THROW_Y[row + 1] - SPEARMAN_THROW_Y[row]
             )
-
-        val frame =
-            when (
-                visualState.animation
-            ) {
-                EnemyVisualAnimation.IDLE ->
-                    animation.idleFrame
-
-                EnemyVisualAnimation.WALK ->
-                    selectWalkFrame(
-                        animation =
-                            animation,
-
-                        animationTime =
-                            visualState
-                                .currentAnimationTime()
-                    )
+            texture = textureForPath(SPEARMAN_THROW_PATH, 1402, 1122)
+            flipX = false
+        } else {
+            val animation = definition.animationFor(visualState.direction)
+            frame = when (visualState.animation) {
+                EnemyVisualAnimation.IDLE -> animation.idleFrame
+                EnemyVisualAnimation.WALK -> selectWalkFrame(
+                    animation = animation,
+                    animationTime = visualState.currentAnimationTime()
+                )
             }
-
-        val texture =
-            textureFor(
-                definition
-            )
+            texture = animation.texturePath?.let { path ->
+                textureForPath(
+                    path,
+                    checkNotNull(animation.sourceWidth),
+                    checkNotNull(animation.sourceHeight)
+                )
+            } ?: textureFor(definition)
+            flipX = animation.flipX
+        }
 
         val region =
             regionFor(
@@ -122,7 +137,10 @@ class EnemySpriteRenderer {
                     texture,
 
                 frame =
-                    frame
+                    frame,
+
+                flipX =
+                    flipX
             )
 
         /*
@@ -200,6 +218,37 @@ class EnemySpriteRenderer {
             drawWidth,
             drawHeight
         )
+
+        specialVisual
+            ?.takeIf { it.kind == EnemyTraitSpecialVisualKind.HORSEMAN_SWIPE }
+            ?.let { swipe -> renderHorsemanSwipe(enemy, swipe.progress, swipe.scale) }
+    }
+
+    private fun renderHorsemanSwipe(
+        enemy: Enemy,
+        progress: Float,
+        scale: Float
+    ) {
+        val frameIndex = (progress * 8f).toInt().coerceIn(0, 7)
+        val column = frameIndex % 4
+        val row = frameIndex / 4
+        val frame = EnemySpriteFrame(
+            x = HORSEMAN_SWIPE_X[column],
+            y = HORSEMAN_SWIPE_Y[row],
+            width = HORSEMAN_SWIPE_X[column + 1] - HORSEMAN_SWIPE_X[column],
+            height = HORSEMAN_SWIPE_Y[row + 1] - HORSEMAN_SWIPE_Y[row]
+        )
+        val texture = textureForPath(HORSEMAN_SWIPE_PATH, 1774, 887)
+        val region = regionFor(texture, frame)
+        val size = 620f * scale
+        batch.color = Color(1f, 1f, 1f, enemy.deathFadeAlpha)
+        batch.draw(
+            region,
+            enemy.centerX - size / 2f,
+            enemy.centerY - size / 2f,
+            size,
+            size
+        )
     }
 
     private fun selectWalkFrame(
@@ -239,14 +288,26 @@ class EnemySpriteRenderer {
         EnemySpriteSheetDefinition
     ): Texture {
 
+        return textureForPath(
+            definition.texturePath,
+            definition.sourceWidth,
+            definition.sourceHeight
+        )
+    }
+
+    private fun textureForPath(
+        path: String,
+        expectedWidth: Int,
+        expectedHeight: Int
+    ): Texture {
         return textures
             .getOrPut(
-                definition.texturePath
+                path
             ) {
                 val texture =
                     Texture(
                         Gdx.files.internal(
-                            definition.texturePath
+                            path
                         )
                     )
 
@@ -257,13 +318,13 @@ class EnemySpriteRenderer {
 
                 require(
                     texture.width ==
-                        definition.sourceWidth &&
+                        expectedWidth &&
                         texture.height ==
-                        definition.sourceHeight
+                        expectedHeight
                 ) {
-                    "Unexpected texture size for ${definition.texturePath}: " +
+                    "Unexpected texture size for $path: " +
                         "${texture.width}x${texture.height}; expected " +
-                        "${definition.sourceWidth}x${definition.sourceHeight}"
+                        "${expectedWidth}x${expectedHeight}"
                 }
 
                 texture
@@ -272,7 +333,8 @@ class EnemySpriteRenderer {
 
     private fun regionFor(
         texture: Texture,
-        frame: EnemySpriteFrame
+        frame: EnemySpriteFrame,
+        flipX: Boolean = false
     ): TextureRegion {
 
         val key =
@@ -281,7 +343,8 @@ class EnemySpriteRenderer {
                 x = frame.x,
                 y = frame.y,
                 width = frame.width,
-                height = frame.height
+                height = frame.height,
+                flipX = flipX
             )
 
         return regions
@@ -294,7 +357,11 @@ class EnemySpriteRenderer {
                     frame.y,
                     frame.width,
                     frame.height
-                )
+                ).also { region ->
+                    if (flipX) {
+                        region.flip(true, false)
+                    }
+                }
             }
     }
 
@@ -318,6 +385,17 @@ class EnemySpriteRenderer {
         val x: Int,
         val y: Int,
         val width: Int,
-        val height: Int
+        val height: Int,
+        val flipX: Boolean
     )
+
+    companion object {
+        private const val SPEARMAN_THROW_PATH = "enemies/humanoid/spearman_throw.png"
+        private val SPEARMAN_THROW_X = intArrayOf(0, 280, 561, 841, 1122, 1402)
+        private val SPEARMAN_THROW_Y = intArrayOf(0, 280, 561, 842, 1122)
+
+        private const val HORSEMAN_SWIPE_PATH = "enemy_effects/horseman_swipe.png"
+        private val HORSEMAN_SWIPE_X = intArrayOf(0, 444, 887, 1330, 1774)
+        private val HORSEMAN_SWIPE_Y = intArrayOf(0, 444, 887)
+    }
 }

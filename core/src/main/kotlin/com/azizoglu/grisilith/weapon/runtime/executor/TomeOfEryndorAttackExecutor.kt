@@ -109,6 +109,9 @@ class TomeOfEryndorAttackExecutor(
                 enemyManager =
                     context.enemyManager,
 
+
+                originX = context.attackOriginX,
+                originY = context.attackOriginY,
                 maximumRange =
                     effectiveRange
             ) ?: return
@@ -116,10 +119,10 @@ class TomeOfEryndorAttackExecutor(
         val attackDirection =
             Vector2(
                 primaryTarget.centerX -
-                    context.player.centerX,
+                    context.attackOriginX,
 
                 primaryTarget.centerY -
-                    context.player.centerY
+                    context.attackOriginY
             )
 
         if (attackDirection.isZero) {
@@ -129,10 +132,10 @@ class TomeOfEryndorAttackExecutor(
         attackDirection.nor()
 
         val startX =
-            context.player.centerX
+            context.attackOriginX
 
         val startY =
-            context.player.centerY
+            context.attackOriginY
 
         val endX =
             startX +
@@ -312,8 +315,8 @@ class TomeOfEryndorAttackExecutor(
                     sourceWeaponRuntimeId = context.weapon.runtimeId,
                     sourceWeaponDefinitionId = context.weapon.definition.id.value,
                     sourceName = context.weapon.displayName,
-                    sourceCenterX = context.player.centerX,
-                    sourceCenterY = context.player.centerY
+                    sourceCenterX = context.attackOriginX,
+                    sourceCenterY = context.attackOriginY
                 )
             )
 
@@ -335,11 +338,11 @@ class TomeOfEryndorAttackExecutor(
             enemy.applyKnockback(
                 directionX =
                     enemy.centerX -
-                        context.player.centerX,
+                        context.attackOriginX,
 
                 directionY =
                     enemy.centerY -
-                        context.player.centerY,
+                        context.attackOriginY,
 
                 strength =
                     definition.baseKnockback *

@@ -58,6 +58,9 @@ class DaggerAttackExecutor(
                 enemyManager =
                     context.enemyManager,
 
+
+                originX = context.attackOriginX,
+                originY = context.attackOriginY,
                 maximumRange =
                     effectiveThrowRange
             ) ?: return
@@ -103,6 +106,9 @@ class DaggerAttackExecutor(
                     enemyManager =
                         context.enemyManager,
 
+
+                originX = context.attackOriginX,
+                originY = context.attackOriginY,
                     maximumRange =
                         effectiveThrowRange
                 )
@@ -130,8 +136,8 @@ class DaggerAttackExecutor(
 
         val targetDistance =
             Vector2.dst(
-                context.player.centerX,
-                context.player.centerY,
+                context.attackOriginX,
+                context.attackOriginY,
                 target.centerX,
                 target.centerY
             )
@@ -305,11 +311,11 @@ class DaggerAttackExecutor(
             target.applyKnockback(
                 directionX =
                     target.centerX -
-                        context.player.centerX,
+                        context.attackOriginX,
 
                 directionY =
                     target.centerY -
-                        context.player.centerY,
+                        context.attackOriginY,
 
                 strength =
                     definition.baseKnockback *
@@ -380,10 +386,10 @@ class DaggerAttackExecutor(
         val throwDirection =
             Vector2(
                 targetX -
-                    context.player.centerX,
+                    context.attackOriginX,
 
                 targetY -
-                    context.player.centerY
+                    context.attackOriginY
             )
 
         if (throwDirection.isZero) {
@@ -402,12 +408,12 @@ class DaggerAttackExecutor(
          * farkı projectile yönüne yansır.
          */
         val adjustedTargetX =
-            context.player.centerX +
+            context.attackOriginX +
                 throwDirection.x *
                 throwRange
 
         val adjustedTargetY =
-            context.player.centerY +
+            context.attackOriginY +
                 throwDirection.y *
                 throwRange
 
@@ -437,10 +443,10 @@ class DaggerAttackExecutor(
         context.projectiles.add(
             Projectile(
                 startX =
-                    context.player.centerX,
+                    context.attackOriginX,
 
                 startY =
-                    context.player.centerY,
+                    context.attackOriginY,
 
                 targetX =
                     adjustedTargetX,

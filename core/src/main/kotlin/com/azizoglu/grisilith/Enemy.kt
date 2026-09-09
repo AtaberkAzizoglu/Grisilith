@@ -24,8 +24,13 @@ import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.enemy.behavior.EnemyBehaviorController
 import com.azizoglu.grisilith.enemy.behavior.EnemyCombatClock
 import com.azizoglu.grisilith.enemy.runtime.EnemyRuntimeBundle
+import com.azizoglu.grisilith.enemy.definition.EnemyKindIds
 import com.azizoglu.grisilith.enemy.navigation.EnemyNavigationAgent
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitDamageContext
+import com.azizoglu.grisilith.enemy.trait.EnemyTraitCombatTarget
+import com.azizoglu.grisilith.enemy.trait.EnemyTraitTargetDamage
+import com.azizoglu.grisilith.enemy.trait.EnemyTraitProjectileVisual
+import com.azizoglu.grisilith.enemy.trait.EnemyTraitSpecialVisual
 import com.azizoglu.grisilith.enemy.visual.EnemyVisualState
 import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
@@ -38,7 +43,9 @@ class Enemy(
 
     private val runtimeBundle:
     EnemyRuntimeBundle =
-        EnemyRuntimeBundle.EMPTY
+        EnemyRuntimeBundle.EMPTY,
+
+    val isSlimeFragment: Boolean = false
 ) {
     private var latestDamageContext =
         EnemyDamageContext.NONE
@@ -78,6 +85,9 @@ class Enemy(
 
     private var lastTraitHealthMultiplier =
         1f
+
+    private var pendingSlimeSplit =
+        false
 
     private val knockbackVelocity =
         Vector2()
@@ -234,6 +244,12 @@ class Enemy(
         get() =
             visualState
 
+    val traitProjectileVisuals: List<EnemyTraitProjectileVisual>
+        get() = traitRuntime.projectileVisuals()
+
+    val traitSpecialVisual: EnemyTraitSpecialVisual?
+        get() = traitRuntime.specialVisual(this)
+
     val behaviorId
         get() =
             stats.behaviorId
@@ -368,7 +384,9 @@ class Enemy(
         worldHeight: Float,
         mapObstacles: List<MapObstacle>,
         nearbyEnemies: List<Enemy>,
-        onContactDamage: (Int) -> Unit
+        onContactDamage: (Int) -> Unit,
+        combatTargets: List<EnemyTraitCombatTarget> = emptyList(),
+        onTraitTargetDamage: (EnemyTraitTargetDamage) -> Unit = {}
     ) {
         updateTemporaryCombatBuff(delta)
 
@@ -461,7 +479,10 @@ class Enemy(
                 worldHeight,
 
             obstacles =
-                mapObstacles
+                mapObstacles,
+
+            combatTargets =
+                combatTargets
         )
 
         synchronizeTraitHealthMultiplier()
@@ -478,6 +499,10 @@ class Enemy(
                     )
                 }
             }
+
+        traitRuntime
+            .consumeTargetDamage()
+            .forEach(onTraitTargetDamage)
 
         combatClock.update(
             delta =
@@ -1098,6 +1123,15 @@ class Enemy(
             )
 
         if (
+            appliedDamage > 0 &&
+            health.isDead &&
+            !isSlimeFragment &&
+            kindId == EnemyKindIds.SLIME
+        ) {
+            pendingSlimeSplit = true
+        }
+
+        if (
             appliedDamage >
             0
         ) {
@@ -1171,6 +1205,34 @@ class Enemy(
             }
 
         return appliedDamage
+    }
+
+    fun consumeSlimeSplitRequest(): Boolean {
+        if (!pendingSlimeSplit) return false
+        pendingSlimeSplit = false
+        return true
+    }
+
+    internal fun slimeFragmentStats(): EnemyStats {
+        fun fifth(value: Int) = (value * 0.20f).roundToInt().coerceAtLeast(1)
+        return stats.copy(
+            maximumHealth = fifth(health.maximumHealth),
+            contactDamage = fifth(stats.contactDamage),
+            movementSpeed = (stats.movementSpeed * 0.20f).coerceAtLeast(1f),
+            size = stats.size * 0.55f,
+            goldReward = stats.goldReward * 0.20f,
+            armorClass = (stats.armorClass * 0.20f).roundToInt().coerceAtLeast(0),
+            baseArmor = (stats.baseArmor * 0.20f).roundToInt().coerceAtLeast(0),
+            attacksPerSecond = (stats.attacksPerSecond * 0.20f).coerceAtLeast(0.10f),
+            attackRange = (stats.attackRange * 0.55f).coerceAtLeast(20f),
+            weaponDamageMultiplier = stats.weaponDamageMultiplier * 0.20f,
+            attackSpeedScore = (stats.attackSpeedScore * 0.20f).roundToInt(),
+            mainDamageStat = (stats.mainDamageStat * 0.20f).roundToInt(),
+            secondaryDamageStat = (stats.secondaryDamageStat * 0.20f).roundToInt(),
+            critRate = (stats.critRate * 0.20f).roundToInt(),
+            critDamage = (stats.critDamage * 0.20f).roundToInt(),
+            piercing = (stats.piercing * 0.20f).roundToInt()
+        )
     }
 
     val lethalDamageContext: EnemyDamageContext?

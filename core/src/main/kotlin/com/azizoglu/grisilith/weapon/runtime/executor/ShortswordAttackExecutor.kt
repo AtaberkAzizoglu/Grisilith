@@ -69,6 +69,9 @@ class ShortswordAttackExecutor(
                 enemyManager =
                     context.enemyManager,
 
+
+                originX = context.attackOriginX,
+                originY = context.attackOriginY,
                 maximumRange =
                     effectiveRange
             ) ?: return
@@ -79,10 +82,10 @@ class ShortswordAttackExecutor(
         val playerToTarget =
             Vector2(
                 primaryTarget.centerX -
-                    context.player.centerX,
+                    context.attackOriginX,
 
                 primaryTarget.centerY -
-                    context.player.centerY
+                    context.attackOriginY
             )
 
         if (playerToTarget.isZero) {
@@ -124,9 +127,9 @@ class ShortswordAttackExecutor(
                         .DOUBLE_SLASH
                 },
             centerX =
-                primaryTarget.centerX,
+                context.attackOriginX + playerToTarget.x * visualSize * 0.35f,
             centerY =
-                primaryTarget.centerY,
+                context.attackOriginY + playerToTarget.y * visualSize * 0.35f,
             rotationDegrees =
                 attackAngle,
             worldWidth =
@@ -503,11 +506,11 @@ class ShortswordAttackExecutor(
             enemy.applyKnockback(
                 directionX =
                     enemy.centerX -
-                        context.player.centerX,
+                        context.attackOriginX,
 
                 directionY =
                     enemy.centerY -
-                        context.player.centerY,
+                        context.attackOriginY,
 
                 strength =
                     definition.baseKnockback *

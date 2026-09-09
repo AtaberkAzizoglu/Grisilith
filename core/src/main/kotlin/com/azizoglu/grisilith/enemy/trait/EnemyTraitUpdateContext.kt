@@ -17,7 +17,22 @@ data class EnemyTraitUpdateContext(
     val targetBounds: Rectangle,
     val worldWidth: Float,
     val worldHeight: Float,
-    val obstacles: List<MapObstacle>
+    val obstacles: List<MapObstacle>,
+    val combatTargets: List<EnemyTraitCombatTarget> = emptyList()
+)
+
+enum class EnemyTraitTargetType {
+    PLAYER,
+    SUMMON,
+    GATE
+}
+
+data class EnemyTraitCombatTarget(
+    val type: EnemyTraitTargetType,
+    val index: Int = -1,
+    val centerX: Float,
+    val centerY: Float,
+    val bounds: Rectangle
 )
 
 data class EnemyTraitDamageContext(
@@ -32,6 +47,44 @@ data class EnemyTraitDamageContext(
 data class EnemyTraitPlayerDamage(
     val amount: Int,
     val sourceName: String
+)
+
+data class EnemyTraitTargetDamage(
+    val targetType: EnemyTraitTargetType,
+    val targetIndex: Int = -1,
+    val amount: Int,
+    val sourceName: String,
+    val projectileOrMagic: Boolean = false
+)
+
+enum class EnemyTraitProjectileVisualKind {
+    ARROW,
+    SPEAR,
+    AIR,
+    POISON,
+    LIGHTNING,
+    NECROTIC
+}
+
+data class EnemyTraitProjectileVisual(
+    val kind: EnemyTraitProjectileVisualKind,
+    val centerX: Float,
+    val centerY: Float,
+    val velocityX: Float,
+    val velocityY: Float,
+    val worldHeight: Float,
+    val alpha: Float = 1f
+)
+
+enum class EnemyTraitSpecialVisualKind {
+    SPEARMAN_THROW,
+    HORSEMAN_SWIPE
+}
+
+data class EnemyTraitSpecialVisual(
+    val kind: EnemyTraitSpecialVisualKind,
+    val progress: Float,
+    val scale: Float = 1f
 )
 
 interface EnemyTrait {
@@ -112,6 +165,15 @@ interface EnemyTrait {
         List<EnemyTraitPlayerDamage> {
         return emptyList()
     }
+
+    fun consumeTargetDamage():
+        List<EnemyTraitTargetDamage> {
+        return emptyList()
+    }
+
+    fun projectileVisuals(): List<EnemyTraitProjectileVisual> = emptyList()
+
+    fun specialVisual(owner: Enemy): EnemyTraitSpecialVisual? = null
 
     fun render(
         owner: Enemy,

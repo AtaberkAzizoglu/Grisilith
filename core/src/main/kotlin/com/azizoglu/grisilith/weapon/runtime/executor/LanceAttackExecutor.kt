@@ -53,6 +53,9 @@ class LanceAttackExecutor(
                 enemyManager =
                     context.enemyManager,
 
+
+                originX = context.attackOriginX,
+                originY = context.attackOriginY,
                 maximumRange =
                     effectiveRange
             ) ?: return
@@ -64,10 +67,10 @@ class LanceAttackExecutor(
         val direction =
             Vector2(
                 primaryTarget.centerX -
-                    context.player.centerX,
+                    context.attackOriginX,
 
                 primaryTarget.centerY -
-                    context.player.centerY
+                    context.attackOriginY
             )
 
         if (direction.isZero) {
@@ -88,9 +91,9 @@ class LanceAttackExecutor(
                 MeleeAttackVisualKind
                     .LANCE_THRUST,
             centerX =
-                primaryTarget.centerX,
+                context.attackOriginX + direction.x * effectiveRange * 0.50f,
             centerY =
-                primaryTarget.centerY,
+                context.attackOriginY + direction.y * effectiveRange * 0.50f,
             rotationDegrees =
                 attackAngle,
             worldWidth =
@@ -109,10 +112,10 @@ class LanceAttackExecutor(
         )
 
         val startX =
-            context.player.centerX
+            context.attackOriginX
 
         val startY =
-            context.player.centerY
+            context.attackOriginY
 
         val endX =
             startX +
@@ -207,9 +210,9 @@ class LanceAttackExecutor(
                 MeleeAttackVisualKind
                     .LANCE_SPIN,
             centerX =
-                context.player.centerX,
+                context.attackOriginX,
             centerY =
-                context.player.centerY,
+                context.attackOriginY,
             rotationDegrees =
                 0f,
             worldWidth =
@@ -229,8 +232,8 @@ class LanceAttackExecutor(
                     Vector2.dst(
                         enemy.centerX,
                         enemy.centerY,
-                        context.player.centerX,
-                        context.player.centerY
+                        context.attackOriginX,
+                        context.attackOriginY
                     ) <=
                     radius +
                     enemy.bounds.width /

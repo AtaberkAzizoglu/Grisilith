@@ -21,6 +21,11 @@ internal object DefaultEnemyTraits {
         return when (
             id
         ) {
+            EnemyTraitIds.AIMED_ARROW ->
+                AimedArrowEnemyTrait()
+
+            EnemyTraitIds.WITCH_ELEMENTAL_PROJECTILE ->
+                WitchElementalProjectileEnemyTrait()
             EnemyTraitIds.WOLF_PACK ->
                 WolfPackTrait()
 
@@ -46,25 +51,25 @@ internal object DefaultEnemyTraits {
                 GorillaStompTheEarthTrait()
 
             EnemyTraitIds.SPEARMAN_THROW_THE_LANCE ->
-                SpearmanThrowTheLanceTrait()
+                SpearmanThrowSpearEnemyTrait()
 
             EnemyTraitIds.HORSEMAN_BATTLE_CRY ->
-                HorsemanBattleCryTrait()
+                HorsemanSwipeAroundEnemyTrait()
 
             EnemyTraitIds.WITCH_SUMMON_FAMILIARS ->
-                WitchSummonFamiliarsPlaceholderTrait()
+                WitchcraftEnemyTrait()
 
             EnemyTraitIds.GHOST_INCORPOREAL_EVASION ->
                 GhostIncorporealEvasionTrait()
 
             EnemyTraitIds.GHOST_HAUNTING_PRESENCE ->
-                GhostHauntingPresenceTrait()
+                GhostStormEnemyTrait()
 
             EnemyTraitIds.SLIME_ACIDIC_PATH ->
                 SlimeAcidicPathTrait()
 
             EnemyTraitIds.SLIME_SPLIT_ON_DEATH ->
-                SlimeSplitOnDeathTrait()
+                SlimeRealSplitMarkerTrait()
 
             EnemyTraitIds.VAMPIRE_MISTY_TRANSPORTATION ->
                 VampireMistyEscapeTrait()
@@ -1178,7 +1183,11 @@ private class SlimeAcidicPathTrait :
                     2f
                 )
                 .coerceAtLeast(
-                    MINIMUM_RADIUS
+                    if (context.owner.isSlimeFragment) {
+                        FRAGMENT_MINIMUM_RADIUS
+                    } else {
+                        MINIMUM_RADIUS
+                    }
                 )
 
         puddles.add(
@@ -1193,7 +1202,11 @@ private class SlimeAcidicPathTrait :
                     radius,
 
                 remainingSeconds =
-                    PUDDLE_DURATION_SECONDS
+                    if (context.owner.isSlimeFragment) {
+                        FRAGMENT_PUDDLE_DURATION_SECONDS
+                    } else {
+                        PUDDLE_DURATION_SECONDS
+                    }
             )
         )
 
@@ -1388,7 +1401,10 @@ private class SlimeAcidicPathTrait :
     companion object {
 
         private const val PUDDLE_DURATION_SECONDS =
-            6f
+            10f
+
+        private const val FRAGMENT_PUDDLE_DURATION_SECONDS =
+            7f
 
         private const val TICK_SECONDS =
             0.50f
@@ -1398,6 +1414,9 @@ private class SlimeAcidicPathTrait :
 
         private const val MINIMUM_RADIUS =
             42f
+
+        private const val FRAGMENT_MINIMUM_RADIUS =
+            20f
 
         /*
          * Saniyede iki tick ile yaklaşık 1.30 × contactDamage DPS.

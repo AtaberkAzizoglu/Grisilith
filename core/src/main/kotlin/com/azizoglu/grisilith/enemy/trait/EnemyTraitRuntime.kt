@@ -35,7 +35,8 @@ class EnemyTraitRuntime private constructor(
         targetBounds: Rectangle,
         worldWidth: Float,
         worldHeight: Float,
-        obstacles: List<MapObstacle>
+        obstacles: List<MapObstacle>,
+        combatTargets: List<EnemyTraitCombatTarget> = emptyList()
     ) {
         val context =
             EnemyTraitUpdateContext(
@@ -47,7 +48,8 @@ class EnemyTraitRuntime private constructor(
                 targetBounds = Rectangle(targetBounds),
                 worldWidth = worldWidth,
                 worldHeight = worldHeight,
-                obstacles = obstacles
+                obstacles = obstacles,
+                combatTargets = combatTargets
             )
 
         var resolvedModifiers =
@@ -209,6 +211,24 @@ class EnemyTraitRuntime private constructor(
 
         return result
     }
+
+    fun consumeTargetDamage():
+        List<EnemyTraitTargetDamage> {
+
+        if (traits.isEmpty()) return emptyList()
+
+        val result = mutableListOf<EnemyTraitTargetDamage>()
+        traits.forEach { trait ->
+            result.addAll(trait.consumeTargetDamage())
+        }
+        return result
+    }
+
+    fun projectileVisuals(): List<EnemyTraitProjectileVisual> =
+        traits.flatMap { it.projectileVisuals() }
+
+    fun specialVisual(owner: Enemy): EnemyTraitSpecialVisual? =
+        traits.firstNotNullOfOrNull { it.specialVisual(owner) }
 
     fun render(
         owner: Enemy,

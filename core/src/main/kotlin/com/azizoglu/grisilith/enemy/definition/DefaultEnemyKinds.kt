@@ -308,18 +308,18 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.BANDIT,
             displayName = "Bandit",
             description =
-                "A balanced Humanoid carrying a Level 3 Longsword and Scale Mail Armor.",
+                "A balanced Humanoid that deals damage by making contact.",
             enemyTags = setOf(EnemyTag.HUMANOID),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 170,
-                    armorClass = 18,
-                    baseArmor = 2,
-                    contactDamage = 19,
-                    movementSpeed = 120f,
-                    attacksPerSecond = 0.90f,
+                    maximumHealth = 325,
+                    armorClass = 10,
+                    baseArmor = 3,
+                    contactDamage = 26,
+                    movementSpeed = 122f,
+                    attacksPerSecond = 0.78f,
                     attackRange = 58f,
                     weaponDamageMultiplier = 0.95f,
                     attackSpeedScore = 14,
@@ -351,18 +351,18 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.ARCHER,
             displayName = "Archer",
             description =
-                "A fragile ranged Humanoid carrying a Level 3 Crossbow and Leather Armor.",
+                "A fragile ranged Humanoid with slow, clearly telegraphed and powerful arrows.",
             enemyTags = setOf(EnemyTag.HUMANOID),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 135,
-                    armorClass = 8,
+                    maximumHealth = 200,
+                    armorClass = 6,
                     baseArmor = 2,
-                    contactDamage = 13,
-                    movementSpeed = 120f,
-                    attacksPerSecond = 0.78f,
+                    contactDamage = 16,
+                    movementSpeed = 132f,
+                    attacksPerSecond = 0.68f,
                     attackRange = 560f,
                     weaponDamageMultiplier = 0.90f,
                     attackSpeedScore = 16,
@@ -386,6 +386,10 @@ object DefaultEnemyKinds {
                             )
                         ),
                     armorId = ARMOR_LEATHER
+                ),
+            activeSkillIds =
+                listOf(
+                    EnemyAbilityIds.AIMED_ARROW
                 )
         )
 
@@ -394,20 +398,20 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.SPEARMAN,
             displayName = "Spearman",
             description =
-                "A heavily armored Mini Boss using a Level 5 Lance and Plate Armor.",
+                "A heavily armored Mini Boss that tracks targets before throwing a powerful spear.",
             enemyTags = setOf(EnemyTag.HUMANOID),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 1550,
-                    armorClass = 38,
-                    baseArmor = 2,
-                    contactDamage = 58,
-                    movementSpeed = 105f,
-                    attacksPerSecond = 0.58f,
-                    attackRange = 92f,
-                    weaponDamageMultiplier = 1.12f,
+                    maximumHealth = 7800,
+                    armorClass = 17,
+                    baseArmor = 5,
+                    contactDamage = 82,
+                    movementSpeed = 88f,
+                    attacksPerSecond = 0.54f,
+                    attackRange = 98f,
+                    weaponDamageMultiplier = 1.30f,
                     attackSpeedScore = 8,
                     mainDamageStat = 30,
                     secondaryDamageStat = 16,
@@ -441,20 +445,20 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.HORSEMAN,
             displayName = "Horseman",
             description =
-                "A very fast ranged Mini Boss using a Level 5 Longbow and Leather Armor.",
+                "A very fast Mini Boss that attacks changing quadrants around itself.",
             enemyTags = setOf(EnemyTag.HUMANOID),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.VERY_LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 1450,
-                    armorClass = 18,
-                    baseArmor = 2,
-                    contactDamage = 44,
-                    movementSpeed = 175f,
-                    attacksPerSecond = 1.02f,
-                    attackRange = 620f,
-                    weaponDamageMultiplier = 1.05f,
+                    maximumHealth = 6800,
+                    armorClass = 15,
+                    baseArmor = 4,
+                    contactDamage = 72,
+                    movementSpeed = 225f,
+                    attacksPerSecond = 0.82f,
+                    attackRange = 82f,
+                    weaponDamageMultiplier = 1.28f,
                     attackSpeedScore = 22,
                     mainDamageStat = 20,
                     secondaryDamageStat = 30,
@@ -465,13 +469,13 @@ object DefaultEnemyKinds {
                     piercing = 14
                 ),
             behaviorId =
-                EnemyBehaviorIds.KEEP_DISTANCE_AND_SHOOT,
+                EnemyBehaviorIds.CHASE_AND_MELEE,
             equipment =
                 EnemyEquipmentDefinition(
                     weapons =
                         listOf(
                             EnemyWeaponDefinition(
-                                weaponId = WPN_LONGBOW,
+                                weaponId = WPN_LANCE,
                                 level = 5
                             )
                         ),
@@ -488,20 +492,20 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.WITCH,
             displayName = "Witch",
             description =
-                "The Humanoid Final Boss. Uses all equipped Spell Focus weapons simultaneously.",
+                "The Humanoid Final Boss. Casts Witchcraft and fires random elemental projectiles.",
             enemyTags = setOf(EnemyTag.HUMANOID),
             allowedTypes = setOf(EnemyType.FINAL_BOSS),
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 4800,
-                    armorClass = 20,
-                    baseArmor = 2,
-                    contactDamage = 42,
-                    movementSpeed = 145f,
-                    attacksPerSecond = 1.10f,
+                    maximumHealth = 24000,
+                    armorClass = 21,
+                    baseArmor = 4,
+                    contactDamage = 108,
+                    movementSpeed = 155f,
+                    attacksPerSecond = 1.65f,
                     attackRange = 680f,
-                    weaponDamageMultiplier = 1.18f,
+                    weaponDamageMultiplier = 1.42f,
                     attackSpeedScore = 24,
                     mainDamageStat = 16,
                     secondaryDamageStat = 40,
@@ -542,7 +546,8 @@ object DefaultEnemyKinds {
                 ),
             activeSkillIds =
                 listOf(
-                    EnemyAbilityIds.WITCH_SUMMON_FAMILIARS
+                    EnemyAbilityIds.WITCH_SUMMON_FAMILIARS,
+                    EnemyAbilityIds.WITCH_ELEMENTAL_PROJECTILE
                 )
         )
 
@@ -551,7 +556,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.SKELETON_WARRIOR,
             displayName = "Skeleton Warrior",
             description =
-                "A balanced Undead warrior using Level 3 Double Swords.",
+                "A balanced Undead warrior that deals damage by making contact.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
@@ -593,7 +598,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.SKELETON_ARCHER,
             displayName = "Skeleton Archer",
             description =
-                "A lightly armored Undead archer using a Level 3 Longbow.",
+                "A lightly armored Undead archer with slow, telegraphed and powerful arrows.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
@@ -617,7 +622,7 @@ object DefaultEnemyKinds {
                     piercing = 13
                 ),
             behaviorId =
-                EnemyBehaviorIds.KEEP_DISTANCE_AND_SHOOT,
+                EnemyBehaviorIds.CHASE_AND_MELEE,
             equipment =
                 EnemyEquipmentDefinition(
                     weapons =
@@ -627,6 +632,10 @@ object DefaultEnemyKinds {
                                 level = 3
                             )
                         )
+                ),
+            activeSkillIds =
+                listOf(
+                    EnemyAbilityIds.AIMED_ARROW
                 )
         )
 
@@ -667,7 +676,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.GHOST,
             displayName = "Ghost",
             description =
-                "An incorporeal Mini Boss that ignores obstacles and can avoid incoming attacks.",
+                "An incorporeal Mini Boss that evades attacks and becomes invulnerable during Ghost Storm.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.LARGE,
@@ -706,7 +715,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.SLIME,
             displayName = "Slime",
             description =
-                "A huge, slow Mini Boss that leaves damaging Acidic Path areas behind it.",
+                "A huge Mini Boss that leaves acid behind and splits into four independent pieces on death.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.VERY_LARGE,

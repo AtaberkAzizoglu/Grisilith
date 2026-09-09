@@ -91,6 +91,25 @@ class EnemyRuntimeFactory(
         )
     }
 
+    fun createSlimeFragment(
+        parent: Enemy,
+        startX: Float,
+        startY: Float
+    ): Enemy {
+        val definition = requireDefinition(
+            requireNotNull(parent.kindId) {
+                "Slime fragment parent must have a Kind ID."
+            }
+        )
+        return Enemy(
+            startX = startX,
+            startY = startY,
+            stats = parent.slimeFragmentStats(),
+            runtimeBundle = createRuntimeBundle(definition),
+            isSlimeFragment = true
+        )
+    }
+
     fun createStats(
         kindId: ContentId,
         enemyType: EnemyType,
@@ -149,9 +168,16 @@ class EnemyRuntimeFactory(
         val weaponRuntime =
             EnemyWeaponRuntimeGroup
                 .fromDefinitions(
-                    definition
-                        .equipment
-                        .weapons
+                    if (
+                        definition
+                            .usesEquipmentWeaponsInCombat
+                    ) {
+                        definition
+                            .equipment
+                            .weapons
+                    } else {
+                        emptyList()
+                    }
                 )
 
         val traitRuntime =

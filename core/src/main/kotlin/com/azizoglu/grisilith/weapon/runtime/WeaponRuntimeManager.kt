@@ -255,6 +255,9 @@ class WeaponRuntimeManager(
         mapObstacles: List<MapObstacle>,
         worldWidth: Float,
         worldHeight: Float,
+        attackOriginForSlot: (Int) -> Pair<Float, Float> = {
+            player.centerX to player.centerY
+        },
         onDamageDealt: (
             damage: Int,
             weaponName: String
@@ -601,10 +604,14 @@ class WeaponRuntimeManager(
                     ]
                         ?: return@forEachIndexed
 
+                val attackOrigin = attackOriginForSlot(slotIndex)
+
                 runtime.update(
                     delta = delta,
                     slotIndex = slotIndex,
                     player = player,
+                    attackOriginX = attackOrigin.first,
+                    attackOriginY = attackOrigin.second,
                     enemyManager =
                         enemyManager,
                     projectiles =

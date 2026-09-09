@@ -137,6 +137,9 @@ class ProjectileWeaponAttackExecutor(
                 enemyManager =
                     context.enemyManager,
 
+
+                originX = context.attackOriginX,
+                originY = context.attackOriginY,
                 maximumRange =
                     effectiveRange
             ) ?: return
@@ -296,9 +299,9 @@ class ProjectileWeaponAttackExecutor(
         val baseDirection =
             Vector2(
                 targetX -
-                    context.player.centerX,
+                    context.attackOriginX,
                 targetY -
-                    context.player.centerY
+                    context.attackOriginY
             )
 
         if (baseDirection.isZero) {
@@ -317,11 +320,11 @@ class ProjectileWeaponAttackExecutor(
             createProjectile(
                 context = context,
                 targetX =
-                    context.player.centerX +
+                    context.attackOriginX +
                         direction.x *
                         effectiveRange,
                 targetY =
-                    context.player.centerY +
+                    context.attackOriginY +
                         direction.y *
                         effectiveRange
             )
@@ -356,10 +359,10 @@ class ProjectileWeaponAttackExecutor(
         val baseDirection =
             Vector2(
                 targetX -
-                    context.player.centerX,
+                    context.attackOriginX,
 
                 targetY -
-                    context.player.centerY
+                    context.attackOriginY
             )
 
         if (baseDirection.isZero) {
@@ -396,12 +399,12 @@ class ProjectileWeaponAttackExecutor(
                     )
 
             val adjustedTargetX =
-                context.player.centerX +
+                context.attackOriginX +
                     projectileDirection.x *
                     effectiveRange
 
             val adjustedTargetY =
-                context.player.centerY +
+                context.attackOriginY +
                     projectileDirection.y *
                     effectiveRange
 
@@ -426,10 +429,10 @@ class ProjectileWeaponAttackExecutor(
         val baseDirection =
             Vector2(
                 targetX -
-                    context.player.centerX,
+                    context.attackOriginX,
 
                 targetY -
-                    context.player.centerY
+                    context.attackOriginY
             )
 
         if (baseDirection.isZero) {
@@ -473,12 +476,12 @@ class ProjectileWeaponAttackExecutor(
                     )
 
             val adjustedTargetX =
-                context.player.centerX +
+                context.attackOriginX +
                     projectileDirection.x *
                     effectiveRange
 
             val adjustedTargetY =
-                context.player.centerY +
+                context.attackOriginY +
                     projectileDirection.y *
                     effectiveRange
 
@@ -827,10 +830,10 @@ class ProjectileWeaponAttackExecutor(
         context.projectiles.add(
             Projectile(
                 startX =
-                    context.player.centerX,
+                    context.attackOriginX,
 
                 startY =
-                    context.player.centerY,
+                    context.attackOriginY,
 
                 targetX =
                     targetX,
@@ -986,8 +989,8 @@ class ProjectileWeaponAttackExecutor(
             sourceWeaponRuntimeId = context.weapon.runtimeId,
             sourceWeaponDefinitionId = context.weapon.definition.id.value,
             sourceName = context.weapon.displayName,
-            sourceCenterX = context.player.centerX,
-            sourceCenterY = context.player.centerY
+            sourceCenterX = context.attackOriginX,
+            sourceCenterY = context.attackOriginY
         )
     }
 

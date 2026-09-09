@@ -2,13 +2,18 @@ package com.azizoglu.grisilith.weapon.visual
 
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.weapon.Projectile
+import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.trait.EnemyTraitProjectileVisual
+import com.azizoglu.grisilith.enemy.trait.EnemyTraitProjectileVisualKind
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import kotlin.math.max
 import kotlin.math.sqrt
+import kotlin.math.atan2
 
 class ProjectileSpriteRenderer {
 
@@ -67,6 +72,11 @@ class ProjectileSpriteRenderer {
 
         private const val CROSSBOW_EXTRA_THICKNESS_OFFSET =
             0.90f
+
+        /* Every kind now uses only its right-facing source frame. */
+        private const val SOURCE_RIGHT_COLUMN = 6
+
+        private const val SPEAR_TEXTURE_PATH = "projectiles/spear_projectile.png"
     }
 
     private val definition =
@@ -80,8 +90,11 @@ class ProjectileSpriteRenderer {
         null
 
     private var regions:
-        Array<Array<TextureRegion>>? =
+        Array<TextureRegion>? =
         null
+
+    private var spearTexture: Texture? = null
+    private var spearRegion: TextureRegion? = null
 
     fun hasVisualDefinition(
         projectile: Projectile
@@ -127,39 +140,8 @@ class ProjectileSpriteRenderer {
                 )
                     ?: return@forEach
 
-            val direction =
-                ProjectileVisualDirection
-                    .fromVelocity(
-                        x =
-                            projectile
-                                .visualVelocityX,
-
-                        y =
-                            projectile
-                                .visualVelocityY
-                    )
-
-            /*
-             * HOTFIX: every visual was facing exactly the opposite direction.
-             *
-             * Source columns are:
-             * 0 N, 1 NW, 2 W, 3 SW, 4 S, 5 SE, 6 E, 7 NE
-             *
-             * Opposite direction in this circular order is always +4.
-             */
-            val correctedColumnIndex =
-                (
-                    direction.columnIndex +
-                        4
-                    ) %
-                    definition.columns
-
             val region =
-                regions[
-                    kind.rowIndex
-                ][
-                    correctedColumnIndex
-                ]
+                regions[kind.rowIndex]
 
             val weaponId =
                 projectile
@@ -217,34 +199,14 @@ class ProjectileSpriteRenderer {
              * Crossbow keeps the code-only shorter/thicker bolt treatment.
              */
             if (weaponId == CROSSBOW_ID) {
-                when (correctedColumnIndex) {
-                    0,
-                    4 -> {
-                        drawHeight *=
-                            CROSSBOW_LENGTH_SCALE
-
-                        drawWidth *=
-                            CROSSBOW_THICKNESS_SCALE
-                    }
-
-                    2,
-                    6 -> {
-                        drawWidth *=
-                            CROSSBOW_LENGTH_SCALE
-
-                        drawHeight *=
-                            CROSSBOW_THICKNESS_SCALE
-                    }
-
-                    else -> {
-                        drawWidth *=
-                            0.86f
-
-                        drawHeight *=
-                            0.86f
-                    }
-                }
+                drawWidth *= CROSSBOW_LENGTH_SCALE
+                drawHeight *= CROSSBOW_THICKNESS_SCALE
             }
+
+            val rotation = rotationDegrees(
+                projectile.visualVelocityX,
+                projectile.visualVelocityY
+            )
 
             val drawX =
                 projectile.visualCenterX -
@@ -276,33 +238,114 @@ class ProjectileSpriteRenderer {
                         velocityLength *
                         CROSSBOW_EXTRA_THICKNESS_OFFSET
 
-                batch.draw(
+                drawRotated(
                     region,
                     drawX - perpendicularX,
                     drawY - perpendicularY,
                     drawWidth,
-                    drawHeight
+                    drawHeight,
+                    rotation
                 )
 
-                batch.draw(
+                drawRotated(
                     region,
                     drawX + perpendicularX,
                     drawY + perpendicularY,
                     drawWidth,
-                    drawHeight
+                    drawHeight,
+                    rotation
                 )
             }
 
-            batch.draw(
+            drawRotated(
                 region,
                 drawX,
                 drawY,
                 drawWidth,
-                drawHeight
+                drawHeight,
+                rotation
             )
         }
 
         batch.end()
+    }
+
+    fun renderEnemyProjectiles(enemies: List<Enemy>, camera: OrthographicCamera) {
+        val visuals = enemies.flatMap { it.traitProjectileVisuals }
+        if (visuals.isEmpty()) return
+        val atlasTexture = ensureTexture() ?: return
+        val atlasRegions = ensureRegions(atlasTexture)
+        batch.projectionMatrix = camera.combined
+        batch.enableBlending()
+        batch.begin()
+        visuals.forEach { visual ->
+            val region = enemyRegion(visual, atlasRegions) ?: return@forEach
+            val aspect = region.regionWidth.toFloat() / region.regionHeight.coerceAtLeast(1).toFloat()
+            val height = visual.worldHeight
+            val width = height * aspect
+            batch.color = Color(1f, 1f, 1f, visual.alpha.coerceIn(0f, 1f))
+            drawRotated(
+                region,
+                visual.centerX - width / 2f,
+                visual.centerY - height / 2f,
+                width,
+                height,
+                rotationDegrees(visual.velocityX, visual.velocityY)
+            )
+        }
+        batch.color = Color.WHITE
+        batch.end()
+    }
+
+    private fun enemyRegion(
+        visual: EnemyTraitProjectileVisual,
+        atlasRegions: Array<TextureRegion>
+    ): TextureRegion? = when (visual.kind) {
+        EnemyTraitProjectileVisualKind.ARROW -> atlasRegions[ProjectileVisualKind.ARROW.rowIndex]
+        EnemyTraitProjectileVisualKind.AIR -> atlasRegions[ProjectileVisualKind.AIR.rowIndex]
+        EnemyTraitProjectileVisualKind.POISON -> atlasRegions[ProjectileVisualKind.POISON.rowIndex]
+        EnemyTraitProjectileVisualKind.LIGHTNING -> atlasRegions[ProjectileVisualKind.LIGHTNING.rowIndex]
+        EnemyTraitProjectileVisualKind.NECROTIC -> atlasRegions[ProjectileVisualKind.NECROTIC.rowIndex]
+        EnemyTraitProjectileVisualKind.SPEAR -> ensureSpearRegion()
+    }
+
+    private fun ensureSpearRegion(): TextureRegion? {
+        spearRegion?.let { return it }
+        val handle = Gdx.files.internal(SPEAR_TEXTURE_PATH)
+        if (!handle.exists()) return null
+        val loaded = Texture(handle).also {
+            it.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest)
+        }
+        require(loaded.width == 724 && loaded.height == 2172) {
+            "Unexpected spear projectile size: ${loaded.width}x${loaded.height}"
+        }
+        spearTexture = loaded
+        return TextureRegion(loaded, 0, 882, 712, 280).also { spearRegion = it }
+    }
+
+    private fun rotationDegrees(x: Float, y: Float): Float =
+        Math.toDegrees(atan2(y.toDouble(), x.toDouble())).toFloat()
+
+    private fun drawRotated(
+        region: TextureRegion,
+        x: Float,
+        y: Float,
+        width: Float,
+        height: Float,
+        rotation: Float
+    ) {
+        batch.draw(
+            region,
+            x,
+            y,
+            width / 2f,
+            height / 2f,
+            width,
+            height,
+            1f,
+            1f,
+            rotation
+        )
     }
 
     private fun resolveVisualKind(
@@ -394,7 +437,7 @@ class ProjectileSpriteRenderer {
     private fun ensureRegions(
         texture:
         Texture
-    ): Array<Array<TextureRegion>> {
+    ): Array<TextureRegion> {
 
         regions
             ?.let {
@@ -410,10 +453,7 @@ class ProjectileSpriteRenderer {
         }
 
         val built =
-            Array(
-                definition.rows
-            ) {
-                    row ->
+            Array(definition.rows) { row ->
 
                 val top =
                     ROW_BOUNDS[row]
@@ -421,25 +461,9 @@ class ProjectileSpriteRenderer {
                 val bottom =
                     ROW_BOUNDS[row + 1]
 
-                Array(
-                    definition.columns
-                ) {
-                        column ->
-
-                    val left =
-                        COLUMN_BOUNDS[column]
-
-                    val right =
-                        COLUMN_BOUNDS[column + 1]
-
-                    TextureRegion(
-                        texture,
-                        left,
-                        top,
-                        right - left,
-                        bottom - top
-                    )
-                }
+                val left = COLUMN_BOUNDS[SOURCE_RIGHT_COLUMN]
+                val right = COLUMN_BOUNDS[SOURCE_RIGHT_COLUMN + 1]
+                TextureRegion(texture, left, top, right - left, bottom - top)
             }
 
         regions =
@@ -457,6 +481,10 @@ class ProjectileSpriteRenderer {
 
         regions =
             null
+
+        spearRegion = null
+        spearTexture?.dispose()
+        spearTexture = null
 
         batch.dispose()
     }

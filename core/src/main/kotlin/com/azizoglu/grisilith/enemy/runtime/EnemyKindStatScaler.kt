@@ -5,6 +5,7 @@ import com.azizoglu.grisilith.enemy.EnemyStats
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.enemy.definition.DefaultEnemyTypeModifiers
 import com.azizoglu.grisilith.enemy.definition.EnemyKindDefinition
+import com.azizoglu.grisilith.enemy.definition.EnemyTag
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -54,11 +55,14 @@ object EnemyKindStatScaler {
             EnemyAdaptiveScalingRuntime
                 .current()
 
+        val humanoidGrowth = humanoidGrowth(definition, enemyType, safeStage)
+
         val scaledHealth =
             (
                 definition.baseStats
                     .maximumHealth *
                     stageScaling.healthMultiplier *
+                    humanoidGrowth.healthMultiplier *
                     typeModifier.healthMultiplier *
                     adaptiveScaling.healthMultiplier
                 )
@@ -70,6 +74,7 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .armorClass *
                     stageScaling.armorMultiplier *
+                    humanoidGrowth.armorMultiplier *
                     typeModifier.armorMultiplier *
                     adaptiveScaling.armorClassMultiplier
                 )
@@ -81,6 +86,7 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .contactDamage *
                     stageScaling.damageMultiplier *
+                    humanoidGrowth.damageMultiplier *
                     typeModifier.damageMultiplier *
                     adaptiveScaling.damageMultiplier
                 )
@@ -102,6 +108,7 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .attacksPerSecond *
                     stageScaling.attackSpeedMultiplier *
+                    humanoidGrowth.attackSpeedMultiplier *
                     typeModifier.attackSpeedMultiplier *
                     adaptiveScaling.attackSpeedMultiplier
                 )
@@ -167,6 +174,7 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .weaponDamageMultiplier *
                     stageScaling.damageMultiplier *
+                    humanoidGrowth.damageMultiplier *
                     typeModifier.damageMultiplier *
                     adaptiveScaling.damageMultiplier,
 
@@ -278,11 +286,38 @@ object EnemyKindStatScaler {
         )
     }
 
+    private fun humanoidGrowth(
+        definition: EnemyKindDefinition,
+        enemyType: EnemyType,
+        stage: Int
+    ): HumanoidGrowth {
+        if (EnemyTag.HUMANOID !in definition.enemyTags) return HumanoidGrowth()
+        val progress = (stage - 1).coerceAtLeast(0)
+        val bossFactor = when (enemyType) {
+            EnemyType.MINI_BOSS -> 1f
+            EnemyType.FINAL_BOSS -> 1.25f
+            else -> 0.35f
+        }
+        return HumanoidGrowth(
+            healthMultiplier = 1f + progress * 0.008f * bossFactor,
+            armorMultiplier = 1f + progress * 0.002f * bossFactor,
+            damageMultiplier = 1f + progress * 0.005f * bossFactor,
+            attackSpeedMultiplier = 1f + progress * 0.0015f * bossFactor
+        )
+    }
+
     private data class StageScaling(
         val healthMultiplier: Float,
         val armorMultiplier: Float,
         val damageMultiplier: Float,
         val movementSpeedMultiplier: Float,
         val attackSpeedMultiplier: Float
+    )
+
+    private data class HumanoidGrowth(
+        val healthMultiplier: Float = 1f,
+        val armorMultiplier: Float = 1f,
+        val damageMultiplier: Float = 1f,
+        val attackSpeedMultiplier: Float = 1f
     )
 }

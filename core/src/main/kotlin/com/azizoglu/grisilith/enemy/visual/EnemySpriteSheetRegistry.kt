@@ -5,8 +5,10 @@ import com.azizoglu.grisilith.content.ContentId
 object EnemySpriteSheetRegistry {
 
     private val definitions =
-        DefaultBeastEnemySpriteSheets
-            .all
+        (
+            DefaultBeastEnemySpriteSheets.all +
+                DefaultHumanoidEnemySpriteSheets.all
+            )
             .associateBy {
                     definition ->
                 definition.kindId

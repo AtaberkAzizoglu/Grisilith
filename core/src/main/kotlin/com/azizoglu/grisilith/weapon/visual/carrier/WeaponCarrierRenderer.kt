@@ -160,27 +160,6 @@ class WeaponCarrierRenderer {
             )
         }
 
-        /*
-         * IMPORTANT:
-         * Attack FX is deliberately centered on PLAYER in WorldRenderer.
-         * Minions are only visual carriers; actual attacks still originate
-         * from the existing player-based executors.
-         */
-    }
-
-    fun renderAttackEffectAtPlayer(
-        snapshot: CarrierSnapshot,
-        playerCenterX: Float,
-        playerCenterY: Float,
-        playerDirection: CharacterVisualDirection,
-        camera: OrthographicCamera
-    ) {
-        /*
-         * Intentionally empty.
-         *
-         * Retained only for source compatibility with older call sites.
-         * All melee attack FX now come from the independent v3 event renderer.
-         */
     }
 
     private fun renderMinion(

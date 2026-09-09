@@ -16,6 +16,11 @@ data class WeaponAttackContext(
     val player:
     Player,
 
+    /* Physical source carrying this weapon: player for slot 0, minion otherwise. */
+    val attackOriginX: Float,
+
+    val attackOriginY: Float,
+
     val enemyManager:
     EnemyManager,
 
