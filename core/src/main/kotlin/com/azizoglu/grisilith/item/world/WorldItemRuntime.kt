@@ -127,13 +127,19 @@ class WorldItemRuntime(
         Rectangle(it.x - 28f, it.y - 18f, 56f, 38f)
     }
 
-    fun onEnemyKilled(enemy: Enemy) {
-        if (enemy.type == EnemyType.MINI_BOSS) {
+    fun onEnemyKilled(
+        enemy: Enemy,
+        lootMultiplier: Float = 1f,
+        shouldOpenPortal: Boolean = enemy.type == EnemyType.MINI_BOSS
+    ) {
+        if (shouldOpenPortal) {
             portal = Vector2(worldWidth * 0.5f, worldHeight * 0.5f)
         }
 
         val copies = count(ItemEffectId.LOOT_THE_ENEMIES)
-        if (copies <= 0 || Random.nextFloat() >= (copies * 0.05f).coerceAtMost(0.25f)) return
+        val effectiveChance = (copies * 0.05f).coerceAtMost(0.25f) *
+            lootMultiplier.coerceIn(0f, 1f)
+        if (copies <= 0 || Random.nextFloat() >= effectiveChance) return
 
         val tags = DefaultEnemyKinds.all
             .firstOrNull { it.id == enemy.kindId }

@@ -332,18 +332,7 @@ object DefaultEnemyKinds {
                     piercing = 5
                 ),
             behaviorId =
-                EnemyBehaviorIds.CHASE_AND_MELEE,
-            equipment =
-                EnemyEquipmentDefinition(
-                    weapons =
-                        listOf(
-                            EnemyWeaponDefinition(
-                                weaponId = WPN_LONGSWORD,
-                                level = 3
-                            )
-                        ),
-                    armorId = ARMOR_SCALE_MAIL
-                )
+                EnemyBehaviorIds.CHASE_AND_MELEE
         )
 
     val archer =
@@ -376,17 +365,6 @@ object DefaultEnemyKinds {
                 ),
             behaviorId =
                 EnemyBehaviorIds.KEEP_DISTANCE_AND_SHOOT,
-            equipment =
-                EnemyEquipmentDefinition(
-                    weapons =
-                        listOf(
-                            EnemyWeaponDefinition(
-                                weaponId = WPN_CROSSBOW,
-                                level = 3
-                            )
-                        ),
-                    armorId = ARMOR_LEATHER
-                ),
             activeSkillIds =
                 listOf(
                     EnemyAbilityIds.AIMED_ARROW
@@ -408,7 +386,7 @@ object DefaultEnemyKinds {
                     armorClass = 17,
                     baseArmor = 5,
                     contactDamage = 82,
-                    movementSpeed = 88f,
+                    movementSpeed = 105.6f,
                     attacksPerSecond = 0.54f,
                     attackRange = 98f,
                     weaponDamageMultiplier = 1.30f,
@@ -423,17 +401,6 @@ object DefaultEnemyKinds {
                 ),
             behaviorId =
                 EnemyBehaviorIds.CHASE_AND_MELEE,
-            equipment =
-                EnemyEquipmentDefinition(
-                    weapons =
-                        listOf(
-                            EnemyWeaponDefinition(
-                                weaponId = WPN_LANCE,
-                                level = 5
-                            )
-                        ),
-                    armorId = ARMOR_PLATE
-                ),
             activeSkillIds =
                 listOf(
                     EnemyAbilityIds.SPEARMAN_THROW_THE_LANCE
@@ -455,7 +422,7 @@ object DefaultEnemyKinds {
                     armorClass = 15,
                     baseArmor = 4,
                     contactDamage = 72,
-                    movementSpeed = 225f,
+                    movementSpeed = 202.5f,
                     attacksPerSecond = 0.82f,
                     attackRange = 82f,
                     weaponDamageMultiplier = 1.28f,
@@ -470,17 +437,6 @@ object DefaultEnemyKinds {
                 ),
             behaviorId =
                 EnemyBehaviorIds.CHASE_AND_MELEE,
-            equipment =
-                EnemyEquipmentDefinition(
-                    weapons =
-                        listOf(
-                            EnemyWeaponDefinition(
-                                weaponId = WPN_LANCE,
-                                level = 5
-                            )
-                        ),
-                    armorId = ARMOR_LEATHER
-                ),
             activeSkillIds =
                 listOf(
                     EnemyAbilityIds.HORSEMAN_BATTLE_CRY
@@ -517,33 +473,6 @@ object DefaultEnemyKinds {
                 ),
             behaviorId =
                 EnemyBehaviorIds.MULTI_WEAPON_CASTER,
-            equipment =
-                EnemyEquipmentDefinition(
-                    weapons =
-                        listOf(
-                            EnemyWeaponDefinition(
-                                weaponId = WPN_TOME_OF_ERYNDOR,
-                                level = 4,
-                                quantity = 1
-                            ),
-                            EnemyWeaponDefinition(
-                                weaponId = WPN_AMULET_OF_TROLL_KING,
-                                level = 4,
-                                quantity = 1
-                            ),
-                            EnemyWeaponDefinition(
-                                weaponId = WPN_ORB_OF_SKY,
-                                level = 5,
-                                quantity = 2
-                            ),
-                            EnemyWeaponDefinition(
-                                weaponId = WPN_TOME_OF_ERYNDOR,
-                                level = 5,
-                                quantity = 2
-                            )
-                        ),
-                    armorId = ARMOR_ROBE_OF_MAGE
-                ),
             activeSkillIds =
                 listOf(
                     EnemyAbilityIds.WITCH_SUMMON_FAMILIARS,
@@ -562,35 +491,25 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.MEDIUM,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 180,
-                    armorClass = 14,
-                    baseArmor = 2,
-                    contactDamage = 20,
-                    movementSpeed = 118f,
-                    attacksPerSecond = 1.15f,
-                    attackRange = 55f,
-                    weaponDamageMultiplier = 0.98f,
-                    attackSpeedScore = 20,
-                    mainDamageStat = 20,
-                    secondaryDamageStat = 14,
-                    baseCritRatePercent = 15f,
-                    baseCritDamagePercent = 120f,
+                    maximumHealth = 358,
+                    armorClass = 11,
+                    baseArmor = 3,
+                    contactDamage = 26,
+                    movementSpeed = 122f,
+                    attacksPerSecond = 0.78f,
+                    attackRange = 58f,
+                    weaponDamageMultiplier = 1.00f,
+                    attackSpeedScore = 14,
+                    mainDamageStat = 18,
+                    secondaryDamageStat = 16,
+                    baseCritRatePercent = 20f,
+                    baseCritDamagePercent = 130f,
                     critRate = 0,
                     critDamage = 0,
                     piercing = 5
                 ),
             behaviorId =
-                EnemyBehaviorIds.CHASE_AND_MELEE,
-            equipment =
-                EnemyEquipmentDefinition(
-                    weapons =
-                        listOf(
-                            EnemyWeaponDefinition(
-                                weaponId = WPN_DOUBLE_SWORDS,
-                                level = 3
-                            )
-                        )
-                )
+                EnemyBehaviorIds.CHASE_AND_MELEE
         )
 
     val skeletonArcher =
@@ -604,35 +523,25 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.MEDIUM,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 150,
-                    armorClass = 7,
+                    maximumHealth = 200,
+                    armorClass = 6,
                     baseArmor = 2,
-                    contactDamage = 14,
-                    movementSpeed = 104f,
-                    attacksPerSecond = 0.88f,
-                    attackRange = 600f,
-                    weaponDamageMultiplier = 0.92f,
-                    attackSpeedScore = 18,
+                    contactDamage = 16,
+                    movementSpeed = 132f,
+                    attacksPerSecond = 0.68f,
+                    attackRange = 560f,
+                    weaponDamageMultiplier = 0.90f,
+                    attackSpeedScore = 16,
                     mainDamageStat = 12,
                     secondaryDamageStat = 24,
-                    baseCritRatePercent = 25f,
-                    baseCritDamagePercent = 130f,
+                    baseCritRatePercent = 30f,
+                    baseCritDamagePercent = 150f,
                     critRate = 0,
                     critDamage = 0,
                     piercing = 13
                 ),
             behaviorId =
-                EnemyBehaviorIds.CHASE_AND_MELEE,
-            equipment =
-                EnemyEquipmentDefinition(
-                    weapons =
-                        listOf(
-                            EnemyWeaponDefinition(
-                                weaponId = WPN_LONGBOW,
-                                level = 3
-                            )
-                        )
-                ),
+                EnemyBehaviorIds.KEEP_DISTANCE_AND_SHOOT,
             activeSkillIds =
                 listOf(
                     EnemyAbilityIds.AIMED_ARROW
@@ -650,11 +559,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.MEDIUM,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 300,
-                    armorClass = 22,
-                    baseArmor = 2,
-                    contactDamage = 22,
-                    movementSpeed = 78f,
+                    maximumHealth = 520,
+                    armorClass = 16,
+                    baseArmor = 4,
+                    contactDamage = 24,
+                    movementSpeed = 70f,
                     attacksPerSecond = 0.62f,
                     attackRange = 52f,
                     weaponDamageMultiplier = 0.92f,
@@ -682,10 +591,10 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 1500,
-                    armorClass = 20,
-                    baseArmor = 2,
-                    contactDamage = 50,
+                    maximumHealth = 6200,
+                    armorClass = 8,
+                    baseArmor = 1,
+                    contactDamage = 18,
                     movementSpeed = 120f,
                     attacksPerSecond = 0.70f,
                     attackRange = 68f,
@@ -721,10 +630,10 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.VERY_LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 2100,
-                    armorClass = 10,
-                    baseArmor = 2,
-                    contactDamage = 42,
+                    maximumHealth = 7600,
+                    armorClass = 5,
+                    baseArmor = 1,
+                    contactDamage = 65,
                     movementSpeed = 72f,
                     attacksPerSecond = 0.62f,
                     attackRange = 88f,
@@ -740,6 +649,8 @@ object DefaultEnemyKinds {
                 ),
             behaviorId =
                 EnemyBehaviorIds.SLOW_CHASE_AND_MELEE,
+            traversalProfile =
+                EnemyTraversalProfile.INCORPOREAL,
             passiveIds =
                 listOf(
                     EnemyAbilityIds.SLIME_SPLIT_ON_DEATH,
@@ -752,20 +663,20 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.VAMPIRE_LORD,
             displayName = "Vampire Lord",
             description =
-                "The Undead Final Boss. Teleports, drains life and carries a Longsword with Scale Mail.",
+                "The Undead Final Boss. Hunts by contact, drains life and escapes through living mist.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.FINAL_BOSS),
             sizeCategory = EnemySizeCategory.COLOSSAL,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 5600,
-                    armorClass = 32,
-                    baseArmor = 2,
-                    contactDamage = 82,
-                    movementSpeed = 150f,
-                    attacksPerSecond = 1.00f,
-                    attackRange = 82f,
-                    weaponDamageMultiplier = 1.25f,
+                    maximumHealth = 22000,
+                    armorClass = 20,
+                    baseArmor = 4,
+                    contactDamage = 105,
+                    movementSpeed = 170f,
+                    attacksPerSecond = 0.95f,
+                    attackRange = 105f,
+                    weaponDamageMultiplier = 1.35f,
                     attackSpeedScore = 26,
                     mainDamageStat = 34,
                     secondaryDamageStat = 34,
@@ -777,17 +688,6 @@ object DefaultEnemyKinds {
                 ),
             behaviorId =
                 EnemyBehaviorIds.CHASE_AND_MELEE,
-            equipment =
-                EnemyEquipmentDefinition(
-                    weapons =
-                        listOf(
-                            EnemyWeaponDefinition(
-                                weaponId = WPN_LONGSWORD,
-                                level = 4
-                            )
-                        ),
-                    armorId = ARMOR_SCALE_MAIL
-                ),
             activeSkillIds =
                 listOf(
                     EnemyAbilityIds.VAMPIRE_MISTY_TRANSPORTATION

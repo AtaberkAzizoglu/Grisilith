@@ -238,7 +238,12 @@ class SummonedEntity(
         }
 
         conditions.update(
-            delta = delta
+            delta = delta,
+            onTick = { tick ->
+                if (tick.source.tickDamage > 0) {
+                    takeDamage(tick.source.tickDamage)
+                }
+            }
         )
 
         val visualStartX =

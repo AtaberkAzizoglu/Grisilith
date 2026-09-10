@@ -358,10 +358,10 @@ object MapObstacleGenerator {
             GenerationRule(
                 MapObstacleType.LAKE,
                 1,
-                520f,
-                680f,
-                330f,
-                440f
+                560f,
+                720f,
+                350f,
+                470f
             ),
             GenerationRule(
                 MapObstacleType.ROCK,
@@ -481,7 +481,7 @@ object MapObstacleGenerator {
         gameMap: GameMap
     ): Float {
         return when (gameMap) {
-            GameMap.ROAD_TO_HOME -> 0.70f
+            GameMap.ROAD_TO_HOME -> 0.40f
             GameMap.TROUBLE_AT_HOME -> 0.40f
             else -> 0f
         }

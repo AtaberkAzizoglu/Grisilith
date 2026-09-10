@@ -30,7 +30,16 @@ class GameTimeController {
             return 0f
         }
 
-        val gameDelta = realDelta * gameSpeed
+        /*
+         * Texture creation (notably the first Phantom Steed activation) can
+         * block one render frame. That wall-clock stall must never be fed to
+         * gameplay clocks, otherwise stage timers jump/overflow.
+         */
+        val safeRealDelta =
+            realDelta.takeIf { it.isFinite() }
+                ?.coerceIn(0f, MAX_GAMEPLAY_FRAME_DELTA_SECONDS)
+                ?: 0f
+        val gameDelta = safeRealDelta * gameSpeed
         elapsedGameTime += gameDelta
 
         return gameDelta
@@ -44,6 +53,7 @@ class GameTimeController {
     }
 
     companion object {
+        private const val MAX_GAMEPLAY_FRAME_DELTA_SECONDS = 0.10f
         val ALLOWED_GAME_SPEEDS = setOf(
             0.5f,
             1f,

@@ -1,6 +1,12 @@
 package com.azizoglu.grisilith.screen
 
+import kotlin.math.roundToInt
+
 import com.azizoglu.grisilith.combat.damage.DamageNumberManager
+import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.combat.condition.ConditionApplication
+import com.azizoglu.grisilith.combat.condition.ConditionSource
 
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyManager
@@ -3191,6 +3197,20 @@ class FirstScreen(
                     )
 
                 if (appliedDamage > 0) {
+                    if (sourceEnemy.kindId == com.azizoglu.grisilith.enemy.definition.EnemyKindIds.GHOST) {
+                        player.applyCondition(
+                            ConditionApplication(
+                                type = ConditionType.NECROSIS,
+                                durationSeconds = 5f,
+                                source = ConditionSource(
+                                    damageType = DamageType.NECROTIC,
+                                    tickDamage = (sourceEnemy.contactDamage * 0.60f)
+                                        .roundToInt().coerceAtLeast(1),
+                                    sourceName = "Ghost Necrosis"
+                                )
+                            )
+                        )
+                    }
                     if (ActiveItemEffects.reflectContactDamage(sourceEnemy)) {
                         handleEnemyKilled(sourceEnemy)
                     }
@@ -3207,6 +3227,42 @@ class FirstScreen(
 
                 summon.takeDamage(
                     damage
+                )
+            },
+
+            onPlayerCondition = { condition, duration, tickDamage ->
+                player.applyCondition(
+                    ConditionApplication(
+                        type = condition,
+                        durationSeconds = duration,
+                        source = ConditionSource(
+                            damageType = when (condition) {
+                                ConditionType.NECROSIS -> DamageType.NECROTIC
+                                ConditionType.CORRODING -> DamageType.ACID
+                                else -> DamageType.NONE
+                            },
+                            tickDamage = tickDamage.coerceAtLeast(0),
+                            sourceName = condition.displayName
+                        )
+                    )
+                )
+            },
+
+            onSummonCondition = { summon, condition, duration, tickDamage ->
+                summon.applyCondition(
+                    ConditionApplication(
+                        type = condition,
+                        durationSeconds = duration,
+                        source = ConditionSource(
+                            damageType = when (condition) {
+                                ConditionType.NECROSIS -> DamageType.NECROTIC
+                                ConditionType.CORRODING -> DamageType.ACID
+                                else -> DamageType.NONE
+                            },
+                            tickDamage = tickDamage.coerceAtLeast(0),
+                            sourceName = condition.displayName
+                        )
+                    )
                 )
             },
 
@@ -3748,12 +3804,35 @@ class FirstScreen(
         val isNoLootTotemMiniBoss =
             noLootTotemMiniBosses.remove(killedEnemy)
 
+        val isLargeSlime =
+            killedEnemy.kindId == com.azizoglu.grisilith.enemy.definition.EnemyKindIds.SLIME &&
+                !killedEnemy.isSlimeFragment
+
+        val slimeLootMultiplier =
+            if (isLargeSlime) 0f else if (killedEnemy.isSlimeFragment) 0.25f else 1f
+
+        val shouldOpenPortal = when {
+            isLargeSlime -> false
+            killedEnemy.isSlimeFragment ->
+                enemyManager.allEnemies.none { other ->
+                    other !== killedEnemy &&
+                        other.kindId == killedEnemy.kindId &&
+                        other.isSlimeFragment &&
+                        !other.isDead
+                }
+            else -> killedEnemy.type == EnemyType.MINI_BOSS
+        }
+
         if (!isNoLootTotemMiniBoss) {
-            worldItemRuntime.onEnemyKilled(killedEnemy)
+            worldItemRuntime.onEnemyKilled(
+                enemy = killedEnemy,
+                lootMultiplier = slimeLootMultiplier,
+                shouldOpenPortal = shouldOpenPortal
+            )
         }
 
         val awardedGrisilithCoins =
-            if (isNoLootTotemMiniBoss) {
+            if (isNoLootTotemMiniBoss || isLargeSlime) {
                 0
             } else runRewardTracker.onEnemyKilled(
                 enemyType =
@@ -3767,7 +3846,9 @@ class FirstScreen(
                         finalBossRewardId
                     } else {
                         null
-                    }
+                    },
+                rewardChanceMultiplier =
+                    if (killedEnemy.isSlimeFragment) 0.25f else 1f
             )
 
         if (
@@ -3792,7 +3873,7 @@ class FirstScreen(
         )
 
         val goldDrop =
-            if (suppressGold || isNoLootTotemMiniBoss) 0
+            if (suppressGold || isNoLootTotemMiniBoss || isLargeSlime) 0
             else goldRewardFor(killedEnemy)
 
         if (
@@ -3812,7 +3893,9 @@ class FirstScreen(
                 )
         }
 
-        if (!isNoLootTotemMiniBoss) {
+        if (!isNoLootTotemMiniBoss && !isLargeSlime &&
+            (!killedEnemy.isSlimeFragment || kotlin.random.Random.nextFloat() < 0.25f)
+        ) {
             tryDropChestFromEnemy(killedEnemy)
         }
     }
@@ -4127,8 +4210,15 @@ class FirstScreen(
         )
 
         worldItemRenderer.render(
-            snapshot = worldItemRuntime.visualSnapshot(),
-            camera = camera
+            snapshot = worldItemRuntime.visualSnapshot().let { snapshot ->
+                if (enemyManager.playerVisionMultiplier < 1f) {
+                    snapshot.copy(blindFaithMistLevel = maxOf(1, snapshot.blindFaithMistLevel))
+                } else {
+                    snapshot
+                }
+            },
+            camera = camera,
+            ghostDarknessActive = enemyManager.playerVisionMultiplier < 1f
         )
 
         worldItemRenderer.renderEdgeIndicators(

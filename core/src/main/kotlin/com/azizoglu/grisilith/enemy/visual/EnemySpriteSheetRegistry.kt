@@ -7,7 +7,8 @@ object EnemySpriteSheetRegistry {
     private val definitions =
         (
             DefaultBeastEnemySpriteSheets.all +
-                DefaultHumanoidEnemySpriteSheets.all
+                DefaultHumanoidEnemySpriteSheets.all +
+                DefaultUndeadEnemySpriteSheets.all
             )
             .associateBy {
                     definition ->

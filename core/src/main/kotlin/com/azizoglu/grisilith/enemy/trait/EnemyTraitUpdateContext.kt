@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.enemy.trait
 
 import com.azizoglu.grisilith.content.ContentId
+import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.map.MapObstacle
@@ -46,7 +48,8 @@ data class EnemyTraitDamageContext(
  */
 data class EnemyTraitPlayerDamage(
     val amount: Int,
-    val sourceName: String
+    val sourceName: String,
+    val damageType: DamageType = DamageType.NONE
 )
 
 data class EnemyTraitTargetDamage(
@@ -54,7 +57,19 @@ data class EnemyTraitTargetDamage(
     val targetIndex: Int = -1,
     val amount: Int,
     val sourceName: String,
-    val projectileOrMagic: Boolean = false
+    val damageType: DamageType = DamageType.NONE,
+    val projectileOrMagic: Boolean = false,
+    val conditionType: ConditionType? = null,
+    val conditionDurationSeconds: Float? = null,
+    val conditionTickDamage: Int = 0
+)
+
+data class EnemyTraitGroundVisual(
+    val centerX: Float,
+    val centerY: Float,
+    val diameter: Float,
+    val frameIndex: Int,
+    val alpha: Float = 1f
 )
 
 enum class EnemyTraitProjectileVisualKind {
@@ -78,13 +93,35 @@ data class EnemyTraitProjectileVisual(
 
 enum class EnemyTraitSpecialVisualKind {
     SPEARMAN_THROW,
-    HORSEMAN_SWIPE
+    HORSEMAN_SWIPE,
+    GHOST_STORM
 }
 
 data class EnemyTraitSpecialVisual(
     val kind: EnemyTraitSpecialVisualKind,
     val progress: Float,
-    val scale: Float = 1f
+    val scale: Float = 1f,
+    val segmentMask: Int = 0,
+    val isImpact: Boolean = false
+)
+
+enum class EnemyTraitSpellVisualKind {
+    STATIC_CLOUD,
+    METEOR,
+    TSUNAMI,
+    CALL_LIGHTNING
+}
+
+data class EnemyTraitSpellVisual(
+    val kind: EnemyTraitSpellVisualKind,
+    val centerX: Float,
+    val centerY: Float,
+    val worldWidth: Float,
+    val worldHeight: Float,
+    val animationSeconds: Float = 0f,
+    val progress: Float = 0f,
+    val rotationDegrees: Float = 0f,
+    val alpha: Float = 1f
 )
 
 interface EnemyTrait {
@@ -172,6 +209,10 @@ interface EnemyTrait {
     }
 
     fun projectileVisuals(): List<EnemyTraitProjectileVisual> = emptyList()
+
+    fun spellVisuals(): List<EnemyTraitSpellVisual> = emptyList()
+
+    fun groundVisuals(): List<EnemyTraitGroundVisual> = emptyList()
 
     fun specialVisual(owner: Enemy): EnemyTraitSpecialVisual? = null
 

@@ -227,6 +227,12 @@ class EnemyTraitRuntime private constructor(
     fun projectileVisuals(): List<EnemyTraitProjectileVisual> =
         traits.flatMap { it.projectileVisuals() }
 
+    fun spellVisuals(): List<EnemyTraitSpellVisual> =
+        traits.flatMap { it.spellVisuals() }
+
+    fun groundVisuals(): List<EnemyTraitGroundVisual> =
+        traits.flatMap { it.groundVisuals() }
+
     fun specialVisual(owner: Enemy): EnemyTraitSpecialVisual? =
         traits.firstNotNullOfOrNull { it.specialVisual(owner) }
 

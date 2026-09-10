@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.enemy
 
 import com.azizoglu.grisilith.map.MapObstacle
+import com.azizoglu.grisilith.map.MapObstacleType
 import com.azizoglu.grisilith.map.TroubleAtHomeLayout
 import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.map.enemy.MapEnemyRuntimeContext
@@ -19,6 +20,9 @@ class EnemySpawner(
     companion object {
         private const val MINIMUM_PLAYER_DISTANCE =
             200f
+
+        private const val GATE_SPAWN_SAFE_DISTANCE =
+            500f
 
         private const val WORLD_EDGE_PADDING =
             20f
@@ -648,6 +652,15 @@ class EnemySpawner(
                     minimumY
                 )
 
+        val gateVisualBounds =
+            if (mapEnemyContext.gameMap == GameMap.TROUBLE_AT_HOME) {
+                mapObstacles
+                    .firstOrNull { it.type == MapObstacleType.CITY_GATE }
+                    ?.visualBounds
+            } else {
+                null
+            }
+
         repeat(
             MAXIMUM_POSITION_ATTEMPTS
         ) {
@@ -704,6 +717,17 @@ class EnemySpawner(
                 )
 
             if (
+                gateVisualBounds != null &&
+                distanceSquaredToRectangle(
+                    centerX,
+                    centerY,
+                    gateVisualBounds
+                ) < GATE_SPAWN_SAFE_DISTANCE * GATE_SPAWN_SAFE_DISTANCE
+            ) {
+                return@repeat
+            }
+
+            if (
                 !canSpawnInsideObstacles &&
                 mapObstacles.any { obstacle ->
                     obstacle.blocksMovement &&
@@ -722,5 +746,17 @@ class EnemySpawner(
         }
 
         return null
+    }
+
+    private fun distanceSquaredToRectangle(
+        x: Float,
+        y: Float,
+        rectangle: Rectangle
+    ): Float {
+        val closestX = x.coerceIn(rectangle.x, rectangle.x + rectangle.width)
+        val closestY = y.coerceIn(rectangle.y, rectangle.y + rectangle.height)
+        val dx = x - closestX
+        val dy = y - closestY
+        return dx * dx + dy * dy
     }
 }

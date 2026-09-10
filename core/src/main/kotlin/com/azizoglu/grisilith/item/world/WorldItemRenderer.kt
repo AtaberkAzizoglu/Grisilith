@@ -42,7 +42,11 @@ class WorldItemRenderer {
         batch.end()
     }
 
-    fun render(snapshot: WorldItemVisualSnapshot, camera: OrthographicCamera) {
+    fun render(
+        snapshot: WorldItemVisualSnapshot,
+        camera: OrthographicCamera,
+        ghostDarknessActive: Boolean = false
+    ) {
         batch.projectionMatrix = camera.combined
         batch.begin()
         snapshot.loot.forEach {
@@ -95,7 +99,23 @@ class WorldItemRenderer {
         renderConstructionAndBoundaries(snapshot, camera)
         renderProgressBars(snapshot, camera)
         renderTotemUi(snapshot, camera)
+        if (ghostDarknessActive) renderGhostDarkness(camera)
         renderBlindFaith(snapshot, camera)
+    }
+
+    private fun renderGhostDarkness(camera: OrthographicCamera) {
+        val width = camera.viewportWidth * camera.zoom
+        val height = camera.viewportHeight * camera.zoom
+        shapes.projectionMatrix = camera.combined
+        shapes.begin(ShapeRenderer.ShapeType.Filled)
+        shapes.color = Color(0.015f, 0.02f, 0.045f, 0.34f)
+        shapes.rect(
+            camera.position.x - width / 2f,
+            camera.position.y - height / 2f,
+            width,
+            height
+        )
+        shapes.end()
     }
 
     private fun renderConstructionAndBoundaries(snapshot: WorldItemVisualSnapshot, camera: OrthographicCamera) {
@@ -162,6 +182,9 @@ class WorldItemRenderer {
                 EnemyKindIds.SPEARMAN -> availableTokenPath("item_world/indicators/spearman_token.png")
                 EnemyKindIds.HORSEMAN -> availableTokenPath("item_world/indicators/horseman_token.png")
                 EnemyKindIds.WITCH -> availableTokenPath("item_world/indicators/witch_token.png")
+                EnemyKindIds.GHOST -> availableTokenPath("item_world/indicators/ghost_token.png")
+                EnemyKindIds.SLIME -> availableTokenPath("item_world/indicators/slime_token.png")
+                EnemyKindIds.VAMPIRE_LORD -> availableTokenPath("item_world/indicators/vampire_lord_token.png")
                 else -> null
             }
             targets.add(

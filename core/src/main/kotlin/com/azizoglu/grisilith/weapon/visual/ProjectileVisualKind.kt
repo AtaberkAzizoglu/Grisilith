@@ -4,6 +4,11 @@ enum class ProjectileVisualKind(
     val rowIndex: Int,
     val baseWorldHeight: Float
 ) {
+    DAGGER(
+        rowIndex = -1,
+        baseWorldHeight = 34f
+    ),
+
     ARROW(
         rowIndex = 0,
         baseWorldHeight = 30f

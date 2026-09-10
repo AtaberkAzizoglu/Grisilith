@@ -107,7 +107,10 @@ class EnemyRuntimeFactory(
             stats = parent.slimeFragmentStats(),
             runtimeBundle = createRuntimeBundle(definition),
             isSlimeFragment = true
-        )
+        ).also { fragment ->
+            fragment.slimeRangedCooldownRemainingSeconds =
+                parent.slimeRangedCooldownRemainingSeconds
+        }
     }
 
     fun createStats(

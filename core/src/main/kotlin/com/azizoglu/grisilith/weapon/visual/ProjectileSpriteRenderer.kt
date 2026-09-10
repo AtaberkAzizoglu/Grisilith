@@ -24,6 +24,9 @@ class ProjectileSpriteRenderer {
         private const val CROSSBOW_ID =
             "WPN_CROSSBOW"
 
+        private const val DAGGER_ID =
+            "WPN_DAGGER"
+
         private val COLUMN_BOUNDS =
             intArrayOf(
                 0,
@@ -73,10 +76,17 @@ class ProjectileSpriteRenderer {
         private const val CROSSBOW_EXTRA_THICKNESS_OFFSET =
             0.90f
 
+        private const val BOW_PROJECTILE_VISUAL_SCALE =
+            1.16f
+
+        private const val DAGGER_PROJECTILE_VISUAL_SCALE =
+            0.68f
+
         /* Every kind now uses only its right-facing source frame. */
         private const val SOURCE_RIGHT_COLUMN = 6
 
         private const val SPEAR_TEXTURE_PATH = "projectiles/spear_projectile.png"
+        private const val DAGGER_TEXTURE_PATH = "projectiles/dagger_projectile.png"
     }
 
     private val definition =
@@ -95,6 +105,8 @@ class ProjectileSpriteRenderer {
 
     private var spearTexture: Texture? = null
     private var spearRegion: TextureRegion? = null
+    private var daggerTexture: Texture? = null
+    private var daggerRegion: TextureRegion? = null
 
     fun hasVisualDefinition(
         projectile: Projectile
@@ -141,7 +153,11 @@ class ProjectileSpriteRenderer {
                     ?: return@forEach
 
             val region =
-                regions[kind.rowIndex]
+                if (kind == ProjectileVisualKind.DAGGER) {
+                    ensureDaggerRegion() ?: return@forEach
+                } else {
+                    regions[kind.rowIndex]
+                }
 
             val weaponId =
                 projectile
@@ -190,6 +206,14 @@ class ProjectileSpriteRenderer {
                     else ->
                         baseHeight
                 }
+
+            if (weaponId == LONGBOW_ID || weaponId == CROSSBOW_ID) {
+                drawHeight *= BOW_PROJECTILE_VISUAL_SCALE
+            }
+
+            if (weaponId == DAGGER_ID) {
+                drawHeight *= DAGGER_PROJECTILE_VISUAL_SCALE
+            }
 
             var drawWidth =
                 drawHeight *
@@ -323,6 +347,22 @@ class ProjectileSpriteRenderer {
         return TextureRegion(loaded, 0, 882, 712, 280).also { spearRegion = it }
     }
 
+    private fun ensureDaggerRegion(): TextureRegion? {
+        daggerRegion?.let { return it }
+        val handle = Gdx.files.internal(DAGGER_TEXTURE_PATH)
+        if (!handle.exists()) return null
+        val loaded = Texture(handle).also {
+            it.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest)
+        }
+        require(loaded.width == 1774 && loaded.height == 887) {
+            "Unexpected dagger projectile size: ${loaded.width}x${loaded.height}"
+        }
+        daggerTexture = loaded
+        /* Tight alpha crop; the generated source keeps generous safe padding. */
+        return TextureRegion(loaded, 300, 268, 1170, 350)
+            .also { daggerRegion = it }
+    }
+
     private fun rotationDegrees(x: Float, y: Float): Float =
         Math.toDegrees(atan2(y.toDouble(), x.toDouble())).toFloat()
 
@@ -365,6 +405,11 @@ class ProjectileSpriteRenderer {
             weaponId == CROSSBOW_ID
         ) {
             return ProjectileVisualKind.ARROW
+        }
+
+
+        if (weaponId == DAGGER_ID) {
+            return ProjectileVisualKind.DAGGER
         }
 
         /*
@@ -485,6 +530,10 @@ class ProjectileSpriteRenderer {
         spearRegion = null
         spearTexture?.dispose()
         spearTexture = null
+
+        daggerRegion = null
+        daggerTexture?.dispose()
+        daggerTexture = null
 
         batch.dispose()
     }

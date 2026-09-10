@@ -8,6 +8,7 @@ import com.azizoglu.grisilith.summon.SummonedEntity
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitCombatTarget
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitTargetType
 import com.azizoglu.grisilith.enemy.runtime.EnemyRuntimeFactory
+import com.azizoglu.grisilith.content.ConditionType
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
@@ -78,7 +79,9 @@ class EnemyManager {
                 damage
             )
         },
-        onGateDamaged: (Enemy, Int) -> Unit = { _, _ -> }
+        onGateDamaged: (Enemy, Int) -> Unit = { _, _ -> },
+        onPlayerCondition: (ConditionType, Float?, Int) -> Unit = { _, _, _ -> },
+        onSummonCondition: (SummonedEntity, ConditionType, Float?, Int) -> Unit = { _, _, _, _ -> }
     ) {
         /*
          * Only living/active Ivy summons are candidate targets.
@@ -183,7 +186,7 @@ class EnemyManager {
 
             gateBounds?.let {
                 enemy.keepSouthOfBarrier(
-                    barrierY = it.y
+                    barrierY = it.y + it.height
                 )
             }
 
@@ -207,6 +210,14 @@ class EnemyManager {
                                 ?.takeIf { !it.isExpired }
                                 ?.let {
                                     onSummonDamaged(it, damage)
+                                    if (enemy.kindId == com.azizoglu.grisilith.enemy.definition.EnemyKindIds.GHOST) {
+                                        onSummonCondition(
+                                            it,
+                                            ConditionType.NECROSIS,
+                                            5f,
+                                            (enemy.contactDamage * 0.60f).toInt().coerceAtLeast(1)
+                                        )
+                                    }
                                 }
 
                         CombatTargetType.GATE ->
@@ -236,12 +247,34 @@ class EnemyManager {
                             onGateDamaged(enemy, amount)
                         }
                     }
+                    event.conditionType?.let { condition ->
+                        when (event.targetType) {
+                            EnemyTraitTargetType.PLAYER ->
+                                onPlayerCondition(
+                                    condition,
+                                    event.conditionDurationSeconds,
+                                    event.conditionTickDamage
+                                )
+                            EnemyTraitTargetType.SUMMON ->
+                                targetableSummons.getOrNull(event.targetIndex)
+                                    ?.takeIf { !it.isExpired }
+                                    ?.let {
+                                        onSummonCondition(
+                                            it,
+                                            condition,
+                                            event.conditionDurationSeconds,
+                                            event.conditionTickDamage
+                                        )
+                                    }
+                            EnemyTraitTargetType.GATE -> Unit
+                        }
+                    }
                 }
             )
 
             gateBounds?.let {
                 enemy.keepSouthOfBarrier(
-                    barrierY = it.y
+                    barrierY = it.y + it.height
                 )
             }
         }
@@ -352,7 +385,7 @@ class EnemyManager {
                 )
         }
 
-        return candidates.minBy {
+        val closest = candidates.minBy {
             distanceSquared(
                 enemyX = enemy.centerX,
                 enemyY = enemy.centerY,
@@ -360,6 +393,35 @@ class EnemyManager {
                 targetY = it.centerY
             )
         }
+
+        /*
+         * A boss already committed to the gate must become peelable. When the
+         * player comes right beside the gate, switch that boss to the player
+         * so defending the objective is physically possible.
+         */
+        if (
+            closest.type == CombatTargetType.GATE &&
+            enemy.type in setOf(EnemyType.MINI_BOSS, EnemyType.FINAL_BOSS) &&
+            gateBounds != null &&
+            distanceSquaredToRectangle(playerCenterX, playerCenterY, gateBounds) <=
+                BOSS_GATE_PEEL_RADIUS * BOSS_GATE_PEEL_RADIUS
+        ) {
+            return candidates.first { it.type == CombatTargetType.PLAYER }
+        }
+
+        return closest
+    }
+
+    private fun distanceSquaredToRectangle(
+        x: Float,
+        y: Float,
+        rectangle: Rectangle
+    ): Float {
+        val closestX = x.coerceIn(rectangle.x, rectangle.x + rectangle.width)
+        val closestY = y.coerceIn(rectangle.y, rectangle.y + rectangle.height)
+        val dx = x - closestX
+        val dy = y - closestY
+        return dx * dx + dy * dy
     }
 
     private fun distanceSquared(
@@ -536,5 +598,9 @@ class EnemyManager {
         Gdx.gl.glDisable(
             GL20.GL_BLEND
         )
+    }
+
+    companion object {
+        private const val BOSS_GATE_PEEL_RADIUS = 100f
     }
 }

@@ -67,11 +67,12 @@ class RunRewardTracker(
 
     fun onEnemyKilled(
         enemyType: EnemyType,
-        finalBossId: String? = null
+        finalBossId: String? = null,
+        rewardChanceMultiplier: Float = 1f
     ): Int {
         return when (enemyType) {
             EnemyType.MINI_BOSS ->
-                tryAwardMiniBossCoin()
+                tryAwardMiniBossCoin(rewardChanceMultiplier)
 
             EnemyType.FINAL_BOSS ->
                 awardFinalBossCoins(
@@ -106,14 +107,15 @@ class RunRewardTracker(
         return true
     }
 
-    private fun tryAwardMiniBossCoin(): Int {
+    private fun tryAwardMiniBossCoin(chanceMultiplier: Float): Int {
         if (remainingGrisilithCoinCapacity <= 0) {
             return 0
         }
 
         if (!MathUtils.randomBoolean(
-                (MINI_BOSS_COIN_CHANCE +
-                    ActiveItemEffects.miniBossCoinChanceBonus())
+                ((MINI_BOSS_COIN_CHANCE +
+                    ActiveItemEffects.miniBossCoinChanceBonus()) *
+                    chanceMultiplier.coerceIn(0f, 1f))
                     .coerceAtMost(1f)
             )) {
             return 0

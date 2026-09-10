@@ -60,7 +60,22 @@ class TroubleAtHomeDefenseRuntime(
     val targetBounds: Rectangle?
         get() =
             if (isEnabled && !gateHealth.isDead) {
-                gateObstacle?.bounds
+                gateObstacle?.bounds?.let { physicalBounds ->
+                    /*
+                     * The physical gate footprint lives inside the northern
+                     * wall. Enemies cannot legally enter it, so using that
+                     * same rectangle as a combat target made melee contact
+                     * depend on a one-pixel overlap. This attack strip sits
+                     * immediately in front of the gate while preserving the
+                     * real wall collision and the requested visual hitbox.
+                     */
+                    Rectangle(
+                        physicalBounds.x,
+                        physicalBounds.y - GATE_ATTACK_STRIP_DEPTH,
+                        physicalBounds.width,
+                        GATE_ATTACK_STRIP_DEPTH
+                    )
+                }
             } else {
                 null
             }
@@ -493,6 +508,7 @@ class TroubleAtHomeDefenseRuntime(
     }
 
     companion object {
+        private const val GATE_ATTACK_STRIP_DEPTH = 42f
         const val GATE_MAXIMUM_HEALTH = 1000
 
         private const val MAXIMUM_GUARDS = 3

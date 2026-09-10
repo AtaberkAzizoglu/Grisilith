@@ -178,6 +178,13 @@ class WorldRenderer(
                 camera
         )
 
+        /* Acidic Path is a true ground decal: above terrain tiles and below
+         * every obstacle, pickup, combatant and effect. */
+        enemySpriteRenderer.renderGroundVisuals(
+            enemies = enemyManager.allEnemies,
+            camera = camera
+        )
+
         mapObstacleSpriteRenderer.render(
             obstacles =
                 mapObstacles.filter(MapObstacle::isGroundLayer),
@@ -506,7 +513,11 @@ class WorldRenderer(
                     depthEntries.add(
                         DepthRenderEntry(
                             depthY =
-                                enemy.bounds.y,
+                                if (enemy.kindId == com.azizoglu.grisilith.enemy.definition.EnemyKindIds.SLIME) {
+                                    Float.NEGATIVE_INFINITY
+                                } else {
+                                    enemy.bounds.y
+                                },
 
                             render = {
                                 enemySpriteRenderer.render(

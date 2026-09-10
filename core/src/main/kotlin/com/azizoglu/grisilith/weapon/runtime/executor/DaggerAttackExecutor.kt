@@ -491,7 +491,7 @@ class DaggerAttackExecutor(
                         .coerceAtLeast(0f),
 
                 sizeMultiplier =
-                    1f,
+                    0.5f,
 
                 attackerPiercingIgnoreRatio =
                     playerStats

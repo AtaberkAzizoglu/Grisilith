@@ -172,7 +172,8 @@ object MapObstacleSpriteRegistry {
             MapObstacleType.TREE to treeDefinition,
             MapObstacleType.WELL to wellDefinition,
             MapObstacleType.HAY_BALE to hayBaleDefinition,
-            MapObstacleType.BROKEN_WAGON to wagonDefinition
+            MapObstacleType.BROKEN_WAGON to wagonDefinition,
+            MapObstacleType.LAKE to lakeDefinition
         )
 
     private val crateDefinition =

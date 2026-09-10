@@ -25,11 +25,14 @@ import com.azizoglu.grisilith.enemy.behavior.EnemyBehaviorController
 import com.azizoglu.grisilith.enemy.behavior.EnemyCombatClock
 import com.azizoglu.grisilith.enemy.runtime.EnemyRuntimeBundle
 import com.azizoglu.grisilith.enemy.definition.EnemyKindIds
+import com.azizoglu.grisilith.enemy.definition.EnemyAttackDamageTypes
 import com.azizoglu.grisilith.enemy.navigation.EnemyNavigationAgent
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitDamageContext
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitCombatTarget
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitTargetDamage
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitProjectileVisual
+import com.azizoglu.grisilith.enemy.trait.EnemyTraitSpellVisual
+import com.azizoglu.grisilith.enemy.trait.EnemyTraitGroundVisual
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitSpecialVisual
 import com.azizoglu.grisilith.enemy.visual.EnemyVisualState
 import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
@@ -88,6 +91,22 @@ class Enemy(
 
     private var pendingSlimeSplit =
         false
+
+    internal var slimeRangedCooldownRemainingSeconds = 0f
+
+    private var slimeFragmentSpawnAnimationSeconds =
+        if (isSlimeFragment) 0.5f else 0f
+
+    val spawnVisualScale: Float
+        get() {
+            if (!isSlimeFragment || slimeFragmentSpawnAnimationSeconds <= 0f) return 1f
+            val elapsed = 0.5f - slimeFragmentSpawnAnimationSeconds
+            return if (elapsed <= 1f / 3f) {
+                0.5f + (elapsed / (1f / 3f)) * 0.7f
+            } else {
+                1.2f - ((elapsed - 1f / 3f) / (1f / 6f)) * 0.2f
+            }.coerceIn(0.5f, 1.2f)
+        }
 
     private val knockbackVelocity =
         Vector2()
@@ -206,6 +225,9 @@ class Enemy(
                     1
                 )
 
+    val contactDamageType
+        get() = EnemyAttackDamageTypes.contactDamageType(kindId)
+
     val isDead: Boolean
         get() = health.isDead
 
@@ -246,6 +268,12 @@ class Enemy(
 
     val traitProjectileVisuals: List<EnemyTraitProjectileVisual>
         get() = traitRuntime.projectileVisuals()
+
+    val traitSpellVisuals: List<EnemyTraitSpellVisual>
+        get() = traitRuntime.spellVisuals()
+
+    val traitGroundVisuals: List<EnemyTraitGroundVisual>
+        get() = traitRuntime.groundVisuals()
 
     val traitSpecialVisual: EnemyTraitSpecialVisual?
         get() = traitRuntime.specialVisual(this)
@@ -388,6 +416,12 @@ class Enemy(
         combatTargets: List<EnemyTraitCombatTarget> = emptyList(),
         onTraitTargetDamage: (EnemyTraitTargetDamage) -> Unit = {}
     ) {
+        if (slimeFragmentSpawnAnimationSeconds > 0f) {
+            val appliedDelta = delta.coerceAtLeast(0f).coerceAtMost(slimeFragmentSpawnAnimationSeconds)
+            position.y += FRAGMENT_BOUNCE_NORTH_SPEED * appliedDelta
+            slimeFragmentSpawnAnimationSeconds -= appliedDelta
+        }
+
         updateTemporaryCombatBuff(delta)
 
         if (
@@ -1004,6 +1038,17 @@ class Enemy(
                         )
                 )
         ) {
+            if (kindId == EnemyKindIds.GHOST) {
+                pendingDamageNumberEvents.add(
+                    DamageNumberEvent(
+                        amount = 0,
+                        worldX = centerX,
+                        worldY = centerY + size * 0.60f,
+                        displayText = "Miss",
+                        isMiss = true
+                    )
+                )
+            }
             return 0
         }
 
@@ -1214,24 +1259,24 @@ class Enemy(
     }
 
     internal fun slimeFragmentStats(): EnemyStats {
-        fun fifth(value: Int) = (value * 0.20f).roundToInt().coerceAtLeast(1)
+        fun fragmentValue(value: Int) = (value * 0.30f).roundToInt().coerceAtLeast(1)
         return stats.copy(
-            maximumHealth = fifth(health.maximumHealth),
-            contactDamage = fifth(stats.contactDamage),
-            movementSpeed = (stats.movementSpeed * 0.20f).coerceAtLeast(1f),
+            maximumHealth = fragmentValue(health.maximumHealth),
+            contactDamage = fragmentValue(stats.contactDamage),
+            movementSpeed = stats.movementSpeed * 1.75f,
             size = stats.size * 0.55f,
-            goldReward = stats.goldReward * 0.20f,
-            armorClass = (stats.armorClass * 0.20f).roundToInt().coerceAtLeast(0),
-            baseArmor = (stats.baseArmor * 0.20f).roundToInt().coerceAtLeast(0),
-            attacksPerSecond = (stats.attacksPerSecond * 0.20f).coerceAtLeast(0.10f),
+            goldReward = stats.goldReward * 0.25f,
+            armorClass = (stats.armorClass * 0.30f).roundToInt().coerceAtLeast(0),
+            baseArmor = (stats.baseArmor * 0.30f).roundToInt().coerceAtLeast(0),
+            attacksPerSecond = (stats.attacksPerSecond * 0.30f).coerceAtLeast(0.10f),
             attackRange = (stats.attackRange * 0.55f).coerceAtLeast(20f),
-            weaponDamageMultiplier = stats.weaponDamageMultiplier * 0.20f,
-            attackSpeedScore = (stats.attackSpeedScore * 0.20f).roundToInt(),
-            mainDamageStat = (stats.mainDamageStat * 0.20f).roundToInt(),
-            secondaryDamageStat = (stats.secondaryDamageStat * 0.20f).roundToInt(),
-            critRate = (stats.critRate * 0.20f).roundToInt(),
-            critDamage = (stats.critDamage * 0.20f).roundToInt(),
-            piercing = (stats.piercing * 0.20f).roundToInt()
+            weaponDamageMultiplier = stats.weaponDamageMultiplier * 0.30f,
+            attackSpeedScore = (stats.attackSpeedScore * 0.30f).roundToInt(),
+            mainDamageStat = (stats.mainDamageStat * 0.30f).roundToInt(),
+            secondaryDamageStat = (stats.secondaryDamageStat * 0.30f).roundToInt(),
+            critRate = (stats.critRate * 0.30f).roundToInt(),
+            critDamage = (stats.critDamage * 0.30f).roundToInt(),
+            piercing = (stats.piercing * 0.30f).roundToInt()
         )
     }
 
@@ -2047,6 +2092,8 @@ class Enemy(
         )
     }
     companion object {
+
+        private const val FRAGMENT_BOUNCE_NORTH_SPEED = 18f
 
         private const val COLLISION_WIDTH_RATIO =
             0.58f

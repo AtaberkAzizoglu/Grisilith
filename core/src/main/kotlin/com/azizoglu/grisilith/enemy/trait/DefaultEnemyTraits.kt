@@ -2,7 +2,6 @@ package com.azizoglu.grisilith.enemy.trait
 
 import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.content.ContentTag
-import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyType
 import kotlin.math.max
@@ -66,7 +65,7 @@ internal object DefaultEnemyTraits {
                 GhostStormEnemyTrait()
 
             EnemyTraitIds.SLIME_ACIDIC_PATH ->
-                SlimeAcidicPathTrait()
+                SlimeAcidicPathAndSpitTrait()
 
             EnemyTraitIds.SLIME_SPLIT_ON_DEATH ->
                 SlimeRealSplitMarkerTrait()
@@ -747,6 +746,8 @@ private class GorillaThrowTrait :
         val velocityX: Float,
         val velocityY: Float,
         val damage: Int,
+        val startX: Float,
+        val startY: Float,
         val size: Float = 30f,
         var active: Boolean = true
     ) {
@@ -907,7 +908,9 @@ private class GorillaThrowTrait :
                         .roundToInt()
                         .coerceAtLeast(
                             1
-                        )
+                        ),
+                startX = context.owner.centerX,
+                startY = context.owner.centerY
             )
         )
     }
@@ -982,7 +985,8 @@ private class GorillaThrowTrait :
                             rock.damage,
 
                         sourceName =
-                            "Gorilla Throw"
+                            "Gorilla Throw",
+                        damageType = com.azizoglu.grisilith.content.DamageType.BLUDGEONING
                     )
                 )
 
@@ -1015,20 +1019,13 @@ private class GorillaThrowTrait :
             phase ==
             Phase.WINDUP
         ) {
-            shapeRenderer.color =
-                Color(
-                    1f,
-                    0.25f,
-                    0.08f,
-                    0.90f
-                )
-
-            shapeRenderer.rectLine(
+            drawEnemyProjectileDottedLine(
+                shapeRenderer,
                 owner.centerX,
                 owner.centerY,
                 lockedTargetX,
                 lockedTargetY,
-                4f
+                Color.WHITE
             )
         }
 
@@ -1041,6 +1038,14 @@ private class GorillaThrowTrait :
             )
 
         rocks.forEach { rock ->
+            drawEnemyProjectileDottedLine(
+                shapeRenderer,
+                rock.startX,
+                rock.startY,
+                rock.startX + rock.velocityX * 12f,
+                rock.startY + rock.velocityY * 12f,
+                Color(1f, 0.08f, 0.05f, 0.92f)
+            )
             shapeRenderer.circle(
                 rock.x,
                 rock.y,
@@ -1066,6 +1071,31 @@ private class GorillaThrowTrait :
 
         private const val BASE_DAMAGE_MULTIPLIER =
             3.75f
+    }
+}
+
+private fun drawEnemyProjectileDottedLine(
+    renderer: ShapeRenderer,
+    startX: Float,
+    startY: Float,
+    endX: Float,
+    endY: Float,
+    color: Color
+) {
+    val direction = Vector2(endX - startX, endY - startY)
+    val length = direction.len()
+    if (length <= 1f) return
+    direction.nor()
+    renderer.color = color
+    var distance = 14f
+    while (distance < length) {
+        renderer.circle(
+            startX + direction.x * distance,
+            startY + direction.y * distance,
+            3.2f,
+            8
+        )
+        distance += 22f
     }
 }
 
@@ -1320,7 +1350,8 @@ private class SlimeAcidicPathTrait :
                         tickDamage,
 
                     sourceName =
-                        "Acidic Path"
+                        "Acidic Path",
+                    damageType = com.azizoglu.grisilith.content.DamageType.ACID
                 )
             )
         }
@@ -1629,7 +1660,8 @@ private class GorillaStompTheEarthTrait : EnemyTrait {
                     pendingDamage.add(
                         EnemyTraitPlayerDamage(
                             amount = (context.owner.contactDamage * DAMAGE_MULTIPLIER).roundToInt().coerceAtLeast(1),
-                            sourceName = "Stomp the Earth"
+                            sourceName = "Stomp the Earth",
+                            damageType = com.azizoglu.grisilith.content.DamageType.BLUDGEONING
                         )
                     )
                 }
@@ -1671,174 +1703,6 @@ private class GorillaStompTheEarthTrait : EnemyTrait {
         private const val RADIUS = 285f
         private const val DAMAGE_MULTIPLIER = 3.20f
     }
-}
-
-private class SpearmanThrowTheLanceTrait : EnemyTrait {
-    override val id = EnemyTraitIds.SPEARMAN_THROW_THE_LANCE
-
-    private data class LanceProjectile(
-        var x: Float,
-        var y: Float,
-        val vx: Float,
-        val vy: Float,
-        val damage: Int,
-        var life: Float = 2.5f
-    )
-
-    private var cooldown = INITIAL_COOLDOWN_SECONDS
-    private var windup = 0f
-    private var lockedX = 0f
-    private var lockedY = 0f
-    private val projectiles = mutableListOf<LanceProjectile>()
-    private val pendingDamage = mutableListOf<EnemyTraitPlayerDamage>()
-
-    override fun update(context: EnemyTraitUpdateContext) {
-        if (context.owner.isDead) return
-        val dt = context.delta.coerceAtLeast(0f)
-
-        if (windup > 0f) {
-            windup -= dt
-            if (windup <= 0f) launch(context)
-        } else {
-            cooldown -= dt
-            if (cooldown <= 0f) {
-                lockedX = context.targetCenterX
-                lockedY = context.targetCenterY
-                windup = WINDUP_SECONDS
-                cooldown = COOLDOWN_SECONDS
-            }
-        }
-
-        val it = projectiles.iterator()
-        while (it.hasNext()) {
-            val p = it.next()
-            p.x += p.vx * dt
-            p.y += p.vy * dt
-            p.life -= dt
-            val hit = Rectangle(p.x - 10f, p.y - 5f, 20f, 10f).overlaps(context.targetBounds)
-            if (hit) {
-                pendingDamage.add(EnemyTraitPlayerDamage(p.damage, "Throw the Lance"))
-                it.remove()
-            } else if (p.life <= 0f || p.x < 0f || p.y < 0f || p.x > context.worldWidth || p.y > context.worldHeight) {
-                it.remove()
-            }
-        }
-    }
-
-    private fun launch(context: EnemyTraitUpdateContext) {
-        val d = Vector2(lockedX - context.owner.centerX, lockedY - context.owner.centerY)
-        if (d.isZero) d.set(1f, 0f)
-        d.nor().scl(PROJECTILE_SPEED)
-        projectiles.add(
-            LanceProjectile(
-                context.owner.centerX,
-                context.owner.centerY,
-                d.x,
-                d.y,
-                (context.owner.contactDamage * DAMAGE_MULTIPLIER).roundToInt().coerceAtLeast(1)
-            )
-        )
-    }
-
-    override fun consumePlayerDamage(): List<EnemyTraitPlayerDamage> {
-        if (pendingDamage.isEmpty()) return emptyList()
-        return pendingDamage.toList().also { pendingDamage.clear() }
-    }
-
-    override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
-        shapeRenderer.color = Color(0.82f, 0.84f, 0.92f, 0.95f)
-        projectiles.forEach { p ->
-            shapeRenderer.rectLine(p.x - 15f, p.y, p.x + 15f, p.y, 4f)
-        }
-    }
-
-    companion object {
-        private const val INITIAL_COOLDOWN_SECONDS = 6f
-        private const val COOLDOWN_SECONDS = 15f
-        private const val WINDUP_SECONDS = 0.55f
-        private const val PROJECTILE_SPEED = 520f
-        private const val DAMAGE_MULTIPLIER = 2.40f
-    }
-}
-
-private class HorsemanBattleCryTrait : EnemyTrait {
-    override val id = EnemyTraitIds.HORSEMAN_BATTLE_CRY
-
-    private var cooldown = INITIAL_COOLDOWN_SECONDS
-    private var castRemaining = 0f
-    private var castElapsed = 0f
-
-    override fun update(context: EnemyTraitUpdateContext) {
-        if (context.owner.isDead) return
-        val dt = context.delta.coerceAtLeast(0f)
-
-        if (castRemaining > 0f) {
-            castRemaining -= dt
-            castElapsed += dt
-            if (castRemaining <= 0f) {
-                applyCry(context)
-                cooldown = COOLDOWN_SECONDS
-                castElapsed = 0f
-            }
-            return
-        }
-
-        cooldown -= dt
-        if (cooldown <= 0f) {
-            castRemaining = CAST_SECONDS
-            castElapsed = 0f
-        }
-    }
-
-    private fun applyCry(context: EnemyTraitUpdateContext) {
-        val all = context.nearbyEnemies
-        all.forEach { enemy ->
-            if (enemy.isDead) return@forEach
-            val dx = enemy.centerX - context.owner.centerX
-            val dy = enemy.centerY - context.owner.centerY
-            if (dx * dx + dy * dy > RADIUS * RADIUS) return@forEach
-            enemy.applyTemporaryCombatBuff(
-                durationSeconds = BUFF_SECONDS,
-                damageMultiplier = DAMAGE_MULTIPLIER,
-                movementSpeedMultiplier = MOVE_MULTIPLIER,
-                attackSpeedMultiplier = ATTACK_SPEED_MULTIPLIER
-            )
-            enemy.removeCondition(ConditionType.FRIGHTENED)
-        }
-    }
-
-    override fun resolveMovementOverride(owner: Enemy, output: Vector2): Boolean {
-        if (castRemaining <= 0f) return false
-        output.setZero()
-        return true
-    }
-
-    override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
-        if (castRemaining <= 0f) return
-        val progress = (castElapsed / CAST_SECONDS).coerceIn(0f, 1f)
-        val pulse = ((progress * 3f) % 1f)
-        shapeRenderer.color = Color(0.85f, 0.04f, 0.04f, 0.72f)
-        shapeRenderer.circle(owner.centerX, owner.centerY, RADIUS * pulse, 64)
-    }
-
-    companion object {
-        private const val INITIAL_COOLDOWN_SECONDS = 10f
-        private const val COOLDOWN_SECONDS = 30f
-        private const val CAST_SECONDS = 1.50f
-        private const val RADIUS = 520f
-        private const val BUFF_SECONDS = 8f
-        private const val DAMAGE_MULTIPLIER = 1.18f
-        private const val MOVE_MULTIPLIER = 1.12f
-        private const val ATTACK_SPEED_MULTIPLIER = 1.12f
-    }
-}
-
-private class WitchSummonFamiliarsPlaceholderTrait : EnemyTrait {
-    override val id = EnemyTraitIds.WITCH_SUMMON_FAMILIARS
-    /*
-     * Intentionally dormant until the Stage Spawn redesign.
-     * The content/runtime hook exists now so the Witch definition is final.
-     */
 }
 
 private class GhostHauntingPresenceTrait : EnemyTrait {

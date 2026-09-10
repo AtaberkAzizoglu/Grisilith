@@ -142,7 +142,12 @@ class Player(
             )
 
         conditions.update(
-            delta = safeDelta
+            delta = safeDelta,
+            onTick = { tick ->
+                if (tick.source.tickDamage > 0) {
+                    takeDamage(tick.source.tickDamage)
+                }
+            }
         )
 
         previousPosition.set(
@@ -980,10 +985,6 @@ class Player(
             delta.coerceAtLeast(
                 0f
             )
-
-        conditions.update(
-            delta = safeDelta
-        )
 
         updateActualMovementSpeed(
             delta =

@@ -16,6 +16,8 @@ class DamageNumberManager {
         val startX: Float,
         val startY: Float,
         val isCriticalHit: Boolean,
+        val displayText: String?,
+        val isMiss: Boolean,
         val horizontalOffset: Float,
         var elapsedSeconds: Float = 0f
     )
@@ -45,6 +47,8 @@ class DamageNumberManager {
                     startX = event.worldX,
                     startY = event.worldY,
                     isCriticalHit = event.isCriticalHit,
+                    displayText = event.displayText,
+                    isMiss = event.isMiss,
                     horizontalOffset = when (sequence++ % 5) {
                         0 -> -10f
                         1 -> 8f
@@ -99,7 +103,9 @@ class DamageNumberManager {
             )
 
             font.color =
-                if (number.isCriticalHit) {
+                if (number.isMiss) {
+                    Color(1f, 0.12f, 0.10f, alpha)
+                } else if (number.isCriticalHit) {
                     Color(1f, 0.88f, 0.12f, alpha)
                 } else {
                     Color(1f, 1f, 1f, alpha)
@@ -107,7 +113,7 @@ class DamageNumberManager {
 
             font.draw(
                 batch,
-                number.amount.toString(),
+                number.displayText ?: number.amount.toString(),
                 number.startX +
                     sin(progress * 3.1415927f) *
                     number.horizontalOffset,

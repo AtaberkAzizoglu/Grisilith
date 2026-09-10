@@ -151,7 +151,8 @@ class Projectile(
             sizeMultiplier
                 .coerceAtLeast(
                     0.1f
-                )
+                ) *
+            GLOBAL_PROJECTILE_SIZE_MULTIPLIER
 
     private val collisionBounds =
         Rectangle()
@@ -217,6 +218,15 @@ class Projectile(
             isActive &&
                 !ignoresEnemyCollisions &&
                 activationDelayRemaining <= 0f
+
+    companion object {
+        /*
+         * Shared by player- and summon-owned weapon projectiles. Keeping the
+         * multiplier here makes the gameplay body and its sprite grow
+         * together instead of creating misleading visual-only hitboxes.
+         */
+        private const val GLOBAL_PROJECTILE_SIZE_MULTIPLIER = 2f
+    }
 
     init {
         if (velocity.isZero) {
