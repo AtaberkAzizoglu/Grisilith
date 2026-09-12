@@ -7,6 +7,7 @@ import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.summon.SummonedEntity
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitCombatTarget
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitTargetType
+import com.azizoglu.grisilith.enemy.trait.CombatEntityType
 import com.azizoglu.grisilith.enemy.runtime.EnemyRuntimeFactory
 import com.azizoglu.grisilith.content.ConditionType
 
@@ -60,6 +61,7 @@ class EnemyManager {
         targetX: Float,
         targetY: Float,
         targetBounds: Rectangle,
+        playerMaximumHealth: Int,
         summons: List<SummonedEntity>,
         gateCenterX: Float? = null,
         gateCenterY: Float? = null,
@@ -98,6 +100,7 @@ class EnemyManager {
                 playerCenterX = targetX,
                 playerCenterY = targetY,
                 playerBounds = targetBounds,
+                playerMaximumHealth = playerMaximumHealth,
                 summons = targetableSummons,
                 gateCenterX = gateCenterX,
                 gateCenterY = gateCenterY,
@@ -195,6 +198,12 @@ class EnemyManager {
                 targetX = selectedTarget.centerX,
                 targetY = selectedTarget.centerY,
                 targetBounds = selectedTarget.bounds,
+                targetEntityType =
+                    when (selectedTarget.type) {
+                        CombatTargetType.PLAYER -> CombatEntityType.PLAYER
+                        CombatTargetType.SUMMON -> CombatEntityType.SUMMON
+                        CombatTargetType.GATE -> CombatEntityType.STRUCTURE
+                    },
                 worldWidth = worldWidth,
                 worldHeight = worldHeight,
                 mapObstacles = mapObstacles,
@@ -307,6 +316,7 @@ class EnemyManager {
         playerCenterX: Float,
         playerCenterY: Float,
         playerBounds: Rectangle,
+        playerMaximumHealth: Int,
         summons: List<SummonedEntity>,
         gateCenterX: Float?,
         gateCenterY: Float?,
@@ -317,7 +327,8 @@ class EnemyManager {
                 type = EnemyTraitTargetType.PLAYER,
                 centerX = playerCenterX,
                 centerY = playerCenterY,
-                bounds = Rectangle(playerBounds)
+                bounds = Rectangle(playerBounds),
+                maximumHealth = playerMaximumHealth
             )
         )
         summons.forEachIndexed { index, summon ->
@@ -326,7 +337,8 @@ class EnemyManager {
                 index = index,
                 centerX = summon.centerX,
                 centerY = summon.centerY,
-                bounds = Rectangle(summon.combatBounds)
+                bounds = Rectangle(summon.combatBounds),
+                maximumHealth = summon.health.maximumHealth
             )
         }
         if (gateCenterX != null && gateCenterY != null && gateBounds != null) {

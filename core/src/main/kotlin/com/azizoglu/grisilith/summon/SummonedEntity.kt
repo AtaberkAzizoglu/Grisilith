@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.summon
 
 import com.azizoglu.grisilith.combat.HealthComponent
+import com.azizoglu.grisilith.combat.healing.HealingVisualManager
+import com.azizoglu.grisilith.combat.healing.HealingVisualAnchor
 import com.azizoglu.grisilith.combat.damage.DamageNumberEvent
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionContainer
@@ -131,6 +133,14 @@ class SummonedEntity(
             maximumHealth =
                 stats.maximumHealth
         )
+
+    init {
+        health.onHealingApplied = { _, type ->
+            HealingVisualManager.spawnFollowing(type) {
+                HealingVisualAnchor(centerX, centerY, combatRadius * 2f)
+            }
+        }
+    }
 
     /** Active gameplay conditions, shared with the world condition VFX layer. */
     val conditions =

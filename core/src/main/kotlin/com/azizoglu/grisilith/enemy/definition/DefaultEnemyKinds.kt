@@ -666,7 +666,7 @@ object DefaultEnemyKinds {
                 "The Undead Final Boss. Hunts by contact, drains life and escapes through living mist.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.FINAL_BOSS),
-            sizeCategory = EnemySizeCategory.COLOSSAL,
+            sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
                     maximumHealth = 22000,
@@ -679,7 +679,7 @@ object DefaultEnemyKinds {
                     weaponDamageMultiplier = 1.35f,
                     attackSpeedScore = 26,
                     mainDamageStat = 34,
-                    secondaryDamageStat = 34,
+                    secondaryDamageStat = 28,
                     baseCritRatePercent = 50f,
                     baseCritDamagePercent = 200f,
                     critRate = 0,
@@ -690,7 +690,8 @@ object DefaultEnemyKinds {
                 EnemyBehaviorIds.CHASE_AND_MELEE,
             activeSkillIds =
                 listOf(
-                    EnemyAbilityIds.VAMPIRE_MISTY_TRANSPORTATION
+                    EnemyAbilityIds.VAMPIRE_MISTY_TRANSPORTATION,
+                    EnemyAbilityIds.HORSEMAN_BATTLE_CRY
                 ),
             passiveIds =
                 listOf(

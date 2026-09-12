@@ -169,12 +169,14 @@ class EnemyTraitRuntime private constructor(
 
     fun onPlayerContact(
         owner: Enemy,
-        dealtDamage: Int
+        dealtDamage: Int,
+        targetEntityType: CombatEntityType
     ) {
         traits.forEach { trait ->
             trait.onPlayerContact(
                 owner = owner,
-                dealtDamage = dealtDamage
+                dealtDamage = dealtDamage,
+                targetEntityType = targetEntityType
             )
         }
     }

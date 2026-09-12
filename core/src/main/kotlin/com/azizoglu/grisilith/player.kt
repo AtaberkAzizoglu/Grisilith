@@ -1,6 +1,9 @@
 package com.azizoglu.grisilith.player
 
 import com.azizoglu.grisilith.combat.HealthComponent
+import com.azizoglu.grisilith.combat.HealingVisualType
+import com.azizoglu.grisilith.combat.healing.HealingVisualManager
+import com.azizoglu.grisilith.combat.healing.HealingVisualAnchor
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionContainer
 import com.azizoglu.grisilith.content.ConditionType
@@ -77,6 +80,14 @@ class Player(
             maximumHealth =
                 stats.calculatedMaximumHealth()
         )
+
+    init {
+        health.onHealingApplied = { _, type ->
+            HealingVisualManager.spawnFollowing(type) {
+                HealingVisualAnchor(centerX, centerY, size)
+            }
+        }
+    }
 
     /** Active gameplay conditions, also consumed by ConditionVisualRenderer. */
     val conditions =
@@ -797,7 +808,8 @@ class Player(
         health.heal(
             (healingAmount *
                 ActiveItemEffects.healingMultiplier())
-                .toInt()
+                .toInt(),
+            HealingVisualType.LIFE_STEAL
         )
     }
 

@@ -3,6 +3,7 @@ package com.azizoglu.grisilith.screen
 import kotlin.math.roundToInt
 
 import com.azizoglu.grisilith.combat.damage.DamageNumberManager
+import com.azizoglu.grisilith.combat.healing.HealingVisualManager
 import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
@@ -2901,6 +2902,7 @@ class FirstScreen(
             delta =
                 delta
         )
+        HealingVisualManager.update(delta)
 
         if (player.health.isDead) {
             return
@@ -3156,6 +3158,9 @@ class FirstScreen(
 
             targetBounds =
                 player.bounds,
+
+            playerMaximumHealth =
+                player.health.maximumHealth,
 
             summons =
                 summonManager
@@ -3901,14 +3906,16 @@ class FirstScreen(
     }
 
     private fun goldRewardFor(enemy: Enemy): Int =
-        ActiveItemEffects.modifyGoldReward(
-            GoldEconomyCalculator.enemyDrop(
+        (
+            ActiveItemEffects.modifyGoldReward(
+                GoldEconomyCalculator.enemyDrop(
                 enemyType = enemy.type,
                 harvestScore = playerStats.totalScore(StatType.HARVEST)
-            ),
-            enemyType = enemy.type,
-            enemyKindId = enemy.kindId
-        )
+                ),
+                enemyType = enemy.type,
+                enemyKindId = enemy.kindId
+            ) * if (enemy.isSlimeFragment) 0.25f else 1f
+        ).roundToInt().coerceAtLeast(if (enemy.isSlimeFragment) 1 else 0)
 
     private fun applyChestReward(
         reward:

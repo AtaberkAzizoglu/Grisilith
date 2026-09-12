@@ -67,6 +67,12 @@ object DefaultUndeadEnemySpriteSheets {
             frameDuration = frameDuration
         )
 
+    val vampireSecondForm = standardDefinition(
+        EnemyKindIds.VAMPIRE_LORD,
+        "vampire_lord_second_form.png",
+        0.10f
+    )
+
     val all = listOf(
         standardDefinition(
             EnemyKindIds.SKELETON_WARRIOR,

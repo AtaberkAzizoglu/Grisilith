@@ -1,7 +1,8 @@
 package com.azizoglu.grisilith.combat
 
 class HealthComponent(
-    maximumHealth: Int
+    maximumHealth: Int,
+    var onHealingApplied: ((Int, HealingVisualType) -> Unit)? = null
 ) {
     init {
         require(maximumHealth > 0) {
@@ -42,7 +43,10 @@ class HealthComponent(
         return previousHealth - currentHealth
     }
 
-    fun heal(amount: Int): Int {
+    fun heal(
+        amount: Int,
+        visualType: HealingVisualType = HealingVisualType.HEAL
+    ): Int {
         if (amount <= 0 || isDead) {
             return 0
         }
@@ -53,7 +57,9 @@ class HealthComponent(
             (currentHealth + amount)
                 .coerceAtMost(maximumHealth)
 
-        return currentHealth - previousHealth
+        val applied = currentHealth - previousHealth
+        if (applied > 0) onHealingApplied?.invoke(applied, visualType)
+        return applied
     }
 
     fun increaseMaximumHealth(

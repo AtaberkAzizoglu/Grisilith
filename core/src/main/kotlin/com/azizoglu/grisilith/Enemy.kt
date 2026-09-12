@@ -4,6 +4,8 @@ import com.azizoglu.grisilith.combat.damage.DamageNumberEvent
 
 import com.azizoglu.grisilith.combat.ContactDamageTimer
 import com.azizoglu.grisilith.combat.HealthComponent
+import com.azizoglu.grisilith.combat.healing.HealingVisualManager
+import com.azizoglu.grisilith.combat.healing.HealingVisualAnchor
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
@@ -29,6 +31,7 @@ import com.azizoglu.grisilith.enemy.definition.EnemyAttackDamageTypes
 import com.azizoglu.grisilith.enemy.navigation.EnemyNavigationAgent
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitDamageContext
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitCombatTarget
+import com.azizoglu.grisilith.enemy.trait.CombatEntityType
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitTargetDamage
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitProjectileVisual
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitSpellVisual
@@ -131,7 +134,40 @@ class Enemy(
             EnemyType.FINAL_BOSS -> 0.15f
         }
 
-    private val size = stats.size
+    private var size = stats.size
+    private var lastWorldWidth = 0f
+    private var lastWorldHeight = 0f
+
+    var isVampireSecondForm: Boolean = false
+        private set
+
+    var vampireTransformationRemainingSeconds: Float = 0f
+        private set
+
+    var vampireMistyEscapeCooldownRemainingSeconds: Float = 0f
+        private set
+
+    var isVampireEscaping: Boolean = false
+        private set
+
+    var vampireEscapeTargetX: Float = 0f
+        private set
+
+    var vampireEscapeTargetY: Float = 0f
+        private set
+
+    var isVampireTeleportLocked: Boolean = false
+        private set
+
+    val isVampireTransforming: Boolean
+        get() = vampireTransformationRemainingSeconds > 0f
+
+    val isActiveSkillLocked: Boolean
+        get() =
+            isVampireEscaping ||
+                isVampireTransforming ||
+                isVampireTeleportLocked ||
+                conditions.contains(ConditionType.STUNNED)
 
     private var executionMarkRemainingSeconds =
         0f
@@ -162,8 +198,8 @@ class Enemy(
 
     val effectiveArmorClass: Int
         get() =
-            stats.armorClass -
-                armorClassReduction
+            ((stats.armorClass * if (isVampireSecondForm) 1.5f else 1f).roundToInt() -
+                armorClassReduction).coerceAtLeast(0)
 
     private val collisionBounds = Rectangle()
 
@@ -196,6 +232,14 @@ class Enemy(
         maximumHealth = stats.maximumHealth
     )
 
+    init {
+        health.onHealingApplied = { _, type ->
+            HealingVisualManager.spawnFollowing(type) {
+                HealingVisualAnchor(centerX, centerY, visualSize)
+            }
+        }
+    }
+
     private val conditionRuntime =
         ConditionRuntime(
             owner = this
@@ -215,6 +259,7 @@ class Enemy(
         get() =
             (
                 stats.contactDamage *
+                    (if (isVampireSecondForm) 1.25f else 1f) *
                     traitRuntime
                         .currentModifiers
                         .damageMultiplier *
@@ -331,11 +376,11 @@ class Enemy(
 
     val ignoresObstacles: Boolean
         get() =
-            stats.ignoresObstacles
+            stats.ignoresObstacles || kindId == EnemyKindIds.VAMPIRE_LORD
 
     val canSpawnInsideObstacles: Boolean
         get() =
-            stats.canSpawnInsideObstacles
+            stats.canSpawnInsideObstacles || kindId == EnemyKindIds.VAMPIRE_LORD
 
     val centerX: Float
         get() = position.x + size / 2f
@@ -408,6 +453,7 @@ class Enemy(
         targetX: Float,
         targetY: Float,
         targetBounds: Rectangle,
+        targetEntityType: CombatEntityType = CombatEntityType.PLAYER,
         worldWidth: Float,
         worldHeight: Float,
         mapObstacles: List<MapObstacle>,
@@ -416,6 +462,8 @@ class Enemy(
         combatTargets: List<EnemyTraitCombatTarget> = emptyList(),
         onTraitTargetDamage: (EnemyTraitTargetDamage) -> Unit = {}
     ) {
+        lastWorldWidth = worldWidth
+        lastWorldHeight = worldHeight
         if (slimeFragmentSpawnAnimationSeconds > 0f) {
             val appliedDelta = delta.coerceAtLeast(0f).coerceAtMost(slimeFragmentSpawnAnimationSeconds)
             position.y += FRAGMENT_BOUNCE_NORTH_SPEED * appliedDelta
@@ -477,6 +525,13 @@ class Enemy(
             conditions.clear()
             return
         }
+
+        vampireTransformationRemainingSeconds =
+            (vampireTransformationRemainingSeconds - delta.coerceAtLeast(0f))
+                .coerceAtLeast(0f)
+        vampireMistyEscapeCooldownRemainingSeconds =
+            (vampireMistyEscapeCooldownRemainingSeconds - delta.coerceAtLeast(0f))
+                .coerceAtLeast(0f)
 
         if (carriedByHeavyBolt) {
             conditions.clear()
@@ -703,6 +758,7 @@ class Enemy(
                     movementDirection,
                     controlState.modifiedMovementSpeed(
                         stats.movementSpeed *
+                            (if (isVampireSecondForm) 1.20f else 1f) *
                             terrainMovementSpeedMultiplier *
                             traitRuntime
                                 .currentModifiers
@@ -715,7 +771,7 @@ class Enemy(
         }
 
         val isTouchingPlayer =
-            bounds.overlaps(targetBounds)
+            !isVampireEscaping && bounds.overlaps(targetBounds)
 
         if (isTouchingPlayer) {
             position.set(previousPosition)
@@ -783,7 +839,8 @@ class Enemy(
 
                 traitRuntime.onPlayerContact(
                     owner = this,
-                    dealtDamage = resolvedContactDamage
+                    dealtDamage = resolvedContactDamage,
+                    targetEntityType = targetEntityType
                 )
             }
         }
@@ -997,6 +1054,14 @@ class Enemy(
         }
     }
 
+    fun teleportCenter(targetCenterX: Float, targetCenterY: Float, worldWidth: Float, worldHeight: Float) {
+        position.set(
+            (targetCenterX - size / 2f).coerceIn(0f, (worldWidth - size).coerceAtLeast(0f)),
+            (targetCenterY - size / 2f).coerceIn(0f, (worldHeight - size).coerceAtLeast(0f))
+        )
+        previousPosition.set(position)
+    }
+
     fun takeDamage(
         amount: Int,
         damageContext: EnemyDamageContext =
@@ -1162,10 +1227,19 @@ class Enemy(
 
         if (traitResolvedFinalDamage <= 0) return 0
 
+        val triggersVampireMistyEscape =
+            kindId == EnemyKindIds.VAMPIRE_LORD &&
+                !isVampireSecondForm &&
+                traitResolvedFinalDamage >= health.currentHealth
+
         val appliedDamage =
-            health.takeDamage(
-                traitResolvedFinalDamage
-            )
+            if (triggersVampireMistyEscape) {
+                val dealt = health.takeDamage((health.currentHealth - 1).coerceAtLeast(0))
+                beginVampireMistyEscape()
+                dealt
+            } else {
+                health.takeDamage(traitResolvedFinalDamage)
+            }
 
         if (
             appliedDamage > 0 &&
@@ -1804,6 +1878,46 @@ class Enemy(
         }
     }
 
+    private fun beginVampireMistyEscape() {
+        if (isVampireSecondForm || isVampireEscaping || kindId != EnemyKindIds.VAMPIRE_LORD) return
+        isVampireEscaping = true
+        vampireEscapeTargetX =
+            if (centerX < lastWorldWidth / 2f) size / 2f + VAMPIRE_ESCAPE_EDGE_MARGIN
+            else lastWorldWidth - size / 2f - VAMPIRE_ESCAPE_EDGE_MARGIN
+        vampireEscapeTargetY =
+            centerY.coerceIn(
+                size / 2f + VAMPIRE_ESCAPE_EDGE_MARGIN,
+                lastWorldHeight - size / 2f - VAMPIRE_ESCAPE_EDGE_MARGIN
+            )
+        vampireMistyEscapeCooldownRemainingSeconds = 180f
+    }
+
+    fun startVampireSecondFormTransformation() {
+        if (isVampireSecondForm || kindId != EnemyKindIds.VAMPIRE_LORD) return
+        val oldCenterX = centerX
+        val oldCenterY = centerY
+        isVampireEscaping = false
+        isVampireSecondForm = true
+        size = 82f
+        position.set(oldCenterX - size / 2f, oldCenterY - size / 2f)
+        previousPosition.set(position)
+        health.setMaximumHealth(
+            newMaximumHealth = (stats.maximumHealth * 1.50f).roundToInt(),
+            healAddedHealth = false
+        )
+        health.restoreCurrentHealth(health.maximumHealth)
+        HealingVisualManager.spawnFollowing(
+            com.azizoglu.grisilith.combat.HealingVisualType.HEAL
+        ) {
+            HealingVisualAnchor(centerX, centerY, visualSize)
+        }
+        vampireTransformationRemainingSeconds = VAMPIRE_TRANSFORMATION_DURATION_SECONDS
+    }
+
+    fun setVampireTeleportLocked(locked: Boolean) {
+        isVampireTeleportLocked = locked
+    }
+
     fun resolveCircularExclusion(
         centerX: Float,
         centerY: Float,
@@ -1960,9 +2074,11 @@ class Enemy(
             }
 
         val barY =
-            position.y +
-                size +
-                7f
+            if (kindId == EnemyKindIds.VAMPIRE_LORD) {
+                position.y + size * 1.62f + 8f
+            } else {
+                position.y + size + 7f
+            }
 
         val backgroundColor =
             Color(
@@ -2090,8 +2206,43 @@ class Enemy(
                 health.healthRatio,
             barHeight
         )
+
+        if (isVampireSecondForm) {
+            shapeRenderer.color = Color.BLACK
+            val filledWidth = barWidth * health.healthRatio
+            val patternInset = 0.5f
+            val patternBottomY = barY + patternInset
+            val patternTopY = barY + barHeight - patternInset
+            val patternHeight = patternTopY - patternBottomY
+            val filledEndX = position.x + filledWidth - patternInset
+            val cellWidth = patternHeight
+            var cellStartX = position.x + patternInset
+            while (cellStartX < filledEndX) {
+                val cellEndX = (cellStartX + cellWidth).coerceAtMost(filledEndX)
+                val cellRatio = ((cellEndX - cellStartX) / cellWidth).coerceIn(0f, 1f)
+                shapeRenderer.rectLine(
+                    cellStartX,
+                    patternBottomY,
+                    cellEndX,
+                    patternBottomY + patternHeight * cellRatio,
+                    0.65f
+                )
+                shapeRenderer.rectLine(
+                    cellStartX,
+                    patternTopY,
+                    cellEndX,
+                    patternTopY - patternHeight * cellRatio,
+                    0.65f
+                )
+                cellStartX += cellWidth
+            }
+        }
     }
     companion object {
+
+        const val VAMPIRE_TRANSFORMATION_DURATION_SECONDS = 3.2f
+
+        private const val VAMPIRE_ESCAPE_EDGE_MARGIN = 24f
 
         private const val FRAGMENT_BOUNCE_NORTH_SPEED = 18f
 

@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
+import com.badlogic.gdx.math.MathUtils
 import kotlin.math.floor
 import kotlin.math.max
 
@@ -74,11 +75,11 @@ class EnemySpriteRenderer {
         enemy: Enemy
     ) {
         val definition =
-            EnemySpriteSheetRegistry
-                .find(
-                    enemy.kindId
-                )
-                ?: return
+            if (enemy.isVampireSecondForm) {
+                DefaultUndeadEnemySpriteSheets.vampireSecondForm
+            } else {
+                EnemySpriteSheetRegistry.find(enemy.kindId) ?: return
+            }
 
         if (
             enemy.isDead &&
@@ -243,13 +244,25 @@ class EnemySpriteRenderer {
                 enemy.deathFadeAlpha
             )
 
-        batch.draw(
-            region,
-            drawX,
-            drawY,
-            drawWidth,
-            drawHeight
-        )
+        val vampireBodyIsReplacedByMist =
+            specialVisual?.kind == EnemyTraitSpecialVisualKind.VAMPIRE_TRANSFORMATION ||
+                specialVisual?.kind == EnemyTraitSpecialVisualKind.VAMPIRE_TELEPORT
+        if (!vampireBodyIsReplacedByMist) {
+            batch.draw(
+                region,
+                drawX,
+                drawY,
+                drawWidth,
+                drawHeight
+            )
+        }
+
+        specialVisual
+            ?.takeIf {
+                it.kind == EnemyTraitSpecialVisualKind.VAMPIRE_TRANSFORMATION ||
+                    it.kind == EnemyTraitSpecialVisualKind.VAMPIRE_TELEPORT
+            }
+            ?.let { renderVampireMist(enemy, it.progress) }
 
         specialVisual
             ?.takeIf { it.kind == EnemyTraitSpecialVisualKind.HORSEMAN_SWIPE }
@@ -393,11 +406,16 @@ class EnemySpriteRenderer {
 
     private fun renderSpellVisuals(visuals: List<EnemyTraitSpellVisual>) {
         visuals.forEach { visual ->
+            if (visual.kind == EnemyTraitSpellVisualKind.VAMPIRE_HUNGER) {
+                renderVampireHunger(visual)
+                return@forEach
+            }
             val (prefix, frameCount, frameSeconds) = when (visual.kind) {
                 EnemyTraitSpellVisualKind.STATIC_CLOUD -> Triple("static_clouds", 6, 0.16f)
                 EnemyTraitSpellVisualKind.METEOR -> Triple("meteor", 10, 0f)
                 EnemyTraitSpellVisualKind.TSUNAMI -> Triple("tsunami", 10, 0.11f)
                 EnemyTraitSpellVisualKind.CALL_LIGHTNING -> Triple("call_lightning", 6, 0f)
+                EnemyTraitSpellVisualKind.VAMPIRE_HUNGER -> error("Handled above")
             }
             val frame = if (frameSeconds > 0f) {
                 ((visual.animationSeconds / frameSeconds).toInt() % frameCount) + 1
@@ -428,6 +446,43 @@ class EnemySpriteRenderer {
             )
         }
         batch.color = Color.WHITE
+    }
+
+    private fun renderVampireMist(enemy: Enemy, progress: Float) {
+        val texture = textureForPath(VAMPIRE_TRANSFORMATION_PATH, 2560, 1024)
+        val frameIndex = (progress * 10f).toInt().coerceIn(0, 9)
+        val frameColumn = frameIndex % 5
+        val frameRow = frameIndex / 5
+        val region =
+            regionFor(
+                texture,
+                EnemySpriteFrame(frameColumn * 512, frameRow * 512, 512, 512)
+            )
+        val size = enemy.visualSize * 1.75f
+        batch.color = Color(1f, 1f, 1f, enemy.deathFadeAlpha)
+        batch.draw(region, enemy.centerX - size / 2f, enemy.centerY - size * 0.42f, size, size)
+    }
+
+    private fun renderVampireHunger(visual: EnemyTraitSpellVisual) {
+        val texture = textureForPath(VAMPIRE_HUNGER_PATH, 2560, 512)
+        val frameIndex = (visual.progress * 5f).toInt().coerceIn(0, 4)
+        val region = regionFor(texture, EnemySpriteFrame(frameIndex * 512, 0, 512, 512))
+        val travel = ((visual.progress - 0.60f) / 0.40f).coerceIn(0f, 1f)
+        val x = MathUtils.lerp(visual.centerX, visual.targetCenterX, travel)
+        val y = MathUtils.lerp(visual.centerY, visual.targetCenterY, travel)
+        batch.color = Color(1f, 1f, 1f, visual.alpha)
+        batch.draw(
+            region,
+            x - visual.worldWidth / 2f,
+            y - visual.worldHeight / 2f,
+            visual.worldWidth / 2f,
+            visual.worldHeight / 2f,
+            visual.worldWidth,
+            visual.worldHeight,
+            1f,
+            1f,
+            visual.rotationDegrees
+        )
     }
 
     private fun renderHorsemanSwipe(
@@ -661,5 +716,7 @@ class EnemySpriteRenderer {
         private const val GHOST_STORM_PATH = "enemy_effects/ghost_storm_runtime.png"
         private const val GHOST_STORM_RADIUS = 285f
         private const val SLIME_PATH_TEXTURE = "enemy_effects/slime_acidic_path.png"
+        private const val VAMPIRE_TRANSFORMATION_PATH = "enemy_effects/vampire_transformation.png"
+        private const val VAMPIRE_HUNGER_PATH = "enemy_effects/vampire_hunger.png"
     }
 }

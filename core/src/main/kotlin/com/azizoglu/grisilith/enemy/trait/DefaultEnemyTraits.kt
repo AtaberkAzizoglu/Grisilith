@@ -2,15 +2,20 @@ package com.azizoglu.grisilith.enemy.trait
 
 import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.content.ContentTag
+import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.combat.HealingVisualType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyType
-import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.MathUtils
+import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualKind
+import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualManager
 
 internal object DefaultEnemyTraits {
 
@@ -305,140 +310,167 @@ private class VampireHungerTrait :
     override val id =
         EnemyTraitIds.VAMPIRE_HUNGER
 
-    private var enemyCleaveCooldownRemaining =
-        0f
+    private var pulseCooldown = 0f
+    private val pendingDamage = mutableListOf<EnemyTraitTargetDamage>()
+    private val visuals = mutableListOf<ActiveHungerVisual>()
+    private val enemyRetargetCooldowns = mutableMapOf<Enemy, Float>()
+    private val combatTargetRetargetCooldowns =
+        mutableMapOf<Pair<EnemyTraitTargetType, Int>, Float>()
 
     override fun update(
         context: EnemyTraitUpdateContext
     ) {
-        enemyCleaveCooldownRemaining =
-            (
-                enemyCleaveCooldownRemaining -
-                    context.delta
-                        .coerceAtLeast(
-                            0f
-                        )
+        val dt = context.delta.coerceAtLeast(0f)
+        pulseCooldown = (pulseCooldown - dt).coerceAtLeast(0f)
+        updateRetargetCooldowns(enemyRetargetCooldowns, dt)
+        updateRetargetCooldowns(combatTargetRetargetCooldowns, dt)
+        visuals.forEach { it.elapsed += dt }
+        visuals.removeAll { it.elapsed >= HUNGER_VISUAL_SECONDS }
+        if (context.owner.isDead || context.owner.isActiveSkillLocked || pulseCooldown > 0f) return
+
+        val owner = context.owner
+        lastOwnerX = owner.centerX
+        lastOwnerY = owner.centerY
+        val radiusSquared = HUNGER_RADIUS * HUNGER_RADIUS
+        var successfulHits = 0
+
+        context.nearbyEnemies.forEach { other ->
+            if (other === owner || other.isDead) return@forEach
+            if (enemyRetargetCooldowns.containsKey(other)) return@forEach
+            val dx = other.centerX - owner.centerX
+            val dy = other.centerY - owner.centerY
+            if (dx * dx + dy * dy > radiusSquared) return@forEach
+            val applied =
+                other.takeDamage(
+                    (other.health.maximumHealth * NON_PLAYER_DAMAGE_MAX_HEALTH_RATIO)
+                        .roundToInt()
+                        .coerceAtLeast(1)
                 )
-                .coerceAtLeast(
-                    0f
-                )
+            if (applied > 0) {
+                enemyRetargetCooldowns[other] = TARGET_RETARGET_LOCK_SECONDS
+                successfulHits++
+                visuals += ActiveHungerVisual(other.centerX, other.centerY)
+            }
+        }
+
+        context.combatTargets.forEach { target ->
+            if (target.entityType == CombatEntityType.STRUCTURE) return@forEach
+            val targetKey = target.type to target.index
+            if (combatTargetRetargetCooldowns.containsKey(targetKey)) return@forEach
+            val dx = target.centerX - owner.centerX
+            val dy = target.centerY - owner.centerY
+            if (dx * dx + dy * dy > radiusSquared) return@forEach
+            val ratio =
+                if (target.entityType == CombatEntityType.PLAYER) {
+                    PLAYER_DAMAGE_MAX_HEALTH_RATIO
+                } else {
+                    NON_PLAYER_DAMAGE_MAX_HEALTH_RATIO
+                }
+            pendingDamage += EnemyTraitTargetDamage(
+                targetType = target.type,
+                targetIndex = target.index,
+                amount = (target.maximumHealth * ratio).roundToInt().coerceAtLeast(1),
+                sourceName = "Vampire Hunger",
+                damageType = DamageType.NONE,
+                projectileOrMagic = true
+            )
+            combatTargetRetargetCooldowns[targetKey] = TARGET_RETARGET_LOCK_SECONDS
+            successfulHits++
+            visuals += ActiveHungerVisual(target.centerX, target.centerY)
+        }
+
+        if (successfulHits > 0) {
+            val healRatio =
+                if (owner.isVampireSecondForm) {
+                    SECOND_FORM_HEAL_RATIO_PER_TARGET
+                } else {
+                    FIRST_FORM_HEAL_RATIO_PER_TARGET
+                }
+            owner.health.heal(
+                (owner.health.maximumHealth * healRatio * successfulHits).roundToInt().coerceAtLeast(1),
+                HealingVisualType.LIFE_STEAL
+            )
+        }
+        pulseCooldown = PULSE_SECONDS
     }
+
+    override fun consumeTargetDamage() = pendingDamage.toList().also { pendingDamage.clear() }
 
     override fun onPlayerContact(
         owner: Enemy,
-        dealtDamage: Int
+        dealtDamage: Int,
+        targetEntityType: CombatEntityType
     ) {
         if (
             owner.isDead ||
-            dealtDamage <=
-            0
-        ) {
-            return
-        }
-
-        healOwner(
-            owner =
-                owner,
-
-            minimumHeal =
-                PLAYER_CONTACT_MINIMUM_HEAL,
-
-            maximumHealthRatio =
-                PLAYER_CONTACT_HEAL_RATIO
-        )
-    }
-
-    override fun onEnemyContact(
-        owner: Enemy,
-        other: Enemy
-    ) {
-        if (
-            owner.isDead ||
-            other.isDead ||
-            enemyCleaveCooldownRemaining >
-            0f
-        ) {
-            return
-        }
-
-        val cleaveDamage =
-            (
-                owner.contactDamage *
-                    ALLY_CLEAVE_DAMAGE_RATIO
-                )
-                .roundToInt()
-                .coerceAtLeast(
-                    1
-                )
-
-        val appliedDamage =
-            other.takeDamage(
-                amount =
-                    cleaveDamage
-            )
-
-        if (
-            appliedDamage <=
-            0
-        ) {
-            return
-        }
-
-        healOwner(
-            owner =
-                owner,
-
-            minimumHeal =
-                ALLY_CONTACT_MINIMUM_HEAL,
-
-            maximumHealthRatio =
-                ALLY_CONTACT_HEAL_RATIO
-        )
-
-        enemyCleaveCooldownRemaining =
-            ALLY_CLEAVE_COOLDOWN_SECONDS
-    }
-
-    private fun healOwner(
-        owner: Enemy,
-        minimumHeal: Int,
-        maximumHealthRatio: Float
-    ) {
-        val proportionalHeal =
-            (
-                owner.health
-                    .maximumHealth *
-                    maximumHealthRatio
-                )
-                .roundToInt()
-
+            dealtDamage <= 0 ||
+            targetEntityType == CombatEntityType.STRUCTURE
+        ) return
+        val healRatio =
+            if (owner.isVampireSecondForm) {
+                SECOND_FORM_CONTACT_HEAL_RATIO
+            } else {
+                FIRST_FORM_CONTACT_HEAL_RATIO
+            }
         owner.health.heal(
-            max(
-                minimumHeal,
-                proportionalHeal
-            )
+            (owner.health.maximumHealth * healRatio)
+                .roundToInt()
+                .coerceAtLeast(1),
+            HealingVisualType.LIFE_STEAL
         )
     }
+
+    override fun spellVisuals(): List<EnemyTraitSpellVisual> = visuals.map {
+        EnemyTraitSpellVisual(
+            kind = EnemyTraitSpellVisualKind.VAMPIRE_HUNGER,
+            centerX = it.startX,
+            centerY = it.startY,
+            targetCenterX = it.ownerX,
+            targetCenterY = it.ownerY,
+            worldWidth = 88f,
+            worldHeight = 88f,
+            animationSeconds = it.elapsed,
+            progress = (it.elapsed / HUNGER_VISUAL_SECONDS).coerceIn(0f, 0.999f),
+            rotationDegrees =
+                MathUtils.atan2(it.ownerY - it.startY, it.ownerX - it.startX) *
+                    MathUtils.radiansToDegrees
+        )
+    }
+
+    private fun <K> updateRetargetCooldowns(cooldowns: MutableMap<K, Float>, delta: Float) {
+        val iterator = cooldowns.iterator()
+        while (iterator.hasNext()) {
+            val entry = iterator.next()
+            val remaining = entry.value - delta
+            if (remaining <= 0f) {
+                iterator.remove()
+            } else {
+                entry.setValue(remaining)
+            }
+        }
+    }
+
+    private inner class ActiveHungerVisual(val startX: Float, val startY: Float) {
+        val ownerX get() = lastOwnerX
+        val ownerY get() = lastOwnerY
+        var elapsed = 0f
+    }
+
+    private var lastOwnerX = 0f
+    private var lastOwnerY = 0f
 
     companion object {
 
-        private const val PLAYER_CONTACT_HEAL_RATIO =
-            0.0060f
-
-        private const val PLAYER_CONTACT_MINIMUM_HEAL =
-            35
-
-        private const val ALLY_CONTACT_HEAL_RATIO =
-            0.0030f
-
-        private const val ALLY_CONTACT_MINIMUM_HEAL =
-            20
-
-        private const val ALLY_CLEAVE_DAMAGE_RATIO =
-            0.20f
-
-        private const val ALLY_CLEAVE_COOLDOWN_SECONDS =
-            0.75f
+        private const val PULSE_SECONDS = 0.25f
+        private const val TARGET_RETARGET_LOCK_SECONDS = 0.75f
+        private const val HUNGER_RADIUS = 270f
+        private const val PLAYER_DAMAGE_MAX_HEALTH_RATIO = 0.04f
+        private const val NON_PLAYER_DAMAGE_MAX_HEALTH_RATIO = 0.08f
+        private const val FIRST_FORM_HEAL_RATIO_PER_TARGET = 0.005f
+        private const val SECOND_FORM_HEAL_RATIO_PER_TARGET = 0.01f
+        private const val HUNGER_VISUAL_SECONDS = 0.72f
+        private const val FIRST_FORM_CONTACT_HEAL_RATIO = 0.075f
+        private const val SECOND_FORM_CONTACT_HEAL_RATIO = 0.15f
     }
 }
 
@@ -1790,76 +1822,247 @@ private class SlimeSplitOnDeathTrait : EnemyTrait {
 private class VampireMistyEscapeTrait : EnemyTrait {
     override val id = EnemyTraitIds.MISTY_ESCAPE
 
-    private var active = false
-    private var cooldown = 0f
-    private var targetX = 0f
-    private var targetY = 0f
-    private var healAccumulator = 0f
+    private enum class TeleportPhase {
+        READY,
+        PREPARING,
+        ARRIVAL_WAIT
+    }
+
+    private var teleportCooldown = TELEPORT_INTERVAL_SECONDS
+    private var teleportPhase = TeleportPhase.READY
+    private var teleportPhaseRemaining = 0f
+    private var teleportDestinationX = 0f
+    private var teleportDestinationY = 0f
+    private var longswordCooldown = LONGSWORD_INTERVAL_SECONDS
+    private var longswordTelegraphActive = false
+    private var longswordTelegraphRemaining = 0f
+    private val longswordDirection = Vector2(1f, 0f)
+    private var longswordAngle = 0f
+    private val pendingDamage = mutableListOf<EnemyTraitTargetDamage>()
 
     override fun update(context: EnemyTraitUpdateContext) {
-        if (context.owner.isDead) return
+        val owner = context.owner
+        if (owner.isDead) return
         val dt = context.delta.coerceAtLeast(0f)
-        targetX = context.targetCenterX
-        targetY = context.targetCenterY
 
-        if (!active) {
-            cooldown = (cooldown - dt).coerceAtLeast(0f)
-            if (cooldown <= 0f && context.owner.health.healthRatio <= ACTIVATION_HEALTH_RATIO) {
-                active = true
-                healAccumulator = 0f
+        if (owner.isVampireEscaping) {
+            val dx = owner.vampireEscapeTargetX - owner.centerX
+            val dy = owner.vampireEscapeTargetY - owner.centerY
+            if (dx * dx + dy * dy <= VAMPIRE_ESCAPE_STOP_DISTANCE * VAMPIRE_ESCAPE_STOP_DISTANCE) {
+                owner.startVampireSecondFormTransformation()
+            }
+            return
+        }
+        if (!owner.isVampireSecondForm || owner.isVampireTransforming) return
+
+        when (teleportPhase) {
+            TeleportPhase.PREPARING -> {
+                teleportPhaseRemaining = (teleportPhaseRemaining - dt).coerceAtLeast(0f)
+                if (teleportPhaseRemaining <= 0f) {
+                    owner.teleportCenter(
+                        teleportDestinationX,
+                        teleportDestinationY,
+                        context.worldWidth,
+                        context.worldHeight
+                    )
+                    teleportPhase = TeleportPhase.ARRIVAL_WAIT
+                    teleportPhaseRemaining = TELEPORT_ARRIVAL_WAIT_SECONDS
+                }
+                return
+            }
+
+            TeleportPhase.ARRIVAL_WAIT -> {
+                teleportPhaseRemaining = (teleportPhaseRemaining - dt).coerceAtLeast(0f)
+                if (teleportPhaseRemaining <= 0f) {
+                    teleportPhase = TeleportPhase.READY
+                    owner.setVampireTeleportLocked(false)
+                    teleportCooldown = TELEPORT_INTERVAL_SECONDS
+                }
+                return
+            }
+
+            TeleportPhase.READY -> Unit
+        }
+
+        if (owner.isActiveSkillLocked) return
+
+        teleportCooldown = (teleportCooldown - dt).coerceAtLeast(0f)
+        longswordCooldown = (longswordCooldown - dt).coerceAtLeast(0f)
+
+        val playerTarget =
+            context.combatTargets.firstOrNull { it.type == EnemyTraitTargetType.PLAYER }
+        val playerDistanceSquared =
+            playerTarget?.let {
+                val dx = it.centerX - owner.centerX
+                val dy = it.centerY - owner.centerY
+                dx * dx + dy * dy
+            } ?: 0f
+
+        if (
+            teleportCooldown <= 0f &&
+            playerDistanceSquared > TELEPORT_MINIMUM_PLAYER_DISTANCE * TELEPORT_MINIMUM_PLAYER_DISTANCE
+        ) {
+            val angle = MathUtils.random(0f, MathUtils.PI2)
+            val safeMargin = owner.visualSize / 2f + 8f
+            teleportDestinationX =
+                (context.targetCenterX + MathUtils.cos(angle) * TELEPORT_RADIUS)
+                    .coerceIn(safeMargin, context.worldWidth - safeMargin)
+            teleportDestinationY =
+                (context.targetCenterY + MathUtils.sin(angle) * TELEPORT_RADIUS)
+                    .coerceIn(safeMargin, context.worldHeight - safeMargin)
+            teleportPhase = TeleportPhase.PREPARING
+            teleportPhaseRemaining = TELEPORT_PREPARE_SECONDS
+            owner.setVampireTeleportLocked(true)
+            longswordTelegraphActive = false
+            longswordTelegraphRemaining = 0f
+            longswordCooldown = LONGSWORD_INTERVAL_SECONDS
+            return
+        }
+
+        if (longswordTelegraphActive) {
+            longswordTelegraphRemaining =
+                (longswordTelegraphRemaining - dt).coerceAtLeast(0f)
+            if (longswordTelegraphRemaining <= 0f) {
+                performLongswordCone(context, longswordDirection)
+                longswordTelegraphActive = false
+                longswordCooldown = LONGSWORD_INTERVAL_SECONDS
             }
             return
         }
 
-        healAccumulator += context.owner.health.maximumHealth * HEAL_RATIO_PER_SECOND * dt
-        val heal = healAccumulator.toInt()
-        if (heal > 0) {
-            context.owner.health.heal(heal)
-            healAccumulator -= heal.toFloat()
-        }
-
-        if (context.owner.health.healthRatio >= TARGET_HEALTH_RATIO) {
-            active = false
-            cooldown = COOLDOWN_SECONDS
-            healAccumulator = 0f
+        if (
+            longswordCooldown <= LONGSWORD_TELEGRAPH_SECONDS &&
+            playerTarget != null &&
+            playerDistanceSquared <= LONGSWORD_RANGE * LONGSWORD_RANGE
+        ) {
+            longswordDirection.set(
+                playerTarget.centerX - owner.centerX,
+                playerTarget.centerY - owner.centerY
+            )
+            if (!longswordDirection.isZero) {
+                longswordDirection.nor()
+                longswordAngle =
+                    MathUtils.atan2(longswordDirection.y, longswordDirection.x) * MathUtils.radiansToDegrees
+                longswordTelegraphActive = true
+                longswordTelegraphRemaining = LONGSWORD_TELEGRAPH_SECONDS
+            }
         }
     }
 
     override fun resolveMovementOverride(owner: Enemy, output: Vector2): Boolean {
-        if (!active) return false
-        output.set(owner.centerX - targetX, owner.centerY - targetY)
-        if (!output.isZero) output.nor()
-        return true
-    }
-
-    override fun modifiers(): EnemyTraitModifiers {
-        return if (active) {
-            EnemyTraitModifiers(movementSpeedMultiplier = MIST_SPEED_MULTIPLIER)
-        } else {
-            EnemyTraitModifiers.IDENTITY
+        if (owner.isVampireEscaping) {
+            output.set(owner.vampireEscapeTargetX - owner.centerX, owner.vampireEscapeTargetY - owner.centerY)
+            if (output.isZero) return true
+            output.nor().scl(VAMPIRE_ESCAPE_SPEED_MULTIPLIER)
+            return true
         }
+        if (owner.isVampireTransforming || owner.isVampireTeleportLocked) {
+            output.setZero()
+            return true
+        }
+        return false
     }
 
     override fun shouldNegateIncomingDamage(owner: Enemy, context: EnemyTraitDamageContext): Boolean {
-        return active
+        return owner.isVampireEscaping || owner.isVampireTransforming
     }
 
     override fun contactDamageMultiplier(owner: Enemy): Float {
-        return if (active) 0f else 1f
+        return if (owner.isActiveSkillLocked) 0f else 1f
+    }
+
+    override fun consumeTargetDamage() = pendingDamage.toList().also { pendingDamage.clear() }
+
+    override fun specialVisual(owner: Enemy): EnemyTraitSpecialVisual? {
+        if (owner.isVampireTransforming) {
+            return EnemyTraitSpecialVisual(
+                EnemyTraitSpecialVisualKind.VAMPIRE_TRANSFORMATION,
+                1f -
+                    owner.vampireTransformationRemainingSeconds /
+                    Enemy.VAMPIRE_TRANSFORMATION_DURATION_SECONDS
+            )
+        }
+        if (teleportPhase == TeleportPhase.PREPARING) {
+            return EnemyTraitSpecialVisual(
+                EnemyTraitSpecialVisualKind.VAMPIRE_TELEPORT,
+                1f - teleportPhaseRemaining / TELEPORT_PREPARE_SECONDS
+            )
+        }
+        if (teleportPhase == TeleportPhase.ARRIVAL_WAIT) {
+            return EnemyTraitSpecialVisual(
+                EnemyTraitSpecialVisualKind.VAMPIRE_TELEPORT,
+                teleportPhaseRemaining / TELEPORT_ARRIVAL_WAIT_SECONDS
+            )
+        }
+        return null
     }
 
     override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
-        if (!active) return
-        shapeRenderer.color = Color(0.72f, 0.72f, 0.78f, 0.42f)
-        shapeRenderer.ellipse(owner.centerX - 70f, owner.centerY - 42f, 140f, 84f)
+        if (teleportPhase == TeleportPhase.PREPARING) {
+            shapeRenderer.color = Color(0.92f, 0.05f, 0.05f, 0.50f)
+            shapeRenderer.circle(
+                teleportDestinationX,
+                teleportDestinationY,
+                TELEPORT_MARKER_RADIUS,
+                48
+            )
+        }
+        if (longswordTelegraphActive) {
+            shapeRenderer.color = Color(1f, 0.43f, 0.05f, 0.50f)
+            shapeRenderer.arc(
+                owner.centerX,
+                owner.centerY,
+                LONGSWORD_RANGE,
+                longswordAngle - LONGSWORD_HALF_ANGLE,
+                LONGSWORD_HALF_ANGLE * 2f,
+                36
+            )
+        }
+    }
+
+    private fun performLongswordCone(context: EnemyTraitUpdateContext, lockedDirection: Vector2) {
+        val owner = context.owner
+        val direction = Vector2(lockedDirection)
+        val angle = MathUtils.atan2(direction.y, direction.x) * MathUtils.radiansToDegrees
+        MeleeAttackVisualManager.spawn(
+            MeleeAttackVisualKind.LONGSWORD_CONE,
+            owner.centerX + direction.x * LONGSWORD_RANGE * 0.42f,
+            owner.centerY + direction.y * LONGSWORD_RANGE * 0.42f,
+            angle,
+            LONGSWORD_RANGE * 0.86f,
+            LONGSWORD_RANGE * 0.64f,
+            0.25f
+        )
+        context.combatTargets.forEach { target ->
+            if (target.entityType == CombatEntityType.STRUCTURE) return@forEach
+            val toTarget = Vector2(target.centerX - owner.centerX, target.centerY - owner.centerY)
+            if (toTarget.len2() > LONGSWORD_RANGE * LONGSWORD_RANGE || toTarget.isZero) return@forEach
+            toTarget.nor()
+            val targetAngle = MathUtils.acos(direction.dot(toTarget).coerceIn(-1f, 1f)) * MathUtils.radiansToDegrees
+            if (targetAngle > LONGSWORD_HALF_ANGLE) return@forEach
+            pendingDamage += EnemyTraitTargetDamage(
+                targetType = target.type,
+                targetIndex = target.index,
+                amount = (owner.contactDamage * 0.80f).roundToInt().coerceAtLeast(1),
+                sourceName = "Vampire Longsword Cone",
+                damageType = DamageType.NONE
+            )
+        }
     }
 
     companion object {
-        private const val ACTIVATION_HEALTH_RATIO = 0.25f
-        private const val TARGET_HEALTH_RATIO = 0.66f
-        private const val HEAL_RATIO_PER_SECOND = 0.18f
-        private const val MIST_SPEED_MULTIPLIER = 2.40f
-        private const val COOLDOWN_SECONDS = 60f
+        private const val TELEPORT_INTERVAL_SECONDS = 8f
+        private const val TELEPORT_RADIUS = 350f
+        private const val TELEPORT_MINIMUM_PLAYER_DISTANCE = 1000f
+        private const val TELEPORT_PREPARE_SECONDS = 0.75f
+        private const val TELEPORT_ARRIVAL_WAIT_SECONDS = 1.5f
+        private const val TELEPORT_MARKER_RADIUS = 52f
+        private const val LONGSWORD_INTERVAL_SECONDS = 2f
+        private const val LONGSWORD_TELEGRAPH_SECONDS = 1f
+        private const val LONGSWORD_RANGE = 260f
+        private const val LONGSWORD_HALF_ANGLE = 15f
+        private const val VAMPIRE_ESCAPE_STOP_DISTANCE = 10f
+        private const val VAMPIRE_ESCAPE_SPEED_MULTIPLIER = 3.2f
     }
 }
 

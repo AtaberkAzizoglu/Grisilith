@@ -29,12 +29,25 @@ enum class EnemyTraitTargetType {
     GATE
 }
 
+enum class CombatEntityType {
+    PLAYER,
+    SUMMON,
+    ENEMY,
+    STRUCTURE
+}
+
 data class EnemyTraitCombatTarget(
     val type: EnemyTraitTargetType,
     val index: Int = -1,
     val centerX: Float,
     val centerY: Float,
-    val bounds: Rectangle
+    val bounds: Rectangle,
+    val maximumHealth: Int = 1,
+    val entityType: CombatEntityType = when (type) {
+        EnemyTraitTargetType.PLAYER -> CombatEntityType.PLAYER
+        EnemyTraitTargetType.SUMMON -> CombatEntityType.SUMMON
+        EnemyTraitTargetType.GATE -> CombatEntityType.STRUCTURE
+    }
 )
 
 data class EnemyTraitDamageContext(
@@ -94,7 +107,9 @@ data class EnemyTraitProjectileVisual(
 enum class EnemyTraitSpecialVisualKind {
     SPEARMAN_THROW,
     HORSEMAN_SWIPE,
-    GHOST_STORM
+    GHOST_STORM,
+    VAMPIRE_TRANSFORMATION,
+    VAMPIRE_TELEPORT
 }
 
 data class EnemyTraitSpecialVisual(
@@ -109,7 +124,8 @@ enum class EnemyTraitSpellVisualKind {
     STATIC_CLOUD,
     METEOR,
     TSUNAMI,
-    CALL_LIGHTNING
+    CALL_LIGHTNING,
+    VAMPIRE_HUNGER
 }
 
 data class EnemyTraitSpellVisual(
@@ -121,7 +137,9 @@ data class EnemyTraitSpellVisual(
     val animationSeconds: Float = 0f,
     val progress: Float = 0f,
     val rotationDegrees: Float = 0f,
-    val alpha: Float = 1f
+    val alpha: Float = 1f,
+    val targetCenterX: Float = centerX,
+    val targetCenterY: Float = centerY
 )
 
 interface EnemyTrait {
@@ -188,7 +206,8 @@ interface EnemyTrait {
 
     fun onPlayerContact(
         owner: Enemy,
-        dealtDamage: Int
+        dealtDamage: Int,
+        targetEntityType: CombatEntityType = CombatEntityType.PLAYER
     ) {
     }
 

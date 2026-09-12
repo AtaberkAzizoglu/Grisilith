@@ -659,7 +659,11 @@ class HudRenderer(
 
         font.draw(
             batch,
-            "Stage ${remainingStageSeconds}s",
+            if (stageController.hasTimeLimit) {
+                "Stage ${remainingStageSeconds}s"
+            } else {
+                "Stage ∞"
+            },
             left,
             top -
                 154f

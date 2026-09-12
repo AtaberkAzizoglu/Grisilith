@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.screen.render
 
 import com.azizoglu.grisilith.chest.ChestWorldVisualManager
 import com.azizoglu.grisilith.combat.condition.visual.ConditionVisualRenderer
+import com.azizoglu.grisilith.combat.healing.HealingVisualRenderer
 import com.azizoglu.grisilith.economy.CurrencyPickupManager
 import com.azizoglu.grisilith.character.visual.CharacterSpriteRenderer
 import com.azizoglu.grisilith.character.visual.MountedCharacterSpriteRenderer
@@ -112,6 +113,8 @@ class WorldRenderer(
 
     private val conditionVisualRenderer =
         ConditionVisualRenderer()
+
+    private val healingVisualRenderer = HealingVisualRenderer()
 
     private val worldPickupSpriteRenderer =
         WorldPickupSpriteRenderer()
@@ -716,6 +719,8 @@ class WorldRenderer(
                     camera = camera
                 )
             }
+
+        healingVisualRenderer.render(camera.combined)
     }
 
     private fun renderMountedPlayerHealthBar(
@@ -868,6 +873,8 @@ class WorldRenderer(
 
         conditionVisualRenderer
             .dispose()
+
+        healingVisualRenderer.dispose()
 
         worldPickupSpriteRenderer
             .dispose()

@@ -268,6 +268,10 @@ internal class HorsemanSwipeAroundEnemyTrait : EnemyTrait {
 
     override fun update(context: EnemyTraitUpdateContext) {
         if (context.owner.isDead) return
+        if (
+            context.owner.kindId == com.azizoglu.grisilith.enemy.definition.EnemyKindIds.VAMPIRE_LORD &&
+            (!context.owner.isVampireSecondForm || context.owner.isActiveSkillLocked)
+        ) return
         val dt = context.delta.coerceAtLeast(0f)
 
         impactRemaining = (impactRemaining - dt).coerceAtLeast(0f)
