@@ -35,6 +35,11 @@ data class EnemyDamageContext(
                         tag == ContentTag.RANGED_WEAPON
                 }
 
+    val isProjectileAttack: Boolean
+        get() =
+            projectileTravelProgress > 0f ||
+                ContentTag.RANGED_WEAPON in sourceWeaponTags
+
     companion object {
         private val PHYSICAL_DAMAGE_TYPES =
             setOf(

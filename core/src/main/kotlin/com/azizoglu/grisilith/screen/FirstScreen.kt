@@ -3303,6 +3303,13 @@ class FirstScreen(
             worldHeight = worldHeight
         )
 
+        enemyManager.spawnPendingSpecialEnemies(
+            runtimeFactory = mapEnemyRuntimeContext.runtimeFactory,
+            worldWidth = worldWidth,
+            worldHeight = worldHeight,
+            obstacles = blockingMapObstacles
+        )
+
         worldItemRuntime.resolveEnemyExclusions(
             enemyManager.allEnemies
         )
@@ -3688,6 +3695,10 @@ class FirstScreen(
                 stageController
                     .currentStage,
 
+            maximumStage =
+                stageController
+                    .maximumStage,
+
             stageType =
                 stageController
                     .currentStageType,
@@ -3795,6 +3806,8 @@ class FirstScreen(
         killedEnemy: Enemy,
         suppressGold: Boolean = false
     ) {
+        killedEnemy.registerBabyCrocodileDeath()
+
         weaponRuntimeManager
             .notifyCharacterTraitEnemyKilled(
                 killedEnemy
@@ -3809,15 +3822,24 @@ class FirstScreen(
         val isNoLootTotemMiniBoss =
             noLootTotemMiniBosses.remove(killedEnemy)
 
+        val suppressAllLoot = !killedEnemy.dropsLoot
+
         val isLargeSlime =
             killedEnemy.kindId == com.azizoglu.grisilith.enemy.definition.EnemyKindIds.SLIME &&
                 !killedEnemy.isSlimeFragment
+
+        val grantsSwarmFamilyReward =
+            killedEnemy.claimSwarmFamilyRewardIfLast(
+                enemyManager.allEnemies
+            )
 
         val slimeLootMultiplier =
             if (isLargeSlime) 0f else if (killedEnemy.isSlimeFragment) 0.25f else 1f
 
         val shouldOpenPortal = when {
             isLargeSlime -> false
+            killedEnemy.kindId == com.azizoglu.grisilith.enemy.definition.EnemyKindIds.BEE_SWARM ->
+                grantsSwarmFamilyReward && killedEnemy.type == EnemyType.MINI_BOSS
             killedEnemy.isSlimeFragment ->
                 enemyManager.allEnemies.none { other ->
                     other !== killedEnemy &&
@@ -3828,7 +3850,7 @@ class FirstScreen(
             else -> killedEnemy.type == EnemyType.MINI_BOSS
         }
 
-        if (!isNoLootTotemMiniBoss) {
+        if (!isNoLootTotemMiniBoss && !suppressAllLoot) {
             worldItemRuntime.onEnemyKilled(
                 enemy = killedEnemy,
                 lootMultiplier = slimeLootMultiplier,
@@ -3837,7 +3859,7 @@ class FirstScreen(
         }
 
         val awardedGrisilithCoins =
-            if (isNoLootTotemMiniBoss || isLargeSlime) {
+            if (isNoLootTotemMiniBoss || isLargeSlime || suppressAllLoot || !grantsSwarmFamilyReward) {
                 0
             } else runRewardTracker.onEnemyKilled(
                 enemyType =
@@ -3878,7 +3900,7 @@ class FirstScreen(
         )
 
         val goldDrop =
-            if (suppressGold || isNoLootTotemMiniBoss || isLargeSlime) 0
+            if (suppressGold || isNoLootTotemMiniBoss || isLargeSlime || suppressAllLoot || !grantsSwarmFamilyReward) 0
             else goldRewardFor(killedEnemy)
 
         if (
@@ -3898,7 +3920,7 @@ class FirstScreen(
                 )
         }
 
-        if (!isNoLootTotemMiniBoss && !isLargeSlime &&
+        if (!isNoLootTotemMiniBoss && !isLargeSlime && !suppressAllLoot &&
             (!killedEnemy.isSlimeFragment || kotlin.random.Random.nextFloat() < 0.25f)
         ) {
             tryDropChestFromEnemy(killedEnemy)
@@ -4217,15 +4239,9 @@ class FirstScreen(
         )
 
         worldItemRenderer.render(
-            snapshot = worldItemRuntime.visualSnapshot().let { snapshot ->
-                if (enemyManager.playerVisionMultiplier < 1f) {
-                    snapshot.copy(blindFaithMistLevel = maxOf(1, snapshot.blindFaithMistLevel))
-                } else {
-                    snapshot
-                }
-            },
+            snapshot = worldItemRuntime.visualSnapshot(),
             camera = camera,
-            ghostDarknessActive = enemyManager.playerVisionMultiplier < 1f
+            ghostDarknessActive = enemyManager.hasLivingGhost
         )
 
         worldItemRenderer.renderEdgeIndicators(

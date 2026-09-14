@@ -42,6 +42,11 @@ import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
 import kotlin.math.roundToInt
 
+class SwarmSplitBudget(
+    var remainingSplits: Int = 4,
+    var familyRewardClaimed: Boolean = false
+)
+
 class Enemy(
     startX: Float,
     startY: Float,
@@ -51,7 +56,12 @@ class Enemy(
     EnemyRuntimeBundle =
         EnemyRuntimeBundle.EMPTY,
 
-    val isSlimeFragment: Boolean = false
+    val isSlimeFragment: Boolean = false,
+    val spawnStage: Int = 1,
+    val isBabyCrocodile: Boolean = false,
+    internal val babyCrocodileParent: Enemy? = null,
+    private val swarmSplitBudget: SwarmSplitBudget? =
+        if (stats.kindId == EnemyKindIds.BEE_SWARM) SwarmSplitBudget() else null
 ) {
     private var latestDamageContext =
         EnemyDamageContext.NONE
@@ -94,6 +104,14 @@ class Enemy(
 
     private var pendingSlimeSplit =
         false
+
+    private var pendingBabyCrocodileSpawns = 0
+    private var pendingSwarmSplit = false
+    private var crocodileMovementMultiplier = 1f
+    private var crocodileDashMultiplierValue = 1f
+    private var swarmMovementMultiplier = 1f
+    private var swarmBodyScale = 1f
+    private var specialDeathHandled = false
 
     internal var slimeRangedCooldownRemainingSeconds = 0f
 
@@ -323,6 +341,18 @@ class Enemy(
     val traitSpecialVisual: EnemyTraitSpecialVisual?
         get() = traitRuntime.specialVisual(this)
 
+    val isTargetable: Boolean
+        get() = !isDead && traitRuntime.isTargetable(this)
+
+    val suppressesHealthBar: Boolean
+        get() = traitRuntime.suppressHealthBar(this)
+
+    val dropsLoot: Boolean
+        get() = !isBabyCrocodile
+
+    val crocodileDashMultiplier: Float
+        get() = crocodileDashMultiplierValue
+
     val behaviorId
         get() =
             stats.behaviorId
@@ -398,19 +428,43 @@ class Enemy(
         get() =
             size
 
+    /**
+     * Bosses are intentionally drawn larger than their base size. The same
+     * scale is used by combat hitboxes so visible body edges remain hittable.
+     */
+    val visualRenderScale: Float
+        get() = bossVisualScale * spawnVisualScale * bodyScaleMultiplier
+
+    private val bodyScaleMultiplier: Float
+        get() =
+            when (traitSpecialVisual?.kind) {
+                com.azizoglu.grisilith.enemy.trait.EnemyTraitSpecialVisualKind.GRIZZLY_RAGE -> 1.15f
+                else -> swarmBodyScale
+            }
+
+    private val bossVisualScale: Float
+        get() =
+            when (type) {
+                EnemyType.MINI_BOSS,
+                EnemyType.FINAL_BOSS -> 1.20f
+
+                else -> 1f
+            }
+
     /*
      * position + size visual frame'dir.
      * bounds alt gövde / ayak gameplay footprint'idir.
      */
     val bounds: Rectangle
         get() {
+            val width = size * COLLISION_WIDTH_RATIO * bossVisualScale * bodyScaleMultiplier
+            val height = size * COLLISION_HEIGHT_RATIO * bossVisualScale * bodyScaleMultiplier
             collisionBounds.set(
-                position.x +
-                    size * COLLISION_OFFSET_X_RATIO,
+                centerX - width / 2f,
                 position.y +
                     size * COLLISION_OFFSET_Y_RATIO,
-                size * COLLISION_WIDTH_RATIO,
-                size * COLLISION_HEIGHT_RATIO
+                width,
+                height
             )
 
             return collisionBounds
@@ -425,13 +479,14 @@ class Enemy(
      */
     val projectileHitBounds: Rectangle
         get() {
+            val width = size * PROJECTILE_HIT_WIDTH_RATIO * bossVisualScale * bodyScaleMultiplier
+            val height = size * PROJECTILE_HIT_HEIGHT_RATIO * bossVisualScale * bodyScaleMultiplier
             projectileCollisionBounds.set(
-                position.x +
-                    size * PROJECTILE_HIT_OFFSET_X_RATIO,
+                centerX - width / 2f,
                 position.y +
                     size * PROJECTILE_HIT_OFFSET_Y_RATIO,
-                size * PROJECTILE_HIT_WIDTH_RATIO,
-                size * PROJECTILE_HIT_HEIGHT_RATIO
+                width,
+                height
             )
 
             return projectileCollisionBounds
@@ -764,6 +819,8 @@ class Enemy(
                                 .currentModifiers
                                 .movementSpeedMultiplier *
                             temporaryMovementSpeedMultiplier *
+                            crocodileMovementMultiplier *
+                            swarmMovementMultiplier *
                             traitSpeedMultiplier
                     ) * delta
                 )
@@ -1332,6 +1389,81 @@ class Enemy(
         return true
     }
 
+    fun requestBabyCrocodileSpawn() {
+        if (!isDead && !isBabyCrocodile && kindId == EnemyKindIds.CROCODILE) {
+            pendingBabyCrocodileSpawns++
+        }
+    }
+
+    fun consumeBabyCrocodileSpawnRequests(): Int =
+        pendingBabyCrocodileSpawns.also { pendingBabyCrocodileSpawns = 0 }
+
+    fun requestSwarmSplit() {
+        if (!isDead && kindId == EnemyKindIds.BEE_SWARM) pendingSwarmSplit = true
+    }
+
+    fun consumeSwarmSplitRequest(): Boolean {
+        if (!pendingSwarmSplit || isDead) return false
+        pendingSwarmSplit = false
+        val budget = swarmSplitBudget ?: return false
+        if (budget.remainingSplits <= 0) return false
+        budget.remainingSplits--
+        return true
+    }
+
+    internal fun applySwarmSplit() {
+        val oldMaximum = health.maximumHealth
+        val oldCurrent = health.currentHealth
+        health.setMaximumHealth((oldMaximum * 0.75f).roundToInt().coerceAtLeast(1), healAddedHealth = false)
+        health.restoreCurrentHealth((oldCurrent * 0.75f).roundToInt().coerceIn(1, health.maximumHealth))
+        swarmMovementMultiplier *= 1.01f
+        swarmBodyScale = (swarmBodyScale * 0.82f).coerceAtLeast(0.42f)
+    }
+
+    internal fun swarmCloneStats(): EnemyStats = stats
+
+    internal fun copySwarmRuntimeFrom(parent: Enemy) {
+        health.setMaximumHealth(parent.health.maximumHealth, healAddedHealth = false)
+        health.restoreCurrentHealth(parent.health.currentHealth)
+        swarmMovementMultiplier = parent.swarmMovementMultiplier
+        swarmBodyScale = parent.swarmBodyScale
+    }
+
+    internal fun swarmBudget(): SwarmSplitBudget? = swarmSplitBudget
+
+    internal fun claimSwarmFamilyRewardIfLast(
+        allEnemies: List<Enemy>
+    ): Boolean {
+        if (kindId != EnemyKindIds.BEE_SWARM) return true
+
+        val family = swarmSplitBudget ?: return true
+        if (family.familyRewardClaimed) return false
+
+        val hasLivingFamilyMember = allEnemies.any { other ->
+            other !== this &&
+                !other.isDead &&
+                other.kindId == EnemyKindIds.BEE_SWARM &&
+                other.swarmSplitBudget === family
+        }
+        if (hasLivingFamilyMember) return false
+
+        family.familyRewardClaimed = true
+        return true
+    }
+
+    fun registerBabyCrocodileDeath(): Boolean {
+        if (!isBabyCrocodile || specialDeathHandled) return false
+        specialDeathHandled = true
+        babyCrocodileParent?.onBabyCrocodileDied()
+        return true
+    }
+
+    private fun onBabyCrocodileDied() {
+        if (isDead || kindId != EnemyKindIds.CROCODILE) return
+        crocodileMovementMultiplier *= 1.01f
+        crocodileDashMultiplierValue *= 1.01f
+    }
+
     internal fun slimeFragmentStats(): EnemyStats {
         fun fragmentValue(value: Int) = (value * 0.30f).roundToInt().coerceAtLeast(1)
         return stats.copy(
@@ -1871,7 +2003,7 @@ class Enemy(
             )
         }
 
-        if (renderHealthBar) {
+        if (renderHealthBar && !suppressesHealthBar) {
             renderHealthBar(
                 shapeRenderer = shapeRenderer
             )
@@ -2252,9 +2384,6 @@ class Enemy(
         private const val COLLISION_HEIGHT_RATIO =
             0.42f
 
-        private const val COLLISION_OFFSET_X_RATIO =
-            0.21f
-
         private const val COLLISION_OFFSET_Y_RATIO =
             0.04f
         private const val PROJECTILE_HIT_WIDTH_RATIO =
@@ -2262,9 +2391,6 @@ class Enemy(
 
         private const val PROJECTILE_HIT_HEIGHT_RATIO =
             0.80f
-
-        private const val PROJECTILE_HIT_OFFSET_X_RATIO =
-            0.06f
 
         private const val PROJECTILE_HIT_OFFSET_Y_RATIO =
             0.06f

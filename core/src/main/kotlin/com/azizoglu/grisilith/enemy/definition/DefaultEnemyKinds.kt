@@ -223,9 +223,12 @@ object DefaultEnemyKinds {
                 ),
             behaviorId =
                 EnemyBehaviorIds.SWARM_CHASE,
+            traversalProfile =
+                EnemyTraversalProfile.INCORPOREAL,
             passiveIds =
                 listOf(
-                    EnemyAbilityIds.SWARM_BEING
+                    EnemyAbilityIds.SWARM_BEING,
+                    EnemyAbilityIds.SPLIT_THE_SWARM
                 )
         )
 
@@ -261,8 +264,11 @@ object DefaultEnemyKinds {
                 EnemyBehaviorIds.SLOW_CHASE_AND_MELEE,
             activeSkillIds =
                 listOf(
-                    EnemyAbilityIds.CROCODILE_BURROW,
                     EnemyAbilityIds.CROCODILE_JUMP
+                ),
+            passiveIds =
+                listOf(
+                    EnemyAbilityIds.BABY_CROCODILES
                 )
         )
 
@@ -699,6 +705,20 @@ object DefaultEnemyKinds {
                 )
         )
 
+    val mimic =
+        EnemyKindDefinition(
+            id = EnemyKindIds.MIMIC,
+            displayName = "Mimic",
+            description = "A rare Monster disguised as an ordinary chest until its prey comes close.",
+            enemyTags = setOf(EnemyTag.MONSTER),
+            allowedTypes = setOf(EnemyType.NORMAL),
+            sizeCategory = EnemySizeCategory.MEDIUM,
+            baseStats = boar.baseStats,
+            behaviorId = EnemyBehaviorIds.CHASE_AND_MELEE,
+            passiveIds = listOf(EnemyAbilityIds.MIMICRY),
+            spawnWeight = 0.01f
+        )
+
     val all:
         List<EnemyKindDefinition> =
         listOf(
@@ -719,7 +739,8 @@ object DefaultEnemyKinds {
             zombie,
             ghost,
             slime,
-            vampireLord
+            vampireLord,
+            mimic
         )
 
     fun createRegistry():

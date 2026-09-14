@@ -9,5 +9,6 @@ package com.azizoglu.grisilith.enemy.definition
 enum class EnemyTag {
     BEAST,
     HUMANOID,
-    UNDEAD
+    UNDEAD,
+    MONSTER
 }

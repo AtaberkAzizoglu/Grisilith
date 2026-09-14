@@ -130,7 +130,7 @@ class ChalkDustCastTelegraphRenderer {
                     "meteor"
             }
 
-        return "effects/chalk_dust_cast/" +
+        return "weapons_animations/spell_cast_effects/" +
             folder +
             "/" +
             folder +

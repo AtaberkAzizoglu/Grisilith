@@ -4,6 +4,7 @@ import com.azizoglu.grisilith.save.RunSaveStatLayers
 import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 import com.azizoglu.grisilith.character.trait.CharacterTraitId
 import kotlin.math.roundToInt
+import kotlin.math.pow
 import java.util.HashMap
 
 class PlayerStats(
@@ -836,12 +837,9 @@ class PlayerStats(
                 StatType.ENEMY_COUNT
             )
 
-        return (
-            1f +
-                (score - 10) *
-                0.05f
-            )
-            .coerceAtLeast(0.25f)
+        return 1.1.pow(
+            score.coerceAtLeast(0).toDouble()
+        ).toFloat()
     }
 
     fun magicPowerMultiplier(): Float {

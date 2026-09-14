@@ -915,7 +915,7 @@ class SpellFocusEffectSpriteRenderer {
         frameIndexZeroBased: Int
     ): String {
 
-        return "effects/spell_focus/" +
+        return "weapons_animations/spell_effects/" +
             prefix +
             "_" +
             (frameIndexZeroBased + 1)
@@ -986,10 +986,10 @@ class SpellFocusEffectSpriteRenderer {
             "ignite_dash"
 
         private const val IGNITE_AIM_MARKER_PATH =
-            "effects/spell_focus/ignite_dash_cast_area.png"
+            "weapons_animations/spell_effects/ignite_dash_cast_area.png"
 
         private const val IGNITE_AIM_INNER_MARKER_PATH =
-            "effects/spell_focus/ignite_dash_cast_inner.png"
+            "weapons_animations/spell_effects/ignite_dash_cast_inner.png"
 
         private const val ERASING_PREFIX =
             "erasing_souls"

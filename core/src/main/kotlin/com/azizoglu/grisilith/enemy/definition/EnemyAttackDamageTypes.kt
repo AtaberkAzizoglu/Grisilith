@@ -22,12 +22,12 @@ object EnemyAttackDamageTypes {
         EnemyKindIds.SKELETON_WARRIOR -> DamageType.SLASHING
 
         EnemyKindIds.ZOMBIE,
-        EnemyKindIds.GHOST -> DamageType.NECROTIC
+        EnemyKindIds.GHOST,
+        EnemyKindIds.VAMPIRE_LORD -> DamageType.NECROTIC
 
         EnemyKindIds.SLIME -> DamageType.ACID
 
         // Witch attacks declare their element per projectile/spell.
-        // Vampire Lord intentionally remains unspecified for its later design pass.
         else -> DamageType.NONE
     }
 }

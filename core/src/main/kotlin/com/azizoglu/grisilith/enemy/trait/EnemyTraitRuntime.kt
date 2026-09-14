@@ -137,6 +137,12 @@ class EnemyTraitRuntime private constructor(
         return multiplier.coerceIn(0.05f, 1f)
     }
 
+    fun isTargetable(owner: Enemy): Boolean =
+        traits.all { it.isTargetable(owner) }
+
+    fun suppressHealthBar(owner: Enemy): Boolean =
+        traits.any { it.suppressHealthBar(owner) }
+
     fun contactDamageMultiplier(
         owner: Enemy
     ): Float {

@@ -10,6 +10,8 @@ import com.azizoglu.grisilith.enemy.runtime.ability.EnemyAbilityRuntime
 import com.azizoglu.grisilith.enemy.runtime.ai.EnemyAiPipeline
 import com.azizoglu.grisilith.enemy.runtime.weapon.EnemyWeaponRuntimeGroup
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitRuntime
+import com.azizoglu.grisilith.enemy.definition.DefaultEnemyKinds
+import com.azizoglu.grisilith.config.GameMap
 
 /*
  * EnemyKindDefinition'dan gerçek Enemy runtime nesnesi üretir.
@@ -87,8 +89,74 @@ class EnemyRuntimeFactory(
                 stats,
 
             runtimeBundle =
-                runtimeBundle
+                runtimeBundle,
+
+            spawnStage = stage
         )
+    }
+
+    fun createMimic(
+        gameMap: GameMap,
+        stage: Int,
+        startX: Float,
+        startY: Float
+    ): Enemy {
+        val baseStats = when (gameMap) {
+            GameMap.ROAD_TO_HOME -> DefaultEnemyKinds.boar.baseStats.copy(
+                contactDamage = DefaultEnemyKinds.grayWolf.baseStats.contactDamage,
+                movementSpeed = DefaultEnemyKinds.grayWolf.baseStats.movementSpeed,
+                attacksPerSecond = DefaultEnemyKinds.grayWolf.baseStats.attacksPerSecond,
+                attackSpeedScore = DefaultEnemyKinds.grayWolf.baseStats.attackSpeedScore,
+                mainDamageStat = DefaultEnemyKinds.grayWolf.baseStats.mainDamageStat
+            )
+
+            GameMap.TROUBLE_AT_HOME -> DefaultEnemyKinds.bandit.baseStats
+
+            GameMap.FOLLOWING_THE_DUNGEON_DELVER -> DefaultEnemyKinds.zombie.baseStats.copy(
+                contactDamage = DefaultEnemyKinds.skeletonWarrior.baseStats.contactDamage,
+                mainDamageStat = DefaultEnemyKinds.skeletonWarrior.baseStats.mainDamageStat
+            )
+        }
+        val definition = DefaultEnemyKinds.mimic.copy(baseStats = baseStats)
+        return create(definition, EnemyType.UNIQUE, stage, startX, startY)
+    }
+
+    fun createBabyCrocodile(
+        parent: Enemy,
+        startX: Float,
+        startY: Float
+    ): Enemy {
+        val boarStats = createStats(DefaultEnemyKinds.boar, EnemyType.NORMAL, parent.spawnStage)
+            .copy(
+                kindId = com.azizoglu.grisilith.enemy.definition.EnemyKindIds.CROCODILE,
+                behaviorId = DefaultEnemyKinds.boar.behaviorId,
+                goldReward = 0f
+            )
+        return Enemy(
+            startX = startX,
+            startY = startY,
+            stats = boarStats,
+            runtimeBundle = EnemyRuntimeBundle.EMPTY,
+            spawnStage = parent.spawnStage,
+            isBabyCrocodile = true,
+            babyCrocodileParent = parent
+        )
+    }
+
+    fun createSwarmSplitChild(
+        parent: Enemy,
+        startX: Float,
+        startY: Float
+    ): Enemy {
+        val definition = requireDefinition(requireNotNull(parent.kindId))
+        return Enemy(
+            startX = startX,
+            startY = startY,
+            stats = parent.swarmCloneStats(),
+            runtimeBundle = createRuntimeBundle(definition),
+            spawnStage = parent.spawnStage,
+            swarmSplitBudget = parent.swarmBudget()
+        ).also { it.copySwarmRuntimeFrom(parent) }
     }
 
     fun createSlimeFragment(
@@ -106,7 +174,8 @@ class EnemyRuntimeFactory(
             startY = startY,
             stats = parent.slimeFragmentStats(),
             runtimeBundle = createRuntimeBundle(definition),
-            isSlimeFragment = true
+            isSlimeFragment = true,
+            spawnStage = parent.spawnStage
         ).also { fragment ->
             fragment.slimeRangedCooldownRemainingSeconds =
                 parent.slimeRangedCooldownRemainingSeconds

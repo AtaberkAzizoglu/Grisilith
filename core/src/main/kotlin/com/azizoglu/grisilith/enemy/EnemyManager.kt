@@ -13,6 +13,7 @@ import com.azizoglu.grisilith.content.ConditionType
 
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.MathUtils
 
 class EnemyManager {
 
@@ -51,6 +52,11 @@ class EnemyManager {
                 .map { it.playerVisionMultiplier }
                 .minOrNull()
                 ?: 1f
+
+    val hasLivingGhost: Boolean
+        get() = enemies.any {
+            !it.isDead && it.kindId == com.azizoglu.grisilith.enemy.definition.EnemyKindIds.GHOST
+        }
 
     fun spawn(enemy: Enemy) {
         enemies.add(enemy)
@@ -518,7 +524,7 @@ class EnemyManager {
         return enemies
             .asSequence()
             .filterNot { enemy ->
-                enemy.isDead
+                enemy.isDead || !enemy.isTargetable
             }
             .minByOrNull { enemy ->
                 val differenceX =
@@ -581,6 +587,54 @@ class EnemyManager {
             }
         }
         enemies.addAll(additions)
+    }
+
+    fun spawnPendingSpecialEnemies(
+        runtimeFactory: EnemyRuntimeFactory,
+        worldWidth: Float,
+        worldHeight: Float,
+        obstacles: List<MapObstacle>
+    ) {
+        val additions = mutableListOf<Enemy>()
+        enemies.toList().forEach { parent ->
+            repeat(parent.consumeBabyCrocodileSpawnRequests()) {
+                val position = nearbySpawnPosition(parent, 62f, worldWidth, worldHeight, obstacles)
+                    ?: return@repeat
+                additions += runtimeFactory.createBabyCrocodile(parent, position.first, position.second)
+            }
+
+            if (parent.consumeSwarmSplitRequest()) {
+                parent.applySwarmSplit()
+                val position = nearbySpawnPosition(parent, parent.visualSize * 0.8f, worldWidth, worldHeight, emptyList())
+                    ?: ((parent.centerX + parent.visualSize * 0.65f) to parent.centerY)
+                additions += runtimeFactory.createSwarmSplitChild(
+                    parent,
+                    position.first.coerceIn(0f, (worldWidth - parent.visualSize).coerceAtLeast(0f)),
+                    position.second.coerceIn(0f, (worldHeight - parent.visualSize).coerceAtLeast(0f))
+                )
+            }
+        }
+        enemies.addAll(additions)
+    }
+
+    private fun nearbySpawnPosition(
+        parent: Enemy,
+        childSize: Float,
+        worldWidth: Float,
+        worldHeight: Float,
+        obstacles: List<MapObstacle>
+    ): Pair<Float, Float>? {
+        repeat(16) {
+            val angle = MathUtils.random(0f, MathUtils.PI2)
+            val distance = parent.visualSize * MathUtils.random(0.65f, 1.15f)
+            val x = (parent.centerX + MathUtils.cos(angle) * distance - childSize / 2f)
+                .coerceIn(0f, (worldWidth - childSize).coerceAtLeast(0f))
+            val y = (parent.centerY + MathUtils.sin(angle) * distance - childSize / 2f)
+                .coerceIn(0f, (worldHeight - childSize).coerceAtLeast(0f))
+            val bounds = Rectangle(x, y, childSize, childSize)
+            if (obstacles.none { it.blocksMovement && bounds.overlaps(it.bounds) }) return x to y
+        }
+        return null
     }
 
     fun clearAll() {

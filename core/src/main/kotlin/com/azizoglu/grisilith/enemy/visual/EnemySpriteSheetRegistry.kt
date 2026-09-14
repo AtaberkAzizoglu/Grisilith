@@ -8,7 +8,8 @@ object EnemySpriteSheetRegistry {
         (
             DefaultBeastEnemySpriteSheets.all +
                 DefaultHumanoidEnemySpriteSheets.all +
-                DefaultUndeadEnemySpriteSheets.all
+                DefaultUndeadEnemySpriteSheets.all +
+                DefaultMonsterEnemySpriteSheets.all
             )
             .associateBy {
                     definition ->

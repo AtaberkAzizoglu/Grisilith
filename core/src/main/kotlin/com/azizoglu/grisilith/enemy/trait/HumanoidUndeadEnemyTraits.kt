@@ -95,7 +95,7 @@ internal class AimedArrowEnemyTrait : EnemyTrait {
 
     override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
         if (aimRemaining > 0f) {
-            drawDottedLine(shapeRenderer, owner.centerX, owner.centerY, aimX, aimY, Color.WHITE)
+            drawEnemyProjectileDottedLine(shapeRenderer, owner.centerX, owner.centerY, aimX, aimY, Color.WHITE)
         }
         drawProjectileTrajectories(shapeRenderer, projectiles)
     }
@@ -198,7 +198,7 @@ internal class SpearmanThrowSpearEnemyTrait : EnemyTrait {
 
     override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
         if (phase == Phase.AIMING || phase == Phase.THROWING) {
-            drawDottedLine(
+            drawEnemyProjectileDottedLine(
                 shapeRenderer,
                 owner.centerX,
                 owner.centerY,
@@ -480,7 +480,7 @@ internal class WitchElementalProjectileEnemyTrait : EnemyTrait {
 
     override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
         if (aimRemaining > 0f) {
-            drawDottedLine(shapeRenderer, owner.centerX, owner.centerY, aimX, aimY, Color.WHITE)
+            drawEnemyProjectileDottedLine(shapeRenderer, owner.centerX, owner.centerY, aimX, aimY, Color.WHITE)
         }
         drawProjectileTrajectories(shapeRenderer, projectiles)
     }
@@ -690,6 +690,14 @@ internal class WitchcraftEnemyTrait : EnemyTrait {
 
     override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
         if (chargeRemaining > 0f) {
+            drawEnemyProjectileDottedLine(
+                shapeRenderer,
+                owner.centerX,
+                owner.centerY,
+                targetX,
+                targetY,
+                Color.WHITE
+            )
             shapeRenderer.color = spell.color
             shapeRenderer.circle(targetX, targetY, spell.radius, 64)
         }
@@ -928,7 +936,7 @@ internal class SlimeAcidicPathAndSpitTrait : EnemyTrait {
 
     override fun render(owner: Enemy, shapeRenderer: ShapeRenderer) {
         if (aimRemaining > 0f) {
-            drawDottedLine(shapeRenderer, owner.centerX, owner.centerY, aimX, aimY, Color.WHITE)
+            drawEnemyProjectileDottedLine(shapeRenderer, owner.centerX, owner.centerY, aimX, aimY, Color.WHITE)
         }
         drawProjectileTrajectories(shapeRenderer, projectiles)
     }
@@ -1111,37 +1119,12 @@ private fun rayToWorldEdge(
     )
 }
 
-private fun drawDottedLine(
-    renderer: ShapeRenderer,
-    startX: Float,
-    startY: Float,
-    endX: Float,
-    endY: Float,
-    color: Color
-) {
-    val direction = Vector2(endX - startX, endY - startY)
-    val length = direction.len()
-    if (length <= 1f) return
-    direction.nor()
-    renderer.color = color
-    var distance = 14f
-    while (distance < length) {
-        renderer.circle(
-            startX + direction.x * distance,
-            startY + direction.y * distance,
-            3.2f,
-            8
-        )
-        distance += 22f
-    }
-}
-
 private fun drawProjectileTrajectories(
     renderer: ShapeRenderer,
     projectiles: List<EnemySkillProjectile>
 ) {
     projectiles.forEach { projectile ->
-        drawDottedLine(
+        drawEnemyProjectileDottedLine(
             renderer,
             projectile.trajectoryStartX,
             projectile.trajectoryStartY,

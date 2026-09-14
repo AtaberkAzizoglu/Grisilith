@@ -57,4 +57,7 @@ object EnemyKindIds {
 
     val VAMPIRE_LORD =
         ContentId("ENEMY_KIND_VAMPIRE_LORD")
+
+    val MIMIC =
+        ContentId("ENEMY_KIND_MIMIC")
 }

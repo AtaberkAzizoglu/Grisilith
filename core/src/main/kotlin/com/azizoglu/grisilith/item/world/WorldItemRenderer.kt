@@ -99,23 +99,32 @@ class WorldItemRenderer {
         renderConstructionAndBoundaries(snapshot, camera)
         renderProgressBars(snapshot, camera)
         renderTotemUi(snapshot, camera)
-        if (ghostDarknessActive) renderGhostDarkness(camera)
+        if (ghostDarknessActive) renderGhostPresenceFrame(camera)
         renderBlindFaith(snapshot, camera)
     }
 
-    private fun renderGhostDarkness(camera: OrthographicCamera) {
+    private fun renderGhostPresenceFrame(camera: OrthographicCamera) {
         val width = camera.viewportWidth * camera.zoom
         val height = camera.viewportHeight * camera.zoom
-        shapes.projectionMatrix = camera.combined
-        shapes.begin(ShapeRenderer.ShapeType.Filled)
-        shapes.color = Color(0.015f, 0.02f, 0.045f, 0.34f)
-        shapes.rect(
+        val path = "enemy_effects/ghost_presence_frame.png"
+        val texture = textures.getOrPut(path) {
+            Texture(Gdx.files.internal(path)).also {
+                it.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
+            }
+        }
+        batch.projectionMatrix = camera.combined
+        batch.enableBlending()
+        batch.begin()
+        batch.color = Color(1f, 1f, 1f, 0.88f)
+        batch.draw(
+            texture,
             camera.position.x - width / 2f,
             camera.position.y - height / 2f,
             width,
             height
         )
-        shapes.end()
+        batch.color = Color.WHITE
+        batch.end()
     }
 
     private fun renderConstructionAndBoundaries(snapshot: WorldItemVisualSnapshot, camera: OrthographicCamera) {
@@ -287,7 +296,7 @@ class WorldItemRenderer {
         val texture = texture("item_world/blind_faith_mist_sheet.png")
         val level = (snapshot.blindFaithMistLevel - 1).coerceIn(0, 3)
         val frame = (snapshot.blindFaithAnimationSeconds / 0.22f).toInt().mod(4)
-        val xs = intArrayOf(159, 465, 805, 1197)
+        val xs = intArrayOf(159, 505, 849, 1197)
         val ys = intArrayOf(20, 253, 486, 718)
         val region = TextureRegion(texture, xs[frame], ys[level], 260, 216)
         val width = camera.viewportWidth * camera.zoom

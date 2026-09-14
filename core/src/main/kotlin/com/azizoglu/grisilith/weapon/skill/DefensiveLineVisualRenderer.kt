@@ -122,7 +122,7 @@ class DefensiveLineVisualRenderer {
         private val lowTexture by lazy {
             Texture(
                 Gdx.files.internal(
-                    "weapon_skills/defensive_line/defensive_line_low.png"
+                    "weapons_animations/weapon_skills/defensive_line/defensive_line_low.png"
                 )
             ).also {
                     texture ->
@@ -137,7 +137,7 @@ class DefensiveLineVisualRenderer {
         private val highTexture by lazy {
             Texture(
                 Gdx.files.internal(
-                    "weapon_skills/defensive_line/defensive_line_high.png"
+                    "weapons_animations/weapon_skills/defensive_line/defensive_line_high.png"
                 )
             ).also {
                     texture ->

@@ -40,9 +40,6 @@ object EnemyTraitIds {
     val SWARM_BEING =
         EnemyAbilityIds.SWARM_BEING
 
-    val CROCODILE_BURROW =
-        EnemyAbilityIds.CROCODILE_BURROW
-
     val GORILLA_STOMP_THE_EARTH =
         EnemyAbilityIds.GORILLA_STOMP_THE_EARTH
 
@@ -70,4 +67,13 @@ object EnemyTraitIds {
 
     val VAMPIRE_HUNGER =
         EnemyAbilityIds.VAMPIRE_HUNGER
+
+    val MIMICRY =
+        EnemyAbilityIds.MIMICRY
+
+    val BABY_CROCODILES =
+        EnemyAbilityIds.BABY_CROCODILES
+
+    val SPLIT_THE_SWARM =
+        EnemyAbilityIds.SPLIT_THE_SWARM
 }

@@ -88,6 +88,7 @@ data class EnemyTraitGroundVisual(
 enum class EnemyTraitProjectileVisualKind {
     ARROW,
     SPEAR,
+    ROCK,
     AIR,
     POISON,
     LIGHTNING,
@@ -109,7 +110,10 @@ enum class EnemyTraitSpecialVisualKind {
     HORSEMAN_SWIPE,
     GHOST_STORM,
     VAMPIRE_TRANSFORMATION,
-    VAMPIRE_TELEPORT
+    VAMPIRE_TELEPORT,
+    MIMIC_TRANSFORMATION,
+    GRIZZLY_RAGE,
+    GORILLA_SLAM
 }
 
 data class EnemyTraitSpecialVisual(
@@ -221,6 +225,10 @@ interface EnemyTrait {
         List<EnemyTraitPlayerDamage> {
         return emptyList()
     }
+
+    fun isTargetable(owner: Enemy): Boolean = true
+
+    fun suppressHealthBar(owner: Enemy): Boolean = false
 
     fun consumeTargetDamage():
         List<EnemyTraitTargetDamage> {

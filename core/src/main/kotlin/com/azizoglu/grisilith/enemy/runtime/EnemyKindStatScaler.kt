@@ -55,14 +55,14 @@ object EnemyKindStatScaler {
             EnemyAdaptiveScalingRuntime
                 .current()
 
-        val humanoidGrowth = humanoidGrowth(definition, enemyType, safeStage)
+        val familyGrowth = familyGrowth(definition, enemyType, safeStage)
 
         val scaledHealth =
             (
                 definition.baseStats
                     .maximumHealth *
                     stageScaling.healthMultiplier *
-                    humanoidGrowth.healthMultiplier *
+                    familyGrowth.healthMultiplier *
                     typeModifier.healthMultiplier *
                     adaptiveScaling.healthMultiplier
                 )
@@ -74,7 +74,7 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .armorClass *
                     stageScaling.armorMultiplier *
-                    humanoidGrowth.armorMultiplier *
+                    familyGrowth.armorMultiplier *
                     typeModifier.armorMultiplier *
                     adaptiveScaling.armorClassMultiplier
                 )
@@ -86,7 +86,7 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .contactDamage *
                     stageScaling.damageMultiplier *
-                    humanoidGrowth.damageMultiplier *
+                    familyGrowth.damageMultiplier *
                     typeModifier.damageMultiplier *
                     adaptiveScaling.damageMultiplier
                 )
@@ -108,7 +108,7 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .attacksPerSecond *
                     stageScaling.attackSpeedMultiplier *
-                    humanoidGrowth.attackSpeedMultiplier *
+                    familyGrowth.attackSpeedMultiplier *
                     typeModifier.attackSpeedMultiplier *
                     adaptiveScaling.attackSpeedMultiplier
                 )
@@ -174,7 +174,7 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .weaponDamageMultiplier *
                     stageScaling.damageMultiplier *
-                    humanoidGrowth.damageMultiplier *
+                    familyGrowth.damageMultiplier *
                     typeModifier.damageMultiplier *
                     adaptiveScaling.damageMultiplier,
 
@@ -286,24 +286,42 @@ object EnemyKindStatScaler {
         )
     }
 
-    private fun humanoidGrowth(
+    private fun familyGrowth(
         definition: EnemyKindDefinition,
         enemyType: EnemyType,
         stage: Int
-    ): HumanoidGrowth {
-        if (EnemyTag.HUMANOID !in definition.enemyTags) return HumanoidGrowth()
+    ): FamilyGrowth {
         val progress = (stage - 1).coerceAtLeast(0)
         val bossFactor = when (enemyType) {
             EnemyType.MINI_BOSS -> 1f
             EnemyType.FINAL_BOSS -> 1.25f
             else -> 0.35f
         }
-        return HumanoidGrowth(
-            healthMultiplier = 1f + progress * 0.008f * bossFactor,
-            armorMultiplier = 1f + progress * 0.002f * bossFactor,
-            damageMultiplier = 1f + progress * 0.005f * bossFactor,
-            attackSpeedMultiplier = 1f + progress * 0.0015f * bossFactor
-        )
+
+        return when {
+            EnemyTag.HUMANOID in definition.enemyTags ->
+                FamilyGrowth(
+                    healthMultiplier = 1f + progress * 0.006f * bossFactor,
+                    armorMultiplier = 1f + progress * 0.0015f * bossFactor,
+                    damageMultiplier = 1f + progress * 0.00375f * bossFactor,
+                    attackSpeedMultiplier = 1f + progress * 0.0011f * bossFactor
+                )
+
+            /*
+             * Undying Growth: Undead scale more through persistence than raw
+             * offense. It uses the same continuous family layer as Humanoids,
+             * with a little more health and less damage/attack speed growth.
+             */
+            EnemyTag.UNDEAD in definition.enemyTags ->
+                FamilyGrowth(
+                    healthMultiplier = 1f + progress * 0.0065f * bossFactor,
+                    armorMultiplier = 1f + progress * 0.0012f * bossFactor,
+                    damageMultiplier = 1f + progress * 0.0032f * bossFactor,
+                    attackSpeedMultiplier = 1f + progress * 0.0008f * bossFactor
+                )
+
+            else -> FamilyGrowth()
+        }
     }
 
     private data class StageScaling(
@@ -314,7 +332,7 @@ object EnemyKindStatScaler {
         val attackSpeedMultiplier: Float
     )
 
-    private data class HumanoidGrowth(
+    private data class FamilyGrowth(
         val healthMultiplier: Float = 1f,
         val armorMultiplier: Float = 1f,
         val damageMultiplier: Float = 1f,

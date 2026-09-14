@@ -5,7 +5,7 @@ object DefaultProjectileSpriteSheet {
     val definition =
         ProjectileSpriteSheetDefinition(
             texturePath =
-                "projectiles/projectile_atlas.png",
+                "weapons_animations/projectiles/projectile_atlas.png",
 
             tileWidth =
                 192,

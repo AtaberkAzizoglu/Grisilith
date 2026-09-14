@@ -85,8 +85,9 @@ class ProjectileSpriteRenderer {
         /* Every kind now uses only its right-facing source frame. */
         private const val SOURCE_RIGHT_COLUMN = 6
 
-        private const val SPEAR_TEXTURE_PATH = "projectiles/spear_projectile.png"
-        private const val DAGGER_TEXTURE_PATH = "projectiles/dagger_projectile.png"
+        private const val SPEAR_TEXTURE_PATH = "weapons_animations/projectiles/spear_projectile.png"
+        private const val DAGGER_TEXTURE_PATH = "weapons_animations/projectiles/dagger_projectile.png"
+        private const val GORILLA_ROCK_TEXTURE_PATH = "enemy_effects/gorilla_throw.png"
     }
 
     private val definition =
@@ -107,6 +108,8 @@ class ProjectileSpriteRenderer {
     private var spearRegion: TextureRegion? = null
     private var daggerTexture: Texture? = null
     private var daggerRegion: TextureRegion? = null
+    private var gorillaRockTexture: Texture? = null
+    private var gorillaRockRegion: TextureRegion? = null
 
     fun hasVisualDefinition(
         projectile: Projectile
@@ -331,6 +334,21 @@ class ProjectileSpriteRenderer {
         EnemyTraitProjectileVisualKind.LIGHTNING -> atlasRegions[ProjectileVisualKind.LIGHTNING.rowIndex]
         EnemyTraitProjectileVisualKind.NECROTIC -> atlasRegions[ProjectileVisualKind.NECROTIC.rowIndex]
         EnemyTraitProjectileVisualKind.SPEAR -> ensureSpearRegion()
+        EnemyTraitProjectileVisualKind.ROCK -> ensureGorillaRockRegion()
+    }
+
+    private fun ensureGorillaRockRegion(): TextureRegion? {
+        gorillaRockRegion?.let { return it }
+        val handle = Gdx.files.internal(GORILLA_ROCK_TEXTURE_PATH)
+        if (!handle.exists()) return null
+        val loaded = Texture(handle).also {
+            it.setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest)
+        }
+        require(loaded.width == 1536 && loaded.height == 1024) {
+            "Unexpected Gorilla rock sheet size: ${loaded.width}x${loaded.height}"
+        }
+        gorillaRockTexture = loaded
+        return TextureRegion(loaded, 18, 430, 170, 190).also { gorillaRockRegion = it }
     }
 
     private fun ensureSpearRegion(): TextureRegion? {
@@ -534,6 +552,10 @@ class ProjectileSpriteRenderer {
         daggerRegion = null
         daggerTexture?.dispose()
         daggerTexture = null
+
+        gorillaRockRegion = null
+        gorillaRockTexture?.dispose()
+        gorillaRockTexture = null
 
         batch.dispose()
     }

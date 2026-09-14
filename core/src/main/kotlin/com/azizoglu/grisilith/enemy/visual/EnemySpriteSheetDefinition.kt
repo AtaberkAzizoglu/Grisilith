@@ -7,6 +7,7 @@ data class EnemySpriteSheetDefinition(
     val texturePath: String,
     val sourceWidth: Int,
     val sourceHeight: Int,
+    val referenceSide: Float? = null,
     val animations:
     Map<
         EnemyVisualDirection,
@@ -26,6 +27,8 @@ data class EnemySpriteSheetDefinition(
         require(
             sourceHeight > 0
         )
+
+        require(referenceSide == null || referenceSide > 0f)
 
         require(
             animations.keys.containsAll(

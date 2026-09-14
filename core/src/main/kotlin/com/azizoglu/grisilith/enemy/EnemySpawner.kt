@@ -6,6 +6,7 @@ import com.azizoglu.grisilith.map.TroubleAtHomeLayout
 import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.map.enemy.MapEnemyRuntimeContext
 import com.azizoglu.grisilith.stage.StageType
+import com.azizoglu.grisilith.enemy.definition.DefaultEnemyKinds
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
@@ -30,11 +31,20 @@ class EnemySpawner(
         private const val MAXIMUM_POSITION_ATTEMPTS =
             40
 
-        private const val REGULAR_SPAWN_DEADLINE_RATIO =
-            0.85f
-
         private const val MINIMUM_SCHEDULE_INTERVAL =
-            0.01f
+            0.001f
+
+        private const val SPAWN_COMPLETION_MARGIN_SECONDS =
+            0.10f
+
+        private const val UNTIMED_STAGE_REGULAR_SPAWN_REFERENCE_SECONDS =
+            90f
+
+        private const val MIMIC_STAGE_CHANCE =
+            0.001f
+
+        private const val UNTIMED_STAGE_MIMIC_WINDOW_SECONDS =
+            60f
     }
 
     private val spawnWarnings =
@@ -54,6 +64,11 @@ class EnemySpawner(
 
     private var scheduledRegularEnemiesThisStage =
         0
+
+    private var stageElapsedSeconds = 0f
+    private var mimicSelectedForStage = false
+    private var mimicSpawned = false
+    private var mimicSpawnAtSeconds = Float.POSITIVE_INFINITY
 
     /*
      * true yalnızca 1 saniyelik uyarı tamamlanıp Boss gerçekten
@@ -75,6 +90,7 @@ class EnemySpawner(
         delta: Float,
         enemyManager: EnemyManager,
         currentStage: Int,
+        maximumStage: Int,
         stageType: StageType,
         stageDurationSeconds: Float,
         enemyCountMultiplier: Float,
@@ -86,6 +102,8 @@ class EnemySpawner(
             currentStage =
                 currentStage
         )
+
+        stageElapsedSeconds += delta.coerceAtLeast(0f)
 
         updateWarnings(
             delta =
@@ -112,6 +130,15 @@ class EnemySpawner(
                 mapObstacles
         )
 
+        updateMimicScheduling(
+            enemyManager = enemyManager,
+            currentStage = currentStage,
+            stageDurationSeconds = stageDurationSeconds,
+            playerCenterX = playerCenterX,
+            playerCenterY = playerCenterY,
+            mapObstacles = mapObstacles
+        )
+
         updateRegularEnemyScheduling(
             delta =
                 delta,
@@ -119,8 +146,8 @@ class EnemySpawner(
             currentStage =
                 currentStage,
 
-            stageType =
-                stageType,
+            maximumStage =
+                maximumStage,
 
             stageDurationSeconds =
                 stageDurationSeconds,
@@ -164,6 +191,11 @@ class EnemySpawner(
 
         scheduledRegularEnemiesThisStage =
             0
+
+        stageElapsedSeconds = 0f
+        mimicSelectedForStage = false
+        mimicSpawned = false
+        mimicSpawnAtSeconds = Float.POSITIVE_INFINITY
 
         spawnWarnings.clear()
     }
@@ -225,7 +257,57 @@ class EnemySpawner(
         scheduledRegularEnemiesThisStage =
             0
 
+        stageElapsedSeconds = 0f
+        mimicSelectedForStage = MathUtils.random() < MIMIC_STAGE_CHANCE
+        mimicSpawned = false
+        mimicSpawnAtSeconds = Float.NaN
+
         spawnWarnings.clear()
+    }
+
+    private fun updateMimicScheduling(
+        enemyManager: EnemyManager,
+        currentStage: Int,
+        stageDurationSeconds: Float,
+        playerCenterX: Float,
+        playerCenterY: Float,
+        mapObstacles: List<MapObstacle>
+    ) {
+        if (!mimicSelectedForStage || mimicSpawned) return
+        if (mimicSpawnAtSeconds.isNaN()) {
+            val schedulingDuration =
+                if (stageDurationSeconds.isFinite()) {
+                    stageDurationSeconds
+                } else {
+                    UNTIMED_STAGE_MIMIC_WINDOW_SECONDS
+                }
+            mimicSpawnAtSeconds =
+                MathUtils.random(0f, (schedulingDuration * 0.5f).coerceAtLeast(0.1f))
+        }
+        if (stageElapsedSeconds < mimicSpawnAtSeconds) return
+
+        val stats = mapEnemyContext.runtimeFactory.createStats(
+            definition = DefaultEnemyKinds.mimic,
+            enemyType = EnemyType.UNIQUE,
+            stage = currentStage
+        )
+        val position = findValidSpawnPosition(
+            enemySize = stats.size,
+            canSpawnInsideObstacles = false,
+            playerCenterX = playerCenterX,
+            playerCenterY = playerCenterY,
+            mapObstacles = mapObstacles
+        ) ?: return
+
+        enemyManager.spawn(
+            mapEnemyContext.runtimeFactory.createMimic(
+                gameMap = mapEnemyContext.gameMap,
+                stage = currentStage,
+                startX = position.first,
+                startY = position.second
+            )
+        )
+        mimicSpawned = true
     }
 
     private fun updateWarnings(
@@ -386,7 +468,7 @@ class EnemySpawner(
     private fun updateRegularEnemyScheduling(
         delta: Float,
         currentStage: Int,
-        stageType: StageType,
+        maximumStage: Int,
         stageDurationSeconds: Float,
         enemyCountMultiplier: Float,
         playerCenterX: Float,
@@ -400,42 +482,31 @@ class EnemySpawner(
                         currentStage
                 )
 
-        val regularEnemyQuota =
+        val regularEnemyCount =
             EnemySpawnScaling
-                .regularEnemyQuotaForStage(
+                .regularEnemyCountForStage(
                     stage =
                         currentStage,
 
-                    isBossStage =
-                        stageType !=
-                            StageType.NORMAL,
+                    maximumStage =
+                        maximumStage,
 
                     enemyCountMultiplier =
                         enemyCountMultiplier
                 )
 
-        if (
-            scheduledRegularEnemiesThisStage >=
-            regularEnemyQuota
-        ) {
-            return
-        }
+        val spawnReferenceDuration =
+            if (stageDurationSeconds.isFinite()) {
+                stageDurationSeconds
+            } else {
+                UNTIMED_STAGE_REGULAR_SPAWN_REFERENCE_SECONDS
+            }
 
-        val spawnDeadline =
+        val schedulingDuration =
             (
-                stageDurationSeconds *
-                    REGULAR_SPAWN_DEADLINE_RATIO
-                )
-                .coerceAtLeast(
-                    EnemySpawnWarning
-                        .WARNING_DURATION_SECONDS
-                )
-
-        val schedulingWindow =
-            (
-                spawnDeadline -
-                    EnemySpawnWarning
-                        .WARNING_DURATION_SECONDS
+                spawnReferenceDuration -
+                    EnemySpawnWarning.WARNING_DURATION_SECONDS -
+                    SPAWN_COMPLETION_MARGIN_SECONDS
                 )
                 .coerceAtLeast(
                     MINIMUM_SCHEDULE_INTERVAL
@@ -443,8 +514,8 @@ class EnemySpawner(
 
         val scheduleInterval =
             (
-                schedulingWindow /
-                    regularEnemyQuota
+                schedulingDuration /
+                    regularEnemyCount
                         .toFloat()
                 )
                 .coerceAtLeast(
@@ -459,8 +530,10 @@ class EnemySpawner(
         while (
             spawnTimer >=
             scheduleInterval &&
-            scheduledRegularEnemiesThisStage <
-            regularEnemyQuota
+            (
+                !stageDurationSeconds.isFinite() ||
+                    scheduledRegularEnemiesThisStage < regularEnemyCount
+                )
         ) {
             val scheduled =
                 scheduleRegularEnemy(
@@ -493,10 +566,6 @@ class EnemySpawner(
             if (
                 !scheduled
             ) {
-                /*
-                 * Geçerli konum bulunamadığında zorla spawn edilmez.
-                 * Timer korunur ve sonraki update'te yeniden denenir.
-                 */
                 break
             }
 
@@ -661,21 +730,10 @@ class EnemySpawner(
                 null
             }
 
-        repeat(
-            MAXIMUM_POSITION_ATTEMPTS
-        ) {
-            val spawnX =
-                MathUtils.random(
-                    minimumX,
-                    maximumX
-                )
-
-            val spawnY =
-                MathUtils.random(
-                    minimumY,
-                    maximumY
-                )
-
+        fun isValidPosition(
+            spawnX: Float,
+            spawnY: Float
+        ): Boolean {
             val centerX =
                 spawnX +
                     enemySize /
@@ -705,7 +763,7 @@ class EnemySpawner(
                 MINIMUM_PLAYER_DISTANCE *
                 MINIMUM_PLAYER_DISTANCE
             ) {
-                return@repeat
+                return false
             }
 
             val candidateBounds =
@@ -724,7 +782,7 @@ class EnemySpawner(
                     gateVisualBounds
                 ) < GATE_SPAWN_SAFE_DISTANCE * GATE_SPAWN_SAFE_DISTANCE
             ) {
-                return@repeat
+                return false
             }
 
             if (
@@ -736,13 +794,51 @@ class EnemySpawner(
                     )
                 }
             ) {
-                return@repeat
+                return false
             }
 
-            return Pair(
-                spawnX,
-                spawnY
-            )
+            return true
+        }
+
+        repeat(
+            MAXIMUM_POSITION_ATTEMPTS
+        ) {
+            val spawnX =
+                MathUtils.random(
+                    minimumX,
+                    maximumX
+                )
+
+            val spawnY =
+                MathUtils.random(
+                    minimumY,
+                    maximumY
+                )
+
+            if (isValidPosition(spawnX, spawnY)) {
+                return Pair(spawnX, spawnY)
+            }
+        }
+
+        /*
+         * Random attempts can all miss when obstacles occupy much of a map.
+         * Scan the remaining arena immediately so a queued spawn does not
+         * wait for another frame merely because its first positions failed.
+         */
+        val gridStep =
+            (enemySize * 0.5f)
+                .coerceIn(12f, 40f)
+
+        var fallbackY = minimumY
+        while (fallbackY <= maximumY) {
+            var fallbackX = minimumX
+            while (fallbackX <= maximumX) {
+                if (isValidPosition(fallbackX, fallbackY)) {
+                    return Pair(fallbackX, fallbackY)
+                }
+                fallbackX += gridStep
+            }
+            fallbackY += gridStep
         }
 
         return null

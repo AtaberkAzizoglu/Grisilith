@@ -34,9 +34,6 @@ object EnemyAbilityIds {
     val SWARM_BEING =
         ContentId("ENEMY_PASSIVE_SWARM_BEING")
 
-    val CROCODILE_BURROW =
-        ContentId("ENEMY_SKILL_CROCODILE_BURROW")
-
     val GORILLA_STOMP_THE_EARTH =
         ContentId("ENEMY_SKILL_GORILLA_STOMP_THE_EARTH")
 
@@ -60,4 +57,13 @@ object EnemyAbilityIds {
 
     val VAMPIRE_HUNGER =
         ContentId("ENEMY_PASSIVE_VAMPIRE_HUNGER")
+
+    val MIMICRY =
+        ContentId("ENEMY_PASSIVE_MIMICRY")
+
+    val BABY_CROCODILES =
+        ContentId("ENEMY_PASSIVE_BABY_CROCODILES")
+
+    val SPLIT_THE_SWARM =
+        ContentId("ENEMY_PASSIVE_SPLIT_THE_SWARM")
 }

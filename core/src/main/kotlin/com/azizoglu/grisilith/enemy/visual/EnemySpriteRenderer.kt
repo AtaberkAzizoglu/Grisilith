@@ -1,7 +1,6 @@
 package com.azizoglu.grisilith.enemy.visual
 
 import com.azizoglu.grisilith.enemy.Enemy
-import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitSpecialVisualKind
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitSpellVisual
 import com.azizoglu.grisilith.enemy.trait.EnemyTraitSpellVisualKind
@@ -74,9 +73,12 @@ class EnemySpriteRenderer {
     private fun renderEnemy(
         enemy: Enemy
     ) {
+        val specialVisual = enemy.traitSpecialVisual
         val definition =
             if (enemy.isVampireSecondForm) {
                 DefaultUndeadEnemySpriteSheets.vampireSecondForm
+            } else if (specialVisual?.kind == EnemyTraitSpecialVisualKind.GRIZZLY_RAGE) {
+                DefaultBeastEnemySpriteSheets.grizzlyBearAngry
             } else {
                 EnemySpriteSheetRegistry.find(enemy.kindId) ?: return
             }
@@ -92,7 +94,6 @@ class EnemySpriteRenderer {
         val visualState =
             enemy.currentVisualState
 
-        val specialVisual = enemy.traitSpecialVisual
         val spearmanThrow = specialVisual
             ?.takeIf { it.kind == EnemyTraitSpecialVisualKind.SPEARMAN_THROW }
 
@@ -149,29 +150,16 @@ class EnemySpriteRenderer {
                     flipX
             )
 
-        /*
-         * Boss scale affects rendering only.
-         * Collision and projectile hitboxes remain unchanged.
-         */
-        val visualScale =
-            when (
-                enemy.type
-            ) {
-                EnemyType.MINI_BOSS,
-                EnemyType.FINAL_BOSS ->
-                    1.20f
-
-                else ->
-                    1f
-            }
-
         val worldSize =
-            enemy.visualSize
+            (if (enemy.kindId == com.azizoglu.grisilith.enemy.definition.EnemyKindIds.GRIZZLY_BEAR) {
+                max(enemy.visualSize, GRIZZLY_MINIMUM_VISUAL_SIZE)
+            } else {
+                enemy.visualSize
+            })
                 .coerceAtLeast(
                     1f
                 ) *
-                visualScale *
-                enemy.spawnVisualScale
+                enemy.visualRenderScale
 
         /*
          * Kaynak frame'lerin aspect ratio'sunu koruyoruz.
@@ -182,10 +170,12 @@ class EnemySpriteRenderer {
             if (spearmanThrow != null) {
                 SPEARMAN_THROW_REFERENCE_SIDE
             } else {
-                val animation = definition.animationFor(visualState.direction)
-                (animation.walkFrames + animation.idleFrame)
-                    .maxOf { max(it.width, it.height) }
-                    .toFloat()
+                definition.referenceSide ?: run {
+                    val animation = definition.animationFor(visualState.direction)
+                    (animation.walkFrames + animation.idleFrame)
+                        .maxOf { max(it.width, it.height) }
+                        .toFloat()
+                }
             }.coerceAtLeast(1f)
 
         val scale =
@@ -234,6 +224,16 @@ class EnemySpriteRenderer {
                 }
             }
 
+        specialVisual
+            ?.takeIf { it.kind == EnemyTraitSpecialVisualKind.GORILLA_SLAM }
+            ?.let { slam ->
+                if (slam.isImpact) {
+                    renderGorillaSlam(enemy, slam.progress, slam.scale)
+                } else {
+                    renderGorillaSlamTelegraph(enemy, slam.scale)
+                }
+            }
+
         renderSpellVisuals(enemy.traitSpellVisuals)
 
         batch.color =
@@ -247,7 +247,9 @@ class EnemySpriteRenderer {
         val vampireBodyIsReplacedByMist =
             specialVisual?.kind == EnemyTraitSpecialVisualKind.VAMPIRE_TRANSFORMATION ||
                 specialVisual?.kind == EnemyTraitSpecialVisualKind.VAMPIRE_TELEPORT
-        if (!vampireBodyIsReplacedByMist) {
+        val mimicBodyIsReplaced =
+            specialVisual?.kind == EnemyTraitSpecialVisualKind.MIMIC_TRANSFORMATION
+        if (!vampireBodyIsReplacedByMist && !mimicBodyIsReplaced) {
             batch.draw(
                 region,
                 drawX,
@@ -263,6 +265,10 @@ class EnemySpriteRenderer {
                     it.kind == EnemyTraitSpecialVisualKind.VAMPIRE_TELEPORT
             }
             ?.let { renderVampireMist(enemy, it.progress) }
+
+        specialVisual
+            ?.takeIf { it.kind == EnemyTraitSpecialVisualKind.MIMIC_TRANSFORMATION }
+            ?.let { renderMimicTransformation(enemy, it.progress) }
 
         specialVisual
             ?.takeIf { it.kind == EnemyTraitSpecialVisualKind.HORSEMAN_SWIPE }
@@ -404,6 +410,52 @@ class EnemySpriteRenderer {
         )
     }
 
+    private fun renderGorillaSlam(enemy: Enemy, progress: Float, scale: Float) {
+        val texture = textureForPath(GORILLA_SLAM_PATH, 2172, 724)
+        val frameIndex = (progress * 6f).toInt().coerceIn(0, 5)
+        val column = frameIndex % 3
+        val row = frameIndex / 3
+        val region = regionFor(texture, EnemySpriteFrame(column * 724, row * 362, 724, 362))
+        val width = 570f * scale
+        val height = width * 0.50f
+        batch.color = Color(1f, 1f, 1f, 0.95f * enemy.deathFadeAlpha)
+        batch.draw(region, enemy.centerX - width / 2f, enemy.centerY - height / 2f, width, height)
+    }
+
+    private fun renderGorillaSlamTelegraph(enemy: Enemy, scale: Float) {
+        val texture = textureForPath(HORSEMAN_QUARTER_TELEGRAPH_PATH, 1254, 1254)
+        val region = regionFor(texture, EnemySpriteFrame(80, 115, 1120, 1110))
+        val radius = GORILLA_SLAM_RADIUS * scale
+        batch.color = Color(1f, 1f, 1f, 0.50f * enemy.deathFadeAlpha)
+        repeat(4) { segment ->
+            batch.draw(
+                region,
+                enemy.centerX,
+                enemy.centerY,
+                0f,
+                0f,
+                radius,
+                radius,
+                1f,
+                1f,
+                45f - segment * 90f
+            )
+        }
+    }
+
+    private fun renderMimicTransformation(enemy: Enemy, progress: Float) {
+        val texture = textureForPath(MIMIC_TRANSFORMATION_PATH, 2172, 724)
+        val frameIndex = (progress * 7f).toInt().coerceIn(0, 6)
+        val frames = MIMIC_TRANSFORMATION_FRAMES
+        val frame = frames[frameIndex]
+        val region = regionFor(texture, frame)
+        val scale = (enemy.visualSize * 1.45f) / MIMIC_TRANSFORMATION_REFERENCE_SIDE
+        val width = frame.width * scale
+        val height = frame.height * scale
+        batch.color = Color(1f, 1f, 1f, enemy.deathFadeAlpha)
+        batch.draw(region, enemy.centerX - width / 2f, enemy.bounds.y, width, height)
+    }
+
     private fun renderSpellVisuals(visuals: List<EnemyTraitSpellVisual>) {
         visuals.forEach { visual ->
             if (visual.kind == EnemyTraitSpellVisualKind.VAMPIRE_HUNGER) {
@@ -422,7 +474,7 @@ class EnemySpriteRenderer {
             } else {
                 (visual.progress * frameCount).toInt().coerceIn(0, frameCount - 1) + 1
             }
-            val path = "effects/spell_focus/${prefix}_${frame.toString().padStart(2, '0')}.png"
+            val path = "weapons_animations/spell_effects/${prefix}_${frame.toString().padStart(2, '0')}.png"
             val handle = Gdx.files.internal(path)
             if (!handle.exists()) return@forEach
             val texture = textures.getOrPut(path) {
@@ -432,14 +484,25 @@ class EnemySpriteRenderer {
             }
             val region = TextureRegion(texture)
             batch.color = Color(1f, 1f, 1f, visual.alpha.coerceIn(0f, 1f))
+            val sourceRatio = texture.width.toFloat() / texture.height.toFloat().coerceAtLeast(1f)
+            val requestedRatio = visual.worldWidth / visual.worldHeight.coerceAtLeast(1f)
+            val drawWidth: Float
+            val drawHeight: Float
+            if (sourceRatio > requestedRatio) {
+                drawWidth = visual.worldWidth
+                drawHeight = visual.worldWidth / sourceRatio
+            } else {
+                drawHeight = visual.worldHeight
+                drawWidth = visual.worldHeight * sourceRatio
+            }
             batch.draw(
                 region,
-                visual.centerX - visual.worldWidth / 2f,
-                visual.centerY - visual.worldHeight / 2f,
-                visual.worldWidth / 2f,
-                visual.worldHeight / 2f,
-                visual.worldWidth,
-                visual.worldHeight,
+                visual.centerX - drawWidth / 2f,
+                visual.centerY - drawHeight / 2f,
+                drawWidth / 2f,
+                drawHeight / 2f,
+                drawWidth,
+                drawHeight,
                 1f,
                 1f,
                 visual.rotationDegrees
@@ -718,5 +781,19 @@ class EnemySpriteRenderer {
         private const val SLIME_PATH_TEXTURE = "enemy_effects/slime_acidic_path.png"
         private const val VAMPIRE_TRANSFORMATION_PATH = "enemy_effects/vampire_transformation.png"
         private const val VAMPIRE_HUNGER_PATH = "enemy_effects/vampire_hunger.png"
+        private const val GORILLA_SLAM_PATH = "enemy_effects/gorilla_slam.png"
+        private const val GORILLA_SLAM_RADIUS = 285f
+        private const val GRIZZLY_MINIMUM_VISUAL_SIZE = 80f
+        private const val MIMIC_TRANSFORMATION_PATH = "enemy_effects/mimic_transformation.png"
+        private const val MIMIC_TRANSFORMATION_REFERENCE_SIDE = 489f
+        private val MIMIC_TRANSFORMATION_FRAMES = arrayOf(
+            EnemySpriteFrame(18, 250, 292, 361),
+            EnemySpriteFrame(310, 237, 310, 345),
+            EnemySpriteFrame(620, 231, 310, 380),
+            EnemySpriteFrame(930, 206, 308, 390),
+            EnemySpriteFrame(1271, 156, 280, 443),
+            EnemySpriteFrame(1551, 123, 310, 480),
+            EnemySpriteFrame(1861, 106, 296, 489)
+        )
     }
 }

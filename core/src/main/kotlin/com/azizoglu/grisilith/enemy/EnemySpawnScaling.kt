@@ -1,17 +1,15 @@
 package com.azizoglu.grisilith.enemy
 
 import kotlin.math.roundToInt
+import kotlin.math.ceil
 import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
 
 object EnemySpawnScaling {
 
-    private const val BASE_SPAWN_INTERVAL = 1.5f
-    private const val MINIMUM_SPAWN_INTERVAL = 0.18f
+    private const val BASE_ENEMY_COUNT = 45
+    private const val ENEMY_COUNT_PER_STAGE = 5
 
-    private const val BASE_MAXIMUM_ENEMY_COUNT = 45
-    private const val ENEMY_COUNT_PER_STAGE = BASE_MAXIMUM_ENEMY_COUNT * 10 / 100
-
-    private const val BASE_UNIQUE_CHANCE = 0.031f
+    private const val BASE_UNIQUE_CHANCE = 0.025f
     private const val UNIQUE_CHANCE_PER_STAGE = 0f
     private const val MAXIMUM_UNIQUE_CHANCE = 0.025f
 
@@ -20,16 +18,8 @@ object EnemySpawnScaling {
     ): EnemySpawnSettings {
         val safeStage = stage.coerceAtLeast(1)
 
-        val spawnInterval =
-            (
-                BASE_SPAWN_INTERVAL -
-                    (safeStage - 1) * 0.045f
-                ).coerceAtLeast(
-                    MINIMUM_SPAWN_INTERVAL
-                )
-
-        val maximumEnemyCount =
-            BASE_MAXIMUM_ENEMY_COUNT +
+        val baseEnemyCount =
+            BASE_ENEMY_COUNT +
                 (safeStage - 1) *
                 ENEMY_COUNT_PER_STAGE
 
@@ -44,35 +34,61 @@ object EnemySpawnScaling {
                 )
 
         return EnemySpawnSettings(
-            spawnInterval = spawnInterval,
-            maximumEnemyCount = maximumEnemyCount,
+            baseEnemyCount = baseEnemyCount,
             uniqueSpawnChance = uniqueSpawnChance
         )
     }
 
-    fun regularEnemyQuotaForStage(
+    fun regularEnemyCountForStage(
         stage: Int,
-        isBossStage: Boolean,
+        maximumStage: Int,
         enemyCountMultiplier: Float = 1f
     ): Int {
-        val baseStageEnemyCount =
+        val safeStage = stage.coerceAtLeast(1)
+        val linearStageEnemyCount =
             settingsForStage(stage)
-                .maximumEnemyCount
+                .baseEnemyCount
 
-        val stageTypeMultiplier =
-            if (isBossStage) {
-                0.5f
+        val earlyBalancedEnemyCount =
+            if (safeStage <= EARLY_GAME_END_STAGE) {
+                EARLY_GAME_START_COUNT +
+                    (safeStage - 1) * EARLY_GAME_COUNT_PER_STAGE
             } else {
-                1f
+                linearStageEnemyCount
             }
 
+        val safeMaximumStage = maximumStage.coerceAtLeast(1)
+        val lateGameStartStage =
+            ceil(safeMaximumStage * LATE_GAME_START_RATIO)
+                .toInt()
+                .coerceIn(1, safeMaximumStage)
+
+        val lateGameProgress =
+            if (safeStage <= lateGameStartStage || lateGameStartStage >= safeMaximumStage) {
+                0f
+            } else {
+                (safeStage - lateGameStartStage).toFloat() /
+                    (safeMaximumStage - lateGameStartStage).toFloat()
+            }
+
+        val lateGameMultiplier =
+            1f + LATE_GAME_MAXIMUM_BONUS * lateGameProgress.coerceIn(0f, 1f)
+
         return (
-            baseStageEnemyCount *
-                stageTypeMultiplier *
+            earlyBalancedEnemyCount *
+                lateGameMultiplier *
+                GLOBAL_ENEMY_COUNT_MULTIPLIER *
                 enemyCountMultiplier
             )
             .roundToInt()
             .coerceAtLeast(1)
     }
+
+    private const val EARLY_GAME_END_STAGE = 5
+    private const val EARLY_GAME_START_COUNT = 15
+    private const val EARLY_GAME_COUNT_PER_STAGE = 11
+    private const val GLOBAL_ENEMY_COUNT_MULTIPLIER = 0.80f
+    private const val LATE_GAME_START_RATIO = 0.80f
+    private const val LATE_GAME_MAXIMUM_BONUS = 0.10f
 
 }

@@ -289,6 +289,9 @@ object DefaultBeastEnemySpriteSheets {
             sourceHeight =
                 408,
 
+            referenceSide =
+                83f,
+
             animations =
                 mapOf(
                     EnemyVisualDirection.DOWN to
@@ -359,6 +362,57 @@ object DefaultBeastEnemySpriteSheets {
                                 0.15f
                         )
                 )
+        )
+
+    val grizzlyBearAngry =
+        EnemySpriteSheetDefinition(
+            kindId = EnemyKindIds.GRIZZLY_BEAR,
+            texturePath = "enemies/beast/grizzly_bear_angry.png",
+            sourceWidth = 1536,
+            sourceHeight = 1024,
+            referenceSide = 217f,
+            animations = mapOf(
+                EnemyVisualDirection.DOWN to EnemySpriteAnimationDefinition(
+                    idleFrame = EnemySpriteFrame(479, 59, 160, 203),
+                    walkFrames = listOf(
+                        EnemySpriteFrame(692, 67, 153, 191),
+                        EnemySpriteFrame(901, 70, 156, 187),
+                        EnemySpriteFrame(1109, 71, 159, 186),
+                        EnemySpriteFrame(1323, 70, 171, 179)
+                    ),
+                    walkFrameDurationSeconds = 0.13f
+                ),
+                EnemyVisualDirection.LEFT to EnemySpriteAnimationDefinition(
+                    idleFrame = EnemySpriteFrame(464, 304, 198, 146),
+                    walkFrames = listOf(
+                        EnemySpriteFrame(666, 313, 214, 138),
+                        EnemySpriteFrame(880, 318, 215, 132),
+                        EnemySpriteFrame(1095, 318, 215, 132),
+                        EnemySpriteFrame(1310, 315, 203, 135)
+                    ),
+                    walkFrameDurationSeconds = 0.13f
+                ),
+                EnemyVisualDirection.RIGHT to EnemySpriteAnimationDefinition(
+                    idleFrame = EnemySpriteFrame(466, 517, 199, 149),
+                    walkFrames = listOf(
+                        EnemySpriteFrame(665, 530, 213, 140),
+                        EnemySpriteFrame(887, 530, 208, 137),
+                        EnemySpriteFrame(1095, 530, 215, 140),
+                        EnemySpriteFrame(1310, 530, 203, 138)
+                    ),
+                    walkFrameDurationSeconds = 0.13f
+                ),
+                EnemyVisualDirection.UP to EnemySpriteAnimationDefinition(
+                    idleFrame = EnemySpriteFrame(495, 713, 147, 213),
+                    walkFrames = listOf(
+                        EnemySpriteFrame(701, 715, 137, 214),
+                        EnemySpriteFrame(909, 715, 135, 211),
+                        EnemySpriteFrame(1123, 713, 133, 217),
+                        EnemySpriteFrame(1338, 715, 133, 214)
+                    ),
+                    walkFrameDurationSeconds = 0.13f
+                )
+            )
         )
 
     val beeSwarm =
@@ -456,24 +510,27 @@ object DefaultBeastEnemySpriteSheets {
                 "enemies/beast/crocodile.png",
 
             sourceWidth =
-                558,
+                1402,
 
             sourceHeight =
-                447,
+                1122,
+
+            referenceSide =
+                296f,
 
             animations =
                 mapOf(
                     EnemyVisualDirection.DOWN to
                         EnemySpriteAnimationDefinition(
                             idleFrame =
-                                EnemySpriteFrame(x = 194, y = 31, width = 51, height = 80),
+                                EnemySpriteFrame(x = 73, y = 34, width = 195, height = 272),
 
                             walkFrames =
                                 listOf(
-                                    EnemySpriteFrame(x = 268, y = 29, width = 50, height = 82),
-                                    EnemySpriteFrame(x = 340, y = 30, width = 53, height = 81),
-                                    EnemySpriteFrame(x = 413, y = 32, width = 54, height = 79),
-                                    EnemySpriteFrame(x = 487, y = 34, width = 54, height = 77)
+                                    EnemySpriteFrame(x = 348, y = 41, width = 193, height = 270),
+                                    EnemySpriteFrame(x = 607, y = 39, width = 190, height = 270),
+                                    EnemySpriteFrame(x = 869, y = 44, width = 203, height = 266),
+                                    EnemySpriteFrame(x = 1166, y = 38, width = 184, height = 268)
                                 ),
 
                             walkFrameDurationSeconds =
@@ -483,14 +540,14 @@ object DefaultBeastEnemySpriteSheets {
                     EnemyVisualDirection.LEFT to
                         EnemySpriteAnimationDefinition(
                             idleFrame =
-                                EnemySpriteFrame(x = 188, y = 144, width = 65, height = 41),
+                                EnemySpriteFrame(x = 10, y = 352, width = 294, height = 170),
 
                             walkFrames =
                                 listOf(
-                                    EnemySpriteFrame(x = 260, y = 147, width = 65, height = 39),
-                                    EnemySpriteFrame(x = 333, y = 148, width = 67, height = 37),
-                                    EnemySpriteFrame(x = 409, y = 147, width = 66, height = 38),
-                                    EnemySpriteFrame(x = 482, y = 147, width = 68, height = 38)
+                                    EnemySpriteFrame(x = 304, y = 349, width = 274, height = 176),
+                                    EnemySpriteFrame(x = 576, y = 352, width = 269, height = 170),
+                                    EnemySpriteFrame(x = 836, y = 352, width = 279, height = 173),
+                                    EnemySpriteFrame(x = 1116, y = 346, width = 276, height = 176)
                                 ),
 
                             walkFrameDurationSeconds =
@@ -500,14 +557,14 @@ object DefaultBeastEnemySpriteSheets {
                     EnemyVisualDirection.RIGHT to
                         EnemySpriteAnimationDefinition(
                             idleFrame =
-                                EnemySpriteFrame(x = 188, y = 240, width = 64, height = 39),
+                                EnemySpriteFrame(x = 20, y = 583, width = 289, height = 178),
 
                             walkFrames =
                                 listOf(
-                                    EnemySpriteFrame(x = 259, y = 241, width = 66, height = 38),
-                                    EnemySpriteFrame(x = 332, y = 242, width = 67, height = 38),
-                                    EnemySpriteFrame(x = 406, y = 242, width = 68, height = 38),
-                                    EnemySpriteFrame(x = 481, y = 242, width = 68, height = 38)
+                                    EnemySpriteFrame(x = 305, y = 583, width = 273, height = 178),
+                                    EnemySpriteFrame(x = 572, y = 581, width = 277, height = 180),
+                                    EnemySpriteFrame(x = 850, y = 583, width = 270, height = 178),
+                                    EnemySpriteFrame(x = 1115, y = 585, width = 272, height = 173)
                                 ),
 
                             walkFrameDurationSeconds =
@@ -517,14 +574,14 @@ object DefaultBeastEnemySpriteSheets {
                     EnemyVisualDirection.UP to
                         EnemySpriteAnimationDefinition(
                             idleFrame =
-                                EnemySpriteFrame(x = 194, y = 311, width = 48, height = 96),
+                                EnemySpriteFrame(x = 60, y = 787, width = 200, height = 296),
 
                             walkFrames =
                                 listOf(
-                                    EnemySpriteFrame(x = 266, y = 311, width = 51, height = 96),
-                                    EnemySpriteFrame(x = 341, y = 314, width = 53, height = 89),
-                                    EnemySpriteFrame(x = 417, y = 315, width = 47, height = 90),
-                                    EnemySpriteFrame(x = 489, y = 315, width = 54, height = 90)
+                                    EnemySpriteFrame(x = 341, y = 796, width = 204, height = 282),
+                                    EnemySpriteFrame(x = 599, y = 794, width = 199, height = 283),
+                                    EnemySpriteFrame(x = 873, y = 797, width = 208, height = 285),
+                                    EnemySpriteFrame(x = 1151, y = 793, width = 198, height = 283)
                                 ),
 
                             walkFrameDurationSeconds =
