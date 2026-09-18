@@ -6,7 +6,7 @@ object DefaultCollectionMaps {
 
     val all:
         List<MapCollectionDefinition> =
-        GameMap.entries.map { gameMap ->
+        GameMap.entries.filterNot { it == GameMap.TEST_MAP }.map { gameMap ->
 
             MapCollectionDefinition(
                 gameMap =

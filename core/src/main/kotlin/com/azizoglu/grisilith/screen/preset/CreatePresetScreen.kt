@@ -1832,6 +1832,8 @@ class CreatePresetScreen(
     private fun filteredArmors():
         List<ArmorDefinition> {
 
+        if (selectedCharacter()?.canEquipArmor == false) return emptyList()
+
         return armors.filter { armor ->
 
             interactionState.showLockedContent ||
@@ -2149,9 +2151,20 @@ class CreatePresetScreen(
                 finalBaseStats,
 
             characterTraitId =
-                character.trait.id
+                character.trait.id,
+            canEquipArmor = character.canEquipArmor,
+            unarmoredBaseHealth = character.unarmoredBaseHealth,
+            unarmoredBaseArmor = character.unarmoredBaseArmor,
+            unarmoredBaseMagicResistance = character.unarmoredBaseMagicResistance
         ).also {
                 previewStats ->
+
+            val armor = selectedArmor()
+            previewStats.setArmorBaseValues(
+                armor?.baseHealth ?: character.unarmoredBaseHealth,
+                armor?.baseArmor ?: character.unarmoredBaseArmor,
+                armor?.baseMagicResistance ?: character.unarmoredBaseMagicResistance
+            )
 
             val gearBonuses =
                 StatType.entries
@@ -3085,14 +3098,14 @@ class CreatePresetScreen(
                 armorSlot,
 
             emptyTitle =
-                "ARMOR",
+                if (selectedCharacter()?.canEquipArmor == false) "ARMOR\nUNAVAILABLE" else "ARMOR",
 
             selectedName =
                 selectedArmor()
                     ?.displayName,
 
             isValidDropTarget =
-                interactionState
+                interactionState.canEquipArmor && interactionState
                     .draggedContent
                     ?.type ==
                     CreatePresetEquipmentType.ARMOR
@@ -4322,6 +4335,8 @@ class CreatePresetScreen(
                             "Base Armor: ${armor.baseArmor}"
                         )
 
+                        appendLine("Base Magic Resistance: ${armor.baseMagicResistance}")
+
                         val modifierText =
                             armor
                                 .allStatModifiers()
@@ -5475,6 +5490,9 @@ class CreatePresetScreen(
 
             StatType.ARMOR_CLASS ->
                 "Improves physical protection and contributes to damage reduction."
+
+            StatType.MAGIC_RESISTANCE ->
+                "Base Magic Resistance x this score reduces Fire, Air, Water, Lightning, Necrotic and Acid damage. Poison is excluded."
 
             StatType.STRENGTH ->
                 "Improves damage scaling for Strength-based Weapons."

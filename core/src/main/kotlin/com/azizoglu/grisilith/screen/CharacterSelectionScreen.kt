@@ -368,7 +368,10 @@ class CharacterSelectionScreen(
                     StatType.HP_REGENERATION,
 
                 "Life Steal" to
-                    StatType.LIFE_STEAL
+                    StatType.LIFE_STEAL,
+
+                "Magic Resist" to
+                    StatType.MAGIC_RESISTANCE
             )
 
         leftColumnStats.forEachIndexed {

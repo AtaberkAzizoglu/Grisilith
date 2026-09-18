@@ -365,7 +365,8 @@ private class VampireHungerTrait :
                         .coerceAtLeast(1),
                     EnemyDamageContext(
                         damageType = DamageType.NECROTIC,
-                        sourceName = "Vampire Hunger"
+                        sourceName = "Vampire Hunger",
+                        conditionStatScore = owner.conditionDamageStatScore
                     )
                 )
             if (applied > 0) {

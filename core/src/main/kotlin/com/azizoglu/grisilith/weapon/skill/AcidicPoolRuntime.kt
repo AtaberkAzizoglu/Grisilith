@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.weapon.skill
 
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.weapon.skill.area.PersistentArea
 import com.azizoglu.grisilith.weapon.skill.area.PersistentAreaAnchor
 import com.azizoglu.grisilith.weapon.skill.area.PersistentAreaManager
@@ -13,6 +14,9 @@ import com.badlogic.gdx.math.MathUtils
 class AcidicPoolRuntime(
     areaManager: PersistentAreaManager
 ) {
+
+    private val reactiveTarget =
+        ReactiveSpellFieldTarget(DamageType.FIRE)
 
     private val areaRuntime:
         PersistentAreaRuntime =
@@ -151,7 +155,7 @@ class AcidicPoolRuntime(
                 ?.first
                 ?: return false
 
-        return areaRuntime.begin(
+        val began = areaRuntime.begin(
             PersistentArea(
                 id =
                     AREA_ID,
@@ -179,6 +183,8 @@ class AcidicPoolRuntime(
                         .FIXED_WORLD_POSITION
             )
         )
+        if (began) reactiveTarget.reset()
+        return began
     }
 
     fun contains(
@@ -217,6 +223,16 @@ class AcidicPoolRuntime(
             IGNITION_VISUAL_SECONDS
 
         return true
+    }
+
+    fun tryDamageReactiveTarget(
+        damageType: DamageType?,
+        worldX: Float,
+        worldY: Float
+    ): Boolean {
+        if (!isActive || vitriolicIgnitionActive || !contains(worldX, worldY)) return false
+        if (!reactiveTarget.tryDamage(damageType)) return false
+        return tryActivateVitriolicIgnition(worldX, worldY)
     }
 
     fun update(
@@ -303,6 +319,7 @@ class AcidicPoolRuntime(
 
     fun clear() {
         areaRuntime.clear()
+        reactiveTarget.clear()
 
         vitriolicIgnitionActive =
             false

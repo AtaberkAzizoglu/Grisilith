@@ -106,7 +106,7 @@ object DefaultWeaponAbilities {
         0.33333334f
 
     const val STATIC_CLOUDS_LIGHTNING_DPS_MULTIPLIER =
-        1.19f
+        0.000165f
 
     const val STATIC_CLOUDS_STUN_CHANCE =
         0.05f
@@ -144,14 +144,9 @@ object DefaultWeaponAbilities {
     const val ACIDIC_POOL_TICK_SECONDS =
         0.25f
 
-    /*
-     * Değer DPS çarpanıdır.
-     *
-     * Tick başına:
-     * Active Skill Damage × 0.90 × 0.50
-     */
+    /* Target Max HP ratio per (Wisdom + related magical stat), per tick. */
     const val ACIDIC_POOL_DAMAGE_PER_SECOND_MULTIPLIER =
-        1.65f
+        0.00015f
 
     const val ACIDIC_POOL_CORRODING_DURATION_SECONDS =
         3f
@@ -179,7 +174,7 @@ object DefaultWeaponAbilities {
         0.16666667f
 
     const val VORTEX_PULL_DAMAGE_PER_SECOND_MULTIPLIER =
-        1.90f
+        0.00010f
 
     const val VORTEX_PULL_NORMAL_PULL_MULTIPLIER =
         1f

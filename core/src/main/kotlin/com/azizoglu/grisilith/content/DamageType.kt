@@ -67,5 +67,10 @@ enum class DamageType(
     COLD(
         displayName = "Cold",
         canCriticallyHit = false
-    )
+    );
+
+    /** Poison, Earth, Cold and untyped damage deliberately bypass this defense. */
+    val isMagical: Boolean
+        get() = this == FIRE || this == AIR || this == WATER ||
+            this == LIGHTNING || this == NECROTIC || this == ACID
 }

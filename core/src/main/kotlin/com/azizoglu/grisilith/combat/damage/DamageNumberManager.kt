@@ -3,6 +3,7 @@ package com.azizoglu.grisilith.combat.damage
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.map.TroubleAtHomeDefenseRuntime
 import com.azizoglu.grisilith.summon.SummonManager
+import com.azizoglu.grisilith.player.Player
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -37,6 +38,10 @@ class DamageNumberManager {
 
     fun collectFromGate(runtime: TroubleAtHomeDefenseRuntime) {
         collectEvents(runtime.consumeDamageNumberEvents())
+    }
+
+    fun collectFromPlayer(player: Player) {
+        collectEvents(player.consumeDamageNumberEvents())
     }
 
     private fun collectEvents(events: List<DamageNumberEvent>) {

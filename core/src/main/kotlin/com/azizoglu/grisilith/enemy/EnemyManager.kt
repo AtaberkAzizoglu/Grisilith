@@ -62,6 +62,8 @@ class EnemyManager {
         enemies.add(enemy)
     }
 
+    fun remove(enemy: Enemy): Boolean = enemies.remove(enemy)
+
     fun update(
         delta: Float,
         targetX: Float,
@@ -75,13 +77,17 @@ class EnemyManager {
         worldWidth: Float,
         worldHeight: Float,
         mapObstacles: List<MapObstacle>,
-        onPlayerDamaged: (Enemy, Int) -> Unit,
+        onPlayerDamaged: (Enemy, Int, com.azizoglu.grisilith.content.DamageType) -> Unit,
         onSummonDamaged: (
             summon: SummonedEntity,
-            damage: Int
+            damage: Int,
+            damageType: com.azizoglu.grisilith.content.DamageType,
+            source: Enemy
         ) -> Unit = {
                 summon,
-                damage ->
+                damage,
+                _,
+                _ ->
 
             summon.takeDamage(
                 damage
@@ -155,7 +161,7 @@ class EnemyManager {
                     nearbyEnemies =
                         enemies,
 
-                    onContactDamage = {
+                    onContactDamage = { _, _ ->
                         /*
                          * Cannot be reached for a dead Enemy because
                          * Enemy.update() returns from its isDead branch.
@@ -215,22 +221,22 @@ class EnemyManager {
                 mapObstacles = mapObstacles,
                 nearbyEnemies = enemies,
                 combatTargets = traitTargets,
-                onContactDamage = { damage ->
+                onContactDamage = { damage, damageType ->
                     when (selectedTarget.type) {
                         CombatTargetType.PLAYER ->
-                            onPlayerDamaged(enemy, damage)
+                            onPlayerDamaged(enemy, damage, damageType)
 
                         CombatTargetType.SUMMON ->
                             selectedTarget.summon
                                 ?.takeIf { !it.isExpired }
                                 ?.let {
-                                    onSummonDamaged(it, damage)
+                                    onSummonDamaged(it, damage, damageType, enemy)
                                     if (enemy.kindId == com.azizoglu.grisilith.enemy.definition.EnemyKindIds.GHOST) {
                                         onSummonCondition(
                                             it,
                                             ConditionType.NECROSIS,
                                             5f,
-                                            (enemy.contactDamage * 0.60f).toInt().coerceAtLeast(1)
+                                            enemy.conditionDamageStatScore
                                         )
                                     }
                                 }
@@ -242,13 +248,13 @@ class EnemyManager {
                 onTraitTargetDamage = { event ->
                     if (event.amount > 0) when (event.targetType) {
                         EnemyTraitTargetType.PLAYER ->
-                            onPlayerDamaged(enemy, event.amount)
+                            onPlayerDamaged(enemy, event.amount, event.damageType)
 
                         EnemyTraitTargetType.SUMMON ->
                             targetableSummons
                                 .getOrNull(event.targetIndex)
                                 ?.takeIf { !it.isExpired }
-                                ?.let { onSummonDamaged(it, event.amount) }
+                                ?.let { onSummonDamaged(it, event.amount, event.damageType, enemy) }
 
                         EnemyTraitTargetType.GATE -> {
                             val amount =
@@ -268,7 +274,7 @@ class EnemyManager {
                                 onPlayerCondition(
                                     condition,
                                     event.conditionDurationSeconds,
-                                    event.conditionTickDamage
+                                    event.conditionStatScore
                                 )
                             EnemyTraitTargetType.SUMMON ->
                                 targetableSummons.getOrNull(event.targetIndex)
@@ -278,7 +284,7 @@ class EnemyManager {
                                             it,
                                             condition,
                                             event.conditionDurationSeconds,
-                                            event.conditionTickDamage
+                                            event.conditionStatScore
                                         )
                                     }
                             EnemyTraitTargetType.GATE -> Unit

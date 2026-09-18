@@ -34,15 +34,22 @@ class ConditionContainer {
     fun apply(
         application: ConditionApplication
     ) {
-        val existing = conditions[application.type]
+        val definition = DefaultConditionDefinitions.definitionFor(application.type)
+        val normalizedApplication =
+            if (definition.dealsPeriodicDamage && application.durationSeconds != null) {
+                application.copy(durationSeconds = application.durationSeconds.coerceAtMost(
+                    DefaultConditionDefinitions.DEFAULT_DURATION_SECONDS
+                ))
+            } else application
+        val existing = conditions[normalizedApplication.type]
 
         if (existing == null) {
-            conditions[application.type] =
-                ActiveCondition(application)
+            conditions[normalizedApplication.type] =
+                ActiveCondition(normalizedApplication)
             return
         }
 
-        existing.refresh(application)
+        existing.refresh(normalizedApplication)
     }
 
     /*

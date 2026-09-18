@@ -17,6 +17,11 @@ data class CharacterDefinition(
 
     val trait: CharacterTraitDefinition,
 
+    val canEquipArmor: Boolean = true,
+    val unarmoredBaseHealth: Int = 1,
+    val unarmoredBaseArmor: Int = 0,
+    val unarmoredBaseMagicResistance: Int = 0,
+
     /*
      * Karaktere özgü ham kritik değerleri.
      * Crit Rate ve Crit Damage Stat katkıları
@@ -50,6 +55,7 @@ data class CharacterDefinition(
         emptySet()
 
     init {
+        require(unarmoredBaseHealth > 0 && unarmoredBaseArmor >= 0 && unarmoredBaseMagicResistance >= 0)
         require(displayName.isNotBlank()) {
             "Character name cannot be blank."
         }

@@ -9,15 +9,10 @@ data class ConditionDefinition(
     val damageType: DamageType = DamageType.NONE,
     val scalingStat: StatType? = null,
     val tickIntervalSeconds: Float? = null,
-    val baseTickDamage: Float = 0f,
-    val damagePerStatPoint: Float = 0f
+    val maximumHealthRatioPerStatPoint: Float = 0f
 ) {
     init {
-        require(baseTickDamage >= 0f) {
-            "Condition base tick damage cannot be negative."
-        }
-
-        require(damagePerStatPoint >= 0f) {
+        require(maximumHealthRatioPerStatPoint >= 0f) {
             "Condition stat scaling cannot be negative."
         }
 
@@ -32,5 +27,6 @@ data class ConditionDefinition(
         get() =
             damageType != DamageType.NONE &&
                 scalingStat != null &&
-                tickIntervalSeconds != null
+                tickIntervalSeconds != null &&
+                maximumHealthRatioPerStatPoint > 0f
 }

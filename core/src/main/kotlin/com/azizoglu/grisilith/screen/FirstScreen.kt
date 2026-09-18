@@ -6,6 +6,7 @@ import com.azizoglu.grisilith.combat.damage.DamageNumberManager
 import com.azizoglu.grisilith.combat.healing.HealingVisualManager
 import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionSource
 
@@ -26,6 +27,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.azizoglu.grisilith.util.GameTimeController
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.InputAdapter
 import com.azizoglu.grisilith.stage.StageController
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.stage.StageType
@@ -99,6 +101,9 @@ import com.azizoglu.grisilith.tamga.runtime.active.ActiveTamgaEndReason
 import com.azizoglu.grisilith.tamga.render.ActiveTamgaHudRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.math.Rectangle
+import com.azizoglu.grisilith.enemy.definition.EnemyTag
 import com.azizoglu.grisilith.reward.RunRewardTracker
 import com.azizoglu.grisilith.content.CollectionEncounterIds
 import com.azizoglu.grisilith.profile.PlayerProfileRepository
@@ -191,7 +196,11 @@ class FirstScreen(
                     .baseCritDamagePercent,
 
             characterTraitId =
-                selectedCharacter.trait.id
+                selectedCharacter.trait.id,
+            canEquipArmor = selectedCharacter.canEquipArmor,
+            unarmoredBaseHealth = selectedCharacter.unarmoredBaseHealth,
+            unarmoredBaseArmor = selectedCharacter.unarmoredBaseArmor,
+            unarmoredBaseMagicResistance = selectedCharacter.unarmoredBaseMagicResistance
         ).apply {
             selectedPreset
                 ?.let { preset ->
@@ -238,9 +247,9 @@ class FirstScreen(
     )
 
     private val equippedArmor =
-        EquippedArmor().apply {
+        EquippedArmor(selectedCharacter.canEquipArmor).apply {
             selectedPreset
-                ?.armor
+                ?.armor?.takeIf { selectedCharacter.canEquipArmor }
                 ?.let { armor ->
                     equip(
                         armor
@@ -300,7 +309,7 @@ class FirstScreen(
                 60f,
 
             maximumStage =
-                difficulty.maximumStage
+                if (gameMap == GameMap.TEST_MAP) 50 else difficulty.maximumStage
         )
 
 
@@ -366,15 +375,15 @@ class FirstScreen(
             characterId = selectedCharacter.id.value
         )
 
-    private val mapObstacles: List<MapObstacle> =
+    private var mapObstacles: List<MapObstacle> =
         MapObstacleGenerator.generate(
             gameMap = gameMap,
             playerStartX = player.centerX,
             playerStartY = player.centerY
         )
 
-    private val blockingMapObstacles: List<MapObstacle> =
-        mapObstacles.filter(MapObstacle::blocksMovement)
+    private val blockingMapObstacles: List<MapObstacle>
+        get() = mapObstacles.filter(MapObstacle::blocksMovement)
 
     private val projectiles = mutableListOf<Projectile>()
 
@@ -394,7 +403,7 @@ class FirstScreen(
                 blockingMapObstacles
         )
 
-    private val troubleAtHomeDefenseRuntime =
+    private var troubleAtHomeDefenseRuntime =
         TroubleAtHomeDefenseRuntime(
             gameMap = gameMap,
             obstacles = mapObstacles
@@ -442,6 +451,46 @@ class FirstScreen(
 
     private var isPauseMenuOpen =
         false
+
+    private enum class TestDeathMode { END_RUN, RESTART_STAGE, IMMORTAL }
+
+    private var isTestSettingsOpen = false
+    private var isTestRunFrozen = false
+    private var isTestEnemySpawningEnabled = false
+    private var testEnemyTag = EnemyTag.BEAST
+    private var testDummySelected = false
+    private var testDeathMode = TestDeathMode.END_RUN
+    private var testObstaclesEnabled = false
+    private var testItemIndex = 0
+    private var testWeaponIndex = 0
+    private var testDummyEnemy: Enemy? = null
+    private var isTestResetConfirmationOpen = false
+    private var isTestStatEditorOpen = false
+    private var testCatalogKind: String? = null
+    private var testCatalogOffset = 0
+    private var isTestStageListOpen = false
+    private var testStageListOffset = 0
+    private var draggedTestWeaponSlot: Int? = null
+    private var draggedTestItemRuntimeId: String? = null
+    private var testPointerWasDown = false
+    private var isTestInfiniteStage = false
+    private var isTestOwnedItemsOpen = false
+    private var testItemRarityFilter: com.azizoglu.grisilith.item.definition.ItemRarity? = null
+    private enum class TestWeaponFilter { ALL, MELEE, RANGED, SPELL_FOCUS }
+    private var testWeaponFilter = TestWeaponFilter.ALL
+    private var testCatalogScroll = 0f
+    private var testPressedAtMillis = 0L
+    private var testCatalogDragLastY: Float? = null
+    private val testMapScrollProcessor = object : InputAdapter() {
+        override fun scrolled(amountX: Float, amountY: Float): Boolean {
+            if (gameMap != GameMap.TEST_MAP || !isTestSettingsOpen || (testCatalogKind == null && !isTestOwnedItemsOpen)) return false
+            val entryCount = if (isTestOwnedItemsOpen) itemInventory.allItems().size else filteredTestCatalogEntries().size
+            val rowHeight = if (isTestOwnedItemsOpen) 34f else 36f
+            val maximum = ((entryCount - 10).coerceAtLeast(0) * rowHeight)
+            testCatalogScroll = (testCatalogScroll + amountY * rowHeight * 2f).coerceIn(0f, maximum)
+            return true
+        }
+    }
 
     private var hasInitializedRun =
         false
@@ -883,6 +932,11 @@ class FirstScreen(
                             StatType.ARMOR_CLASS
                         )
                         .toString()
+            ),
+
+            ChestCharacterStatRow(
+                label = "Magic Resist",
+                value = playerStats.totalScore(StatType.MAGIC_RESISTANCE).toString()
             ),
 
             ChestCharacterStatRow(
@@ -1625,6 +1679,10 @@ class FirstScreen(
     override fun show() {
         viewport.apply()
 
+        if (gameMap == GameMap.TEST_MAP && Gdx.input.inputProcessor == null) {
+            Gdx.input.inputProcessor = testMapScrollProcessor
+        }
+
         camera.position.set(
             player.centerX,
             player.centerY,
@@ -1801,6 +1859,7 @@ class FirstScreen(
         equippedArmor.clear()
 
         snapshot.armorDefinitionId
+            ?.takeIf { selectedCharacter.canEquipArmor }
             ?.let {
                     savedArmorId ->
 
@@ -1993,6 +2052,14 @@ class FirstScreen(
             delta
         )
 
+        if (gameMap == GameMap.TEST_MAP) {
+            handleTestMapDeathPolicy()
+            synchronizeTestDummyVisibility()
+            testDummyEnemy?.takeIf { !it.isDead }?.health?.let { health ->
+                health.restoreCurrentHealth(health.maximumHealth)
+            }
+        }
+
         if (isRunSummaryOpen) {
             runSummaryStatInteractionController
                 .update()
@@ -2051,6 +2118,8 @@ class FirstScreen(
                 chooseGlyphSpellPopup.isOpen ||
                 isMarketOpen ||
                 isPauseMenuOpen ||
+                isTestSettingsOpen ||
+                isTestRunFrozen ||
                 isRunSummaryOpen
 
         val gameDelta =
@@ -2066,6 +2135,21 @@ class FirstScreen(
             !gameplayStopped
         ) {
             updateGame(gameDelta)
+
+            /*
+             * The simulation delta is deliberately capped to prevent a
+             * single slow frame from teleporting entities. Ability cooldowns
+             * are clocks, however: with a crowded screen they must still
+             * advance in real time instead of appearing frozen.
+             */
+            val uncappedCooldownDelta =
+                delta.takeIf { it.isFinite() }
+                    ?.coerceIn(0f, 0.5f)
+                    ?.times(gameTimeController.gameSpeed)
+                    ?: 0f
+            weaponRuntimeManager.reduceAllAbilityCooldowns(
+                (uncappedCooldownDelta - gameDelta).coerceAtLeast(0f)
+            )
         }
 
         renderGame()
@@ -2199,6 +2283,9 @@ class FirstScreen(
     private fun handleGameControls(
         delta: Float
     ) {
+        if (gameMap == GameMap.TEST_MAP && canShowTestMapControls() && handleTestMapControls()) return
+        if (!canShowTestMapControls()) testPointerWasDown = false
+
         if (chooseGlyphSpellPopup.isOpen) {
             chooseGlyphSpellPopup.handleInput()
             return
@@ -2282,6 +2369,340 @@ class FirstScreen(
         handleGameSpeedButtonInput()
         handleWeaponAbilityInput()
 
+    }
+
+    private fun canShowTestMapControls(): Boolean =
+        gameMap == GameMap.TEST_MAP &&
+            !player.health.isDead &&
+            !stageController.isRunComplete &&
+            !isRunSummaryOpen &&
+            !isMarketOpen &&
+            !isPauseMenuOpen &&
+            !chestRewardController.isOpen &&
+            !statCardController.isOpen &&
+            !chooseToSummonPopup.isOpen &&
+            !chooseGlyphSpellPopup.isOpen
+
+    private fun handleTestMapControls(): Boolean {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && isTestSettingsOpen) {
+            when {
+                testCatalogKind != null -> testCatalogKind = null
+                isTestOwnedItemsOpen -> isTestOwnedItemsOpen = false
+                else -> isTestSettingsOpen = false
+            }
+            return true
+        }
+        val pointerDown = Gdx.input.isButtonPressed(Input.Buttons.LEFT)
+        val justPressed = Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)
+        val justReleased = !pointerDown && testPointerWasDown
+        testPointerWasDown = pointerDown
+        val p = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat())
+        viewport.unproject(p)
+        val left = camera.position.x - CAMERA_WIDTH / 2f
+        val bottom = camera.position.y - CAMERA_HEIGHT / 2f
+        val right = left + CAMERA_WIDTH
+        fun hit(x: Float, y: Float, w: Float, h: Float) = Rectangle(x, y, w, h).contains(p)
+
+        if (justPressed) testPressedAtMillis = com.badlogic.gdx.utils.TimeUtils.millis()
+        val isShortRelease = justReleased &&
+            com.badlogic.gdx.utils.TimeUtils.timeSinceMillis(testPressedAtMillis) < 1_000L
+
+        if (justReleased && isTestSettingsOpen) {
+            var completedDrag = false
+            draggedTestWeaponSlot?.let { source ->
+                completedDrag = true
+                val target = (0 until WeaponInventory.WEAPON_SLOT_COUNT).firstOrNull { i ->
+                    val column = i % 3
+                    val row = i / 3
+                    hit(right - 315f + column * 96f, bottom + 358f - row * 104f, 82f, 82f)
+                }
+                when {
+                    target == null && p.x < right - 330f -> weaponInventory.removeWeaponFromSlot(source)
+                    target != null && target != source -> {
+                        val merged = weaponInventory.mergeSlots(source, target)
+                        if (merged != WeaponInventoryResult.MERGED) weaponInventory.swapSlots(source, target)
+                    }
+                }
+                weaponStatBonusSynchronizer.synchronize()
+            }
+            draggedTestItemRuntimeId?.let { runtimeId ->
+                completedDrag = true
+                if (p.x < right - 330f) {
+                    itemInventory.removeItem(runtimeId)
+                    itemStatSynchronizer.synchronize()
+                }
+            }
+            draggedTestWeaponSlot = null
+            draggedTestItemRuntimeId = null
+            if (completedDrag) return true
+        }
+
+        if (!isTestSettingsOpen && justPressed && hit(right - 300f, bottom + 18f, 150f, 42f)) {
+            isTestSettingsOpen = !isTestSettingsOpen
+            return true
+        }
+        if (!isTestSettingsOpen && justPressed && hit(right - 140f, bottom + 18f, 120f, 42f)) {
+            isTestRunFrozen = !isTestRunFrozen
+            return true
+        }
+        if (!isTestSettingsOpen && justPressed && hit(right - 300f, bottom + 66f, 280f, 38f)) {
+            weaponRuntimeManager.reduceAllAbilityCooldowns(Float.MAX_VALUE)
+            tamgaRuntimeManager.resetAllActiveCooldowns()
+            ActiveItemEffects.resetAllCooldowns()
+            return true
+        }
+        if (!isTestSettingsOpen) return false
+
+        if (isTestOwnedItemsOpen) {
+            if (isShortRelease && hit(left + 775f, bottom + 570f, 80f, 32f)) {
+                isTestOwnedItemsOpen = false
+                return true
+            }
+            if (isShortRelease && hit(left + 325f, bottom + 145f, 520f, 390f)) {
+                val row = ((bottom + 535f - p.y) / 34f).toInt()
+                val index = (testCatalogScroll / 34f).toInt() + row
+                val item = itemInventory.allItems().getOrNull(index)
+                if (item != null && hit(left + 755f, bottom + 501f - row * 34f, 80f, 28f)) {
+                    itemInventory.removeItem(item.runtimeId)
+                    itemStatSynchronizer.synchronize()
+                }
+            }
+            return true
+        }
+
+        if (testCatalogKind != null) {
+            val entries = filteredTestCatalogEntries()
+            val listBounds = Rectangle(left + 275f, bottom + 135f, 620f, 405f)
+            if (pointerDown && listBounds.contains(p)) {
+                val previousY = testCatalogDragLastY
+                if (previousY != null) {
+                    testCatalogScroll = (testCatalogScroll + previousY - p.y)
+                        .coerceIn(0f, ((entries.size - 10).coerceAtLeast(0) * 36f))
+                }
+                testCatalogDragLastY = p.y
+            } else if (!pointerDown) {
+                testCatalogDragLastY = null
+            }
+
+            if (isShortRelease && hit(left + 840f, bottom + 570f, 55f, 32f)) {
+                testCatalogKind = null
+                return true
+            }
+            if (isShortRelease && testCatalogKind == "ITEM") {
+                val rarities = listOf<com.azizoglu.grisilith.item.definition.ItemRarity?>(null) +
+                    com.azizoglu.grisilith.item.definition.ItemRarity.entries
+                rarities.forEachIndexed { i, rarity ->
+                    if (hit(left + 280f + i * 95f, bottom + 570f, 88f, 30f)) {
+                        testItemRarityFilter = rarity; testCatalogScroll = 0f; return true
+                    }
+                }
+            }
+            if (isShortRelease && testCatalogKind == "WEAPON") {
+                TestWeaponFilter.entries.forEachIndexed { i, filter ->
+                    if (hit(left + 280f + i * 145f, bottom + 570f, 138f, 30f)) {
+                        testWeaponFilter = filter; testCatalogScroll = 0f; return true
+                    }
+                }
+            }
+            if (isShortRelease && listBounds.contains(p)) {
+                val row = ((bottom + 535f - p.y) / 36f).toInt()
+                val index = (testCatalogScroll / 36f).toInt() + row
+                entries.getOrNull(index)?.let { entry ->
+                    if (entry is com.azizoglu.grisilith.item.definition.ItemDefinition) {
+                        itemInventory.addItem(ItemInstance(entry)); itemStatSynchronizer.synchronize()
+                    } else if (entry is com.azizoglu.grisilith.weapon.definition.WeaponDefinition) {
+                        weaponInventory.addPurchasedWeapon(WeaponInstance(entry)); weaponStatBonusSynchronizer.synchronize()
+                    }
+                }
+                return true
+            }
+            return true
+        }
+
+        if (justPressed && !isTestStatEditorOpen && !isTestResetConfirmationOpen) {
+            (0 until WeaponInventory.WEAPON_SLOT_COUNT).firstOrNull { i ->
+                val column = i % 3
+                val row = i / 3
+                weaponInventory.weaponAt(i) != null &&
+                    hit(right - 315f + column * 96f, bottom + 358f - row * 104f, 82f, 82f)
+            }?.let { draggedTestWeaponSlot = it; return true }
+        }
+        if (isTestStatEditorOpen) {
+            if (isShortRelease) {
+                StatType.entries.forEachIndexed { i, stat ->
+                    val column = i / 10
+                    val row = i % 10
+                    val x = left + 145f + column * 500f
+                    val y = bottom + 555f - row * 48f
+                    if (hit(x + 250f, y, 32f, 30f)) playerStats.adjustRunBonus(stat, -5)
+                    if (hit(x + 286f, y, 32f, 30f)) playerStats.adjustRunBonus(stat, -1)
+                    if (hit(x + 322f, y, 32f, 30f)) playerStats.adjustRunBonus(stat, 1)
+                    if (hit(x + 358f, y, 32f, 30f)) playerStats.adjustRunBonus(stat, 5)
+                }
+                if (hit(right - 230f, bottom + 85f, 150f, 38f)) isTestStatEditorOpen = false
+            }
+            player.synchronizeMaximumHealthWithStats(healAddedHealth = true)
+            return true
+        }
+        if (isTestResetConfirmationOpen) {
+            if (isShortRelease && hit(left + 300f, bottom + 300f, 120f, 44f)) restartRun()
+            if (isShortRelease && hit(left + 440f, bottom + 300f, 120f, 44f)) isTestResetConfirmationOpen = false
+            return true
+        }
+        if (isShortRelease && hit(right - 190f, bottom + 650f, 160f, 42f)) {
+            isTestSettingsOpen = false
+            return true
+        }
+        if (isShortRelease && hit(right - 213f, bottom + 482f, 173f, 34f)) {
+            isTestStatEditorOpen = true
+            return true
+        }
+        if (isShortRelease && hit(left + 55f, bottom + 595f, 120f, 28f)) {
+            isTestEnemySpawningEnabled = !isTestEnemySpawningEnabled
+            return true
+        }
+        listOf(EnemyTag.BEAST, EnemyTag.HUMANOID, EnemyTag.UNDEAD).forEachIndexed { i, tag ->
+            if (isShortRelease && hit(left + 220f + i * 145f, bottom + 595f, 135f, 28f)) {
+                testEnemyTag = tag
+                testDummySelected = false
+                enemyManager.clearAll()
+                testDummyEnemy = null
+                mapEnemyRuntimeContext.selectEnemyTag(tag)
+                enemySpawner.resetTimer()
+                return true
+            }
+        }
+        if (isShortRelease && hit(left + 655f, bottom + 595f, 145f, 28f)) {
+            testDummySelected = true
+            isTestEnemySpawningEnabled = false
+            enemyManager.clearAll()
+            testDummyEnemy = mapEnemyRuntimeContext.runtimeFactory.createTestDummy(
+                stageController.currentStage,
+                worldWidth / 2f,
+                worldHeight / 2f
+            ).also(enemyManager::spawn)
+            return true
+        }
+        if (isShortRelease && (hit(left + 55f, bottom + 505f, 105f, 28f) || hit(left + 170f, bottom + 505f, 105f, 28f))) {
+            testObstaclesEnabled = hit(left + 55f, bottom + 505f, 105f, 28f)
+            mapObstacles = if (testObstaclesEnabled) MapObstacleGenerator.generate(GameMap.ROAD_TO_HOME, player.centerX, player.centerY) else emptyList()
+            summonManager.replaceMapObstacles(blockingMapObstacles)
+            return true
+        }
+        TestDeathMode.entries.forEachIndexed { i, mode ->
+            if (isShortRelease && hit(left + 430f + i * 145f, bottom + 505f, 135f, 28f)) {
+                testDeathMode = mode
+                return true
+            }
+        }
+        if (isShortRelease) repeat(50) { index ->
+            val stage = index + 1; val col = index % 10; val row = index / 10
+            if (hit(left + 55f + col * 78f, bottom + 440f - row * 38f, 70f, 30f)) { selectTestStage(stage); return true }
+        }
+        if (isShortRelease && hit(left + 690f, bottom + 215f, 190f, 40f)) { isTestInfiniteStage = !isTestInfiniteStage; return true }
+        if (isShortRelease && hit(left + 55f, bottom + 210f, 170f, 40f)) { sessionWallet.addGold(10_000f); return true }
+        if (isShortRelease && hit(left + 245f, bottom + 210f, 190f, 40f)) { testCatalogKind = "ITEM"; testCatalogScroll = 0f; return true }
+        if (isShortRelease && hit(left + 455f, bottom + 210f, 190f, 40f)) { testCatalogKind = "WEAPON"; testCatalogScroll = 0f; return true }
+        if (isShortRelease && hit(right - 315f, bottom + 135f, 274f, 62f)) {
+            isTestOwnedItemsOpen = true
+            testCatalogScroll = 0f
+            return true
+        }
+        if (isShortRelease && hit(left + 55f, bottom + 65f, 180f, 48f)) { isTestResetConfirmationOpen = true; return true }
+        if (isShortRelease && hit(left + 255f, bottom + 65f, 180f, 48f)) { enemyManager.clearAll(); testDummyEnemy = null; return true }
+        return true
+    }
+
+    private fun selectTestStage(stage: Int) {
+        stageController.restoreCheckpointStage(stage.coerceIn(1, 50))
+        enemyManager.clearAll()
+        testDummyEnemy = null
+        projectiles.clear()
+        enemySpawner.resetTimer()
+        portalStageCompletionRequested = false
+    }
+
+    private fun filteredTestCatalogEntries(): List<Any> =
+        when (testCatalogKind) {
+            "ITEM" ->
+                DefaultItems.all
+                    .asSequence()
+                    .filter { definition ->
+                        testItemRarityFilter == null || definition.rarity == testItemRarityFilter
+                    }
+                    .sortedWith(compareBy({ it.rarity.ordinal }, { it.displayName }))
+                    .toList()
+
+            "WEAPON" ->
+                DefaultWeapons.all
+                    .asSequence()
+                    .filter { definition ->
+                        when (testWeaponFilter) {
+                            TestWeaponFilter.ALL -> true
+                            TestWeaponFilter.MELEE -> ContentTag.MELEE_WEAPON in definition.tags
+                            TestWeaponFilter.RANGED -> ContentTag.RANGED_WEAPON in definition.tags
+                            TestWeaponFilter.SPELL_FOCUS -> ContentTag.SPELL_FOCUS in definition.tags
+                        }
+                    }
+                    .sortedWith(
+                        compareBy<com.azizoglu.grisilith.weapon.definition.WeaponDefinition>(
+                            { definition ->
+                                when {
+                                    ContentTag.MELEE_WEAPON in definition.tags -> 0
+                                    ContentTag.RANGED_WEAPON in definition.tags -> 1
+                                    else -> 2
+                                }
+                            },
+                            { it.displayName }
+                        )
+                    )
+                    .toList()
+
+            else -> emptyList()
+        }
+
+    private fun restartTestStage() {
+        val stage = stageController.currentStage
+        enemyManager.clearAll()
+        testDummyEnemy = null
+        projectiles.clear()
+        summonManager.clear()
+        stageController.restoreCheckpointStage(stage)
+        player.health.restoreCurrentHealth(player.health.maximumHealth)
+        troubleAtHomeDefenseRuntime.gateHealth.restoreCurrentHealth(troubleAtHomeDefenseRuntime.gateHealth.maximumHealth)
+        enemySpawner.resetTimer()
+        portalStageCompletionRequested = false
+    }
+
+    private fun handleTestMapDeathPolicy() {
+        val playerDead = player.health.isDead
+        val gateDead = troubleAtHomeDefenseRuntime.isEnabled && troubleAtHomeDefenseRuntime.gateHealth.isDead
+        if (!playerDead && !gateDead) return
+        when (testDeathMode) {
+            TestDeathMode.END_RUN -> Unit
+            TestDeathMode.RESTART_STAGE -> restartTestStage()
+            TestDeathMode.IMMORTAL -> {
+                if (playerDead) player.health.restoreCurrentHealth(1)
+                if (gateDead) troubleAtHomeDefenseRuntime.gateHealth.restoreCurrentHealth(1)
+            }
+        }
+    }
+
+    private fun synchronizeTestDummyVisibility() {
+        val shouldExist = testDummySelected && canShowTestMapControls() && !isTestSettingsOpen
+        val current = testDummyEnemy
+        if (!shouldExist) {
+            if (current != null) enemyManager.remove(current)
+            testDummyEnemy = null
+            return
+        }
+        if (current == null || current !in enemyManager.allEnemies || current.isDead) {
+            testDummyEnemy = mapEnemyRuntimeContext.runtimeFactory.createTestDummy(
+                stageController.currentStage,
+                worldWidth / 2f,
+                worldHeight / 2f
+            ).also(enemyManager::spawn)
+        }
     }
 
     private fun handleGameSpeedButtonInput() {
@@ -3022,7 +3443,7 @@ class FirstScreen(
                 val lower = runStatistics.totalBossesDefeated.coerceAtLeast(0)
                 val upper = stageController.currentStage.coerceAtLeast(lower)
                 val count = if (upper == lower) lower else kotlin.random.Random.nextInt(lower, upper + 1)
-                val grisilith = count > 0 && kotlin.random.Random.nextFloat() < 0.01f &&
+                val grisilith = gameMap != GameMap.TEST_MAP && count > 0 && kotlin.random.Random.nextFloat() < 0.01f &&
                     runRewardTracker.awardBonusGrisilithCoin() > 0
                 currencyPickupManager.spawnGoldReward(x, y, (count - if (grisilith) 1 else 0).toFloat())
                 if (grisilith) currencyPickupManager.spawnGrisilithCoins(x, y, 1)
@@ -3194,25 +3615,34 @@ class FirstScreen(
 
             onPlayerDamaged = {
                     sourceEnemy,
-                    damage ->
+                    damage,
+                    damageType ->
 
                 val appliedDamage =
                     player.takeDamage(
-                        damage
+                        damage,
+                        damageType
                     )
 
                 if (appliedDamage > 0) {
+                    com.azizoglu.grisilith.combat.condition.DamageConditionRules
+                        .conditionFor(damageType)
+                        ?.let { condition ->
+                            player.applyCondition(
+                                com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator.createApplication(
+                                    condition,
+                                    sourceEnemy.conditionDamageStatScore,
+                                    sourceName = sourceEnemy.kindId?.value ?: "Enemy"
+                                )
+                            )
+                        }
                     if (sourceEnemy.kindId == com.azizoglu.grisilith.enemy.definition.EnemyKindIds.GHOST) {
                         player.applyCondition(
-                            ConditionApplication(
-                                type = ConditionType.NECROSIS,
-                                durationSeconds = 5f,
-                                source = ConditionSource(
-                                    damageType = DamageType.NECROTIC,
-                                    tickDamage = (sourceEnemy.contactDamage * 0.60f)
-                                        .roundToInt().coerceAtLeast(1),
-                                    sourceName = "Ghost Necrosis"
-                                )
+                            com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator.createApplication(
+                                ConditionType.NECROSIS,
+                                sourceEnemy.conditionDamageStatScore,
+                                3f,
+                                "Ghost Necrosis"
                             )
                         )
                     }
@@ -3228,45 +3658,67 @@ class FirstScreen(
 
             onSummonDamaged = {
                     summon,
-                    damage ->
+                    damage,
+                    damageType,
+                    sourceEnemy ->
 
-                summon.takeDamage(
-                    damage
+                val appliedDamage = summon.takeDamage(
+                    damage,
+                    damageType
                 )
+                if (appliedDamage > 0) {
+                    com.azizoglu.grisilith.combat.condition.DamageConditionRules
+                        .conditionFor(damageType)
+                        ?.let { condition ->
+                            summon.applyCondition(
+                                com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator.createApplication(
+                                    condition,
+                                    sourceEnemy.conditionDamageStatScore,
+                                    sourceName = sourceEnemy.kindId?.value ?: "Enemy"
+                                )
+                            )
+                        }
+                }
             },
 
-            onPlayerCondition = { condition, duration, tickDamage ->
-                player.applyCondition(
-                    ConditionApplication(
-                        type = condition,
-                        durationSeconds = duration,
-                        source = ConditionSource(
-                            damageType = when (condition) {
-                                ConditionType.NECROSIS -> DamageType.NECROTIC
-                                ConditionType.CORRODING -> DamageType.ACID
-                                else -> DamageType.NONE
-                            },
-                            tickDamage = tickDamage.coerceAtLeast(0),
-                            sourceName = condition.displayName
+            onPlayerCondition = { condition, duration, conditionStatScore ->
+                if (condition == ConditionType.ACIDIC_PATH_DAMAGE) {
+                    player.applyCondition(
+                        com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator.createApplication(
+                            ConditionType.CORRODING,
+                            conditionStatScore,
+                            3f,
+                            "Acidic Path"
                         )
+                    )
+                }
+                player.applyCondition(
+                    com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator.createApplication(
+                        type = condition,
+                        sourceStatScore = conditionStatScore,
+                        durationSeconds = duration ?: 3f,
+                        sourceName = condition.displayName
                     )
                 )
             },
 
-            onSummonCondition = { summon, condition, duration, tickDamage ->
-                summon.applyCondition(
-                    ConditionApplication(
-                        type = condition,
-                        durationSeconds = duration,
-                        source = ConditionSource(
-                            damageType = when (condition) {
-                                ConditionType.NECROSIS -> DamageType.NECROTIC
-                                ConditionType.CORRODING -> DamageType.ACID
-                                else -> DamageType.NONE
-                            },
-                            tickDamage = tickDamage.coerceAtLeast(0),
-                            sourceName = condition.displayName
+            onSummonCondition = { summon, condition, duration, conditionStatScore ->
+                if (condition == ConditionType.ACIDIC_PATH_DAMAGE) {
+                    summon.applyCondition(
+                        com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator.createApplication(
+                            ConditionType.CORRODING,
+                            conditionStatScore,
+                            3f,
+                            "Acidic Path"
                         )
+                    )
+                }
+                summon.applyCondition(
+                    com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator.createApplication(
+                        type = condition,
+                        sourceStatScore = conditionStatScore,
+                        durationSeconds = duration ?: 3f,
+                        sourceName = condition.displayName
                     )
                 )
             },
@@ -3573,11 +4025,14 @@ class FirstScreen(
                 }
             )
 
-            /*
-             * Only summon-owned projectiles react here.
-             * Normal player projectiles return immediately because their
-             * sourceSummonRuntimeId is null.
-             */
+            projectile.checkPlayerProjectileAgainstRogueSummons(
+                summons = summonManager.activeSummons,
+                onDamageDealt = { appliedDamage, sourceName ->
+                    runStatistics.recordDamageDealt(appliedDamage, sourceName)
+                }
+            )
+
+            /* Only summon-owned projectiles react below. */
             projectile.checkSummonCollision(
                 summons =
                     summonManager
@@ -3684,7 +4139,7 @@ class FirstScreen(
 
         updateCamera()
 
-        enemySpawner.update(
+        if (gameMap != GameMap.TEST_MAP || isTestEnemySpawningEnabled) enemySpawner.update(
             delta =
                 delta,
 
@@ -3861,7 +4316,7 @@ class FirstScreen(
         val awardedGrisilithCoins =
             if (isNoLootTotemMiniBoss || isLargeSlime || suppressAllLoot || !grantsSwarmFamilyReward) {
                 0
-            } else runRewardTracker.onEnemyKilled(
+            } else if (gameMap == GameMap.TEST_MAP) 0 else runRewardTracker.onEnemyKilled(
                 enemyType =
                     killedEnemy.type,
 
@@ -4089,6 +4544,7 @@ class FirstScreen(
     private fun updateStage(
         delta: Float
     ): Boolean {
+        if (gameMap == GameMap.TEST_MAP && isTestInfiniteStage) return false
         val normalStageTimeCompleted =
             stageController.update(delta)
 
@@ -4360,6 +4816,7 @@ class FirstScreen(
         damageNumberManager.collectFromGate(
             troubleAtHomeDefenseRuntime
         )
+        damageNumberManager.collectFromPlayer(player)
 
         damageNumberManager.render(
             batch =
@@ -4490,6 +4947,298 @@ class FirstScreen(
         }
         chooseToSummonPopup.render()
         chooseGlyphSpellPopup.render()
+
+        if (canShowTestMapControls()) renderTestMapControls()
+    }
+
+    private fun renderTestMapControls() {
+        val left = camera.position.x - CAMERA_WIDTH / 2f
+        val bottom = camera.position.y - CAMERA_HEIGHT / 2f
+        val right = left + CAMERA_WIDTH
+        val hasTestSettingsModal =
+            testCatalogKind != null || isTestOwnedItemsOpen || isTestStatEditorOpen || isTestResetConfirmationOpen
+        val pointer = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat()).also(viewport::unproject)
+        fun contains(x: Float, y: Float, width: Float, height: Float) =
+            Rectangle(x, y, width, height).contains(pointer)
+        var tooltip: String? = null
+        var tooltipX = pointer.x + 16f
+        var tooltipY = pointer.y + 12f
+
+        if (isTestSettingsOpen && isTestOwnedItemsOpen) {
+            val row = ((bottom + 535f - pointer.y) / 34f).toInt()
+            if (contains(left + 325f, bottom + 145f, 520f, 390f) && row in 0..11) {
+                val index = (testCatalogScroll / 34f).toInt() + row
+                tooltip = itemInventory.allItems().getOrNull(index)?.definition?.description
+            }
+        } else if (isTestSettingsOpen && testCatalogKind != null) {
+            val entries = filteredTestCatalogEntries()
+            val row = ((bottom + 535f - pointer.y) / 36f).toInt()
+            if (contains(left + 275f, bottom + 135f, 620f, 405f) && row in 0..11) {
+                val index = (testCatalogScroll / 36f).toInt() + row
+                tooltip = when (val entry = entries.getOrNull(index)) {
+                    is com.azizoglu.grisilith.item.definition.ItemDefinition -> entry.description
+                    is com.azizoglu.grisilith.weapon.definition.WeaponDefinition -> entry.description
+                    else -> null
+                }
+            }
+        } else if (isTestSettingsOpen) {
+            (0 until WeaponInventory.WEAPON_SLOT_COUNT).firstOrNull { i ->
+                val column = i % 3
+                val row = i / 3
+                contains(right - 315f + column * 96f, bottom + 358f - row * 104f, 82f, 82f)
+            }?.let { slot -> tooltip = weaponInventory.weaponAt(slot)?.definition?.description }
+            if (contains(right - 315f, bottom + 82f, 82f, 45f)) tooltip = selectedPreset?.weaponTamga?.description
+            if (contains(right - 219f, bottom + 82f, 82f, 45f)) tooltip = selectedPreset?.armorTamga?.description
+            if (contains(right - 123f, bottom + 82f, 82f, 45f)) tooltip = equippedArmor.definition?.description
+        }
+
+        shapeRenderer.projectionMatrix = camera.combined
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+        if (!isTestSettingsOpen) {
+            shapeRenderer.color = Color(0.10f, 0.12f, 0.20f, 0.94f)
+            shapeRenderer.rect(right - 300f, bottom + 18f, 150f, 42f)
+            shapeRenderer.color = if (isTestRunFrozen) Color(0.75f, 0.18f, 0.18f, 0.95f) else Color(0.18f, 0.48f, 0.30f, 0.95f)
+            shapeRenderer.rect(right - 140f, bottom + 18f, 120f, 42f)
+            shapeRenderer.color = Color(0.24f, 0.20f, 0.45f, 0.96f)
+            shapeRenderer.rect(right - 300f, bottom + 66f, 280f, 38f)
+        }
+        if (isTestSettingsOpen) {
+            shapeRenderer.color = Color(0.055f, 0.06f, 0.10f, 0.97f)
+            shapeRenderer.rect(left + 20f, bottom + 20f, CAMERA_WIDTH - 40f, CAMERA_HEIGHT - 40f)
+            fun panel(x: Float, y: Float, width: Float, height: Float, color: Color = Color(0.13f, 0.15f, 0.24f, 1f)) {
+                shapeRenderer.color = color
+                shapeRenderer.rect(x, y, width, height)
+            }
+            panel(left + 40f, bottom + 565f, 850f, 70f)
+            panel(left + 40f, bottom + 490f, 330f, 62f)
+            panel(left + 385f, bottom + 490f, 505f, 62f)
+            panel(left + 40f, bottom + 270f, 850f, 208f)
+            panel(left + 40f, bottom + 195f, 850f, 65f)
+            panel(right - 330f, bottom + 75f, 290f, 555f, Color(0.18f, 0.20f, 0.36f, 1f))
+            panel(right - 315f, bottom + 482f, 92f, 100f, Color(0.03f, 0.035f, 0.055f, 1f))
+            panel(right - 213f, bottom + 482f, 173f, 34f, Color(0.24f, 0.20f, 0.30f, 1f))
+            repeat(6) { i ->
+                val column = i % 3
+                val row = i / 3
+                panel(right - 315f + column * 96f, bottom + 358f - row * 104f, 82f, 82f, Color(0.10f, 0.42f, 0.52f, 1f))
+            }
+            panel(right - 315f, bottom + 135f, 274f, 62f, Color(0.52f, 0.55f, 0.74f, 1f))
+            repeat(3) { i -> panel(right - 315f + i * 96f, bottom + 82f, 82f, 45f, Color(0.12f, 0.12f, 0.48f, 1f)) }
+
+            fun check(x: Float, y: Float, selected: Boolean) {
+                shapeRenderer.color = Color(0.025f, 0.03f, 0.05f, 1f)
+                shapeRenderer.rect(x, y, 18f, 18f)
+                if (selected) {
+                    shapeRenderer.color = Color(0.20f, 0.85f, 0.72f, 1f)
+                    shapeRenderer.rect(x + 4f, y + 4f, 10f, 10f)
+                }
+            }
+            check(left + 55f, bottom + 600f, isTestEnemySpawningEnabled)
+            check(left + 220f, bottom + 600f, !testDummySelected && testEnemyTag == EnemyTag.BEAST)
+            check(left + 365f, bottom + 600f, !testDummySelected && testEnemyTag == EnemyTag.HUMANOID)
+            check(left + 510f, bottom + 600f, !testDummySelected && testEnemyTag == EnemyTag.UNDEAD)
+            check(left + 655f, bottom + 600f, testDummySelected)
+            check(left + 55f, bottom + 510f, testObstaclesEnabled)
+            check(left + 170f, bottom + 510f, !testObstaclesEnabled)
+            TestDeathMode.entries.forEachIndexed { i, mode -> check(left + 430f + i * 145f, bottom + 510f, testDeathMode == mode) }
+            check(left + 690f, bottom + 221f, isTestInfiniteStage)
+
+            repeat(50) { index ->
+                val stage = index + 1
+                val column = index % 10
+                val row = index / 10
+                panel(
+                    left + 55f + column * 78f,
+                    bottom + 440f - row * 38f,
+                    70f,
+                    30f,
+                    if (stageController.currentStage == stage) Color(0.20f, 0.62f, 0.48f, 1f) else Color(0.22f, 0.25f, 0.38f, 1f)
+                )
+            }
+            panel(left + 55f, bottom + 210f, 170f, 40f, Color(0.38f, 0.34f, 0.08f, 1f))
+            panel(left + 245f, bottom + 210f, 190f, 40f, Color(0.18f, 0.34f, 0.48f, 1f))
+            panel(left + 455f, bottom + 210f, 190f, 40f, Color(0.18f, 0.34f, 0.48f, 1f))
+            panel(left + 55f, bottom + 65f, 180f, 48f, Color(0.70f, 0.08f, 0.08f, 1f))
+            panel(left + 255f, bottom + 65f, 180f, 48f, Color(0.56f, 0.18f, 0.10f, 1f))
+
+            if (hasTestSettingsModal) {
+                panel(left + 20f, bottom + 20f, CAMERA_WIDTH - 40f, CAMERA_HEIGHT - 40f, Color(0.035f, 0.04f, 0.07f, 1f))
+            }
+
+            if (testCatalogKind != null) {
+                panel(left + 255f, bottom + 95f, 660f, 525f, Color(0.035f, 0.04f, 0.075f, 0.995f))
+                panel(left + 275f, bottom + 135f, 620f, 405f, Color(0.09f, 0.10f, 0.16f, 1f))
+            }
+            if (isTestOwnedItemsOpen) {
+                panel(left + 305f, bottom + 105f, 560f, 515f, Color(0.035f, 0.04f, 0.075f, 0.995f))
+                panel(left + 325f, bottom + 145f, 520f, 390f, Color(0.09f, 0.10f, 0.16f, 1f))
+                val visibleItems = itemInventory.allItems().drop((testCatalogScroll / 34f).toInt()).take(11)
+                visibleItems.forEachIndexed { row, _ ->
+                    panel(left + 755f, bottom + 501f - row * 34f, 80f, 28f, Color(0.56f, 0.12f, 0.12f, 1f))
+                }
+            }
+            if (isTestResetConfirmationOpen) panel(left + 275f, bottom + 275f, 330f, 120f, Color(0.07f, 0.08f, 0.13f, 1f))
+            if (isTestStatEditorOpen) {
+                panel(left + 120f, bottom + 70f, 1030f, 580f, Color(0.06f, 0.07f, 0.12f, 0.995f))
+                StatType.entries.forEachIndexed { i, _ ->
+                    val column = i / 10
+                    val row = i % 10
+                    val x = left + 145f + column * 500f
+                    val y = bottom + 555f - row * 48f
+                    repeat(4) { button ->
+                        panel(x + 250f + button * 36f, y, 32f, 30f, Color(0.20f, 0.25f, 0.40f, 1f))
+                    }
+                }
+                panel(right - 230f, bottom + 85f, 150f, 38f, Color(0.32f, 0.18f, 0.24f, 1f))
+            }
+            if (!hasTestSettingsModal) {
+                draggedTestWeaponSlot?.let { slot ->
+                    val weapon = weaponInventory.weaponAt(slot) ?: return@let
+                    panel(pointer.x - 58f, pointer.y - 30f, 116f, 60f, Color(0.10f, 0.42f, 0.52f, 0.96f))
+                }
+            }
+            tooltip?.let {
+                tooltipX = tooltipX.coerceAtMost(right - 375f)
+                tooltipY = tooltipY.coerceIn(bottom + 105f, bottom + 610f)
+                panel(tooltipX, tooltipY, 340f, 82f, Color(0.02f, 0.025f, 0.045f, 0.99f))
+            }
+        }
+        shapeRenderer.end()
+        hudBatch.projectionMatrix = camera.combined
+        hudBatch.begin()
+        hudFont.color = Color.WHITE
+        if (!isTestSettingsOpen) {
+            hudFont.draw(hudBatch, "RUN SETTINGS", right - 286f, bottom + 46f)
+            hudFont.draw(hudBatch, if (isTestRunFrozen) "RESUME" else "PAUSE", right - 125f, bottom + 46f)
+            hudFont.draw(hudBatch, "RESET ALL COOLDOWNS", right - 282f, bottom + 92f)
+        }
+        if (isTestSettingsOpen) {
+            hudFont.data.setScale(0.78f)
+            fun text(value: String, x: Float, y: Float) = hudFont.draw(hudBatch, value, x, y)
+            fun short(value: String, maximum: Int): String =
+                if (value.length <= maximum) value else value.take((maximum - 1).coerceAtLeast(1)) + "…"
+            fun wrapName(value: String, maximum: Int = 13): List<String> {
+                val lines = mutableListOf<String>()
+                var current = ""
+                value.split(' ').forEach { word ->
+                    val candidate = if (current.isEmpty()) word else "$current $word"
+                    if (candidate.length <= maximum) current = candidate
+                    else {
+                        if (current.isNotEmpty()) lines += current
+                        current = word
+                    }
+                }
+                if (current.isNotEmpty()) lines += current
+                return lines
+            }
+            if (!hasTestSettingsModal) {
+            text("Return to Game", right - 185f, bottom + 680f)
+            text("ENEMY SPAWN", left + 50f, bottom + 630f)
+            text(if (isTestEnemySpawningEnabled) "On" else "Off", left + 78f, bottom + 616f)
+            text("Beast", left + 245f, bottom + 616f); text("Humanoid", left + 390f, bottom + 616f)
+            text("Undead", left + 535f, bottom + 616f); text("Test Dummy", left + 680f, bottom + 616f)
+            text("OBSTACLES", left + 50f, bottom + 546f); text("On", left + 78f, bottom + 526f); text("Off", left + 193f, bottom + 526f)
+            text("AT DEATH", left + 395f, bottom + 546f)
+            text("End Run", left + 453f, bottom + 526f); text("Restart Stage", left + 598f, bottom + 526f); text("Immortal", left + 743f, bottom + 526f)
+            text("STAGE SELECT", left + 50f, bottom + 472f)
+            repeat(50) { index ->
+                val stage = index + 1; val column = index % 10; val row = index / 10
+                val label = if (stage % 5 == 0) "$stage Boss" else stage.toString()
+                text(label, left + 62f + column * 78f, bottom + 461f - row * 38f)
+            }
+            text("Infinite Stage", left + 716f, bottom + 237f)
+            text("ADD 10,000 GOLD (${sessionWallet.goldCoins.toInt()})", left + 64f, bottom + 236f)
+            text("ADD ITEM", left + 292f, bottom + 236f); text("ADD WEAPON", left + 492f, bottom + 236f)
+            text("RESET MAP", left + 92f, bottom + 95f); text("RESET ENEMIES", left + 278f, bottom + 95f)
+            text(selectedCharacter.displayName, right - 305f, bottom + 610f)
+            text("PORTRAIT", right - 300f, bottom + 535f)
+            text("Stage ${stageController.currentStage}", right - 210f, bottom + 566f); text("Gold ${sessionWallet.goldCoins.toInt()}", right - 210f, bottom + 535f)
+            text("EDIT STATS", right - 192f, bottom + 504f)
+            weaponInventory.weaponSlots.forEachIndexed { i, slot ->
+                val column = i % 3; val row = i / 3
+                val weapon = slot.weapon
+                hudFont.data.setScale(0.55f)
+                val lines = wrapName(weapon?.definition?.displayName ?: "Empty")
+                lines.take(3).forEachIndexed { lineIndex, line ->
+                    text(line, right - 309f + column * 96f, bottom + 429f - row * 104f - lineIndex * 14f)
+                }
+                if (weapon != null) text("Level ${weapon.level}", right - 309f + column * 96f, bottom + 371f - row * 104f)
+                hudFont.data.setScale(0.78f)
+            }
+            text("ITEMS (${itemInventory.allItems().size}) — OPEN LIST", right - 305f, bottom + 171f)
+            text(short(selectedPreset?.weaponTamga?.displayName ?: "Tamga", 9), right - 310f, bottom + 109f)
+            text(short(selectedPreset?.armorTamga?.displayName ?: "Tamga", 9), right - 214f, bottom + 109f)
+            text(short(equippedArmor.definition?.displayName ?: "Armor", 9), right - 118f, bottom + 109f)
+            draggedTestWeaponSlot?.let { slot ->
+                weaponInventory.weaponAt(slot)?.let { weapon ->
+                    hudFont.data.setScale(0.62f)
+                    text(short(weapon.definition.displayName, 18), pointer.x - 50f, pointer.y + 12f)
+                    text("Lv.${weapon.level}", pointer.x - 18f, pointer.y - 12f)
+                    hudFont.data.setScale(0.78f)
+                }
+            }
+            }
+            if (isTestResetConfirmationOpen) {
+                text("Reset all Test Map changes and return to Stage 1?", left + 300f, bottom + 370f)
+                text("YES", left + 340f, bottom + 325f)
+                text("NO", left + 485f, bottom + 325f)
+            }
+            if (isTestStatEditorOpen) {
+                text("STAT EDITOR", left + 520f, bottom + 640f)
+                StatType.entries.forEachIndexed { i, stat ->
+                    val column = i / 10
+                    val row = i % 10
+                    val x = left + 145f + column * 500f
+                    val y = bottom + 555f - row * 48f
+                    text("${stat.displayName}: ${playerStats.totalScore(stat)}", x, y + 21f)
+                    text("-5", x + 258f, y + 21f)
+                    text("-1", x + 294f, y + 21f)
+                    text("+1", x + 329f, y + 21f)
+                    text("+5", x + 365f, y + 21f)
+                }
+                text("CLOSE", right - 200f, bottom + 110f)
+            }
+            testCatalogKind?.let { kind ->
+                val entries = filteredTestCatalogEntries()
+                text("$kind CATALOG", left + 280f, bottom + 606f); text("CLOSE", left + 850f, bottom + 593f)
+                if (kind == "ITEM") {
+                    val filters = listOf("All") + com.azizoglu.grisilith.item.definition.ItemRarity.entries.map { it.name.lowercase().replaceFirstChar(Char::uppercase) }
+                    filters.forEachIndexed { i, name -> text(name.take(10), left + 283f + i * 95f, bottom + 592f) }
+                } else {
+                    listOf("All", "Melee", "Ranged", "Spell Focus").forEachIndexed { i, name -> text(name, left + 283f + i * 145f, bottom + 592f) }
+                }
+                val start = (testCatalogScroll / 36f).toInt()
+                entries.drop(start).take(11).forEachIndexed { row, entry ->
+                    val label = when (entry) {
+                        is com.azizoglu.grisilith.item.definition.ItemDefinition -> "${entry.rarity.name}  ${entry.displayName}"
+                        is com.azizoglu.grisilith.weapon.definition.WeaponDefinition -> {
+                            val group = when {
+                                ContentTag.MELEE_WEAPON in entry.tags -> "MELEE"
+                                ContentTag.RANGED_WEAPON in entry.tags -> "RANGED"
+                                else -> "SPELL FOCUS"
+                            }
+                            "$group  ${entry.displayName}"
+                        }
+                        else -> entry.toString()
+                    }
+                    text(label, left + 292f, bottom + 526f - row * 36f)
+                }
+            }
+            if (isTestOwnedItemsOpen) {
+                text("OWNED ITEMS", left + 330f, bottom + 602f)
+                text("CLOSE", left + 800f, bottom + 602f)
+                val ownedStart = (testCatalogScroll / 34f).toInt()
+                itemInventory.allItems().drop(ownedStart).take(11).forEachIndexed { row, item ->
+                    text("${ownedStart + row + 1}. ${short(item.displayName, 42)}", left + 342f, bottom + 526f - row * 34f)
+                    text("DELETE", left + 765f, bottom + 526f - row * 34f)
+                }
+            }
+            tooltip?.let { value ->
+                value.chunked(52).take(4).forEachIndexed { index, line -> text(line, tooltipX + 10f, tooltipY + 67f - index * 17f) }
+            }
+            hudFont.data.setScale(1f)
+        }
+        hudBatch.end()
     }
 
     private fun randomVillageGuardProfile(
@@ -4581,6 +5330,10 @@ class FirstScreen(
         }
 
         previousInputProcessor = null
+
+        if (Gdx.input.inputProcessor === testMapScrollProcessor) {
+            Gdx.input.inputProcessor = null
+        }
 
         marketRenderer.dispose()
         pauseRenderer.dispose()

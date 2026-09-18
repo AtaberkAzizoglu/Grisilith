@@ -13,7 +13,9 @@ data class SummonStats(
     val baseDamage: Int,
     val movementSpeed: Float,
     val attackRange: Float,
-    val attackSpeedMultiplier: Float
+    val attackSpeedMultiplier: Float,
+    val armorClass: Int = 0,
+    val magicResistance: Int = 0
 ) {
 
     init {
@@ -22,6 +24,8 @@ data class SummonStats(
         require(movementSpeed >= 0f)
         require(attackRange >= 0f)
         require(attackSpeedMultiplier > 0f)
+        require(armorClass >= 0)
+        require(magicResistance >= 0)
     }
 
     companion object {
@@ -90,7 +94,9 @@ data class SummonStats(
                         healthMultiplier = healthMultiplier * itemHealthMultiplier,
                         damageMultiplier = damageMultiplier,
                         movementSpeedMultiplier = movementSpeedMultiplier,
-                        attackSpeedMultiplier = attackSpeedMultiplier * 0.88f
+                        attackSpeedMultiplier = attackSpeedMultiplier * 0.88f,
+                        armorClass = scaledDefense(shepherd, COW_ARMOR_CLASS_RATIO),
+                        magicResistance = scaledDefense(shepherd, COW_MAGIC_RESISTANCE_RATIO)
                     )
                 }
 
@@ -104,7 +110,9 @@ data class SummonStats(
                         healthMultiplier = healthMultiplier * itemHealthMultiplier,
                         damageMultiplier = damageMultiplier,
                         movementSpeedMultiplier = movementSpeedMultiplier,
-                        attackSpeedMultiplier = attackSpeedMultiplier * 1.18f
+                        attackSpeedMultiplier = attackSpeedMultiplier * 1.18f,
+                        armorClass = scaledDefense(shepherd, IMP_ARMOR_CLASS_RATIO),
+                        magicResistance = scaledDefense(shepherd, IMP_MAGIC_RESISTANCE_RATIO)
                     )
                 }
 
@@ -118,7 +126,9 @@ data class SummonStats(
                         healthMultiplier = healthMultiplier * itemHealthMultiplier,
                         damageMultiplier = damageMultiplier,
                         movementSpeedMultiplier = movementSpeedMultiplier,
-                        attackSpeedMultiplier = attackSpeedMultiplier
+                        attackSpeedMultiplier = attackSpeedMultiplier,
+                        armorClass = scaledDefense(shepherd, KNIGHT_ARMOR_CLASS_RATIO),
+                        magicResistance = scaledDefense(shepherd, KNIGHT_MAGIC_RESISTANCE_RATIO)
                     )
                 }
 
@@ -132,7 +142,9 @@ data class SummonStats(
                         healthMultiplier = healthMultiplier * itemHealthMultiplier,
                         damageMultiplier = damageMultiplier,
                         movementSpeedMultiplier = movementSpeedMultiplier,
-                        attackSpeedMultiplier = attackSpeedMultiplier * 0.88f
+                        attackSpeedMultiplier = attackSpeedMultiplier * 0.88f,
+                        armorClass = scaledDefense(shepherd, TOAD_ARMOR_CLASS_RATIO),
+                        magicResistance = scaledDefense(shepherd, TOAD_MAGIC_RESISTANCE_RATIO)
                     )
                 }
 
@@ -191,7 +203,9 @@ data class SummonStats(
             healthMultiplier: Float,
             damageMultiplier: Float,
             movementSpeedMultiplier: Float,
-            attackSpeedMultiplier: Float
+            attackSpeedMultiplier: Float,
+            armorClass: Int,
+            magicResistance: Int
         ): SummonStats {
 
             return SummonStats(
@@ -223,9 +237,25 @@ data class SummonStats(
 
                 attackSpeedMultiplier =
                     attackSpeedMultiplier
-                        .coerceAtLeast(0.10f)
+                        .coerceAtLeast(0.10f),
+
+                armorClass = armorClass.coerceAtLeast(0),
+
+                magicResistance = magicResistance.coerceAtLeast(0)
             )
         }
+
+        private fun scaledDefense(shepherd: Int, ratio: Float): Int =
+            (shepherd.coerceAtLeast(0) * ratio).roundToInt().coerceAtLeast(0)
+
+        private const val COW_ARMOR_CLASS_RATIO = 0.70f
+        private const val COW_MAGIC_RESISTANCE_RATIO = 0.30f
+        private const val IMP_ARMOR_CLASS_RATIO = 0.50f
+        private const val IMP_MAGIC_RESISTANCE_RATIO = 0.70f
+        private const val KNIGHT_ARMOR_CLASS_RATIO = 0.60f
+        private const val KNIGHT_MAGIC_RESISTANCE_RATIO = 0.60f
+        private const val TOAD_ARMOR_CLASS_RATIO = 0.30f
+        private const val TOAD_MAGIC_RESISTANCE_RATIO = 0.10f
 
         private const val GUARD_DAMAGE_MULTIPLIER =
             1.25f

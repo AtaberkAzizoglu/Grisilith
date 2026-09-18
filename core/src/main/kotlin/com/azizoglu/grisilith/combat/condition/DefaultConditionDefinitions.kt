@@ -16,32 +16,28 @@ object DefaultConditionDefinitions {
                 damageType = DamageType.FIRE,
                 scalingStat = StatType.ELEMENTAL_DAMAGE,
                 tickIntervalSeconds = DOT_TICK_INTERVAL_SECONDS,
-                baseTickDamage = 1f,
-                damagePerStatPoint = 0.12f
+                maximumHealthRatioPerStatPoint = 0.0005f
             ),
             ConditionDefinition(
                 type = ConditionType.POISONED,
                 damageType = DamageType.POISON,
                 scalingStat = StatType.SHEPHERD,
                 tickIntervalSeconds = DOT_TICK_INTERVAL_SECONDS,
-                baseTickDamage = 1f,
-                damagePerStatPoint = 0.10f
+                maximumHealthRatioPerStatPoint = 0.0005f
             ),
             ConditionDefinition(
                 type = ConditionType.CORRODING,
                 damageType = DamageType.ACID,
                 scalingStat = StatType.MIGHT_OF_NATURE,
                 tickIntervalSeconds = DOT_TICK_INTERVAL_SECONDS,
-                baseTickDamage = 1f,
-                damagePerStatPoint = 0.11f
+                maximumHealthRatioPerStatPoint = 0.0006f
             ),
             ConditionDefinition(
                 type = ConditionType.NECROSIS,
                 damageType = DamageType.NECROTIC,
                 scalingStat = StatType.MIGHT_OF_NATURE,
                 tickIntervalSeconds = DOT_TICK_INTERVAL_SECONDS,
-                baseTickDamage = 1f,
-                damagePerStatPoint = 0.12f
+                maximumHealthRatioPerStatPoint = 0.0006f
             ),
             ConditionDefinition(type = ConditionType.WET),
             ConditionDefinition(type = ConditionType.STUNNED),
@@ -49,7 +45,14 @@ object DefaultConditionDefinitions {
             ConditionDefinition(type = ConditionType.PARALYZED),
             ConditionDefinition(type = ConditionType.FRIGHTENED),
             ConditionDefinition(type = ConditionType.SLOWED),
-            ConditionDefinition(type = ConditionType.XXX_CURSE)
+            ConditionDefinition(type = ConditionType.XXX_CURSE),
+            ConditionDefinition(
+                type = ConditionType.ACIDIC_PATH_DAMAGE,
+                damageType = DamageType.ACID,
+                scalingStat = StatType.MIGHT_OF_NATURE,
+                tickIntervalSeconds = DOT_TICK_INTERVAL_SECONDS,
+                maximumHealthRatioPerStatPoint = 0.07f / 6f
+            )
         )
             .associateBy { definition ->
                 definition.type

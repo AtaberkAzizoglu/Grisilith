@@ -18,7 +18,12 @@ class PlayerStats(
     Int = 100,
 
     private val characterTraitId:
-    CharacterTraitId? = null
+    CharacterTraitId? = null,
+
+    val canEquipArmor: Boolean = true,
+    private val unarmoredBaseHealth: Int = 1,
+    private val unarmoredBaseArmor: Int = 0,
+    private val unarmoredBaseMagicResistance: Int = 0
 ) {
     companion object {
         const val MINIMUM_SCORE = 0
@@ -81,11 +86,13 @@ class PlayerStats(
      */
     private var armorBaseHealth:
         Int =
-        1
+        unarmoredBaseHealth
 
     private var armorBaseArmor:
         Int =
-        0
+        unarmoredBaseArmor
+
+    private var armorBaseMagicResistance: Int = unarmoredBaseMagicResistance
 
     init {
         StatType.entries.forEach { statType ->
@@ -544,13 +551,17 @@ class PlayerStats(
 
     fun setArmorBaseValues(
         baseHealth: Int,
-        baseArmor: Int
+        baseArmor: Int,
+        baseMagicResistance: Int = 0
     ) {
         armorBaseHealth =
-            baseHealth.coerceAtLeast(1)
+            (if (canEquipArmor) baseHealth else unarmoredBaseHealth).coerceAtLeast(1)
 
         armorBaseArmor =
-            baseArmor.coerceAtLeast(0)
+            (if (canEquipArmor) baseArmor else unarmoredBaseArmor).coerceAtLeast(0)
+
+        armorBaseMagicResistance =
+            (if (canEquipArmor) baseMagicResistance else unarmoredBaseMagicResistance).coerceAtLeast(0)
     }
 
     fun armorBaseHealth(): Int =
@@ -558,6 +569,11 @@ class PlayerStats(
 
     fun armorBaseArmor(): Int =
         armorBaseArmor
+
+    fun armorBaseMagicResistance(): Int = armorBaseMagicResistance
+
+    fun rawMagicDamageReduction(): Float =
+        armorBaseMagicResistance.toFloat() * totalScore(StatType.MAGIC_RESISTANCE)
 
     fun calculatedMaximumHealth(): Int {
         val maxHpScore =

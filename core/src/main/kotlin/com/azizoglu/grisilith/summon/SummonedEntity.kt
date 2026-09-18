@@ -7,6 +7,7 @@ import com.azizoglu.grisilith.combat.damage.DamageNumberEvent
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionContainer
 import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.navigation.EnemyNavigationAgent
 import com.azizoglu.grisilith.map.MapObstacle
@@ -250,8 +251,9 @@ class SummonedEntity(
         conditions.update(
             delta = delta,
             onTick = { tick ->
-                if (tick.source.tickDamage > 0) {
-                    takeDamage(tick.source.tickDamage)
+                val tickDamage = tick.source.resolvedTickDamage(health.maximumHealth)
+                if (tickDamage > 0) {
+                    takeDamage(tickDamage, tick.source.damageType)
                 }
             }
         )
@@ -461,7 +463,8 @@ class SummonedEntity(
     }
 
     fun takeDamage(
-        amount: Int
+        amount: Int,
+        damageType: DamageType = DamageType.NONE
     ): Int {
 
         if (
@@ -471,8 +474,23 @@ class SummonedEntity(
             return 0
         }
 
+        val defense = when (damageType) {
+            DamageType.SLASHING,
+            DamageType.PIERCING,
+            DamageType.BLUDGEONING -> stats.armorClass
+
+            DamageType.FIRE,
+            DamageType.AIR,
+            DamageType.WATER,
+            DamageType.LIGHTNING,
+            DamageType.NECROTIC,
+            DamageType.ACID -> stats.magicResistance
+
+            else -> 0
+        }
+
         val appliedDamage =
-            health.takeDamage(amount)
+            health.takeDamage((amount - defense).coerceAtLeast(1))
 
         if (appliedDamage > 0) {
             pendingDamageNumberEvents +=

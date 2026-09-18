@@ -70,6 +70,10 @@ object PresetValidator {
                         )
                 }
 
+        if (!character.canEquipArmor && (preset.armorId != null || preset.armorTamgaId != null)) {
+            return invalid("${character.displayName} cannot equip Armor or Armor Tamgas.")
+        }
+
         val item =
             preset.itemId
                 ?.let { itemId ->

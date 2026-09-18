@@ -22,12 +22,9 @@ class VitriolicIgnitionRule(
          * aldığında deterministik olarak tetiklenir.
          */
         if (
-            event.trigger !=
-            CombatInteractionTrigger.DAMAGE_APPLIED ||
-            event.damageType !=
-            DamageType.FIRE ||
-            event.appliedDamage <=
-            0
+            (event.trigger != CombatInteractionTrigger.DAMAGE_APPLIED &&
+                event.trigger != CombatInteractionTrigger.PROJECTILE_PASSED) ||
+            event.damageType != DamageType.FIRE
         ) {
             return
         }

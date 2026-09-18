@@ -69,6 +69,13 @@ object DefaultItems {
         sharedCopyLimit = sharedCopyLimit
     )
 
+    val obsidianWardPendant = commonStatItem(
+        id = "ITEM_OBSIDIAN_WARD_PENDANT",
+        displayName = "Obsidian Ward Pendant",
+        description = "Increases Magic Resistance by 1.",
+        statType = StatType.MAGIC_RESISTANCE
+    )
+
     val spellScroll =
         commonStatItem(
             id =
@@ -881,6 +888,7 @@ object DefaultItems {
         List<ItemDefinition> =
         listOf(
             spellScroll,
+            obsidianWardPendant,
             windBoots,
             vampireFangs,
             luckyDice,

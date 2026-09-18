@@ -74,7 +74,7 @@ data class EnemyTraitTargetDamage(
     val projectileOrMagic: Boolean = false,
     val conditionType: ConditionType? = null,
     val conditionDurationSeconds: Float? = null,
-    val conditionTickDamage: Int = 0
+    val conditionStatScore: Int = 0
 )
 
 data class EnemyTraitGroundVisual(

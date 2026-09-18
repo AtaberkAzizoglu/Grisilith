@@ -13,3 +13,15 @@ dependencies {
 jar {
   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
+
+tasks.register('verifyMagicResistance', JavaExec) {
+  dependsOn testClasses
+  classpath = sourceSets.test.runtimeClasspath
+  mainClass = 'com.azizoglu.grisilith.statistics.MagicResistanceChecksKt'
+}
+
+tasks.register('verifyDotBalance', JavaExec) {
+  dependsOn testClasses
+  classpath = sourceSets.test.runtimeClasspath
+  mainClass = 'com.azizoglu.grisilith.combat.condition.DotBalanceChecksKt'
+}

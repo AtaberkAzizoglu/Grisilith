@@ -31,12 +31,16 @@ object DefaultMapEnemyProfiles {
                 GameMap.FOLLOWING_THE_DUNGEON_DELVER
         )
 
+    val testMap =
+        MapEnemyProfile(gameMap = GameMap.TEST_MAP)
+
     val all:
         List<MapEnemyProfile> =
         listOf(
             roadToHome,
             troubleAtHome,
-            followingTheDungeonDelver
+            followingTheDungeonDelver,
+            testMap
         )
 
     private val byMap =

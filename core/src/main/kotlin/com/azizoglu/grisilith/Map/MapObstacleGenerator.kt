@@ -39,13 +39,14 @@ object MapObstacleGenerator {
         playerStartY: Float
     ): List<MapObstacle> {
         return when (gameMap) {
-            GameMap.ROAD_TO_HOME ->
+            GameMap.ROAD_TO_HOME,
+            GameMap.TEST_MAP ->
                 generateRandomLayout(
                     gameMap = gameMap,
                     playerStartX = playerStartX,
                     playerStartY = playerStartY,
                     initialObstacles = emptyList(),
-                    rules = roadRules
+                    rules = if (gameMap == GameMap.TEST_MAP) emptyList() else roadRules
                 )
 
             GameMap.TROUBLE_AT_HOME ->

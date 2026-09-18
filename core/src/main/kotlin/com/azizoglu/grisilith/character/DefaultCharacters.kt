@@ -26,8 +26,8 @@ object DefaultCharacters {
 
             baseStats =
                 createStats(
-                    maxHp = 12,
-                    armorClass = 13,
+                    maxHp = 11,
+                    armorClass = 14,
                     strength = 12,
                     dexterity = 7,
                     wisdom = 4,
@@ -205,11 +205,15 @@ object DefaultCharacters {
                 "Koba",
             description =
                 "A half-orc barbarian who fights almost bare-skinned, " +
-                    "turning his remaining vitality into savage force.",
+                    "turning his remaining vitality into savage force. " +
+                    "Cannot equip armor; intrinsic Base HP 14 and Base Armor 9.",
             minionDescription =
                 "Half-naked barbarian weapon bearers.",
             trait =
                 DefaultCharacterTraits.bloodweight,
+            canEquipArmor = false,
+            unarmoredBaseHealth = 14,
+            unarmoredBaseArmor = 9,
             baseStats =
                 createStats(
                     maxHp = 15,
@@ -332,9 +336,11 @@ object DefaultCharacters {
         piercing: Int,
         enemyCount: Int,
         hpRegeneration: Int,
-        lifeSteal: Int
+        lifeSteal: Int,
+        magicResistance: Int = 10
     ): Map<StatType, Int> {
         return mapOf(
+            StatType.MAGIC_RESISTANCE to magicResistance,
             StatType.MAX_HP to
                 maxHp,
 

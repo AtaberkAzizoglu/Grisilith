@@ -10,6 +10,10 @@ import com.azizoglu.grisilith.profile.PlayerProfileRepository
 
 class CreatePresetInteractionState {
 
+    val canEquipArmor: Boolean
+        get() = com.azizoglu.grisilith.character.DefaultCharacters.all
+            .firstOrNull { it.id == selectedCharacterId }?.canEquipArmor ?: false
+
     var selectedCharacterId:
         ContentId? =
         null
@@ -194,6 +198,11 @@ class CreatePresetInteractionState {
         selectedArmorTamgaId =
             preset.armorTamgaId
 
+        if (!canEquipArmor) {
+            selectedArmorId = null
+            selectedArmorTamgaId = null
+        }
+
         statAllocation =
             preset.statAllocation
 
@@ -229,6 +238,11 @@ class CreatePresetInteractionState {
 
         selectedCharacterId =
             inspectedId
+
+        if (!canEquipArmor) {
+            selectedArmorId = null
+            selectedArmorTamgaId = null
+        }
 
         inspectedCharacterId =
             null
@@ -390,7 +404,7 @@ class CreatePresetInteractionState {
         ContentId
     ) {
         if (
-            !hasCharacterSelected
+            !hasCharacterSelected || !canEquipArmor
         ) {
             return
         }
@@ -477,9 +491,9 @@ class CreatePresetInteractionState {
                 ?: return
 
         if (
-            dragged.type ==
-            CreatePresetEquipmentType
-                .ARMOR
+            canEquipArmor && dragged.type ==
+                CreatePresetEquipmentType
+                    .ARMOR
         ) {
             selectedArmorId =
                 dragged.contentId
@@ -557,7 +571,7 @@ class CreatePresetInteractionState {
                 .ARMOR_TAMGA_SLOT -> {
 
                 if (
-                    tamga.canUseArmorSlot
+                    canEquipArmor && tamga.canUseArmorSlot
                 ) {
                     selectedArmorTamgaId =
                         tamga.id

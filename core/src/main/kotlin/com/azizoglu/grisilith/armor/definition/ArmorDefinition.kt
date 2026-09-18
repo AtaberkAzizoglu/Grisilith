@@ -34,6 +34,8 @@ data class ArmorDefinition(
     val baseArmor:
     Int,
 
+    val baseMagicResistance: Int = 0,
+
     /*
      * Movement Speed, Attack Speed, Wisdom, Luck vb.
      * gerçek Stat değişiklikleri.
@@ -77,6 +79,10 @@ data class ArmorDefinition(
 
         require(baseArmor >= 0) {
             "Armor Base Armor cannot be negative."
+        }
+
+        require(baseMagicResistance >= 0) {
+            "Armor Base Magic Resistance cannot be negative."
         }
 
         require(

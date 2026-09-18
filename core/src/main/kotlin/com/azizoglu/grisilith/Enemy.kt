@@ -1,4 +1,5 @@
 package com.azizoglu.grisilith.enemy
+import com.azizoglu.grisilith.content.DamageType
 
 import com.azizoglu.grisilith.combat.damage.DamageNumberEvent
 
@@ -15,6 +16,8 @@ import kotlin.math.sqrt
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionRuntime
 import com.azizoglu.grisilith.combat.condition.ConditionControlRules
+import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
+import com.azizoglu.grisilith.combat.condition.DamageConditionRules
 import com.azizoglu.grisilith.combat.reaction.SpellReactionResolver
 import com.azizoglu.grisilith.combat.affinity.DamageAffinityResolver
 import com.azizoglu.grisilith.combat.interaction.CombatInteractionEvent
@@ -466,9 +469,14 @@ class Enemy(
                 width,
                 height
             )
-
             return collisionBounds
         }
+
+    val conditionDamageStatScore: Int
+        get() = stats.secondaryDamageStat
+
+    val mainDamageStat: Int
+        get() = stats.mainDamageStat
 
     /*
      * Wider projectile-only target area.
@@ -513,7 +521,7 @@ class Enemy(
         worldHeight: Float,
         mapObstacles: List<MapObstacle>,
         nearbyEnemies: List<Enemy>,
-        onContactDamage: (Int) -> Unit,
+        onContactDamage: (Int, DamageType) -> Unit,
         combatTargets: List<EnemyTraitCombatTarget> = emptyList(),
         onTraitTargetDamage: (EnemyTraitTargetDamage) -> Unit = {}
     ) {
@@ -639,7 +647,8 @@ class Enemy(
                     0
                 ) {
                     onContactDamage(
-                        traitDamage.amount
+                        traitDamage.amount,
+                        traitDamage.damageType
                     )
                 }
             }
@@ -892,7 +901,10 @@ class Enemy(
                         .roundToInt()
                         .coerceAtLeast(1)
 
-                onContactDamage(resolvedContactDamage)
+                onContactDamage(
+                    resolvedContactDamage,
+                    com.azizoglu.grisilith.enemy.definition.EnemyAttackDamageTypes.contactDamageType(kindId)
+                )
 
                 traitRuntime.onPlayerContact(
                     owner = this,
@@ -1284,13 +1296,18 @@ class Enemy(
 
         if (traitResolvedFinalDamage <= 0) return 0
 
+        val isTestDummy =
+            kindId?.value == "ENEMY_KIND_TEST_DUMMY"
+
         val triggersVampireMistyEscape =
             kindId == EnemyKindIds.VAMPIRE_LORD &&
                 !isVampireSecondForm &&
                 traitResolvedFinalDamage >= health.currentHealth
 
         val appliedDamage =
-            if (triggersVampireMistyEscape) {
+            if (isTestDummy) {
+                traitResolvedFinalDamage
+            } else if (triggersVampireMistyEscape) {
                 val dealt = health.takeDamage((health.currentHealth - 1).coerceAtLeast(0))
                 beginVampireMistyEscape()
                 dealt
@@ -1311,6 +1328,18 @@ class Enemy(
             appliedDamage >
             0
         ) {
+            if (resolvedDamageContext.appliesAutomaticCondition && !isDead) {
+                DamageConditionRules.conditionFor(resolvedDamageContext.damageType)?.let { condition ->
+                    applyCondition(
+                        ConditionDamageCalculator.createApplication(
+                            type = condition,
+                            sourceStatScore = resolvedDamageContext.conditionStatScore
+                                ?: ActiveItemEffects.currentConditionStatScore(condition),
+                            sourceName = resolvedDamageContext.sourceName
+                        )
+                    )
+                }
+            }
             latestDamageContext =
                 resolvedDamageContext
 
@@ -1757,7 +1786,7 @@ class Enemy(
     fun applyCondition(
         application: ConditionApplication
     ) {
-        if (isDead) {
+        if (isDead || application.type in stats.conditionImmunities) {
             return
         }
 
@@ -1768,7 +1797,7 @@ class Enemy(
         conditionType: ConditionType,
         durationSeconds: Float? = null
     ) {
-        if (isDead) {
+        if (isDead || conditionType in stats.conditionImmunities) {
             return
         }
 

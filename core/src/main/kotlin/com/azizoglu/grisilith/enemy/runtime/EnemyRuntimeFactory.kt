@@ -102,7 +102,8 @@ class EnemyRuntimeFactory(
         startY: Float
     ): Enemy {
         val baseStats = when (gameMap) {
-            GameMap.ROAD_TO_HOME -> DefaultEnemyKinds.boar.baseStats.copy(
+            GameMap.ROAD_TO_HOME,
+            GameMap.TEST_MAP -> DefaultEnemyKinds.boar.baseStats.copy(
                 contactDamage = DefaultEnemyKinds.grayWolf.baseStats.contactDamage,
                 movementSpeed = DefaultEnemyKinds.grayWolf.baseStats.movementSpeed,
                 attacksPerSecond = DefaultEnemyKinds.grayWolf.baseStats.attacksPerSecond,
@@ -119,6 +120,40 @@ class EnemyRuntimeFactory(
         }
         val definition = DefaultEnemyKinds.mimic.copy(baseStats = baseStats)
         return create(definition, EnemyType.UNIQUE, stage, startX, startY)
+    }
+
+    fun createTestDummy(
+        stage: Int,
+        centerX: Float,
+        centerY: Float
+    ): Enemy {
+        val base = DefaultEnemyKinds.grayWolf
+        val definition = base.copy(
+            id = ContentId("ENEMY_KIND_TEST_DUMMY"),
+            displayName = "Test Dummy",
+            description = "An immobile, non-attacking test target.",
+            sizeCategory = com.azizoglu.grisilith.enemy.definition.EnemySizeCategory.VERY_LARGE,
+            baseStats = base.baseStats.copy(
+                maximumHealth = 1_000_000,
+                armorClass = 0,
+                baseArmor = 0,
+                contactDamage = 0,
+                movementSpeed = 0f,
+                attacksPerSecond = 0f,
+                attackRange = 0f,
+                weaponDamageMultiplier = 0f
+            ),
+            activeSkillIds = emptyList(),
+            passiveIds = emptyList()
+        )
+        val size = definition.sizeCategory.baseSizePixels
+        return create(
+            definition = definition,
+            enemyType = EnemyType.UNIQUE,
+            stage = stage,
+            startX = centerX - size / 2f,
+            startY = centerY - size / 2f
+        )
     }
 
     fun createBabyCrocodile(

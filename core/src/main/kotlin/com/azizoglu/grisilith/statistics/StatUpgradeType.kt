@@ -65,5 +65,9 @@ enum class StatUpgradeType(
 
     LIFE_STEAL(
         StatType.LIFE_STEAL
+    ),
+
+    MAGIC_RESISTANCE(
+        StatType.MAGIC_RESISTANCE
     )
 }

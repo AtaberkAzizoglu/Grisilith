@@ -480,6 +480,10 @@ class TamgaRuntimeManager(
         phantomSteedRuntime.reduceCooldown(seconds)
     }
 
+    fun resetAllActiveCooldowns() {
+        reduceAllActiveCooldowns(Float.MAX_VALUE)
+    }
+
     fun updateChargerAfterMovement(
         delta:
         Float

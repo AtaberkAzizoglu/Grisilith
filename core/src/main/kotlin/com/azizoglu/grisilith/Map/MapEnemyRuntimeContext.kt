@@ -19,12 +19,20 @@ class MapEnemyRuntimeContext(
         DefaultEnemyKinds.createRegistry()
 ) {
 
-    val profile:
+    var profile:
         MapEnemyProfile =
         DefaultMapEnemyProfiles
             .forMap(
                 gameMap
             )
+        private set
+
+    fun selectEnemyTag(tag: com.azizoglu.grisilith.enemy.definition.EnemyTag) {
+        require(tag != com.azizoglu.grisilith.enemy.definition.EnemyTag.MONSTER) {
+            "Monster family is not available in Test Map controls."
+        }
+        profile = MapEnemyProfile(gameMap = gameMap, enemyTags = setOf(tag))
+    }
 
     val selectionResolver =
         MapEnemySelectionResolver(

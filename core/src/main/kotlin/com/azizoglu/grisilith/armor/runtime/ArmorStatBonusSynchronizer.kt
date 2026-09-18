@@ -17,6 +17,8 @@ class ArmorStatBonusSynchronizer(
     PlayerStats
 ) {
 
+    private var hasSynchronized = false
+
     private var lastArmorId:
         String? =
         null
@@ -30,7 +32,7 @@ class ArmorStatBonusSynchronizer(
                 ?.id
                 ?.value
 
-        if (currentArmorId == lastArmorId) {
+        if (hasSynchronized && currentArmorId == lastArmorId) {
             return
         }
 
@@ -38,7 +40,8 @@ class ArmorStatBonusSynchronizer(
             baseHealth =
                 currentArmor?.baseHealth ?: 1,
             baseArmor =
-                currentArmor?.baseArmor ?: 0
+                currentArmor?.baseArmor ?: 0,
+            baseMagicResistance = currentArmor?.baseMagicResistance ?: 0
         )
 
         val accumulatedBonuses =
@@ -64,9 +67,11 @@ class ArmorStatBonusSynchronizer(
 
         lastArmorId =
             currentArmorId
+        hasSynchronized = true
     }
 
     fun invalidate() {
         lastArmorId = null
+        hasSynchronized = false
     }
 }

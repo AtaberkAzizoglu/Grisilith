@@ -10,6 +10,7 @@ import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.combat.affinity.DamageAffinityProfile
 import com.azizoglu.grisilith.combat.affinity.DamageAffinityResolver
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.combat.damage.DamageNumberEvent
 import com.azizoglu.grisilith.character.visual.CharacterVisualState
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
@@ -80,6 +81,8 @@ class Player(
             maximumHealth =
                 stats.calculatedMaximumHealth()
         )
+
+    private val pendingDamageNumberEvents = mutableListOf<DamageNumberEvent>()
 
     init {
         health.onHealingApplied = { _, type ->
@@ -155,8 +158,9 @@ class Player(
         conditions.update(
             delta = safeDelta,
             onTick = { tick ->
-                if (tick.source.tickDamage > 0) {
-                    takeDamage(tick.source.tickDamage)
+                val tickDamage = tick.source.resolvedTickDamage(health.maximumHealth)
+                if (tickDamage > 0) {
+                    takeDamage(tickDamage, tick.source.damageType)
                 }
             }
         )
@@ -653,12 +657,13 @@ class Player(
             return 0
         }
 
-        return health.takeDamage(
-            amount =
-                ActiveItemEffects.resolveDamageBeforeHealth(
-                    affinityResolvedDamage
-                )
-        )
+        val defendedDamage =
+            if (damageType.isMagical) {
+                (affinityResolvedDamage - stats.rawMagicDamageReduction())
+                    .roundToInt().coerceAtLeast(1)
+            } else affinityResolvedDamage
+
+        return applyHealthDamage(ActiveItemEffects.resolveDamageBeforeHealth(defendedDamage))
     }
 
     fun setDamageAffinityProfile(
@@ -687,6 +692,9 @@ class Player(
         if (amount <= 0) {
             return 0
         }
+
+        // Magical attacks never use physical Armor, even through an older caller.
+        if (damageType.isMagical) return takeDamage(amount, damageType)
 
         val itemModifiedDamage =
             (amount * ActiveItemEffects.incomingDamageMultiplier())
@@ -727,11 +735,24 @@ class Player(
                 .roundToInt()
                 .coerceAtLeast(1)
 
-        return health.takeDamage(
-            ActiveItemEffects.resolveDamageBeforeHealth(
-                reducedDamage
+        return applyHealthDamage(ActiveItemEffects.resolveDamageBeforeHealth(reducedDamage))
+    }
+
+    private fun applyHealthDamage(amount: Int): Int {
+        val applied = health.takeDamage(amount)
+        if (applied > 0) {
+            pendingDamageNumberEvents += DamageNumberEvent(
+                amount = applied,
+                worldX = centerX,
+                worldY = centerY + size * 0.72f
             )
-        )
+        }
+        return applied
+    }
+
+    fun consumeDamageNumberEvents(): List<DamageNumberEvent> {
+        if (pendingDamageNumberEvents.isEmpty()) return emptyList()
+        return pendingDamageNumberEvents.toList().also { pendingDamageNumberEvents.clear() }
     }
 
     fun constrainCenterToCircle(

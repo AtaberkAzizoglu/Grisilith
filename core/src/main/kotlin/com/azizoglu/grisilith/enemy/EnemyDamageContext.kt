@@ -24,7 +24,10 @@ data class EnemyDamageContext(
 
     val sourceIsSummon: Boolean = false,
 
-    val projectileTravelProgress: Float = 0f
+    val projectileTravelProgress: Float = 0f,
+
+    val conditionStatScore: Int? = null,
+    val appliesAutomaticCondition: Boolean = true
 ) {
 
     val isPhysicalWeaponDamage: Boolean

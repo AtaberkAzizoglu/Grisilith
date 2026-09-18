@@ -70,8 +70,8 @@ class MapSelectionScreen(
                         390f,
 
                     y =
-                        435f -
-                            index * 110f,
+                        470f -
+                            index * 90f,
 
                     width =
                         500f,

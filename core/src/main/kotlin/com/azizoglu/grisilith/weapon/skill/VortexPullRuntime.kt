@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.weapon.skill
 
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.weapon.skill.area.AreaSkillField
 import com.azizoglu.grisilith.weapon.skill.area.AreaSkillRuntime
 import com.badlogic.gdx.math.Vector2
@@ -8,6 +9,9 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 
 class VortexPullRuntime {
+
+    private val reactiveTarget =
+        ReactiveSpellFieldTarget(DamageType.NECROTIC)
 
     private val areaRuntime =
         AreaSkillRuntime()
@@ -135,6 +139,16 @@ class VortexPullRuntime {
             PLAGUE_ACTIVATION_VISUAL_SECONDS
 
         return true
+    }
+
+    fun tryDamageReactiveTarget(
+        damageType: DamageType?,
+        worldX: Float,
+        worldY: Float
+    ): Boolean {
+        if (!isActive || plagueStormActive || !contains(worldX, worldY)) return false
+        if (!reactiveTarget.tryDamage(damageType)) return false
+        return activatePlagueStorm()
     }
 
     /*
@@ -276,7 +290,7 @@ class VortexPullRuntime {
             )
         }
 
-        return areaRuntime.begin(
+        val began = areaRuntime.begin(
             centerX =
                 selectedCenter.x,
 
@@ -290,6 +304,8 @@ class VortexPullRuntime {
                 DefaultWeaponAbilities
                     .VORTEX_PULL_DURATION_SECONDS
         )
+        if (began) reactiveTarget.reset()
+        return began
     }
 
     fun update(
@@ -490,6 +506,7 @@ class VortexPullRuntime {
 
     fun clear() {
         areaRuntime.clear()
+        reactiveTarget.clear()
 
         visualRotationDegrees =
             0f
@@ -521,7 +538,7 @@ class VortexPullRuntime {
             9f
 
         private const val PLAGUE_STORM_DURATION_SECONDS =
-            12f
+            13f
 
         private const val PLAGUE_ACTIVATION_VISUAL_SECONDS =
             0.60f

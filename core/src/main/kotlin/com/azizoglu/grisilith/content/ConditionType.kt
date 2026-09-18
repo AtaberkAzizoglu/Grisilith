@@ -13,5 +13,6 @@ enum class ConditionType(
     PARALYZED("Paralyzed"),
     FRIGHTENED("Frightened"),
     SLOWED("Slowed"),
-    XXX_CURSE("XXX Curse")
+    XXX_CURSE("XXX Curse"),
+    ACIDIC_PATH_DAMAGE("Acidic Path")
 }

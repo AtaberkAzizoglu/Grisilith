@@ -41,13 +41,15 @@ class ConditionRuntime(
                         tick.source.sourceWeaponDefinitionId,
 
                     sourceName =
-                        tick.source.sourceName
+                        tick.source.sourceName,
+
+                    appliesAutomaticCondition = false
                 )
 
             val appliedDamage =
                 owner.takeDamage(
                     amount =
-                        tick.source.tickDamage,
+                        tick.source.resolvedTickDamage(owner.health.maximumHealth),
 
                     damageContext =
                         damageContext

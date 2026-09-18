@@ -454,7 +454,8 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.WITCH,
             displayName = "Witch",
             description =
-                "The Humanoid Final Boss. Casts Witchcraft and fires random elemental projectiles.",
+                "The Humanoid Final Boss. Casts Witchcraft and fires random elemental projectiles. " +
+                    "Poison damage and Poisoned damage-over-time are resisted at 50%.",
             enemyTags = setOf(EnemyTag.HUMANOID),
             allowedTypes = setOf(EnemyType.FINAL_BOSS),
             sizeCategory = EnemySizeCategory.LARGE,
@@ -491,7 +492,8 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.SKELETON_WARRIOR,
             displayName = "Skeleton Warrior",
             description =
-                "A balanced Undead warrior that deals damage by making contact.",
+                "A balanced Undead warrior that deals damage by making contact. " +
+                    "Undead are immune to Poison and Necrotic damage, Poisoned and Necrosis.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
@@ -523,7 +525,8 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.SKELETON_ARCHER,
             displayName = "Skeleton Archer",
             description =
-                "A lightly armored Undead archer with slow, telegraphed and powerful arrows.",
+                "A lightly armored Undead archer with slow, telegraphed and powerful arrows. " +
+                    "Undead are immune to Poison and Necrotic damage, Poisoned and Necrosis.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
@@ -559,7 +562,8 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.ZOMBIE,
             displayName = "Zombie",
             description =
-                "A slow and durable Undead enemy with strong armor.",
+                "A slow and durable Undead enemy with strong armor. " +
+                    "Undead are immune to Poison and Necrotic damage, Poisoned and Necrosis.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
@@ -591,7 +595,8 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.GHOST,
             displayName = "Ghost",
             description =
-                "An incorporeal Mini Boss that evades attacks and becomes invulnerable during Ghost Storm.",
+                "An incorporeal Mini Boss that evades attacks and becomes invulnerable during Ghost Storm. " +
+                    "Undead are immune to Poison and Necrotic damage, Poisoned and Necrosis.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.LARGE,
@@ -630,7 +635,8 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.SLIME,
             displayName = "Slime",
             description =
-                "A huge Mini Boss that leaves acid behind and splits into four independent pieces on death.",
+                "A huge Mini Boss that leaves acid behind and splits into four independent pieces on death. " +
+                    "Undead are immune to Poison and Necrotic damage, Poisoned and Necrosis.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.VERY_LARGE,
@@ -669,7 +675,8 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.VAMPIRE_LORD,
             displayName = "Vampire Lord",
             description =
-                "The Undead Final Boss. Hunts by contact, drains life and escapes through living mist.",
+                "The Undead Final Boss. Hunts by contact, drains life and escapes through living mist. " +
+                    "Undead are immune to Poison and Necrotic damage, Poisoned and Necrosis.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.FINAL_BOSS),
             sizeCategory = EnemySizeCategory.LARGE,

@@ -1688,7 +1688,9 @@ class PresetManagerScreen(
                         "This Preset starts without Armor."
 
                     details =
-                        "Armor can be obtained during the run."
+                        if (!preset.character.canEquipArmor) {
+                            "Cannot equip Armor.\nBase HP: ${preset.character.unarmoredBaseHealth}\nBase Armor: ${preset.character.unarmoredBaseArmor}\nBase Magic Resistance: ${preset.character.unarmoredBaseMagicResistance}"
+                        } else "This character starts with no Armor bonuses."
                 } else {
                     title =
                         armor.displayName
@@ -1705,6 +1707,8 @@ class PresetManagerScreen(
                             appendLine(
                                 "Base Armor: ${armor.baseArmor}"
                             )
+
+                            appendLine("Base Magic Resistance: ${armor.baseMagicResistance}")
 
                             val modifierText =
                                 armor
@@ -2355,8 +2359,17 @@ class PresetManagerScreen(
                 preRunBaseStats,
 
             characterTraitId =
-                preset.character.trait.id
+                preset.character.trait.id,
+            canEquipArmor = preset.character.canEquipArmor,
+            unarmoredBaseHealth = preset.character.unarmoredBaseHealth,
+            unarmoredBaseArmor = preset.character.unarmoredBaseArmor,
+            unarmoredBaseMagicResistance = preset.character.unarmoredBaseMagicResistance
         ).apply {
+            setArmorBaseValues(
+                preset.armor?.baseHealth ?: preset.character.unarmoredBaseHealth,
+                preset.armor?.baseArmor ?: preset.character.unarmoredBaseArmor,
+                preset.armor?.baseMagicResistance ?: preset.character.unarmoredBaseMagicResistance
+            )
             setGearBonuses(
                 preset.gearBonuses
             )

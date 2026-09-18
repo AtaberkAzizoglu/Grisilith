@@ -23,9 +23,13 @@ class SummonManager(
     private val weaponInventory: WeaponInventory,
     private val playerStats: PlayerStats,
     private val currentStageProvider: () -> Int,
-    private val mapObstacles: List<MapObstacle> =
+    private var mapObstacles: List<MapObstacle> =
         emptyList()
 ) {
+
+    fun replaceMapObstacles(obstacles: List<MapObstacle>) {
+        mapObstacles = obstacles
+    }
 
     private val entities =
         mutableListOf<SummonedEntity>()

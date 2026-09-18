@@ -983,6 +983,39 @@ class Projectile(
             false
     }
 
+    /**
+     * Player-owned projectiles may hit neutral/rogue summons.  They are not
+     * friendly summons and therefore must participate in player combat just
+     * like an enemy target.
+     */
+    fun checkPlayerProjectileAgainstRogueSummons(
+        summons: List<SummonedEntity>,
+        onDamageDealt: (damage: Int, sourceName: String) -> Unit = { _, _ -> }
+    ) {
+        if (
+            sourceSummonRuntimeId != null ||
+            !isActive ||
+            ignoresEnemyCollisions ||
+            activationDelayRemaining > 0f
+        ) return
+
+        val projectileCenterX = position.x + size / 2f
+        val projectileCenterY = position.y + size / 2f
+        val target = summons.firstOrNull { candidate ->
+            if (candidate.isExpired || candidate.faction != com.azizoglu.grisilith.summon.SummonCombatFaction.ROGUE) {
+                false
+            } else {
+                val radius = size / 2f + candidate.combatRadius
+                Vector2.dst2(projectileCenterX, projectileCenterY, candidate.centerX, candidate.centerY) <= radius * radius
+            }
+        } ?: return
+
+        val appliedDamage = target.takeDamage(damage.coerceAtLeast(1), damageType)
+        conditionApplication?.let(target::applyCondition)
+        if (appliedDamage > 0) onDamageDealt(appliedDamage, sourceWeaponName)
+        deactivate()
+    }
+
     fun checkObstacleCollision(
         obstacleBounds:
         List<Rectangle>

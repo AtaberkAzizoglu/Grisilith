@@ -24,12 +24,9 @@ class PlagueStormRule(
          * kullanır.
          */
         if (
-            event.trigger !=
-            CombatInteractionTrigger.DAMAGE_APPLIED ||
-            event.damageType !=
-            DamageType.NECROTIC ||
-            event.appliedDamage <=
-            0 ||
+            (event.trigger != CombatInteractionTrigger.DAMAGE_APPLIED &&
+                event.trigger != CombatInteractionTrigger.PROJECTILE_PASSED) ||
+            event.damageType != DamageType.NECROTIC ||
             !isInsideVortex(
                 event.worldX,
                 event.worldY

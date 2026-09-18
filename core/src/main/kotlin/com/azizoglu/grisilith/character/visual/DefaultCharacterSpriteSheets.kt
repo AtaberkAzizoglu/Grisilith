@@ -3,7 +3,8 @@ package com.azizoglu.grisilith.character.visual
 import com.azizoglu.grisilith.content.ContentId
 
 /*
- * Character source PNG files are used unchanged.
+ * The first three characters retain their original source sheets.
+ * Koba and Linlos use normalized transparent 128px-cell atlases.
  *
  * The portrait on the left side of each source PNG is intentionally
  * not part of gameplay animation. Only the directional sprite rows
@@ -584,22 +585,22 @@ object DefaultCharacterSpriteSheets {
     val koba =
         gridSpriteSheet(
             characterId = "CHR_KOBA",
-            texturePath = "characters/koba.png",
-            sourceWidth = 1389,
-            sourceHeight = 998,
-            frameXs = listOf(160, 445, 720, 1000),
-            frameWidth = 250,
+            texturePath = "characters/koba_v2.png",
+            sourceWidth = 640,
+            sourceHeight = 512,
+            frameXs = listOf(0, 128, 256, 384, 512),
+            frameWidth = 128,
             walkFrameDurationSeconds = 0.12f
         )
 
     val linlosDustman =
         gridSpriteSheet(
             characterId = "CHR_LINLOS_DUSTMAN",
-            texturePath = "characters/linlos_dustman.png",
-            sourceWidth = 1536,
-            sourceHeight = 1024,
-            frameXs = listOf(80, 430, 795, 1165),
-            frameWidth = 260,
+            texturePath = "characters/linlos_dustman_v2.png",
+            sourceWidth = 640,
+            sourceHeight = 512,
+            frameXs = listOf(0, 128, 256, 384, 512),
+            frameWidth = 128,
             walkFrameDurationSeconds = 0.13f
         )
 
@@ -639,7 +640,7 @@ object DefaultCharacterSpriteSheets {
 
             return CharacterSpriteAnimationDefinition(
                 idleFrame = frames.first(),
-                walkFrames = frames,
+                walkFrames = frames.drop(1),
                 walkFrameDurationSeconds = walkFrameDurationSeconds
             )
         }

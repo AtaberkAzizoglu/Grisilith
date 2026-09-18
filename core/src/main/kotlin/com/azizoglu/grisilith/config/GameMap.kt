@@ -53,6 +53,15 @@ enum class GameMap(
             setOf(
                 EnemyTag.UNDEAD
             )
+    ),
+
+    TEST_MAP(
+        displayName = "Test Map",
+        description = "A controlled 50-stage sandbox for testing builds and combat.",
+        worldWidth = 2200f,
+        worldHeight = 1500f,
+        isInitiallyUnlocked = true,
+        enemyTags = setOf(EnemyTag.BEAST)
     );
 
     init {

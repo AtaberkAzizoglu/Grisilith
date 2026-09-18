@@ -1350,10 +1350,7 @@ class MarketRenderer(
                 availableHeight /
                     statCount
                 )
-                .coerceIn(
-                    11.5f,
-                    15f
-                )
+                .coerceAtMost(15f)
 
         var currentY =
             layout.statsPanel.y +

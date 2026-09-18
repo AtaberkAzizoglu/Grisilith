@@ -36,7 +36,7 @@ class RunSummaryStatRenderer(
             18f
 
         private const val ROW_HEIGHT =
-            28f
+            25f
 
         private const val ROW_TOP_PADDING =
             42f

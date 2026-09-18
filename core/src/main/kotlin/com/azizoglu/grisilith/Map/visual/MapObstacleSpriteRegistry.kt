@@ -279,6 +279,7 @@ object MapObstacleSpriteRegistry {
     ): Map<MapObstacleType, MapObstacleSpriteDefinition> {
         return when (gameMap) {
             GameMap.ROAD_TO_HOME -> roadDefinitions
+            GameMap.TEST_MAP -> roadDefinitions
             GameMap.TROUBLE_AT_HOME -> troubleAtHomeDefinitions
             GameMap.FOLLOWING_THE_DUNGEON_DELVER -> dungeonDefinitions
         }

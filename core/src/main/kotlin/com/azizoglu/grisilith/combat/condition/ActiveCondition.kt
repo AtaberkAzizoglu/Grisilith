@@ -49,7 +49,7 @@ class ActiveCondition(
 
         if (
             interval != null &&
-            currentSource.tickDamage > 0
+            (currentSource.tickDamage > 0 || currentSource.tickMaximumHealthRatio > 0f)
         ) {
             secondsUntilNextTick -= activeDelta
 
@@ -91,8 +91,9 @@ class ActiveCondition(
             }
 
         if (
-            application.source.tickDamage >
-            currentSource.tickDamage
+            application.source.tickMaximumHealthRatio > currentSource.tickMaximumHealthRatio ||
+            (application.source.tickMaximumHealthRatio == currentSource.tickMaximumHealthRatio &&
+                application.source.tickDamage > currentSource.tickDamage)
         ) {
             currentSource = application.source
         }

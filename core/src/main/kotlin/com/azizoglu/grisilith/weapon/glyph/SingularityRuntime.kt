@@ -597,25 +597,6 @@ class SingularityRuntime(
         onEnemyKilled: (Enemy) -> Unit
     ) {
 
-        val tickDamage =
-            (
-                damageCalculator
-                    .calculateSpellSkillDamage(
-                        weapon =
-                            singularity
-                                .request
-                                .sourceWeapon,
-
-                        damageType =
-                            DamageType.NECROTIC
-                    ) *
-                    TICK_DAMAGE_MULTIPLIER
-                )
-                .roundToInt()
-                .coerceAtLeast(
-                    1
-                )
-
         enemyManager
             .allEnemies
             .toList()
@@ -647,7 +628,11 @@ class SingularityRuntime(
                         enemy,
 
                     damage =
-                        tickDamage,
+                        damageCalculator.calculateMaximumHealthSpellTickDamage(
+                            enemy.health.maximumHealth,
+                            DamageType.NECROTIC,
+                            TICK_DAMAGE_MULTIPLIER
+                        ),
 
                     singularity =
                         singularity,
@@ -890,7 +875,7 @@ class SingularityRuntime(
             0.40f
 
         private const val TICK_DAMAGE_MULTIPLIER =
-            4.11f
+            0.00020f
 
         private const val BASE_EXPLOSION_RADIUS =
             300f

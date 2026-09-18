@@ -4,6 +4,7 @@ import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.combat.affinity.DamageAffinityProfile
 import com.azizoglu.grisilith.enemy.combat.EnemyCombatTuning
 import com.azizoglu.grisilith.enemy.definition.EnemyTraversalProfile
+import com.azizoglu.grisilith.content.ConditionType
 
 /*
  * Runtime sırasında Enemy tarafından kullanılan çözülmüş değerler.
@@ -45,6 +46,8 @@ data class EnemyStats(
 
     val damageAffinities: DamageAffinityProfile =
         DamageAffinityProfile.NONE,
+
+    val conditionImmunities: Set<ConditionType> = emptySet(),
 
     val kindId: ContentId? = null,
     val behaviorId: ContentId? = null,

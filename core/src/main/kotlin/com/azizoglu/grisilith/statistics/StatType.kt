@@ -21,5 +21,6 @@ enum class StatType(
     PIERCING("Piercing"),
     ENEMY_COUNT("Enemy Count"),
     HP_REGENERATION("HP Regeneration"),
-    LIFE_STEAL("Life Steal")
+    LIFE_STEAL("Life Steal"),
+    MAGIC_RESISTANCE("Magic Resistance")
 }

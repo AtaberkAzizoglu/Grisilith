@@ -163,6 +163,12 @@ object ActiveItemEffects {
     fun currentShepherdScore(): Int =
         stats?.totalScore(StatType.SHEPHERD) ?: 0
 
+    fun currentConditionStatScore(conditionType: com.azizoglu.grisilith.content.ConditionType): Int {
+        val stat = com.azizoglu.grisilith.combat.condition.DamageConditionRules
+            .scalingStatFor(conditionType) ?: return 0
+        return stats?.totalScore(stat) ?: 0
+    }
+
     fun resolveDamageContext(context: EnemyDamageContext): EnemyDamageContext {
         val copies = count(ItemEffectId.CHAOS_THEORY)
         if (copies <= 0 || context.damageType !in magicalDamageTypes) return context
@@ -479,6 +485,13 @@ object ActiveItemEffects {
 
         updateBloodScentMovement()
     }
+
+    /**
+     * Test-map hook. No current item owns an independent cooldown clock.
+     * Keep the hook so the button automatically remains the single reset
+     * entry point when an active/cooldown-based item is introduced.
+     */
+    fun resetAllCooldowns() = Unit
 
     private fun beginStage() {
         secondHeartAvailable = count(ItemEffectId.SECOND_HEART) > 0

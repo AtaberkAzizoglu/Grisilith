@@ -2,6 +2,9 @@ package com.azizoglu.grisilith.enemy.trait
 
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
+import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
@@ -26,7 +29,7 @@ private data class EnemySkillProjectile(
     val ignoresObstacles: Boolean = false,
     val conditionType: com.azizoglu.grisilith.content.ConditionType? = null,
     val conditionDurationSeconds: Float? = null,
-    val conditionTickDamage: Int = 0,
+    val conditionStatScore: Int = 0,
     val trajectoryStartX: Float = x,
     val trajectoryStartY: Float = y,
     val trajectoryEndX: Float = x + velocityX * 12f,
@@ -498,7 +501,7 @@ internal class WitchcraftEnemyTrait : EnemyTrait {
         val multiplier: Float,
         val damageType: DamageType
     ) {
-        STATIC_CLOUD("Static Cloud", 225f, Color(0.45f, 0.78f, 1f, 0.42f), 2.0f, DamageType.LIGHTNING),
+        STATIC_CLOUD("Static Cloud", DefaultWeaponAbilities.STATIC_CLOUDS_RADIUS, Color(0.45f, 0.78f, 1f, 0.42f), 2.0f, DamageType.LIGHTNING),
         METEOR("Meteor", 175f, Color(1f, 0.22f, 0.04f, 0.48f), 3.0f, DamageType.FIRE),
         TSUNAMI("Tsunami", 270f, Color(0.05f, 0.55f, 0.92f, 0.40f), 2.25f, DamageType.WATER),
         CALL_LIGHTNING("Call Lightning", 135f, Color(0.68f, 0.88f, 1f, 0.55f), 2.65f, DamageType.LIGHTNING)
@@ -513,7 +516,7 @@ internal class WitchcraftEnemyTrait : EnemyTrait {
     private data class StaticCloud(
         val x: Float,
         val y: Float,
-        var remaining: Float = 4.2f,
+        var remaining: Float = DefaultWeaponAbilities.STATIC_CLOUDS_DURATION_SECONDS,
         var tick: Float = 0f,
         var animationSeconds: Float = 0f
     )
@@ -602,14 +605,19 @@ internal class WitchcraftEnemyTrait : EnemyTrait {
                 continue
             }
             if (cloud.tick > 0f) continue
-            cloud.tick += 0.75f
+            cloud.tick += DefaultWeaponAbilities.STATIC_CLOUDS_TICK_SECONDS
             context.combatTargets.forEach { target ->
                 if (!circleOverlapsRectangle(cloud.x, cloud.y, Spell.STATIC_CLOUD.radius, target.bounds)) return@forEach
                 pendingDamage += target.damage(
-                    amount = (context.owner.contactDamage * 0.55f).roundToInt().coerceAtLeast(1),
+                    amount = (target.maximumHealth *
+                        (context.owner.mainDamageStat + context.owner.conditionDamageStatScore) *
+                        DefaultWeaponAbilities.STATIC_CLOUDS_LIGHTNING_DPS_MULTIPLIER)
+                        .roundToInt().coerceAtLeast(1),
                     source = Spell.STATIC_CLOUD.label,
                     damageType = Spell.STATIC_CLOUD.damageType,
-                    projectileOrMagic = true
+                    projectileOrMagic = true,
+                    conditionType = if (MathUtils.random() <= DefaultWeaponAbilities.STATIC_CLOUDS_STUN_CHANCE) ConditionType.STUNNED else null,
+                    conditionDurationSeconds = DefaultWeaponAbilities.STATIC_CLOUDS_STUN_DURATION_SECONDS
                 )
             }
         }
@@ -740,13 +748,15 @@ internal class GhostStormEnemyTrait : EnemyTrait {
                     context.combatTargets.forEach { target ->
                         if (!circleOverlapsRectangle(context.owner.centerX, context.owner.centerY, RADIUS, target.bounds)) return@forEach
                         pendingDamage += target.damage(
-                            amount = (context.owner.contactDamage * 0.22f).roundToInt().coerceAtLeast(1),
+                            amount = (target.maximumHealth * 0.01f *
+                                (context.owner.spawnStage / 5).coerceAtLeast(1))
+                                .roundToInt().coerceAtLeast(1),
                             source = "Ghost Storm",
                             damageType = DamageType.NECROTIC,
                             projectileOrMagic = true,
                             conditionType = com.azizoglu.grisilith.content.ConditionType.NECROSIS,
-                            conditionDurationSeconds = 5f,
-                            conditionTickDamage = (context.owner.contactDamage * 0.60f).roundToInt()
+                            conditionDurationSeconds = 3f,
+                            conditionStatScore = context.owner.conditionDamageStatScore
                         )
                     }
                 }
@@ -786,9 +796,9 @@ internal class GhostStormEnemyTrait : EnemyTrait {
 
     companion object {
         private const val CHARGE_SECONDS = 1.25f
-        private const val STORM_SECONDS = 2.40f
+        private const val STORM_SECONDS = 5f
         private const val COOLDOWN_SECONDS = 12f
-        private const val TICK_SECONDS = 0.60f
+        private const val TICK_SECONDS = 0.25f
         private const val RADIUS = 285f
     }
 }
@@ -864,9 +874,7 @@ internal class SlimeAcidicPathAndSpitTrait : EnemyTrait {
             ignoresObstacles = true,
             conditionType = com.azizoglu.grisilith.content.ConditionType.CORRODING,
             conditionDurationSeconds = 5f,
-            conditionTickDamage =
-                (owner.contactDamage * if (isFragment) 0.06f else 0.22f)
-                    .roundToInt().coerceAtLeast(1)
+            conditionStatScore = owner.conditionDamageStatScore
         )
         owner.slimeRangedCooldownRemainingSeconds = RANGED_COOLDOWN_SECONDS
     }
@@ -903,14 +911,13 @@ internal class SlimeAcidicPathAndSpitTrait : EnemyTrait {
                 if (target.type == EnemyTraitTargetType.GATE) return@forEach
                 if (!circleOverlapsRectangle(puddle.x, puddle.y, puddle.diameter / 2f, target.bounds)) return@forEach
                 pendingDamage += target.damage(
-                    amount = (context.owner.contactDamage * PATH_DAMAGE_MULTIPLIER)
-                        .roundToInt().coerceAtLeast(1),
+                    amount = 0,
                     source = "Acidic Path",
                     damageType = DamageType.ACID,
                     projectileOrMagic = true,
-                    conditionType = com.azizoglu.grisilith.content.ConditionType.CORRODING,
-                    conditionDurationSeconds = 4f,
-                    conditionTickDamage = (context.owner.contactDamage * 0.10f).roundToInt()
+                    conditionType = com.azizoglu.grisilith.content.ConditionType.ACIDIC_PATH_DAMAGE,
+                    conditionDurationSeconds = 3f,
+                    conditionStatScore = (context.owner.spawnStage / 5).coerceAtLeast(1)
                 )
             }
         }
@@ -943,8 +950,7 @@ internal class SlimeAcidicPathAndSpitTrait : EnemyTrait {
 
     companion object {
         private const val DROP_DISTANCE = 58f
-        private const val PATH_TICK_SECONDS = 0.65f
-        private const val PATH_DAMAGE_MULTIPLIER = 0.18f
+        private const val PATH_TICK_SECONDS = 1f
         private const val RANGED_COOLDOWN_SECONDS = 12f
         private const val AIM_SECONDS = 0.85f
         private const val SLIME_AIM_RANGE = 1600f
@@ -1017,7 +1023,7 @@ private fun updateProjectiles(
                 projectileOrMagic = true,
                 conditionType = projectile.conditionType,
                 conditionDurationSeconds = projectile.conditionDurationSeconds,
-                conditionTickDamage = projectile.conditionTickDamage
+                conditionStatScore = projectile.conditionStatScore
             )
         }
         if (target != null || (obstacleHit && !projectile.ignoresObstacles) || expired) {
@@ -1043,7 +1049,7 @@ private fun EnemyTraitCombatTarget.damage(
     projectileOrMagic: Boolean = false,
     conditionType: com.azizoglu.grisilith.content.ConditionType? = null,
     conditionDurationSeconds: Float? = null,
-    conditionTickDamage: Int = 0
+    conditionStatScore: Int = 0
 ) = EnemyTraitTargetDamage(
     targetType = type,
     targetIndex = index,
@@ -1053,7 +1059,7 @@ private fun EnemyTraitCombatTarget.damage(
     projectileOrMagic = projectileOrMagic,
     conditionType = conditionType,
     conditionDurationSeconds = conditionDurationSeconds,
-    conditionTickDamage = conditionTickDamage
+    conditionStatScore = conditionStatScore
 )
 
 private fun EnemySkillProjectile.toVisual() = EnemyTraitProjectileVisual(

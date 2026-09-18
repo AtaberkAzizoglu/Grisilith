@@ -415,7 +415,8 @@ class PauseRenderer(
                     ?.let { armor ->
                         armor.displayName +
                             "\nHP ${armor.baseHealth}" +
-                            "  ARM ${armor.baseArmor}"
+                            "  ARM ${armor.baseArmor}" +
+                            "  MR ${armor.baseMagicResistance}"
                     }
                     ?: "EMPTY"
         )
@@ -1504,7 +1505,13 @@ class PauseRenderer(
                         "ARMOR"
 
                     description =
-                        "No Armor Equipped."
+                        "No Armor Equipped.\n\n" +
+                            "Base HP: ${playerStats.armorBaseHealth()}\n" +
+                            "Base Armor: ${playerStats.armorBaseArmor()}\n" +
+                            "Base Magic Resistance: ${playerStats.armorBaseMagicResistance()}\n" +
+                            "Current Max HP: ${playerStats.calculatedMaximumHealth()}\n" +
+                            "Physical Damage Reduce: ${formatDecimal(playerStats.rawArmorDamageReduction())}\n" +
+                            "Magical Damage Reduce: ${formatDecimal(playerStats.rawMagicDamageReduction())}"
                 } else {
                     title =
                         armor.displayName
@@ -1535,6 +1542,9 @@ class PauseRenderer(
                             appendLine(
                                 "Base Armor: ${armor.baseArmor}"
                             )
+
+                            appendLine("Base Magic Resistance: ${armor.baseMagicResistance}")
+                            appendLine("Magical Damage Reduce: ${formatDecimal(playerStats.rawMagicDamageReduction())}")
 
                             appendLine()
 

@@ -55,7 +55,8 @@ object MapTileSpriteRegistry {
     ): MapTileSpriteDefinition {
         return when (gameMap) {
             GameMap.ROAD_TO_HOME,
-            GameMap.TROUBLE_AT_HOME ->
+            GameMap.TROUBLE_AT_HOME,
+            GameMap.TEST_MAP ->
                 grass
 
             GameMap.FOLLOWING_THE_DUNGEON_DELVER ->

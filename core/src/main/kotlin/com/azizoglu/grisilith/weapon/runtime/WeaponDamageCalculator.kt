@@ -427,6 +427,18 @@ class WeaponDamageCalculator(
             .coerceAtLeast(1)
     }
 
+    /** Percentage coefficient is expressed as a ratio (0.000165 = 0.0165%). */
+    fun calculateMaximumHealthSpellTickDamage(
+        targetMaximumHealth: Int,
+        damageType: DamageType,
+        ratioPerStatPoint: Float
+    ): Int {
+        val wisdom = playerStats.totalScore(StatType.WISDOM).coerceAtLeast(0)
+        val related = playerStats.totalScore(relatedSpellDamageStat(damageType)).coerceAtLeast(0)
+        return (targetMaximumHealth.coerceAtLeast(1) * (wisdom + related) * ratioPerStatPoint)
+            .roundToInt().coerceAtLeast(1)
+    }
+
     private fun calculateSpellFocusNormalDamage(
         weapon: WeaponInstance,
         damageType: DamageType

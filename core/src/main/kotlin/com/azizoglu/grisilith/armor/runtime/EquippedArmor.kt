@@ -8,7 +8,7 @@ import com.azizoglu.grisilith.content.ContentId
  *
  * Armor yalnızca Preset yüklenirken atanacaktır.
  */
-class EquippedArmor {
+class EquippedArmor(private val canEquipArmor: Boolean = true) {
 
     var definition:
         ArmorDefinition? =
@@ -23,6 +23,7 @@ class EquippedArmor {
         armor:
         ArmorDefinition
     ) {
+        require(canEquipArmor) { "This character cannot equip Armor." }
         definition =
             armor
     }

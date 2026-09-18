@@ -201,7 +201,8 @@ class WeaponRuntimeManager(
                             worldY ->
 
                         acidicPoolRuntime
-                            .tryActivateVitriolicIgnition(
+                            .tryDamageReactiveTarget(
+                                DamageType.FIRE,
                                 worldX,
                                 worldY
                             )
@@ -240,8 +241,13 @@ class WeaponRuntimeManager(
                     },
 
                     activatePlagueStorm = {
-                        vortexPullRuntime
-                            .activatePlagueStorm()
+                        vortexPullRuntime.field?.let { field ->
+                            vortexPullRuntime.tryDamageReactiveTarget(
+                                DamageType.NECROTIC,
+                                field.center.x,
+                                field.center.y
+                            )
+                        } ?: false
                     }
                 )
             )
@@ -1260,28 +1266,16 @@ class WeaponRuntimeManager(
         }
 
         val rawTickDamage =
-            (
-                activeSkillDamageCalculator
-                    .calculateSpellSkillDamage(
-                        weapon =
-                            weapon,
-
-                        damageType =
-                            DamageType.ACID
-                    ) *
-                    DefaultWeaponAbilities
-                        .ACIDIC_POOL_DAMAGE_PER_SECOND_MULTIPLIER
+            activeSkillDamageCalculator.calculateMaximumHealthSpellTickDamage(
+                    enemy.health.maximumHealth,
+                    DamageType.ACID,
+                    DefaultWeaponAbilities.ACIDIC_POOL_DAMAGE_PER_SECOND_MULTIPLIER
                 )
-                .roundToInt()
                 .coerceAtLeast(
                     1
                 )
 
-        val modifiedDamage =
-            modifyWeaponDamage(
-                enemy = enemy,
-                baseDamage = rawTickDamage
-            )
+        val modifiedDamage = rawTickDamage
 
         val wasAlive =
             !enemy.isDead
@@ -1425,28 +1419,16 @@ class WeaponRuntimeManager(
         }
 
         val lightningDamage =
-            (
-                activeSkillDamageCalculator
-                    .calculateSpellSkillDamage(
-                        weapon =
-                            weapon,
-
-                        damageType =
-                            DamageType.LIGHTNING
-                    ) *
-                    DefaultWeaponAbilities
-                        .STATIC_CLOUDS_LIGHTNING_DPS_MULTIPLIER
+            activeSkillDamageCalculator.calculateMaximumHealthSpellTickDamage(
+                    enemy.health.maximumHealth,
+                    DamageType.LIGHTNING,
+                    DefaultWeaponAbilities.STATIC_CLOUDS_LIGHTNING_DPS_MULTIPLIER
                 )
-                .roundToInt()
                 .coerceAtLeast(
                     1
                 )
 
-        val modifiedDamage =
-            modifyWeaponDamage(
-                enemy = enemy,
-                baseDamage = lightningDamage
-            )
+        val modifiedDamage = lightningDamage
 
         val wasAlive =
             !enemy.isDead
@@ -1553,28 +1535,16 @@ class WeaponRuntimeManager(
             !enemy.isDead
 
         val vortexRawDamage =
-            (
-                activeSkillDamageCalculator
-                    .calculateSpellSkillDamage(
-                        weapon =
-                            weapon,
-
-                        damageType =
-                            DamageType.AIR
-                    ) *
-                    DefaultWeaponAbilities
-                        .VORTEX_PULL_DAMAGE_PER_SECOND_MULTIPLIER
+            activeSkillDamageCalculator.calculateMaximumHealthSpellTickDamage(
+                    enemy.health.maximumHealth,
+                    DamageType.AIR,
+                    DefaultWeaponAbilities.VORTEX_PULL_DAMAGE_PER_SECOND_MULTIPLIER
                 )
-                .roundToInt()
                 .coerceAtLeast(
                     1
                 )
 
-        val vortexDamage =
-            modifyWeaponDamage(
-                enemy = enemy,
-                baseDamage = vortexRawDamage
-            )
+        val vortexDamage = vortexRawDamage
 
         var totalAppliedDamage =
             enemy.takeDamage(
@@ -1604,27 +1574,16 @@ class WeaponRuntimeManager(
             !enemy.isDead
         ) {
             val plagueRawDamage =
-                (
-                    activeSkillDamageCalculator
-                        .calculateSpellSkillDamage(
-                            weapon =
-                                weapon,
-
-                            damageType =
-                                DamageType.NECROTIC
-                        ) *
+                activeSkillDamageCalculator.calculateMaximumHealthSpellTickDamage(
+                        enemy.health.maximumHealth,
+                        DamageType.NECROTIC,
                         PLAGUE_STORM_NECROTIC_TICK_MULTIPLIER
                     )
-                    .roundToInt()
                     .coerceAtLeast(
                         1
                     )
 
-            val plagueDamage =
-                modifyWeaponDamage(
-                    enemy = enemy,
-                    baseDamage = plagueRawDamage
-                )
+            val plagueDamage = plagueRawDamage
 
             totalAppliedDamage +=
                 enemy.takeDamage(
@@ -2197,7 +2156,7 @@ class WeaponRuntimeManager(
             7.77f
 
         private const val PLAGUE_STORM_NECROTIC_TICK_MULTIPLIER =
-            0.95f
+            0.00005f
 
         private const val PLAGUE_STORM_NECROSIS_SECONDS =
             2f

@@ -39,6 +39,8 @@ class PresetContentResolver(
                         ?: return null
                 }
 
+        if (!character.canEquipArmor && (armor != null || preset.armorTamgaId != null)) return null
+
         val item =
             preset.itemId
                 ?.let { itemId ->

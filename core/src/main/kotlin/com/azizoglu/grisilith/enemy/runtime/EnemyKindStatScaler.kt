@@ -6,6 +6,10 @@ import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.enemy.definition.DefaultEnemyTypeModifiers
 import com.azizoglu.grisilith.enemy.definition.EnemyKindDefinition
 import com.azizoglu.grisilith.enemy.definition.EnemyTag
+import com.azizoglu.grisilith.combat.affinity.DamageAffinity
+import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.content.ConditionType
+import com.azizoglu.grisilith.enemy.definition.EnemyKindIds
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
@@ -222,9 +226,20 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .projectileSpeedMultiplier,
 
-            damageAffinities =
-                definition.baseStats
-                    .damageAffinities,
+            damageAffinities = when {
+                EnemyTag.UNDEAD in definition.enemyTags ->
+                    definition.baseStats.damageAffinities
+                        .withAffinity(DamageType.POISON, DamageAffinity.IMMUNE)
+                        .withAffinity(DamageType.NECROTIC, DamageAffinity.IMMUNE)
+                definition.id == EnemyKindIds.WITCH ->
+                    definition.baseStats.damageAffinities
+                        .withAffinity(DamageType.POISON, DamageAffinity.RESISTANT)
+                else -> definition.baseStats.damageAffinities
+            },
+
+            conditionImmunities = if (EnemyTag.UNDEAD in definition.enemyTags) {
+                setOf(ConditionType.POISONED, ConditionType.NECROSIS)
+            } else emptySet(),
 
             kindId =
                 definition.id,
