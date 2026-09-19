@@ -75,7 +75,6 @@ object LanceDefinition {
 
 
 
-                        level3Range = 1.10f,
                         level4Range = 1.10f,
                         level5Range = 1.10f,
 
@@ -102,7 +101,7 @@ object LanceDefinition {
 
             weaponAbility =
                 DefaultWeaponAbilities
-                    .impaleAndDrag,
+                    .spinAttack,
 
             initialUnlockState =
                 ContentUnlockState.UNLOCKED

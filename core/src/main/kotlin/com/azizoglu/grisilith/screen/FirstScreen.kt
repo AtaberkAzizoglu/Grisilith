@@ -2885,7 +2885,13 @@ class FirstScreen(
                 worldY =
                     pointerPosition.y
             )
-                ?: return
+
+        if (clickedSlot == null) {
+            weaponRuntimeManager
+                .releaseAimedPhysicalAbilityEarly()
+
+            return
+        }
 
         weaponRuntimeManager
             .tryActivateAbilityInSlot(
@@ -3286,6 +3292,12 @@ class FirstScreen(
     ) {
         com.azizoglu.grisilith.weapon.visual.attack
             .MeleeAttackVisualManager
+            .update(
+                delta
+            )
+
+        com.azizoglu.grisilith.weapon.visual.attack
+            .SoulDrainVisualManager
             .update(
                 delta
             )
@@ -5320,6 +5332,10 @@ class FirstScreen(
             .MeleeAttackVisualManager
             .clear()
 
+        com.azizoglu.grisilith.weapon.visual.attack
+            .SoulDrainVisualManager
+            .clear()
+
 
         if (
             Gdx.input.inputProcessor ===
@@ -5339,6 +5355,7 @@ class FirstScreen(
         pauseRenderer.dispose()
 
         tamgaRuntimeManager.dispose()
+        weaponRuntimeManager.dispose()
         worldRenderer.dispose()
         worldItemRenderer.dispose()
         shapeRenderer.dispose()

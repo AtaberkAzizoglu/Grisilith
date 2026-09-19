@@ -45,10 +45,11 @@ data class SummonStats(
         fun create(
             type: SummonType,
             playerStats: PlayerStats,
-            stage: Int
+            stage: Int,
+            shepherdScalingMultiplier: Float = 1f
         ): SummonStats {
 
-            val shepherd =
+            val shepherdScore =
                 playerStats
                     .totalScore(
                         StatType.SHEPHERD
@@ -57,6 +58,10 @@ data class SummonStats(
                         0,
                         PlayerStats.RUN_MAXIMUM_SCORE
                     )
+
+            val shepherd =
+                shepherdScore *
+                    shepherdScalingMultiplier.coerceAtLeast(0f)
 
             val damageMultiplier =
                 1f +
@@ -245,8 +250,8 @@ data class SummonStats(
             )
         }
 
-        private fun scaledDefense(shepherd: Int, ratio: Float): Int =
-            (shepherd.coerceAtLeast(0) * ratio).roundToInt().coerceAtLeast(0)
+        private fun scaledDefense(shepherd: Float, ratio: Float): Int =
+            (shepherd.coerceAtLeast(0f) * ratio).roundToInt().coerceAtLeast(0)
 
         private const val COW_ARMOR_CLASS_RATIO = 0.70f
         private const val COW_MAGIC_RESISTANCE_RATIO = 0.30f

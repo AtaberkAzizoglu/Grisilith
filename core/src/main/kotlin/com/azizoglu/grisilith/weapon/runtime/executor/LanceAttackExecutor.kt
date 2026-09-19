@@ -60,9 +60,7 @@ class LanceAttackExecutor(
                     effectiveRange
             ) ?: return
 
-        val attackNumber =
-            context.weapon
-                .registerNormalAttack()
+        context.weapon.registerNormalAttack()
 
         val direction =
             Vector2(
@@ -86,6 +84,20 @@ class LanceAttackExecutor(
             ) *
                 MathUtils.radiansToDegrees
 
+        val halfWidth =
+            (
+                definition.areaRadius *
+                    if (
+                        context.weapon
+                            .hasBasicAttackUpgrade
+                    ) {
+                        UPGRADED_WIDTH_MULTIPLIER
+                    } else {
+                        1f
+                    }
+                )
+                .coerceAtLeast(1f)
+
         MeleeAttackVisualManager.spawn(
             kind =
                 MeleeAttackVisualKind
@@ -98,11 +110,11 @@ class LanceAttackExecutor(
                 attackAngle,
             worldWidth =
                 effectiveRange *
-                    1.20f,
+                    1.04f,
             worldHeight =
                 (
-                    definition.areaRadius *
-                        5.5f
+                    halfWidth *
+                        2.2f
                     )
                     .coerceAtLeast(
                         46f
@@ -126,20 +138,6 @@ class LanceAttackExecutor(
             startY +
                 direction.y *
                 effectiveRange
-
-        val halfWidth =
-            (
-                definition.areaRadius *
-                    if (
-                        context.weapon
-                            .hasBasicAttackUpgrade
-                    ) {
-                        UPGRADED_WIDTH_MULTIPLIER
-                    } else {
-                        1f
-                    }
-                )
-                .coerceAtLeast(1f)
 
         CombatDebugVisualManager.addLine(
             startX = startX,
@@ -174,79 +172,6 @@ class LanceAttackExecutor(
             )
         }
 
-        if (
-            context.weapon
-                .hasBasicAttackUpgrade &&
-            attackNumber %
-            5 ==
-            0
-        ) {
-            executeUpgradedSpin(
-                context =
-                    context,
-                effectiveRange =
-                    effectiveRange
-            )
-        }
-    }
-
-    private fun executeUpgradedSpin(
-        context: WeaponAttackContext,
-        effectiveRange: Float
-    ) {
-        /*
-         * Lv.3+ every fifth normal attack:
-         * additional player-centered circular attack.
-         *
-         * Radius = 66% of the normal effective Lance range.
-         * It is an additional full normal-damage hit.
-         */
-        val radius =
-            effectiveRange *
-                0.66f
-
-        MeleeAttackVisualManager.spawn(
-            kind =
-                MeleeAttackVisualKind
-                    .LANCE_SPIN,
-            centerX =
-                context.attackOriginX,
-            centerY =
-                context.attackOriginY,
-            rotationDegrees =
-                0f,
-            worldWidth =
-                radius *
-                    2f,
-            worldHeight =
-                radius *
-                    2f,
-            durationSeconds =
-                0.42f
-        )
-
-        context.enemyManager
-            .allEnemies
-            .filter { enemy ->
-                !enemy.isDead &&
-                    Vector2.dst(
-                        enemy.centerX,
-                        enemy.centerY,
-                        context.attackOriginX,
-                        context.attackOriginY
-                    ) <=
-                    radius +
-                    enemy.bounds.width /
-                    2f
-            }
-            .forEach { enemy ->
-                WeaponAreaAttackHelper.damageEnemy(
-                    enemy = enemy,
-                    context = context,
-                    damageCalculator =
-                        damageCalculator
-                )
-            }
     }
 
     private fun isInsideAttackLine(

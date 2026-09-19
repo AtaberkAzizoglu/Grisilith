@@ -21,7 +21,7 @@ object LongbowDefinition {
                 ),
 
             displayName =
-                "Longbow",
+                "Bow",
 
             description =
                 "A balanced ranged weapon with reliable reach and accuracy.",

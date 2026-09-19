@@ -6,6 +6,7 @@ import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.enemy.EnemyManager
+import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.player.Player
 import com.azizoglu.grisilith.weapon.Projectile
@@ -91,8 +92,15 @@ class GlyphSpellRuntime(
             request.glyphType
         ) {
             GlyphType.CALL_LIGHTNING -> {
+                val targetedRequest =
+                    requestForPriorityTarget(
+                        request = request,
+                        enemyManager = enemyManager,
+                        maximumRange = CALL_LIGHTNING_TARGETING_RANGE
+                    ) ?: return
+
                 castCallLightning(
-                    request,
+                    targetedRequest,
                     enemyManager,
                     onDamageDealt,
                     onEnemyKilled
@@ -100,8 +108,20 @@ class GlyphSpellRuntime(
             }
 
             GlyphType.METEOR -> {
+                val targetedRequest =
+                    requestForPriorityTarget(
+                        request = request,
+                        enemyManager = enemyManager,
+                        maximumRange =
+                            if (request.sourceWeapon.hasWeaponAbilityUpgrade) {
+                                METEOR_UPGRADED_TARGETING_RANGE
+                            } else {
+                                METEOR_TARGETING_RANGE
+                            }
+                    ) ?: return
+
                 castMeteor(
-                    request,
+                    targetedRequest,
                     enemyManager,
                     onDamageDealt,
                     onEnemyKilled
@@ -260,7 +280,11 @@ class GlyphSpellRuntime(
                     2.20f,
 
             worldHeight =
-                TSUNAMI_FRONT_LENGTH
+                if (wave.request.sourceWeapon.hasWeaponAbilityUpgrade) {
+                    TSUNAMI_UPGRADED_FRONT_LENGTH
+                } else {
+                    TSUNAMI_FRONT_LENGTH
+                }
         )
     }
 
@@ -312,10 +336,17 @@ class GlyphSpellRuntime(
                         DamageType.LIGHTNING
                 )
 
+        val upgraded =
+            request.sourceWeapon.hasWeaponAbilityUpgrade
+
         val innerDamage =
             (
                 baseDamage *
-                    LIGHTNING_INNER_DAMAGE_MULTIPLIER
+                    if (upgraded) {
+                        LIGHTNING_UPGRADED_INNER_DAMAGE_MULTIPLIER
+                    } else {
+                        LIGHTNING_INNER_DAMAGE_MULTIPLIER
+                    }
                 )
                 .roundToInt()
                 .coerceAtLeast(
@@ -378,7 +409,8 @@ class GlyphSpellRuntime(
                     )
                 }
 
-                distance <=
+                upgraded &&
+                    distance <=
                     LIGHTNING_OUTER_RADIUS -> {
 
                     val dealt =
@@ -462,7 +494,11 @@ class GlyphSpellRuntime(
                     request.centerY,
 
                 radius =
-                    LIGHTNING_OUTER_RADIUS,
+                    if (upgraded) {
+                        LIGHTNING_OUTER_RADIUS
+                    } else {
+                        LIGHTNING_INNER_RADIUS
+                    },
 
                 remainingSeconds =
                     PULSE_DURATION_SECONDS
@@ -490,7 +526,11 @@ class GlyphSpellRuntime(
                         damageType =
                             DamageType.FIRE
                     ) *
-                    METEOR_DAMAGE_MULTIPLIER
+                    if (request.sourceWeapon.hasWeaponAbilityUpgrade) {
+                        METEOR_UPGRADED_DAMAGE_MULTIPLIER
+                    } else {
+                        METEOR_DAMAGE_MULTIPLIER
+                    }
                 )
                 .roundToInt()
                 .coerceAtLeast(
@@ -657,6 +697,51 @@ class GlyphSpellRuntime(
             )
     }
 
+    private fun requestForPriorityTarget(
+        request: GlyphCastRequest,
+        enemyManager: EnemyManager,
+        maximumRange: Float
+    ): GlyphCastRequest? {
+        val rangeSquared = maximumRange * maximumRange
+        val candidates =
+            enemyManager.allEnemies
+                .asSequence()
+                .filter { enemy ->
+                    !enemy.isDead &&
+                        Vector2.dst2(
+                            request.centerX,
+                            request.centerY,
+                            enemy.centerX,
+                            enemy.centerY
+                        ) <= rangeSquared
+                }
+                .toList()
+
+        if (candidates.isEmpty()) return null
+
+        val bosses =
+            candidates.filter { enemy ->
+                enemy.type == EnemyType.MINI_BOSS ||
+                    enemy.type == EnemyType.FINAL_BOSS
+            }
+
+        val target =
+            (if (bosses.isNotEmpty()) bosses else candidates)
+                .minByOrNull { enemy ->
+                    Vector2.dst2(
+                        request.centerX,
+                        request.centerY,
+                        enemy.centerX,
+                        enemy.centerY
+                    )
+                } ?: return null
+
+        return request.copy(
+            centerX = target.centerX,
+            centerY = target.centerY
+        )
+    }
+
     private fun updateTsunami(
         delta: Float,
         enemyManager: EnemyManager,
@@ -696,7 +781,11 @@ class GlyphSpellRuntime(
                         damageType =
                             DamageType.WATER
                     ) *
-                    TSUNAMI_DAMAGE_MULTIPLIER
+                    if (wave.request.sourceWeapon.hasWeaponAbilityUpgrade) {
+                        TSUNAMI_UPGRADED_DAMAGE_MULTIPLIER
+                    } else {
+                        TSUNAMI_DAMAGE_MULTIPLIER
+                    }
                 )
                 .roundToInt()
                 .coerceAtLeast(
@@ -745,7 +834,11 @@ class GlyphSpellRuntime(
                     TSUNAMI_FRONT_THICKNESS /
                     2f ||
                     sideDistance >
-                    TSUNAMI_FRONT_LENGTH /
+                    (if (wave.request.sourceWeapon.hasWeaponAbilityUpgrade) {
+                        TSUNAMI_UPGRADED_FRONT_LENGTH
+                    } else {
+                        TSUNAMI_FRONT_LENGTH
+                    }) /
                     2f
                 ) {
                     return@forEach
@@ -816,7 +909,11 @@ class GlyphSpellRuntime(
                             wave.direction.y,
 
                         strength =
-                            TSUNAMI_KNOCKBACK_STRENGTH
+                            if (wave.request.sourceWeapon.hasWeaponAbilityUpgrade) {
+                                TSUNAMI_UPGRADED_KNOCKBACK_STRENGTH
+                            } else {
+                                TSUNAMI_KNOCKBACK_STRENGTH
+                            }
                     )
                 }
             }
@@ -933,6 +1030,9 @@ class GlyphSpellRuntime(
             240f
 
         private const val LIGHTNING_INNER_DAMAGE_MULTIPLIER =
+            7.5f
+
+        private const val LIGHTNING_UPGRADED_INNER_DAMAGE_MULTIPLIER =
             10.45f
 
         private const val LIGHTNING_OUTER_DAMAGE_MULTIPLIER =
@@ -944,25 +1044,43 @@ class GlyphSpellRuntime(
         private const val LIGHTNING_CHAIN_RANGE =
             240f
 
+        private const val CALL_LIGHTNING_TARGETING_RANGE =
+            750f
+
         private const val METEOR_RADIUS =
             185f
 
         private const val METEOR_DAMAGE_MULTIPLIER =
+            10f
+
+        private const val METEOR_UPGRADED_DAMAGE_MULTIPLIER =
             15.55f
 
+        private const val METEOR_TARGETING_RANGE =
+            550f
+
+        private const val METEOR_UPGRADED_TARGETING_RANGE =
+            700f
+
         private const val METEOR_BURNED_SECONDS =
-            5f
+            3f
 
         private const val TSUNAMI_SPEED =
             620f
 
         private const val TSUNAMI_FRONT_LENGTH =
+            550f
+
+        private const val TSUNAMI_UPGRADED_FRONT_LENGTH =
             760f
 
         private const val TSUNAMI_FRONT_THICKNESS =
             118f
 
         private const val TSUNAMI_DAMAGE_MULTIPLIER =
+            7.5f
+
+        private const val TSUNAMI_UPGRADED_DAMAGE_MULTIPLIER =
             11.11f
 
         private const val TSUNAMI_WET_SECONDS =
@@ -970,5 +1088,8 @@ class GlyphSpellRuntime(
 
         private const val TSUNAMI_KNOCKBACK_STRENGTH =
             30f
+
+        private const val TSUNAMI_UPGRADED_KNOCKBACK_STRENGTH =
+            50f
     }
 }

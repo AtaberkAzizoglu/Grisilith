@@ -92,7 +92,7 @@ class SingularityRuntime(
                     request,
 
                 remainingActiveSeconds =
-                    ACTIVE_DURATION_SECONDS
+                    activeDurationSeconds(request)
             )
 
         return true
@@ -237,7 +237,7 @@ class SingularityRuntime(
                 singularity.request.centerY,
 
             radius =
-                BASE_RADIUS,
+                pullRadius(singularity),
 
             elapsedSeconds =
                 singularity.elapsedSeconds,
@@ -400,7 +400,7 @@ class SingularityRuntime(
                             INNER_ENEMY_PULL_SPEED
 
                         distance <=
-                            OUTER_PULL_RADIUS ->
+                            pullRadius(singularity) ->
                             OUTER_ENEMY_PULL_SPEED
 
                         else ->
@@ -469,12 +469,14 @@ class SingularityRuntime(
         singularity.tickAccumulator +=
             delta
 
+        val damageTickSeconds = damageTickSeconds(singularity)
+
         while (
             singularity.tickAccumulator >=
-            DAMAGE_TICK_SECONDS
+            damageTickSeconds
         ) {
             singularity.tickAccumulator -=
-                DAMAGE_TICK_SECONDS
+                damageTickSeconds
 
             applyDamageTick(
                 singularity =
@@ -541,7 +543,7 @@ class SingularityRuntime(
                         PLAYER_PULL_RATIO
 
                 distance <=
-                    OUTER_PULL_RADIUS ->
+                    pullRadius(singularity) ->
                     OUTER_ENEMY_PULL_SPEED *
                         PLAYER_PULL_RATIO
 
@@ -672,12 +674,12 @@ class SingularityRuntime(
 
         val explosionRadius =
             (
-                BASE_EXPLOSION_RADIUS +
+                baseExplosionRadius(singularity) +
                     deathCount *
                     EXPLOSION_RADIUS_GROWTH_PER_DEATH
                 )
                 .coerceAtMost(
-                    MAXIMUM_EXPLOSION_RADIUS
+                    maximumExplosionRadius(singularity)
                 )
 
         val explosionDamage =
@@ -848,21 +850,49 @@ class SingularityRuntime(
         }
     }
 
+    private fun isUpgraded(singularity: ActiveSingularity): Boolean =
+        singularity.request.sourceWeapon.hasWeaponAbilityUpgrade
+
+    private fun activeDurationSeconds(request: GlyphCastRequest): Float =
+        if (request.sourceWeapon.hasWeaponAbilityUpgrade) {
+            UPGRADED_ACTIVE_DURATION_SECONDS
+        } else {
+            ACTIVE_DURATION_SECONDS
+        }
+
+    private fun pullRadius(singularity: ActiveSingularity): Float =
+        if (isUpgraded(singularity)) UPGRADED_PULL_RADIUS else BASE_RADIUS
+
+    private fun damageTickSeconds(singularity: ActiveSingularity): Float =
+        if (isUpgraded(singularity)) UPGRADED_DAMAGE_TICK_SECONDS else DAMAGE_TICK_SECONDS
+
+    private fun baseExplosionRadius(singularity: ActiveSingularity): Float =
+        if (isUpgraded(singularity)) UPGRADED_BASE_EXPLOSION_RADIUS else BASE_EXPLOSION_RADIUS
+
+    private fun maximumExplosionRadius(singularity: ActiveSingularity): Float =
+        if (isUpgraded(singularity)) UPGRADED_MAXIMUM_EXPLOSION_RADIUS else MAXIMUM_EXPLOSION_RADIUS
+
     companion object {
 
         private const val ACTIVE_DURATION_SECONDS =
+            10f
+
+        private const val UPGRADED_ACTIVE_DURATION_SECONDS =
             13f
 
         private const val COLLAPSE_DURATION_SECONDS =
             1.20f
 
         private const val DAMAGE_TICK_SECONDS =
+            0.333f
+
+        private const val UPGRADED_DAMAGE_TICK_SECONDS =
             0.25f
 
         private const val BASE_RADIUS =
             222f
 
-        private const val OUTER_PULL_RADIUS =
+        private const val UPGRADED_PULL_RADIUS =
             300f
 
         private const val INNER_ENEMY_PULL_SPEED =
@@ -878,12 +908,18 @@ class SingularityRuntime(
             0.00020f
 
         private const val BASE_EXPLOSION_RADIUS =
+            250f
+
+        private const val UPGRADED_BASE_EXPLOSION_RADIUS =
             300f
 
         private const val EXPLOSION_RADIUS_GROWTH_PER_DEATH =
             33f
 
         private const val MAXIMUM_EXPLOSION_RADIUS =
+            750f
+
+        private const val UPGRADED_MAXIMUM_EXPLOSION_RADIUS =
             1500f
 
         private const val EXPLOSION_DAMAGE_PER_DEATH_MULTIPLIER =

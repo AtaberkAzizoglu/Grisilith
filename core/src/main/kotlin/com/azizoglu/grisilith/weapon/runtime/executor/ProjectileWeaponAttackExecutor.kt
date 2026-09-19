@@ -98,8 +98,9 @@ class ProjectileWeaponAttackExecutor(
         private const val CHALK_DUST_ANGLE_STEP =
             10f
 
+        /* Lv.4: three projectiles, each with a 30% damage penalty. */
         private const val CHALK_DUST_DAMAGE_MULTIPLIER =
-            0.45f
+            0.70f
 
         private const val CHALK_DUST_WALL_BOUNCES =
             2
@@ -147,6 +148,9 @@ class ProjectileWeaponAttackExecutor(
         val weaponId =
             definition.id.value
 
+        val attackNumber =
+            context.weapon.registerNormalAttack()
+
         val isUpgradedSteamWand =
             weaponId == STEAM_WAND_ID &&
                 context.weapon
@@ -157,7 +161,8 @@ class ProjectileWeaponAttackExecutor(
                 context = context,
                 targetX = target.centerX,
                 targetY = target.centerY,
-                effectiveRange = effectiveRange
+                effectiveRange = effectiveRange,
+                attackNumber = attackNumber
             )
 
             return
@@ -178,94 +183,6 @@ class ProjectileWeaponAttackExecutor(
             )
 
             return
-        }
-
-        val isHeavyBoltsWeapon =
-            context.weapon
-                .unlockedAbility
-                ?.id ==
-                DefaultWeaponAbilities
-                    .HEAVY_BOLTS_ID
-
-        if (isHeavyBoltsWeapon) {
-            val attackNumber =
-                context.weapon
-                    .registerNormalAttack()
-
-            if (
-                attackNumber %
-                DefaultWeaponAbilities
-                    .HEAVY_BOLT_ATTACK_INTERVAL ==
-                0
-            ) {
-                createProjectile(
-                    context =
-                        context,
-
-                    targetX =
-                        target.centerX,
-
-                    targetY =
-                        target.centerY,
-
-                    damageMultiplier =
-                        DefaultWeaponAbilities
-                            .HEAVY_BOLT_DAMAGE_MULTIPLIER,
-
-                    travelRangeMultiplier =
-                        HEAVY_BOLT_TRAVEL_RANGE_MULTIPLIER,
-
-                    forcedMaximumTargets =
-                        Int.MAX_VALUE,
-
-                    forcedDamageMultiplierAfterFirstHit =
-                        1f,
-
-                    sizeMultiplier =
-                        DefaultWeaponAbilities
-                            .HEAVY_BOLT_SIZE_MULTIPLIER,
-
-                    activationDelaySeconds =
-                        DefaultWeaponAbilities
-                            .HEAVY_BOLT_CAST_SECONDS,
-
-                    isHeavyBolt =
-                        true,
-
-                    firstTargetBossDamageMultiplier =
-                        DefaultWeaponAbilities
-                            .HEAVY_BOLT_FIRST_BOSS_MULTIPLIER,
-
-                    carryFirstNormalTarget =
-                        true
-                )
-
-                return
-            }
-        }
-
-        val isLeisurelyShotWeapon =
-            context.weapon
-                .unlockedAbility
-                ?.id ==
-                DefaultWeaponAbilities
-                    .LEISURELY_SHOT_ID
-
-        if (isLeisurelyShotWeapon) {
-            val attackNumber =
-                context.weapon
-                    .registerNormalAttack()
-
-            if (attackNumber % 4 == 0) {
-                executeLeisurelyShot(
-                    context = context,
-                    targetX = target.centerX,
-                    targetY = target.centerY,
-                    effectiveRange = effectiveRange
-                )
-
-                return
-            }
         }
 
         val projectileCount =
@@ -335,12 +252,9 @@ class ProjectileWeaponAttackExecutor(
         context: WeaponAttackContext,
         targetX: Float,
         targetY: Float,
-        effectiveRange: Float
+        effectiveRange: Float,
+        attackNumber: Int
     ) {
-        val attackNumber =
-            context.weapon
-                .registerNormalAttack()
-
         val isFanAttack =
             attackNumber % 3 == 0
 

@@ -109,6 +109,10 @@ object OrbOfSkyDefinition {
                 DefaultWeaponAbilities
                     .vortexPull,
 
+            upgradedWeaponAbility =
+                DefaultWeaponAbilities
+                    .vortexPullUpgraded,
+
             initialUnlockState =
                 ContentUnlockState.UNLOCKED
         )

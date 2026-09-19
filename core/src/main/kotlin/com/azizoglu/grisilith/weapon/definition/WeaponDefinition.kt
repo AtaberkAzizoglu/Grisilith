@@ -119,13 +119,16 @@ data class WeaponDefinition(
      */
     val maximumInventoryCopies: Int? = null,
 
-    /*
-     * Level 5'te açılan silaha özgü yetenek.
-     *
-     * Geçiş sürecinde null bırakılabilir. Weapon Skills
-     * paketlerinde silahlar tek tek bu alana bağlanacaktır.
-     */
+    /* Level 3'te açılan silaha özgü yetenek. */
     val weaponAbility:
+    WeaponAbilityDefinition? = null,
+
+    /*
+     * Yalnızca Level 5'te davranışı/aktivasyon türü tamamen değişen
+     * silahlar için alternatif tanım. Çoğu silah aynı tanımı kullanır ve
+     * gücü WeaponInstance.hasWeaponAbilityUpgrade üzerinden belirlenir.
+     */
+    val upgradedWeaponAbility:
     WeaponAbilityDefinition? = null,
 
     override val initialUnlockState:
@@ -272,17 +275,24 @@ data class WeaponDefinition(
         }
 
         require(
-            levelStats.getValue(3)
+            levelStats.getValue(4)
                 .basicAttackUpgraded
         ) {
-            "Weapon $id must unlock its basic attack upgrade at level 3."
+            "Weapon $id must unlock its basic attack upgrade at level 4."
+        }
+
+        require(
+            levelStats.getValue(3)
+                .weaponAbilityUnlocked
+        ) {
+            "Weapon $id must unlock its ability at level 3."
         }
 
         require(
             levelStats.getValue(5)
-                .weaponAbilityUnlocked
+                .weaponAbilityUpgraded
         ) {
-            "Weapon $id must unlock its ability at level 5."
+            "Weapon $id must upgrade its ability at level 5."
         }
 
         maximumInventoryCopies?.let { maximumCopies ->

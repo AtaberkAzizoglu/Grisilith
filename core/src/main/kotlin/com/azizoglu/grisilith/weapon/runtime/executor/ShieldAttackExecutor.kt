@@ -28,7 +28,7 @@ class ShieldAttackExecutor(
 
     companion object {
         /*
-         * Lv.3 sonrasında Strength'in Shield
+         * Lv.4 sonrasında Strength'in Shield
          * hasarına küçük katkısı.
          */
         private const val UPGRADED_STRENGTH_SCALING =
@@ -125,7 +125,7 @@ class ShieldAttackExecutor(
         )
 
         /*
-         * Shield açısı Lv.3'te değişmiyor.
+         * Shield açısı Lv.4'te değişmiyor.
          * Geliştirme esas olarak menzil ve
          * Strength scaling kazandırıyor.
          */

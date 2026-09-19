@@ -30,7 +30,7 @@ enum class SummonType(
 
     KNIGHT_SPIRIT(
         displayName =
-            "Knight Spirit",
+            "Oathbreaker",
 
         faction =
             SummonCombatFaction.ROGUE,

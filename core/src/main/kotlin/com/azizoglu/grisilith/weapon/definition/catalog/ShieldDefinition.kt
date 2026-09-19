@@ -72,12 +72,10 @@ object ShieldDefinition {
 
 
 
-                        level3Range = 1.20f,
                         level4Range = 1.20f,
                         level5Range = 1.20f,
 
                         level2Knockback = 1.10f,
-                        level3Knockback = 1.20f,
                         level4Knockback = 1.20f,
                         level5Knockback = 1.20f,
 
@@ -112,6 +110,10 @@ object ShieldDefinition {
             weaponAbility =
                 DefaultWeaponAbilities
                     .defensiveLine,
+
+            upgradedWeaponAbility =
+                DefaultWeaponAbilities
+                    .defensiveLineBurst,
 
             initialUnlockState =
                 ContentUnlockState.UNLOCKED

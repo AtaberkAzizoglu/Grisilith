@@ -153,7 +153,7 @@ class WeaponRuntime(
                 false
 
             executor.execute(
-                WeaponAttackContext(
+                createAttackContext(
                     weapon = weapon,
 
                     weaponSlotIndex =
@@ -175,105 +175,7 @@ class WeaponRuntime(
                         onDamageDealt,
 
                     onEnemyKilled =
-                        onEnemyKilled,
-
-                    onWeaponHit = {
-                            hitEvent ->
-
-                        if (hitEvent.isCriticalHit) {
-                            ActiveItemEffects.onCriticalHit()
-                        }
-
-                        player.tryLifeSteal(
-                            isEligibleHit =
-                                hitEvent
-                                    .isLifeStealEligible
-                        )
-
-                        characterTraitRuntime
-                            .onWeaponHit(
-                                event = hitEvent,
-                                onDamageDealt =
-                                    onDamageDealt,
-                                onEnemyKilled =
-                                    onEnemyKilled
-                            )
-
-                        tamgaRuntimeManager
-                            .onWeaponHit(
-                                event =
-                                    hitEvent,
-
-                                onDamageDealt =
-                                    onDamageDealt,
-
-                                onEnemyKilled =
-                                    onEnemyKilled
-                            )
-                    },
-
-                    modifyWeaponDamage = {
-                            enemy,
-                            baseDamage ->
-
-                        val tamgaModifiedDamage =
-                            tamgaRuntimeManager
-                                .modifyWeaponDamage(
-                                    enemy = enemy,
-                                    baseDamage =
-                                        baseDamage
-                                )
-                                .coerceAtLeast(
-                                    1
-                                )
-
-                        val abilityMultiplier =
-                            abilityDamageMultiplierProvider(
-                                weapon,
-                                player,
-                                enemy
-                            )
-                                .coerceAtLeast(
-                                    0f
-                                ) *
-                                ActiveItemEffects
-                                    .abilityDamageMultiplier(weapon)
-
-                        val abilityModifiedDamage =
-                            (
-                                tamgaModifiedDamage *
-                                    abilityMultiplier
-                                )
-                                .roundToInt()
-                                .coerceAtLeast(
-                                    1
-                                )
-
-                        val relentlessModifiedDamage =
-                            applyRelentlessDamage(
-                                enemy = enemy,
-                                baseDamage = abilityModifiedDamage
-                            )
-
-                        characterTraitRuntime
-                            .modifyAttackDamage(
-                                relentlessModifiedDamage
-                            )
-                    },
-
-                    modifyWeaponRange = {
-                            baseRange ->
-
-                        (baseRange +
-                            tamgaRuntimeManager
-                                .weaponRangeBonusPixels()) *
-                            ActiveItemEffects.weaponRangeMultiplier()
-                    },
-
-                    tryTriggerAutomaticAbility = {
-                        abilityRuntime
-                            .triggerAutomatic()
-                    }
+                        onEnemyKilled
                 )
             )
 
@@ -303,6 +205,100 @@ class WeaponRuntime(
                     )
             }
         }
+    }
+
+    fun executeAbilityAttack(
+        slotIndex: Int,
+        player: Player,
+        attackOriginX: Float,
+        attackOriginY: Float,
+        enemyManager: EnemyManager,
+        projectiles: MutableList<Projectile>,
+        onDamageDealt: (Int, String) -> Unit,
+        onEnemyKilled: (Enemy) -> Unit,
+        action: (WeaponAttackContext) -> Unit
+    ) {
+        action(
+            createAttackContext(
+                weapon = weapon,
+                weaponSlotIndex = slotIndex,
+                player = player,
+                attackOriginX = attackOriginX,
+                attackOriginY = attackOriginY,
+                enemyManager = enemyManager,
+                projectiles = projectiles,
+                onDamageDealt = onDamageDealt,
+                onEnemyKilled = onEnemyKilled
+            )
+        )
+    }
+
+    private fun createAttackContext(
+        weapon: WeaponInstance,
+        weaponSlotIndex: Int,
+        player: Player,
+        attackOriginX: Float,
+        attackOriginY: Float,
+        enemyManager: EnemyManager,
+        projectiles: MutableList<Projectile>,
+        onDamageDealt: (Int, String) -> Unit,
+        onEnemyKilled: (Enemy) -> Unit
+    ): WeaponAttackContext {
+        return WeaponAttackContext(
+            weapon = weapon,
+            weaponSlotIndex = weaponSlotIndex,
+            player = player,
+            attackOriginX = attackOriginX,
+            attackOriginY = attackOriginY,
+            enemyManager = enemyManager,
+            projectiles = projectiles,
+            onDamageDealt = onDamageDealt,
+            onEnemyKilled = onEnemyKilled,
+            onWeaponHit = { hitEvent ->
+                if (hitEvent.isCriticalHit) {
+                    ActiveItemEffects.onCriticalHit()
+                }
+                player.tryLifeSteal(hitEvent.isLifeStealEligible)
+                characterTraitRuntime.onWeaponHit(
+                    event = hitEvent,
+                    onDamageDealt = onDamageDealt,
+                    onEnemyKilled = onEnemyKilled
+                )
+                tamgaRuntimeManager.onWeaponHit(
+                    event = hitEvent,
+                    onDamageDealt = onDamageDealt,
+                    onEnemyKilled = onEnemyKilled
+                )
+            },
+            modifyWeaponDamage = { enemy, baseDamage ->
+                val tamgaModifiedDamage =
+                    tamgaRuntimeManager.modifyWeaponDamage(
+                        enemy = enemy,
+                        baseDamage = baseDamage
+                    ).coerceAtLeast(1)
+                val abilityMultiplier =
+                    abilityDamageMultiplierProvider(
+                        weapon,
+                        player,
+                        enemy
+                    ).coerceAtLeast(0f) *
+                        ActiveItemEffects.abilityDamageMultiplier(weapon)
+                val abilityModifiedDamage =
+                    (tamgaModifiedDamage * abilityMultiplier)
+                        .roundToInt()
+                        .coerceAtLeast(1)
+                characterTraitRuntime.modifyAttackDamage(
+                    applyRelentlessDamage(enemy, abilityModifiedDamage)
+                )
+            },
+            modifyWeaponRange = { baseRange ->
+                (baseRange + tamgaRuntimeManager.weaponRangeBonusPixels()) *
+                    ActiveItemEffects.weaponRangeMultiplier()
+            },
+            tryTriggerAutomaticAbility = {
+                abilityRuntime.triggerAutomatic()
+            }
+        )
     }
 
     private fun applyRelentlessDamage(

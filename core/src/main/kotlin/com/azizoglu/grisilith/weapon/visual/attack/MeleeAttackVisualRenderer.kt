@@ -63,6 +63,17 @@ class MeleeAttackVisualRenderer {
             val height =
                 event.worldHeight
 
+            val sourceFrameCount =
+                if (event.kind == MeleeAttackVisualKind.FIRE_BEAM) 4 else 1
+
+            val sourceFrameIndex =
+                (event.progress * sourceFrameCount)
+                    .toInt()
+                    .coerceIn(0, sourceFrameCount - 1)
+
+            val sourceWidth =
+                texture.width / sourceFrameCount
+
             batch.draw(
                 texture,
                 event.centerX -
@@ -80,9 +91,9 @@ class MeleeAttackVisualRenderer {
                 1f,
                 1f,
                 event.rotationDegrees,
+                sourceFrameIndex * sourceWidth,
                 0,
-                0,
-                texture.width,
+                sourceWidth,
                 texture.height,
                 false,
                 false
@@ -110,6 +121,12 @@ class MeleeAttackVisualRenderer {
 
                 MeleeAttackVisualKind.DOUBLE_SLASH_X ->
                     DOUBLE_X_FRAMES
+
+                MeleeAttackVisualKind.RAPID_STROKES_UPGRADED ->
+                    RAPID_STROKES_FRAMES
+
+                MeleeAttackVisualKind.FIRE_BEAM ->
+                    FIRE_BEAM_FRAMES
 
                 MeleeAttackVisualKind.LONGSWORD_CONE ->
                     LONGSWORD_FRAMES
@@ -229,6 +246,23 @@ class MeleeAttackVisualRenderer {
                 ROOT + "double_x_5.png",
                 ROOT + "double_x_6.png",
                 ROOT + "double_x_7.png"
+            )
+
+        private val RAPID_STROKES_FRAMES =
+            arrayOf(
+                "weapons_animations/weapon_skills/rapid_strokes/rapid_strokes_0.png",
+                "weapons_animations/weapon_skills/rapid_strokes/rapid_strokes_1.png",
+                "weapons_animations/weapon_skills/rapid_strokes/rapid_strokes_2.png",
+                "weapons_animations/weapon_skills/rapid_strokes/rapid_strokes_3.png",
+                "weapons_animations/weapon_skills/rapid_strokes/rapid_strokes_4.png",
+                "weapons_animations/weapon_skills/rapid_strokes/rapid_strokes_5.png",
+                "weapons_animations/weapon_skills/rapid_strokes/rapid_strokes_6.png",
+                "weapons_animations/weapon_skills/rapid_strokes/rapid_strokes_7.png"
+            )
+
+        private val FIRE_BEAM_FRAMES =
+            arrayOf(
+                "weapons_animations/weapon_skills/fire_beam/fire_beam.png"
             )
 
         private val LONGSWORD_FRAMES =

@@ -85,7 +85,7 @@ class LongswordAttackExecutor(
                 .hasBasicAttackUpgrade
 
         /*
-         * Lv.3+ already receives a larger gameplay range through level stats.
+         * Lv.4+ receives a larger gameplay range through level stats.
          * The visual reads the SAME effectiveRange so its size grows with it.
          */
         MeleeAttackVisualManager.spawn(

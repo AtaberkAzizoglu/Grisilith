@@ -850,10 +850,6 @@ class Player(
         shapeRenderer: ShapeRenderer,
         renderBody: Boolean = true
     ) {
-        renderDefensiveLineGlow(
-            shapeRenderer
-        )
-
         if (renderBody) {
             shapeRenderer.color =
                 if (health.isDead) {
@@ -1058,80 +1054,6 @@ class Player(
                 0f,
                 maximumY
             )
-    }
-
-
-    private fun renderDefensiveLineGlow(
-        shapeRenderer: ShapeRenderer
-    ) {
-        val currentBonus =
-            stats.weaponSkillBonus(
-                StatType.ARMOR_CLASS
-            )
-
-        if (currentBonus <= 0) {
-            return
-        }
-
-        val maximumBonus =
-            stats.weaponSkillBonusLimit(
-                StatType.ARMOR_CLASS
-            )
-
-        val isMaximum =
-            maximumBonus > 0 &&
-                currentBonus >= maximumBonus
-
-        shapeRenderer.color =
-            if (isMaximum) {
-                Color(
-                    0.48f,
-                    0.48f,
-                    0.52f,
-                    0.90f
-                )
-            } else {
-                Color(
-                    0.78f,
-                    0.78f,
-                    0.82f,
-                    0.72f
-                )
-            }
-
-        val padding =
-            if (isMaximum) 7f else 5f
-
-        val thickness =
-            if (isMaximum) 4f else 3f
-
-        shapeRenderer.rect(
-            position.x - padding,
-            position.y - padding,
-            size + padding * 2f,
-            thickness
-        )
-
-        shapeRenderer.rect(
-            position.x - padding,
-            position.y + size + padding - thickness,
-            size + padding * 2f,
-            thickness
-        )
-
-        shapeRenderer.rect(
-            position.x - padding,
-            position.y - padding,
-            thickness,
-            size + padding * 2f
-        )
-
-        shapeRenderer.rect(
-            position.x + size + padding - thickness,
-            position.y - padding,
-            thickness,
-            size + padding * 2f
-        )
     }
 
 

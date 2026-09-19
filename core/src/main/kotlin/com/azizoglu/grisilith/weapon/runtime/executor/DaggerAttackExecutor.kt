@@ -65,62 +65,12 @@ class DaggerAttackExecutor(
                     effectiveThrowRange
             ) ?: return
 
-        val attackNumber =
-            context.weapon
-                .registerNormalAttack()
+        context.weapon.registerNormalAttack()
 
-        val shouldRepeatAttack =
-            context.weapon
-                .hasBasicAttackUpgrade &&
-                attackNumber % 3 == 0
-
-        /*
-         * Üçüncü saldırıda ilk bıçak hafifçe
-         * sola yönelir. Normal saldırıda açı 0.
-         */
         executeAttackAgainstTarget(
             context = context,
-            target = target,
-            throwAngleOffsetDegrees =
-                if (shouldRepeatAttack) {
-                    -4f
-                } else {
-                    0f
-                }
+            target = target
         )
-
-        if (shouldRepeatAttack) {
-            /*
-             * İlk saldırı hedefi öldürmüş olabilir.
-             * İkinci saldırı için yeniden geçerli
-             * bir hedef seçilir.
-             */
-            val secondTarget =
-                targetSelector.selectTarget(
-                    targetingType =
-                        definition.targetingType,
-
-                    player =
-                        context.player,
-
-                    enemyManager =
-                        context.enemyManager,
-
-
-                originX = context.attackOriginX,
-                originY = context.attackOriginY,
-                    maximumRange =
-                        effectiveThrowRange
-                )
-
-            if (secondTarget != null) {
-                executeAttackAgainstTarget(
-                    context = context,
-                    target = secondTarget,
-                    throwAngleOffsetDegrees = 4f
-                )
-            }
-        }
     }
 
     private fun executeAttackAgainstTarget(
@@ -176,32 +126,7 @@ class DaggerAttackExecutor(
         isCriticalHit: Boolean
     ): AbilityDamageResult {
 
-        if (
-            !isCriticalHit ||
-            context.weapon
-                .unlockedAbility
-                ?.id !=
-            DefaultWeaponAbilities
-                .ASSASSINATE_ID
-        ) {
-            return AbilityDamageResult(
-                damage =
-                    baseDamage
-                        .coerceAtLeast(
-                            1
-                        ),
-
-                abilityTriggered =
-                    false
-            )
-        }
-
-        val activated =
-            context.triggerAutomaticAbility()
-
-        if (
-            !activated
-        ) {
+        if (!isCriticalHit || !context.weapon.hasBasicAttackUpgrade) {
             return AbilityDamageResult(
                 damage =
                     baseDamage
@@ -219,7 +144,7 @@ class DaggerAttackExecutor(
                 (
                     baseDamage *
                         DefaultWeaponAbilities
-                            .ASSASSINATE_DAMAGE_MULTIPLIER
+                            .DAGGER_BASIC_CRITICAL_DAMAGE_MULTIPLIER
                     )
                     .roundToInt()
                     .coerceAtLeast(
@@ -522,20 +447,10 @@ class DaggerAttackExecutor(
                         damageCalculator
                             .criticalDamageMultiplier()
 
-                    val canUseAssassinate =
-                        context.weapon
-                            .unlockedAbility
-                            ?.id ==
-                            DefaultWeaponAbilities
-                                .ASSASSINATE_ID
-
-                    if (
-                        canUseAssassinate &&
-                        context.triggerAutomaticAbility()
-                    ) {
+                    if (context.weapon.hasBasicAttackUpgrade) {
                         baseCriticalMultiplier *
                             DefaultWeaponAbilities
-                                .ASSASSINATE_DAMAGE_MULTIPLIER
+                                .DAGGER_BASIC_CRITICAL_DAMAGE_MULTIPLIER
                     } else {
                         baseCriticalMultiplier
                     }

@@ -72,7 +72,6 @@ object LongswordDefinition {
 
 
 
-                        level3Range = 1.30f,
                         level4Range = 1.30f,
                         level5Range = 1.30f,
 
@@ -99,7 +98,7 @@ object LongswordDefinition {
 
             weaponAbility =
                 DefaultWeaponAbilities
-                    .executioner,
+                    .airSlash,
 
             initialUnlockState =
                 ContentUnlockState.UNLOCKED

@@ -70,11 +70,10 @@ object CrossbowDefinition {
 
 
                         /*
-                         * Lv.3 sonrasındaki delme
+                         * Lv.4 sonrasındaki delme
                          * mesafesi artışının geçici
                          * sayısal karşılığı.
                          */
-                        level3Range = 1.15f,
                         level4Range = 1.15f,
                         level5Range = 1.15f,
 

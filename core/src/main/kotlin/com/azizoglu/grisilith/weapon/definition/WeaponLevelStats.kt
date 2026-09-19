@@ -29,14 +29,19 @@ data class WeaponLevelStats(
         emptyList(),
 
     /*
-     * Level 3'te normal saldırı geliştirmesi açılır.
+     * Level 4'te normal saldırı geliştirmesi açılır.
      */
     val basicAttackUpgraded: Boolean = false,
 
     /*
-     * Level 5'te silaha özgü yetenek açılır.
+     * Level 3'te silaha özgü yetenek açılır.
      */
-    val weaponAbilityUnlocked: Boolean = false
+    val weaponAbilityUnlocked: Boolean = false,
+
+    /*
+     * Level 5'te açılmış yeteneğin güçlü sürümü kullanılır.
+     */
+    val weaponAbilityUpgraded: Boolean = false
 ) {
     init {
         require(level in 1..5) {
@@ -50,14 +55,20 @@ data class WeaponLevelStats(
         require(additionalTargets >= 0)
 
         if (basicAttackUpgraded) {
-            require(level >= 3) {
-                "Basic attack upgrade cannot unlock before level 3."
+            require(level >= 4) {
+                "Basic attack upgrade cannot unlock before level 4."
             }
         }
 
         if (weaponAbilityUnlocked) {
-            require(level >= 5) {
-                "Weapon ability cannot unlock before level 5."
+            require(level >= 3) {
+                "Weapon ability cannot unlock before level 3."
+            }
+        }
+
+        if (weaponAbilityUpgraded) {
+            require(level >= 5 && weaponAbilityUnlocked) {
+                "Weapon ability upgrade requires an unlocked level 5 ability."
             }
         }
     }

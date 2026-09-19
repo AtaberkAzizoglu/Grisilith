@@ -21,6 +21,52 @@ class ShortswordAttackExecutor(
     WeaponTargetSelector
 ) : WeaponAttackExecutor {
 
+    fun executeRapidStroke(
+        context: WeaponAttackContext,
+        target: Enemy,
+        visualSizeMultiplier: Float
+    ) {
+        if (target.isDead) return
+
+        val direction = Vector2(
+            target.centerX - context.attackOriginX,
+            target.centerY - context.attackOriginY
+        )
+        if (direction.isZero) direction.set(1f, 0f)
+        direction.nor()
+
+        val attackAngle = MathUtils.atan2(direction.y, direction.x) *
+            MathUtils.radiansToDegrees
+        val upgraded = context.weapon.hasWeaponAbilityUpgrade
+        val lineLength = if (context.weapon.hasBasicAttackUpgrade) {
+            UPGRADED_LINE_LENGTH
+        } else {
+            NORMAL_LINE_LENGTH
+        }
+
+        MeleeAttackVisualManager.spawn(
+            kind = if (upgraded) {
+                MeleeAttackVisualKind.RAPID_STROKES_UPGRADED
+            } else if (context.weapon.hasBasicAttackUpgrade) {
+                MeleeAttackVisualKind.DOUBLE_SLASH_X
+            } else {
+                MeleeAttackVisualKind.DOUBLE_SLASH
+            },
+            centerX = target.centerX,
+            centerY = target.centerY,
+            rotationDegrees = attackAngle,
+            worldWidth = lineLength * visualSizeMultiplier,
+            worldHeight = lineLength * visualSizeMultiplier,
+            durationSeconds = 0.24f
+        )
+
+        if (context.weapon.hasBasicAttackUpgrade) {
+            executeCrossedSlash(context, target, direction, visualSizeMultiplier)
+        } else {
+            executeSingleSlash(context, target, direction, visualSizeMultiplier)
+        }
+    }
+
     companion object {
         /*
          * Geçici prototip ölçüleri.
@@ -164,7 +210,8 @@ class ShortswordAttackExecutor(
     private fun executeSingleSlash(
         context: WeaponAttackContext,
         primaryTarget: Enemy,
-        playerToTarget: Vector2
+        playerToTarget: Vector2,
+        sizeMultiplier: Float = 1f
     ) {
         /*
          * Normal saldırı hedefin üzerinde,
@@ -202,7 +249,7 @@ class ShortswordAttackExecutor(
                 lineDirection =
                     slashDirection,
                 lineLength =
-                    NORMAL_LINE_LENGTH
+                    NORMAL_LINE_LENGTH * sizeMultiplier
             )
 
         targets.forEach { enemy ->
@@ -225,10 +272,11 @@ class ShortswordAttackExecutor(
     private fun executeCrossedSlash(
         context: WeaponAttackContext,
         primaryTarget: Enemy,
-        playerToTarget: Vector2
+        playerToTarget: Vector2,
+        sizeMultiplier: Float = 1f
     ) {
         /*
-         * Lv.3:
+         * Lv.4:
          * Hedef merkezli iki çapraz çizgi.
          */
         val firstDirection =
@@ -251,7 +299,7 @@ class ShortswordAttackExecutor(
             lineDirection =
                 firstDirection,
             lineLength =
-                UPGRADED_LINE_LENGTH,
+                UPGRADED_LINE_LENGTH * sizeMultiplier,
             upgraded = true
         )
 
@@ -263,7 +311,7 @@ class ShortswordAttackExecutor(
             lineDirection =
                 secondDirection,
             lineLength =
-                UPGRADED_LINE_LENGTH,
+                UPGRADED_LINE_LENGTH * sizeMultiplier,
             upgraded = true
         )
 
@@ -277,7 +325,7 @@ class ShortswordAttackExecutor(
                 lineDirection =
                     firstDirection,
                 lineLength =
-                    UPGRADED_LINE_LENGTH
+                    UPGRADED_LINE_LENGTH * sizeMultiplier
             )
 
         val secondLineTargets =
@@ -290,7 +338,7 @@ class ShortswordAttackExecutor(
                 lineDirection =
                     secondDirection,
                 lineLength =
-                    UPGRADED_LINE_LENGTH
+                    UPGRADED_LINE_LENGTH * sizeMultiplier
             )
 
         /*
@@ -310,7 +358,7 @@ class ShortswordAttackExecutor(
 
         uniqueTargets.forEach { enemy ->
             /*
-             * Lv.3 saldırısında ana hedef ve
+             * Lv.4 saldırısında ana hedef ve
              * çizgilere değen diğer hedefler
              * tam hasar alır.
              */

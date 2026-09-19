@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.weapon.skill
 
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.weapon.skill.area.PersistentArea
 import com.azizoglu.grisilith.weapon.skill.area.PersistentAreaAnchor
@@ -98,7 +99,8 @@ class AcidicPoolRuntime(
     fun tryBegin(
         playerCenterX: Float,
         playerCenterY: Float,
-        enemies: List<Enemy>
+        enemies: List<Enemy>,
+        upgraded: Boolean
     ): Boolean {
 
         if (isActive) {
@@ -106,8 +108,11 @@ class AcidicPoolRuntime(
         }
 
         val placementRangeSquared =
-            DefaultWeaponAbilities
-                .ACIDIC_POOL_PLACEMENT_RANGE
+            (if (upgraded) {
+                DefaultWeaponAbilities.ACIDIC_POOL_UPGRADED_PLACEMENT_RANGE
+            } else {
+                DefaultWeaponAbilities.ACIDIC_POOL_PLACEMENT_RANGE
+            })
                 .let {
                         range ->
 
@@ -122,7 +127,7 @@ class AcidicPoolRuntime(
          * Alan, menzildeki en yakın canlı düşmanın
          * merkezi üzerinde açılır.
          */
-        val target =
+        val candidates =
             enemies
                 .asSequence()
                 .filter {
@@ -147,6 +152,16 @@ class AcidicPoolRuntime(
                     distanceSquared <=
                         placementRangeSquared
                 }
+                .toList()
+
+        val bossCandidates =
+            candidates.filter { (enemy, _) ->
+                enemy.type == EnemyType.MINI_BOSS ||
+                    enemy.type == EnemyType.FINAL_BOSS
+            }
+
+        val target =
+            (if (bossCandidates.isNotEmpty()) bossCandidates else candidates)
                 .minByOrNull {
                         (_, distanceSquared) ->
 
@@ -171,8 +186,11 @@ class AcidicPoolRuntime(
                         .ACIDIC_POOL_RADIUS,
 
                 durationSeconds =
-                    DefaultWeaponAbilities
-                        .ACIDIC_POOL_DURATION_SECONDS,
+                    if (upgraded) {
+                        DefaultWeaponAbilities.ACIDIC_POOL_UPGRADED_DURATION_SECONDS
+                    } else {
+                        DefaultWeaponAbilities.ACIDIC_POOL_DURATION_SECONDS
+                    },
 
                 tickIntervalSeconds =
                     DefaultWeaponAbilities

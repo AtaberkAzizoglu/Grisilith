@@ -116,6 +116,10 @@ object AmuletOfTrollKingDefinition {
                 DefaultWeaponAbilities
                     .acidicPool,
 
+            upgradedWeaponAbility =
+                DefaultWeaponAbilities
+                    .acidicPoolUpgraded,
+
             initialUnlockState =
                 ContentUnlockState.UNLOCKED
         )

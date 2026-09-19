@@ -64,7 +64,8 @@ class StaticCloudsRuntime(
             visualTimeSeconds
 
     fun tryBegin(
-        player: Player
+        player: Player,
+        upgraded: Boolean
     ): Boolean {
         return areaRuntime.begin(
             PersistentArea(
@@ -82,8 +83,11 @@ class StaticCloudsRuntime(
                         .STATIC_CLOUDS_RADIUS,
 
                 durationSeconds =
-                    DefaultWeaponAbilities
-                        .STATIC_CLOUDS_DURATION_SECONDS,
+                    if (upgraded) {
+                        DefaultWeaponAbilities.STATIC_CLOUDS_UPGRADED_DURATION_SECONDS
+                    } else {
+                        DefaultWeaponAbilities.STATIC_CLOUDS_DURATION_SECONDS
+                    },
 
                 tickIntervalSeconds =
                     DefaultWeaponAbilities

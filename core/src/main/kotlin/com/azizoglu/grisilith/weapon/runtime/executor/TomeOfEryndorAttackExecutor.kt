@@ -1,6 +1,5 @@
 package com.azizoglu.grisilith.weapon.runtime.executor
 
-import com.azizoglu.grisilith.combat.debug.CombatDebugVisualManager
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
@@ -13,6 +12,9 @@ import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
 import com.azizoglu.grisilith.statistics.PlayerStats
+import com.badlogic.gdx.math.MathUtils
+import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualKind
+import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualManager
 
 class TomeOfEryndorAttackExecutor(
     private val damageCalculator:
@@ -147,16 +149,18 @@ class TomeOfEryndorAttackExecutor(
                 attackDirection.y *
                 effectiveRange
 
-        /*
-         * Lv.3 saldırısı altın debug çizgisiyle
-         * gösterilir.
-         */
-        CombatDebugVisualManager.addLine(
-            startX = startX,
-            startY = startY,
-            endX = endX,
-            endY = endY,
-            upgraded = true
+        val attackAngle =
+            MathUtils.atan2(attackDirection.y, attackDirection.x) *
+                MathUtils.radiansToDegrees
+
+        MeleeAttackVisualManager.spawn(
+            kind = MeleeAttackVisualKind.FIRE_BEAM,
+            centerX = startX + attackDirection.x * effectiveRange * 0.5f,
+            centerY = startY + attackDirection.y * effectiveRange * 0.5f,
+            rotationDegrees = attackAngle,
+            worldWidth = effectiveRange,
+            worldHeight = BEAM_HALF_WIDTH * 3.4f,
+            durationSeconds = 0.28f
         )
 
         /*

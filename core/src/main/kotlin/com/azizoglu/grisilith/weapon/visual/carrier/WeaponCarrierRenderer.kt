@@ -1166,10 +1166,10 @@ class WeaponCarrierRenderer {
                 /*
                  * Exact requested rule:
                  * Level 1-2 = first parenthesis-like dual crescent.
-                 * Level 3+  = second X-shaped slash.
+                 * Level 4+  = second X-shaped slash.
                  */
                 MELEE_TEXTURE to
-                    if (level < 3) {
+                    if (level < 4) {
                         Rect(
                             770,
                             0,

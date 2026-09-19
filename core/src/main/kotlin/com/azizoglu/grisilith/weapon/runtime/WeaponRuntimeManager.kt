@@ -10,6 +10,9 @@ import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
 import com.azizoglu.grisilith.weapon.skill.DefensiveLineRuntime
 import com.azizoglu.grisilith.weapon.skill.DefensiveLineVisualRenderer
+import com.azizoglu.grisilith.weapon.skill.PhysicalWeaponAbilityRuntime
+import com.azizoglu.grisilith.weapon.definition.WeaponAttackPattern
+import com.azizoglu.grisilith.weapon.runtime.executor.ShortswordAttackExecutor
 import com.azizoglu.grisilith.map.MapObstacle
 import com.azizoglu.grisilith.weapon.skill.IgniteDashRuntime
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
@@ -94,6 +97,16 @@ class WeaponRuntimeManager(
 
     private val defensiveLineVisualRenderer =
         DefensiveLineVisualRenderer()
+
+    private val physicalWeaponAbilityRuntime =
+        PhysicalWeaponAbilityRuntime(
+            playerStats = playerStats,
+            damageCalculator = activeSkillDamageCalculator,
+            shortswordExecutor = executorFactory.executorFor(
+                WeaponAttackPattern.SHORT_SLASH_LINES
+            ) as ShortswordAttackExecutor,
+            defensiveLineRuntime = defensiveLineRuntime
+        )
 
     private val igniteDashRuntime =
         IgniteDashRuntime(
@@ -385,6 +398,16 @@ class WeaponRuntimeManager(
             player = player,
             equippedWeapons =
                 inventory.allWeapons()
+        )
+
+        physicalWeaponAbilityRuntime.update(
+            delta = delta,
+            player = player,
+            enemyManager = enemyManager,
+            projectiles = projectiles,
+            attackOriginForSlot = attackOriginForSlot,
+            onDamageDealt = onDamageDealt,
+            onEnemyKilled = onEnemyKilled
         )
 
         igniteDashRuntime.update(
@@ -768,6 +791,10 @@ class WeaponRuntimeManager(
             )
     }
 
+    fun releaseAimedPhysicalAbilityEarly(): Boolean =
+        physicalWeaponAbilityRuntime
+            .releaseAimedCastEarly()
+
     fun tryActivateAbilityInSlot(
         slotIndex: Int,
         player: Player,
@@ -797,6 +824,21 @@ class WeaponRuntimeManager(
         return when (
             ability.id
         ) {
+            DefaultWeaponAbilities.RAPID_STROKES_ID,
+            DefaultWeaponAbilities.AIR_SLASH_ID,
+            DefaultWeaponAbilities.SPIN_ATTACK_ID,
+            DefaultWeaponAbilities.DEFENSIVE_LINE_BURST_ID,
+            DefaultWeaponAbilities.KNIFE_SWARM_ID,
+            DefaultWeaponAbilities.LEISURELY_SHOT_ID,
+            DefaultWeaponAbilities.HEAVY_BOLTS_ID -> {
+                physicalWeaponAbilityRuntime.tryActivate(
+                    weapon = weapon,
+                    runtime = runtime,
+                    slotIndex = slotIndex,
+                    player = player
+                )
+            }
+
             DefaultWeaponAbilities
                 .IGNITE_DASH_ID -> {
 
@@ -967,7 +1009,10 @@ class WeaponRuntimeManager(
                         worldWidth,
 
                     worldHeight =
-                        worldHeight
+                        worldHeight,
+
+                    upgraded =
+                        weaponRuntime.weapon.hasWeaponAbilityUpgrade
                 )
 
         if (!areaStarted) {
@@ -1007,7 +1052,8 @@ class WeaponRuntimeManager(
         val areaStarted =
             staticCloudsRuntime
                 .tryBegin(
-                    player
+                    player,
+                    weaponRuntime.weapon.hasWeaponAbilityUpgrade
                 )
 
         if (!areaStarted) {
@@ -1062,7 +1108,10 @@ class WeaponRuntimeManager(
 
                     enemies =
                         enemyManager
-                            .allEnemies
+                            .allEnemies,
+
+                    upgraded =
+                        weaponRuntime.weapon.hasWeaponAbilityUpgrade
                 )
 
         if (!areaStarted) {
@@ -1494,8 +1543,11 @@ class WeaponRuntimeManager(
 
         if (
             MathUtils.random() >
-            DefaultWeaponAbilities
-                .STATIC_CLOUDS_STUN_CHANCE
+            if (staticCloudsWeapon?.hasWeaponAbilityUpgrade == true) {
+                DefaultWeaponAbilities.STATIC_CLOUDS_UPGRADED_STUN_CHANCE
+            } else {
+                DefaultWeaponAbilities.STATIC_CLOUDS_STUN_CHANCE
+            }
         ) {
             return
         }
@@ -1726,8 +1778,11 @@ class WeaponRuntimeManager(
                         damageType =
                             DamageType.NECROTIC
                     ) *
-                    DefaultWeaponAbilities
-                        .ERASING_SOULS_DAMAGE_MULTIPLIER
+                    if (sourceWeapon.hasWeaponAbilityUpgrade) {
+                        DefaultWeaponAbilities.ERASING_SOULS_UPGRADED_DAMAGE_MULTIPLIER
+                    } else {
+                        DefaultWeaponAbilities.ERASING_SOULS_DAMAGE_MULTIPLIER
+                    }
                 )
                 .roundToInt()
                 .coerceAtLeast(
@@ -1801,6 +1856,11 @@ class WeaponRuntimeManager(
         worldX: Float,
         worldY: Float
     ) {
+        physicalWeaponAbilityRuntime.updateAim(
+            worldX = worldX,
+            worldY = worldY
+        )
+
         igniteDashRuntime
             .updateAimPosition(
                 worldX =
@@ -1812,6 +1872,8 @@ class WeaponRuntimeManager(
     }
 
     fun cancelActiveAbilities() {
+        physicalWeaponAbilityRuntime.clear()
+
         impaleRuntime
             .cancel()
 
@@ -1853,6 +1915,11 @@ class WeaponRuntimeManager(
         shapeRenderer: ShapeRenderer,
         player: Player
     ) {
+        physicalWeaponAbilityRuntime.render(
+            shapeRenderer = shapeRenderer,
+            player = player
+        )
+
         igniteDashRuntime.render(
             shapeRenderer =
                 shapeRenderer,
@@ -2103,6 +2170,7 @@ class WeaponRuntimeManager(
     }
 
     fun resetAllTimers() {
+        physicalWeaponAbilityRuntime.clear()
         defensiveLineRuntime.reset()
         igniteDashRuntime.reset()
         vortexPullRuntime.clear()
@@ -2127,6 +2195,10 @@ class WeaponRuntimeManager(
             .forEach { runtime ->
                 runtime.resetTimer()
             }
+    }
+
+    fun dispose() {
+        physicalWeaponAbilityRuntime.dispose()
     }
 
     fun refreshWeaponStatBonuses() {

@@ -301,10 +301,21 @@ class WorldItemRenderer {
         val region = TextureRegion(texture, xs[frame], ys[level], 260, 216)
         val width = camera.viewportWidth * camera.zoom
         val height = camera.viewportHeight * camera.zoom
+        /*
+         * The source sheet's third and fourth rows drift substantially between
+         * frames. These measured mist centroids align every crop to the stable
+         * first-row reference, preventing the full-screen effect from shaking.
+         */
+        val centroidX = BLIND_FAITH_CENTROID_X[level][frame]
+        val centroidY = BLIND_FAITH_CENTROID_Y[level][frame]
+        val drawX = camera.position.x - width / 2f +
+            (BLIND_FAITH_REFERENCE_X - centroidX) / 260f * width
+        val drawY = camera.position.y - height / 2f +
+            (centroidY - BLIND_FAITH_REFERENCE_Y) / 216f * height
         batch.projectionMatrix = camera.combined
         batch.begin()
         batch.setColor(1f, 1f, 1f, 0.92f)
-        batch.draw(region, camera.position.x - width / 2f, camera.position.y - height / 2f, width, height)
+        batch.draw(region, drawX, drawY, width, height)
         batch.setColor(Color.WHITE)
         batch.end()
     }
@@ -340,5 +351,22 @@ class WorldItemRenderer {
         font.dispose()
         batch.dispose()
         shapes.dispose()
+    }
+
+    companion object {
+        private const val BLIND_FAITH_REFERENCE_X = 138.55f
+        private const val BLIND_FAITH_REFERENCE_Y = 99.72f
+        private val BLIND_FAITH_CENTROID_X = arrayOf(
+            floatArrayOf(139.08f, 137.38f, 138.63f, 139.10f),
+            floatArrayOf(119.79f, 135.86f, 137.07f, 132.03f),
+            floatArrayOf(107.52f, 128.10f, 94.31f, 131.53f),
+            floatArrayOf(123.75f, 121.77f, 114.02f, 141.24f)
+        )
+        private val BLIND_FAITH_CENTROID_Y = arrayOf(
+            floatArrayOf(99.06f, 100.17f, 100.10f, 99.56f),
+            floatArrayOf(105.37f, 103.93f, 105.74f, 104.65f),
+            floatArrayOf(106.80f, 98.57f, 99.34f, 88.68f),
+            floatArrayOf(123.87f, 139.91f, 138.80f, 105.13f)
+        )
     }
 }

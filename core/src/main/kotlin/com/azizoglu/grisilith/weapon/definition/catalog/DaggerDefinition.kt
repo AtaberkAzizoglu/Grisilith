@@ -104,7 +104,7 @@ object DaggerDefinition {
 
             weaponAbility =
                 DefaultWeaponAbilities
-                    .assassinate,
+                    .knifeSwarm,
 
             initialUnlockState =
                 ContentUnlockState.UNLOCKED

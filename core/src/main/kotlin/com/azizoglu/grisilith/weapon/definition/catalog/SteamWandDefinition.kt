@@ -104,6 +104,10 @@ object SteamWandDefinition {
                 DefaultWeaponAbilities
                     .igniteDash,
 
+            upgradedWeaponAbility =
+                DefaultWeaponAbilities
+                    .igniteDashUpgraded,
+
             initialUnlockState =
                 ContentUnlockState.UNLOCKED
         )

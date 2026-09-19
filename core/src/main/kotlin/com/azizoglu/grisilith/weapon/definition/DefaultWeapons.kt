@@ -20,18 +20,14 @@ import com.azizoglu.grisilith.weapon.definition.catalog.TotemOfDarkCloudsDefinit
 
 object DefaultWeapons {
 
-    /*
-     * Double Swords previously had no concrete Level 5 ability definition.
-     * Keep the catalog definition intact and attach Relentless here so all
-     * systems consuming DefaultWeapons receive the completed definition.
-     */
+    /* Double Swords ability is attached here for catalog compatibility. */
     val doubleSwords =
         DoubleSwordsDefinition
             .definition
             .copy(
                 weaponAbility =
                     DefaultWeaponAbilities
-                        .relentless
+                        .rapidStrokes
             )
 
     /*

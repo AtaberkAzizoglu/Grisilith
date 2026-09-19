@@ -11,6 +11,7 @@ import com.azizoglu.grisilith.map.MapObstacle
 import com.badlogic.gdx.math.Rectangle
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
+import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.skill.WeaponAbilityState
 import com.azizoglu.grisilith.weapon.summon.IvySummonChoice
@@ -220,7 +221,7 @@ class SummonManager(
                                 enemy,
 
                             attackName =
-                                "Call the Knight",
+                                "Call the Oathbreaker",
 
                             damageType =
                                 DamageType.NECROTIC,
@@ -283,7 +284,7 @@ class SummonManager(
                                 target,
 
                             attackName =
-                                "Call the Knight"
+                                "Call the Oathbreaker"
                         )
                     },
 
@@ -293,7 +294,7 @@ class SummonManager(
                         onPlayerDamage(
                             summon.stats.baseDamage,
                             summon.sourceWeaponDisplayName +
-                                " — Call the Knight"
+                                " — Call the Oathbreaker"
                         )
                     }
                 )
@@ -478,10 +479,10 @@ class SummonManager(
             }
 
         val expectedWaveCount =
-            summonTypeFor(
-                scheduler.choice
+            waveCountFor(
+                summonTypeFor(scheduler.choice),
+                weapon
             )
-                .defaultCount
 
         val remainingActive =
             entities
@@ -1225,18 +1226,24 @@ class SummonManager(
                     playerStats,
 
                 stage =
-                    currentStageProvider()
+                    currentStageProvider(),
+
+                shepherdScalingMultiplier =
+                    shepherdScalingMultiplierFor(type, weapon)
             )
 
+        val waveCount =
+            waveCountFor(type, weapon)
+
         repeat(
-            type.defaultCount
+            waveCount
         ) {
                 index ->
 
             val angle =
                 (
                     MathUtils.PI2 /
-                        type.defaultCount
+                        waveCount
                     ) *
                     index +
                     MathUtils.random(
@@ -1672,4 +1679,28 @@ class SummonManager(
         private const val TOAD_POISON_DURATION_SECONDS =
             3f
     }
+
+    private fun waveCountFor(
+        type: SummonType,
+        weapon: WeaponInstance
+    ): Int =
+        type.defaultCount +
+            if (
+                weapon.hasWeaponAbilityUpgrade &&
+                type in setOf(SummonType.COW, SummonType.IMP)
+            ) {
+                1
+            } else {
+                0
+            }
+
+    private fun shepherdScalingMultiplierFor(
+        type: SummonType,
+        weapon: WeaponInstance
+    ): Float =
+        if (weapon.hasWeaponAbilityUpgrade) {
+            if (type == SummonType.KNIGHT_SPIRIT) 1.55f else 1.40f
+        } else {
+            0.70f
+        }
 }

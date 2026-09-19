@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.weapon.skill
 
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.weapon.skill.area.AreaSkillField
 import com.azizoglu.grisilith.weapon.skill.area.AreaSkillRuntime
@@ -33,6 +34,9 @@ class VortexPullRuntime {
 
     private var plaguePulseSeconds =
         0f
+
+    private var damageTickSeconds =
+        DefaultWeaponAbilities.VORTEX_PULL_DAMAGE_TICK_SECONDS
 
     val isPlagueStormActive: Boolean
         get() =
@@ -161,7 +165,8 @@ class VortexPullRuntime {
         playerCenterY: Float,
         enemies: List<Enemy>,
         worldWidth: Float,
-        worldHeight: Float
+        worldHeight: Float,
+        upgraded: Boolean
     ): Boolean {
         if (isActive) {
             return false
@@ -197,8 +202,14 @@ class VortexPullRuntime {
          * hedefler ve alan merkezini doğrudan o Enemy'nin merkezine koyar.
          * Rastgele anchor / random offset yoktur.
          */
+        val bossCandidates =
+            livingCandidates.filter { enemy ->
+                enemy.type == EnemyType.MINI_BOSS ||
+                    enemy.type == EnemyType.FINAL_BOSS
+            }
+
         val anchor =
-            livingCandidates
+            (if (bossCandidates.isNotEmpty()) bossCandidates else livingCandidates)
                 .minByOrNull { enemy ->
                     Vector2.dst2(
                         playerCenterX,
@@ -290,6 +301,13 @@ class VortexPullRuntime {
             )
         }
 
+        damageTickSeconds =
+            if (upgraded) {
+                DefaultWeaponAbilities.VORTEX_PULL_UPGRADED_DAMAGE_TICK_SECONDS
+            } else {
+                DefaultWeaponAbilities.VORTEX_PULL_DAMAGE_TICK_SECONDS
+            }
+
         val began = areaRuntime.begin(
             centerX =
                 selectedCenter.x,
@@ -362,8 +380,7 @@ class VortexPullRuntime {
                 delta,
 
             tickIntervalSeconds =
-                DefaultWeaponAbilities
-                    .VORTEX_PULL_DAMAGE_TICK_SECONDS,
+                damageTickSeconds,
 
             onFrame = {
                     area,
@@ -486,8 +503,7 @@ class VortexPullRuntime {
 
                         onDamageTick(
                             enemy,
-                            DefaultWeaponAbilities
-                                .VORTEX_PULL_DAMAGE_TICK_SECONDS
+                            damageTickSeconds
                         )
                     }
             },

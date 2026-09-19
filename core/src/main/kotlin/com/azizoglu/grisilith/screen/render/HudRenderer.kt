@@ -331,9 +331,8 @@ class HudRenderer(
                 )
 
                 if (
-                    ability
-                        ?.activationType ==
-                    WeaponAbilityActivationType.ACTIVE
+                    ability?.activationType == WeaponAbilityActivationType.ACTIVE ||
+                    summonPresentation != null
                 ) {
                     shapeRenderer.color =
                         abilityGlowColor(

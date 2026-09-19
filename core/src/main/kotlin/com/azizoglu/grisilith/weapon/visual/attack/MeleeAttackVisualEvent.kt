@@ -3,6 +3,8 @@ package com.azizoglu.grisilith.weapon.visual.attack
 enum class MeleeAttackVisualKind {
     DOUBLE_SLASH,
     DOUBLE_SLASH_X,
+    RAPID_STROKES_UPGRADED,
+    FIRE_BEAM,
     LONGSWORD_CONE,
     LANCE_THRUST,
     LANCE_SPIN,

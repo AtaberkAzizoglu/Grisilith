@@ -2,6 +2,46 @@ package com.azizoglu.grisilith.weapon.skill
 
 object DefaultWeaponAbilities {
 
+    const val RAPID_STROKES_ID =
+        "WPN_ABILITY_RAPID_STROKES"
+    const val RAPID_STROKES_COOLDOWN_SECONDS = 30f
+    const val RAPID_STROKES_ATTACKS = 5
+    const val RAPID_STROKES_UPGRADED_ATTACKS = 7
+    const val RAPID_STROKES_UPGRADED_SIZE_MULTIPLIER = 2.5f
+
+    const val AIR_SLASH_ID =
+        "WPN_ABILITY_AIR_SLASH"
+    const val AIR_SLASH_COOLDOWN_SECONDS = 35f
+    const val AIR_SLASH_RANGE = 350f
+    const val AIR_SLASH_UPGRADED_RANGE = 450f
+    const val AIR_SLASH_ANGLE_DEGREES = 40f
+    const val AIR_SLASH_MISSING_HEALTH_DAMAGE_PER_PERCENT = 0.003f
+    const val AIR_SLASH_MAXIMUM_MISSING_HEALTH_PERCENT = 70f
+
+    const val SPIN_ATTACK_ID =
+        "WPN_ABILITY_SPIN_ATTACK"
+    const val SPIN_ATTACK_COOLDOWN_SECONDS = 40f
+    const val SPIN_ATTACK_BASE_RADIUS_MULTIPLIER = 0.75f
+    const val SPIN_ATTACK_UPGRADED_RADIUS_MULTIPLIER = 1f
+    const val SPIN_ATTACK_UPGRADED_DAMAGE_MULTIPLIER = 1.5f
+
+    const val DEFENSIVE_LINE_BURST_ID =
+        "WPN_ABILITY_DEFENSIVE_LINE_BURST"
+    const val DEFENSIVE_LINE_BURST_COOLDOWN_SECONDS = 35f
+    const val DEFENSIVE_LINE_BURST_RADIUS = 190f
+    const val DEFENSIVE_LINE_BURST_AC_DAMAGE_MULTIPLIER = 0.75f
+    const val DEFENSIVE_LINE_BURST_KNOCKBACK = 95f
+
+    const val KNIFE_SWARM_ID =
+        "WPN_ABILITY_KNIFE_SWARM"
+    const val KNIFE_SWARM_COOLDOWN_SECONDS = 20f
+    const val KNIFE_SWARM_PROJECTILES = 6
+    const val KNIFE_SWARM_UPGRADED_REPEAT_DELAY_SECONDS = 0.25f
+    const val KNIFE_SWARM_UPGRADED_ANGLE_OFFSET_DEGREES = 30f
+    const val KNIFE_SWARM_RANGE = 600f
+
+    const val DAGGER_BASIC_CRITICAL_DAMAGE_MULTIPLIER = 1.5f
+
     const val GLYPH_CASTING_ID =
         "WPN_ABILITY_GLYPH_CASTING"
 
@@ -39,14 +79,14 @@ object DefaultWeaponAbilities {
     const val ERASING_SOULS_ID =
         "WPN_ABILITY_ERASING_SOULS"
 
-    const val ERASING_SOULS_TRIGGER_RADIUS =
-        600f
+    const val ERASING_SOULS_TRIGGER_RADIUS = 450f
+    const val ERASING_SOULS_UPGRADED_TRIGGER_RADIUS = 600f
 
     const val ERASING_SOULS_EXPLOSION_RADIUS =
         100f
 
-    const val ERASING_SOULS_DAMAGE_MULTIPLIER =
-        2.25f
+    const val ERASING_SOULS_DAMAGE_MULTIPLIER = 1.25f
+    const val ERASING_SOULS_UPGRADED_DAMAGE_MULTIPLIER = 2f
 
     const val ERASING_SOULS_NECROSIS_DURATION_SECONDS =
         2f
@@ -89,15 +129,15 @@ object DefaultWeaponAbilities {
     const val STATIC_CLOUDS_ID =
         "WPN_ABILITY_STATIC_CLOUDS"
 
-    const val STATIC_CLOUDS_DURATION_SECONDS =
-        12f
+    const val STATIC_CLOUDS_DURATION_SECONDS = 10f
+    const val STATIC_CLOUDS_UPGRADED_DURATION_SECONDS = 12f
 
     /*
      * Kaynak tasarım 30-45 saniye aralığı veriyor.
      * İlk sabit denge değeri olarak orta nokta kullanılır.
      */
-    const val STATIC_CLOUDS_COOLDOWN_SECONDS =
-        38f
+    const val STATIC_CLOUDS_COOLDOWN_SECONDS = 45f
+    const val STATIC_CLOUDS_UPGRADED_COOLDOWN_SECONDS = 38f
 
     const val STATIC_CLOUDS_RADIUS =
         145f
@@ -108,8 +148,8 @@ object DefaultWeaponAbilities {
     const val STATIC_CLOUDS_LIGHTNING_DPS_MULTIPLIER =
         0.000165f
 
-    const val STATIC_CLOUDS_STUN_CHANCE =
-        0.05f
+    const val STATIC_CLOUDS_STUN_CHANCE = 0.05f
+    const val STATIC_CLOUDS_UPGRADED_STUN_CHANCE = 0.075f
 
     const val STATIC_CLOUDS_STUN_DURATION_SECONDS =
         1f
@@ -129,14 +169,14 @@ object DefaultWeaponAbilities {
     const val ACIDIC_POOL_ID =
         "WPN_ABILITY_ACIDIC_POOL"
 
-    const val ACIDIC_POOL_DURATION_SECONDS =
-        15f
+    const val ACIDIC_POOL_DURATION_SECONDS = 10f
+    const val ACIDIC_POOL_UPGRADED_DURATION_SECONDS = 15f
 
-    const val ACIDIC_POOL_COOLDOWN_SECONDS =
-        44f
+    const val ACIDIC_POOL_COOLDOWN_SECONDS = 50f
+    const val ACIDIC_POOL_UPGRADED_COOLDOWN_SECONDS = 44f
 
-    const val ACIDIC_POOL_PLACEMENT_RANGE =
-        660f
+    const val ACIDIC_POOL_PLACEMENT_RANGE = 550f
+    const val ACIDIC_POOL_UPGRADED_PLACEMENT_RANGE = 660f
 
     const val ACIDIC_POOL_RADIUS =
         165f
@@ -161,8 +201,8 @@ object DefaultWeaponAbilities {
     const val VORTEX_PULL_DURATION_SECONDS =
         13f
 
-    const val VORTEX_PULL_COOLDOWN_SECONDS =
-        42f
+    const val VORTEX_PULL_COOLDOWN_SECONDS = 50f
+    const val VORTEX_PULL_UPGRADED_COOLDOWN_SECONDS = 42f
 
     const val VORTEX_PULL_PLACEMENT_RANGE =
         650f
@@ -170,8 +210,8 @@ object DefaultWeaponAbilities {
     const val VORTEX_PULL_RADIUS =
         195f
 
-    const val VORTEX_PULL_DAMAGE_TICK_SECONDS =
-        0.16666667f
+    const val VORTEX_PULL_DAMAGE_TICK_SECONDS = 0.25f
+    const val VORTEX_PULL_UPGRADED_DAMAGE_TICK_SECONDS = 0.16666667f
 
     const val VORTEX_PULL_DAMAGE_PER_SECOND_MULTIPLIER =
         0.00010f
@@ -198,11 +238,11 @@ object DefaultWeaponAbilities {
      * Dokümanda cooldown 3-4 stage arası / 50-100 saniye
      * olarak tarif edildiği için ilk denge değeri 75 saniyedir.
      */
-    const val IGNITE_DASH_COOLDOWN_SECONDS =
-        45f
+    const val IGNITE_DASH_COOLDOWN_SECONDS = 50f
+    const val IGNITE_DASH_UPGRADED_COOLDOWN_SECONDS = 45f
 
-    const val IGNITE_DASH_MAXIMUM_RANGE =
-        450f
+    const val IGNITE_DASH_MAXIMUM_RANGE = 315f
+    const val IGNITE_DASH_UPGRADED_MAXIMUM_RANGE = 450f
 
     const val IGNITE_DASH_EXPLOSION_RADIUS =
         120f
@@ -213,8 +253,8 @@ object DefaultWeaponAbilities {
     const val IGNITE_DASH_OUTER_DAMAGE_RATIO =
         0.40f
 
-    const val IGNITE_DASH_DAMAGE_MULTIPLIER =
-        10.55f
+    const val IGNITE_DASH_DAMAGE_MULTIPLIER = 7.9125f
+    const val IGNITE_DASH_UPGRADED_DAMAGE_MULTIPLIER = 10.55f
 
     const val IGNITE_DASH_BURN_DURATION_SECONDS =
         3f
@@ -358,6 +398,12 @@ object DefaultWeaponAbilities {
                 STATIC_CLOUDS_DURATION_SECONDS
         )
 
+    val staticCloudsUpgraded =
+        staticClouds.copy(
+            cooldownSeconds = STATIC_CLOUDS_UPGRADED_COOLDOWN_SECONDS,
+            durationSeconds = STATIC_CLOUDS_UPGRADED_DURATION_SECONDS
+        )
+
     val chooseToSummon =
         WeaponAbilityDefinition(
             id =
@@ -390,6 +436,12 @@ object DefaultWeaponAbilities {
                 ACIDIC_POOL_DURATION_SECONDS
         )
 
+    val acidicPoolUpgraded =
+        acidicPool.copy(
+            cooldownSeconds = ACIDIC_POOL_UPGRADED_COOLDOWN_SECONDS,
+            durationSeconds = ACIDIC_POOL_UPGRADED_DURATION_SECONDS
+        )
+
     val vortexPull =
         WeaponAbilityDefinition(
             id =
@@ -407,6 +459,11 @@ object DefaultWeaponAbilities {
 
             durationSeconds =
                 VORTEX_PULL_DURATION_SECONDS
+        )
+
+    val vortexPullUpgraded =
+        vortexPull.copy(
+            cooldownSeconds = VORTEX_PULL_UPGRADED_COOLDOWN_SECONDS
         )
 
     val igniteDash =
@@ -428,6 +485,11 @@ object DefaultWeaponAbilities {
                 IGNITE_DASH_AIM_DURATION_SECONDS
         )
 
+    val igniteDashUpgraded =
+        igniteDash.copy(
+            cooldownSeconds = IGNITE_DASH_UPGRADED_COOLDOWN_SECONDS
+        )
+
     val heavyBolts =
         WeaponAbilityDefinition(
             id =
@@ -438,7 +500,13 @@ object DefaultWeaponAbilities {
 
             activationType =
                 WeaponAbilityActivationType
-                    .PASSIVE
+                    .ACTIVE,
+
+            cooldownSeconds =
+                30f,
+
+            durationSeconds =
+                2f
         )
 
     val defensiveLine =
@@ -454,7 +522,49 @@ object DefaultWeaponAbilities {
             id = LEISURELY_SHOT_ID,
             displayName = "Leisurely Shot",
             activationType =
-                WeaponAbilityActivationType.PASSIVE
+                WeaponAbilityActivationType.ACTIVE,
+            cooldownSeconds = 25f,
+            durationSeconds = 1f
+        )
+
+    val rapidStrokes =
+        WeaponAbilityDefinition(
+            id = RAPID_STROKES_ID,
+            displayName = "Rapid Strokes",
+            activationType = WeaponAbilityActivationType.ACTIVE,
+            cooldownSeconds = RAPID_STROKES_COOLDOWN_SECONDS
+        )
+
+    val airSlash =
+        WeaponAbilityDefinition(
+            id = AIR_SLASH_ID,
+            displayName = "Air Slash",
+            activationType = WeaponAbilityActivationType.ACTIVE,
+            cooldownSeconds = AIR_SLASH_COOLDOWN_SECONDS
+        )
+
+    val spinAttack =
+        WeaponAbilityDefinition(
+            id = SPIN_ATTACK_ID,
+            displayName = "Spin Attack",
+            activationType = WeaponAbilityActivationType.ACTIVE,
+            cooldownSeconds = SPIN_ATTACK_COOLDOWN_SECONDS
+        )
+
+    val defensiveLineBurst =
+        WeaponAbilityDefinition(
+            id = DEFENSIVE_LINE_BURST_ID,
+            displayName = "Defensive Line Burst",
+            activationType = WeaponAbilityActivationType.ACTIVE,
+            cooldownSeconds = DEFENSIVE_LINE_BURST_COOLDOWN_SECONDS
+        )
+
+    val knifeSwarm =
+        WeaponAbilityDefinition(
+            id = KNIFE_SWARM_ID,
+            displayName = "Knife Swarm",
+            activationType = WeaponAbilityActivationType.ACTIVE,
+            cooldownSeconds = KNIFE_SWARM_COOLDOWN_SECONDS
         )
 
     val relentless =

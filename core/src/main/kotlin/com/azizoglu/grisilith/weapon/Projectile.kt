@@ -68,6 +68,12 @@ class Projectile(
     private val ignoresEnemyCollisions:
     Boolean = false,
 
+    private val ignoresObstacleCollisions:
+    Boolean = false,
+
+    private val ignoresWorldBoundaryCollisions:
+    Boolean = false,
+
     wallBounceCount: Int = 0,
 
     sizeMultiplier: Float = 1f,
@@ -106,12 +112,23 @@ class Projectile(
     Float = 1f,
 
     private val criticalDamageMultiplierProvider:
-    (() -> Float)? = null
+    (() -> Float)? = null,
+
+    private val targetDamageMultiplierProvider:
+    ((Enemy) -> Float)? = null,
+
+    val customVisualId: String? = null
 ) {
     private val ignoresObstaclesFromItem =
         ActiveItemEffects.rollGhostProjectile(sourceWeapon)
 
     private val position =
+        Vector2(
+            startX,
+            startY
+        )
+
+    private val previousPosition =
         Vector2(
             startX,
             startY
@@ -217,7 +234,13 @@ class Projectile(
         get() =
             isActive &&
                 !ignoresEnemyCollisions &&
-                activationDelayRemaining <= 0f
+                activationDelayRemaining <= 0f &&
+                customVisualId == null
+
+    val visualTravelProgress: Float
+        get() =
+            (travelledDistance / safeMaximumTravelDistance)
+                .coerceIn(0f, 1f)
 
     companion object {
         /*
@@ -276,6 +299,8 @@ class Projectile(
 
         val movementY =
             velocity.y * delta
+
+        previousPosition.set(position)
 
         position.add(
             movementX,
@@ -368,10 +393,12 @@ class Projectile(
             return
         }
 
-        resolveWorldBoundaryCollision(
-            worldWidth = worldWidth,
-            worldHeight = worldHeight
-        )
+        if (!ignoresWorldBoundaryCollisions) {
+            resolveWorldBoundaryCollision(
+                worldWidth = worldWidth,
+                worldHeight = worldHeight
+            )
+        }
     }
 
     private fun resolveWorldBoundaryCollision(
@@ -657,6 +684,14 @@ class Projectile(
                         .coerceAtLeast(1)
                 }
 
+            val targetAdjustedDamage =
+                (
+                    hitDamage *
+                        (targetDamageMultiplierProvider?.invoke(enemy) ?: 1f)
+                    )
+                    .roundToInt()
+                    .coerceAtLeast(1)
+
             val modifiedHitDamage =
                 if (
                     sourceWeapon != null &&
@@ -664,7 +699,7 @@ class Projectile(
                 ) {
                     modifyWeaponDamage(
                         enemy,
-                        hitDamage
+                        targetAdjustedDamage
                     )
                         .coerceAtLeast(1)
                 } else {
@@ -672,7 +707,7 @@ class Projectile(
                      * Hasarsız veya yalnızca görsel amaçlı
                      * projectile'larda Tamga çalıştırılmaz.
                      */
-                    hitDamage
+                    targetAdjustedDamage
                 }
 
             val appliedDamage =
@@ -754,11 +789,7 @@ class Projectile(
                 isFirstTarget &&
                 carryFirstNormalTarget &&
                 !enemy.isDead &&
-                enemy.type in
-                setOf(
-                    EnemyType.NORMAL,
-                    EnemyType.UNIQUE
-                )
+                enemy.type == EnemyType.NORMAL
             ) {
                 carriedEnemy =
                     enemy
@@ -839,14 +870,15 @@ class Projectile(
             /*
              * Önceden kaydedilmiş sıradaki hedefe geçer.
              */
-            if (
-                queuedRicochetTargets.isNotEmpty() &&
-                remainingTargets > 0
-            ) {
+            if (queuedRicochetTargets.isNotEmpty()) {
                 val redirected =
                     redirectToNextQueuedTarget()
 
                 if (redirected) {
+                    /* Ricochets have their own hit budget. */
+                    remainingTargets =
+                        remainingTargets.coerceAtLeast(1)
+
                     travelledDistance = 0f
 
                     currentMaximumTravelDistance =
@@ -1022,6 +1054,7 @@ class Projectile(
     ) {
         if (
             !isActive ||
+            ignoresObstacleCollisions ||
             activationDelayRemaining >
             0f
         ) {
@@ -1037,13 +1070,70 @@ class Projectile(
             size
         )
 
-        if (
-            obstacleBounds.any {
+        val obstacle =
+            obstacleBounds.firstOrNull {
                 collisionBounds.overlaps(it)
-            }
-        ) {
+            } ?: return
+
+        if (remainingWallBounces <= 0) {
             deactivate()
+            return
         }
+
+        val previousLeft = previousPosition.x
+        val previousRight = previousPosition.x + size
+        val previousBottom = previousPosition.y
+        val previousTop = previousPosition.y + size
+
+        val collidedHorizontally =
+            previousRight <= obstacle.x ||
+                previousLeft >= obstacle.x + obstacle.width
+
+        val collidedVertically =
+            previousTop <= obstacle.y ||
+                previousBottom >= obstacle.y + obstacle.height
+
+        when {
+            collidedHorizontally && collidedVertically -> {
+                velocity.scl(-1f)
+            }
+
+            collidedHorizontally -> {
+                velocity.x = -velocity.x
+            }
+
+            collidedVertically -> {
+                velocity.y = -velocity.y
+            }
+
+            else -> {
+                /*
+                 * A fast projectile may already be inside the obstacle by
+                 * the time collision is sampled. Reflect on the axis with
+                 * the shallower penetration in that case.
+                 */
+                val centerX = position.x + size / 2f
+                val centerY = position.y + size / 2f
+                val obstacleCenterX = obstacle.x + obstacle.width / 2f
+                val obstacleCenterY = obstacle.y + obstacle.height / 2f
+                val normalizedX =
+                    kotlin.math.abs(centerX - obstacleCenterX) /
+                        (obstacle.width / 2f + size / 2f).coerceAtLeast(1f)
+                val normalizedY =
+                    kotlin.math.abs(centerY - obstacleCenterY) /
+                        (obstacle.height / 2f + size / 2f).coerceAtLeast(1f)
+
+                if (normalizedX >= normalizedY) {
+                    velocity.x = -velocity.x
+                } else {
+                    velocity.y = -velocity.y
+                }
+            }
+        }
+
+        position.set(previousPosition)
+        remainingWallBounces--
+        travelledDistance = 0f
     }
 
     private fun deactivate() {

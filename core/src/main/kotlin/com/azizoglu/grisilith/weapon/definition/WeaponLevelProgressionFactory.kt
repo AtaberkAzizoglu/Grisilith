@@ -58,9 +58,9 @@ object WeaponLevelProgressionFactory {
                 WeaponLevelStats(
                     level = 2,
                     damageMultiplier =
-                        level2Damage,
+                        1f,
                     attackSpeedMultiplier =
-                        level2AttackSpeed,
+                        1.15f,
                     rangeMultiplier =
                         level2Range,
                     knockbackMultiplier =
@@ -75,9 +75,9 @@ object WeaponLevelProgressionFactory {
                 WeaponLevelStats(
                     level = 3,
                     damageMultiplier =
-                        level3Damage,
+                        1f,
                     attackSpeedMultiplier =
-                        level3AttackSpeed,
+                        1.22f,
                     rangeMultiplier =
                         level3Range,
                     knockbackMultiplier =
@@ -86,7 +86,7 @@ object WeaponLevelProgressionFactory {
                         level3AdditionalTargets,
                     grantedStatModifiers =
                         level2Modifiers,
-                    basicAttackUpgraded =
+                    weaponAbilityUnlocked =
                         true
                 ),
 
@@ -94,9 +94,9 @@ object WeaponLevelProgressionFactory {
                 WeaponLevelStats(
                     level = 4,
                     damageMultiplier =
-                        level4Damage,
+                        1f,
                     attackSpeedMultiplier =
-                        level4AttackSpeed,
+                        1.22f,
                     rangeMultiplier =
                         level4Range,
                     knockbackMultiplier =
@@ -107,6 +107,8 @@ object WeaponLevelProgressionFactory {
                         level2Modifiers +
                             level4Modifiers,
                     basicAttackUpgraded =
+                        true,
+                    weaponAbilityUnlocked =
                         true
                 ),
 
@@ -114,9 +116,9 @@ object WeaponLevelProgressionFactory {
                 WeaponLevelStats(
                     level = 5,
                     damageMultiplier =
-                        level5Damage,
+                        1f,
                     attackSpeedMultiplier =
-                        level5AttackSpeed,
+                        1.30f,
                     rangeMultiplier =
                         level5Range,
                     knockbackMultiplier =
@@ -129,6 +131,8 @@ object WeaponLevelProgressionFactory {
                     basicAttackUpgraded =
                         true,
                     weaponAbilityUnlocked =
+                        true,
+                    weaponAbilityUpgraded =
                         true
                 )
         )

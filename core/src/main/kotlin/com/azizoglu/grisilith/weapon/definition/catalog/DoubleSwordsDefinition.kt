@@ -71,7 +71,6 @@ object DoubleSwordsDefinition {
 
 
 
-                        level3Range = 1.40f,
                         level4Range = 1.40f,
                         level5Range = 1.40f,
 

@@ -5,14 +5,12 @@ import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.statistics.PlayerStats
-import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
-import com.badlogic.gdx.math.Vector2
+import com.azizoglu.grisilith.weapon.visual.attack.SoulDrainVisualManager
 import kotlin.math.roundToInt
-import com.azizoglu.grisilith.combat.debug.CombatDebugVisualManager
 
 class TotemOfDarkCloudsAttackExecutor(
     private val damageCalculator:
@@ -36,15 +34,6 @@ class TotemOfDarkCloudsAttackExecutor(
         private const val DRAIN_ATTACK_DAMAGE_MULTIPLIER =
             1.35f
 
-        /*
-         * Hedeften oyuncuya dönen görsel
-         * projectile hızı.
-         */
-        private const val RETURN_PROJECTILE_SPEED =
-            10f
-
-        private const val RETURN_PROJECTILE_SIZE =
-            11f
     }
 
     override fun execute(
@@ -152,12 +141,6 @@ class TotemOfDarkCloudsAttackExecutor(
                 .roundToInt()
                 .coerceAtLeast(1)
 
-        val targetX =
-            target.centerX
-
-        val targetY =
-            target.centerY
-
         val wasAliveBeforeAttack =
             !target.isDead
 
@@ -215,92 +198,9 @@ class TotemOfDarkCloudsAttackExecutor(
                 DamageType.NECROTIC
         )
 
-        /*
-         * Hedef ölse bile saldırı anındaki
-         * merkezinden görsel projectile çıkar.
-         */
-        createReturningVisualProjectile(
-            context = context,
-            startX = targetX,
-            startY = targetY
-        )
-    }
-
-    private fun createReturningVisualProjectile(
-        context: WeaponAttackContext,
-        startX: Float,
-        startY: Float
-    ) {
-        val playerX =
-            context.attackOriginX
-
-        val playerY =
-            context.attackOriginY
-
-        CombatDebugVisualManager.addLine(
-            startX = startX,
-            startY = startY,
-            endX = playerX,
-            endY = playerY,
-            upgraded = true,
-            durationSeconds = 0.30f
-        )
-
-        val travelDistance =
-            Vector2.dst(
-                startX,
-                startY,
-                playerX,
-                playerY
-            )
-                .coerceAtLeast(1f)
-
-        context.projectiles.add(
-            Projectile(
-                /*
-                 * Projectile pozisyonu sol-alt
-                 * köşeyi kullandığı için merkez
-                 * düzeltmesi yapıyoruz.
-                 */
-                startX =
-                    startX -
-                        RETURN_PROJECTILE_SIZE /
-                        2f,
-
-                startY =
-                    startY -
-                        RETURN_PROJECTILE_SIZE /
-                        2f,
-
-                targetX =
-                    playerX,
-
-                targetY =
-                    playerY,
-
-                sourceWeaponName =
-                    context.weapon.displayName,
-
-                damage = 0,
-
-                isCriticalHit = false,
-
-                maximumTargets = 1,
-
-                projectileSpeed =
-                    RETURN_PROJECTILE_SPEED,
-
-                maximumTravelDistance =
-                    travelDistance,
-
-                damageType =
-                    DamageType.NECROTIC,
-
-                knockback = 0f,
-
-                ignoresEnemyCollisions =
-                    true
-            )
+        SoulDrainVisualManager.spawn(
+            enemy = target,
+            player = context.player
         )
     }
 }

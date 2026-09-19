@@ -108,6 +108,10 @@ object TotemOfDarkCloudsDefinition {
                 DefaultWeaponAbilities
                     .staticClouds,
 
+            upgradedWeaponAbility =
+                DefaultWeaponAbilities
+                    .staticCloudsUpgraded,
+
             initialUnlockState =
                 ContentUnlockState.UNLOCKED
         )

@@ -79,6 +79,10 @@ class ProjectileSpriteRenderer {
         private const val BOW_PROJECTILE_VISUAL_SCALE =
             1.16f
 
+        /* Matches a regular, non-critical player Longbow arrow exactly. */
+        private const val PLAYER_ARROW_VISUAL_HEIGHT =
+            60.088f
+
         private const val DAGGER_PROJECTILE_VISUAL_SCALE =
             0.68f
 
@@ -308,7 +312,12 @@ class ProjectileSpriteRenderer {
         visuals.forEach { visual ->
             val region = enemyRegion(visual, atlasRegions) ?: return@forEach
             val aspect = region.regionWidth.toFloat() / region.regionHeight.coerceAtLeast(1).toFloat()
-            val height = visual.worldHeight
+            val height =
+                if (visual.kind == EnemyTraitProjectileVisualKind.ARROW) {
+                    PLAYER_ARROW_VISUAL_HEIGHT
+                } else {
+                    visual.worldHeight
+                }
             val width = height * aspect
             batch.color = Color(1f, 1f, 1f, visual.alpha.coerceIn(0f, 1f))
             drawRotated(

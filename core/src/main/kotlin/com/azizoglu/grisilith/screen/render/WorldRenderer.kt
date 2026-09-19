@@ -21,6 +21,7 @@ import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.visual.ProjectileSpriteRenderer
 import com.azizoglu.grisilith.weapon.visual.carrier.WeaponCarrierRenderer
 import com.azizoglu.grisilith.weapon.visual.attack.MeleeAttackVisualRenderer
+import com.azizoglu.grisilith.weapon.visual.attack.SoulDrainVisualRenderer
 import com.azizoglu.grisilith.weapon.visual.carrier.WeaponCarrierVisualSystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
@@ -110,6 +111,9 @@ class WorldRenderer(
 
     private val meleeAttackVisualRenderer =
         MeleeAttackVisualRenderer()
+
+    private val soulDrainVisualRenderer =
+        SoulDrainVisualRenderer()
 
     private val conditionVisualRenderer =
         ConditionVisualRenderer()
@@ -600,6 +604,11 @@ class WorldRenderer(
                 camera
             )
 
+        soulDrainVisualRenderer
+            .render(
+                camera
+            )
+
         /*
          * PASS 3:
          * Projectile sprite'ları world depth'in üzerinde kalır.
@@ -869,6 +878,9 @@ class WorldRenderer(
             .dispose()
 
         meleeAttackVisualRenderer
+            .dispose()
+
+        soulDrainVisualRenderer
             .dispose()
 
         conditionVisualRenderer

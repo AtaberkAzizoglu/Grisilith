@@ -23,10 +23,10 @@ enum class IvySummonChoice(
 
     CALL_THE_KNIGHT(
         displayName =
-            "CALL THE KNIGHT",
+            "CALL THE OATHBREAKER",
 
         description =
-            "Calls a hostile Knight Spirit that can attack enemies and the player."
+            "Calls a hostile Oathbreaker that can attack enemies and the player."
     );
 
     companion object {

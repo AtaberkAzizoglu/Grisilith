@@ -40,7 +40,7 @@ class DefensiveLineVisualRenderer {
         val texture =
             if (
                 bonusArmorClass >
-                5
+                LOW_ARMOR_VISUAL_MAXIMUM
             ) {
                 highTexture
             } else {
@@ -113,7 +113,10 @@ class DefensiveLineVisualRenderer {
 
     companion object {
         private const val BASE_VISUAL_SIZE =
-            72f
+            144f
+
+        private const val LOW_ARMOR_VISUAL_MAXIMUM =
+            7
 
         private val batch by lazy {
             SpriteBatch()

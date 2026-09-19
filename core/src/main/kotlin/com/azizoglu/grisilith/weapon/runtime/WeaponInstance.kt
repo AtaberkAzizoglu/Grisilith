@@ -74,13 +74,23 @@ class WeaponInstance(
             currentLevelStats
                 .weaponAbilityUnlocked
 
+    val hasWeaponAbilityUpgrade: Boolean
+        get() =
+            currentLevelStats
+                .weaponAbilityUpgraded
+
     val unlockedAbility:
         WeaponAbilityDefinition?
         get() =
             if (
                 hasWeaponAbility
             ) {
-                definition.weaponAbility
+                if (hasWeaponAbilityUpgrade) {
+                    definition.upgradedWeaponAbility
+                        ?: definition.weaponAbility
+                } else {
+                    definition.weaponAbility
+                }
             } else {
                 null
             }

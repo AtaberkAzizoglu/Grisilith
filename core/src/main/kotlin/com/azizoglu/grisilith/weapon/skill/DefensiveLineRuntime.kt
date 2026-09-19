@@ -33,8 +33,10 @@ class DefensiveLineRuntime(
     ) {
         val shieldCount =
             equippedWeapons.count { weapon ->
-                weapon.unlockedAbility?.id ==
-                    DefaultWeaponAbilities.DEFENSIVE_LINE_ID
+                weapon.unlockedAbility?.id in setOf(
+                    DefaultWeaponAbilities.DEFENSIVE_LINE_ID,
+                    DefaultWeaponAbilities.DEFENSIVE_LINE_BURST_ID
+                )
             }
 
         if (shieldCount <= 0) {

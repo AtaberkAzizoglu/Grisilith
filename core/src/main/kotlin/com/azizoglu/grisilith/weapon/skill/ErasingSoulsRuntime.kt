@@ -74,7 +74,10 @@ class ErasingSoulsRuntime {
                     playerCenterX,
 
                 playerCenterY =
-                    playerCenterY
+                    playerCenterY,
+
+                sourceWeapon =
+                    sourceWeapon
             )
         ) {
             return emptyList()
@@ -120,7 +123,10 @@ class ErasingSoulsRuntime {
                         playerCenterX,
 
                     playerCenterY =
-                        playerCenterY
+                        playerCenterY,
+
+                    sourceWeapon =
+                        sourceWeapon
                 )
             ) {
                 continue
@@ -256,9 +262,7 @@ class ErasingSoulsRuntime {
                             target
                         )
 
-                        pendingDeaths.addLast(
-                            target
-                        )
+                        /* Lv.3 and Lv.5 explosions no longer chain. */
                     }
                 }
         }
@@ -341,7 +345,8 @@ class ErasingSoulsRuntime {
     private fun isInsideTriggerArea(
         enemy: Enemy,
         playerCenterX: Float,
-        playerCenterY: Float
+        playerCenterY: Float,
+        sourceWeapon: WeaponInstance
     ): Boolean {
 
         return Vector2.dst2(
@@ -350,8 +355,11 @@ class ErasingSoulsRuntime {
             enemy.centerX,
             enemy.centerY
         ) <=
-            DefaultWeaponAbilities
-                .ERASING_SOULS_TRIGGER_RADIUS
+            (if (sourceWeapon.hasWeaponAbilityUpgrade) {
+                DefaultWeaponAbilities.ERASING_SOULS_UPGRADED_TRIGGER_RADIUS
+            } else {
+                DefaultWeaponAbilities.ERASING_SOULS_TRIGGER_RADIUS
+            })
                 .let {
                     it *
                         it

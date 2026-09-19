@@ -369,6 +369,13 @@ class IgniteDashRuntime(
         worldWidth: Float,
         worldHeight: Float
     ) {
+        val maximumRange =
+            if (activeWeapon?.hasWeaponAbilityUpgrade == true) {
+                DefaultWeaponAbilities.IGNITE_DASH_UPGRADED_MAXIMUM_RANGE
+            } else {
+                DefaultWeaponAbilities.IGNITE_DASH_MAXIMUM_RANGE
+            }
+
         val desiredTarget =
             if (
                 hasAimPosition
@@ -377,8 +384,7 @@ class IgniteDashRuntime(
             } else {
                 Vector2(
                     player.centerX +
-                        DefaultWeaponAbilities
-                            .IGNITE_DASH_MAXIMUM_RANGE,
+                        maximumRange,
 
                     player.centerY
                 )
@@ -407,8 +413,7 @@ class IgniteDashRuntime(
         val distance =
             direction.len()
                 .coerceAtMost(
-                    DefaultWeaponAbilities
-                        .IGNITE_DASH_MAXIMUM_RANGE
+                    maximumRange
                 )
 
         direction.nor()
@@ -557,8 +562,11 @@ class IgniteDashRuntime(
         val innerExplosionDamage =
             (
                 baseDamage *
-                    DefaultWeaponAbilities
-                        .IGNITE_DASH_DAMAGE_MULTIPLIER
+                    if (weapon.hasWeaponAbilityUpgrade) {
+                        DefaultWeaponAbilities.IGNITE_DASH_UPGRADED_DAMAGE_MULTIPLIER
+                    } else {
+                        DefaultWeaponAbilities.IGNITE_DASH_DAMAGE_MULTIPLIER
+                    }
                 )
                 .roundToInt()
                 .coerceAtLeast(
