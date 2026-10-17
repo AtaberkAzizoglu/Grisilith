@@ -10,7 +10,7 @@ enum class IvySummonChoice(
             "SUMMON ANIMALS",
 
         description =
-            "Summons two durable cows that fight beside the player."
+            "Summons durable allied cows: two at Level 3, three at Level 5."
     ),
 
     SUMMON_DEMONS(
@@ -18,7 +18,7 @@ enum class IvySummonChoice(
             "SUMMON DEMONS",
 
         description =
-            "Summons one Imp with balanced health and damage."
+            "Summons fragile allied Imps with powerful ranged Fire attacks: one at Level 3, two at Level 5."
     ),
 
     CALL_THE_KNIGHT(
@@ -26,7 +26,7 @@ enum class IvySummonChoice(
             "CALL THE OATHBREAKER",
 
         description =
-            "Calls a hostile Oathbreaker that can attack enemies and the player."
+            "Calls a neutral Oathbreaker."
     );
 
     companion object {

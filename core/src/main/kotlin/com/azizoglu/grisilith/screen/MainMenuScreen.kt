@@ -8,11 +8,16 @@ import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.azizoglu.grisilith.ui.typography.UiFontFactory
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
-import com.azizoglu.grisilith.profile.PlayerProfileRepository
-import com.azizoglu.grisilith.screen.render.GrisilithCoinRenderer
+import com.badlogic.gdx.math.Rectangle
+import com.azizoglu.grisilith.ui.theme.PanelVisualStyle
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
+import com.azizoglu.grisilith.statistics.career.HighScoreRepository
 
 class MainMenuScreen(
     private val game:
@@ -25,6 +30,9 @@ class MainMenuScreen(
 
         private const val VIEWPORT_HEIGHT =
             720f
+
+        private const val BACKGROUND_CHANGE_SECONDS =
+            600f
     }
 
     private val camera =
@@ -41,33 +49,75 @@ class MainMenuScreen(
         SpriteBatch()
 
     private val font =
-        BitmapFont()
+        UiFontFactory.createDisplay()
 
-    private val grisilithCoinRenderer =
-        GrisilithCoinRenderer()
+    private val titleTexture =
+        Texture(Gdx.files.internal("ui/branding/grisilith_title.png")).also {
+            it.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
+        }
+
+    private val chronicleRewardBadge =
+        Texture(
+            Gdx.files.internal(
+                "ui/components/overlays/chronicle_reward_badge.png"
+            )
+        ).also {
+            it.setFilter(
+                Texture.TextureFilter.Linear,
+                Texture.TextureFilter.Linear
+            )
+        }
 
     private val pointer =
         MenuPointer(
             viewport
         )
 
-    private val buttons =
+    private val backgroundPaths =
+        listOf(
+            "ui/backgrounds/main_menu/segliano.png",
+            "ui/backgrounds/main_menu/town_undead_battle.png",
+            "ui/backgrounds/main_menu/flokwarham.png",
+            "ui/backgrounds/main_menu/antia.png",
+            "ui/backgrounds/main_menu/jyn_ark.png",
+            "ui/backgrounds/main_menu/xzorsh.png",
+            "ui/backgrounds/main_menu/requiem.png",
+            "ui/backgrounds/main_menu/dunsheaden.png",
+            "ui/backgrounds/main_menu/grand_battle.png",
+            "ui/backgrounds/main_menu/halatha_magic_school.png"
+        )
+
+    private val remainingBackgrounds =
+        mutableListOf<Int>()
+
+    private var currentBackgroundIndex = -1
+    private var currentBackground: Texture? = null
+    private var backgroundElapsed = 0f
+
+    private val nextBackgroundBounds =
+        Rectangle(24f, 24f, 54f, 54f)
+
+    private var nextBackgroundPressed = false
+
+    private var quitConfirmationOpen = false
+
+    private val menuButtons =
         listOf(
             MenuButton(
                 text =
                     "PLAY",
 
                 x =
-                    440f,
+                    950f,
 
                 y =
-                    455f,
+                    480f,
 
                 width =
-                    400f,
+                    270f,
 
                 height =
-                    65f
+                    62f
             ) {
                 game.showPlayMenu()
             },
@@ -77,54 +127,54 @@ class MainMenuScreen(
                     "COLLECTION",
 
                 x =
-                    440f,
+                    950f,
 
                 y =
-                    370f,
+                    408f,
 
                 width =
-                    400f,
+                    270f,
 
                 height =
-                    65f
+                    62f
             ) {
                 game.showCollection()
             },
 
             MenuButton(
                 text =
-                    "MERCHANT FROM HALATHA",
+                    "MERCHANT",
 
                 x =
-                    440f,
+                    950f,
 
                 y =
-                    285f,
+                    336f,
 
                 width =
-                    400f,
+                    270f,
 
                 height =
-                    65f
+                    62f
             ) {
                 game.showMerchant()
             },
 
             MenuButton(
                 text =
-                    "HIGH SCORES",
+                    "CHRONICLE",
 
                 x =
-                    440f,
+                    950f,
 
                 y =
-                    200f,
+                    264f,
 
                 width =
-                    400f,
+                    270f,
 
                 height =
-                    65f
+                    62f
             ) {
                 game.showHighScores()
             },
@@ -134,18 +184,50 @@ class MainMenuScreen(
                     "SETTINGS",
 
                 x =
-                    440f,
+                    950f,
 
                 y =
-                    115f,
+                    192f,
 
                 width =
-                    400f,
+                    270f,
 
                 height =
-                    65f
+                    62f
             ) {
                 game.showSettings()
+            },
+
+            MenuButton(
+                text = "QUIT GAME",
+                x = 950f,
+                y = 120f,
+                width = 270f,
+                height = 62f
+            ) {
+                quitConfirmationOpen = true
+            }
+        )
+
+    private val quitButtons =
+        listOf(
+            MenuButton(
+                text = "YES, QUIT",
+                x = 455f,
+                y = 254f,
+                width = 175f,
+                height = 64f
+            ) {
+                Gdx.app.exit()
+            },
+            MenuButton(
+                text = "CANCEL",
+                x = 650f,
+                y = 254f,
+                width = 175f,
+                height = 64f
+            ) {
+                quitConfirmationOpen = false
             }
         )
 
@@ -161,6 +243,10 @@ class MainMenuScreen(
         camera.update()
 
         pointer.reset()
+
+        if (currentBackground == null) {
+            showNextBackground()
+        }
     }
 
     override fun render(
@@ -169,7 +255,18 @@ class MainMenuScreen(
     ) {
         pointer.update()
 
-        buttons.forEach { button ->
+        if (!quitConfirmationOpen) {
+            backgroundElapsed += delta.coerceAtMost(1f)
+            if (backgroundElapsed >= BACKGROUND_CHANGE_SECONDS) {
+                showNextBackground()
+            }
+            updateNextBackgroundButton()
+        } else {
+            nextBackgroundPressed = false
+        }
+
+        val activeButtons = if (quitConfirmationOpen) quitButtons else menuButtons
+        activeButtons.forEach { button ->
             val screenChanged =
                 button.update(
                     pointerPosition =
@@ -203,71 +300,79 @@ class MainMenuScreen(
 
         batch.begin()
 
+        batch.color = Color.WHITE
+        currentBackground?.let { background ->
+            batch.draw(background, 0f, 0f, VIEWPORT_WIDTH, VIEWPORT_HEIGHT)
+        }
+
+        batch.color = Color.WHITE
+        batch.draw(
+            titleTexture,
+            895f,
+            565f,
+            0f,
+            0f,
+            360f,
+            120f,
+            1f,
+            1f,
+            0f,
+            0,
+            0,
+            titleTexture.width,
+            titleTexture.height,
+            false,
+            false
+        )
+
         val oldScaleX =
             font.data.scaleX
 
         val oldScaleY =
             font.data.scaleY
 
-        font.data.setScale(
-            2.5f
-        )
+        font.data.setScale(0.66f)
+        font.color = Color(0.72f, 0.73f, 0.75f, 1f)
+        font.draw(batch, "Version 0.3.5", 930f, 70f, 290f, Align.right, false)
+        font.draw(batch, "Made by o1cylon", 930f, 48f, 290f, Align.right, false)
+        font.data.setScale(oldScaleX, oldScaleY)
 
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            "GRISILITH",
-            0f,
-            630f,
-            VIEWPORT_WIDTH,
-            1,
-            false
-        )
-
-        font.data.setScale(
-            0.9f
-        )
-
-        font.color =
-            Color.GRAY
-
-        font.draw(
-            batch,
-            "Desktop Prototype",
-            0f,
-            570f,
-            VIEWPORT_WIDTH,
-            1,
-            false
-        )
-
-        font.data.setScale(
-            oldScaleX,
-            oldScaleY
-        )
-
-        grisilithCoinRenderer.render(
-            batch =
+        if (!quitConfirmationOpen) {
+            UiComponentRenderer.drawGameSpeedButton(
+                batch = batch,
+                bounds = nextBackgroundBounds,
+                speed = 1f
+            )
+            font.data.setScale(1.02f)
+            font.color = Color(0.94f, 0.88f, 0.72f, 1f)
+            font.draw(
                 batch,
+                ">",
+                nextBackgroundBounds.x,
+                nextBackgroundBounds.y + 37f,
+                nextBackgroundBounds.width,
+                Align.center,
+                false
+            )
+            font.data.setScale(oldScaleX, oldScaleY)
+        }
 
-            font =
-                font,
+        if (quitConfirmationOpen) {
+            UiComponentRenderer.drawPanel(
+                batch = batch,
+                bounds = Rectangle(370f, 210f, 540f, 230f),
+                style = PanelVisualStyle.MODAL
+            )
+            font.data.setScale(1.15f)
+            font.color = Color(0.95f, 0.91f, 0.84f, 1f)
+            font.draw(batch, "ARE YOU SURE?", 370f, 382f, 540f, Align.center, false)
+            font.data.setScale(0.78f)
+            font.color = Color(0.75f, 0.76f, 0.78f, 1f)
+            font.draw(batch, "Do you really want to quit the game?", 400f, 342f, 480f, Align.center, false)
+            font.data.setScale(oldScaleX, oldScaleY)
+        }
 
-            amount =
-                PlayerProfileRepository
-                    .profile
-                    .grisilithCoins,
-
-            x =
-                1080f,
-
-            y =
-                680f
-        )
-
-        buttons.forEach { button ->
+        activeButtons.forEach { button ->
             button.render(
                 batch =
                     batch,
@@ -280,6 +385,21 @@ class MainMenuScreen(
 
                 pointerHeld =
                     pointer.isHeld
+            )
+        }
+
+        if (
+            !quitConfirmationOpen &&
+            HighScoreRepository
+                .hasClaimableAchievementRewards()
+        ) {
+            batch.color = Color.WHITE
+            batch.draw(
+                chronicleRewardBadge,
+                1186f,
+                297f,
+                24f,
+                24f
             )
         }
 
@@ -307,8 +427,49 @@ class MainMenuScreen(
         )
     }
 
+    private fun updateNextBackgroundButton() {
+        val centerX = nextBackgroundBounds.x + nextBackgroundBounds.width / 2f
+        val centerY = nextBackgroundBounds.y + nextBackgroundBounds.height / 2f
+        val dx = pointer.position.x - centerX
+        val dy = pointer.position.y - centerY
+        val inside = dx * dx + dy * dy <= nextBackgroundBounds.width * nextBackgroundBounds.width / 4f
+
+        if (pointer.justPressed) {
+            nextBackgroundPressed = inside
+        }
+        if (pointer.justReleased) {
+            if (nextBackgroundPressed && inside) {
+                showNextBackground()
+            }
+            nextBackgroundPressed = false
+        }
+    }
+
+    private fun showNextBackground() {
+        if (remainingBackgrounds.isEmpty()) {
+            val shuffled = backgroundPaths.indices.shuffled().toMutableList()
+            if (shuffled.size > 1 && shuffled.last() == currentBackgroundIndex) {
+                val swapIndex = shuffled.indexOfFirst { it != currentBackgroundIndex }
+                val replacement = shuffled[swapIndex]
+                shuffled[swapIndex] = shuffled.last()
+                shuffled[shuffled.lastIndex] = replacement
+            }
+            remainingBackgrounds += shuffled
+        }
+
+        currentBackgroundIndex = remainingBackgrounds.removeAt(remainingBackgrounds.lastIndex)
+        currentBackground?.dispose()
+        currentBackground = Texture(Gdx.files.internal(backgroundPaths[currentBackgroundIndex])).also {
+            it.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
+        }
+        backgroundElapsed = 0f
+    }
+
     override fun dispose() {
         batch.dispose()
         font.dispose()
+        titleTexture.dispose()
+        chronicleRewardBadge.dispose()
+        currentBackground?.dispose()
     }
 }

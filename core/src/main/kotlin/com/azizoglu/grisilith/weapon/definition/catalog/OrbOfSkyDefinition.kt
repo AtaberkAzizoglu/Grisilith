@@ -73,10 +73,6 @@ object OrbOfSkyDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.10f,
-                        level3Damage = 1.20f,
-                        level4Damage = 1.35f,
-                        level5Damage = 1.50f,
 
                         level2AttackSpeed = 1.15f,
                         level3AttackSpeed = 1.22f,

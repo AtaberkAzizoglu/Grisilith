@@ -139,7 +139,7 @@ object DefaultHumanoidEnemySpriteSheets {
             intArrayOf(0, 308, 574, 831, 1122),
             0.12f
         ),
-        spearmanDefinition(),
+        CorrectedEnemySpriteSheets.spearman,
         horsemanDefinition(),
         fullAtlasDefinition(
             EnemyKindIds.WITCH,

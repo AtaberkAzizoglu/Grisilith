@@ -8,7 +8,7 @@ import com.azizoglu.grisilith.statistics.StatType
 
 object DefaultItems {
 
-    private fun commonStatItem(
+    private fun uncommonStatItem(
         id: String,
         displayName: String,
         description: String,
@@ -22,7 +22,8 @@ object DefaultItems {
                 displayName,
 
             description =
-                description,
+                description +
+                    "\nMaximum copies: ${ItemRarity.UNCOMMON.maximumInventoryCopies}.",
 
             tags =
                 setOf(
@@ -30,7 +31,7 @@ object DefaultItems {
                 ),
 
             rarity =
-                ItemRarity.COMMON,
+                ItemRarity.UNCOMMON,
 
             statModifiers =
                 listOf(
@@ -60,7 +61,8 @@ object DefaultItems {
     ) = ItemDefinition(
         id = ContentId(id),
         displayName = displayName,
-        description = description,
+        description = description +
+            "\nMaximum copies: ${maximumInventoryCopies ?: rarity.maximumInventoryCopies}.",
         rarity = rarity,
         statModifiers = statModifiers,
         effectId = effectId,
@@ -69,20 +71,21 @@ object DefaultItems {
         sharedCopyLimit = sharedCopyLimit
     )
 
-    val obsidianWardPendant = commonStatItem(
+    val obsidianWardPendant =
+        uncommonStatItem(
         id = "ITEM_OBSIDIAN_WARD_PENDANT",
-        displayName = "Obsidian Ward Pendant",
+        displayName = "Obsidian Ward Ring",
         description = "Increases Magic Resistance by 1.",
         statType = StatType.MAGIC_RESISTANCE
     )
 
     val spellScroll =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_SPELL_SCROLL",
 
             displayName =
-                "Spell Scroll",
+                "Spell Book",
 
             description =
                 "Increases Wisdom by 1.",
@@ -92,7 +95,7 @@ object DefaultItems {
         )
 
     val windBoots =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_WIND_BOOTS",
 
@@ -107,7 +110,7 @@ object DefaultItems {
         )
 
     val vampireFangs =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_VAMPIRE_FANGS",
 
@@ -122,7 +125,7 @@ object DefaultItems {
         )
 
     val luckyDice =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_LUCKY_DICE",
 
@@ -137,7 +140,7 @@ object DefaultItems {
         )
 
     val gladiatorsLocket =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_GLADIATORS_LOCKET",
 
@@ -152,7 +155,7 @@ object DefaultItems {
         )
 
     val lordBledasBanner =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_LORD_BLEDAS_BANNER",
 
@@ -167,7 +170,7 @@ object DefaultItems {
         )
 
     val hourglass =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_HOURGLASS",
 
@@ -182,7 +185,7 @@ object DefaultItems {
         )
 
     val hillGiantsBelt =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_HILL_GIANTS_BELT",
 
@@ -197,7 +200,7 @@ object DefaultItems {
         )
 
     val chainMail =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_CHAIN_MAIL",
 
@@ -212,12 +215,12 @@ object DefaultItems {
         )
 
     val sandals =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_SANDALS",
 
             displayName =
-                "Sandals",
+                "Leather Boots",
 
             description =
                 "Increases Dexterity by 1.",
@@ -227,7 +230,7 @@ object DefaultItems {
         )
 
     val kepenek =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_KEPENEK",
 
@@ -242,7 +245,7 @@ object DefaultItems {
         )
 
     val whetstone =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_WHETSTONE",
 
@@ -257,7 +260,7 @@ object DefaultItems {
         )
 
     val warHorn =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_WAR_HORN",
 
@@ -272,12 +275,12 @@ object DefaultItems {
         )
 
     val goddessSelinusAmulet =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_GODDESS_SELINUS_AMULET",
 
             displayName =
-                "Goddess Selinus' Amulet",
+                "Goddes Selinus' Necklace",
 
             description =
                 "Increases HP Regeneration by 1.",
@@ -287,7 +290,7 @@ object DefaultItems {
         )
 
     val copperRod =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_COPPER_ROD",
 
@@ -302,7 +305,7 @@ object DefaultItems {
         )
 
     val amuletOfAzuth =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_AMULET_OF_AZUTH",
 
@@ -317,7 +320,7 @@ object DefaultItems {
         )
 
     val griffinFeather =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_GRIFFIN_FEATHER",
 
@@ -332,12 +335,12 @@ object DefaultItems {
         )
 
     val warmastersOrder =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_WARMASTERS_ORDER",
 
             displayName =
-                "Warmaster's Order",
+                "Fang",
 
             description =
                 "Increases Crit Rate by 1.",
@@ -347,7 +350,7 @@ object DefaultItems {
         )
 
     val heavyArrow =
-        commonStatItem(
+        uncommonStatItem(
             id =
                 "ITEM_HEAVY_ARROW",
 
@@ -390,7 +393,7 @@ object DefaultItems {
 
     val cruelPrecision = effectItem(
         "ITEM_CRUEL_PRECISION",
-        "Cruel Precision",
+        "Leather Armband",
         "Reduces Crit Rate by 3 and increases Crit Damage by 5.",
         ItemRarity.RARE,
         statModifiers = listOf(
@@ -409,7 +412,7 @@ object DefaultItems {
 
     val specialist = effectItem(
         "ITEM_SPECIALIST",
-        "Specialist",
+        "Specialist Ring",
         "Your most-used magical damage type deals 7% more damage; the others deal 10% less.",
         ItemRarity.ARTIFACT,
         ItemEffectId.SPECIALIST
@@ -417,7 +420,7 @@ object DefaultItems {
 
     val chaosTheory = effectItem(
         "ITEM_CHAOS_THEORY",
-        "Chaos Theory",
+        "Orb of Chaos Theory",
         "Magical damage has a stacking 20% chance per copy to change into another magical damage type.",
         ItemRarity.RARE,
         ItemEffectId.CHAOS_THEORY
@@ -425,7 +428,7 @@ object DefaultItems {
 
     val summonersPact = effectItem(
         "ITEM_SUMMONERS_PACT",
-        "Summoner's Pact",
+        "Summoners Pact Ring",
         "Summons gain 10% damage and health, while the player's damage is reduced by 25%.",
         ItemRarity.RARE,
         ItemEffectId.SUMMONERS_PACT
@@ -434,7 +437,7 @@ object DefaultItems {
     val bloodMoney = effectItem(
         "ITEM_BLOOD_MONEY",
         "Blood Money",
-        "Gold rewards have a 10% chance to double, but enemies deal 20% more damage.",
+        "Collected Gold Coins have a 10% chance to double, but enemies deal 20% more damage.",
         ItemRarity.RARE,
         ItemEffectId.BLOOD_MONEY
     )
@@ -442,7 +445,7 @@ object DefaultItems {
     val greedySoul = effectItem(
         "ITEM_GREEDY_SOUL",
         "Greedy Soul",
-        "Increases Pickup Range by 25% and reduces Movement Speed by 2.",
+        "Increases Pickup Range by 25%, but reduces Movement Speed by 2.",
         ItemRarity.RARE,
         ItemEffectId.GREEDY_SOUL,
         statModifiers = listOf(
@@ -460,15 +463,15 @@ object DefaultItems {
 
     val noMercy = effectItem(
         "ITEM_NO_MERCY",
-        "No Mercy",
-        "Deals 5% more damage, but all healing is reduced by 75%.",
+        "Mercy Mask",
+        "You deal 5% more damage, but all healing you receive is reduced by 75%.",
         ItemRarity.RARE,
         ItemEffectId.NO_MERCY
     )
 
     val compressedSpace = effectItem(
         "ITEM_COMPRESSED_SPACE",
-        "Compressed Space",
+        "Archer's Monoglass",
         "Reduces Weapon Range by 25% and increases damage by 8%.",
         ItemRarity.LEGENDARY,
         ItemEffectId.COMPRESSED_SPACE
@@ -509,7 +512,7 @@ object DefaultItems {
     val arsenal = effectItem(
         "ITEM_ARSENAL",
         "Arsenal",
-        "All weapons deal 11% more damage for every different weapon owned.",
+        "All Weapons deal 11% more damage for every different Weapon owned.",
         ItemRarity.LEGENDARY,
         ItemEffectId.ARSENAL
     )
@@ -540,7 +543,7 @@ object DefaultItems {
 
     val oddity = effectItem(
         "ITEM_ODDITY",
-        "Oddity",
+        "Odd Eye",
         "Odd-numbered weapon slots gain 1% Crit Chance; even-numbered slots gain 1% Attack Speed.",
         ItemRarity.RARE,
         ItemEffectId.ODDITY
@@ -557,7 +560,7 @@ object DefaultItems {
     val collector = effectItem(
         "ITEM_COLLECTOR",
         "Collector",
-        "Deals 0.1% more damage for every different Item and Tamga owned.",
+        "You deal 0.1% more damage for every different Item and Tamga you own.",
         ItemRarity.RARE,
         ItemEffectId.COLLECTOR
     )
@@ -579,42 +582,42 @@ object DefaultItems {
 
     val conversionHealth = conversionItem(
         "ITEM_CONVERSION_HEALTH",
-        "Conversion: Health",
+        "Conversion HP to STR",
         "Converts 20% of Max HP into Strength when acquired.",
         ItemEffectId.CONVERSION_HEALTH
     )
 
     val conversionArmorClass = conversionItem(
         "ITEM_CONVERSION_ARMOR_CLASS",
-        "Conversion: Armor Class",
+        "Conversion: AC to STR",
         "Converts 20% of Armor Class into Strength when acquired.",
         ItemEffectId.CONVERSION_ARMOR_CLASS
     )
 
     val conversionShepherd = conversionItem(
         "ITEM_CONVERSION_SHEPHERD",
-        "Conversion: Shepherd",
+        "Conversion SPH to WIS",
         "Converts 20% of Shepherd into Wisdom when acquired.",
         ItemEffectId.CONVERSION_SHEPHERD
     )
 
     val conversionAttackSpeed = conversionItem(
         "ITEM_CONVERSION_ATTACK_SPEED",
-        "Conversion: Attack Speed",
+        "Conversion: AS to DEX",
         "Converts 20% of Attack Speed into Dexterity when acquired.",
         ItemEffectId.CONVERSION_ATTACK_SPEED
     )
 
     val conversionMovementSpeed = conversionItem(
         "ITEM_CONVERSION_MOVEMENT_SPEED",
-        "Conversion: Movement Speed",
+        "Conversion MS to DEX",
         "Converts 20% of Movement Speed into Dexterity when acquired.",
         ItemEffectId.CONVERSION_MOVEMENT_SPEED
     )
 
     val conversionEnemyCount = conversionItem(
         "ITEM_CONVERSION_ENEMY_COUNT",
-        "Conversion: Enemy Count",
+        "Conversion: EC to PIR",
         "Converts 20% of Enemy Count into Piercing when acquired.",
         ItemEffectId.CONVERSION_ENEMY_COUNT
     )
@@ -637,7 +640,7 @@ object DefaultItems {
 
     val cursedMark = effectItem(
         "ITEM_CURSED_MARK",
-        "Cursed Mark",
+        "Cursed Mark Tattoo",
         "Increases Enemy Count by 2.",
         ItemRarity.RARE,
         statModifiers = listOf(
@@ -646,7 +649,7 @@ object DefaultItems {
     )
 
     val bloodSacrifice = effectItem(
-        "ITEM_BLOOD_SACRIFICE", "Blood Sacrifice",
+        "ITEM_BLOOD_SACRIFICE", "Sacrificed Blood Vial",
         "Weapon Skills have a 50% chance to cost half of current health and skip their cooldown. Cannot kill the player.",
         ItemRarity.LEGENDARY, ItemEffectId.BLOOD_SACRIFICE,
         maximumInventoryCopies = 1
@@ -654,7 +657,7 @@ object DefaultItems {
 
     val deepWounds = effectItem(
         "ITEM_DEEP_WOUNDS", "Deep Wounds",
-        "Below 20% health, Attack Speed, Movement Speed and Crit Rate increase by 2.",
+        "When you drop below 20% health, Attack Speed, Movement Speed and Crit Rate increase by 2.",
         ItemRarity.RARE, ItemEffectId.DEEP_WOUNDS
     )
 
@@ -675,7 +678,7 @@ object DefaultItems {
     )
 
     val crowdHunger = effectItem(
-        "ITEM_CROWD_HUNGER", "Crowd Hunger",
+        "ITEM_CROWD_HUNGER", "Crowd Hunter",
         "Deals 1% more damage per nearby enemy, up to 5% per copy.",
         ItemRarity.LEGENDARY, ItemEffectId.CROWD_HUNGER
     )
@@ -687,14 +690,14 @@ object DefaultItems {
     )
 
     val ghostProjectile = effectItem(
-        "ITEM_GHOST_PROJECTILE", "Ghost Projectile",
-        "Ranged projectiles have a 40% chance to pass through obstacles.",
+        "ITEM_GHOST_PROJECTILE", "Ghost Arrow",
+        "Ranged Weapon projectiles have a 40% chance to pass through obstacles.",
         ItemRarity.RARE, ItemEffectId.GHOST_PROJECTILE,
         maximumInventoryCopies = 1
     )
 
     val criticalMomentum = effectItem(
-        "ITEM_CRITICAL_MOMENTUM", "Critical Momentum",
+        "ITEM_CRITICAL_MOMENTUM", "Rope Sandals",
         "Critical hits grant 1 Movement Speed for 5 seconds.",
         ItemRarity.RARE, ItemEffectId.CRITICAL_MOMENTUM
     )
@@ -706,7 +709,7 @@ object DefaultItems {
     )
 
     val sharedFury = effectItem(
-        "ITEM_SHARED_FURY", "Shared Fury",
+        "ITEM_SHARED_FURY", "Fury Orb",
         "When a summon dies, gain 1 Haste and 1 Wisdom for 5 seconds.",
         ItemRarity.RARE, ItemEffectId.SHARED_FURY
     )
@@ -718,14 +721,14 @@ object DefaultItems {
     )
 
     val overflowingPower = effectItem(
-        "ITEM_OVERFLOWING_POWER", "Overflowing Power",
+        "ITEM_OVERFLOWING_POWER", "Overflowing Power Stone",
         "A ready Weapon Skill gains 1% damage per unused second, up to 15% on its next use.",
         ItemRarity.ARTIFACT, ItemEffectId.OVERFLOWING_POWER
     )
 
     val thorns = effectItem(
         "ITEM_THORNS", "Thorns",
-        "Contact damage reflects damage based on Armor Class.",
+        "When you take contact damage, the attacker receives reflected damage based on your Armor Class.",
         ItemRarity.RARE, ItemEffectId.THORNS
     )
 
@@ -748,13 +751,13 @@ object DefaultItems {
     )
 
     val extraReward = effectItem(
-        "ITEM_EXTRA_REWARD", "Extra Reward",
+        "ITEM_EXTRA_REWARD", "Gold Pouch",
         "Picking up a Chest heals 6% of maximum health.",
         ItemRarity.RARE, ItemEffectId.EXTRA_REWARD
     )
 
     val gambler = effectItem(
-        "ITEM_GAMBLER", "Gambler",
+        "ITEM_GAMBLER", "Gamblers Card",
         "At each stage start, one eligible random Stat gains 1 and another loses 1.",
         ItemRarity.RARE, ItemEffectId.GAMBLER
     )
@@ -773,7 +776,7 @@ object DefaultItems {
     )
 
     val predestination = effectItem(
-        "ITEM_PREDESTINATION", "Predestination",
+        "ITEM_PREDESTINATION", "The D20",
         "Each stage empowers one random Damage Type by 2.5%.",
         ItemRarity.RARE, ItemEffectId.PREDESTINATION
     )
@@ -798,21 +801,21 @@ object DefaultItems {
     )
 
     val littleRisk = effectItem(
-        "ITEM_LITTLE_RISK", "Little Risk",
-        "Adds 0.5 percentage points to Unique frequency and 2 points to Mini Boss Grisilith Coin chance per copy.",
+        "ITEM_LITTLE_RISK", "Risky Dice",
+        "Each copy increases the Unique Enemy spawn chance by 0.5 percentage points and the Mini Boss Grisilith Coin drop chance by 2 percentage points.",
         ItemRarity.RARE, ItemEffectId.LITTLE_RISK
     )
 
     val blindFaith = effectItem(
         "ITEM_BLIND_FAITH", "Blind Faith",
-        "Deals 6% more damage per copy and hides enemy health bars. Mist begins at two copies and grows with further copies.",
+        "You deal 6% more damage per copy, but enemy health bars are hidden. Vision-obscuring mist begins at two copies and grows with further copies.",
         ItemRarity.RARE, ItemEffectId.BLIND_FAITH,
         maximumInventoryCopies = 5
     )
 
     val animatedBroom = effectItem(
         "ITEM_ANIMATED_BROOM", "Animated Broom",
-        "Animates one untargetable broom per copy to collect Gold and Grisilith Coins.",
+        "A straw broom comes to life through magic and collects nearby Gold and Grisilith Coins. A new broom appears for every copy of this item.",
         ItemRarity.RARE, ItemEffectId.ANIMATED_BROOM
     )
 
@@ -836,7 +839,7 @@ object DefaultItems {
 
     val lootTheEnemies = effectItem(
         "ITEM_LOOT_THE_ENEMIES", "Loot the Enemies",
-        "Enemies have a 5% loot chance per copy. Loot heals 10% maximum health, but Movement Speed is reduced by 1 per copy.",
+        "Enemies have a 5% chance per copy to drop a healing collectible. Its appearance depends on the enemy type, but every version heals 10% of maximum health. Each copy also reduces Movement Speed by 1.",
         ItemRarity.RARE, ItemEffectId.LOOT_THE_ENEMIES,
         statModifiers = listOf(StatModifier(StatType.MOVEMENT_SPEED, -1)),
         maximumInventoryCopies = 5
@@ -844,49 +847,55 @@ object DefaultItems {
 
     val boneTotems = effectItem(
         "ITEM_BONE_TOTEMS", "Bone Totems",
-        "Stages have a 35% chance to contain a chargeable Bone Totem that rolls one reward from the owned Totem List.",
+        "Stages have a 35% chance to contain a chargeable Bone Totem that rolls one reward from the owned Totem List. Bone Totem List items expand the reward pool, but every beneficial reward adds a dangerous result to the roulette.",
         ItemRarity.RARE, ItemEffectId.BONE_TOTEMS,
         maximumInventoryCopies = 1
     )
 
     val boneTotemHealingAura = effectItem(
         "ITEM_BONE_TOTEM_HEALING_AURA", "Bone Totems List: Healing Aura",
-        "Adds Healing Aura to the Bone Totem reward pool.",
+        "Adds Healing Aura to the Bone Totem reward pool. For 12 seconds, the aura heals the player and allied summons inside it for 1.5% of maximum health every 0.25 seconds.",
         ItemRarity.RARE, ItemEffectId.BONE_TOTEM_HEALING_AURA,
         maximumInventoryCopies = 1
     )
 
     val boneTotemProtectersArea = effectItem(
         "ITEM_BONE_TOTEM_PROTECTERS_AREA", "Bone Totems List: Protecters Area",
-        "Adds Protecters Area to the Bone Totem reward pool.",
+        "Adds Protecters Area to the Bone Totem reward pool. For 10 seconds, enemies inside the area take damage equal to 4% of their maximum health every 0.33 seconds.",
         ItemRarity.RARE, ItemEffectId.BONE_TOTEM_PROTECTERS_AREA,
         maximumInventoryCopies = 1
     )
 
     val boneTotemBurriedTreasure = effectItem(
         "ITEM_BONE_TOTEM_BURRIED_TREASURE", "Bone Totems List: Burried Treasure",
-        "Adds Burried Treasure to the Bone Totem reward pool.",
+        "Adds Burried Treasure to the Bone Totem reward pool. It drops a random amount of treasure between the number of defeated Bosses and the current Stage, with a small chance for one Grisilith Coin.",
         ItemRarity.RARE, ItemEffectId.BONE_TOTEM_BURRIED_TREASURE,
         maximumInventoryCopies = 1
     )
 
     val boneTotemHourglass = effectItem(
         "ITEM_BONE_TOTEM_HOURGLASS", "Bone Totems List: Hourglass",
-        "Adds Hourglass to the Bone Totem reward pool.",
+        "Adds Hourglass to the Bone Totem reward pool. It reduces all Weapon Ability, active Tamga and summon cooldowns by 5 seconds for every defeated Boss.",
         ItemRarity.RARE, ItemEffectId.BONE_TOTEM_HOURGLASS,
         maximumInventoryCopies = 1
     )
 
     val boneTotemToads = effectItem(
         "ITEM_BONE_TOTEM_TOADS", "Bone Totems List: Toads",
-        "Adds Toads to the Bone Totem reward pool.",
+        "Adds Toads to the Bone Totem reward pool. It summons one temporary allied Toad for every 5 Shepherd.",
         ItemRarity.RARE, ItemEffectId.BONE_TOTEM_TOADS,
         maximumInventoryCopies = 1
     )
 
+    val discardVoucher = effectItem("ITEM_DISCARD_VOUCHER", "Discard Voucher",
+        "Grants one extra chest discard after your normal allowance is exhausted. " +
+        "One voucher is consumed only when that extra discard is used.",
+        ItemRarity.RARE, ItemEffectId.DISCARD_VOUCHER)
+
     val all:
         List<ItemDefinition> =
         listOf(
+            discardVoucher,
             spellScroll,
             obsidianWardPendant,
             windBoots,

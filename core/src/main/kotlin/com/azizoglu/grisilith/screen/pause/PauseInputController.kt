@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.screen.pause
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.utils.viewport.Viewport
 
 class PauseInputController(
@@ -18,8 +19,10 @@ class PauseInputController(
         (Int) -> Boolean,
 
     private val groupedItemCountProvider:
-        () -> Int
-) {
+        () -> Int,
+    private val onWeaponDrop: (Int, Int) -> Unit = { _, _ -> },
+    private val onConfirmWeaponMerge: () -> Unit = {}
+) : InputAdapter() {
 
     private var pointerWasHeld =
         false
@@ -28,6 +31,20 @@ class PauseInputController(
         PauseButtonType? =
         null
 
+    private var itemDragLastY: Float? = null
+    private var weaponPressSlot: Int? = null
+    private val weaponPressPosition = com.badlogic.gdx.math.Vector2()
+
+    override fun scrolled(amountX: Float, amountY: Float): Boolean {
+        val layout = layoutProvider()
+        updatePointerPosition()
+        if (interactionState.isAnyModalOpen || !layout.itemPanel.contains(interactionState.pointerPosition)) {
+            return false
+        }
+        scrollItemRows(layout, if (amountY > 0f) 1 else -1)
+        return true
+    }
+
     fun update():
         PauseAction? {
 
@@ -35,6 +52,8 @@ class PauseInputController(
 
         val layout =
             layoutProvider()
+
+        updateHoverDetails(layout)
 
         handleItemScroll(
             layout
@@ -52,6 +71,12 @@ class PauseInputController(
         val pointerJustReleased =
             !pointerHeld &&
                 pointerWasHeld
+
+        if (!interactionState.isAnyModalOpen && handleWeaponDrag(layout, pointerHeld, pointerJustPressed, pointerJustReleased)) {
+            pointerWasHeld = pointerHeld
+            return null
+        }
+        handleItemDrag(layout, pointerHeld)
 
         /*
          * Confirmation açıkken yalnızca
@@ -137,10 +162,6 @@ class PauseInputController(
                     handlePauseButtonRelease(
                         releasedButton
                     )
-            } else {
-                handleInventoryClick(
-                    layout
-                )
             }
 
             pressedButton =
@@ -185,11 +206,17 @@ class PauseInputController(
             }
 
             PauseButtonType
+                .MAIN_MENU -> {
+                interactionState.openConfirmation(PauseConfirmationType.QUIT_TO_MAIN_MENU)
+                null
+            }
+
+            PauseButtonType
                 .QUIT_GAME -> {
                 interactionState
                     .openConfirmation(
                         PauseConfirmationType
-                            .QUIT_TO_MAIN_MENU
+                            .EXIT_GAME
                     )
 
                 null
@@ -241,6 +268,10 @@ class PauseInputController(
             interactionState
                 .confirmationType
         ) {
+            PauseConfirmationType.MERGE_WEAPONS -> {
+                onConfirmWeaponMerge()
+                null
+            }
             PauseConfirmationType
                 .RESTART_RUN -> {
                 interactionState
@@ -254,6 +285,12 @@ class PauseInputController(
                 interactionState
                     .closeAllModals()
 
+                PauseAction.MAIN_MENU
+            }
+
+            PauseConfirmationType
+                .EXIT_GAME -> {
+                interactionState.closeAllModals()
                 PauseAction.QUIT_GAME
             }
 
@@ -336,7 +373,7 @@ class PauseInputController(
 
         val visibleItemRowIndex =
             PauseLayout
-                .itemRowRectangles(
+                .itemSlotRectangles(
                     layout.itemPanel
                 )
                 .indexOfFirst { rectangle ->
@@ -407,28 +444,66 @@ class PauseInputController(
             return
         }
 
-        val maximumVisibleRows =
-            PauseLayout
-                .maximumVisibleItemRows(
-                    layout.itemPanel
-                )
-
-        val maximumOffset =
-            (
-                groupedItemCountProvider() -
-                    maximumVisibleRows
-                )
-                .coerceAtLeast(
-                    0
-                )
+        val maximumOffset = PauseLayout.maximumItemScrollOffset(
+            groupedItemCountProvider(),
+            layout.itemPanel
+        )
 
         interactionState.scrollItems(
             amount =
-                scrollAmount,
+                scrollAmount * PauseLayout.ITEM_COLUMNS,
 
             maximumOffset =
                 maximumOffset
         )
+    }
+
+    private fun scrollItemRows(layout: PauseLayout, rows: Int) {
+        val maximumOffset = PauseLayout.maximumItemScrollOffset(groupedItemCountProvider(), layout.itemPanel)
+        interactionState.scrollItems(rows * PauseLayout.ITEM_COLUMNS, maximumOffset)
+    }
+
+    private fun handleItemDrag(layout: PauseLayout, pointerHeld: Boolean) {
+        val pointer = interactionState.pointerPosition
+        if (!pointerHeld || !layout.itemPanel.contains(pointer) || interactionState.isAnyModalOpen) {
+            itemDragLastY = null
+            return
+        }
+        val previousY = itemDragLastY
+        if (previousY == null) {
+            itemDragLastY = pointer.y
+            return
+        }
+        val delta = pointer.y - previousY
+        if (kotlin.math.abs(delta) >= 18f) {
+            scrollItemRows(layout, if (delta < 0f) 1 else -1)
+            itemDragLastY = pointer.y
+        }
+    }
+
+    private fun updateHoverDetails(layout: PauseLayout) {
+        if (interactionState.isAnyModalOpen || interactionState.draggedWeaponSlotIndex != null) {
+            interactionState.setHoverDetails(null, null, null, null)
+            return
+        }
+        val pointer = interactionState.pointerPosition
+        val weapon = layout.weaponSlots.indexOfFirst { it.contains(pointer) }
+            .takeIf { it >= 0 && weaponExistsAt(it) }
+        val visibleItem = PauseLayout.itemSlotRectangles(layout.itemPanel)
+            .indexOfFirst { it.contains(pointer) }
+        val item = if (visibleItem >= 0) {
+            (interactionState.itemScrollOffset + visibleItem)
+                .takeIf { it < groupedItemCountProvider() }
+        } else null
+        val gear = when {
+            layout.armorSlot.contains(pointer) -> PauseGearDetailType.ARMOR
+            layout.weaponTamgaSlot.contains(pointer) -> PauseGearDetailType.WEAPON_TAMGA
+            layout.armorTamgaSlot.contains(pointer) -> PauseGearDetailType.ARMOR_TAMGA
+            else -> null
+        }
+        val stat = PauseLayout.statRowRectangles(layout.characterStatsPanel)
+            .entries.firstOrNull { it.value.contains(pointer) }?.key
+        interactionState.setHoverDetails(weapon, item, gear, stat)
     }
 
     private fun updatePointerPosition() {
@@ -478,6 +553,10 @@ class PauseInputController(
                     .SETTINGS
             }
 
+            layout.mainMenuButton.contains(pointer) -> {
+                PauseButtonType.MAIN_MENU
+            }
+
             layout.quitGameButton
                 .contains(
                     pointer
@@ -493,6 +572,7 @@ class PauseInputController(
     }
 
     fun reset() {
+        weaponPressSlot = null
         pointerWasHeld =
             false
 
@@ -500,6 +580,32 @@ class PauseInputController(
             null
 
         interactionState.reset()
+
+        itemDragLastY = null
+    }
+
+    private fun handleWeaponDrag(layout: PauseLayout, held: Boolean, pressed: Boolean, released: Boolean): Boolean {
+        val pointer = interactionState.pointerPosition
+        if (pressed) {
+            weaponPressSlot = layout.weaponSlots.indexOfFirst { it.contains(pointer) }
+                .takeIf { it >= 0 && weaponExistsAt(it) }
+            weaponPressPosition.set(pointer)
+        }
+        val source = weaponPressSlot ?: return false
+        if (held && pointer.dst2(weaponPressPosition) >= 64f) interactionState.draggedWeaponSlotIndex = source
+        val dragging = interactionState.draggedWeaponSlotIndex != null
+        interactionState.weaponDropTargetIndex = if (dragging) layout.weaponSlots.indexOfFirst { it.contains(pointer) }.takeIf { it >= 0 } else null
+        if (released) {
+            val target = interactionState.weaponDropTargetIndex
+            weaponPressSlot = null
+            interactionState.draggedWeaponSlotIndex = null
+            interactionState.weaponDropTargetIndex = null
+            pressedButton = null
+            interactionState.setPressedButton(null)
+            if (dragging && target != null) onWeaponDrop(source, target)
+        }
+        if (dragging) interactionState.setHoverDetails(null, null, null, null)
+        return dragging
     }
 }
 
@@ -510,6 +616,8 @@ enum class PauseAction {
     RESTART,
 
     OPEN_SETTINGS,
+
+    MAIN_MENU,
 
     QUIT_GAME
 }

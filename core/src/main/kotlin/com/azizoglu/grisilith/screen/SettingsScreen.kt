@@ -3,6 +3,7 @@ package com.azizoglu.grisilith.screen
 import com.azizoglu.grisilith.GrisilithGame
 import com.azizoglu.grisilith.screen.components.MenuButton
 import com.azizoglu.grisilith.screen.components.MenuPointer
+import com.azizoglu.grisilith.screen.components.MenuButtonVisualStyle
 import com.azizoglu.grisilith.settings.GameSettings
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
@@ -10,12 +11,16 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.azizoglu.grisilith.ui.typography.UiFontFactory
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import kotlin.math.roundToInt
+import com.badlogic.gdx.math.Rectangle
+import com.azizoglu.grisilith.ui.theme.PanelVisualStyle
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
 
-class SettingsScreen(
+private class LegacySettingsScreen(
     private val game:
     GrisilithGame,
 
@@ -37,10 +42,10 @@ class SettingsScreen(
             690f
 
         private const val ROW_START_Y =
-            535f
+            540f
 
         private const val ROW_SPACING =
-            52f
+            42f
     }
 
     private val camera =
@@ -57,7 +62,7 @@ class SettingsScreen(
         SpriteBatch()
 
     private val font =
-        BitmapFont()
+        UiFontFactory.createBody()
 
     private val pointer =
         MenuPointer(
@@ -128,6 +133,17 @@ class SettingsScreen(
 
         batch.begin()
 
+        UiComponentRenderer.drawPanel(
+            batch,
+            Rectangle(210f, 100f, 860f, 475f),
+            PanelVisualStyle.MAIN
+        )
+        UiComponentRenderer.drawPanel(
+            batch,
+            Rectangle(410f, 618f, 460f, 58f),
+            PanelVisualStyle.TITLE
+        )
+
         renderTitle()
         renderLabels()
 
@@ -195,6 +211,32 @@ class SettingsScreen(
                 GameSettings
                     .decreaseMasterVolume()
 
+                refreshButtons()
+            },
+
+            MenuButton(
+                text = onOffText(GameSettings.showAbilityShortcuts),
+                x = VALUE_X,
+                y = rowY(8),
+                width = 320f,
+                height = buttonHeight,
+                visualStyle = MenuButtonVisualStyle.TOGGLE,
+                isSelected = GameSettings.showAbilityShortcuts
+            ) {
+                GameSettings.toggleAbilityShortcuts()
+                refreshButtons()
+            },
+
+            MenuButton(
+                text = onOffText(GameSettings.showAbilityCooldowns),
+                x = VALUE_X,
+                y = rowY(9),
+                width = 320f,
+                height = buttonHeight,
+                visualStyle = MenuButtonVisualStyle.TOGGLE,
+                isSelected = GameSettings.showAbilityCooldowns
+            ) {
+                GameSettings.toggleAbilityCooldowns()
                 refreshButtons()
             },
 
@@ -403,7 +445,11 @@ class SettingsScreen(
                     320f,
 
                 height =
-                    buttonHeight
+                    buttonHeight,
+
+                visualStyle = MenuButtonVisualStyle.TOGGLE,
+
+                isSelected = GameSettings.fullscreen
             ) {
                 GameSettings
                     .toggleFullscreen()
@@ -429,7 +475,11 @@ class SettingsScreen(
                     320f,
 
                 height =
-                    buttonHeight
+                    buttonHeight,
+
+                visualStyle = MenuButtonVisualStyle.TOGGLE,
+
+                isSelected = GameSettings.vSync
             ) {
                 GameSettings
                     .toggleVSync()
@@ -455,7 +505,11 @@ class SettingsScreen(
                     320f,
 
                 height =
-                    buttonHeight
+                    buttonHeight,
+
+                visualStyle = MenuButtonVisualStyle.TOGGLE,
+
+                isSelected = GameSettings.screenShake
             ) {
                 GameSettings
                     .toggleScreenShake()
@@ -481,7 +535,11 @@ class SettingsScreen(
                     320f,
 
                 height =
-                    buttonHeight
+                    buttonHeight,
+
+                visualStyle = MenuButtonVisualStyle.TOGGLE,
+
+                isSelected = GameSettings.damageNumbers
             ) {
                 GameSettings
                     .toggleDamageNumbers()
@@ -508,7 +566,11 @@ class SettingsScreen(
                     320f,
 
                 height =
-                    buttonHeight
+                    buttonHeight,
+
+                visualStyle = MenuButtonVisualStyle.TOGGLE,
+
+                isSelected = GameSettings.showGameSpeedButton
             ) {
                 GameSettings
                     .toggleGameSpeedButton()
@@ -586,15 +648,8 @@ class SettingsScreen(
         font.color =
             Color.WHITE
 
-        font.draw(
-            batch,
-            "SETTINGS",
-            0f,
-            650f,
-            VIEWPORT_WIDTH,
-            Align.center,
-            false
-        )
+        com.azizoglu.grisilith.ui.ScreenTitleArt.draw(batch,"SETTINGS",
+            com.badlogic.gdx.math.Rectangle(370f,610f,540f,52f))
 
         font.data.setScale(
             0.85f
@@ -607,7 +662,7 @@ class SettingsScreen(
             batch,
             "Display settings are applied immediately.",
             0f,
-            603f,
+            607f,
             VIEWPORT_WIDTH,
             Align.center,
             false
@@ -629,7 +684,9 @@ class SettingsScreen(
                 "VSync",
                 "Screen Shake",
                 "Damage Numbers",
-                "Game Speed Button"
+                "Game Speed Button",
+                "Ability Shortcut Keys",
+                "Ability Cooldowns"
             )
 
         val oldScaleX =

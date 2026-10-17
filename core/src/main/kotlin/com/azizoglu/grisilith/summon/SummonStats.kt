@@ -15,10 +15,13 @@ data class SummonStats(
     val attackRange: Float,
     val attackSpeedMultiplier: Float,
     val armorClass: Int = 0,
-    val magicResistance: Int = 0
+    val magicResistance: Int = 0,
+    val baseArmor: Int = 1,
+    val baseMagicResistance: Int = 1
 ) {
 
     init {
+        require(baseArmor >= 0 && baseMagicResistance >= 0)
         require(maximumHealth > 0)
         require(baseDamage > 0)
         require(movementSpeed >= 0f)

@@ -59,6 +59,8 @@ class GlyphMotionRuntime(
             sourceWeapon !=
                 null
 
+    val preparingWeapon: WeaponInstance? get() = sourceWeapon
+
     /*
      * Compatibility name retained because existing UI/runtime code may still
      * use hasVisibleTrail. It now means "cast telegraph is visible".

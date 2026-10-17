@@ -14,6 +14,7 @@ import com.azizoglu.grisilith.weapon.runtime.executor.TotemOfDarkCloudsAttackExe
 class WeaponAttackExecutorFactory(
     playerStats: PlayerStats
 ) {
+    val extendedRuntime = ExtendedPhysicalWeaponRuntime(playerStats)
 
     private val damageCalculator =
         WeaponDamageCalculator(
@@ -120,6 +121,7 @@ class WeaponAttackExecutorFactory(
         attackPattern: WeaponAttackPattern
     ): WeaponAttackExecutor? {
         return when (attackPattern) {
+            WeaponAttackPattern.EXTENDED_PHYSICAL -> extendedRuntime
             WeaponAttackPattern
                 .SHORT_SLASH_LINES -> {
                 shortswordExecutor

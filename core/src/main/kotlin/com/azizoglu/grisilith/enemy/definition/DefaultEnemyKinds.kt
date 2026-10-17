@@ -56,7 +56,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.GRAY_WOLF,
             displayName = "Gray Wolf",
             description =
-                "A fast Beast that becomes stronger when another Gray Wolf is nearby.",
+                "The forest's enthusiastic welcoming committee. It chases visitors down for a bite, and a nearby wolf makes the welcome faster and considerably less friendly.",
             enemyTags = setOf(EnemyTag.BEAST),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
@@ -65,6 +65,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 250,
                     armorClass = 6,
                     baseArmor = 3,
+                    baseMagicResistance = 2,
+                    magicResistance = 4,
                     contactDamage = 22,
                     movementSpeed = 150f,
                     attacksPerSecond = 0.85f,
@@ -92,7 +94,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.BOAR,
             displayName = "Boar",
             description =
-                "A durable and slow Beast that can charge in a straight line.",
+                "The forest's opinion on right of way, delivered tusks first. After lining up its route, it charges straight through anything still arguing about it.",
             enemyTags = setOf(EnemyTag.BEAST),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
@@ -101,6 +103,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 400,
                     armorClass = 14,
                     baseArmor = 3,
+                    baseMagicResistance = 2,
+                    magicResistance = 4,
                     contactDamage = 30,
                     movementSpeed = 92f,
                     attacksPerSecond = 0.60f,
@@ -128,7 +132,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.BALD_EAGLE,
             displayName = "Bald Eagle",
             description =
-                "A very fast but fragile flying Beast that ignores obstacles.",
+                "The forest's express delivery service, now delivering beak. It pursues visitors from above and considers walls somebody else's problem.",
             enemyTags = setOf(EnemyTag.BEAST),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.SMALL,
@@ -137,6 +141,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 170,
                     armorClass = 5,
                     baseArmor = 2,
+                    baseMagicResistance = 2,
+                    magicResistance = 6,
                     contactDamage = 12,
                     movementSpeed = 180f,
                     attacksPerSecond = 1.30f,
@@ -162,7 +168,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.GRIZZLY_BEAR,
             displayName = "Grizzly Bear",
             description =
-                "A high-health Mini Boss that becomes enraged below half health.",
+                "The forest's complaints department. It follows you personally, and every wound makes its response stronger and its customer service worse.",
             enemyTags = setOf(EnemyTag.BEAST),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.LARGE,
@@ -171,6 +177,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 5000,
                     armorClass = 13,
                     baseArmor = 3,
+                    baseMagicResistance = 3,
+                    magicResistance = 6,
                     contactDamage = 58,
                     movementSpeed = 145f,
                     attacksPerSecond = 0.68f,
@@ -198,7 +206,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.BEE_SWARM,
             displayName = "Bee Swarm",
             description =
-                "A single swarm entity with high health, low damage and rapid attacks.",
+                "The forest's smallest residents have formed a very loud union. Fences cannot stop them and single-target swats achieve little; a broad hit hurts more, but may split the meeting into two angry committees.",
             enemyTags = setOf(EnemyTag.BEAST),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.LARGE,
@@ -207,6 +215,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 3200,
                     armorClass = 4,
                     baseArmor = 1,
+                    baseMagicResistance = 2,
+                    magicResistance = 5,
                     contactDamage = 22,
                     movementSpeed = 132f,
                     attacksPerSecond = 2.35f,
@@ -237,7 +247,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.CROCODILE,
             displayName = "Crocodile",
             description =
-                "A massive and very slow Beast that leaps toward the player.",
+                "The forest's family picnic has arrived, and you are apparently lunch. Hungry youngsters keep joining in while the parent lines up a surprisingly athletic leap through anyone in its path.",
             enemyTags = setOf(EnemyTag.BEAST),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.VERY_LARGE,
@@ -246,6 +256,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 6500,
                     armorClass = 15,
                     baseArmor = 4,
+                    baseMagicResistance = 3,
+                    magicResistance = 5,
                     contactDamage = 72,
                     movementSpeed = 72f,
                     attacksPerSecond = 0.48f,
@@ -277,7 +289,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.SILVERBACK_GORILLA,
             displayName = "Silverback Gorilla",
             description =
-                "The Beast Final Boss. A powerful brawler that throws a stationary projectile.",
+                "The forest's landlord would like you off the property. Stand close and it pounds a wide patch of ground; stand far away and the eviction notice arrives as a very large rock.",
             enemyTags = setOf(EnemyTag.BEAST),
             allowedTypes = setOf(EnemyType.FINAL_BOSS),
             sizeCategory = EnemySizeCategory.VERY_LARGE,
@@ -286,6 +298,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 20200,
                     armorClass = 18,
                     baseArmor = 3,
+                    baseMagicResistance = 5,
+                    magicResistance = 10,
                     contactDamage = 92,
                     movementSpeed = 165f,
                     attacksPerSecond = 0.90f,
@@ -312,9 +326,10 @@ object DefaultEnemyKinds {
     val bandit =
         EnemyKindDefinition(
             id = EnemyKindIds.BANDIT,
+            spawnWeight = 4f,
             displayName = "Bandit",
             description =
-                "A balanced Humanoid that deals damage by making contact.",
+                "An ambitious professional in the involuntary donations industry. Runs straight up to collect, with absolutely no interest in providing a receipt.",
             enemyTags = setOf(EnemyTag.HUMANOID),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
@@ -323,6 +338,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 325,
                     armorClass = 10,
                     baseArmor = 3,
+                    baseMagicResistance = 4,
+                    magicResistance = 8,
                     contactDamage = 26,
                     movementSpeed = 122f,
                     attacksPerSecond = 0.78f,
@@ -346,7 +363,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.ARCHER,
             displayName = "Archer",
             description =
-                "A fragile ranged Humanoid with slow, clearly telegraphed and powerful arrows.",
+                "A firm believer in conducting business remotely. Keeps a safe distance, takes an obvious moment to aim, then sends a slow arrow with a surprisingly expensive impact.",
             enemyTags = setOf(EnemyTag.HUMANOID),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
@@ -355,6 +372,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 200,
                     armorClass = 6,
                     baseArmor = 2,
+                    baseMagicResistance = 4,
+                    magicResistance = 8,
                     contactDamage = 16,
                     movementSpeed = 132f,
                     attacksPerSecond = 0.68f,
@@ -382,7 +401,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.SPEARMAN,
             displayName = "Spearman",
             description =
-                "A heavily armored Mini Boss that tracks targets before throwing a powerful spear.",
+                "A specialist in keeping negotiations at spear length. Chases you with one spear, carefully tracks your movements, then throws another; apparently the equipment budget was approved.",
             enemyTags = setOf(EnemyTag.HUMANOID),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.LARGE,
@@ -391,6 +410,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 7800,
                     armorClass = 17,
                     baseArmor = 5,
+                    baseMagicResistance = 5,
+                    magicResistance = 13,
                     contactDamage = 82,
                     movementSpeed = 105.6f,
                     attacksPerSecond = 0.54f,
@@ -418,7 +439,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.HORSEMAN,
             displayName = "Horseman",
             description =
-                "A very fast Mini Boss that attacks changing quadrants around itself.",
+                "Management supplied a horse, so now every problem is urgent. Closes the distance at speed and sweeps different stretches of ground with broad swings; personal space was not included in the contract.",
             enemyTags = setOf(EnemyTag.HUMANOID),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.VERY_LARGE,
@@ -427,6 +448,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 6800,
                     armorClass = 15,
                     baseArmor = 4,
+                    baseMagicResistance = 6,
+                    magicResistance = 16,
                     contactDamage = 72,
                     movementSpeed = 202.5f,
                     attacksPerSecond = 0.82f,
@@ -454,8 +477,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.WITCH,
             displayName = "Witch",
             description =
-                "The Humanoid Final Boss. Casts Witchcraft and fires random elemental projectiles. " +
-                    "Poison damage and Poisoned damage-over-time are resisted at 50%.",
+                "An independent consultant with far too many spell subscriptions. Stays back, throws elemental projectiles and mixes borrowed weapon magic into alarming combinations. Poison and Poisoned only get half the usual result; occupational exposure, presumably.",
             enemyTags = setOf(EnemyTag.HUMANOID),
             allowedTypes = setOf(EnemyType.FINAL_BOSS),
             sizeCategory = EnemySizeCategory.LARGE,
@@ -464,6 +486,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 24000,
                     armorClass = 21,
                     baseArmor = 4,
+                    baseMagicResistance = 8,
+                    magicResistance = 25,
                     contactDamage = 108,
                     movementSpeed = 155f,
                     attacksPerSecond = 1.65f,
@@ -490,10 +514,10 @@ object DefaultEnemyKinds {
     val skeletonWarrior =
         EnemyKindDefinition(
             id = EnemyKindIds.SKELETON_WARRIOR,
+            spawnWeight = 2f,
             displayName = "Skeleton Warrior",
             description =
-                "A balanced Undead warrior that deals damage by making contact. " +
-                    "Undead are immune to Poison and Necrotic damage, Poisoned and Necrosis.",
+                "Retirement was denied, so it still marches up to hit people. Having already completed the dying part, it ignores Poison, Necrotic damage, Poisoned and Necrosis. The pension remains outstanding.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
@@ -502,6 +526,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 358,
                     armorClass = 11,
                     baseArmor = 3,
+                    baseMagicResistance = 5,
+                    magicResistance = 10,
                     contactDamage = 26,
                     movementSpeed = 122f,
                     attacksPerSecond = 0.78f,
@@ -525,8 +551,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.SKELETON_ARCHER,
             displayName = "Skeleton Archer",
             description =
-                "A lightly armored Undead archer with slow, telegraphed and powerful arrows. " +
-                    "Undead are immune to Poison and Necrotic damage, Poisoned and Necrosis.",
+                "Still working from beyond the grave, preferably at a distance. Pauses to aim before firing slow, heavy-hitting arrows. Poison, Necrotic damage, Poisoned and Necrosis cannot make this shift any worse.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
@@ -535,6 +560,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 200,
                     armorClass = 6,
                     baseArmor = 2,
+                    baseMagicResistance = 5,
+                    magicResistance = 11,
                     contactDamage = 16,
                     movementSpeed = 132f,
                     attacksPerSecond = 0.68f,
@@ -560,10 +587,10 @@ object DefaultEnemyKinds {
     val zombie =
         EnemyKindDefinition(
             id = EnemyKindIds.ZOMBIE,
+            spawnWeight = 2f,
             displayName = "Zombie",
             description =
-                "A slow and durable Undead enemy with strong armor. " +
-                    "Undead are immune to Poison and Necrotic damage, Poisoned and Necrosis.",
+                "Clocked out of life, never clocked out of work. Shambles after visitors and takes an unreasonable amount of punishment before stopping. Poison, Necrotic damage, Poisoned and Necrosis are not accepted sick-leave excuses.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,
@@ -572,6 +599,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 520,
                     armorClass = 16,
                     baseArmor = 4,
+                    baseMagicResistance = 6,
+                    magicResistance = 13,
                     contactDamage = 24,
                     movementSpeed = 70f,
                     attacksPerSecond = 0.62f,
@@ -595,8 +624,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.GHOST,
             displayName = "Ghost",
             description =
-                "An incorporeal Mini Boss that evades attacks and becomes invulnerable during Ghost Storm. " +
-                    "Undead are immune to Poison and Necrotic damage, Poisoned and Necrosis.",
+                "Death's most committed office lurker brings its own visibility-reducing fog. Drifts through obstacles, sometimes lets attacks pass through, and answers personal visits with area attacks. Poison and Necrotic damage, Poisoned and Necrosis all go unanswered.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.LARGE,
@@ -605,6 +633,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 6200,
                     armorClass = 8,
                     baseArmor = 1,
+                    baseMagicResistance = 9,
+                    magicResistance = 14,
                     contactDamage = 18,
                     movementSpeed = 120f,
                     attacksPerSecond = 0.70f,
@@ -635,8 +665,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.SLIME,
             displayName = "Slime",
             description =
-                "A huge Mini Boss that leaves acid behind and splits into four independent pieces on death. " +
-                    "Undead are immune to Poison and Necrotic damage, Poisoned and Necrosis.",
+                "The afterlife's cleaning department has misunderstood the assignment. Slides after visitors, leaving short-lived acid trails that hurt and corrode. Its first death creates four smaller messes; Poison, Necrotic damage, Poisoned and Necrosis cannot improve the situation.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.MINI_BOSS),
             sizeCategory = EnemySizeCategory.VERY_LARGE,
@@ -645,6 +674,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 7600,
                     armorClass = 5,
                     baseArmor = 1,
+                    baseMagicResistance = 8,
+                    magicResistance = 8,
                     contactDamage = 65,
                     movementSpeed = 72f,
                     attacksPerSecond = 0.62f,
@@ -675,8 +706,7 @@ object DefaultEnemyKinds {
             id = EnemyKindIds.VAMPIRE_LORD,
             displayName = "Vampire Lord",
             description =
-                "The Undead Final Boss. Hunts by contact, drains life and escapes through living mist. " +
-                    "Undead are immune to Poison and Necrotic damage, Poisoned and Necrosis.",
+                "Upper management insists the graveyard is a family. This particular relative hunts up close, drains your life, sweeps the surrounding ground and commutes through living mist. Poison, Necrotic damage, Poisoned and Necrosis will not persuade it to take a day off.",
             enemyTags = setOf(EnemyTag.UNDEAD),
             allowedTypes = setOf(EnemyType.FINAL_BOSS),
             sizeCategory = EnemySizeCategory.LARGE,
@@ -685,6 +715,8 @@ object DefaultEnemyKinds {
                     maximumHealth = 22000,
                     armorClass = 20,
                     baseArmor = 4,
+                    baseMagicResistance = 10,
+                    magicResistance = 22,
                     contactDamage = 105,
                     movementSpeed = 170f,
                     attacksPerSecond = 0.95f,
@@ -716,7 +748,7 @@ object DefaultEnemyKinds {
         EnemyKindDefinition(
             id = EnemyKindIds.MIMIC,
             displayName = "Mimic",
-            description = "A rare Monster disguised as an ordinary chest until its prey comes close.",
+            description = "A monstrosity offering the most suspicious discount in the dungeon: free loot, collection in person. Looks like an ordinary chest until you approach, then abruptly revises the terms and conditions to include teeth.",
             enemyTags = setOf(EnemyTag.MONSTER),
             allowedTypes = setOf(EnemyType.NORMAL),
             sizeCategory = EnemySizeCategory.MEDIUM,

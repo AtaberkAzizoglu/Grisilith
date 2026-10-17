@@ -1,0 +1,11 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':lwjgl3')
+    desktop.kotlin.sourceSets.main.kotlin.srcDir(gradle.rootProject.file('tools/physical-weapon-smoke'))
+    desktop.tasks.register('physicalWeaponSmoke', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PhysicalWeaponSmoke'
+        workingDir = gradle.rootProject.file('assets')
+        jvmArgs '--enable-native-access=ALL-UNNAMED'
+    }
+}

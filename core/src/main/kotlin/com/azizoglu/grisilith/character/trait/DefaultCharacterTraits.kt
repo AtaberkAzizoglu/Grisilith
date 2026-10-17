@@ -7,7 +7,8 @@ object DefaultCharacterTraits {
             id = CharacterTraitId.NECROMANCY,
             displayName = "Necromancy",
             description =
-                "Necrotic damage can trigger Life Steal."
+                "Thanks to forbidden knowledge, Lavena Vol can trigger Life Steal " +
+                    "by dealing Necrotic damage."
         )
 
     val theHypocrisy =
@@ -15,8 +16,9 @@ object DefaultCharacterTraits {
             id = CharacterTraitId.THE_HYPOCRISY,
             displayName = "The Hypocrisy",
             description =
-                "Melee Weapon hits deal a small amount of Fire damage " +
-                    "scaling with Elemental Damage and apply Burned."
+                "Although Sir Imbert fears magic, he enchants his blades in combat. " +
+                    "Melee Weapon hits deal additional Fire damage and apply Burned. " +
+                    "The additional Fire damage increases with Elemental Damage."
         )
 
     val hurry =
@@ -24,8 +26,8 @@ object DefaultCharacterTraits {
             id = CharacterTraitId.HURRY,
             displayName = "Hurry",
             description =
-                "Every 5 Movement Speed grants 1 Attack Speed and raises " +
-                    "the Attack Speed maximum by the same amount."
+                "Every 5 Movement Speed grants 1 Attack Speed and raises the Attack " +
+                    "Speed maximum by the same amount."
         )
 
     val bloodweight =
@@ -33,7 +35,8 @@ object DefaultCharacterTraits {
             id = CharacterTraitId.BLOODWEIGHT,
             displayName = "Bloodweight",
             description =
-                "Every attack gains bonus damage equal to 1% of current HP."
+                "Whenever Koba attacks with a melee Weapon, he deals additional " +
+                    "damage equal to 1% of his current HP."
         )
 
     val theToadCycle =
@@ -41,8 +44,8 @@ object DefaultCharacterTraits {
             id = CharacterTraitId.THE_TOAD_CYCLE,
             displayName = "The Toad Cycle",
             description =
-                "Summons a Toad every 15 seconds. Poisoned enemy deaths " +
-                    "reduce the timer by 2 seconds. Up to 4 Toad Cycle " +
-                    "Toads can be alive at once."
+                "Summons a poisonous Toad every 15 seconds. Killing an enemy with " +
+                    "Poison reduces the next summon timer by 2 seconds. Up to four " +
+                    "Toads can fight alongside Linlos at once."
         )
 }

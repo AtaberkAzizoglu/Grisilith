@@ -684,9 +684,9 @@ object DefaultBeastEnemySpriteSheets {
             grayWolf,
             boar,
             baldEagle,
-            grizzlyBear,
+            CorrectedEnemySpriteSheets.bear,
             beeSwarm,
-            crocodile,
+            CorrectedEnemySpriteSheets.crocodile,
             silverbackGorilla
         )
 }

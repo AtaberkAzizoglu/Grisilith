@@ -4,18 +4,27 @@ import com.azizoglu.grisilith.GrisilithGame
 import com.azizoglu.grisilith.screen.components.MenuButton
 import com.azizoglu.grisilith.screen.components.MenuPointer
 import com.azizoglu.grisilith.screen.render.HighScoreRenderer
+import com.azizoglu.grisilith.profile.PlayerProfileRepository
+import com.azizoglu.grisilith.statistics.career.CareerAchievement
 import com.azizoglu.grisilith.statistics.career.HighScoreRepository
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
+import com.azizoglu.grisilith.ui.input.VerticalScrollbarDragController
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ScreenAdapter
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.azizoglu.grisilith.ui.typography.UiFontFactory
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
+import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.FitViewport
 
 class HighScoreScreen(
@@ -34,15 +43,17 @@ class HighScoreScreen(
          * Sayfadaki bütün bölümlerin yaklaşık toplam yüksekliği.
          */
         private const val CONTENT_HEIGHT =
-            1510f
+            1040f
+
+        private const val CONTENT_VIEWPORT_HEIGHT =
+            500f
 
         private const val MINIMUM_SCROLL =
             0f
 
         private const val MAXIMUM_SCROLL =
             CONTENT_HEIGHT -
-                VIEWPORT_HEIGHT +
-                120f
+                CONTENT_VIEWPORT_HEIGHT
 
         private const val WHEEL_SCROLL_AMOUNT =
             75f
@@ -68,7 +79,46 @@ class HighScoreScreen(
         ShapeRenderer()
 
     private val font =
-        BitmapFont()
+        UiFontFactory.createBody()
+
+    private val titleFont =
+        UiFontFactory.createDisplay(28)
+
+    private val archiveBackground =
+        Texture(
+            Gdx.files.internal(
+                "ui/backgrounds/chronicle_archive.png"
+            )
+        ).also {
+            it.setFilter(
+                Texture.TextureFilter.Linear,
+                Texture.TextureFilter.Linear
+            )
+        }
+
+    private val stonePanel =
+        Texture(
+            Gdx.files.internal(
+                "ui/backgrounds/chronicle_panel_hd.png"
+            )
+        ).also {
+            it.setFilter(
+                Texture.TextureFilter.Linear,
+                Texture.TextureFilter.Linear
+            )
+        }
+
+    private val grisilithCoin =
+        Texture(
+            Gdx.files.internal(
+                "currency/grisilith_coin.png"
+            )
+        ).also {
+            it.setFilter(
+                Texture.TextureFilter.Linear,
+                Texture.TextureFilter.Linear
+            )
+        }
 
     private val pointer =
         MenuPointer(
@@ -78,8 +128,38 @@ class HighScoreScreen(
     private val renderer =
         HighScoreRenderer()
 
+    private val achievementTypes =
+        CareerAchievement.entries
+
+    private val achievementButtons =
+        achievementTypes.map { achievement ->
+            MenuButton(
+                text = "",
+                x = 0f,
+                y = 0f,
+                width = 50f,
+                height = 50f
+            ) {
+                if (
+                    HighScoreRepository
+                        .claimAchievementReward(
+                            achievement
+                        )
+                ) {
+                    PlayerProfileRepository
+                        .addGrisilithCoins(1)
+                }
+            }
+        }
+
     private var scrollOffset =
         0f
+
+    private val scrollbarBounds =
+        Rectangle(1082f, 104f, 22f, 500f)
+
+    private val scrollbarDrag =
+        VerticalScrollbarDragController()
 
     private var previousInputProcessor:
         InputProcessor? =
@@ -130,6 +210,12 @@ class HighScoreScreen(
             game.showMainMenu()
         }
 
+    private val claimAllButton = MenuButton("CLAIM ALL", 858f, 30f, 240f, 60f) {
+        val rewards = HighScoreRepository.claimAllAchievementRewards()
+        PlayerProfileRepository.addGrisilithCoins(rewards)
+        updateAchievementButtons()
+    }
+
     override fun show() {
 
         viewport.apply()
@@ -149,6 +235,8 @@ class HighScoreScreen(
 
         previousDragScreenY =
             null
+
+        scrollbarDrag.reset()
 
         previousInputProcessor =
             Gdx.input.inputProcessor
@@ -171,7 +259,27 @@ class HighScoreScreen(
             return
         }
 
-        handleDragScrolling()
+        if (!handleScrollbarDrag()) {
+            handleDragScrolling()
+        }
+
+        updateAchievementButtons()
+
+        claimAllButton.isEnabled = HighScoreRepository.hasClaimableAchievementRewards()
+        claimAllButton.update(pointer.position, pointer.justPressed, pointer.justReleased)
+
+        achievementButtons.forEach { button ->
+            if (
+                button.isEnabled &&
+                button.update(
+                    pointerPosition = pointer.position,
+                    pointerJustPressed = pointer.justPressed,
+                    pointerJustReleased = pointer.justReleased
+                )
+            ) {
+                updateAchievementButtons()
+            }
+        }
 
         if (
             backButton.update(
@@ -205,33 +313,110 @@ class HighScoreScreen(
         batch.projectionMatrix =
             camera.combined
 
-        renderer.renderShapes(
-            shapeRenderer =
-                shapeRenderer,
+        batch.begin()
 
-            statistics =
-                HighScoreRepository
-                    .statistics,
-
-            scrollOffset =
-                scrollOffset
+        batch.color = Color.WHITE
+        batch.draw(
+            archiveBackground,
+            0f,
+            0f,
+            VIEWPORT_WIDTH,
+            VIEWPORT_HEIGHT
         )
+
+        batch.color = Color.WHITE
+        batch.draw(
+            stonePanel,
+            155f,
+            24f,
+            970f,
+            672f
+        )
+
+        renderer.renderTitle(
+            batch = batch,
+            titleFont = titleFont
+        )
+
+        claimAllButton.render(batch, font, pointer.position, pointer.isHeld)
+        batch.end()
+
+        val contentClip =
+            Rectangle(190f, 104f, 850f, CONTENT_VIEWPORT_HEIGHT)
+
+        val scissors =
+            Rectangle()
+
+        ScissorStack.calculateScissors(
+            camera,
+            batch.transformMatrix,
+            contentClip,
+            scissors
+        )
+
+        val contentVisible =
+            ScissorStack.pushScissors(scissors)
+
+        if (contentVisible) {
+            renderer.renderShapes(
+                shapeRenderer = shapeRenderer,
+                scrollOffset = scrollOffset
+            )
+
+            batch.begin()
+
+            renderer.renderTexts(
+                batch = batch,
+                font = font,
+                statistics = HighScoreRepository.statistics,
+                scrollOffset = scrollOffset
+            )
+
+            achievementButtons.forEach { button ->
+                if (isAchievementButtonVisible(button.bounds)) {
+                    button.render(
+                        batch = batch,
+                        font = font,
+                        pointerPosition = pointer.position,
+                        pointerHeld = pointer.isHeld
+                    )
+
+                    val iconSize = 28f
+                    batch.color =
+                        if (button.isEnabled) {
+                            Color.WHITE
+                        } else {
+                            Color(0.38f, 0.38f, 0.38f, 0.72f)
+                        }
+                    batch.draw(
+                        grisilithCoin,
+                        button.bounds.x +
+                            (button.bounds.width - iconSize) / 2f,
+                        button.bounds.y +
+                            (button.bounds.height - iconSize) / 2f,
+                        iconSize,
+                        iconSize
+                    )
+                    batch.color = Color.WHITE
+                }
+            }
+
+            batch.end()
+            ScissorStack.popScissors()
+        }
 
         batch.begin()
 
-        renderer.renderTexts(
-            batch =
-                batch,
-
-            font =
-                font,
-
-            statistics =
-                HighScoreRepository
-                    .statistics,
-
-            scrollOffset =
-                scrollOffset
+        UiComponentRenderer.drawChronicleScrollbar(
+            batch = batch,
+            bounds = scrollbarBounds,
+            visibleRatio = CONTENT_VIEWPORT_HEIGHT / CONTENT_HEIGHT,
+            scrollRatio =
+                if (MAXIMUM_SCROLL <= 0f) {
+                    0f
+                } else {
+                    scrollOffset / MAXIMUM_SCROLL
+                }
         )
 
         /*
@@ -350,6 +535,11 @@ class HighScoreScreen(
             backButton.bounds.contains(
                 pointer.position
             )
+            || claimAllButton.bounds.contains(pointer.position) ||
+            achievementButtons.any {
+                isAchievementButtonVisible(it.bounds) &&
+                    it.bounds.contains(pointer.position)
+            }
         ) {
             previousDragScreenY =
                 null
@@ -379,6 +569,33 @@ class HighScoreScreen(
             currentScreenY
     }
 
+    private fun handleScrollbarDrag(): Boolean {
+        val visibleRatio = CONTENT_VIEWPORT_HEIGHT / CONTENT_HEIGHT
+        val thumb =
+            UiComponentRenderer.bronzeScrollbarThumbBounds(
+                scrollbarBounds,
+                visibleRatio,
+                scrollOffset / MAXIMUM_SCROLL
+            )
+        val interactionBounds =
+            Rectangle(
+                scrollbarBounds.x - 5f,
+                scrollbarBounds.y,
+                scrollbarBounds.width + 10f,
+                scrollbarBounds.height
+            )
+        return scrollbarDrag.update(
+            pointer.position,
+            pointer.justPressed,
+            pointer.isHeld,
+            pointer.justReleased,
+            interactionBounds,
+            thumb
+        ) { ratio ->
+            scrollOffset = ratio * MAXIMUM_SCROLL
+        }
+    }
+
     private fun scrollBy(
         amount: Float
     ) {
@@ -392,6 +609,36 @@ class HighScoreScreen(
                 MAXIMUM_SCROLL
             )
     }
+
+    private fun updateAchievementButtons() {
+
+        achievementButtons.forEachIndexed {
+                index,
+                button ->
+
+            button.bounds.set(
+                renderer.achievementButtonBounds(
+                    index = index,
+                    scrollOffset = scrollOffset
+                )
+            )
+
+            button.isEnabled =
+                isAchievementButtonVisible(
+                    button.bounds
+                ) &&
+                HighScoreRepository
+                    .canClaimAchievementReward(
+                        achievementTypes[index]
+                    )
+        }
+    }
+
+    private fun isAchievementButtonVisible(
+        bounds: Rectangle
+    ): Boolean =
+        bounds.y >= 104f &&
+            bounds.y + bounds.height <= 604f
 
     override fun resize(
         width: Int,
@@ -433,5 +680,10 @@ class HighScoreScreen(
         batch.dispose()
         shapeRenderer.dispose()
         font.dispose()
+        titleFont.dispose()
+        archiveBackground.dispose()
+        stonePanel.dispose()
+        grisilithCoin.dispose()
+        renderer.dispose()
     }
 }

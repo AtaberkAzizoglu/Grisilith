@@ -23,15 +23,7 @@ object VortexPullTargetRules {
                 )
             }
 
-            EnemyType.MINI_BOSS -> {
-                DefaultWeaponAbilities
-                    .VORTEX_PULL_MINI_BOSS_PULL_MULTIPLIER
-            }
-
-            EnemyType.FINAL_BOSS -> {
-                DefaultWeaponAbilities
-                    .VORTEX_PULL_FINAL_BOSS_PULL_MULTIPLIER
-            }
+            EnemyType.MINI_BOSS, EnemyType.FINAL_BOSS -> 0f
         }
     }
 

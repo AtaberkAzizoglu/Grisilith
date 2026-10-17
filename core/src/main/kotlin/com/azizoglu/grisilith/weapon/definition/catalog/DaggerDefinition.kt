@@ -24,11 +24,10 @@ object DaggerDefinition {
                 "Dagger",
 
             description =
-                "A fast weapon that stabs nearby targets or throws blades at range.",
+                "A fast thrown weapon that hurls blades at targets, even at close range.",
 
             tags =
                 setOf(
-                    ContentTag.MELEE_WEAPON,
                     ContentTag.RANGED_WEAPON,
                     ContentTag.THROW
                 ),
@@ -46,9 +45,9 @@ object DaggerDefinition {
             baseAttacksPerSecond = 0.606f,
 
             /*
-             * Çok kısa melee menzili.
+             * All normal attacks are thrown; existing damage and throw range are preserved.
              */
-            baseRange = 90f,
+            baseRange = 480f,
 
             /*
              * Fırlatma menzili.
@@ -69,10 +68,6 @@ object DaggerDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.10f,
-                        level3Damage = 1.20f,
-                        level4Damage = 1.35f,
-                        level5Damage = 1.50f,
 
                         level2AttackSpeed = 1.15f,
                         level3AttackSpeed = 1.22f,

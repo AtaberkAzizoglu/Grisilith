@@ -113,7 +113,7 @@ class DefensiveLineVisualRenderer {
 
     companion object {
         private const val BASE_VISUAL_SIZE =
-            144f
+            288f
 
         private const val LOW_ARMOR_VISUAL_MAXIMUM =
             7

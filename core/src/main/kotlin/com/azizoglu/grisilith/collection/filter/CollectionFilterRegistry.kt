@@ -2,8 +2,8 @@ package com.azizoglu.grisilith.collection.filter
 
 import com.azizoglu.grisilith.content.ContentCategory
 import com.azizoglu.grisilith.content.ContentTag
-import com.azizoglu.grisilith.content.EnemyCollectionDefinition
-import com.azizoglu.grisilith.enemy.EnemyType
+import com.azizoglu.grisilith.enemy.definition.EnemyKindDefinition
+import com.azizoglu.grisilith.enemy.definition.EnemyTag
 import com.azizoglu.grisilith.item.definition.ItemDefinition
 import com.azizoglu.grisilith.item.definition.ItemRarity
 import com.azizoglu.grisilith.tamga.definition.TamgaActivationType
@@ -16,6 +16,7 @@ object CollectionFilterRegistry {
     fun optionsFor(category: ContentCategory): List<CollectionFilterOption> =
         when (category) {
             ContentCategory.CHARACTER,
+            ContentCategory.SUMMON,
             ContentCategory.MAP -> emptyList()
 
             ContentCategory.WEAPON -> listOf(
@@ -32,11 +33,10 @@ object CollectionFilterRegistry {
             )
 
             ContentCategory.ITEM -> listOf(
-                rarity(ItemRarity.COMMON, Color(0.82f, 0.82f, 0.82f, 1f)),
                 rarity(ItemRarity.UNCOMMON, Color(0.35f, 0.85f, 0.40f, 1f)),
                 rarity(ItemRarity.RARE, Color(0.30f, 0.55f, 1f, 1f)),
-                rarity(ItemRarity.LEGENDARY, Color(0.75f, 0.35f, 0.95f, 1f)),
-                rarity(ItemRarity.ARTIFACT, Color.GOLD)
+                rarity(ItemRarity.LEGENDARY, Color(1f, 0.82f, 0.15f, 1f)),
+                rarity(ItemRarity.ARTIFACT, Color(0.95f, 0.18f, 0.18f, 1f))
             )
 
             ContentCategory.TAMGA -> listOf(
@@ -62,10 +62,10 @@ object CollectionFilterRegistry {
             )
 
             ContentCategory.ENEMY -> listOf(
-                enemy("enemy_minion", "Minion Enemies", EnemyType.NORMAL),
-                enemy("enemy_unique", "Unique Enemies", EnemyType.UNIQUE),
-                enemy("enemy_boss", "Bosses", EnemyType.MINI_BOSS),
-                enemy("enemy_main_boss", "Main Bosses", EnemyType.FINAL_BOSS)
+                enemy("enemy_beast", "Beast", EnemyTag.BEAST),
+                enemy("enemy_humanoid", "Humanoid", EnemyTag.HUMANOID),
+                enemy("enemy_undead", "Undead", EnemyTag.UNDEAD),
+                enemy("enemy_monstrosity", "Monstrosity", EnemyTag.MONSTER)
             )
         }
 
@@ -91,8 +91,8 @@ object CollectionFilterRegistry {
     private fun enemy(
         id: String,
         name: String,
-        type: EnemyType
-    ) = CollectionFilterOption(id, "enemy_type", name) {
-        it is EnemyCollectionDefinition && it.enemyType == type
+        tag: EnemyTag
+    ) = CollectionFilterOption(id, "enemy_family", name) {
+        it is EnemyKindDefinition && tag in it.enemyTags
     }
 }

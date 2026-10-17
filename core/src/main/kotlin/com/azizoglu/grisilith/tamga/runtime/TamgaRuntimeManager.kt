@@ -418,6 +418,24 @@ class TamgaRuntimeManager(
         )
     }
 
+    fun chargerPreviewRadius(): Float? = if (isChargerEquipped() && chargerRuntime.isActive) {
+        240f + (4.3f - chargerRuntime.remainingActiveSeconds).coerceIn(0f, 3.5f) * 18f
+    } else null
+
+    /** Equipped passives appear only when their effect can currently operate. */
+    fun activeStatusIconPaths(): List<String> = TamgaEffectId.entries.filter { effect ->
+        hasTamgaEffect(effect) && when (effect) {
+            TamgaEffectId.CHARGER -> chargerRuntime.isActive
+            TamgaEffectId.PHANTOM_STEED -> phantomSteedRuntime.isActive
+            TamgaEffectId.QUICK_SHOT -> quickShotStacks > 0
+            TamgaEffectId.FLAME_BLADES -> weaponInventory.weaponAt(0)?.let { isMeleeWeapon(it) } == true
+            TamgaEffectId.PANIC -> panicPulses.isNotEmpty()
+            TamgaEffectId.HOLY_LIGHTS -> holyLightsRuntime.currentMode != null
+            TamgaEffectId.ARCANE_AURA -> arcaneAuraRuntime.currentMode != null
+            TamgaEffectId.HEIGHT_INSECURITY -> true
+        }
+    }.map { "ui/content_icons/tamgas/tmg_${if (it == TamgaEffectId.PHANTOM_STEED) "mounted_combatant" else it.name.lowercase()}.png" }
+
     private fun isHolyLightsActive():
         Boolean {
 

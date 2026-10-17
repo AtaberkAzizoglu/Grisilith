@@ -302,15 +302,6 @@ class MeleeAttackVisualRenderer {
             )
 
         private val LANCE_SPIN_FRAMES =
-            arrayOf(
-                ROOT + "lance_spin_0.png",
-                ROOT + "lance_spin_1.png",
-                ROOT + "lance_spin_2.png",
-                ROOT + "lance_spin_3.png",
-                ROOT + "lance_spin_4.png",
-                ROOT + "lance_spin_5.png",
-                ROOT + "lance_spin_6.png",
-                ROOT + "lance_spin_7.png"
-            )
+            (0 until 16).map { "weapon_visuals/lance_spin_v4/frame_$it.png" }.toTypedArray()
     }
 }

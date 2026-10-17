@@ -18,6 +18,12 @@ class PresetContentResolver(
         RunPreset
     ): ResolvedPresetContent? {
 
+        // Legacy saves remain intact, but higher-rarity items are never starting gear.
+        val startingItem = preset.itemId?.let(contentRegistry::findById) as? ItemDefinition
+        if (startingItem != null && !PresetItemRules.canStartWith(startingItem)) {
+            return resolve(preset.copy(itemId = null))
+        }
+
         val character =
             contentRegistry.findById(
                 preset.characterId

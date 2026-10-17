@@ -12,12 +12,13 @@ import com.badlogic.gdx.math.Vector2
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.enemy.definition.EnemyKindIds
+import com.azizoglu.grisilith.ui.typography.UiFontFactory
 import kotlin.math.abs
 import kotlin.math.min
 
 class WorldItemRenderer {
     private val batch = SpriteBatch()
-    private val font = BitmapFont()
+    private val font = UiFontFactory.createNumeric()
     private val shapes = ShapeRenderer()
     private val textures = mutableMapOf<String, Texture>()
 

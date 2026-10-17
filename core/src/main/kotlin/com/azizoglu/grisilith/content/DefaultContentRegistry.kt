@@ -5,6 +5,7 @@ import com.azizoglu.grisilith.character.DefaultCharacters
 import com.azizoglu.grisilith.item.definition.DefaultItems
 import com.azizoglu.grisilith.tamga.definition.DefaultTamgas
 import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
+import com.azizoglu.grisilith.enemy.definition.DefaultEnemyKinds
 
 object DefaultContentRegistry {
 
@@ -33,11 +34,12 @@ object DefaultContentRegistry {
             )
 
             registerAll(
-                DefaultCollectionEnemies.all
+                DefaultEnemyKinds.all
             )
 
             registerAll(
                 DefaultCollectionMaps.all
             )
+            registerAll(com.azizoglu.grisilith.summon.SummonCollectionDefinition.all)
         }
 }

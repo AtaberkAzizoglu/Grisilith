@@ -4,10 +4,20 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Preferences
 import kotlin.math.max
 
+enum class CareerAchievement {
+    ENEMIES,
+    BOSSES,
+    FINAL_BOSSES
+}
+
 object HighScoreRepository {
 
     private const val PREFERENCES_NAME =
         "grisilith_high_scores"
+
+    // New kill-only Score; never infer these from legacy damage/stage totals.
+    private const val KEY_TOTAL_SCORE = "score_v1_total"
+    private const val KEY_HIGHEST_SCORE = "score_v1_highest"
 
     private const val KEY_ENEMIES_KILLED =
         "enemies_killed"
@@ -63,6 +73,24 @@ object HighScoreRepository {
     private const val KEY_MOST_DAMAGE_TAKEN =
         "most_damage_taken"
 
+    private const val KEY_ENEMY_ACHIEVEMENT_CLAIMS =
+        "enemy_achievement_claims"
+
+    private const val KEY_BOSS_ACHIEVEMENT_CLAIMS =
+        "boss_achievement_claims"
+
+    private const val KEY_FINAL_BOSS_ACHIEVEMENT_CLAIMS =
+        "final_boss_achievement_claims"
+
+    private const val ENEMY_ACHIEVEMENT_STEP =
+        1_000L
+
+    private const val BOSS_ACHIEVEMENT_STEP =
+        20L
+
+    private const val FINAL_BOSS_ACHIEVEMENT_STEP =
+        1L
+
     private val preferences:
         Preferences
         get() =
@@ -73,6 +101,15 @@ object HighScoreRepository {
     private var currentStatistics =
         CareerStatistics()
 
+    private var enemyAchievementClaims =
+        0
+
+    private var bossAchievementClaims =
+        0
+
+    private var finalBossAchievementClaims =
+        0
+
     val statistics:
         CareerStatistics
         get() =
@@ -80,8 +117,28 @@ object HighScoreRepository {
 
     fun load() {
 
+        enemyAchievementClaims =
+            preferences.getInteger(
+                KEY_ENEMY_ACHIEVEMENT_CLAIMS,
+                0
+            ).coerceAtLeast(0)
+
+        bossAchievementClaims =
+            preferences.getInteger(
+                KEY_BOSS_ACHIEVEMENT_CLAIMS,
+                0
+            ).coerceAtLeast(0)
+
+        finalBossAchievementClaims =
+            preferences.getInteger(
+                KEY_FINAL_BOSS_ACHIEVEMENT_CLAIMS,
+                0
+            ).coerceAtLeast(0)
+
         currentStatistics =
             CareerStatistics(
+                totalScore = preferences.getLong(KEY_TOTAL_SCORE,0L).coerceAtLeast(0L),
+                highestScore = preferences.getLong(KEY_HIGHEST_SCORE,0L).coerceAtLeast(0L),
                 enemiesKilled =
                     preferences.getLong(
                         KEY_ENEMIES_KILLED,
@@ -192,6 +249,87 @@ object HighScoreRepository {
             )
     }
 
+    fun achievementValue(
+        achievement: CareerAchievement
+    ): Long =
+        when (achievement) {
+            CareerAchievement.ENEMIES ->
+                currentStatistics.enemiesKilled
+
+            CareerAchievement.BOSSES ->
+                currentStatistics.bossesDefeated
+
+            CareerAchievement.FINAL_BOSSES ->
+                currentStatistics.finalBossesDefeated
+        }
+
+    fun achievementTarget(
+        achievement: CareerAchievement
+    ): Long =
+        achievementStep(achievement) *
+            (achievementClaims(achievement) + 1L)
+
+    fun achievementProgress(
+        achievement: CareerAchievement
+    ): Float =
+        (
+            achievementValue(achievement).toFloat() /
+                achievementTarget(achievement).toFloat()
+            ).coerceIn(0f, 1f)
+
+    fun canClaimAchievementReward(
+        achievement: CareerAchievement
+    ): Boolean =
+        achievementValue(achievement) >=
+            achievementTarget(achievement)
+
+    fun hasClaimableAchievementRewards(): Boolean =
+        CareerAchievement.entries.any(
+            ::canClaimAchievementReward
+        )
+
+    /** Collect every completed milestone without repeated preference writes. */
+    fun claimAllAchievementRewards(): Int {
+        var rewards = 0
+        for (achievement in CareerAchievement.entries) {
+            val claimed = achievementClaims(achievement)
+            val pending = (achievementValue(achievement) / achievementStep(achievement) - claimed)
+                .coerceIn(0L, (Int.MAX_VALUE - claimed).toLong())
+                .coerceAtMost((Int.MAX_VALUE - rewards).toLong()).toInt()
+            when (achievement) {
+                CareerAchievement.ENEMIES -> enemyAchievementClaims += pending
+                CareerAchievement.BOSSES -> bossAchievementClaims += pending
+                CareerAchievement.FINAL_BOSSES -> finalBossAchievementClaims += pending
+            }
+            rewards += pending
+        }
+        if (rewards > 0) save()
+        return rewards
+    }
+
+    fun claimAchievementReward(
+        achievement: CareerAchievement
+    ): Boolean {
+
+        if (!canClaimAchievementReward(achievement)) {
+            return false
+        }
+
+        when (achievement) {
+            CareerAchievement.ENEMIES ->
+                enemyAchievementClaims += 1
+
+            CareerAchievement.BOSSES ->
+                bossAchievementClaims += 1
+
+            CareerAchievement.FINAL_BOSSES ->
+                finalBossAchievementClaims += 1
+        }
+
+        save()
+        return true
+    }
+
     fun recordRunStarted() {
 
         currentStatistics =
@@ -210,9 +348,12 @@ object HighScoreRepository {
 
         val previous =
             currentStatistics
+        val score = run.score.coerceAtLeast(0L)
 
         currentStatistics =
             previous.copy(
+                totalScore = previous.totalScore + score.coerceAtMost(Long.MAX_VALUE-previous.totalScore),
+                highestScore = max(previous.highestScore,score),
                 enemiesKilled =
                     previous.enemiesKilled +
                         run.enemiesKilled,
@@ -308,6 +449,15 @@ object HighScoreRepository {
         currentStatistics =
             CareerStatistics()
 
+        enemyAchievementClaims =
+            0
+
+        bossAchievementClaims =
+            0
+
+        finalBossAchievementClaims =
+            0
+
         preferences.clear()
         preferences.flush()
     }
@@ -315,6 +465,8 @@ object HighScoreRepository {
     private fun save() {
 
         preferences
+            .putLong(KEY_TOTAL_SCORE,currentStatistics.totalScore)
+            .putLong(KEY_HIGHEST_SCORE,currentStatistics.highestScore)
             .putLong(
                 KEY_ENEMIES_KILLED,
                 currentStatistics.enemiesKilled
@@ -387,6 +539,46 @@ object HighScoreRepository {
                 KEY_MOST_DAMAGE_TAKEN,
                 currentStatistics.mostDamageTaken
             )
+            .putInteger(
+                KEY_ENEMY_ACHIEVEMENT_CLAIMS,
+                enemyAchievementClaims
+            )
+            .putInteger(
+                KEY_BOSS_ACHIEVEMENT_CLAIMS,
+                bossAchievementClaims
+            )
+            .putInteger(
+                KEY_FINAL_BOSS_ACHIEVEMENT_CLAIMS,
+                finalBossAchievementClaims
+            )
             .flush()
     }
+
+    private fun achievementClaims(
+        achievement: CareerAchievement
+    ): Int =
+        when (achievement) {
+            CareerAchievement.ENEMIES ->
+                enemyAchievementClaims
+
+            CareerAchievement.BOSSES ->
+                bossAchievementClaims
+
+            CareerAchievement.FINAL_BOSSES ->
+                finalBossAchievementClaims
+        }
+
+    private fun achievementStep(
+        achievement: CareerAchievement
+    ): Long =
+        when (achievement) {
+            CareerAchievement.ENEMIES ->
+                ENEMY_ACHIEVEMENT_STEP
+
+            CareerAchievement.BOSSES ->
+                BOSS_ACHIEVEMENT_STEP
+
+            CareerAchievement.FINAL_BOSSES ->
+                FINAL_BOSS_ACHIEVEMENT_STEP
+        }
 }

@@ -12,12 +12,16 @@ import com.azizoglu.grisilith.screen.pause.PauseInteractionState
 import com.azizoglu.grisilith.screen.pause.PauseLayout
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.statistics.StatPresentationGroup
+import com.azizoglu.grisilith.statistics.StatDetailPresentation
+import com.azizoglu.grisilith.tamga.definition.TamgaDefinition
 import com.azizoglu.grisilith.weapon.definition.WeaponAttackPattern
 import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
@@ -28,6 +32,10 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.Align
 import java.util.Locale
 import kotlin.math.roundToInt
+import com.azizoglu.grisilith.ui.icon.ContentIconRenderer
+import com.azizoglu.grisilith.ui.stat.StatSymbolRenderer
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
+import com.azizoglu.grisilith.ui.theme.PanelVisualStyle
 
 class PauseRenderer(
     private val camera:
@@ -58,7 +66,13 @@ class PauseRenderer(
     ItemInventory,
 
     private val equippedArmor:
-    EquippedArmor
+    EquippedArmor,
+
+    private val weaponTamga:
+    TamgaDefinition? = null,
+
+    private val armorTamga:
+    TamgaDefinition? = null
 ) {
 
     companion object {
@@ -71,6 +85,11 @@ class PauseRenderer(
 
     private val whitePixel =
         createWhitePixelTexture()
+
+    private val pauseBackground =
+        Texture(Gdx.files.internal("ui/backgrounds/pause_stone_table.png")).apply {
+            setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
+        }
 
     private val glyphLayout =
         GlyphLayout()
@@ -86,7 +105,7 @@ class PauseRenderer(
             0.015f,
             0.02f,
             0.035f,
-            0.96f
+            0.30f
         )
 
     private val panelColor =
@@ -177,6 +196,15 @@ class PauseRenderer(
         val layout =
             currentLayout()
 
+        batch.color = Color.WHITE
+        batch.draw(
+            pauseBackground,
+            layout.fullScreen.x,
+            layout.fullScreen.y,
+            layout.fullScreen.width,
+            layout.fullScreen.height
+        )
+
         drawFilledRectangle(
             rectangle =
                 layout.fullScreen,
@@ -201,9 +229,7 @@ class PauseRenderer(
                 interactionState
         )
 
-        renderCharacterStatsPanel(
-            layout
-        )
+        renderCharacterStatsPanel(layout, interactionState)
 
         when {
             interactionState
@@ -258,6 +284,24 @@ class PauseRenderer(
                             ?: return
                 )
             }
+
+            else -> {
+                val dragged = interactionState.draggedWeaponSlotIndex
+                if (dragged == null) renderHoverTooltip(layout, interactionState)
+                else {
+                    interactionState.weaponDropTargetIndex?.let {
+                        val r=layout.weaponSlots[it]
+                        val color=Color(1f,.78f,.2f,1f)
+                        drawFilledRectangle(Rectangle(r.x,r.y,r.width,2f),color)
+                        drawFilledRectangle(Rectangle(r.x,r.y+r.height-2f,r.width,2f),color)
+                        drawFilledRectangle(Rectangle(r.x,r.y,2f,r.height),color)
+                        drawFilledRectangle(Rectangle(r.x+r.width-2f,r.y,2f,r.height),color)
+                    }
+                    weaponInventory.weaponAt(dragged)?.let { weapon ->
+                        ContentIconRenderer.draw(batch, weapon.definition, Rectangle(interactionState.pointerPosition.x - 32f, interactionState.pointerPosition.y - 32f, 64f, 64f))
+                    }
+                }
+            }
         }
 
         batch.color =
@@ -299,8 +343,13 @@ class PauseRenderer(
         layout:
         PauseLayout
     ) {
-        drawSectionPanel(
-            layout.weaponPanel
+        UiComponentRenderer.drawHorizontalSeparator(
+            batch,
+            Rectangle(layout.leftPanel.x + 18f, layout.gearPanel.y + layout.gearPanel.height + 3f, layout.leftPanel.width - 36f, 8f)
+        )
+        UiComponentRenderer.drawHorizontalSeparator(
+            batch,
+            Rectangle(layout.leftPanel.x + 18f, layout.itemPanel.y + layout.itemPanel.height + 3f, layout.leftPanel.width - 36f, 8f)
         )
 
         drawSectionTitle(
@@ -308,7 +357,10 @@ class PauseRenderer(
                 "WEAPONS",
 
             rectangle =
-                layout.weaponPanel
+                layout.weaponPanel,
+
+            verticalOffset =
+                -8f
         )
 
         layout.weaponSlots
@@ -316,71 +368,48 @@ class PauseRenderer(
                     slotIndex,
                     rectangle ->
 
-                drawPanel(
-                    rectangle =
-                        rectangle,
-
-                    fillColor =
-                        slotColor
-                )
-
                 val weapon =
                     weaponInventory.weaponAt(
                         slotIndex
                     )
 
                 if (weapon == null) {
-                    drawCenteredText(
-                        text =
-                            "EMPTY",
-
-                        rectangle =
-                            rectangle,
-
-                        color =
-                            Color.GRAY
-                    )
+                    UiComponentRenderer.drawSlot(batch, rectangle)
+                    return@forEachIndexed
                 } else {
+                    val iconSize =
+                        rectangle.height - 6f
+
+                    val iconBounds =
+                        Rectangle(
+                            rectangle.x + 3f,
+                            rectangle.y + 3f,
+                            iconSize,
+                            iconSize
+                        )
+
+                    ContentIconRenderer.draw(
+                            batch = batch,
+                            definition = weapon.definition,
+                            bounds = iconBounds
+                        )
+
                     val oldScaleX =
                         font.data.scaleX
 
                     val oldScaleY =
                         font.data.scaleY
 
-                    font.data.setScale(
-                        0.75f
-                    )
-
-                    font.color =
-                        Color.WHITE
+                    font.data.setScale(0.72f)
+                    font.color = Color.WHITE
 
                     font.draw(
                         batch,
-                        weapon.displayName,
-                        rectangle.x +
-                            5f,
-                        rectangle.y +
-                            rectangle.height -
-                            13f,
-                        rectangle.width -
-                            10f,
-                        Align.center,
-                        true
-                    )
-
-                    font.color =
-                        Color.GOLD
-
-                    font.draw(
-                        batch,
-                        "Lv. ${weapon.level}",
-                        rectangle.x +
-                            5f,
-                        rectangle.y +
-                            17f,
-                        rectangle.width -
-                            10f,
-                        Align.center,
+                        romanNumeral(weapon.level),
+                        rectangle.x + rectangle.width - 28f,
+                        rectangle.y + 17f,
+                        23f,
+                        Align.right,
                         false
                     )
 
@@ -396,51 +425,63 @@ class PauseRenderer(
         layout:
         PauseLayout
     ) {
-        drawSectionPanel(
-            layout.gearPanel
-        )
+        drawSectionTitle("EQUIPMENT", layout.gearPanel, 8f)
 
         val equippedArmorDefinition =
             equippedArmor.definition
 
-        renderPlaceholderSlot(
-            rectangle =
-                layout.armorSlot,
+        if (equippedArmorDefinition == null) {
+            renderPlaceholderSlot(layout.armorSlot, "ARMOR", "EMPTY")
+        }
 
-            title =
-                "ARMOR",
+        if (equippedArmorDefinition != null) {
+            val armorIconSize =
+                layout.armorSlot.height - 6f
 
-            value =
-                equippedArmorDefinition
-                    ?.let { armor ->
-                        armor.displayName +
-                            "\nHP ${armor.baseHealth}" +
-                            "  ARM ${armor.baseArmor}" +
-                            "  MR ${armor.baseMagicResistance}"
-                    }
-                    ?: "EMPTY"
-        )
+            ContentIconRenderer.draw(
+                batch = batch,
+                definition = equippedArmorDefinition,
+                bounds = Rectangle(
+                    layout.armorSlot.x + 3f,
+                    layout.armorSlot.y + 3f,
+                    armorIconSize,
+                    armorIconSize
+                )
+            )
+        }
 
-        renderPlaceholderSlot(
-            rectangle =
-                layout.weaponTamgaSlot,
+        if (weaponTamga == null) {
+            renderPlaceholderSlot(layout.weaponTamgaSlot, "WEAPON TAMGA", "NONE")
+        }
 
-            title =
-                "WEAPON\nTAMGA",
+        weaponTamga?.let { tamga ->
+            ContentIconRenderer.draw(
+                batch = batch,
+                definition = tamga,
+                bounds = insetIconBounds(layout.weaponTamgaSlot)
+            )
+        }
 
-            value =
-                "NONE"
-        )
+        if (armorTamga == null) {
+            renderPlaceholderSlot(layout.armorTamgaSlot, "ARMOR TAMGA", "NONE")
+        }
 
-        renderPlaceholderSlot(
-            rectangle =
-                layout.armorTamgaSlot,
+        armorTamga?.let { tamga ->
+            ContentIconRenderer.draw(
+                batch = batch,
+                definition = tamga,
+                bounds = insetIconBounds(layout.armorTamgaSlot)
+            )
+        }
+    }
 
-            title =
-                "ARMOR\nTAMGA",
-
-            value =
-                "NONE"
+    private fun insetIconBounds(rectangle: Rectangle): Rectangle {
+        val size = rectangle.height - 6f
+        return Rectangle(
+            rectangle.x + 3f,
+            rectangle.y + 3f,
+            size,
+            size
         )
     }
 
@@ -454,61 +495,7 @@ class PauseRenderer(
         value:
         String
     ) {
-        drawPanel(
-            rectangle =
-                rectangle,
-
-            fillColor =
-                slotColor
-        )
-
-        val oldScaleX =
-            font.data.scaleX
-
-        val oldScaleY =
-            font.data.scaleY
-
-        font.data.setScale(
-            0.67f
-        )
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            title,
-            rectangle.x +
-                4f,
-            rectangle.y +
-                rectangle.height -
-                12f,
-            rectangle.width -
-                8f,
-            Align.center,
-            true
-        )
-
-        font.color =
-            Color.GRAY
-
-        font.draw(
-            batch,
-            value,
-            rectangle.x +
-                4f,
-            rectangle.y +
-                14f,
-            rectangle.width -
-                8f,
-            Align.center,
-            false
-        )
-
-        font.data.setScale(
-            oldScaleX,
-            oldScaleY
-        )
+        UiComponentRenderer.drawSlot(batch, rectangle)
     }
 
     private fun renderItemPanel(
@@ -518,10 +505,6 @@ class PauseRenderer(
         interactionState:
         PauseInteractionState
     ) {
-        drawSectionPanel(
-            layout.itemPanel
-        )
-
         drawSectionTitle(
             text =
                 "ITEMS  (${itemInventory.itemCount})",
@@ -553,7 +536,7 @@ class PauseRenderer(
 
         val visibleRows =
             PauseLayout
-                .itemRowRectangles(
+                .itemSlotRectangles(
                     layout.itemPanel
                 )
 
@@ -574,43 +557,22 @@ class PauseRenderer(
                         )
                         ?: return@forEachIndexed
 
-                drawPanel(
-                    rectangle =
-                        rectangle,
+                val itemIconSize =
+                    rectangle.height - 6f
 
-                    fillColor =
-                        slotColor
-                )
-
-                font.color =
-                    Color.LIGHT_GRAY
-
-                font.draw(
-                    batch,
-                    entry.definition.displayName,
-                    rectangle.x +
-                        8f,
-                    rectangle.y +
-                        19f
-                )
-
-                if (entry.count > 1) {
-                    font.color =
-                        Color.WHITE
-
-                    font.draw(
-                        batch,
-                        "x${entry.count}",
-                        rectangle.x +
-                            rectangle.width -
-                            50f,
-                        rectangle.y +
-                            19f,
-                        40f,
-                        Align.right,
-                        false
+                val itemIconBounds =
+                    Rectangle(
+                        rectangle.x + 3f,
+                        rectangle.y + 3f,
+                        itemIconSize,
+                        itemIconSize
                     )
-                }
+
+                ContentIconRenderer.draw(
+                        batch = batch,
+                        definition = entry.definition,
+                        bounds = itemIconBounds
+                    )
             }
 
         if (
@@ -632,7 +594,7 @@ class PauseRenderer(
 
             font.draw(
                 batch,
-                "UP / DOWN TO SCROLL",
+                "MOUSE WHEEL OR DRAG TO SCROLL",
                 layout.itemPanel.x +
                     12f,
                 layout.itemPanel.y +
@@ -666,17 +628,8 @@ class PauseRenderer(
         font.color =
             Color.WHITE
 
-        font.draw(
-            batch,
-            "PAUSED",
-            layout.centerPanel.x,
-            layout.centerPanel.y +
-                layout.centerPanel.height -
-                45f,
-            layout.centerPanel.width,
-            Align.center,
-            false
-        )
+        val pausedBaseline = layout.centerPanel.y + layout.centerPanel.height - 45f
+        font.draw(batch, "PAUSED", layout.centerPanel.x, pausedBaseline, layout.centerPanel.width, Align.center, false)
 
         font.data.setScale(
             oldScaleX,
@@ -727,16 +680,23 @@ class PauseRenderer(
 
         renderPauseButton(
             text =
-                "Main Menu",
+                "MAIN MENU",
 
             rectangle =
-                layout.quitGameButton,
+                layout.mainMenuButton,
 
             buttonType =
-                PauseButtonType.QUIT_GAME,
+                PauseButtonType.MAIN_MENU,
 
             interactionState =
                 interactionState
+        )
+
+        renderPauseButton(
+            text = "QUIT GAME",
+            rectangle = layout.quitGameButton,
+            buttonType = PauseButtonType.QUIT_GAME,
+            interactionState = interactionState
         )
     }
 
@@ -798,7 +758,10 @@ class PauseRenderer(
      */
     private fun renderCharacterStatsPanel(
         layout:
-        PauseLayout
+        PauseLayout,
+
+        interactionState:
+        PauseInteractionState
     ) {
         drawPanel(
             layout.characterStatsPanel
@@ -814,23 +777,6 @@ class PauseRenderer(
             font.data.scaleY
 
         font.data.setScale(
-            1.12f
-        )
-
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            "CHARACTER",
-            panel.x +
-                18f,
-            panel.y +
-                panel.height -
-                24f
-        )
-
-        font.data.setScale(
             1.08f
         )
 
@@ -840,15 +786,19 @@ class PauseRenderer(
         font.draw(
             batch,
             selectedCharacter.displayName,
-            panel.x +
-                18f,
+            panel.x,
             panel.y +
                 panel.height -
-                64f,
-            panel.width -
-                36f,
-            Align.left,
-            true
+                37f,
+            panel.width,
+            Align.center,
+            false
+        )
+
+        ContentIconRenderer.drawCharacterPortrait(
+            batch = batch,
+            displayName = selectedCharacter.displayName,
+            bounds = layout.characterPortrait
         )
 
         font.data.setScale(
@@ -861,106 +811,57 @@ class PauseRenderer(
         font.draw(
             batch,
             "STATS",
-            panel.x +
-                18f,
+            panel.x,
             panel.y +
                 panel.height -
-                118f
+                230f,
+            panel.width,
+            Align.center,
+            false
         )
 
         font.data.setScale(
             0.97f
         )
 
-        val stats =
-            StatType.entries
-
-        val rowsPerColumn =
-            (
-                stats.size +
-                    1
-                ) /
-                2
-
-        val contentX =
-            panel.x +
-                18f
-
-        val availableWidth =
-            panel.width -
-                36f
-
-        val columnGap =
-            22f
-
-        val columnWidth =
-            (
-                availableWidth -
-                    columnGap
-                ) /
-                2f
-
-        val rowSpacing =
-            34f
-
-        val firstStatY =
-            panel.y +
-                panel.height -
-                165f
-
-        stats.forEachIndexed {
-                index,
-                statType ->
-
-            val column =
-                index /
-                    rowsPerColumn
-
-            val row =
-                index %
-                    rowsPerColumn
-
-            val x =
-                contentX +
-                    column *
-                    (
-                        columnWidth +
-                            columnGap
-                        )
-
-            val y =
-                firstStatY -
-                    row *
-                    rowSpacing
-
-            font.color =
-                Color.LIGHT_GRAY
-
-            font.draw(
+        val statRows = PauseLayout.statRowRectangles(panel)
+        StatPresentationGroup.ordered.zip(PauseLayout.statGroupRectangles(panel)).forEach { (group, bounds) ->
+            UiComponentRenderer.drawHorizontalSeparator(
                 batch,
-                statType.displayName,
-                x,
-                y
+                Rectangle(bounds.x + 4f, bounds.y + bounds.height - 25f, bounds.width - 8f, 7f)
             )
+            font.data.setScale(0.82f)
+            font.color = Color(0.72f, 0.78f, 0.90f, 1f)
+            font.draw(batch, group.title, bounds.x, bounds.y + bounds.height - 5f, bounds.width, Align.center, false)
 
-            font.color =
-                Color.WHITE
-
-            font.draw(
-                batch,
-                playerStats
-                    .totalScore(
-                        statType
-                    )
-                    .toString(),
-                x +
-                    columnWidth -
-                    48f,
-                y,
-                42f,
-                Align.right,
-                false
-            )
+            group.stats.forEach { statType ->
+                val rowBounds = statRows.getValue(statType)
+                val hovered = interactionState.hoveredStatType == statType
+                if (hovered) {
+                    drawFilledRectangle(rowBounds, Color(0.20f, 0.25f, 0.32f, 0.52f))
+                }
+                val y = rowBounds.y + rowBounds.height * 0.67f
+                font.data.setScale(0.88f)
+                StatSymbolRenderer.drawLabel(
+                    batch = batch,
+                    font = font,
+                    statType = statType,
+                    x = rowBounds.x + 4f,
+                    baselineY = y,
+                    iconSize = 20f,
+                    width = rowBounds.width - 52f
+                )
+                font.color = Color.WHITE
+                font.draw(
+                    batch,
+                    playerStats.totalScore(statType).toString(),
+                    rowBounds.x + rowBounds.width - 42f,
+                    y,
+                    34f,
+                    Align.right,
+                    false
+                )
+            }
         }
 
         font.data.setScale(
@@ -999,15 +900,18 @@ class PauseRenderer(
                 PauseConfirmationType
                     .RESTART_RUN
 
+        val isExitGame = interactionState.confirmationType == PauseConfirmationType.EXIT_GAME
+
         font.color =
             Color.WHITE
 
         font.draw(
             batch,
-            if (isRestart) {
-                "RESTART CURRENT RUN?"
-            } else {
-                "QUIT CURRENT RUN?"
+            when {
+                interactionState.confirmationType == PauseConfirmationType.MERGE_WEAPONS -> "MERGE WEAPONS?"
+                isRestart -> "RESTART CURRENT RUN?"
+                isExitGame -> "QUIT GAME?"
+                else -> "RETURN TO MAIN MENU?"
             },
             layout.modalPanel.x +
                 25f,
@@ -1021,11 +925,13 @@ class PauseRenderer(
 
         font.draw(
             batch,
-            if (isRestart) {
-                "All progress from the current run will be lost.\n" +
+            when {
+                interactionState.confirmationType == PauseConfirmationType.MERGE_WEAPONS -> interactionState.mergeConfirmationText
+                isRestart -> "All progress from the current run will be lost.\n" +
                     "The same Character, Map and Difficulty will be used."
-            } else {
-                "All progress from the current run will be lost.\n" +
+                isExitGame -> "All progress from the current run will be lost.\n" +
+                    "The game will close."
+                else -> "All progress from the current run will be lost.\n" +
                     "You will return to the Main Menu."
             },
             layout.modalPanel.x +
@@ -1225,14 +1131,10 @@ class PauseRenderer(
             font.color =
                 Color.GOLD
 
-            font.draw(
-                batch,
-                "Main Damage Scaling: " +
-                    primaryScaling
-                        .first
-                        .displayName,
-                leftX,
-                leftY
+            StatSymbolRenderer.drawRichText(
+                batch, font,
+                "Main Damage Scaling: ${primaryScaling.first.displayName}",
+                leftX, leftY, 310f
             )
 
             leftY -=
@@ -1243,19 +1145,10 @@ class PauseRenderer(
             font.color =
                 Color.LIGHT_GRAY
 
-            font.draw(
-                batch,
-                "Secondary Scaling: " +
-                    secondaryScaling
-                        .joinToString(
-                            separator = ", "
-                        ) { scaling ->
-                            scaling
-                                .first
-                                .displayName
-                        },
-                leftX,
-                leftY
+            StatSymbolRenderer.drawRichText(
+                batch, font,
+                "Secondary Scaling: " + secondaryScaling.joinToString(", ") { it.first.displayName },
+                leftX, leftY, 310f
             )
 
             leftY -=
@@ -1325,32 +1218,20 @@ class PauseRenderer(
                 )
             }
 
-        font.draw(
-            batch,
-            statisticsText,
+        StatSymbolRenderer.drawRichText(
+            batch, font, statisticsText,
             leftX,
             leftY,
-            310f,
-            Align.left,
-            true
+            310f
         )
 
         font.color =
             Color.LIGHT_GRAY
 
-        font.draw(
-            batch,
-            definition.description,
-            layout.modalPanel.x +
-                390f,
-            layout.modalPanel.y +
-                layout.modalPanel.height -
-                95f,
-            layout.modalPanel.width -
-                420f,
-            Align.left,
-            true
-        )
+        WeaponDetailPanel.drawCopy(batch,font,
+            com.azizoglu.grisilith.weapon.definition.WeaponPresentation.hover(weapon),
+            Rectangle(layout.modalPanel.x+390f,layout.modalPanel.y+50f,
+                layout.modalPanel.width-420f,layout.modalPanel.height-145f))
 
         renderDetailCloseHint(
             layout
@@ -1378,21 +1259,6 @@ class PauseRenderer(
             definition.maximumInventoryCopies
                 ?: definition.rarity
                     .maximumInventoryCopies
-
-        val totalBonusText =
-            definition.statModifiers
-                .joinToString(
-                    separator = "\n"
-                ) { modifier ->
-                    val totalAmount =
-                        modifier.amount *
-                            entry.count
-
-                    "${modifier.statType.displayName}: " +
-                        formatSignedValue(
-                            totalAmount
-                        )
-                }
 
         drawModalBackdrop(
             layout
@@ -1446,18 +1312,11 @@ class PauseRenderer(
         font.color =
             Color.LIGHT_GRAY
 
-        font.draw(
-            batch,
-            definition.description,
-            layout.modalPanel.x +
-                24f,
-            layout.modalPanel.y +
-                layout.modalPanel.height -
-                100f,
-            layout.modalPanel.width -
-                48f,
-            Align.left,
-            true
+        StatSymbolRenderer.drawRichText(
+            batch, font, definition.description,
+            layout.modalPanel.x + 24f,
+            layout.modalPanel.y + layout.modalPanel.height - 100f,
+            layout.modalPanel.width - 48f
         )
 
         font.color =
@@ -1471,12 +1330,23 @@ class PauseRenderer(
                         ?.toString()
                         ?: "Unlimited"
                     ) +
-                "\n\nTotal Bonus:\n" +
-                totalBonusText,
+                "\n\nTotal Bonus:",
             layout.modalPanel.x +
                 24f,
             layout.modalPanel.y +
                 145f
+        )
+
+        StatSymbolRenderer.drawModifiersVertical(
+            batch = batch,
+            font = font,
+            modifiers = definition.statModifiers.map { modifier ->
+                modifier.statType to modifier.amount * entry.count
+            },
+            x = layout.modalPanel.x + 24f,
+            firstBaselineY = layout.modalPanel.y + 91f,
+            lineHeight = 23f,
+            iconSize = 18f
         )
 
         renderDetailCloseHint(
@@ -1576,22 +1446,20 @@ class PauseRenderer(
 
             PauseGearDetailType.WEAPON_TAMGA -> {
                 title =
-                    "WEAPON TAMGA"
+                    weaponTamga?.displayName ?: "WEAPON TAMGA"
 
                 description =
-                    "No Weapon Tamga Equipped.\n\n" +
-                        "Weapon Tamgas will modify Weapon stats " +
-                        "or attack behaviour."
+                    weaponTamga?.description
+                        ?: "No Weapon Tamga Equipped."
             }
 
             PauseGearDetailType.ARMOR_TAMGA -> {
                 title =
-                    "ARMOR TAMGA"
+                    armorTamga?.displayName ?: "ARMOR TAMGA"
 
                 description =
-                    "No Armor Tamga Equipped.\n\n" +
-                        "Armor Tamgas will be connected after " +
-                        "the Armor system is implemented."
+                    armorTamga?.description
+                        ?: "No Armor Tamga Equipped."
             }
         }
 
@@ -1659,18 +1527,11 @@ class PauseRenderer(
         font.color =
             Color.LIGHT_GRAY
 
-        font.draw(
-            batch,
-            description,
-            layout.modalPanel.x +
-                24f,
-            layout.modalPanel.y +
-                layout.modalPanel.height -
-                110f,
-            layout.modalPanel.width -
-                48f,
-            Align.left,
-            true
+        StatSymbolRenderer.drawRichText(
+            batch, font, description,
+            layout.modalPanel.x + 24f,
+            layout.modalPanel.y + layout.modalPanel.height - 110f,
+            layout.modalPanel.width - 48f
         )
 
         renderDetailCloseHint(
@@ -1692,6 +1553,53 @@ class PauseRenderer(
                 24f,
             layout.modalPanel.y +
                 22f
+        )
+    }
+
+    private fun renderHoverTooltip(
+        layout: PauseLayout,
+        interactionState: PauseInteractionState
+    ) {
+        val hoveredStat = interactionState.hoveredStatType
+        val content: Pair<String, String> = when {
+            hoveredStat != null -> hoveredStat.displayName to
+                StatDetailPresentation.tooltipText(playerStats, hoveredStat)
+
+            interactionState.hoveredWeaponSlotIndex != null -> {
+                val weapon = weaponInventory.weaponAt(interactionState.hoveredWeaponSlotIndex ?: -1)
+                    ?: return
+                "${weapon.displayName}  •  ${romanNumeral(weapon.level)}" to com.azizoglu.grisilith.weapon.definition.WeaponPresentation.hover(weapon)
+            }
+
+            interactionState.hoveredItemIndex != null -> {
+                val item = groupedItemEntries().getOrNull(interactionState.hoveredItemIndex ?: -1)
+                    ?: return
+                item.definition.displayName to
+                    "${item.definition.rarity.displayName} Item  •  Owned ${romanNumeral(item.count)}\n\n${item.definition.description}"
+            }
+
+            interactionState.hoveredGearDetailType != null -> when (interactionState.hoveredGearDetailType) {
+                PauseGearDetailType.ARMOR -> {
+                    val armor = equippedArmor.definition
+                    (armor?.displayName ?: "Armor") to (armor?.description ?: "No Armor equipped.")
+                }
+                PauseGearDetailType.WEAPON_TAMGA ->
+                    (weaponTamga?.displayName ?: "Weapon Tamga") to
+                        (weaponTamga?.description ?: "No Weapon Tamga equipped.")
+                PauseGearDetailType.ARMOR_TAMGA ->
+                    (armorTamga?.displayName ?: "Armor Tamga") to
+                        (armorTamga?.description ?: "No Armor Tamga equipped.")
+                null -> return
+            }
+
+            else -> return
+        }
+
+        val pointer = interactionState.pointerPosition
+        AdaptiveTooltipRenderer.draw(
+            batch, font, camera, cameraWidth, cameraHeight, pointer,
+            content.first, content.second,
+            maxWidth = if (hoveredStat != null) 460f else 440f
         )
     }
 
@@ -1837,6 +1745,8 @@ class PauseRenderer(
                         "Projectile / Drain"
                     }
 
+                    WeaponAttackPattern.EXTENDED_PHYSICAL ->
+                        com.azizoglu.grisilith.weapon.definition.catalog.NewPhysicalWeapons.patternLabel(weapon.definition.id.value)
                     WeaponAttackPattern.NONE -> {
                         "Passive"
                     }
@@ -1849,13 +1759,20 @@ class PauseRenderer(
         level:
         Int
     ): String {
-        return when (level) {
-            1 -> "I"
-            2 -> "II"
-            3 -> "III"
-            4 -> "IV"
-            5 -> "V"
-            else -> level.toString()
+        if (level <= 0 || level > 3999) return level.toString()
+        var remaining = level
+        val symbols = listOf(
+            1000 to "M", 900 to "CM", 500 to "D", 400 to "CD",
+            100 to "C", 90 to "XC", 50 to "L", 40 to "XL",
+            10 to "X", 9 to "IX", 5 to "V", 4 to "IV", 1 to "I"
+        )
+        return buildString {
+            symbols.forEach { (value, symbol) ->
+                while (remaining >= value) {
+                    append(symbol)
+                    remaining -= value
+                }
+            }
         }
     }
 
@@ -1886,7 +1803,10 @@ class PauseRenderer(
         String,
 
         rectangle:
-        Rectangle
+        Rectangle,
+
+        verticalOffset:
+        Float = 0f
     ) {
         font.color =
             Color.WHITE
@@ -1894,11 +1814,14 @@ class PauseRenderer(
         font.draw(
             batch,
             text,
-            rectangle.x +
-                TEXT_PADDING,
+            rectangle.x,
             rectangle.y +
                 rectangle.height -
-                13f
+                13f +
+                verticalOffset,
+            rectangle.width,
+            Align.center,
+            false
         )
     }
 
@@ -1923,32 +1846,9 @@ class PauseRenderer(
         Color =
             panelColor
     ) {
-        drawFilledRectangle(
-            rectangle =
-                rectangle,
-
-            color =
-                panelBorderColor
-        )
-
-        drawFilledRectangle(
-            rectangle =
-                Rectangle(
-                    rectangle.x +
-                        PANEL_BORDER,
-
-                    rectangle.y +
-                        PANEL_BORDER,
-
-                    rectangle.width -
-                        PANEL_BORDER * 2f,
-
-                    rectangle.height -
-                        PANEL_BORDER * 2f
-                ),
-
-            color =
-                fillColor
+        UiComponentRenderer.drawPanel(
+            batch = batch,
+            bounds = rectangle
         )
     }
 
@@ -2038,5 +1938,6 @@ class PauseRenderer(
 
     fun dispose() {
         whitePixel.dispose()
+        pauseBackground.dispose()
     }
 }

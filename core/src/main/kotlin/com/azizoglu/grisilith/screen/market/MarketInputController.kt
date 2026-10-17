@@ -17,7 +17,13 @@ class MarketInputController(
         () -> MarketLayout,
 
     private val interactionState:
-    MarketInteractionState
+    MarketInteractionState,
+
+    private val itemScrollPixelsProvider:
+        () -> Float,
+
+    private val groupedItemCountProvider:
+        () -> Int
 ) : InputAdapter() {
 
     companion object {
@@ -27,9 +33,6 @@ class MarketInputController(
 
         private const val DRAG_MOVEMENT_THRESHOLD =
             8f
-
-        private const val ITEM_SCROLL_STEP_PIXELS =
-            24f
 
         private const val ITEM_SCROLL_DRAG_THRESHOLD =
             8f
@@ -122,7 +125,7 @@ class MarketInputController(
             (Int) -> Unit,
 
         onItemScroll:
-            (Int) -> Unit,
+            (Float) -> Unit,
 
         onTamgaClicked:
             () -> Unit,
@@ -150,6 +153,7 @@ class MarketInputController(
             () -> Unit
     ) {
         updatePointerPosition()
+        interactionState.updatePointer(pointerPosition.x, pointerPosition.y)
 
         /*
          * Merge onayı açıkken alttaki market
@@ -702,7 +706,7 @@ class MarketInputController(
             (Int) -> Unit,
 
         onItemScroll:
-            (Int) -> Unit
+            (Float) -> Unit
     ): Boolean {
         val layout =
             layoutProvider()
@@ -724,9 +728,7 @@ class MarketInputController(
                     pointerPosition
                 )
             ) {
-                onItemScroll(
-                    requestedScroll
-                )
+                onItemScroll(requestedScroll * 72f)
 
                 return true
             }
@@ -786,32 +788,9 @@ class MarketInputController(
                 pointerPosition.y -
                     itemPanelLastPointerY
 
-            if (
-                abs(
-                    movementSinceLastStep
-                ) >=
-                ITEM_SCROLL_STEP_PIXELS
-            ) {
-                /*
-                 * Parmağı yukarı çekmek listenin
-                 * ilerleyen satırlarına gider.
-                 */
-                val scrollSteps =
-                    (
-                        movementSinceLastStep /
-                            ITEM_SCROLL_STEP_PIXELS
-                        )
-                        .roundToInt()
-
-                if (scrollSteps != 0) {
-                    onItemScroll(
-                        scrollSteps
-                    )
-
-                    itemPanelLastPointerY +=
-                        scrollSteps *
-                            ITEM_SCROLL_STEP_PIXELS
-                }
+            if (movementSinceLastStep != 0f) {
+                onItemScroll(movementSinceLastStep)
+                itemPanelLastPointerY = pointerPosition.y
             }
 
             return true
@@ -854,36 +833,13 @@ class MarketInputController(
         pointerX: Float,
         pointerY: Float
     ): Int? {
-        val maximumVisibleRows =
-            (
-                (
-                    layout.itemPanel.height -
-                        48f
-                    ) / 24f
-                )
-                .toInt()
-                .coerceAtLeast(1)
-
-        for (
-        rowIndex in
-        0 until maximumVisibleRows
-        ) {
-            val rowRectangle =
-                layout.itemRowRectangle(
-                    rowIndex
-                )
-
-            if (
-                rowRectangle.contains(
-                    pointerX,
-                    pointerY
-                )
-            ) {
-                return rowIndex
-            }
-        }
-
-        return null
+        return MarketLayout.itemIndexAt(
+            layout.itemPanel,
+            groupedItemCountProvider(),
+            itemScrollPixelsProvider(),
+            pointerX,
+            pointerY
+        )
     }
 
     private fun clearItemPanelPointerState() {

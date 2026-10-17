@@ -1,0 +1,11 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':lwjgl3')
+    desktop.kotlin.sourceSets.main.kotlin.srcDir(gradle.rootProject.file('tools/preset-ui-smoke'))
+    desktop.tasks.register('presetUiSmoke', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PresetUiSmoke'
+        workingDir = gradle.rootProject.file('assets')
+        jvmArgs '--enable-native-access=ALL-UNNAMED'
+    }
+}

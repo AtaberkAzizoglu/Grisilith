@@ -4,11 +4,8 @@ import com.azizoglu.grisilith.content.StatModifier
 
 object WeaponLevelProgressionFactory {
 
+    // Weapon level upgrades add speed, stats and mechanics, never a blanket damage multiplier.
     fun create(
-        level2Damage: Float = 1f,
-        level3Damage: Float = level2Damage,
-        level4Damage: Float = level3Damage,
-        level5Damage: Float = level4Damage,
 
         level2AttackSpeed: Float = 1f,
         level3AttackSpeed: Float =

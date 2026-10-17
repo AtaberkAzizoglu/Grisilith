@@ -53,7 +53,10 @@ data class EnemyStats(
     val behaviorId: ContentId? = null,
 
     val traversalProfile: EnemyTraversalProfile =
-        EnemyTraversalProfile.BLOCKED_BY_OBSTACLES
+        EnemyTraversalProfile.BLOCKED_BY_OBSTACLES,
+
+    val baseMagicResistance: Int = 0,
+    val magicResistance: Int = 0
 ) {
 
     init {
@@ -64,6 +67,8 @@ data class EnemyStats(
         require(goldReward >= 0f)
         require(armorClass >= 0)
         require(baseArmor >= 0)
+        require(baseMagicResistance >= 0)
+        require(magicResistance >= 0)
         require(attacksPerSecond >= 0f)
         require(attackRange >= 0f)
         require(weaponDamageMultiplier >= 0f)

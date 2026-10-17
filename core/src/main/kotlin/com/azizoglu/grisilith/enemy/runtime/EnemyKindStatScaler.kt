@@ -167,6 +167,11 @@ object EnemyKindStatScaler {
                 definition.baseStats
                     .baseArmor,
 
+            baseMagicResistance = definition.baseStats.baseMagicResistance,
+            magicResistance = (definition.baseStats.magicResistance * stageScaling.armorMultiplier *
+                familyGrowth.armorMultiplier * typeModifier.armorMultiplier * adaptiveScaling.armorClassMultiplier)
+                .roundToInt().coerceAtLeast(0),
+
             attacksPerSecond =
                 scaledAttackSpeed,
 

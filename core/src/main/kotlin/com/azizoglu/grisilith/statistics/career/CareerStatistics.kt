@@ -23,7 +23,9 @@ data class CareerStatistics(
     val highestDamage: Long = 0L,
     val mostGold: Float = 0f,
     val mostGrisilithCoins: Int = 0,
-    val mostDamageTaken: Long = 0L
+    val mostDamageTaken: Long = 0L,
+    val totalScore: Long = 0L,
+    val highestScore: Long = 0L
 ) {
 
     companion object {

@@ -193,7 +193,7 @@ object PlayerProfileRepository {
         unlockId: String
     ): Boolean {
 
-        return currentProfile
+        return com.azizoglu.grisilith.unlock.UnlockRegistry.previewUnlocked(unlockId) || currentProfile
             .isUnlocked(
                 unlockId
             )

@@ -112,13 +112,13 @@ class ShieldAttackExecutor(
                 attackAngle,
             worldWidth =
                 effectiveRange *
-                    0.86f,
+                    1.72f,
             worldHeight =
                 effectiveRange *
                     if (upgraded) {
-                        0.66f
+                        1.32f
                     } else {
-                        0.56f
+                        1.12f
                     },
             durationSeconds =
                 0.27f
@@ -161,7 +161,7 @@ class ShieldAttackExecutor(
 
         val targets =
             context.enemyManager
-                .allEnemies
+                .weaponTargets
                 .filter { enemy ->
                     isInsideCone(
                         enemy = enemy,

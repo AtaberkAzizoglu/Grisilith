@@ -67,7 +67,10 @@ data class PresetStatAllocation(
         Int,
 
         pointBudget:
-        Int
+        Int,
+
+        amount:
+        Int = 1
     ): PresetStatAllocation {
         if (
             spentPointCount >=
@@ -97,11 +100,16 @@ data class PresetStatAllocation(
             bonusPoints
                 .toMutableMap()
 
-        updated[
-            statType
-        ] =
-            currentBonus +
-                1
+        val allowedIncrease =
+            minOf(
+                amount.coerceAtLeast(0),
+                pointBudget - spentPointCount,
+                PresetConstants.MAXIMUM_PRE_RUN_STAT_SCORE - currentFinalScore
+            )
+
+        if (allowedIncrease <= 0) return this
+
+        updated[statType] = currentBonus + allowedIncrease
 
         return PresetStatAllocation(
             bonusPoints =
@@ -117,7 +125,10 @@ data class PresetStatAllocation(
      */
     fun decrease(
         statType:
-        StatType
+        StatType,
+
+        amount:
+        Int = 1
     ): PresetStatAllocation {
         val currentBonus =
             bonusFor(
@@ -132,16 +143,14 @@ data class PresetStatAllocation(
             bonusPoints
                 .toMutableMap()
 
-        if (currentBonus == 1) {
+        val updatedBonus = (currentBonus - amount.coerceAtLeast(0)).coerceAtLeast(0)
+
+        if (updatedBonus == 0) {
             updated.remove(
                 statType
             )
         } else {
-            updated[
-                statType
-            ] =
-                currentBonus -
-                    1
+            updated[statType] = updatedBonus
         }
 
         return PresetStatAllocation(

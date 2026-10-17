@@ -21,6 +21,8 @@ class CombatInteractionManager {
         rules.clear()
     }
 
+    fun unregister(rule: CombatInteractionRule) { rules.remove(rule) }
+
     fun notify(
         event: CombatInteractionEvent
     ) {

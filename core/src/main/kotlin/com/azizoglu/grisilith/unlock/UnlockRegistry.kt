@@ -2,7 +2,9 @@ package com.azizoglu.grisilith.unlock
 
 import com.azizoglu.grisilith.armor.definition.ArmorDefinition
 import com.azizoglu.grisilith.armor.definition.DefaultArmors
+import com.azizoglu.grisilith.character.DefaultCharacters
 import com.azizoglu.grisilith.item.definition.DefaultItems
+import com.azizoglu.grisilith.item.definition.ItemRarity
 import com.azizoglu.grisilith.tamga.definition.DefaultTamgas
 import com.azizoglu.grisilith.tamga.definition.TamgaActivationType
 import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
@@ -10,6 +12,9 @@ import com.azizoglu.grisilith.weapon.definition.WeaponDefinition
 import java.util.Locale
 
 object UnlockRegistry {
+    // v0.3 preview only. Disable for v1.0; never modifies earned purchases.
+    const val PREVIEW_UNLOCKS_ENABLED = true
+    fun previewUnlocked(id: String) = PREVIEW_UNLOCKS_ENABLED && id != STAT_POINT_ID && find(id) != null
 
     const val STAT_POINT_ID =
         "STAT_POINT"
@@ -20,9 +25,6 @@ object UnlockRegistry {
     private const val ARMOR_COST =
         5
 
-    private const val ITEM_COST =
-        10
-
     private const val PASSIVE_TAMGA_COST =
         15
 
@@ -31,6 +33,9 @@ object UnlockRegistry {
 
     private const val STAT_POINT_COST =
         5
+
+    private const val CHARACTER_COST =
+        20
 
     /*
      * Merchant'ta satılacak mevcut Weapon'lar.
@@ -49,19 +54,21 @@ object UnlockRegistry {
             ),
             requireWeapon(
                 "Enchanted Chalk Dust"
-            )
+            ),
+            DefaultWeapons.warhammer, DefaultWeapons.whip, DefaultWeapons.sling, DefaultWeapons.boomerang
         )
 
     /*
      * Şimdilik yalnızca Heavy Plate Armor satılıyor.
      *
-     * Gerçek displayName "Plate Armor" veya
-     * "Heavy Plate Armor" ise ikisini de destekler.
+     * Current displayName is "Full Plate Armor". Legacy names remain
+     * supported so existing profile data can still be resolved.
      */
     private val merchantArmors:
         List<ArmorDefinition> =
         listOf(
-            requirePlateArmor()
+            requirePlateArmor(), DefaultArmors.paddedGambeson, DefaultArmors.barnacleArmor,
+            DefaultArmors.fortressArmor, DefaultArmors.arcaneSilkRobe
         )
 
     private val definitions:
@@ -87,6 +94,21 @@ object UnlockRegistry {
                 )
             )
 
+            listOf(
+                DefaultCharacters.koba,
+                DefaultCharacters.linlosDustman
+            ).forEach { character ->
+                add(
+                    UnlockDefinition(
+                        id = character.id.value,
+                        displayName = character.displayName,
+                        description = character.description,
+                        type = UnlockType.CHARACTER,
+                        cost = CHARACTER_COST
+                    )
+                )
+            }
+
             merchantWeapons.forEach {
                     weapon ->
 
@@ -99,7 +121,9 @@ object UnlockRegistry {
                             weapon.displayName,
 
                         description =
-                            "Permanently unlocks ${weapon.displayName}.",
+                            "Permanently unlocks ${weapon.displayName}." +
+                                if (weapon in com.azizoglu.grisilith.weapon.definition.catalog.NewPhysicalWeapons.all)
+                                    "\n\n" + weapon.description else "",
 
                         type =
                             UnlockType.WEAPON,
@@ -148,13 +172,19 @@ object UnlockRegistry {
                             item.displayName,
 
                         description =
-                            "Permanently unlocks ${item.displayName}.",
+                            "Permanently unlocks ${item.displayName}." +
+                                if (item == DefaultItems.discardVoucher) "\n\n" + item.description else "",
 
                         type =
                             UnlockType.ITEM,
 
-                        cost =
-                            ITEM_COST
+                    cost =
+                            when (item.rarity) {
+                                ItemRarity.UNCOMMON -> 1
+                                ItemRarity.RARE -> 5
+                                ItemRarity.LEGENDARY -> 10
+                                ItemRarity.ARTIFACT -> 20
+                            }
                     )
                 )
             }
@@ -324,9 +354,7 @@ object UnlockRegistry {
         unlockedIds: Set<String>
     ): Boolean {
 
-        return unlockedIds.containsAll(
-            definition.requiredUnlockIds
-        )
+        return definition.requiredUnlockIds.all { it in unlockedIds || previewUnlocked(it) }
     }
 
     private fun validateDependencies() {
@@ -388,6 +416,8 @@ object UnlockRegistry {
                             )
 
                     normalizedName ==
+                        "full plate armor" ||
+                        normalizedName ==
                         "plate armor" ||
                         normalizedName ==
                         "heavy plate armor" ||

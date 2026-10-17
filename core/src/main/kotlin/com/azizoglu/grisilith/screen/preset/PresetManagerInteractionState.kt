@@ -45,6 +45,13 @@ class PresetManagerInteractionState {
             )
     }
 
+    fun setScrollOffset(
+        value: Int,
+        maximumOffset: Int
+    ) {
+        scrollOffset = value.coerceIn(0, maximumOffset)
+    }
+
     fun openStats(
         presetId:
         String

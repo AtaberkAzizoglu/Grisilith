@@ -137,6 +137,8 @@ class EnemyRuntimeFactory(
                 maximumHealth = 1_000_000,
                 armorClass = 0,
                 baseArmor = 0,
+                baseMagicResistance = 0,
+                magicResistance = 0,
                 contactDamage = 0,
                 movementSpeed = 0f,
                 attacksPerSecond = 0f,

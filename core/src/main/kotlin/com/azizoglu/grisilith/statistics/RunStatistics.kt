@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.statistics
 
+import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.save.RunSaveStatistics
 import java.util.HashMap
@@ -26,6 +27,13 @@ class RunStatistics {
         0
         private set
 
+    var totalUniqueEnemiesKilled: Int = 0
+        private set
+
+    val totalNormalEnemiesKilled: Int
+        get() = (totalEnemiesKilled.toLong() - totalUniqueEnemiesKilled -
+            totalBossesDefeated - totalFinalBossesDefeated).coerceAtLeast(0L).toInt()
+
     var totalGoldCollected: Float =
         0f
         private set
@@ -42,6 +50,15 @@ class RunStatistics {
 
     private val weaponDamage =
         mutableMapOf<String, Long>()
+
+    private val damageDealtByType = mutableMapOf<DamageType, Long>()
+    private val damageTakenByType = mutableMapOf<DamageType, Long>()
+    private val damageReducedByType = mutableMapOf<DamageType, Long>()
+
+    val damageDealtTypeStatistics: Map<DamageType, Long> get() = damageDealtByType.toMap()
+    val damageTakenTypeStatistics: Map<DamageType, Long> get() = damageTakenByType.toMap()
+    val damageReducedTypeStatistics: Map<DamageType, Long> get() = damageReducedByType.toMap()
+    val totalDamageReduced: Long get() = damageReducedByType.values.sum()
 
     val weaponDamageStatistics:
         Map<String, Long>
@@ -69,15 +86,33 @@ class RunStatistics {
     }
 
     fun recordDamageTaken(
-        amount: Int
+        amount: Int,
+        requestedAmount: Int = amount,
+        damageType: DamageType = DamageType.NONE
     ) {
 
-        if (amount <= 0) {
+        if (requestedAmount <= 0) {
             return
         }
 
-        totalDamageTaken +=
-            amount
+        if (amount > 0) {
+            totalDamageTaken += amount
+        }
+
+        if (damageType != DamageType.NONE) {
+            if (amount > 0) {
+                damageTakenByType[damageType] = damageTakenByType.getOrDefault(damageType, 0L) + amount
+            }
+            val reduced = (requestedAmount - amount).coerceAtLeast(0)
+            if (reduced > 0) {
+                damageReducedByType[damageType] = damageReducedByType.getOrDefault(damageType, 0L) + reduced
+            }
+        }
+    }
+
+    internal fun recordDamageTypeDealt(amount: Int, damageType: DamageType) {
+        if (amount <= 0 || damageType == DamageType.NONE) return
+        damageDealtByType[damageType] = damageDealtByType.getOrDefault(damageType, 0L) + amount
     }
 
     fun recordEnemyKilled(
@@ -99,9 +134,8 @@ class RunStatistics {
                     1
             }
 
-            EnemyType.NORMAL,
-            EnemyType.UNIQUE -> {
-            }
+            EnemyType.UNIQUE -> totalUniqueEnemiesKilled += 1
+            EnemyType.NORMAL -> Unit
         }
     }
 
@@ -147,6 +181,7 @@ class RunStatistics {
 
             totalEnemiesKilled =
                 totalEnemiesKilled,
+            totalUniqueEnemiesKilled = totalUniqueEnemiesKilled,
 
             totalMiniBossesDefeated =
                 totalBossesDefeated,
@@ -166,7 +201,11 @@ class RunStatistics {
             damageBySource =
                 HashMap(
                     weaponDamage
-                )
+                ),
+
+            damageDealtByType = HashMap(damageDealtByType.mapKeys { it.key.name }),
+            damageTakenByType = HashMap(damageTakenByType.mapKeys { it.key.name }),
+            damageReducedByType = HashMap(damageReducedByType.mapKeys { it.key.name })
         )
     }
 
@@ -204,6 +243,9 @@ class RunStatistics {
                 .coerceAtLeast(
                     0
                 )
+        totalUniqueEnemiesKilled = saveState.totalUniqueEnemiesKilled.coerceIn(0,
+            (totalEnemiesKilled.toLong()-totalBossesDefeated-totalFinalBossesDefeated)
+                .coerceAtLeast(0L).toInt())
 
         totalGoldCollected =
             saveState.totalGoldCollected
@@ -224,6 +266,9 @@ class RunStatistics {
                 )
 
         weaponDamage.clear()
+        damageDealtByType.clear()
+        damageTakenByType.clear()
+        damageReducedByType.clear()
 
         saveState.damageBySource
             .forEach {
@@ -244,5 +289,16 @@ class RunStatistics {
                         damage
                 }
             }
+
+        restoreDamageTypes(saveState.damageDealtByType, damageDealtByType)
+        restoreDamageTypes(saveState.damageTakenByType, damageTakenByType)
+        restoreDamageTypes(saveState.damageReducedByType, damageReducedByType)
+    }
+
+    private fun restoreDamageTypes(source: Map<String, Long>, target: MutableMap<DamageType, Long>) {
+        source.forEach { (name, amount) ->
+            val type = DamageType.entries.firstOrNull { it.name == name } ?: return@forEach
+            if (type != DamageType.NONE && amount > 0L) target[type] = amount
+        }
     }
 }

@@ -25,7 +25,7 @@ object UnlockManager {
 
         if (
             !isRepeatableStatPoint &&
-            profile.isUnlocked(
+            PlayerProfileRepository.isUnlocked(
                 unlockId
             )
         ) {

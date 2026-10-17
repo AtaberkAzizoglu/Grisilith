@@ -69,8 +69,11 @@ enum class DamageType(
         canCriticallyHit = false
     );
 
-    /** Poison, Earth, Cold and untyped damage deliberately bypass this defense. */
+    val isPhysical: Boolean
+        get() = this == SLASHING || this == PIERCING || this == BLUDGEONING
+
+    /** Earth, Cold and untyped damage deliberately bypass this defense. */
     val isMagical: Boolean
         get() = this == FIRE || this == AIR || this == WATER ||
-            this == LIGHTNING || this == NECROTIC || this == ACID
+            this == LIGHTNING || this == NECROTIC || this == ACID || this == POISON
 }

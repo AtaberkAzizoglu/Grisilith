@@ -10,8 +10,10 @@ import com.azizoglu.grisilith.screen.market.MarketLayout
 import com.azizoglu.grisilith.stage.StageController
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.statistics.StatPresentationGroup
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Pixmap
 import com.badlogic.gdx.graphics.Texture
@@ -19,12 +21,20 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
+import com.azizoglu.grisilith.ui.icon.ContentIconRenderer
+import com.azizoglu.grisilith.ui.stat.StatSymbolRenderer
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
 import com.badlogic.gdx.utils.Align
 import com.azizoglu.grisilith.screen.market.MarketInteractionState
+import com.azizoglu.grisilith.settings.GameSettings
+import com.azizoglu.grisilith.ui.theme.ButtonVisualState
+import com.azizoglu.grisilith.ui.theme.PanelVisualStyle
 import com.azizoglu.grisilith.economy.WeaponSalePriceCalculator
 import com.azizoglu.grisilith.weapon.definition.WeaponAttackPattern
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.item.definition.ItemDefinition
+import com.azizoglu.grisilith.item.definition.ItemRarity
 import java.util.Locale
 import kotlin.math.roundToInt
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
@@ -62,7 +72,10 @@ class MarketRenderer(
     WeaponInventory,
 
     private val itemInventory:
-    ItemInventory
+    ItemInventory,
+
+    private val runGrisilithCoinsProvider:
+    () -> Int
 ) {
 
     companion object {
@@ -86,6 +99,32 @@ class MarketRenderer(
 
     private val goldCoinRenderer =
         GoldCoinRenderer()
+
+    private val grisilithCoinRenderer =
+        GrisilithCoinRenderer()
+
+    private val characterStatsRenderer =
+        CharacterStatsPanelRenderer(batch, font) { playerStats }
+
+    private val marketBackground by lazy {
+        Texture(Gdx.files.internal("ui/market/traveling_merchant_tent.png")).also {
+            it.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
+        }
+    }
+
+    private val weaponOfferGlow by lazy {
+        Texture(Gdx.files.internal("ui/market/effects/weapon_offer_glow.png")).also {
+            it.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
+        }
+    }
+
+    private val legendaryOfferGlow by lazy {
+        Texture(Gdx.files.internal("ui/chests/effects/legendary_reward_glow.png"))
+    }
+
+    private val artifactOfferGlow by lazy {
+        Texture(Gdx.files.internal("ui/chests/effects/artifact_reward_glow.png"))
+    }
 
     private val weaponDamageCalculator =
         WeaponDamageCalculator(
@@ -170,7 +209,7 @@ class MarketRenderer(
     fun render(
         marketSlots: List<MarketSlot>,
         marketRerollsUsed: Int,
-        itemScrollOffset: Int,
+        itemScrollOffset: Float,
         interactionState: MarketInteractionState
     ) {
         val layout =
@@ -220,17 +259,7 @@ class MarketRenderer(
                 itemScrollOffset
         )
 
-        renderCharacterPanel(
-            layout
-        )
-
-        renderStatsPanel(
-            layout
-        )
-
-        renderTamgaPanel(
-            layout
-        )
+        renderCharacterAndStatsPanel(layout, interactionState)
 
         renderWeaponSellArea(
             layout =
@@ -263,6 +292,8 @@ class MarketRenderer(
             interactionState =
                 interactionState
         )
+
+        renderHoverTooltip(layout, marketSlots, itemScrollOffset, interactionState)
 
         renderWeaponDetailPopup(
             layout =
@@ -313,13 +344,9 @@ class MarketRenderer(
     private fun renderBackground(
         layout: MarketLayout
     ) {
-        drawFilledRectangle(
-            rectangle =
-                layout.fullScreen,
-
-            color =
-                backgroundColor
-        )
+        batch.color = Color.WHITE
+        batch.draw(marketBackground, layout.fullScreen.x, layout.fullScreen.y, layout.fullScreen.width, layout.fullScreen.height)
+        drawFilledRectangle(layout.fullScreen, Color(0.015f, 0.02f, 0.03f, 0.34f))
     }
 
     private fun renderTopBar(
@@ -328,49 +355,20 @@ class MarketRenderer(
         interactionState:
         MarketInteractionState
     ) {
-        drawPanel(
-            rectangle =
-                layout.stagePanel,
-
-            fillColor =
-                panelColor
+        UiComponentRenderer.drawPanel(batch, layout.stagePanel, PanelVisualStyle.TITLE)
+        UiComponentRenderer.drawButton(
+            batch,
+            layout.goldPanel,
+            if (layout.goldPanel.contains(interactionState.pointerPosition)) ButtonVisualState.HOVERED else ButtonVisualState.NORMAL
+        )
+        UiComponentRenderer.drawButton(
+            batch,
+            layout.returnButton,
+            if (layout.returnButton.contains(interactionState.pointerPosition)) ButtonVisualState.HOVERED else ButtonVisualState.NORMAL
         )
 
-        drawPanel(
-            rectangle =
-                layout.goldPanel,
-
-            fillColor =
-                panelColor
-        )
-
-        drawPanel(
-            rectangle =
-                layout.returnButton,
-
-            fillColor =
-                returnColor
-        )
-
-        val nextStage =
-            (
-                stageController.currentStage +
-                    1
-                )
-                .coerceAtMost(
-                    stageController.maximumStage
-                )
-
-        drawCenteredText(
-            text =
-                "NEXT STAGE: ($nextStage -1)",
-
-            rectangle =
-                layout.stagePanel,
-
-            color =
-                Color.WHITE
-        )
+        val completedStage = (stageController.currentStage - 1).coerceAtLeast(1)
+        drawCenteredText("STAGE $completedStage", layout.stagePanel, Color.GOLD)
 
         val generalFailure =
             interactionState
@@ -379,70 +377,20 @@ class MarketRenderer(
                     feedback.offerIndex == null
                 }
 
-        val rerollText =
-            if (generalFailure != null) {
-                generalFailure.message
-            } else if (rerollPrice <= 0) {
-                "Click or press R to Reroll: FREE"
-            } else {
-                "Click or press R to Reroll: " +
-                    "$rerollPrice Gold Coin"
-            }
-
-        if (
-            generalFailure ==
-            null
-        ) {
-            goldCoinRenderer.render(
-                batch =
-                    batch,
-                font =
-                    font,
-                amount =
-                    sessionWallet.goldCoins,
-                x =
-                    layout.goldPanel.x +
-                        12f,
-                y =
-                    layout.goldPanel.y +
-                        layout.goldPanel.height /
-                            2f +
-                        7f,
-                iconSize =
-                    24f
-            )
+        val shortcut = if (GameSettings.showAbilityShortcuts) " [R]" else ""
+        val rerollText = when {
+            generalFailure != null -> generalFailure.message
+            rerollPrice <= 0 -> "REROLL: FREE$shortcut"
+            else -> "REROLL: $rerollPrice$shortcut"
         }
 
-        drawCenteredText(
-            text =
-                rerollText,
+        val currencyX = layout.stagePanel.x + layout.stagePanel.width + 24f
+        val currencyY = layout.stagePanel.y + 31f
+        goldCoinRenderer.render(batch, font, sessionWallet.goldCoins, currencyX, currencyY, 25f)
+        grisilithCoinRenderer.render(batch, font, runGrisilithCoinsProvider(), currencyX + 116f, currencyY, 25f)
 
-            rectangle =
-                layout.goldPanel,
-
-            color =
-                if (generalFailure != null) {
-                    Color(
-                        1f,
-                        0.35f,
-                        0.35f,
-                        1f
-                    )
-                } else {
-                    Color.GOLD
-                }
-        )
-
-        drawCenteredText(
-            text =
-                "RETURN TO GAME",
-
-            rectangle =
-                layout.returnButton,
-
-            color =
-                Color.WHITE
-        )
+        drawCenteredText(rerollText, layout.goldPanel, if (generalFailure != null) Color(1f, 0.35f, 0.35f, 1f) else Color.GOLD)
+        drawCenteredText("RETURN TO GAME", layout.returnButton, Color.WHITE)
     }
 
     private fun renderMarketOffers(
@@ -451,104 +399,98 @@ class MarketRenderer(
         interactionState:
         MarketInteractionState
     ) {
-        layout.offerCards
-            .forEachIndexed {
-                    index,
-                    cardRectangle ->
+        UiComponentRenderer.drawPanel(batch, layout.weaponSellArea, PanelVisualStyle.MAIN)
+        layout.offerCards.drop(1).forEach { card ->
+            UiComponentRenderer.drawSimpleVerticalSeparator(
+                batch,
+                Rectangle(card.x - 2f, layout.weaponSellArea.y + 15f, 4f, layout.weaponSellArea.height - 30f)
+            )
+        }
 
-                val slot =
-                    marketSlots.getOrNull(
-                        index
-                    )
+        layout.offerCards.forEachIndexed { index, card ->
+            val slot = marketSlots.getOrNull(index)
+            renderCompactOffer(slot, card)
+            renderOfferFailureOverlay(index, card, interactionState)
 
-                val fillColor =
-                    when {
-                        slot?.isSold == true ->
-                            soldColor
-
-                        slot?.isLocked == true ->
-                            lockedColor
-
-                        else ->
-                            cardColor
-                    }
-
-                drawPanel(
-                    rectangle =
-                        cardRectangle,
-
-                    fillColor =
-                        fillColor
-                )
-
-                renderOfferCardContent(
-                    slot = slot,
-                    cardRectangle =
-                        cardRectangle
-                )
-
-                renderOfferFailureOverlay(
-                    offerIndex =
-                        index,
-
-                    cardRectangle =
-                        cardRectangle,
-
-                    interactionState =
-                        interactionState
-                )
-
-                val lockRectangle =
-                    layout.lockButtons[index]
-
-                drawPanel(
-                    rectangle =
-                        lockRectangle,
-
-                    fillColor =
-                        if (
-                            slot?.isLocked ==
-                            true
-                        ) {
-                            Color(
-                                0.55f,
-                                0.31f,
-                                0.06f,
-                                1f
-                            )
-                        } else {
-                            Color(
-                                0.13f,
-                                0.18f,
-                                0.25f,
-                                1f
-                            )
-                        }
-                )
-
-                val lockText =
-                    when {
-                        slot?.isSold == true ->
-                            "SOLD"
-
-                        slot?.isLocked == true ->
-                            "LOCKED"
-
-                        else ->
-                            "LOCK"
-                    }
-
-                drawCenteredText(
-                    text =
-                        lockText,
-
-                    rectangle =
-                        lockRectangle,
-
-                    color =
-                        Color.WHITE
-                )
+            val lock = layout.lockButtons[index]
+            val hovered = lock.contains(interactionState.pointerPosition)
+            val state = when {
+                slot?.isSold == true -> ButtonVisualState.DISABLED
+                hovered -> ButtonVisualState.HOVERED
+                slot?.isLocked == true -> ButtonVisualState.SELECTED
+                else -> ButtonVisualState.NORMAL
             }
+            UiComponentRenderer.drawButton(batch, lock, state)
+            val label = when {
+                slot?.isSold == true -> "SOLD"
+                slot?.isLocked == true -> "LOCKED"
+                else -> "LOCK"
+            }
+            drawCenteredText(label, lock, if (slot?.isSold == true) Color.LIGHT_GRAY else Color.WHITE)
+        }
+    }
+
+    private fun renderCompactOffer(slot: MarketSlot?, card: Rectangle) {
+        val offer = slot?.offer
+        if (slot?.isSold == true) {
+            drawCenteredText("SOLD", Rectangle(card.x, card.y + 48f, card.width, card.height - 48f), Color.GRAY)
+            return
+        }
+        if (offer == null) return
+
+        val iconSize = minOf(86f, card.width - 42f)
+        val icon = Rectangle(card.x + (card.width - iconSize) / 2f, card.y + 105f, iconSize, iconSize)
+        drawMarketOfferGlow(offer.productType, offer.itemDefinition, icon, card)
+        when (offer.productType) {
+            MarketProductType.WEAPON -> offer.weaponDefinition?.let { ContentIconRenderer.draw(batch, it, icon) }
+            MarketProductType.ITEM -> offer.itemDefinition?.let { ContentIconRenderer.draw(batch, it, icon) }
+            MarketProductType.STAT -> offer.statType?.let { StatSymbolRenderer.drawIcon(batch, it, icon.x, icon.y, iconSize) }
+        }
+
+        val oldX = font.data.scaleX
+        val oldY = font.data.scaleY
+        font.data.setScale(0.60f)
+        drawFittedItemName(offer.title, Rectangle(card.x + 5f, card.y + 69f, card.width - 10f, 22f))
+        font.data.setScale(0.66f)
+        font.color = Color.GOLD
+        font.draw(batch, "${offer.price} GOLD", card.x, card.y + 68f, card.width, Align.center, false)
+        font.data.setScale(oldX, oldY)
+    }
+
+    private fun drawMarketOfferGlow(
+        productType: MarketProductType,
+        item: ItemDefinition?,
+        icon: Rectangle,
+        card: Rectangle
+    ) {
+        val texture: Texture
+        val multiplier: Float
+        val alpha: Float
+        when {
+            productType == MarketProductType.WEAPON -> {
+                texture = weaponOfferGlow
+                multiplier = 1.48f
+                alpha = 0.82f
+            }
+            item?.rarity == ItemRarity.ARTIFACT -> {
+                texture = artifactOfferGlow
+                multiplier = 1.42f
+                alpha = 0.88f
+            }
+            item?.rarity == ItemRarity.LEGENDARY -> {
+                texture = legendaryOfferGlow
+                multiplier = 1.18f
+                alpha = 0.70f
+            }
+            else -> return
+        }
+        val size = (icon.width * multiplier).coerceAtMost(minOf(card.width - 8f, card.height - 8f))
+        val drawX = (icon.x + icon.width / 2f - size / 2f).coerceIn(card.x + 4f, card.x + card.width - size - 4f)
+        val drawY = (icon.y + icon.height / 2f - size / 2f).coerceIn(card.y + 4f, card.y + card.height - size - 4f)
+        val oldColor = Color(batch.color)
+        batch.color = Color(1f, 1f, 1f, alpha)
+        batch.draw(texture, drawX, drawY, size, size)
+        batch.color = oldColor
     }
 
     private fun renderOfferFailureOverlay(
@@ -571,10 +513,10 @@ class MarketRenderer(
 
         val overlayRectangle =
             Rectangle(
-                cardRectangle.x + 6f,
-                cardRectangle.y + 41f,
-                cardRectangle.width - 12f,
-                cardRectangle.height - 47f
+                cardRectangle.x + 10f,
+                cardRectangle.y + 62f,
+                cardRectangle.width - 20f,
+                cardRectangle.height - 70f
             )
 
         drawFilledRectangle(
@@ -607,20 +549,29 @@ class MarketRenderer(
         rectangle: Rectangle,
         color: Color
     ) {
-        font.color =
-            color
+        val oldScaleX = font.data.scaleX
+        val oldScaleY = font.data.scaleY
+        val contentWidth = rectangle.width - 24f
+        val contentHeight = rectangle.height - 24f
+        var scale = 0.72f
+        do {
+            font.data.setScale(scale)
+            glyphLayout.setText(font, text, color, contentWidth, Align.center, true)
+            if (glyphLayout.width <= contentWidth && glyphLayout.height <= contentHeight) break
+            scale -= 0.04f
+        } while (scale >= 0.46f)
 
+        font.color = color
         font.draw(
             batch,
             text,
-            rectangle.x + 8f,
-            rectangle.y +
-                rectangle.height / 2f +
-                8f,
-            rectangle.width - 16f,
+            rectangle.x + 12f,
+            rectangle.y + (rectangle.height + glyphLayout.height) / 2f,
+            contentWidth,
             Align.center,
             true
         )
+        font.data.setScale(oldScaleX, oldScaleY)
     }
 
     private fun renderOfferCardContent(
@@ -681,6 +632,29 @@ class MarketRenderer(
                     "STAT"
             }
 
+        val iconDefinition =
+            offer.weaponDefinition
+                ?: offer.itemDefinition
+
+        val iconSize =
+            minOf(72f, cardRectangle.width * 0.28f)
+
+        val iconBounds =
+            Rectangle(
+                cardRectangle.x + cardRectangle.width - iconSize - TEXT_PADDING,
+                cardRectangle.y + cardRectangle.height - iconSize - 15f,
+                iconSize,
+                iconSize
+            )
+
+        val renderedIcon =
+            iconDefinition != null &&
+                ContentIconRenderer.draw(
+                    batch = batch,
+                    definition = iconDefinition,
+                    bounds = iconBounds
+                )
+
         font.color =
             categoryColor(
                 offer.productType
@@ -693,25 +667,29 @@ class MarketRenderer(
                 TEXT_PADDING,
             cardRectangle.y +
                 cardRectangle.height -
-                13f
+                20f
         )
 
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            offer.title,
-            cardRectangle.x +
-                TEXT_PADDING,
-            cardRectangle.y +
-                cardRectangle.height -
-                36f,
-            cardRectangle.width -
-                TEXT_PADDING * 2f,
-            Align.left,
-            true
-        )
+        if (offer.productType == MarketProductType.STAT && offer.statType != null) {
+            StatSymbolRenderer.drawLabel(
+                batch = batch,
+                font = font,
+                statType = offer.statType,
+                x = cardRectangle.x + TEXT_PADDING,
+                baselineY = cardRectangle.y + cardRectangle.height - 43f,
+                iconSize = 20f,
+                width = cardRectangle.width - TEXT_PADDING * 2f
+            )
+        } else {
+            font.color = Color.WHITE
+            font.draw(
+                batch, offer.title,
+                cardRectangle.x + TEXT_PADDING,
+                cardRectangle.y + cardRectangle.height - 43f,
+                cardRectangle.width - TEXT_PADDING * 2f - if (renderedIcon) iconSize + 6f else 0f,
+                Align.left, true
+            )
+        }
 
         val oldScaleX =
             font.data.scaleX
@@ -739,18 +717,13 @@ class MarketRenderer(
             font.color =
                 Color.LIGHT_GRAY
 
-            font.draw(
-                batch,
-                offer.description,
-                cardRectangle.x +
-                    TEXT_PADDING,
-                cardRectangle.y +
-                    cardRectangle.height -
-                    67f,
-                cardRectangle.width -
-                    TEXT_PADDING * 2f,
-                Align.left,
-                true
+            StatSymbolRenderer.drawRichText(
+                batch, font, offer.description,
+                cardRectangle.x + TEXT_PADDING,
+                cardRectangle.y + cardRectangle.height - 74f,
+                cardRectangle.width - TEXT_PADDING * 2f,
+                lineHeight = 16f,
+                iconSize = 13f
             )
         }
 
@@ -786,7 +759,7 @@ class MarketRenderer(
         var currentY =
             cardRectangle.y +
                 cardRectangle.height -
-                67f
+                74f
 
         font.color =
             Color.LIGHT_GRAY
@@ -819,14 +792,12 @@ class MarketRenderer(
             font.color =
                 Color.GOLD
 
-            font.draw(
-                batch,
-                "Main Scaling: " +
-                    primaryScaling
-                        .first
-                        .displayName,
-                startX,
-                currentY
+            StatSymbolRenderer.drawRichText(
+                batch, font,
+                "Main Scaling: ${primaryScaling.first.displayName}",
+                startX, currentY, 250f,
+                lineHeight = 17f,
+                iconSize = 14f
             )
 
             currentY -=
@@ -841,23 +812,13 @@ class MarketRenderer(
             font.color =
                 Color.LIGHT_GRAY
 
-            font.draw(
-                batch,
-                "Secondary: " +
-                    secondaryScaling
-                        .joinToString(
-                            separator = ", "
-                        ) { scaling ->
-                            scaling
-                                .first
-                                .displayName
-                        },
-                startX,
-                currentY,
-                cardRectangle.width -
-                    TEXT_PADDING * 2f,
-                Align.left,
-                true
+            StatSymbolRenderer.drawRichText(
+                batch, font,
+                "Secondary: " + secondaryScaling.joinToString(", ") { it.first.displayName },
+                startX, currentY,
+                cardRectangle.width - TEXT_PADDING * 2f,
+                lineHeight = 17f,
+                iconSize = 14f
             )
         }
     }
@@ -902,96 +863,37 @@ class MarketRenderer(
     private fun renderWeaponInventory(
         layout: MarketLayout
     ) {
-        drawPanel(
-            rectangle =
-                layout.weaponPanel,
-
-            fillColor =
-                panelColor
+        UiComponentRenderer.drawHorizontalSeparator(
+            batch,
+            Rectangle(layout.weaponPanel.x + 12f, layout.weaponPanel.y + layout.weaponPanel.height - 9f, layout.weaponPanel.width - 24f, 8f)
         )
-
-        font.color =
-            Color.WHITE
-
+        font.color = Color.WHITE
         font.draw(
             batch,
-            "WEAPONS  " +
-                "(${weaponInventory.equippedWeaponCount}/" +
-                "${WeaponInventory.WEAPON_SLOT_COUNT})",
-            layout.weaponPanel.x +
-                TEXT_PADDING,
-            layout.weaponPanel.y +
-                layout.weaponPanel.height -
-                13f
+            "WEAPONS  (${weaponInventory.equippedWeaponCount}/${WeaponInventory.WEAPON_SLOT_COUNT})",
+            layout.weaponPanel.x,
+            layout.weaponPanel.y + layout.weaponPanel.height - 15f,
+            layout.weaponPanel.width,
+            Align.center,
+            false
         )
 
-        layout.weaponSlots
-            .forEachIndexed {
-                    index,
-                    slotRectangle ->
-
-                drawPanel(
-                    rectangle =
-                        slotRectangle,
-
-                    fillColor =
-                        cardColor
-                )
-
-                val weapon =
-                    weaponInventory.weaponAt(
-                        index
-                    )
-
-                if (weapon == null) {
-                    drawCenteredText(
-                        text =
-                            "EMPTY",
-
-                        rectangle =
-                            slotRectangle,
-
-                        color =
-                            Color.GRAY
-                    )
-                } else {
-                    font.color =
-                        Color.WHITE
-
-                    font.draw(
-                        batch,
-                        weapon.displayName,
-                        slotRectangle.x +
-                            8f,
-                        slotRectangle.y +
-                            slotRectangle.height -
-                            11f,
-                        slotRectangle.width -
-                            16f,
-                        Align.center,
-                        true
-                    )
-
-                    font.color =
-                        Color.GOLD
-
-                    font.draw(
-                        batch,
-                        "Level " +
-                            romanNumeral(
-                                weapon.level
-                            ),
-                        slotRectangle.x +
-                            8f,
-                        slotRectangle.y +
-                            21f,
-                        slotRectangle.width -
-                            16f,
-                        Align.center,
-                        false
-                    )
-                }
+        layout.weaponSlots.forEachIndexed { index, slot ->
+            val weapon = weaponInventory.weaponAt(index)
+            UiComponentRenderer.drawSlot(batch, slot, locked = weapon == null)
+            if (weapon != null) {
+                ContentIconRenderer.draw(batch, weapon.definition, Rectangle(slot.x + 3f, slot.y + 3f, slot.width - 6f, slot.height - 6f))
+                val oldX = font.data.scaleX
+                val oldY = font.data.scaleY
+                font.data.setScale(0.64f)
+                val levelPanel = Rectangle(slot.x - 1f, slot.y - 28f, slot.width + 2f, 23f)
+                drawFilledRectangle(levelPanel, Color(0.025f, 0.03f, 0.04f, 0.94f))
+                drawHighlightBorder(levelPanel, Color(0.48f, 0.35f, 0.16f, 1f), 2f)
+                font.color = Color.GOLD
+                font.draw(batch, "LV. ${romanNumeral(weapon.level)}", levelPanel.x, levelPanel.y + 15f, levelPanel.width, Align.center, false)
+                font.data.setScale(oldX, oldY)
             }
+        }
     }
 
     private data class GroupedItemEntry(
@@ -1028,200 +930,161 @@ class MarketRenderer(
 
     private fun renderItemInventory(
         layout: MarketLayout,
-        itemScrollOffset: Int
+        itemScrollOffset: Float
     ) {
-        drawPanel(
-            rectangle =
-                layout.itemPanel,
-
-            fillColor =
-                panelColor
+        UiComponentRenderer.drawHorizontalSeparator(
+            batch,
+            Rectangle(layout.itemPanel.x, layout.itemPanel.y + layout.itemPanel.height - 8f, layout.itemPanel.width, 8f)
         )
 
-        font.color =
-            Color.WHITE
-
+        val groupedItems = groupedItemEntries()
+        font.color = Color.WHITE
         font.draw(
             batch,
             "ITEMS  (${itemInventory.itemCount})",
-            layout.itemPanel.x +
-                TEXT_PADDING,
-            layout.itemPanel.y +
-                layout.itemPanel.height -
-                12f
+            layout.itemPanel.x,
+            layout.itemPanel.y + layout.itemPanel.height - 15f,
+            layout.itemPanel.width,
+            Align.center,
+            false
         )
 
-        val groupedItems =
-            groupedItemEntries()
-
         if (groupedItems.isEmpty()) {
-            font.color =
-                Color.GRAY
-
-            font.draw(
-                batch,
-                "No Items",
-                layout.itemPanel.x +
-                    TEXT_PADDING,
-                layout.itemPanel.y +
-                    layout.itemPanel.height -
-                    42f
-            )
-
+            drawCenteredText("NO ITEMS", layout.itemPanel, Color.GRAY)
             return
         }
 
-        val maximumVisibleRows =
-            (
-                (
-                    layout.itemPanel.height -
-                        48f
-                    ) / 24f
-                )
-                .toInt()
-                .coerceAtLeast(1)
+        val safeScrollOffset = itemScrollOffset.coerceIn(0f, MarketLayout.maximumItemScrollPixels(groupedItems.size, layout.itemPanel))
+        val clipBounds = Rectangle(
+            layout.itemPanel.x,
+            layout.itemPanel.y + 14f,
+            layout.itemPanel.width,
+            layout.itemPanel.height - 70f
+        )
+        val scissors = Rectangle()
+        batch.flush()
+        ScissorStack.calculateScissors(camera, batch.transformMatrix, clipBounds, scissors)
+        val clipped = ScissorStack.pushScissors(scissors)
+        groupedItems.forEachIndexed { index, entry ->
+            val slot = MarketLayout.itemSlotRectangle(layout.itemPanel, index, safeScrollOffset)
+            if (!slot.overlaps(clipBounds)) return@forEachIndexed
+            ContentIconRenderer.draw(batch, entry.definition, slot)
 
-        val maximumScrollOffset =
-            (
-                groupedItems.size -
-                    maximumVisibleRows
-                )
-                .coerceAtLeast(0)
-
-        val safeScrollOffset =
-            itemScrollOffset.coerceIn(
-                0,
-                maximumScrollOffset
-            )
-
-        groupedItems
-            .drop(
-                safeScrollOffset
-            )
-            .take(
-                maximumVisibleRows
-            )
-            .forEachIndexed {
-                    rowIndex,
-                    entry ->
-
-                val rowRectangle =
-                    layout.itemRowRectangle(
-                        rowIndex
-                    )
-
-                /*
-                 * Çok hafif satır zemini; daha sonra
-                 * görseller geldiğinde kaldırılabilir.
-                 */
-                drawFilledRectangle(
-                    rectangle =
-                        rowRectangle,
-
-                    color =
-                        Color(
-                            0.09f,
-                            0.12f,
-                            0.17f,
-                            0.70f
-                        )
-                )
-
-                val nameText =
-                    if (entry.count > 1) {
-                        "${entry.definition.displayName}  x${entry.count}"
-                    } else {
-                        entry.definition.displayName
-                    }
-
-                font.color =
-                    Color.LIGHT_GRAY
-
-                font.draw(
-                    batch,
-                    nameText,
-                    rowRectangle.x +
-                        5f,
-                    rowRectangle.y +
-                        17f
-                )
-
-                val totalBonusText =
-                    entry.definition
-                        .statModifiers
-                        .joinToString(
-                            separator = ", "
-                        ) { modifier ->
-                            val totalAmount =
-                                modifier.amount *
-                                    entry.count
-
-                            "${modifier.statType.displayName} " +
-                                formatSignedValue(
-                                    totalAmount
-                                )
-                        }
-
-                font.color =
-                    Color(
-                        0.45f,
-                        0.88f,
-                        0.58f,
-                        1f
-                    )
-
-                font.draw(
-                    batch,
-                    totalBonusText,
-                    rowRectangle.x +
-                        rowRectangle.width -
-                        285f,
-                    rowRectangle.y +
-                        17f,
-                    275f,
-                    Align.right,
-                    false
-                )
+            if (entry.count > 1) {
+                val oldX = font.data.scaleX
+                val oldY = font.data.scaleY
+                font.data.setScale(0.62f)
+                font.color = Color.BLACK
+                font.draw(batch, entry.count.toString(), slot.x + slot.width - 27f, slot.y + 18f, 22f, Align.right, false)
+                font.color = Color.WHITE
+                font.draw(batch, entry.count.toString(), slot.x + slot.width - 28f, slot.y + 19f, 22f, Align.right, false)
+                font.data.setScale(oldX, oldY)
             }
 
-        val hasItemsAbove =
-            safeScrollOffset > 0
-
-        val hasItemsBelow =
-            safeScrollOffset +
-                maximumVisibleRows <
-                groupedItems.size
-
-        if (hasItemsAbove) {
-            font.color =
-                Color.GRAY
-
-            font.draw(
-                batch,
-                "More above",
-                layout.itemPanel.x +
-                    layout.itemPanel.width -
-                    115f,
-                layout.itemPanel.y +
-                    layout.itemPanel.height -
-                    12f
+            drawFittedItemName(
+                entry.definition.displayName,
+                Rectangle(slot.x - 8f, slot.y - 28f, slot.width + 16f, 22f)
             )
         }
-
-        if (hasItemsBelow) {
-            font.color =
-                Color.GRAY
-
-            font.draw(
-                batch,
-                "More below",
-                layout.itemPanel.x +
-                    layout.itemPanel.width -
-                    115f,
-                layout.itemPanel.y +
-                    12f
-            )
+        if (clipped) {
+            batch.flush()
+            ScissorStack.popScissors()
         }
+    }
+
+    private fun drawFittedItemName(text: String, bounds: Rectangle) {
+        val oldX = font.data.scaleX
+        val oldY = font.data.scaleY
+        var scale = 0.68f
+        font.data.setScale(scale)
+        glyphLayout.setText(font, text)
+        if (glyphLayout.width > bounds.width) {
+            scale = (scale * bounds.width / glyphLayout.width).coerceAtLeast(0.46f)
+            font.data.setScale(scale)
+        }
+        font.color = Color.LIGHT_GRAY
+        font.draw(batch, text, bounds.x, bounds.y + 16f, bounds.width, Align.center, false)
+        font.data.setScale(oldX, oldY)
+    }
+
+    private fun renderCharacterAndStatsPanel(layout: MarketLayout, interactionState: MarketInteractionState) {
+        UiComponentRenderer.drawPanel(batch, layout.characterPanel, PanelVisualStyle.MAIN)
+        ContentIconRenderer.drawCharacterPortrait(batch, selectedCharacter.displayName, layout.characterPortrait)
+
+        val oldX = font.data.scaleX
+        val oldY = font.data.scaleY
+        font.data.setScale(0.78f)
+        font.color = Color.CYAN
+        font.draw(
+            batch,
+            selectedCharacter.displayName,
+            layout.characterPanel.x,
+            layout.characterPortrait.y - 8f,
+            layout.characterPanel.width,
+            Align.center,
+            false
+        )
+        font.data.setScale(oldX, oldY)
+
+        characterStatsRenderer.render(
+            layout.statsPanel,
+            interactionState.pointerPosition,
+            layout.fullScreen,
+            drawBackground = false,
+            contentScale = 1.48f
+        )
+    }
+
+    private fun renderHoverTooltip(
+        layout: MarketLayout,
+        marketSlots: List<MarketSlot>,
+        itemScrollOffset: Float,
+        interactionState: MarketInteractionState
+    ) {
+        if (interactionState.isDetailModalOpen || interactionState.isAnyConfirmationOpen ||
+            interactionState.isDraggingWeapon || interactionState.isDraggingMarketOffer
+        ) return
+
+        val pointer = interactionState.pointerPosition
+        var title: String? = null
+        var description: String? = null
+
+        val offerIndex = layout.offerCards.indexOfFirst { it.contains(pointer) }
+        if (offerIndex >= 0 && !layout.lockButtons[offerIndex].contains(pointer)) {
+            marketSlots.getOrNull(offerIndex)?.takeUnless { it.isSold }?.offer?.let { offer ->
+                title = offer.title
+                description = offer.weaponDefinition?.let { com.azizoglu.grisilith.weapon.definition.WeaponPresentation.hover(it,offer.productLevel) } ?: offer.description
+            }
+        }
+
+        if (title == null) {
+            val weaponIndex = layout.weaponSlots.indexOfFirst { it.contains(pointer) }
+            if (weaponIndex >= 0) {
+                weaponInventory.weaponAt(weaponIndex)?.let { weapon ->
+                    title = "${weapon.displayName}  ·  LEVEL ${romanNumeral(weapon.level)}"
+                    description = com.azizoglu.grisilith.weapon.definition.WeaponPresentation.hover(weapon)
+                }
+            }
+        }
+
+        if (title == null) {
+            val grouped = groupedItemEntries()
+            val safeOffset = itemScrollOffset.coerceIn(0f, MarketLayout.maximumItemScrollPixels(grouped.size, layout.itemPanel))
+            val visibleIndex = MarketLayout.itemIndexAt(layout.itemPanel, grouped.size, safeOffset, pointer.x, pointer.y)
+            if (visibleIndex != null) {
+                grouped.getOrNull(visibleIndex)?.let { entry ->
+                    title = if (entry.count > 1) "${entry.definition.displayName}  x${entry.count}" else entry.definition.displayName
+                    description = entry.definition.description
+                }
+            }
+        }
+
+        val tooltipTitle = title ?: return
+        val tooltipDescription = description ?: return
+        AdaptiveTooltipRenderer.draw(
+            batch, font, camera, cameraWidth, cameraHeight, pointer,
+            tooltipTitle, tooltipDescription, maxWidth = 440f
+        )
     }
 
     private fun formatSignedValue(
@@ -1255,7 +1118,7 @@ class MarketRenderer(
                 TEXT_PADDING,
             layout.characterPanel.y +
                 layout.characterPanel.height -
-                13f
+                20f
         )
 
         font.color =
@@ -1286,7 +1149,9 @@ class MarketRenderer(
 
         font.draw(
             batch,
-            selectedCharacter.description,
+            selectedCharacter.trait.displayName +
+                ": " +
+                selectedCharacter.trait.description,
             layout.characterPanel.x +
                 TEXT_PADDING,
             layout.characterPanel.y +
@@ -1325,7 +1190,7 @@ class MarketRenderer(
                 TEXT_PADDING,
             layout.statsPanel.y +
                 layout.statsPanel.height -
-                12f
+                19f
         )
 
         val oldScaleX =
@@ -1338,68 +1203,39 @@ class MarketRenderer(
             0.70f
         )
 
-        val availableHeight =
-            layout.statsPanel.height -
-                42f
-
-        val statCount =
-            StatType.entries.size
-
-        val lineHeight =
-            (
-                availableHeight /
-                    statCount
+        val gap = 5f
+        val groupHeight = (layout.statsPanel.height - 45f - gap) / 2f
+        val groupWidth = (layout.statsPanel.width - TEXT_PADDING * 2f - gap) / 2f
+        StatPresentationGroup.ordered.forEachIndexed { index, group ->
+            val column = index % 2
+            val gridRow = index / 2
+            val bounds = Rectangle(
+                layout.statsPanel.x + TEXT_PADDING + column * (groupWidth + gap),
+                layout.statsPanel.y + 7f + (1 - gridRow) * (groupHeight + gap),
+                groupWidth,
+                groupHeight
+            )
+            drawPanel(bounds, Color(0.075f, 0.09f, 0.14f, 1f))
+            font.data.setScale(0.48f)
+            font.color = Color(0.72f, 0.78f, 0.90f, 1f)
+            font.draw(batch, group.title, bounds.x, bounds.y + bounds.height - 6f, bounds.width, Align.center, false)
+            val lineHeight = ((bounds.height - 19f) / group.stats.size).coerceAtMost(13f)
+            group.stats.forEachIndexed { row, statType ->
+                val y = bounds.y + bounds.height - 20f - row * lineHeight
+                font.data.setScale(0.54f)
+                StatSymbolRenderer.drawLabel(
+                    batch = batch,
+                    font = font,
+                    statType = statType,
+                    x = bounds.x + 4f,
+                    baselineY = y,
+                    iconSize = 11f,
+                    width = bounds.width - 29f
                 )
-                .coerceAtMost(15f)
-
-        var currentY =
-            layout.statsPanel.y +
-                layout.statsPanel.height -
-                35f
-
-        StatType.entries
-            .forEach { statType ->
-                /*
-                 * Son satır panelin dışına çıkmasın.
-                 */
-                if (
-                    currentY <
-                    layout.statsPanel.y +
-                    8f
-                ) {
-                    return@forEach
-                }
-
-                font.color =
-                    Color.LIGHT_GRAY
-
-                font.draw(
-                    batch,
-                    statType.displayName,
-                    layout.statsPanel.x +
-                        TEXT_PADDING,
-                    currentY
-                )
-
-                font.color =
-                    Color.WHITE
-
-                font.draw(
-                    batch,
-                    playerStats
-                        .totalScore(
-                            statType
-                        )
-                        .toString(),
-                    layout.statsPanel.x +
-                        layout.statsPanel.width -
-                        42f,
-                    currentY
-                )
-
-                currentY -=
-                    lineHeight
+                font.color = Color.WHITE
+                font.draw(batch, playerStats.totalScore(statType).toString(), bounds.x + bounds.width - 24f, y)
             }
+        }
 
         font.data.setScale(
             oldScaleX,
@@ -1428,7 +1264,7 @@ class MarketRenderer(
                 TEXT_PADDING,
             layout.tamgaPanel.y +
                 layout.tamgaPanel.height -
-                12f
+                19f
         )
 
         font.color =
@@ -1877,14 +1713,12 @@ class MarketRenderer(
             font.color =
                 Color.GOLD
 
-            font.draw(
-                batch,
-                "Main Damage Scaling: " +
-                    primaryDamageScaling
-                        .first
-                        .displayName,
-                informationX,
-                informationY
+            StatSymbolRenderer.drawRichText(
+                batch, font,
+                "Main Damage Scaling: ${primaryDamageScaling.first.displayName}",
+                informationX, informationY, 230f,
+                lineHeight = 16f,
+                iconSize = 13f
             )
 
             informationY -=
@@ -1898,22 +1732,12 @@ class MarketRenderer(
             font.color =
                 Color.LIGHT_GRAY
 
-            font.draw(
-                batch,
-                "Secondary Scaling: " +
-                    secondaryDamageScaling
-                        .joinToString(
-                            separator = ", "
-                        ) { scaling ->
-                            scaling
-                                .first
-                                .displayName
-                        },
-                informationX,
-                informationY,
-                230f,
-                Align.left,
-                true
+            StatSymbolRenderer.drawRichText(
+                batch, font,
+                "Secondary Scaling: " + secondaryDamageScaling.joinToString(", ") { it.first.displayName },
+                informationX, informationY, 230f,
+                lineHeight = 16f,
+                iconSize = 13f
             )
 
             informationY -=
@@ -1927,14 +1751,13 @@ class MarketRenderer(
         font.color =
             Color.LIGHT_GRAY
 
-        font.draw(
-            batch,
-            statsText,
+        StatSymbolRenderer.drawRichText(
+            batch, font, statsText,
             informationX,
             informationY,
             230f,
-            Align.left,
-            true
+            lineHeight = 16f,
+            iconSize = 13f
         )
 
         /*
@@ -1949,19 +1772,10 @@ class MarketRenderer(
         font.color =
             Color.LIGHT_GRAY
 
-        font.draw(
-            batch,
-            definition.description,
-            layout.weaponDetailPanel.x +
-                275f,
-            layout.weaponDetailPanel.y +
-                layout.weaponDetailPanel.height -
-                80f,
-            layout.weaponDetailPanel.width -
-                295f,
-            Align.left,
-            true
-        )
+        WeaponDetailPanel.drawCopy(batch,font,
+            com.azizoglu.grisilith.weapon.definition.WeaponPresentation.hover(weapon),
+            Rectangle(layout.weaponDetailPanel.x+275f,layout.weaponDetailPanel.y+50f,
+                layout.weaponDetailPanel.width-295f,layout.weaponDetailPanel.height-130f))
 
         font.color =
             Color.GRAY
@@ -2055,6 +1869,8 @@ class MarketRenderer(
                         .TOTEM_PROJECTILE_OR_DRAIN ->
                         "Projectile / Drain"
 
+                    WeaponAttackPattern.EXTENDED_PHYSICAL ->
+                        com.azizoglu.grisilith.weapon.definition.catalog.NewPhysicalWeapons.patternLabel(weapon.definition.id.value)
                     WeaponAttackPattern.NONE ->
                         "Passive"
                 }
@@ -2101,21 +1917,6 @@ class MarketRenderer(
             definition.maximumInventoryCopies
                 ?: definition.rarity
                     .maximumInventoryCopies
-
-        val totalBonusText =
-            definition.statModifiers
-                .joinToString(
-                    separator = "\n"
-                ) { modifier ->
-                    val totalAmount =
-                        modifier.amount *
-                            copyCount
-
-                    "${modifier.statType.displayName}: " +
-                        formatSignedValue(
-                            totalAmount
-                        )
-                }
 
         drawModalBackground(
             layout
@@ -2169,18 +1970,11 @@ class MarketRenderer(
         font.color =
             Color.LIGHT_GRAY
 
-        font.draw(
-            batch,
-            definition.description,
-            layout.weaponDetailPanel.x +
-                20f,
-            layout.weaponDetailPanel.y +
-                layout.weaponDetailPanel.height -
-                84f,
-            layout.weaponDetailPanel.width -
-                40f,
-            Align.left,
-            true
+        StatSymbolRenderer.drawRichText(
+            batch, font, definition.description,
+            layout.weaponDetailPanel.x + 20f,
+            layout.weaponDetailPanel.y + layout.weaponDetailPanel.height - 84f,
+            layout.weaponDetailPanel.width - 40f
         )
 
         font.color =
@@ -2188,13 +1982,23 @@ class MarketRenderer(
 
         font.draw(
             batch,
-            "Owned: $copyCount / $maximumCopies\n\n" +
-                "Total Bonus:\n" +
-                totalBonusText,
+            "Owned: $copyCount / $maximumCopies\n\nTotal Bonus:",
             layout.weaponDetailPanel.x +
                 20f,
             layout.weaponDetailPanel.y +
                 105f
+        )
+
+        StatSymbolRenderer.drawModifiersVertical(
+            batch = batch,
+            font = font,
+            modifiers = definition.statModifiers.map { modifier ->
+                modifier.statType to modifier.amount * copyCount
+            },
+            x = layout.weaponDetailPanel.x + 20f,
+            firstBaselineY = layout.weaponDetailPanel.y + 55f,
+            lineHeight = 24f,
+            iconSize = 18f
         )
 
         font.color =
@@ -2523,17 +2327,10 @@ class MarketRenderer(
             true
         )
 
-        drawPanel(
-            rectangle =
-                layout.mergeConfirmButton,
-
-            fillColor =
-                Color(
-                    0.45f,
-                    0.16f,
-                    0.16f,
-                    1f
-                )
+        UiComponentRenderer.drawDangerButton(
+            batch,
+            layout.mergeConfirmButton,
+            if (layout.mergeConfirmButton.contains(interactionState.pointerPosition)) ButtonVisualState.HOVERED else ButtonVisualState.NORMAL
         )
 
         drawCenteredText(
@@ -2547,17 +2344,10 @@ class MarketRenderer(
                 Color.WHITE
         )
 
-        drawPanel(
-            rectangle =
-                layout.mergeCancelButton,
-
-            fillColor =
-                Color(
-                    0.13f,
-                    0.18f,
-                    0.25f,
-                    1f
-                )
+        UiComponentRenderer.drawButton(
+            batch,
+            layout.mergeCancelButton,
+            if (layout.mergeCancelButton.contains(interactionState.pointerPosition)) ButtonVisualState.HOVERED else ButtonVisualState.NORMAL
         )
 
         drawCenteredText(
@@ -2606,19 +2396,10 @@ class MarketRenderer(
     }
 
     private fun drawHighlightBorder(
-        rectangle: Rectangle
+        rectangle: Rectangle,
+        highlightColor: Color = Color(0.30f, 1f, 0.48f, 1f),
+        thickness: Float = 4f
     ) {
-        val thickness =
-            4f
-
-        val highlightColor =
-            Color(
-                0.30f,
-                1f,
-                0.48f,
-                1f
-            )
-
         drawFilledRectangle(
             rectangle =
                 Rectangle(
@@ -2680,32 +2461,9 @@ class MarketRenderer(
         rectangle: Rectangle,
         fillColor: Color
     ) {
-        drawFilledRectangle(
-            rectangle =
-                rectangle,
-
-            color =
-                borderColor
-        )
-
-        drawFilledRectangle(
-            rectangle =
-                Rectangle(
-                    rectangle.x +
-                        PANEL_BORDER,
-
-                    rectangle.y +
-                        PANEL_BORDER,
-
-                    rectangle.width -
-                        PANEL_BORDER * 2f,
-
-                    rectangle.height -
-                        PANEL_BORDER * 2f
-                ),
-
-            color =
-                fillColor
+        UiComponentRenderer.drawPanel(
+            batch = batch,
+            bounds = rectangle
         )
     }
 
@@ -2782,6 +2540,10 @@ class MarketRenderer(
 
     fun dispose() {
         whitePixel.dispose()
+        marketBackground.dispose()
+        weaponOfferGlow.dispose()
+        legendaryOfferGlow.dispose()
+        artifactOfferGlow.dispose()
     }
 
     private fun createWhitePixelTexture():

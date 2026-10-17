@@ -27,7 +27,9 @@ data class EnemyDamageContext(
     val projectileTravelProgress: Float = 0f,
 
     val conditionStatScore: Int? = null,
-    val appliesAutomaticCondition: Boolean = true
+    val appliesAutomaticCondition: Boolean = true,
+    val projectileAttack: Boolean = false,
+    val defenseTimeScale: Float = 1f
 ) {
 
     val isPhysicalWeaponDamage: Boolean
@@ -40,7 +42,7 @@ data class EnemyDamageContext(
 
     val isProjectileAttack: Boolean
         get() =
-            projectileTravelProgress > 0f ||
+            projectileAttack || projectileTravelProgress > 0f ||
                 ContentTag.RANGED_WEAPON in sourceWeaponTags
 
     companion object {

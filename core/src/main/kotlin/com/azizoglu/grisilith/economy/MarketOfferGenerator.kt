@@ -316,7 +316,7 @@ object MarketOfferGenerator {
                         1f -
                             preferredChance
                         ) /
-                        (groups.size - 1)
+                        (groups.size)
 
                 groups.associateWith { group ->
                     if (group == preferredMarketGroup) {
@@ -736,10 +736,6 @@ object MarketOfferGenerator {
         return when (
             item.rarity
         ) {
-            com.azizoglu.grisilith.item
-                .definition.ItemRarity.COMMON ->
-                14
-
             com.azizoglu.grisilith.item
                 .definition.ItemRarity.UNCOMMON ->
                 20

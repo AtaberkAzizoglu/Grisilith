@@ -1,349 +1,130 @@
 package com.azizoglu.grisilith.tamga.render
 
+import com.azizoglu.grisilith.content.ContentCategory
+import com.azizoglu.grisilith.input.RunInputBindings
+import com.azizoglu.grisilith.settings.GameSettings
 import com.azizoglu.grisilith.tamga.runtime.active.ActiveTamgaState
+import com.azizoglu.grisilith.ui.icon.ContentIconRenderer
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.utils.Align
 import kotlin.math.ceil
 
 class ActiveTamgaHudRenderer(
     private val camera: OrthographicCamera,
     private val cameraWidth: Float,
     private val cameraHeight: Float,
-    private val shapeRenderer: ShapeRenderer,
+    @Suppress("UNUSED_PARAMETER") shapeRenderer: ShapeRenderer,
     private val batch: SpriteBatch,
     private val font: BitmapFont
 ) {
-
     companion object {
-        private const val BUTTON_SIZE = 72f
-        private const val BUTTON_GAP = 16f
-        private const val BOTTOM_MARGIN = 24f
-        private const val BORDER_WIDTH = 3f
+        private const val ICON_SIZE = 48f
+        private const val ICON_GAP = 8f
+        private const val GROUP_GAP = 30f
+        private const val BOTTOM_MARGIN = 18f
+        private const val WEAPON_GROUP_WIDTH = 338f
     }
 
-    private val weaponButtonBounds =
-        Rectangle()
-
-    private val armorButtonBounds =
-        Rectangle()
+    private val weaponButtonBounds = Rectangle()
+    private val armorButtonBounds = Rectangle()
 
     fun render(
         showWeaponButton: Boolean,
+        weaponContentId: String?,
         weaponState: ActiveTamgaState?,
         weaponRemainingActiveSeconds: Float,
         weaponRemainingCooldownSeconds: Float,
         showArmorButton: Boolean,
+        armorContentId: String?,
         armorState: ActiveTamgaState?,
         armorRemainingActiveSeconds: Float,
         armorRemainingCooldownSeconds: Float
     ) {
-        updateButtonBounds(
-            showWeaponButton = showWeaponButton,
-            showArmorButton = showArmorButton
-        )
+        updateButtonBounds(showWeaponButton, showArmorButton)
+        if (!showWeaponButton && !showArmorButton) return
 
-        if (!showWeaponButton && !showArmorButton) {
-            return
-        }
-
-        shapeRenderer.projectionMatrix =
-            camera.combined
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
-
-        if (showWeaponButton) {
-            drawButtonBackground(
-                bounds = weaponButtonBounds,
-                state = weaponState
-            )
-        }
-
-        if (showArmorButton) {
-            drawButtonBackground(
-                bounds = armorButtonBounds,
-                state = armorState
-            )
-        }
-
-        shapeRenderer.end()
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Line
-        )
-
-        GdxLineWidth.set(BORDER_WIDTH)
-
-        if (showWeaponButton) {
-            drawButtonBorder(
-                bounds = weaponButtonBounds,
-                state = weaponState
-            )
-        }
-
-        if (showArmorButton) {
-            drawButtonBorder(
-                bounds = armorButtonBounds,
-                state = armorState
-            )
-        }
-
-        shapeRenderer.end()
-
-        GdxLineWidth.reset()
-
-        batch.projectionMatrix =
-            camera.combined
-
+        batch.projectionMatrix = camera.combined
         batch.begin()
-
-        if (showWeaponButton) {
-            drawButtonText(
-                bounds = weaponButtonBounds,
-                shortcut = "Z",
-                symbol = "CH",
-                state = weaponState,
-                remainingActiveSeconds =
-                    weaponRemainingActiveSeconds,
-                remainingCooldownSeconds =
-                    weaponRemainingCooldownSeconds
-            )
+        if (showWeaponButton && weaponContentId != null) {
+            drawButton(weaponButtonBounds, weaponContentId, RunInputBindings.weaponTamgaLabel(),
+                weaponState, weaponRemainingActiveSeconds, weaponRemainingCooldownSeconds)
         }
-
-        if (showArmorButton) {
-            drawButtonText(
-                bounds = armorButtonBounds,
-                shortcut = "X",
-                symbol = "PS",
-                state = armorState,
-                remainingActiveSeconds =
-                    armorRemainingActiveSeconds,
-                remainingCooldownSeconds =
-                    armorRemainingCooldownSeconds
-            )
+        if (showArmorButton && armorContentId != null) {
+            drawButton(armorButtonBounds, armorContentId, RunInputBindings.armorTamgaLabel(),
+                armorState, armorRemainingActiveSeconds, armorRemainingCooldownSeconds)
         }
-
         batch.end()
     }
 
-    fun isWeaponButtonHit(
-        worldX: Float,
-        worldY: Float
-    ): Boolean {
-        return weaponButtonBounds
-            .contains(
-                worldX,
-                worldY
-            )
-    }
+    fun isWeaponButtonHit(worldX: Float, worldY: Float): Boolean =
+        weaponButtonBounds.contains(worldX, worldY)
 
-    fun isArmorButtonHit(
-        worldX: Float,
-        worldY: Float
-    ): Boolean {
-        return armorButtonBounds
-            .contains(
-                worldX,
-                worldY
-            )
-    }
+    fun isArmorButtonHit(worldX: Float, worldY: Float): Boolean =
+        armorButtonBounds.contains(worldX, worldY)
 
-    private fun updateButtonBounds(
-        showWeaponButton: Boolean,
-        showArmorButton: Boolean
-    ) {
-        weaponButtonBounds.set(
-            0f,
-            0f,
-            0f,
-            0f
-        )
-
-        armorButtonBounds.set(
-            0f,
-            0f,
-            0f,
-            0f
-        )
-
-        val visibleCount =
-            listOf(
-                showWeaponButton,
-                showArmorButton
-            )
-                .count { visible ->
-                    visible
-                }
-
-        if (visibleCount <= 0) {
-            return
-        }
-
-        val totalWidth =
-            visibleCount * BUTTON_SIZE +
-                (visibleCount - 1) * BUTTON_GAP
-
-        var x =
-            camera.position.x -
-                totalWidth / 2f
-
-        val y =
-            camera.position.y -
-                cameraHeight / 2f +
-                BOTTOM_MARGIN
-
-        if (showWeaponButton) {
-            weaponButtonBounds.set(
-                x,
-                y,
-                BUTTON_SIZE,
-                BUTTON_SIZE
-            )
-
-            x +=
-                BUTTON_SIZE +
-                    BUTTON_GAP
-        }
-
-        if (showArmorButton) {
-            armorButtonBounds.set(
-                x,
-                y,
-                BUTTON_SIZE,
-                BUTTON_SIZE
-            )
-        }
-    }
-
-    private fun drawButtonBackground(
+    private fun drawButton(
         bounds: Rectangle,
-        state: ActiveTamgaState?
-    ) {
-        shapeRenderer.color =
-            when (state) {
-                ActiveTamgaState.READY ->
-                    Color(
-                        0.12f,
-                        0.30f,
-                        0.16f,
-                        0.92f
-                    )
-
-                ActiveTamgaState.ACTIVE ->
-                    Color(
-                        0.20f,
-                        0.42f,
-                        0.68f,
-                        0.95f
-                    )
-
-                ActiveTamgaState.COOLDOWN ->
-                    Color(
-                        0.16f,
-                        0.16f,
-                        0.19f,
-                        0.90f
-                    )
-
-                null ->
-                    Color.DARK_GRAY
-            }
-
-        shapeRenderer.rect(
-            bounds.x,
-            bounds.y,
-            bounds.width,
-            bounds.height
-        )
-    }
-
-    private fun drawButtonBorder(
-        bounds: Rectangle,
-        state: ActiveTamgaState?
-    ) {
-        shapeRenderer.color =
-            when (state) {
-                ActiveTamgaState.READY ->
-                    Color.LIME
-
-                ActiveTamgaState.ACTIVE ->
-                    Color.CYAN
-
-                ActiveTamgaState.COOLDOWN ->
-                    Color.GRAY
-
-                null ->
-                    Color.DARK_GRAY
-            }
-
-        shapeRenderer.rect(
-            bounds.x,
-            bounds.y,
-            bounds.width,
-            bounds.height
-        )
-    }
-
-    private fun drawButtonText(
-        bounds: Rectangle,
+        contentId: String,
         shortcut: String,
-        symbol: String,
         state: ActiveTamgaState?,
         remainingActiveSeconds: Float,
         remainingCooldownSeconds: Float
     ) {
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            symbol,
-            bounds.x + 9f,
-            bounds.y + bounds.height - 13f
+        ContentIconRenderer.draw(
+            batch = batch,
+            contentId = contentId,
+            category = ContentCategory.TAMGA,
+            bounds = bounds,
+            alpha = if (state == ActiveTamgaState.COOLDOWN) 0.62f else 1f,
+            framed = false
         )
 
-        font.draw(
-            batch,
-            "[$shortcut]",
-            bounds.x + bounds.width - 32f,
-            bounds.y + bounds.height - 13f
-        )
+        when (state) {
+            ActiveTamgaState.READY -> UiComponentRenderer.drawActiveAbilityFrame(
+                batch, bounds, Color(0.32f, 0.78f, 1f, 1f))
+            ActiveTamgaState.ACTIVE -> UiComponentRenderer.drawActiveAbilityFrame(
+                batch, bounds, Color(0.42f, 1f, 0.66f, 1f))
+            ActiveTamgaState.COOLDOWN -> UiComponentRenderer.drawCooldownOverlay(batch, bounds, 1f)
+            null -> Unit
+        }
 
-        val statusText =
-            when (state) {
-                ActiveTamgaState.READY ->
-                    "READY"
-
-                ActiveTamgaState.ACTIVE ->
-                    "${ceil(remainingActiveSeconds).toInt()}s"
-
-                ActiveTamgaState.COOLDOWN ->
-                    "${ceil(remainingCooldownSeconds).toInt()}s"
-
-                null ->
-                    ""
-            }
-
-        font.draw(
-            batch,
-            statusText,
-            bounds.x + 9f,
-            bounds.y + 20f
-        )
-    }
-}
-
-private object GdxLineWidth {
-    fun set(width: Float) {
-        com.badlogic.gdx.Gdx.gl.glLineWidth(width)
+        val oldX = font.data.scaleX
+        val oldY = font.data.scaleY
+        font.data.setScale(0.58f)
+        if (GameSettings.showAbilityShortcuts) {
+            font.color = Color(0.80f, 0.92f, 1f, 1f)
+            font.draw(batch, "[$shortcut]", bounds.x + 3f, bounds.y + bounds.height - 4f,
+                bounds.width - 6f, Align.right, false)
+        }
+        if (GameSettings.showAbilityCooldowns && state == ActiveTamgaState.COOLDOWN) {
+            val remaining = remainingCooldownSeconds
+            font.color = Color(1f, 0.86f, 0.62f, 1f)
+            font.draw(batch, ceil(remaining.coerceAtLeast(0f)).toInt().toString(),
+                bounds.x + 4f, bounds.y + 15f)
+        }
+        font.data.setScale(oldX, oldY)
     }
 
-    fun reset() {
-        com.badlogic.gdx.Gdx.gl.glLineWidth(1f)
+    private fun updateButtonBounds(showWeaponButton: Boolean, showArmorButton: Boolean) {
+        weaponButtonBounds.set(0f, 0f, 0f, 0f)
+        armorButtonBounds.set(0f, 0f, 0f, 0f)
+        val count = listOf(showWeaponButton, showArmorButton).count { it }
+        if (count == 0) return
+
+        val weaponGroupLeft = camera.position.x - WEAPON_GROUP_WIDTH / 2f
+        val totalWidth = count * ICON_SIZE + (count - 1) * ICON_GAP
+        var x = weaponGroupLeft - GROUP_GAP - totalWidth
+        val y = camera.position.y - cameraHeight / 2f + BOTTOM_MARGIN
+        if (showWeaponButton) {
+            weaponButtonBounds.set(x, y, ICON_SIZE, ICON_SIZE)
+            x += ICON_SIZE + ICON_GAP
+        }
+        if (showArmorButton) armorButtonBounds.set(x, y, ICON_SIZE, ICON_SIZE)
     }
 }

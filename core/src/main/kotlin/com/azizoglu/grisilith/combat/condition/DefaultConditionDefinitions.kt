@@ -46,6 +46,7 @@ object DefaultConditionDefinitions {
             ConditionDefinition(type = ConditionType.FRIGHTENED),
             ConditionDefinition(type = ConditionType.SLOWED),
             ConditionDefinition(type = ConditionType.XXX_CURSE),
+            ConditionDefinition(type = ConditionType.ARMOR_BREAK),
             ConditionDefinition(
                 type = ConditionType.ACIDIC_PATH_DAMAGE,
                 damageType = DamageType.ACID,

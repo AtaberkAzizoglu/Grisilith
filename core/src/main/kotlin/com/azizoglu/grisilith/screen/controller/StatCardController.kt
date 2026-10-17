@@ -2,7 +2,6 @@ package com.azizoglu.grisilith.screen.controller
 
 import com.azizoglu.grisilith.enemy.EnemySpawner
 import com.azizoglu.grisilith.player.Player
-import com.azizoglu.grisilith.screen.render.ChestCharacterStatRow
 import com.azizoglu.grisilith.screen.render.StageStatRewardRenderer
 import com.azizoglu.grisilith.stage.StageController
 import com.azizoglu.grisilith.statistics.PlayerStats
@@ -35,9 +34,6 @@ class StatCardController(
     font: BitmapFont,
 
     characterNameProvider: () -> String,
-
-    characterStatsProvider:
-        () -> List<ChestCharacterStatRow>,
 
     private val onOpenMarket:
         () -> Unit
@@ -76,11 +72,9 @@ class StatCardController(
             font =
                 font,
 
-            characterNameProvider =
-                characterNameProvider,
-
-            characterStatsProvider =
-                characterStatsProvider
+            characterNameProvider = characterNameProvider,
+            playerStatsProvider = { playerStats },
+            pointerPositionProvider = { pointerPosition }
         )
 
     var isOpen:
@@ -355,7 +349,10 @@ class StatCardController(
 
         renderer.renderTexts(
             cards =
-                pendingCards
+                pendingCards,
+
+            hoveredCardIndex =
+                hoveredCardIndex
         )
     }
 

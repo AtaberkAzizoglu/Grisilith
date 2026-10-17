@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.item.definition
 
 enum class ItemEffectId {
+    DISCARD_VOUCHER,
     EXECUTIONERS_MARK,
     GLASS_HEART,
     GREEDY_SOUL,

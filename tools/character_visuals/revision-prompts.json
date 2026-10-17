@@ -1,0 +1,46 @@
+[
+  {
+    "key": "koba_walk_v3",
+    "prompt": "Use case: identity-preserve. Production top-down fantasy RPG walking sprite atlas. Reference is identity/theme anchor, NOT poses to duplicate. EXACT five equal columns, four equal rows. Row1 SOUTH (front), Row2 WEST (left profile), Row3 EAST (right profile), Row4 NORTH (back). Each row: col1 neutral idle feet together; col2 WALK LEFT FOOT clearly forward right arm forward, col3 PASSING with legs crossing, col4 WALK RIGHT FOOT forward left arm forward, col5 OPPOSITE PASSING. Real four-phase seamless walk cycle, NOT five identical poses. Subtle bob, same height and proportions, fixed foot baseline each row. Full bodies with 12% margin in every cell, no cropped head hands feet or staff. Rich crisp painted-pixel style consistent with references. GENUINE transparent alpha backdrop; no checkerboard, shadow, ground, text, labels, portraits or grid. Koba: adult muscular grey-green half-orc barbarian with long black hair, small tusks, red tribal body markings, bare chest, brown leather bracers and fur boots, rugged brown/red waistcloth. Preserve this reference's face colors costume and adult proportions. No carried weapon.",
+    "reference": "C:/Android Projects/Grisilith/assets/characters/koba_v2.png",
+    "path": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-c525d10a-d331-482e-af28-1f4fa32e55b8.png"
+  },
+  {
+    "key": "linlos_walk_v3",
+    "prompt": "Use case: identity-preserve. Production top-down fantasy RPG walking sprite atlas. Reference is identity/theme anchor, NOT poses to duplicate. EXACT five equal columns, four equal rows. Row1 SOUTH (front), Row2 WEST (left profile), Row3 EAST (right profile), Row4 NORTH (back). Each row: col1 neutral idle feet together; col2 WALK LEFT FOOT clearly forward right arm forward, col3 PASSING with legs crossing, col4 WALK RIGHT FOOT forward left arm forward, col5 OPPOSITE PASSING. Real four-phase seamless walk cycle, NOT five identical poses. Subtle bob, same height and proportions, fixed foot baseline each row. Full bodies with 12% margin in every cell, no cropped head hands feet or staff. Rich crisp painted-pixel style consistent with references. GENUINE transparent alpha backdrop; no checkerboard, shadow, ground, text, labels, portraits or grid. Linlos Dustman: ADULT male halfling druid, short stocky build, shaggy brown hair and small beard, green leaf cloak, brown earthy clothing, bare hairy feet, mushroom backpack, crooked wooden walking staff with little lantern. Preserve reference identity palette and attire. Staff remains consistent, arm swings and opposing footsteps animate naturally, NOT a child, no new accessories.",
+    "reference": "C:/Android Projects/Grisilith/assets/characters/linlos_dustman_v2.png",
+    "path": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-53d896b2-2b66-4a25-b0a9-797e4efbb95b.png"
+  },
+  {
+    "key": "minions_2_alpha",
+    "prompt": "Use case: background-extraction. Edit reference only by removing ALL brown/black background behind portraits and sprite rows, making genuine transparent alpha. Preserve every character drawing EXACTLY, including skin, dark outlines, pose, size, frame arrangement and 1536x1024 composition. Do not redraw, crop, move, remove any sprite, add labels, or change dimensions. Original colored dark fantasy bodies must remain intact.",
+    "reference": "C:/Android Projects/Grisilith/assets/weapon_visuals/minions_2.png",
+    "path": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-a3af9bba-8b5b-43db-8b85-1733d7d8672b.png"
+  },
+  {
+    "key": "lance_slim_v5",
+    "prompt": "Use case: precise-object-edit. Redesign this carried lance upright: long slim brown shaft handle at bottom, spear tip UP, a modest narrow pointed silver steel spearhead no more than 22% of full weapon length and 14% weapon width, not the huge sword-like blade. Preserve gold bands and little purple fabric tied below the head. Same fantasy painted pixel art. Entire weapon centered within canvas with margins, transparent alpha, no frame no text.",
+    "reference": "C:/Android Projects/Grisilith/assets/weapon_visuals/carriers_v4/lance.png",
+    "path": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-278979b9-ad31-4db8-b4f4-458f2fc92054.png"
+  },
+  {
+    "key": "helpers_alpha",
+    "prompt": "BACKGROUND REMOVAL, not illustration. Extract only the 32 small full-body sprites from the lower four rows of this reference, preserving each identical character and pose. Remove upper portraits entirely. Pack the small sprites in an EXACT 8 columns by 4 rows atlas: columns1-4 barbarian; columns5-8 druid. Row directions South, West, East, North. Each sprite centered with at least 10% empty transparent padding, ALL brown background pixels gone, genuinely transparent alpha (checkerboard is NOT allowed). Keep fine body/cloak/staff outlines and skin intact. No colored rectangles no brown/black/gradient backdrop no text no shadows. Same artwork, just extracted cutouts.",
+    "path": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-f75a657f-2ea4-4e0b-9e9a-98d6a5429ef8.png"
+  },
+  {
+    "key": "soldier_clean",
+    "prompt": "Use case: identity-preserve. Repair badly crowded animation atlas by re-isolating ONLY SOLDIER, the steel-armored helmeted soldier in LEFT panel; no weapon. Keep exact reference costume colors and chibi full-body proportions. Output EXACT 5 equal columns x 8 equal rows, only full-body sprites, no portraits, headers, text or frames. Rows directions S, SW, W, NW, N, NE, E, SE in that order. Columns idle, left-step, passing, right-step, opposite-passing; distinct smooth walking poses. Every sprite entirely within its own cell, no neighboring sprites touching, generous 15% transparent padding on all sides; consistent scale and foot anchor. Match original painted pixel art, dark outlines. Transparent alpha background, NO black matte, shadows or checkerboard.",
+    "path": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-3df610ef-4018-4c64-9b37-164434f05fbe.png"
+  },
+  {
+    "key": "scout_clean",
+    "prompt": "Use case: identity-preserve. Repair badly crowded animation atlas by re-isolating ONLY SCOUT, the olive green hooded masked scout with quiver in MIDDLE panel; no weapon. Keep exact reference costume colors and chibi full-body proportions. Output EXACT 5 equal columns x 8 equal rows, only full-body sprites, no portraits, headers, text or frames. Rows directions S, SW, W, NW, N, NE, E, SE in that order. Columns idle, left-step, passing, right-step, opposite-passing; distinct smooth walking poses. Every sprite entirely within its own cell, no neighboring sprites touching, generous 15% transparent padding on all sides; consistent scale and foot anchor. Match original painted pixel art, dark outlines. Transparent alpha background, NO black matte, shadows or checkerboard.",
+    "path": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-fce14dde-344f-4793-98d8-ab60f8c4f695.png"
+  },
+  {
+    "key": "mage_clean",
+    "prompt": "Use case: identity-preserve. Repair badly crowded animation atlas by re-isolating ONLY MAGE APPRENTICE, black-haired apprentice in purple robe in RIGHT panel; no weapon. Keep exact reference costume colors and chibi full-body proportions. Output EXACT 5 equal columns x 8 equal rows, only full-body sprites, no portraits, headers, text or frames. Rows directions S, SW, W, NW, N, NE, E, SE in that order. Columns idle, left-step, passing, right-step, opposite-passing; distinct smooth walking poses. Every sprite entirely within its own cell, no neighboring sprites touching, generous 15% transparent padding on all sides; consistent scale and foot anchor. Match original painted pixel art, dark outlines. Transparent alpha background, NO black matte, shadows or checkerboard.",
+    "path": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-521677a0-2b7d-40d6-9c28-a226d5f88adc.png"
+  }
+]

@@ -1,5 +1,6 @@
 package com.azizoglu.grisilith.enemy
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.statistics.RunDamageTypeTelemetry
 
 import com.azizoglu.grisilith.combat.damage.DamageNumberEvent
 
@@ -249,9 +250,17 @@ class Enemy(
                     ?: DEFAULT_CONTACT_HITS_PER_SECOND
         )
 
-    val health = HealthComponent(
+    var weaponTargetSummon: com.azizoglu.grisilith.summon.SummonedEntity? = null
+        private set
+    private val enemyHealth = HealthComponent(
         maximumHealth = stats.maximumHealth
     )
+    val health: HealthComponent get() = weaponTargetSummon?.health ?: enemyHealth
+
+    fun bindWeaponTarget(summon: com.azizoglu.grisilith.summon.SummonedEntity) {
+        weaponTargetSummon = summon
+        position.set(summon.centerX-size/2f,summon.centerY-size/2f)
+    }
 
     init {
         health.onHealingApplied = { _, type ->
@@ -268,7 +277,7 @@ class Enemy(
 
     val conditions
         get() =
-            conditionRuntime.conditions
+            weaponTargetSummon?.conditions ?: conditionRuntime.conditions
 
     val isBurned: Boolean
         get() =
@@ -294,8 +303,11 @@ class Enemy(
     val contactDamageType
         get() = EnemyAttackDamageTypes.contactDamageType(kindId)
 
+    val piercingIgnoreRatio: Float
+        get() = (stats.piercing * 0.01f).coerceIn(0f, 0.75f)
+
     val isDead: Boolean
-        get() = health.isDead
+        get() = weaponTargetSummon?.isExpired ?: health.isDead
 
     val isDeathFadeComplete: Boolean
         get() =
@@ -503,6 +515,35 @@ class Enemy(
     val goldReward: Float
         get() = stats.goldReward
 
+    // Refreshed before enemy updates; independent of terrain and other slow effects.
+    var vortexMovementSpeedMultiplier = 1f
+    private data class GravityField(val x: Float, val y: Float, var remaining: Float)
+    private val bossGravityFields = mutableMapOf<String, GravityField>()
+
+    /** Alters voluntary movement only; never translates, retargets or rotates a boss. */
+    fun applyBossGravity(source: String, x: Float, y: Float) {
+        if(type==EnemyType.MINI_BOSS || type==EnemyType.FINAL_BOSS)
+            bossGravityFields[source] = GravityField(x,y,.20f)
+    }
+
+    fun bossGravityMovementMultiplier(directionX: Float, directionY: Float): Float {
+        val length=Vector2.len(directionX,directionY)
+        if(length<=.001f) return 1f
+        var influence=0f
+        bossGravityFields.values.filter { it.remaining>0f }.forEach { field ->
+            val dx=field.x-centerX;val dy=field.y-centerY;val distance=Vector2.len(dx,dy)
+            if(distance>.001f) influence += (directionX*dx+directionY*dy)/(length*distance)*.10f
+        }
+        return (1f+influence).coerceIn(.90f,1.10f)
+    }
+    private var gearSlowMultiplier = 1f
+    private var gearSlowRemaining = 0f
+    fun applyMovementSlow(multiplier: Float, duration: Float) {
+        gearSlowMultiplier = minOf(gearSlowMultiplier, multiplier.coerceIn(0f,1f))
+        gearSlowRemaining = maxOf(gearSlowRemaining, duration.coerceAtLeast(0f))
+    }
+    var projectileVelocityBender: ((Float, Float, Vector2, Float) -> Unit)? = null
+
     private var terrainMovementSpeedMultiplier =
         1f
 
@@ -534,6 +575,10 @@ class Enemy(
         }
 
         updateTemporaryCombatBuff(delta)
+        bossGravityFields.values.forEach { it.remaining-=delta.coerceAtLeast(0f) }
+        bossGravityFields.entries.removeAll { it.value.remaining<=0f }
+        gearSlowRemaining = (gearSlowRemaining-delta).coerceAtLeast(0f)
+        if(gearSlowRemaining<=0f) gearSlowMultiplier=1f
 
         if (
             armorClassReductionRemainingSeconds >
@@ -823,7 +868,8 @@ class Enemy(
                     controlState.modifiedMovementSpeed(
                         stats.movementSpeed *
                             (if (isVampireSecondForm) 1.20f else 1f) *
-                            terrainMovementSpeedMultiplier *
+                            terrainMovementSpeedMultiplier * vortexMovementSpeedMultiplier * gearSlowMultiplier *
+                            bossGravityMovementMultiplier(movementDirection.x,movementDirection.y) *
                             traitRuntime
                                 .currentModifiers
                                 .movementSpeedMultiplier *
@@ -1155,6 +1201,21 @@ class Enemy(
             )
 
         if (itemModifiedAmount <= 0) return 0
+        weaponTargetSummon?.let { summon ->
+            val applied = summon.takeDamage(itemModifiedAmount,resolvedDamageContext.damageType,
+                resolvedDamageContext.attackerPiercingIgnoreRatio, resolvedDamageContext.defenseTimeScale)
+            if(applied>0) {
+                if(resolvedDamageContext.appliesAutomaticCondition && !summon.isExpired) {
+                    DamageConditionRules.conditionFor(resolvedDamageContext.damageType)?.let { condition ->
+                        summon.applyCondition(ConditionDamageCalculator.createApplication(condition,
+                            sourceStatScore=resolvedDamageContext.conditionStatScore ?: ActiveItemEffects.currentConditionStatScore(condition),
+                            sourceName=resolvedDamageContext.sourceName))
+                    }
+                }
+                ActiveItemEffects.recordDamage(resolvedDamageContext,applied)
+            }
+            return applied
+        }
 
         if (
             traitRuntime
@@ -1240,49 +1301,10 @@ class Enemy(
             return 0
         }
 
-        val armorModifiedDamage =
-            if (
-                resolvedDamageContext.isPhysicalWeaponDamage
-            ) {
-                val safePiercingRatio =
-                    resolvedDamageContext
-                        .attackerPiercingIgnoreRatio
-                        .coerceIn(
-                            0f,
-                            0.75f
-                        )
-
-                /*
-                 * Player ile aynı fiziksel armor modeli:
-                 *
-                 * Raw Armor Reduction =
-                 * Base Armor × Effective Armor Class
-                 *
-                 * Piercing bu toplam azaltımın bir bölümünü ignore eder.
-                 */
-                val rawArmorReduction =
-                    stats.baseArmor
-                        .coerceAtLeast(0)
-                        .toFloat() *
-                        effectiveArmorClass
-                            .coerceAtLeast(0)
-                            .toFloat()
-
-                val effectiveDamageReduction =
-                    rawArmorReduction *
-                        (1f - safePiercingRatio)
-
-                (
-                    affinityModifiedDamage
-                        .toFloat() -
-                        effectiveDamageReduction
-                    )
-                    .roundToInt()
-                    .coerceAtLeast(1)
-            } else {
-                affinityModifiedDamage
-                    .coerceAtLeast(1)
-            }
+        val armorModifiedDamage = com.azizoglu.grisilith.combat.DamageDefense.resolve(
+            affinityModifiedDamage, resolvedDamageContext.damageType, stats.baseArmor, effectiveArmorClass,
+            stats.baseMagicResistance, stats.magicResistance, resolvedDamageContext.attackerPiercingIgnoreRatio,
+            resolvedDamageContext.defenseTimeScale)
 
         val traitResolvedFinalDamage =
             traitRuntime.resolveFinalIncomingDamage(
@@ -1328,6 +1350,11 @@ class Enemy(
             appliedDamage >
             0
         ) {
+            RunDamageTypeTelemetry.recordEnemyDamage(
+                appliedDamage,
+                resolvedDamageContext.damageType
+            )
+
             if (resolvedDamageContext.appliesAutomaticCondition && !isDead) {
                 DamageConditionRules.conditionFor(resolvedDamageContext.damageType)?.let { condition ->
                     applyCondition(
@@ -1503,6 +1530,8 @@ class Enemy(
             goldReward = stats.goldReward * 0.25f,
             armorClass = (stats.armorClass * 0.30f).roundToInt().coerceAtLeast(0),
             baseArmor = (stats.baseArmor * 0.30f).roundToInt().coerceAtLeast(0),
+            baseMagicResistance = (stats.baseMagicResistance * 0.30f).roundToInt().coerceAtLeast(0),
+            magicResistance = (stats.magicResistance * 0.30f).roundToInt().coerceAtLeast(0),
             attacksPerSecond = (stats.attacksPerSecond * 0.30f).coerceAtLeast(0.10f),
             attackRange = (stats.attackRange * 0.55f).coerceAtLeast(20f),
             weaponDamageMultiplier = stats.weaponDamageMultiplier * 0.30f,
@@ -1731,6 +1760,7 @@ class Enemy(
                 armorClassReductionRemainingSeconds,
                 durationSeconds
             )
+        conditions.apply(ConditionType.ARMOR_BREAK,armorClassReductionRemainingSeconds)
     }
 
     fun applyTemporaryCombatBuff(
@@ -1786,6 +1816,7 @@ class Enemy(
     fun applyCondition(
         application: ConditionApplication
     ) {
+        weaponTargetSummon?.let { it.applyCondition(application); return }
         if (isDead || application.type in stats.conditionImmunities) {
             return
         }
@@ -1797,6 +1828,7 @@ class Enemy(
         conditionType: ConditionType,
         durationSeconds: Float? = null
     ) {
+        weaponTargetSummon?.let { it.applyCondition(conditionType,durationSeconds); return }
         if (isDead || conditionType in stats.conditionImmunities) {
             return
         }

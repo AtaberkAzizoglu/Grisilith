@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="runs_lost">0</entry>
+<entry key="boss_achievement_claims">2</entry>
+<entry key="grisilith_coins_earned">0</entry>
+<entry key="damage_dealt">0</entry>
+<entry key="runs_started">0</entry>
+<entry key="gold_spent">0.0</entry>
+<entry key="runs_finished">1</entry>
+<entry key="total_play_time_seconds">60</entry>
+<entry key="runs_won">1</entry>
+<entry key="longest_run_seconds">60</entry>
+<entry key="final_bosses_defeated">3</entry>
+<entry key="damage_taken">0</entry>
+<entry key="most_damage_taken">0</entry>
+<entry key="bosses_defeated">45</entry>
+<entry key="gold_collected">0.0</entry>
+<entry key="highest_damage">0</entry>
+<entry key="most_gold">0.0</entry>
+<entry key="enemy_achievement_claims">2</entry>
+<entry key="enemies_killed">2500</entry>
+<entry key="most_grisilith_coins">0</entry>
+<entry key="final_boss_achievement_claims">3</entry>
+</properties>

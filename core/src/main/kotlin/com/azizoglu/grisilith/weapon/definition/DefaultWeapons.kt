@@ -19,6 +19,10 @@ import com.azizoglu.grisilith.weapon.definition.catalog.TotemOfDarkCloudsDefinit
 
 
 object DefaultWeapons {
+    val warhammer = com.azizoglu.grisilith.weapon.definition.catalog.NewPhysicalWeapons.warhammer
+    val whip = com.azizoglu.grisilith.weapon.definition.catalog.NewPhysicalWeapons.whip
+    val sling = com.azizoglu.grisilith.weapon.definition.catalog.NewPhysicalWeapons.sling
+    val boomerang = com.azizoglu.grisilith.weapon.definition.catalog.NewPhysicalWeapons.boomerang
 
     /* Double Swords ability is attached here for catalog compatibility. */
     val doubleSwords =
@@ -29,14 +33,6 @@ object DefaultWeapons {
                     DefaultWeaponAbilities
                         .rapidStrokes
             )
-
-    /*
-     * Geçici uyumluluk alias'ı.
-     * Projedeki shortsword kullanımları tamamen
-     * değiştirildiğinde kaldırılabilir.
-     */
-    val shortsword =
-        doubleSwords
 
     val longsword =
         LongswordDefinition.definition
@@ -111,7 +107,8 @@ object DefaultWeapons {
             orbOfSky,
             totemOfDarkClouds,
             amuletOfTrollKing,
-            enchantedChalkDust
+            enchantedChalkDust,
+            warhammer, whip, sling, boomerang
         )
 
     fun findById(

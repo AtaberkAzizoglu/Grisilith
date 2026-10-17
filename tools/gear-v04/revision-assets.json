@@ -1,0 +1,44 @@
+[
+  {
+    "key": "warhammer",
+    "prompt": "Redesign reference weapon as single upright dark fantasy pixel-painted game sprite. Handle straight DOWN, hammer head UP horizontal, blunt RECTANGULAR square steel ends, gold bands and brown leather handle, NO purple cloth or fabric anywhere. Transparent background, centered generous margin, no frame/text.",
+    "reference": "C:/Android Projects/Grisilith/assets/weapon_visuals/carriers_v4/warhammer.png",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-0ade2720-8d9c-4d38-b723-e5fb9dff084c.png"
+  },
+  {
+    "key": "sling",
+    "prompt": "Edit reference into a relaxed slack hanging leather sling, not tensioned. Grip/loop at bottom, upper pouch loosely sagging, brown leather gold fittings grey stone. Upright game carried sprite, transparent, no frame/text.",
+    "reference": "C:/Android Projects/Grisilith/assets/weapon_visuals/carriers_v4/sling.png",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-19a2bfd9-aac4-405e-9bb5-b46ca4f3daca.png"
+  },
+  {
+    "key": "imbert",
+    "prompt": "Change ONLY background behind knight inside gold border: remove all blue square artifacts and replace with uniform subtle charcoal-black portrait backdrop. Preserve exact knight identity pose armor hair face and gold frame. No other changes.",
+    "reference": "C:/Android Projects/Grisilith/assets/ui/content_icons/characters/chr_sir_imbert.png",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-e818fc16-56b3-42de-80e4-c3e580269386.png"
+  },
+  {
+    "key": "hammer_strike",
+    "prompt": "Game animation sprite sheet, EXACT 4 columns x 4 rows of equal square cells, 16 sequential frames row-major, no gaps or borders, transparent background. steel square-headed warhammer slam, narrow brown shaft extends horizontally from left edge center to circular impact at cell center-right; expanding ivory gold impact sparks then dust, no purple. Dark fantasy painted pixel sprite style. Fixed anchor and scale across cells, everything contained within each cell. Smooth chronological anticipation impact and fading recovery; no text numbers grid or background.",
+    "reference": null,
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-e9ff515e-4acd-49d1-9a66-80ce6f4cb1b9.png"
+  },
+  {
+    "key": "earthbreaker",
+    "prompt": "Game animation sprite sheet, EXACT 4 columns x 4 rows of equal square cells, 16 sequential frames row-major, no gaps or borders, transparent background. top-down circular rocky earth shockwave: compact cracking start, expanding jagged concentric brown stone and gold ivory dust rings, peak halfway, fade rubble. Dark fantasy painted pixel sprite style. Fixed anchor and scale across cells, everything contained within each cell. Smooth chronological anticipation impact and fading recovery; no text numbers grid or background.",
+    "reference": null,
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-4eaf4ba7-3518-4cb1-8b1c-894f37e6df55.png"
+  },
+  {
+    "key": "whip_strike",
+    "prompt": "Game animation sprite sheet, EXACT 4 columns x 4 rows of equal square cells, 16 sequential frames row-major, no gaps or borders, transparent background. horizontal fine brown whip extending from left center to right, small 30 degree ivory golden lash fan at tip, extends and snaps then retracts, transparent space. Dark fantasy painted pixel sprite style. Fixed anchor and scale across cells, everything contained within each cell. Smooth chronological anticipation impact and fading recovery; no text numbers grid or background.",
+    "reference": null,
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-e7e9eda0-9191-432d-8b96-0430e5a67012.png"
+  },
+  {
+    "key": "whip_sweep",
+    "prompt": "Game animation sprite sheet, EXACT 4 columns x 4 rows of equal square cells, 16 sequential frames row-major, no gaps or borders, transparent background. top-down broad 120 degree fan lash sweeping toward RIGHT, apex at exact cell center, fine brown leather whip and ivory gold arc sparks cover entire fan out to edge, trail fades. Dark fantasy painted pixel sprite style. Fixed anchor and scale across cells, everything contained within each cell. Smooth chronological anticipation impact and fading recovery; no text numbers grid or background.",
+    "reference": null,
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-eaef13bc-5b71-42ee-abe1-3126be2731d9.png"
+  }
+]

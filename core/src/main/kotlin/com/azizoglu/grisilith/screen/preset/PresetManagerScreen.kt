@@ -15,6 +15,7 @@ import com.azizoglu.grisilith.preset.RunPreset
 import com.azizoglu.grisilith.screen.components.MenuButton
 import com.azizoglu.grisilith.screen.components.MenuPointer
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.statistics.StatPresentationGroup
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputAdapter
@@ -30,6 +31,10 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.azizoglu.grisilith.ui.icon.ContentIconRenderer
+import com.azizoglu.grisilith.ui.stat.StatSymbolRenderer
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
+import com.azizoglu.grisilith.ui.input.VerticalScrollbarDragController
 import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.definition.WeaponAttackPattern
@@ -39,6 +44,7 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import java.util.Locale
 import kotlin.math.roundToInt
+import com.azizoglu.grisilith.ui.typography.UiFontFactory
 
 class PresetManagerScreen(
     private val game:
@@ -47,6 +53,8 @@ class PresetManagerScreen(
     private val selectedMap:
     GameMap? = null
 ) : ScreenAdapter() {
+
+    private val scrollbarDrag = VerticalScrollbarDragController()
 
     companion object {
         private const val VIEWPORT_WIDTH =
@@ -88,7 +96,7 @@ class PresetManagerScreen(
         SpriteBatch()
 
     private val font =
-        BitmapFont()
+        UiFontFactory.createBody()
 
     private val glyphLayout =
         GlyphLayout()
@@ -242,6 +250,7 @@ class PresetManagerScreen(
 
         pointer.reset()
         interactionState.reset()
+        scrollbarDrag.reset()
 
         isDraggingPresetList =
             false
@@ -316,7 +325,7 @@ class PresetManagerScreen(
          * butonlar ve kart tıklamaları çalışmaz.
          */
         val dragConsumedInput =
-            handlePresetListDrag()
+            handlePresetScrollbarDrag() || handlePresetListDrag()
 
         if (dragConsumedInput) {
             return
@@ -368,6 +377,40 @@ class PresetManagerScreen(
                         cardRectangle
                 )
             }
+    }
+
+    private fun handlePresetScrollbarDrag(): Boolean {
+        val maximum = maximumOffset()
+        if (maximum <= 0) {
+            scrollbarDrag.reset()
+            return false
+        }
+        val listBounds = presetListRectangle()
+        val track =
+            Rectangle(
+                listBounds.x + listBounds.width + 10f,
+                listBounds.y,
+                16f,
+                listBounds.height
+            )
+        val visibleRatio = VISIBLE_PRESET_COUNT.toFloat() / resolvedPresets.size.toFloat()
+        val thumb =
+            UiComponentRenderer.verticalScrollbarThumbBounds(
+                track,
+                visibleRatio,
+                interactionState.scrollOffset.toFloat() / maximum.toFloat()
+            )
+        val interactionTrack = Rectangle(track.x - 5f, track.y, track.width + 10f, track.height)
+        return scrollbarDrag.update(
+            pointer.position,
+            pointer.justPressed,
+            pointer.isHeld,
+            pointer.justReleased,
+            interactionTrack,
+            thumb
+        ) { ratio ->
+            interactionState.setScrollOffset((ratio * maximum).roundToInt(), maximum)
+        }
     }
 
     private fun handlePresetListDrag():
@@ -901,6 +944,17 @@ class PresetManagerScreen(
                 )
             }
 
+        if (resolvedPresets.size > VISIBLE_PRESET_COUNT) {
+            val listBounds = presetListRectangle()
+            val maximum = maximumOffset().coerceAtLeast(1)
+            UiComponentRenderer.drawVerticalScrollbar(
+                batch = batch,
+                bounds = Rectangle(listBounds.x + listBounds.width + 10f, listBounds.y, 16f, listBounds.height),
+                visibleRatio = VISIBLE_PRESET_COUNT.toFloat() / resolvedPresets.size.toFloat(),
+                scrollRatio = interactionState.scrollOffset.toFloat() / maximum.toFloat()
+            )
+        }
+
         font.color =
             Color.GRAY
 
@@ -958,19 +1012,27 @@ class PresetManagerScreen(
                 )
         )
 
-        drawCenteredText(
-            text =
-                "CHARACTER\nPORTRAIT",
+        if (
+            !ContentIconRenderer.draw(
+                batch = batch,
+                definition = preset.character,
+                bounds = portrait
+            )
+        ) {
+            drawCenteredText(
+                text =
+                    "CHARACTER\nPORTRAIT",
 
-            rectangle =
-                portrait,
+                rectangle =
+                    portrait,
 
-            color =
-                Color.WHITE,
+                color =
+                    Color.WHITE,
 
-            scale =
-                0.7f
-        )
+                scale =
+                    0.7f
+            )
+        }
 
         font.color =
             Color.WHITE
@@ -1042,92 +1104,73 @@ class PresetManagerScreen(
                     }
                 }
 
-            drawPanel(
-                rectangle =
-                    rectangle,
+            val definition =
+                when (contentType) {
+                    PresetCardContentType.WEAPON -> preset.weapon
+                    PresetCardContentType.ARMOR -> preset.armor
+                    PresetCardContentType.ITEM -> preset.item
+                    PresetCardContentType.WEAPON_TAMGA -> preset.weaponTamga
+                    PresetCardContentType.ARMOR_TAMGA -> preset.armorTamga
+                }
 
-                fillColor =
-                    when (contentType) {
-                        PresetCardContentType.WEAPON -> {
-                            Color(
-                                0.08f,
-                                0.34f,
-                                0.12f,
-                                1f
-                            )
-                        }
-
-                        PresetCardContentType.ARMOR -> {
-                            Color(
-                                0.28f,
-                                0.28f,
-                                0.31f,
-                                1f
-                            )
-                        }
-
-                        PresetCardContentType.ITEM -> {
-                            Color(
-                                0.25f,
-                                0.23f,
-                                0.10f,
-                                1f
-                            )
-                        }
-
-                        else -> {
-                            Color(
-                                0.25f,
-                                0.13f,
-                                0.40f,
-                                1f
-                            )
-                        }
-                    }
+            UiComponentRenderer.drawSlot(
+                batch = batch,
+                bounds = rectangle,
+                locked = definition == null
             )
 
-            drawCenteredText(
-                text =
-                    text,
+            val renderedIcon =
+                definition != null &&
+                    ContentIconRenderer.draw(
+                        batch = batch,
+                        definition = definition,
+                        bounds = rectangle
+                    )
 
-                rectangle =
-                    rectangle,
+            if (!renderedIcon) {
+                drawCenteredText(
+                    text =
+                        text,
 
-                color =
-                    if (
-                        contentType ==
-                        PresetCardContentType
-                            .WEAPON_TAMGA ||
-                        contentType ==
-                        PresetCardContentType
-                            .ARMOR_TAMGA
-                    ) {
-                        val hasTamga =
-                            when (contentType) {
-                                PresetCardContentType
-                                    .WEAPON_TAMGA ->
-                                    preset.weaponTamga != null
+                    rectangle =
+                        rectangle,
 
-                                PresetCardContentType
-                                    .ARMOR_TAMGA ->
-                                    preset.armorTamga != null
+                    color =
+                        if (
+                            contentType ==
+                            PresetCardContentType
+                                .WEAPON_TAMGA ||
+                            contentType ==
+                            PresetCardContentType
+                                .ARMOR_TAMGA
+                        ) {
+                            val hasTamga =
+                                when (contentType) {
+                                    PresetCardContentType
+                                        .WEAPON_TAMGA ->
+                                        preset.weaponTamga != null
 
-                                else ->
-                                    true
+                                    PresetCardContentType
+                                        .ARMOR_TAMGA ->
+                                        preset.armorTamga != null
+
+                                    else ->
+                                        true
+                                }
+
+                            if (hasTamga) {
+                                Color.WHITE
+                            } else {
+                                Color.GRAY
                             }
-
-                        if (hasTamga) {
-                            Color.WHITE
                         } else {
-                            Color.GRAY
-                        }
-                    } else {
-                        Color.WHITE
-                    },
+                            Color.WHITE
+                        },
 
-                scale =
-                    0.64f
-            )
+                    scale =
+                        0.64f
+                )
+            }
         }
 
         renderSmallButton(
@@ -1263,93 +1306,41 @@ class PresetManagerScreen(
             0.9f
         )
 
-        val stats =
-            StatType.entries
-
-        val rowsPerColumn =
-            (
-                stats.size +
-                    1
-                ) /
-                2
-
         var hoveredStat:
             StatType? =
             null
 
-        stats.forEachIndexed {
-                index,
-                statType ->
-
-            val column =
-                index /
-                    rowsPerColumn
-
-            val rowIndex =
-                index %
-                    rowsPerColumn
-
-            val x =
-                315f +
-                    column *
-                    340f
-
-            val y =
-                510f -
-                    rowIndex *
-                    32f
-
-            val valueRectangle =
-                Rectangle(
-                    x +
-                        220f,
-                    y -
-                        22f,
-                    78f,
-                    28f
-                )
-
-            val isHovered =
-                valueRectangle.contains(
-                    pointer.position
-                )
-
-            font.color =
-                Color.LIGHT_GRAY
-
-            font.draw(
-                batch,
-                statType.displayName,
-                x,
-                y
+        StatPresentationGroup.ordered.forEachIndexed { index, group ->
+            val column = index % 2
+            val gridRow = index / 2
+            val bounds = Rectangle(
+                300f + column * 350f,
+                145f + (1 - gridRow) * 190f,
+                330f,
+                178f
             )
-
-            font.color =
-                if (isHovered) {
-                    Color.GOLD
-                } else {
-                    Color.WHITE
-                }
-
-            font.draw(
-                batch,
-                (
-                    preset.totalStats[
-                        statType
-                    ] ?: 0
-                    )
-                    .toString(),
-                x +
-                    245f,
-                y,
-                50f,
-                Align.right,
-                false
-            )
-
-            if (isHovered) {
-                hoveredStat =
-                    statType
+            drawPanel(bounds)
+            font.data.setScale(0.68f)
+            font.color = Color(0.72f, 0.78f, 0.90f, 1f)
+            font.draw(batch, group.title, bounds.x, bounds.y + bounds.height - 10f, bounds.width, Align.center, false)
+            group.stats.forEachIndexed { rowIndex, statType ->
+                val x = bounds.x + 12f
+                val y = bounds.y + bounds.height - 42f - rowIndex * 24f
+                val valueRectangle = Rectangle(bounds.x + bounds.width - 66f, y - 19f, 54f, 23f)
+                val isHovered = valueRectangle.contains(pointer.position)
+                font.data.setScale(0.72f)
+                StatSymbolRenderer.drawLabel(batch, font, statType, x, y, 16f, bounds.width - 82f)
+                font.color = if (isHovered) Color.GOLD else Color.WHITE
+                font.draw(
+                    batch,
+                    (preset.totalStats[statType] ?: 0).toString(),
+                    bounds.x + bounds.width - 62f,
+                    y,
+                    48f,
+                    Align.right,
+                    false
+                )
+                if (isHovered) hoveredStat = statType
             }
         }
 
@@ -1472,17 +1463,14 @@ class PresetManagerScreen(
             0.83f
         )
 
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            statType.displayName,
-            tooltip.x +
-                13f,
-            tooltip.y +
-                tooltip.height -
-                17f
+        StatSymbolRenderer.drawLabel(
+            batch = batch,
+            font = font,
+            statType = statType,
+            x = tooltip.x + 13f,
+            baselineY = tooltip.y + tooltip.height - 17f,
+            iconSize = 18f,
+            width = tooltip.width - 26f
         )
 
         font.data.setScale(
@@ -1566,7 +1554,9 @@ class PresetManagerScreen(
 
         font.draw(
             batch,
-            preset.character.description,
+            preset.character.trait.displayName +
+                ": " +
+                preset.character.trait.description,
             300f,
             500f,
             680f,
@@ -1589,7 +1579,7 @@ class PresetManagerScreen(
         )
 
         val baseStatPreview =
-            StatType.entries
+            StatType.grouped
                 .joinToString(
                     separator =
                         "   |   "
@@ -1605,14 +1595,11 @@ class PresetManagerScreen(
         font.color =
             Color.LIGHT_GRAY
 
-        font.draw(
-            batch,
-            baseStatPreview,
-            300f,
-            315f,
-            680f,
-            Align.left,
-            true
+        StatSymbolRenderer.drawRichText(
+            batch, font, baseStatPreview,
+            300f, 315f, 680f,
+            lineHeight = 18f,
+            iconSize = 15f
         )
 
         renderModalCloseHint()
@@ -1847,27 +1834,21 @@ class PresetManagerScreen(
         font.color =
             Color.LIGHT_GRAY
 
-        font.draw(
-            batch,
-            description,
-            300f,
-            505f,
-            680f,
-            Align.left,
-            true
+        StatSymbolRenderer.drawRichText(
+            batch, font, description,
+            300f, 505f, 680f,
+            lineHeight = 21f,
+            iconSize = 18f
         )
 
         font.color =
             Color.WHITE
 
-        font.draw(
-            batch,
-            details,
-            300f,
-            330f,
-            680f,
-            Align.left,
-            true
+        StatSymbolRenderer.drawRichText(
+            batch, font, details,
+            300f, 330f, 680f,
+            lineHeight = 20f,
+            iconSize = 17f
         )
 
         renderModalCloseHint()
@@ -2291,17 +2272,11 @@ class PresetManagerScreen(
             0.94f
         )
 
-        font.draw(
-            batch,
-            definition.description,
+        StatSymbolRenderer.drawRichText(
+            batch, font, definition.description,
             rightX,
-            panel.y +
-                panel.height -
-                75f,
-            panel.width -
-                465f,
-            Align.left,
-            true
+            panel.y + panel.height - 75f,
+            panel.width - 465f
         )
 
         font.color =
@@ -2338,7 +2313,7 @@ class PresetManagerScreen(
          * Gear katmanına verilir.
          */
         val preRunBaseStats =
-            StatType.entries
+            StatType.alphabetical
                 .associateWith { statType ->
                     val base =
                         preset.baseStats[
@@ -2577,6 +2552,8 @@ class PresetManagerScreen(
             WeaponAttackPattern.TOTEM_PROJECTILE_OR_DRAIN ->
                 "Projectile / Drain"
 
+            WeaponAttackPattern.EXTENDED_PHYSICAL ->
+                com.azizoglu.grisilith.weapon.definition.catalog.NewPhysicalWeapons.patternLabel(weapon.definition.id.value)
             WeaponAttackPattern.NONE ->
                 "Passive"
         }
@@ -2711,14 +2688,14 @@ class PresetManagerScreen(
     ): Map<PresetCardContentType, Rectangle> {
 
         val width =
-            105f
+            82f
 
         val height =
-            67f
+            82f
 
         val startX =
             card.x +
-                370f
+                390f
 
         val gap =
             12f
@@ -2728,7 +2705,7 @@ class PresetManagerScreen(
                 Rectangle(
                     startX,
                     card.y +
-                        37f,
+                        18f,
                     width,
                     height
                 ),
@@ -2741,7 +2718,7 @@ class PresetManagerScreen(
                                 gap
                             ),
                     card.y +
-                        37f,
+                        18f,
                     width,
                     height
                 ),
@@ -2755,7 +2732,7 @@ class PresetManagerScreen(
                             ) *
                         2f,
                     card.y +
-                        37f,
+                        18f,
                     width,
                     height
                 ),
@@ -2769,7 +2746,7 @@ class PresetManagerScreen(
                             ) *
                         3f,
                     card.y +
-                        37f,
+                        18f,
                     width,
                     height
                 ),
@@ -2783,7 +2760,7 @@ class PresetManagerScreen(
                             ) *
                         4f,
                     card.y +
-                        37f,
+                        18f,
                     width,
                     height
                 )
@@ -2796,11 +2773,11 @@ class PresetManagerScreen(
     ) =
         Rectangle(
             card.x +
-                965f,
+                930f,
             card.y +
                 68f,
-            120f,
-            36f
+            155f,
+            34f
         )
 
     private fun editButtonRectangle(
@@ -2809,11 +2786,11 @@ class PresetManagerScreen(
     ) =
         Rectangle(
             card.x +
-                965f,
+                930f,
             card.y +
                 20f,
-            55f,
-            35f
+            74f,
+            34f
         )
 
     private fun deleteButtonRectangle(
@@ -2822,11 +2799,11 @@ class PresetManagerScreen(
     ) =
         Rectangle(
             card.x +
-                1030f,
+                1011f,
             card.y +
                 20f,
-            55f,
-            35f
+            74f,
+            34f
         )
 
     private fun selectButtonRectangle(
@@ -2938,28 +2915,9 @@ class PresetManagerScreen(
                 1f
             )
     ) {
-        drawFilledRectangle(
-            rectangle,
-            Color(
-                0.34f,
-                0.52f,
-                0.73f,
-                1f
-            )
-        )
-
-        drawFilledRectangle(
-            Rectangle(
-                rectangle.x +
-                    2f,
-                rectangle.y +
-                    2f,
-                rectangle.width -
-                    4f,
-                rectangle.height -
-                    4f
-            ),
-            fillColor
+        UiComponentRenderer.drawPanel(
+            batch = batch,
+            bounds = rectangle
         )
     }
 

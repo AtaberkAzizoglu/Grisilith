@@ -5,16 +5,21 @@ import com.azizoglu.grisilith.character.CharacterDefinition
 import com.azizoglu.grisilith.character.DefaultCharacters
 import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.statistics.StatPresentationGroup
+import com.azizoglu.grisilith.ui.stat.StatSymbolRenderer
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.azizoglu.grisilith.ui.typography.UiFontFactory
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.azizoglu.grisilith.screen.components.MenuButton
 import com.azizoglu.grisilith.screen.components.MenuPointer
+import com.azizoglu.grisilith.ui.icon.ContentIconRenderer
+import com.badlogic.gdx.math.Rectangle
 
 class CharacterSelectionScreen(
     private val game:
@@ -46,7 +51,7 @@ class CharacterSelectionScreen(
         SpriteBatch()
 
     private val font =
-        BitmapFont()
+        UiFontFactory.createBody()
 
     private val characters =
         DefaultCharacters.all
@@ -263,23 +268,27 @@ class CharacterSelectionScreen(
             batch,
             character.displayName,
             startX,
-            currentY
-        )
-
-        currentY -= 38f
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            character.description,
-            startX,
-            currentY,
+            currentY + 42f,
             228f,
-            -1,
-            true
+            1,
+            false
         )
+
+        val portraitSize =
+            108f
+
+        ContentIconRenderer.draw(
+            batch = batch,
+            definition = character,
+            bounds = Rectangle(
+                startX + (228f - portraitSize) / 2f,
+                currentY - 78f,
+                portraitSize,
+                portraitSize
+            )
+        )
+
+        currentY -= 118f
 
         font.color =
             Color.GOLD
@@ -288,16 +297,16 @@ class CharacterSelectionScreen(
             batch,
             character.trait.displayName +
                 ": " +
-                character.trait.description,
+            character.trait.description,
             startX,
-            currentY - 62f,
+            currentY,
             228f,
             -1,
             true
         )
 
         val statStartY =
-            currentY - 130f
+            currentY - 78f
 
         val leftColumnX =
             startX
@@ -305,136 +314,59 @@ class CharacterSelectionScreen(
         val rightColumnX =
             startX + 114f
 
-        val rowSpacing =
-            22f
-
-        val leftColumnStats =
-            listOf(
-                "Max HP" to
-                    StatType.MAX_HP,
-
-                "Armor Class" to
-                    StatType.ARMOR_CLASS,
-
-                "Strength" to
-                    StatType.STRENGTH,
-
-                "Dexterity" to
-                    StatType.DEXTERITY,
-
-                "Wisdom" to
-                    StatType.WISDOM,
-
-                "Haste" to
-                    StatType.HASTE,
-
-                "Attack Speed" to
-                    StatType.ATTACK_SPEED,
-
-                "Crit Rate" to
-                    StatType.CRIT_RATE,
-
-                "Crit Damage" to
-                    StatType.CRIT_DAMAGE,
-
-                "Movement" to
-                    StatType.MOVEMENT_SPEED
-            )
-
-        val rightColumnStats =
-            listOf(
-                "Luck" to
-                    StatType.LUCK,
-
-                "Harvest" to
-                    StatType.HARVEST,
-
-                "Elemental" to
-                    StatType.ELEMENTAL_DAMAGE,
-
-                "Nature" to
-                    StatType.MIGHT_OF_NATURE,
-
-                "Shepherd" to
-                    StatType.SHEPHERD,
-
-                "Piercing" to
-                    StatType.PIERCING,
-
-                "Enemy Count" to
-                    StatType.ENEMY_COUNT,
-
-                "HP Regen" to
-                    StatType.HP_REGENERATION,
-
-                "Life Steal" to
-                    StatType.LIFE_STEAL,
-
-                "Magic Resist" to
-                    StatType.MAGIC_RESISTANCE
-            )
-
-        leftColumnStats.forEachIndexed {
-                index,
-                statEntry ->
-
-            drawStat(
-                label = statEntry.first,
-                value =
-                    character.baseStat(
-                        statEntry.second
-                    ),
-                x = leftColumnX,
-                y =
-                    statStartY -
-                        index * rowSpacing
-            )
+        fun drawGroupedColumn(
+            groups: List<StatPresentationGroup>,
+            x: Float
+        ) {
+            var y = statStartY
+            groups.forEach { group ->
+                font.data.setScale(0.42f)
+                font.color = Color(0.72f, 0.78f, 0.90f, 1f)
+                font.draw(batch, group.title, x, y, 108f, com.badlogic.gdx.utils.Align.center, false)
+                y -= 16f
+                font.data.setScale(0.52f)
+                group.stats.forEach { statEntry ->
+                    drawStat(statEntry, character.baseStat(statEntry), x, y)
+                    y -= 18f
+                }
+                y -= 4f
+            }
         }
 
-        rightColumnStats.forEachIndexed {
-                index,
-                statEntry ->
-
-            drawStat(
-                label = statEntry.first,
-                value =
-                    character.baseStat(
-                        statEntry.second
-                    ),
-                x = rightColumnX,
-                y =
-                    statStartY -
-                        index * rowSpacing
-            )
-        }
+        drawGroupedColumn(
+            listOf(StatPresentationGroup.magicalDamage, StatPresentationGroup.defensive),
+            leftColumnX
+        )
+        drawGroupedColumn(
+            listOf(StatPresentationGroup.physicalDamage, StatPresentationGroup.utility),
+            rightColumnX
+        )
 
         font.data.setScale(1f)
     }
 
     private fun drawStat(
-        label: String,
+        statType: StatType,
         value: Int,
         x: Float,
         y: Float
     ) {
-        font.color =
-            when {
-                value >= 12 ->
-                    Color.GREEN
-
-                value <= 3 ->
-                    Color.SCARLET
-
-                else ->
-                    Color.LIGHT_GRAY
-            }
-
-        font.draw(
-            batch,
-            "$label: $value",
-            x,
-            y
+        StatSymbolRenderer.drawLabel(
+            batch = batch,
+            font = font,
+            statType = statType,
+            x = x,
+            baselineY = y,
+            iconSize = 13f,
+            width = 92f
         )
+
+        font.color = when {
+            value >= 12 -> Color.GREEN
+            value <= 3 -> Color.SCARLET
+            else -> Color.WHITE
+        }
+        font.draw(batch, value.toString(), x + 96f, y)
     }
 
     override fun resize(

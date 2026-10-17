@@ -121,6 +121,21 @@ class ChestOpeningSession {
             }
     }
 
+    fun completeBatch(chestCount: Int): Boolean {
+        if (state != ChestOpeningState.LOCKED || chestCount <= 0) return false
+        val safeCount = chestCount.coerceAtMost(totalChestCount - openedChestCount)
+        openedChestCount += safeCount
+        currentReward = null
+        state = if (hasRemainingChests) ChestOpeningState.LOCKED else ChestOpeningState.COMPLETED
+        return safeCount > 0
+    }
+
+    fun consumeBatchDiscard(): Boolean {
+        if (state != ChestOpeningState.LOCKED || remainingDiscardCount <= 0) return false
+        remainingDiscardCount -= 1
+        return true
+    }
+
     fun reset() {
         totalChestCount = 0
         openedChestCount = 0

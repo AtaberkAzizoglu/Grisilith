@@ -803,8 +803,8 @@ private class GorillaThrowTrait :
     private data class ThrownRock(
         var x: Float,
         var y: Float,
-        val velocityX: Float,
-        val velocityY: Float,
+        var velocityX: Float,
+        var velocityY: Float,
         val damage: Int,
         val startX: Float,
         val startY: Float,
@@ -987,6 +987,10 @@ private class GorillaThrowTrait :
             val rock =
                 iterator.next()
 
+            val velocity = Vector2(rock.velocityX, rock.velocityY)
+            context.owner.projectileVelocityBender?.invoke(rock.x, rock.y, velocity, context.delta)
+            rock.velocityX = velocity.x
+            rock.velocityY = velocity.y
             rock.x +=
                 rock.velocityX *
                     context.delta

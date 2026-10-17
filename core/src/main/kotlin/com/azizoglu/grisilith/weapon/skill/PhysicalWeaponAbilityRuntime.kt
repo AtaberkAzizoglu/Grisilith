@@ -20,6 +20,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Vector2
@@ -91,6 +92,18 @@ class PhysicalWeaponAbilityRuntime(
             it.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
         }
     }
+    private val airSlashFrames by lazy {
+        // Integer boundaries also support sheets whose dimensions are not multiples of four.
+        Array(16) { index ->
+            val column = index % 4
+            val row = index / 4
+            val x = column * airSlashTexture.width / 4
+            val y = row * airSlashTexture.height / 4
+            TextureRegion(airSlashTexture, x, y,
+                (column + 1) * airSlashTexture.width / 4 - x,
+                (row + 1) * airSlashTexture.height / 4 - y)
+        }
+    }
     private val burstTexture by lazy {
         Texture(Gdx.files.internal(DEFENSIVE_BURST_TEXTURE)).also {
             it.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
@@ -106,6 +119,8 @@ class PhysicalWeaponAbilityRuntime(
                 it.aimY = worldY
             }
     }
+
+    fun isPreparing(weapon: WeaponInstance): Boolean = casts.any { it.weapon === weapon && it.delaySeconds > 0f }
 
     fun tryActivate(
         weapon: WeaponInstance,
@@ -160,11 +175,7 @@ class PhysicalWeaponAbilityRuntime(
             slotIndex = slotIndex,
             aimX = lastAimX.takeIf { it != 1f || lastAimY != 0f } ?: player.centerX + 1f,
             aimY = lastAimY.takeIf { lastAimX != 1f || it != 0f } ?: player.centerY,
-            delaySeconds = when (kind) {
-                CastKind.LEISURELY_SHOT -> 1f
-                CastKind.HEAVY_BOLT -> 2f
-                else -> 0f
-            },
+            delaySeconds = 0f,
             defensiveLineBonus = lineBonus
         )
 
@@ -247,7 +258,7 @@ class PhysicalWeaponAbilityRuntime(
             projectiles, attackOriginForSlot, onDamageDealt, onEnemyKilled
         ) { context ->
             when (cast.kind) {
-                CastKind.RAPID_STROKES -> executeRapidStrokes(context)
+                CastKind.RAPID_STROKES -> executeRapidStrokes(context, cast.aimX, cast.aimY)
                 CastKind.AIR_SLASH -> fireAirSlash(context, cast.aimX, cast.aimY)
                 CastKind.SPIN_ATTACK -> executeSpinAttack(context)
                 CastKind.DEFENSIVE_LINE_BURST ->
@@ -299,11 +310,11 @@ class PhysicalWeaponAbilityRuntime(
         )
     }
 
-    private fun executeRapidStrokes(context: WeaponAttackContext) {
+    private fun executeRapidStrokes(context: WeaponAttackContext, aimX: Float, aimY: Float) {
         val range = context.effectiveWeaponRange(
             context.weapon.definition.baseRange * context.weapon.currentLevelStats.rangeMultiplier
-        )
-        val candidates = context.enemyManager.allEnemies.filter {
+        ) * 1.25f
+        val candidates = context.enemyManager.weaponTargets.filter {
             !it.isDead && Vector2.dst(
                 context.attackOriginX, context.attackOriginY,
                 it.centerX, it.centerY
@@ -321,8 +332,13 @@ class PhysicalWeaponAbilityRuntime(
         repeat(count) {
             val living = candidates.filterNot { it.isDead }
             val pool = if (living.isEmpty()) candidates else living
+            val target = if (com.azizoglu.grisilith.settings.GameSettings.abilityCasting ==
+                com.azizoglu.grisilith.settings.GameSettings.AbilityCasting.AUTO) {
+                com.azizoglu.grisilith.weapon.runtime.AbilityTargeting.select(pool,
+                    context.attackOriginX, context.attackOriginY, range)
+            } else pool.filterNot { it.isDead }.minByOrNull { Vector2.dst2(aimX, aimY, it.centerX, it.centerY) }
             shortswordExecutor.executeRapidStroke(
-                context, pool[MathUtils.random(pool.lastIndex)], size
+                context, target ?: return, size
             )
         }
     }
@@ -337,6 +353,9 @@ class PhysicalWeaponAbilityRuntime(
         val damage = damageCalculator.calculateNonCriticalDamage(
             context.weapon, DamageType.AIR
         )
+        val scaledDamage = (damage * if (upgraded) {
+            DefaultWeaponAbilities.AIR_SLASH_UPGRADED_DAMAGE_MULTIPLIER
+        } else DefaultWeaponAbilities.AIR_SLASH_DAMAGE_MULTIPLIER).roundToInt().coerceAtLeast(1)
         val waveWidth = 2f * range * tan(
             DefaultWeaponAbilities.AIR_SLASH_ANGLE_DEGREES * 0.5f * MathUtils.degreesToRadians
         )
@@ -350,7 +369,7 @@ class PhysicalWeaponAbilityRuntime(
             sourceWeaponName = context.weapon.displayName + " — Air Slash",
             sourceWeapon = context.weapon,
             sourceWeaponSlotIndex = context.weaponSlotIndex,
-            damage = damage,
+            damage = scaledDamage,
             isCriticalHit = false,
             maximumTargets = Int.MAX_VALUE,
             projectileSpeed = 520f,
@@ -360,7 +379,7 @@ class PhysicalWeaponAbilityRuntime(
             ignoresWorldBoundaryCollisions = true,
             sizeMultiplier = waveWidth / 28f,
             attackerPiercingIgnoreRatio = playerStats.piercingIgnoreRatio(),
-            canCriticallyHit = damageCalculator.canCriticallyHit(context.weapon, DamageType.AIR),
+            canCriticallyHit = damageCalculator.canAbilityCriticallyHit(context.weapon),
             criticalHitChance = damageCalculator.criticalHitChance(context.weapon),
             criticalDamageMultiplier = damageCalculator.criticalDamageMultiplier(),
             targetDamageMultiplierProvider = if (upgraded) {
@@ -387,13 +406,13 @@ class PhysicalWeaponAbilityRuntime(
         } else DefaultWeaponAbilities.SPIN_ATTACK_BASE_RADIUS_MULTIPLIER
         val damageMultiplier = if (upgraded) {
             DefaultWeaponAbilities.SPIN_ATTACK_UPGRADED_DAMAGE_MULTIPLIER
-        } else 1f
+        } else DefaultWeaponAbilities.SPIN_ATTACK_DAMAGE_MULTIPLIER
         MeleeAttackVisualManager.spawn(
             MeleeAttackVisualKind.LANCE_SPIN,
             context.attackOriginX, context.attackOriginY, 0f,
             radius * 2f, radius * 2f, 0.42f
         )
-        context.enemyManager.allEnemies.filter {
+        context.enemyManager.weaponTargets.filter {
             !it.isDead && Vector2.dst(
                 it.centerX, it.centerY,
                 context.attackOriginX, context.attackOriginY
@@ -405,11 +424,12 @@ class PhysicalWeaponAbilityRuntime(
 
     private fun executeDefensiveBurst(context: WeaponAttackContext, lineBonus: Int) {
         val armorForDamage = playerStats.totalScore(StatType.ARMOR_CLASS) + lineBonus
-        val baseDamage = (armorForDamage *
+        // AC-scaled shield hit; the captured stacks were removed from totalScore at activation.
+        val baseDamage = (context.weapon.definition.baseDamage * armorForDamage *
             DefaultWeaponAbilities.DEFENSIVE_LINE_BURST_AC_DAMAGE_MULTIPLIER)
             .roundToInt().coerceAtLeast(1)
         burstVisuals += BurstVisual(context.attackOriginX, context.attackOriginY)
-        context.enemyManager.allEnemies.filter {
+        context.enemyManager.weaponTargets.filter {
             !it.isDead && Vector2.dst(
                 it.centerX, it.centerY,
                 context.attackOriginX, context.attackOriginY
@@ -511,7 +531,11 @@ class PhysicalWeaponAbilityRuntime(
     ) {
         val dir = Vector2(direction).nor()
         val baseDamage = damageCalculator.calculateNonCriticalDamage(
-            context.weapon, damageType
+            context.weapon, damageType,
+            // Preserve Knife Swarm's existing damage; throw-only conversion is not a balance change.
+            primaryPhysicalStatOverride = if (context.weapon.definition.id.value == "WPN_DAGGER") {
+                StatType.STRENGTH
+            } else null
         )
         context.projectiles += Projectile(
             startX = context.attackOriginX,
@@ -538,7 +562,7 @@ class PhysicalWeaponAbilityRuntime(
             carryFirstNormalTarget = carryFirstTarget,
             attackerPiercingIgnoreRatio = playerStats.piercingIgnoreRatio(),
             canCriticallyHit = alwaysCritical ||
-                damageCalculator.canCriticallyHit(context.weapon, damageType),
+                damageCalculator.canAbilityCriticallyHit(context.weapon),
             criticalHitChance = if (alwaysCritical) 1f
                 else damageCalculator.criticalHitChance(context.weapon),
             criticalDamageMultiplier = damageCalculator.criticalDamageMultiplier(),
@@ -568,7 +592,11 @@ class PhysicalWeaponAbilityRuntime(
             damageType = damageType,
             allowCritical = true
         )
-        val raw = forcedBaseDamage ?: damageResult.damage
+        val raw = forcedBaseDamage?.let { base ->
+            if (damageResult.isCriticalHit) {
+                (base * damageCalculator.criticalDamageMultiplier()).roundToInt().coerceAtLeast(1)
+            } else base
+        } ?: damageResult.damage
         context.weapon.recordCalculatedCritical(damageResult.isCriticalHit)
         val damage = context.modifiedDamageAgainst(
             enemy, (raw * damageMultiplier).roundToInt().coerceAtLeast(1)
@@ -622,17 +650,18 @@ class PhysicalWeaponAbilityRuntime(
                 projectile.visualVelocityY,
                 projectile.visualVelocityX
             ) * MathUtils.radiansToDegrees
-            val width = if (projectile.sourceWeapon?.hasWeaponAbilityUpgrade == true) 330f else 255f
+            // Compensate for the sheet's transparent cell padding, not the attack range.
+            val width = if (projectile.sourceWeapon?.hasWeaponAbilityUpgrade == true) 430f else 332f
             val height = width * AIR_SLASH_TEXTURE_ASPECT
+            val frame = airSlashFrames[(progress * airSlashFrames.size).toInt()
+                .coerceIn(0, airSlashFrames.lastIndex)]
             batch.setColor(1f, 1f, 1f, alpha)
             batch.draw(
-                airSlashTexture,
+                frame,
                 projectile.visualCenterX - width / 2f,
                 projectile.visualCenterY - height / 2f,
                 width / 2f, height / 2f,
-                width, height, 1f, 1f, rotation,
-                0, 0, airSlashTexture.width, airSlashTexture.height,
-                false, false
+                width, height, 1f, 1f, rotation
             )
         }
 
@@ -713,7 +742,7 @@ class PhysicalWeaponAbilityRuntime(
     companion object {
         private const val AIR_SLASH_VISUAL_ID = "AIR_SLASH"
         private const val AIR_SLASH_TEXTURE =
-            "weapons_animations/weapon_skills/air_slash/air_slash.png"
+            "weapons_animations/weapon_skills/air_slash/air_slash_sheet_v3.png"
         private const val AIR_SLASH_TEXTURE_ASPECT = 1f
         private const val DEFENSIVE_BURST_TEXTURE =
             "weapons_animations/weapon_skills/defensive_line_burst/defensive_line_burst.png"

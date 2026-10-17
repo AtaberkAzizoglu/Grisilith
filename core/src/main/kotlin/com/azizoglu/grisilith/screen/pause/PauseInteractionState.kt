@@ -1,8 +1,12 @@
 package com.azizoglu.grisilith.screen.pause
 
 import com.badlogic.gdx.math.Vector2
+import com.azizoglu.grisilith.statistics.StatType
 
 class PauseInteractionState {
+    var draggedWeaponSlotIndex: Int? = null
+    var weaponDropTargetIndex: Int? = null
+    var mergeConfirmationText: String = ""
 
     val pointerPosition =
         Vector2()
@@ -25,6 +29,18 @@ class PauseInteractionState {
 
     var gearDetailType:
         PauseGearDetailType? = null
+        private set
+
+    var hoveredWeaponSlotIndex: Int? = null
+        private set
+
+    var hoveredItemIndex: Int? = null
+        private set
+
+    var hoveredGearDetailType: PauseGearDetailType? = null
+        private set
+
+    var hoveredStatType: StatType? = null
         private set
 
     var confirmationType:
@@ -66,11 +82,25 @@ class PauseInteractionState {
             buttonType
     }
 
+    fun setHoverDetails(
+        weaponSlotIndex: Int?,
+        itemIndex: Int?,
+        gearType: PauseGearDetailType?,
+        statType: StatType?
+    ) {
+        hoveredWeaponSlotIndex = weaponSlotIndex
+        hoveredItemIndex = itemIndex
+        hoveredGearDetailType = gearType
+        hoveredStatType = statType
+    }
+
     fun openWeaponDetail(
         slotIndex:
         Int
     ) {
         closeAllModals()
+
+        setHoverDetails(null, null, null, null)
 
         detailedWeaponSlotIndex =
             slotIndex
@@ -145,6 +175,8 @@ class PauseInteractionState {
     }
 
     fun reset() {
+        draggedWeaponSlotIndex = null
+        weaponDropTargetIndex = null
         pointerPosition.set(
             0f,
             0f
@@ -157,6 +189,8 @@ class PauseInteractionState {
             null
 
         closeAllModals()
+
+        setHoverDetails(null, null, null, null)
 
         itemScrollOffset =
             0
@@ -171,14 +205,19 @@ enum class PauseButtonType {
 
     SETTINGS,
 
+    MAIN_MENU,
+
     QUIT_GAME
 }
 
 enum class PauseConfirmationType {
+    MERGE_WEAPONS,
 
     RESTART_RUN,
 
-    QUIT_TO_MAIN_MENU
+    QUIT_TO_MAIN_MENU,
+
+    EXIT_GAME
 }
 
 enum class PauseGearDetailType {

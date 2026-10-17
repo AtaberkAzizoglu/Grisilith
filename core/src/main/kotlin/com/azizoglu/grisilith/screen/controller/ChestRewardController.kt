@@ -6,11 +6,10 @@ import com.azizoglu.grisilith.chest.ChestOpeningState
 import com.azizoglu.grisilith.chest.ChestRewardQueue
 import com.azizoglu.grisilith.chest.ChestRewardRoll
 import com.azizoglu.grisilith.chest.ChestRewardRoller
-import com.azizoglu.grisilith.chest.ChestRewardType
 import com.azizoglu.grisilith.config.GameDifficulty
 import com.azizoglu.grisilith.item.definition.ItemDefinition
-import com.azizoglu.grisilith.screen.render.ChestCharacterStatRow
 import com.azizoglu.grisilith.screen.render.ChestRewardOverlayRenderer
+import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
@@ -43,11 +42,7 @@ class ChestRewardController(
     shapeRenderer: ShapeRenderer,
     batch: SpriteBatch,
     font: BitmapFont,
-    characterNameProvider:
-        () -> String,
-
-    characterStatsProvider:
-        () -> List<ChestCharacterStatRow>,
+    private val playerStats: PlayerStats,
 
     private val onApplyReward:
         (ChestRewardRoll) -> Unit,
@@ -97,14 +92,9 @@ class ChestRewardController(
             batch =
                 batch,
 
-            font =
-                font,
-
-            characterNameProvider =
-                characterNameProvider,
-
-            characterStatsProvider =
-                characterStatsProvider
+            font = font,
+            playerStatsProvider = { playerStats },
+            pointerPositionProvider = { pointerPosition }
         )
 
     private val viewport =
@@ -116,7 +106,13 @@ class ChestRewardController(
     private var revealElapsedSeconds =
         0f
 
-    private var isItemDetailOpen =
+    private var batchRewards =
+        emptyList<ChestRewardRoll>()
+
+    private val discardedBatchRewardIndices =
+        mutableSetOf<Int>()
+
+    private var continueOpeningAll =
         false
 
     var isOpen:
@@ -189,8 +185,11 @@ class ChestRewardController(
         revealElapsedSeconds =
             0f
 
-        isItemDetailOpen =
-            false
+        batchRewards =
+            emptyList()
+
+        discardedBatchRewardIndices.clear()
+        continueOpeningAll = false
 
         isOpen =
             true
@@ -199,6 +198,10 @@ class ChestRewardController(
     fun update(
         delta: Float
     ) {
+
+        if (isOpen) {
+            updatePointerPosition()
+        }
 
         overlayRenderer
             .update(
@@ -236,10 +239,24 @@ class ChestRewardController(
             return
         }
 
-        if (
-            isItemDetailOpen
-        ) {
-            handleItemDetailInput()
+        if (batchRewards.isNotEmpty()) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) ||
+                Gdx.input.isKeyJustPressed(Input.Keys.SPACE) ||
+                Gdx.input.isKeyJustPressed(Input.Keys.T)
+            ) {
+                takeBatchRewards()
+                return
+            }
+            if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+                updatePointerPosition()
+                val layout = overlayRenderer.currentLayout(batchRewards.size)
+                val discardIndex = layout.rewardDiscardButtonBounds.indexOfFirst { it.contains(pointerPosition) }
+                if (discardIndex >= 0) {
+                    discardBatchReward(discardIndex)
+                } else if (layout.takeButtonBounds.contains(pointerPosition)) {
+                    takeBatchRewards()
+                }
+            }
             return
         }
 
@@ -297,7 +314,21 @@ class ChestRewardController(
         ) {
             ChestOpeningState.LOCKED,
             ChestOpeningState.UNLOCKED -> {
-                if (
+                if (openingSession.state == ChestOpeningState.LOCKED &&
+                    layout.openFiveButtonBounds.contains(pointerPosition) &&
+                    remainingChestCount() >= 5
+                ) {
+                    openBatch(5, false)
+                } else if (openingSession.state == ChestOpeningState.LOCKED &&
+                    layout.openTenButtonBounds.contains(pointerPosition) &&
+                    remainingChestCount() >= 10
+                ) {
+                    openBatch(10, false)
+                } else if (openingSession.state == ChestOpeningState.LOCKED &&
+                    layout.openAllButtonBounds.contains(pointerPosition)
+                ) {
+                    openBatch(remainingChestCount().coerceAtMost(10), true)
+                } else if (
                     layout.chestBounds.contains(
                         pointerPosition
                     )
@@ -308,25 +339,13 @@ class ChestRewardController(
 
             ChestOpeningState.REWARD_SHOWN -> {
                 when {
-                    currentReward
-                        ?.rewardType ==
-                        ChestRewardType.ITEM &&
-                        layout.rewardVisualBounds.contains(
-                            pointerPosition
-                        ) -> {
-                        isItemDetailOpen =
-                            true
-                    }
-
                     layout.takeButtonBounds.contains(
                         pointerPosition
                     ) -> {
                         takeCurrentReward()
                     }
 
-                    layout.discardButtonBounds.contains(
-                        pointerPosition
-                    ) -> {
+                    layout.rewardDiscardButtonBounds.firstOrNull()?.contains(pointerPosition) == true -> {
                         discardCurrentReward()
                     }
                 }
@@ -335,44 +354,6 @@ class ChestRewardController(
             ChestOpeningState.REVEALING,
             ChestOpeningState.COMPLETED -> {
             }
-        }
-    }
-
-    private fun handleItemDetailInput() {
-
-        if (
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.ESCAPE
-            )
-        ) {
-            isItemDetailOpen =
-                false
-
-            return
-        }
-
-        if (
-            !Gdx.input.isButtonJustPressed(
-                Input.Buttons.LEFT
-            )
-        ) {
-            return
-        }
-
-        updatePointerPosition()
-
-        val bounds =
-            overlayRenderer
-                .currentLayout()
-                .itemDetailBounds
-
-        if (
-            !bounds.contains(
-                pointerPosition
-            )
-        ) {
-            isItemDetailOpen =
-                false
         }
     }
 
@@ -414,29 +395,71 @@ class ChestRewardController(
 
     private fun unlockCurrentChest() {
 
-        val reward =
-            ChestRewardRoller
-                .rollReward(
-                    currentStage =
-                        currentStageProvider(),
-
-                    luckScore =
-                        luckScoreProvider(),
-
-                    preferredStatTypes =
-                        preferredStatTypesProvider(),
-
-                    availableStatTypes =
-                        availableStatTypesProvider(),
-
-                    availableItemDefinitions =
-                        availableItemDefinitionsProvider()
-                )
+        val reward = rollReward()
 
         openingSession
             .unlockCurrentChest(
                 reward
             )
+    }
+
+    private fun rollReward(): ChestRewardRoll =
+        ChestRewardRoller.rollReward(
+            currentStage = currentStageProvider(),
+            luckScore = luckScoreProvider(),
+            preferredStatTypes = preferredStatTypesProvider(),
+            availableStatTypes = availableStatTypesProvider(),
+            availableItemDefinitions = availableItemDefinitionsProvider()
+        )
+
+    private fun remainingChestCount(): Int =
+        (openingSession.totalChestCount - openingSession.openedChestCount).coerceAtLeast(0)
+
+    private fun openBatch(count: Int, continueAll: Boolean) {
+        val safeCount = count.coerceIn(1, remainingChestCount())
+        val rolled = mutableListOf<ChestRewardRoll>()
+        repeat(safeCount) {
+            var candidate = rollReward()
+            var attempts = 0
+            while (
+                candidate.itemDefinition != null &&
+                rolled.any { it.itemDefinition?.id == candidate.itemDefinition?.id } &&
+                attempts < 12
+            ) {
+                candidate = rollReward()
+                attempts++
+            }
+            rolled += candidate
+        }
+        batchRewards = rolled
+        discardedBatchRewardIndices.clear()
+        continueOpeningAll = continueAll
+    }
+
+    private fun discardBatchReward(index: Int) {
+        if (index !in batchRewards.indices || index in discardedBatchRewardIndices) return
+        if (!openingSession.consumeBatchDiscard()) return
+        discardedBatchRewardIndices += index
+        onRunDiscardUsed()
+    }
+
+    private fun takeBatchRewards() {
+        val rewards = batchRewards
+        if (rewards.isEmpty()) return
+        rewards.forEachIndexed { index, reward ->
+            if (index !in discardedBatchRewardIndices) onApplyReward(reward)
+            onChestCompleted()
+        }
+        openingSession.completeBatch(rewards.size)
+        batchRewards = emptyList()
+        discardedBatchRewardIndices.clear()
+        if (openingSession.state == ChestOpeningState.COMPLETED) {
+            finish()
+        } else if (continueOpeningAll) {
+            openBatch(remainingChestCount().coerceAtMost(10), true)
+        } else {
+            continueOpeningAll = false
+        }
     }
 
     private fun takeCurrentReward() {
@@ -458,9 +481,6 @@ class ChestRewardController(
 
         onChestCompleted()
 
-        isItemDetailOpen =
-            false
-
         finishOrPrepareNextChest()
     }
 
@@ -474,9 +494,6 @@ class ChestRewardController(
         }
 
         onRunDiscardUsed()
-
-        isItemDetailOpen =
-            false
 
         finishOrPrepareNextChest()
     }
@@ -499,8 +516,11 @@ class ChestRewardController(
         isOpen =
             false
 
-        isItemDetailOpen =
-            false
+        batchRewards =
+            emptyList()
+
+        discardedBatchRewardIndices.clear()
+        continueOpeningAll = false
 
         openingSession.reset()
 
@@ -524,10 +544,13 @@ class ChestRewardController(
         overlayRenderer
             .renderShapes(
                 state =
-                    openingSession.state,
+                    if (batchRewards.isNotEmpty()) ChestOpeningState.REWARD_SHOWN else openingSession.state,
 
                 reward =
                     openingSession.currentReward,
+
+                rewards =
+                    batchRewards,
 
                 revealProgress =
                     revealProgress(),
@@ -535,8 +558,14 @@ class ChestRewardController(
                 discardEnabled =
                     openingSession.canDiscard,
 
-                itemDetailOpen =
-                    isItemDetailOpen
+                discardedRewardIndices =
+                    discardedBatchRewardIndices,
+
+                remainingDiscardCount =
+                    openingSession.remainingDiscardCount,
+
+                remainingChestCount =
+                    remainingChestCount()
             )
     }
 
@@ -549,13 +578,20 @@ class ChestRewardController(
         overlayRenderer
             .renderTexts(
                 state =
-                    openingSession.state,
+                    if (batchRewards.isNotEmpty()) ChestOpeningState.REWARD_SHOWN else openingSession.state,
 
                 reward =
                     openingSession.currentReward,
 
-                currentChestNumber =
-                    openingSession.currentChestNumber,
+                rewards =
+                    batchRewards,
+
+                openedChestCount =
+                    (
+                        openingSession.openedChestCount +
+                            batchRewards.size +
+                            if (openingSession.currentReward != null) 1 else 0
+                    ).coerceAtMost(openingSession.totalChestCount),
 
                 totalChestCount =
                     openingSession.totalChestCount,
@@ -563,8 +599,11 @@ class ChestRewardController(
                 remainingDiscardCount =
                     openingSession.remainingDiscardCount,
 
-                itemDetailOpen =
-                    isItemDetailOpen
+                discardedRewardIndices =
+                    discardedBatchRewardIndices,
+
+                remainingChestCount =
+                    remainingChestCount()
             )
     }
 

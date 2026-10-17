@@ -117,7 +117,9 @@ class Projectile(
     private val targetDamageMultiplierProvider:
     ((Enemy) -> Float)? = null,
 
-    val customVisualId: String? = null
+    val customVisualId: String? = null,
+    private val ignoredEnemies: Set<Enemy> = emptySet(),
+    private val onImpact: ((Projectile, Enemy) -> Unit)? = null
 ) {
     private val ignoresObstaclesFromItem =
         ActiveItemEffects.rollGhostProjectile(sourceWeapon)
@@ -472,6 +474,12 @@ class Projectile(
         travelledDistance = 0f
     }
 
+    fun bendByVortex(centerX: Float, centerY: Float, radius: Float, turnDegrees: Float, delta: Float) {
+        if (!isActive || activationDelayRemaining > 0f) return
+        ProjectileTrajectoryInfluence.bendToward(velocity, visualCenterX, visualCenterY,
+            centerX, centerY, radius, turnDegrees, delta)
+    }
+
     fun bendToward(
         targetCenterX: Float,
         targetCenterY: Float,
@@ -601,7 +609,7 @@ class Projectile(
         for (enemy in enemies) {
             if (
                 enemy.isDead ||
-                enemy in hitEnemies ||
+                enemy in hitEnemies || enemy in ignoredEnemies ||
                 !collisionBounds.overlaps(
                     enemy.projectileHitBounds
                 )
@@ -716,6 +724,7 @@ class Projectile(
                     damageContext =
                         EnemyDamageContext(
                             damageType = damageType,
+                            projectileAttack = true,
 
                             sourceWeaponRuntimeId =
                                 sourceWeapon?.runtimeId,
@@ -839,6 +848,7 @@ class Projectile(
             }
 
             successfulHitCount++
+            if (isFirstTarget) onImpact?.invoke(this, enemy)
 
             if (!isHeavyBolt) {
                 remainingTargets--
@@ -995,7 +1005,9 @@ class Projectile(
             target.takeDamage(
                 damage.coerceAtLeast(
                     1
-                )
+                ),
+                damageType,
+                attackerPiercingIgnoreRatio
             )
 
         if (
@@ -1042,7 +1054,7 @@ class Projectile(
             }
         } ?: return
 
-        val appliedDamage = target.takeDamage(damage.coerceAtLeast(1), damageType)
+        val appliedDamage = target.takeDamage(damage.coerceAtLeast(1), damageType, attackerPiercingIgnoreRatio)
         conditionApplication?.let(target::applyCondition)
         if (appliedDamage > 0) onDamageDealt(appliedDamage, sourceWeaponName)
         deactivate()
@@ -1277,7 +1289,8 @@ class Projectile(
             return
         }
 
-        if (!renderBody) {
+        // Sling stones are drawn by ExtendedPhysicalWeaponRuntime, not this fallback.
+        if (!renderBody || customVisualId == "SLING_STONE") {
             return
         }
 

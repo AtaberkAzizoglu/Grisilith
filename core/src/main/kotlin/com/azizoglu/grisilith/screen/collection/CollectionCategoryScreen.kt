@@ -10,16 +10,21 @@ import com.azizoglu.grisilith.collection.filter.CollectionFilterState
 import com.azizoglu.grisilith.content.ContentCategory
 import com.azizoglu.grisilith.screen.components.MenuButton
 import com.azizoglu.grisilith.screen.components.MenuPointer
+import com.azizoglu.grisilith.screen.render.AdaptiveTooltipRenderer
 import com.azizoglu.grisilith.screen.render.CollectionCategoryRenderer
+import com.azizoglu.grisilith.ui.input.VerticalScrollbarDragController
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
+import com.azizoglu.grisilith.ui.typography.UiFontFactory
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.InputAdapter
+import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.FitViewport
 import kotlin.math.ceil
 
@@ -29,1049 +34,315 @@ class CollectionCategoryScreen(
 ) : ScreenAdapter() {
 
     companion object {
-
-        private const val VIEWPORT_WIDTH =
-            1280f
-
-        private const val VIEWPORT_HEIGHT =
-            720f
-
-        private const val COLUMN_COUNT =
-            5
-
-        private const val ROW_COUNT =
-            3
-
-        private const val ENTRIES_PER_PAGE =
-            COLUMN_COUNT * ROW_COUNT
-
-        private const val CARD_WIDTH =
-            160f
-
-        private const val CARD_HEIGHT =
-            150f
-
-        private const val CARD_HORIZONTAL_SPACING =
-            24f
-
-        private const val CARD_VERTICAL_SPACING =
-            20f
-
-        private const val GRID_START_X =
-            192f
-
-        /*
-         * İlk satırdaki kartların alt Y koordinatı.
-         */
-        private const val GRID_START_Y =
-            430f
-
-        private const val DETAIL_PANEL_X =
-            180f
-
-        private const val DETAIL_PANEL_Y =
-            115f
-
-        private const val DETAIL_PANEL_WIDTH =
-            920f
-
-        private const val DETAIL_PANEL_HEIGHT =
-            455f
-
-        private const val FILTER_HEADER_X =
-            955f
-
-        private const val FILTER_HEADER_Y =
-            585f
-
-        private const val FILTER_HEADER_WIDTH =
-            245f
-
-        private const val FILTER_HEADER_HEIGHT =
-            44f
-
-        private const val FILTER_OPTION_HEIGHT =
-            38f
+        private const val VIEWPORT_WIDTH = 1280f
+        private const val VIEWPORT_HEIGHT = 720f
+        private const val CARD_HEIGHT = 180f
+        private const val CARD_GAP_X = 14f
+        private const val CARD_GAP_Y = 16f
+        private const val WHEEL_SCROLL = 88f
+        private val GRID_VIEWPORT = Rectangle(48f, 105f, 654f, 414f)
+        private val DETAIL_BOUNDS = Rectangle(748f, 45f, 476f, 498f)
+        private val SCROLLBAR_BOUNDS = Rectangle(712f, 105f, 22f, 414f)
+        private val SEARCH_BOUNDS = Rectangle(48f, 559f, 300f, 64f)
+        private val STATE_BOUNDS = Rectangle(360f, 559f, 190f, 64f)
+        private val SORT_BOUNDS = Rectangle(562f, 559f, 176f, 64f)
+        private val FILTER_BOUNDS = Rectangle(750f, 559f, 474f, 64f)
+        private const val FILTER_OPTION_HEIGHT = 54f
     }
 
-    private val camera =
-        OrthographicCamera()
+    private enum class VisibilityFilter(val label: String) {
+        ALL("ALL"), UNLOCKED("UNLOCKED"), LOCKED("LOCKED"), UNKNOWN("UNKNOWN")
+    }
 
-    private val viewport =
-        FitViewport(
-            VIEWPORT_WIDTH,
-            VIEWPORT_HEIGHT,
-            camera
-        )
+    private val camera = OrthographicCamera()
+    private val viewport = FitViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT, camera)
+    private val batch = SpriteBatch()
+    private val font = UiFontFactory.createBody()
+    private val pointer = MenuPointer(viewport)
+    private val renderer = CollectionCategoryRenderer()
+    private val scrollbarDrag = VerticalScrollbarDragController()
+    private val filterOptions: List<CollectionFilterOption> = CollectionFilterRegistry.optionsFor(category)
+    private val filterState = CollectionFilterState(filterOptions)
+    private var entries: List<CollectionEntry> = emptyList()
+    private var selectedContentId: String? = null
+    private var hoveredContentId: String? = null
+    private var pressedContentId: String? = null
+    private var scrollOffset = 0f
+    private var searchText = ""
+    private var searchFocused = false
+    private var visibilityFilter = VisibilityFilter.ALL
+    private var ascending = true
+    private var previousInputProcessor: InputProcessor? = null
 
-    private val batch =
-        SpriteBatch()
+    private val backButton = MenuButton("BACK", 48f, 30f, 180f, 58f) {
+        game.showCollection()
+    }
 
-    private val shapeRenderer =
-        ShapeRenderer()
-
-    private val font =
-        BitmapFont()
-
-    private val pointer =
-        MenuPointer(
-            viewport
-        )
-
-    private val renderer =
-        CollectionCategoryRenderer()
-
-    private val filterOptions:
-        List<CollectionFilterOption> =
-        CollectionFilterRegistry.optionsFor(
-            category
-        )
-
-    private val filterState =
-        CollectionFilterState(
-            filterOptions
-        )
-
-    private val filterHeaderBounds =
-        Rectangle(
-            FILTER_HEADER_X,
-            FILTER_HEADER_Y,
-            FILTER_HEADER_WIDTH,
-            FILTER_HEADER_HEIGHT
-        )
-
-    /*
-     * Registry'den gelen, filtre uygulanmamış ana liste.
-     */
-    private var entries:
-        List<CollectionEntry> =
-        emptyList()
-
-    /*
-     * Filtre sonrası indeks tutmak yerine Content ID tutulur.
-     * Böylece filtre değişince yanlış kartın seçilmesi önlenir.
-     */
-    private var selectedContentId:
-        String? =
-        null
-
-    private var currentPage =
-        0
-
-    private var cardBounds:
-        List<Rectangle> =
-        emptyList()
-
-    private val detailPanelBounds =
-        Rectangle(
-            DETAIL_PANEL_X,
-            DETAIL_PANEL_Y,
-            DETAIL_PANEL_WIDTH,
-            DETAIL_PANEL_HEIGHT
-        )
-
-    private val backButton =
-        MenuButton(
-            text =
-                "BACK",
-
-            x =
-                40f,
-
-            y =
-                35f,
-
-            width =
-                180f,
-
-            height =
-                60f
-        ) {
-            game.showCollection()
+    private val inputProcessor: InputProcessor = object : InputAdapter() {
+        override fun scrolled(amountX: Float, amountY: Float): Boolean {
+            if (!GRID_VIEWPORT.contains(pointer.position)) return false
+            scrollBy(amountY * WHEEL_SCROLL)
+            return true
         }
 
-    private val previousPageButton =
-        MenuButton(
-            text =
-                "<",
-
-            x =
-                470f,
-
-            y =
-                35f,
-
-            width =
-                90f,
-
-            height =
-                60f
-        ) {
-            previousPage()
+        override fun keyTyped(character: Char): Boolean {
+            if (!searchFocused) return false
+            when {
+                character == '\b' -> searchText = searchText.dropLast(1)
+                character == '\r' || character == '\n' -> searchFocused = false
+                !character.isISOControl() && searchText.length < 32 -> searchText += character
+            }
+            onViewChanged()
+            return true
         }
-
-    private val nextPageButton =
-        MenuButton(
-            text =
-                ">",
-
-            x =
-                720f,
-
-            y =
-                35f,
-
-            width =
-                90f,
-
-            height =
-                60f
-        ) {
-            nextPage()
-        }
+    }
 
     override fun show() {
-
         viewport.apply()
-
-        camera.position.set(
-            VIEWPORT_WIDTH / 2f,
-            VIEWPORT_HEIGHT / 2f,
-            0f
-        )
-
+        camera.position.set(VIEWPORT_WIDTH / 2f, VIEWPORT_HEIGHT / 2f, 0f)
         camera.update()
-
         pointer.reset()
-
-        /*
-         * Kategori ekranı her açıldığında filtreler sıfırlanır.
-         */
+        scrollbarDrag.reset()
         filterState.reset()
-
-        selectedContentId =
-            null
-
-        currentPage =
-            0
-
-        refreshEntries()
+        entries = CollectionProvider.entries(category)
+        selectedContentId = filteredEntries().firstOrNull()?.definition?.id?.value
+        hoveredContentId = null
+        scrollOffset = 0f
+        searchText = ""
+        searchFocused = false
+        visibilityFilter = VisibilityFilter.ALL
+        ascending = true
+        previousInputProcessor = Gdx.input.inputProcessor
+        Gdx.input.inputProcessor = inputProcessor
     }
 
-    override fun render(
-        delta: Float
-    ) {
-
+    override fun render(delta: Float) {
         pointer.update()
-
-        if (
-            handleKeyboardInput()
-        ) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            if (filterState.isDropdownOpen) filterState.closeDropdown() else game.showCollection()
             return
         }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) scrollBy(320f * delta)
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) scrollBy(-320f * delta)
 
-        /*
-         * Input önceliği:
-         *
-         * 1. Detay paneli
-         * 2. Filtre
-         * 3. Geri ve sayfa butonları
-         * 4. Collection kartları
-         */
-        val detailConsumedInput =
-            updateDetailModalInput()
+        if (backButton.update(pointer.position, pointer.justPressed, pointer.justReleased)) return
+        val filterConsumed = updateToolbar()
+        val scrollbarConsumed = updateScrollbar()
+        if (!filterConsumed && !scrollbarConsumed) updateCards()
+        updateHover()
 
-        val filterConsumedInput =
-            if (
-                detailConsumedInput
-            ) {
-                false
-            } else {
-                updateFilterInput()
-            }
-
-        if (
-            !detailConsumedInput &&
-            !filterConsumedInput
-        ) {
-
-            if (
-                updateBackButton()
-            ) {
-                return
-            }
-
-            updatePageButtons()
-            updateCards()
-        }
-
-        Gdx.gl.glClearColor(
-            0.035f,
-            0.025f,
-            0.055f,
-            1f
-        )
-
-        Gdx.gl.glClear(
-            GL20.GL_COLOR_BUFFER_BIT
-        )
-
-        shapeRenderer.projectionMatrix =
-            camera.combined
-
-        batch.projectionMatrix =
-            camera.combined
-
-        val visibleEntries =
-            visibleEntries()
-
-        val selectedEntry =
-            selectedEntry()
-
-        /*
-         * ==================================================
-         * PASS 1 — ANA ARKA PLANLAR VE ÇERÇEVELER
-         * ==================================================
-         *
-         * Kart kareleri ve detay paneli burada çizilir.
-         */
-        renderer.renderCardBackgrounds(
-            shapeRenderer =
-                shapeRenderer,
-
-            entries =
-                visibleEntries,
-
-            cardBounds =
-                cardBounds,
-
-            selectedLocalIndex =
-                selectedLocalIndex()
-        )
-
-        if (
-            selectedEntry != null
-        ) {
-            renderer.renderDetailBackground(
-                shapeRenderer =
-                    shapeRenderer,
-
-                panelBounds =
-                    detailPanelBounds,
-
-                entry =
-                    selectedEntry
-            )
-        }
-
-        /*
-         * ==================================================
-         * PASS 2 — ANA METİNLER VE BUTONLAR
-         * ==================================================
-         */
+        Gdx.gl.glClearColor(0.025f, 0.02f, 0.018f, 1f)
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
+        batch.projectionMatrix = camera.combined
         batch.begin()
-
-        renderer.renderTexts(
-            batch =
-                batch,
-
-            font =
-                font,
-
-            category =
-                category,
-
-            entries =
-                visibleEntries,
-
-            cardBounds =
-                cardBounds,
-
-            currentPage =
-                currentPage,
-
-            pageCount =
-                pageCount(),
-
-            selectedEntry =
-                selectedEntry,
-
-            detailPanelBounds =
-                detailPanelBounds,
-
-            filterOptions =
-                filterOptions,
-
-            filterHeaderBounds =
-                filterHeaderBounds,
-
-            filterOptionBounds =
-                filterOptionBounds(),
-
-            filterDropdownOpen =
-                filterState.isDropdownOpen,
-
-            selectedFilterIds =
-                filterState.selectedOptionIds
+        renderer.renderShell(batch, font, category, GRID_VIEWPORT, DETAIL_BOUNDS)
+        renderer.renderToolbar(
+            batch, font, searchText, searchFocused, visibilityFilter.label,
+            if (ascending) "A - Z" else "Z - A", filterLabel(),
+            SEARCH_BOUNDS, STATE_BOUNDS, SORT_BOUNDS, FILTER_BOUNDS,
+            filterOptions.isNotEmpty(), filterState.isDropdownOpen
         )
-
-        backButton.render(
-            batch =
-                batch,
-
-            font =
-                font,
-
-            pointerPosition =
-                pointer.position,
-
-            pointerHeld =
-                pointer.isHeld
-        )
-
-        if (
-            pageCount() > 1 &&
-            selectedEntry == null
-        ) {
-            previousPageButton.render(
-                batch =
-                    batch,
-
-                font =
-                    font,
-
-                pointerPosition =
-                    pointer.position,
-
-                pointerHeld =
-                    pointer.isHeld
-            )
-
-            nextPageButton.render(
-                batch =
-                    batch,
-
-                font =
-                    font,
-
-                pointerPosition =
-                    pointer.position,
-
-                pointerHeld =
-                    pointer.isHeld
-            )
-        }
-
         batch.end()
 
-        /*
-         * ==================================================
-         * PASS 3 — FİLTRE OVERLAY
-         * ==================================================
-         *
-         * Filtre en son çizildiği için kartların,
-         * kart yazılarının ve butonların üzerinde kalır.
-         *
-         * Detay paneli açıkken filtre çizilmez.
-         */
-        if (
-            filterOptions.isNotEmpty() &&
-            selectedEntry == null
-        ) {
-
-            renderer.renderFilterBackgrounds(
-                shapeRenderer =
-                    shapeRenderer,
-
-                headerBounds =
-                    filterHeaderBounds,
-
-                optionBounds =
-                    filterOptionBounds(),
-
-                dropdownOpen =
-                    filterState.isDropdownOpen,
-
-                selectedOptionIds =
-                    filterState.selectedOptionIds,
-
-                options =
-                    filterOptions
-            )
-
+        val scissors = Rectangle()
+        ScissorStack.calculateScissors(camera, batch.transformMatrix, GRID_VIEWPORT, scissors)
+        if (ScissorStack.pushScissors(scissors)) {
             batch.begin()
-
-            renderer.renderFilterTexts(
-                batch =
-                    batch,
-
-                font =
-                    font,
-
-                options =
-                    filterOptions,
-
-                headerBounds =
-                    filterHeaderBounds,
-
-                optionBounds =
-                    filterOptionBounds(),
-
-                dropdownOpen =
-                    filterState.isDropdownOpen,
-
-                selectedOptionIds =
-                    filterState.selectedOptionIds
+            val cards = cardRectangles()
+            renderer.renderCards(
+                batch, font, category, filteredEntries(), cards,
+                selectedContentId, hoveredContentId, pressedContentId
             )
-
             batch.end()
+            ScissorStack.popScissors()
         }
+
+        batch.begin()
+        val visibleRatio = (GRID_VIEWPORT.height / contentHeight()).coerceIn(0f, 1f)
+        val scrollRatio = if (maximumScroll() <= 0f) 0f else scrollOffset / maximumScroll()
+        UiComponentRenderer.drawChronicleScrollbar(batch, SCROLLBAR_BOUNDS, visibleRatio, scrollRatio)
+        renderer.renderDetails(batch, font, selectedEntry(), DETAIL_BOUNDS)
+        backButton.render(batch, font, pointer.position, pointer.isHeld)
+        if (filterState.isDropdownOpen && filterOptions.isNotEmpty()) {
+            renderer.renderFilterDropdown(
+                batch, font, filterOptions, filterOptionBounds(), filterState.selectedOptionIds
+            )
+        }
+        if (!filterState.isDropdownOpen) {
+            val entry=hoveredEntry()?.takeIf { !it.isUnknown }
+            val character=entry?.definition as? com.azizoglu.grisilith.character.CharacterDefinition
+            if(character!=null) com.azizoglu.grisilith.screen.render.CharacterHoverRenderer.draw(batch,font,pointer.position,character)
+            else if(entry!=null) AdaptiveTooltipRenderer.draw(batch,font,Rectangle(0f,0f,VIEWPORT_WIDTH,VIEWPORT_HEIGHT),pointer.position,
+                entry.definition.displayName,com.azizoglu.grisilith.content.ContentPresentation.hover(entry.definition),560f,.90f,.76f)
+            else renderer.renderDetailHover(batch,font,selectedEntry(),DETAIL_BOUNDS,pointer.position)
+        }
+        batch.end()
     }
 
-    /*
-     * true dönerse ekran değişmiştir ve render() bitmelidir.
-     */
-    private fun handleKeyboardInput():
-        Boolean {
-
-        if (
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.ESCAPE
-            )
-        ) {
-
-            when {
-
-                selectedContentId != null -> {
-                    selectedContentId =
-                        null
-                }
-
-                filterState.isDropdownOpen -> {
-                    filterState.closeDropdown()
-                }
-
-                else -> {
-                    game.showCollection()
-                    return true
-                }
+    private fun updateToolbar(): Boolean {
+        if (!pointer.justReleased) return filterState.isDropdownOpen
+        if (SEARCH_BOUNDS.contains(pointer.position)) {
+            searchFocused = true
+            filterState.closeDropdown()
+            return true
+        }
+        searchFocused = false
+        if (STATE_BOUNDS.contains(pointer.position)) {
+            val values = if (category == ContentCategory.ENEMY || category == ContentCategory.MAP) {
+                VisibilityFilter.entries
+            } else {
+                VisibilityFilter.entries.filter { it != VisibilityFilter.UNKNOWN }
             }
-
-            return false
+            visibilityFilter = values[(values.indexOf(visibilityFilter) + 1) % values.size]
+            onViewChanged()
+            return true
         }
-
-        /*
-         * Modal veya dropdown açıkken yön tuşları
-         * alttaki sayfalara etki etmez.
-         */
-        if (
-            selectedContentId != null ||
-            filterState.isDropdownOpen
-        ) {
-            return false
+        if (SORT_BOUNDS.contains(pointer.position)) {
+            ascending = !ascending
+            onViewChanged()
+            return true
         }
-
-        if (
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.LEFT
-            )
-        ) {
-            previousPage()
-        }
-
-        if (
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.RIGHT
-            )
-        ) {
-            nextPage()
-        }
-
-        return false
-    }
-
-    /*
-     * Detay paneli modal gibi davranır:
-     *
-     * - Panel içine tıklama hiçbir şey yapmaz.
-     * - Panel dışına tıklama paneli kapatır.
-     * - Aynı tıklama alttaki UI'a aktarılmaz.
-     */
-    private fun updateDetailModalInput():
-        Boolean {
-
-        if (
-            selectedContentId == null ||
-            !pointer.justReleased
-        ) {
-            return false
-        }
-
-        if (
-            !detailPanelBounds.contains(
-                pointer.position
-            )
-        ) {
-            selectedContentId =
-                null
-        }
-
-        return true
-    }
-
-    private fun updateFilterInput():
-        Boolean {
-
-        if (
-            filterOptions.isEmpty() ||
-            selectedEntry() != null ||
-            !pointer.justReleased
-        ) {
-            return false
-        }
-
-        /*
-         * Başlığa basınca dropdown açılır/kapanır.
-         */
-        if (
-            filterHeaderBounds.contains(
-                pointer.position
-            )
-        ) {
+        if (filterOptions.isNotEmpty() && FILTER_BOUNDS.contains(pointer.position)) {
             filterState.toggleDropdown()
             return true
         }
-
-        if (
-            !filterState.isDropdownOpen
-        ) {
-            return false
-        }
-
-        val optionIndex =
-            filterOptionBounds()
-                .indexOfFirst {
-                        bounds ->
-
-                    bounds.contains(
-                        pointer.position
-                    )
-                }
-
-        if (
-            optionIndex >= 0
-        ) {
-            val changed =
-                filterState.toggle(
-                    filterOptions[
-                        optionIndex
-                    ].id
-                )
-
-            if (changed) {
-                onFiltersChanged()
+        if (filterState.isDropdownOpen) {
+            val index = filterOptionBounds().indexOfFirst { it.contains(pointer.position) }
+            if (index >= 0) {
+                filterState.toggle(filterOptions[index].id)
+                onViewChanged()
+            } else {
+                filterState.closeDropdown()
             }
-
-            /*
-             * Seçim sonrası dropdown bilerek açık kalır.
-             */
             return true
         }
-
-        /*
-         * Dropdown dışına basılırsa kapanır.
-         * Bu tıklama alttaki karta veya butona geçmez.
-         */
-        filterState.closeDropdown()
-
-        return true
+        return false
     }
 
-    private fun updateBackButton():
-        Boolean {
-
-        return backButton.update(
-            pointerPosition =
-                pointer.position,
-
-            pointerJustPressed =
-                pointer.justPressed,
-
-            pointerJustReleased =
-                pointer.justReleased
-        )
-    }
-
-    private fun updatePageButtons() {
-
-        if (
-            pageCount() <= 1
-        ) {
-            return
-        }
-
-        previousPageButton.update(
-            pointerPosition =
-                pointer.position,
-
-            pointerJustPressed =
-                pointer.justPressed,
-
-            pointerJustReleased =
-                pointer.justReleased
-        )
-
-        nextPageButton.update(
-            pointerPosition =
-                pointer.position,
-
-            pointerJustPressed =
-                pointer.justPressed,
-
-            pointerJustReleased =
-                pointer.justReleased
-        )
+    private fun updateScrollbar(): Boolean {
+        val visibleRatio = (GRID_VIEWPORT.height / contentHeight()).coerceIn(0f, 1f)
+        val scrollRatio = if (maximumScroll() <= 0f) 0f else scrollOffset / maximumScroll()
+        return scrollbarDrag.update(
+            pointer.position, pointer.justPressed, pointer.isHeld, pointer.justReleased,
+            SCROLLBAR_BOUNDS,
+            UiComponentRenderer.bronzeScrollbarThumbBounds(SCROLLBAR_BOUNDS, visibleRatio, scrollRatio)
+        ) { ratio -> scrollOffset = maximumScroll() * ratio }
     }
 
     private fun updateCards() {
-
-        if (
-            !pointer.justReleased
-        ) {
-            return
+        if (pointer.justPressed && GRID_VIEWPORT.contains(pointer.position)) {
+            pressedContentId = entryAtPointer()?.definition?.id?.value
         }
-
-        val localIndex =
-            cardBounds.indexOfFirst {
-                    bounds ->
-
-                bounds.contains(
-                    pointer.position
-                )
+        if (pointer.justReleased) {
+            val entry = entryAtPointer()
+            if (entry != null && entry.definition.id.value == pressedContentId) {
+                selectedContentId = entry.definition.id.value
             }
-
-        if (
-            localIndex == -1
-        ) {
-            return
+            pressedContentId = null
         }
-
-        val globalIndex =
-            currentPage *
-                ENTRIES_PER_PAGE +
-                localIndex
-
-        val filteredEntries =
-            filteredEntries()
-
-        if (
-            globalIndex !in
-            filteredEntries.indices
-        ) {
-            return
-        }
-
-        val selectedEntry =
-            filteredEntries[
-                globalIndex
-            ]
-
-        /*
-         * Hiç karşılaşılmamış Map veya Enemy
-         * detay panelini açamaz.
-         */
-        if (
-            selectedEntry.isUnknown
-        ) {
-            return
-        }
-
-        selectedContentId =
-            selectedEntry
-                .definition
-                .id
-                .value
     }
 
-    private fun selectedEntry():
-        CollectionEntry? {
+    private fun updateHover() {
+        hoveredContentId = if (!filterState.isDropdownOpen && GRID_VIEWPORT.contains(pointer.position)) {
+            entryAtPointer()?.definition?.id?.value
+        } else null
+    }
 
-        val selectedId =
-            selectedContentId
-                ?: return null
-
-        return filteredEntries()
-            .firstOrNull {
-                    entry ->
-
-                entry.definition.id.value ==
-                    selectedId
+    private fun filteredEntries(): List<CollectionEntry> {
+        var result = CollectionFilterEngine.apply(entries, filterOptions, filterState.selectedOptionIds)
+        if (searchText.isNotBlank()) {
+            result = result.filter {
+                !it.isUnknown && it.definition.displayName.contains(searchText.trim(), ignoreCase = true)
             }
-    }
-
-    private fun refreshEntries() {
-
-        entries =
-            CollectionProvider.entries(
-                category
-            )
-
-        currentPage =
-            currentPage.coerceIn(
-                0,
-                lastPageIndex()
-            )
-
-        val selectedId =
-            selectedContentId
-
-        if (
-            selectedId != null &&
-            filteredEntries().none {
-                    entry ->
-
-                entry.definition.id.value ==
-                    selectedId
-            }
-        ) {
-            selectedContentId =
-                null
         }
-
-        rebuildCardBounds()
-    }
-
-    private fun filteredEntries():
-        List<CollectionEntry> {
-
-        return CollectionFilterEngine.apply(
-            entries =
-                entries,
-
-            options =
-                filterOptions,
-
-            selectedOptionIds =
-                filterState.selectedOptionIds
-        )
-    }
-
-    private fun visibleEntries():
-        List<CollectionEntry> {
-
-        val filteredEntries =
-            filteredEntries()
-
-        val startIndex =
-            currentPage *
-                ENTRIES_PER_PAGE
-
-        if (
-            startIndex >=
-            filteredEntries.size
-        ) {
-            return emptyList()
+        result = when (visibilityFilter) {
+            VisibilityFilter.ALL -> result
+            VisibilityFilter.UNLOCKED -> result.filter { it.unlocked && !it.isUnknown }
+            VisibilityFilter.LOCKED -> result.filter { !it.unlocked && !it.isUnknown }
+            VisibilityFilter.UNKNOWN -> result.filter { it.isUnknown }
         }
-
-        val endIndex =
-            minOf(
-                startIndex +
-                    ENTRIES_PER_PAGE,
-
-                filteredEntries.size
-            )
-
-        return filteredEntries.subList(
-            startIndex,
-            endIndex
-        )
+        return if (ascending) result.sortedBy { it.definition.displayName.lowercase() }
+        else result.sortedByDescending { it.definition.displayName.lowercase() }
     }
 
-    private fun rebuildCardBounds() {
+    private fun columns(): Int = 3
 
-        cardBounds =
-            visibleEntries()
-                .indices
-                .map {
-                        localIndex ->
+    private fun cardWidth(): Float =
+        (GRID_VIEWPORT.width - 12f - CARD_GAP_X * (columns() - 1)) / columns()
 
-                    val column =
-                        localIndex %
-                            COLUMN_COUNT
-
-                    val row =
-                        localIndex /
-                            COLUMN_COUNT
-
-                    val x =
-                        GRID_START_X +
-                            column *
-                            (
-                                CARD_WIDTH +
-                                    CARD_HORIZONTAL_SPACING
-                                )
-
-                    val y =
-                        GRID_START_Y -
-                            row *
-                            (
-                                CARD_HEIGHT +
-                                    CARD_VERTICAL_SPACING
-                                )
-
-                    Rectangle(
-                        x,
-                        y,
-                        CARD_WIDTH,
-                        CARD_HEIGHT
-                    )
-                }
-    }
-
-    private fun onFiltersChanged() {
-
-        currentPage =
-            0
-
-        selectedContentId =
-            null
-
-        rebuildCardBounds()
-    }
-
-    private fun filterOptionBounds():
-        List<Rectangle> {
-
-        if (
-            !filterState.isDropdownOpen
-        ) {
-            return emptyList()
-        }
-
-        return filterOptions.mapIndexed {
-                index,
-                _ ->
-
+    private fun cardRectangles(): List<Rectangle> {
+        val width = cardWidth()
+        val top = GRID_VIEWPORT.y + GRID_VIEWPORT.height - CARD_HEIGHT - 18f
+        return filteredEntries().indices.map { index ->
+            val column = index % columns()
+            val row = index / columns()
             Rectangle(
-                FILTER_HEADER_X,
-                FILTER_HEADER_Y -
-                    FILTER_OPTION_HEIGHT *
-                    (
-                        index +
-                            1
-                        ),
-                FILTER_HEADER_WIDTH,
-                FILTER_OPTION_HEIGHT
+                GRID_VIEWPORT.x + 6f + column * (width + CARD_GAP_X),
+                top - row * (CARD_HEIGHT + CARD_GAP_Y) + scrollOffset,
+                width,
+                CARD_HEIGHT
             )
         }
     }
 
-    private fun previousPage() {
+    private fun contentHeight(): Float {
+        val rows = ceil(filteredEntries().size / columns().toFloat()).toInt().coerceAtLeast(1)
+        return rows * CARD_HEIGHT + (rows - 1) * CARD_GAP_Y + 36f
+    }
 
-        if (
-            currentPage <= 0
-        ) {
-            return
+    private fun maximumScroll(): Float = (contentHeight() - GRID_VIEWPORT.height).coerceAtLeast(0f)
+
+    private fun scrollBy(amount: Float) {
+        scrollOffset = (scrollOffset + amount).coerceIn(0f, maximumScroll())
+    }
+
+    private fun entryAtPointer(): CollectionEntry? {
+        val index = cardRectangles().indexOfFirst { it.contains(pointer.position) }
+        return filteredEntries().getOrNull(index)
+    }
+
+    private fun selectedEntry(): CollectionEntry? =
+        filteredEntries().firstOrNull { it.definition.id.value == selectedContentId }
+
+    private fun hoveredEntry(): CollectionEntry? =
+        filteredEntries().firstOrNull { it.definition.id.value == hoveredContentId }
+
+    private fun onViewChanged() {
+        scrollOffset = 0f
+        val visible = filteredEntries()
+        if (visible.none { it.definition.id.value == selectedContentId }) {
+            selectedContentId = visible.firstOrNull()?.definition?.id?.value
         }
-
-        currentPage -=
-            1
-
-        selectedContentId =
-            null
-
-        rebuildCardBounds()
     }
 
-    private fun nextPage() {
-
-        if (
-            currentPage >=
-            lastPageIndex()
-        ) {
-            return
-        }
-
-        currentPage +=
-            1
-
-        selectedContentId =
-            null
-
-        rebuildCardBounds()
+    private fun filterLabel(): String = when (filterState.selectedOptionIds.size) {
+        0 -> "FILTER"
+        1 -> filterOptions.firstOrNull { it.id in filterState.selectedOptionIds }?.displayName ?: "FILTER"
+        else -> "FILTER (${filterState.selectedOptionIds.size})"
     }
 
-    private fun pageCount():
-        Int {
-
-        val filteredSize =
-            filteredEntries().size
-
-        if (
-            filteredSize == 0
-        ) {
-            return 1
-        }
-
-        return ceil(
-            filteredSize.toFloat() /
-                ENTRIES_PER_PAGE.toFloat()
-        ).toInt()
-    }
-
-    private fun lastPageIndex():
-        Int {
-
-        return (
-            pageCount() -
-                1
-            ).coerceAtLeast(
-                0
-            )
-    }
-
-    private fun selectedLocalIndex():
-        Int? {
-
-        val selectedId =
-            selectedContentId
-                ?: return null
-
-        return visibleEntries()
-            .indexOfFirst {
-                    entry ->
-
-                entry.definition.id.value ==
-                    selectedId
-            }
-            .takeIf {
-                it >= 0
-            }
-    }
-
-    override fun resize(
-        width: Int,
-        height: Int
-    ) {
-
-        if (
-            width <= 0 ||
-            height <= 0
-        ) {
-            return
-        }
-
-        viewport.update(
-            width,
-            height,
-            true
+    private fun filterOptionBounds(): List<Rectangle> = filterOptions.mapIndexed { index, _ ->
+        Rectangle(
+            FILTER_BOUNDS.x,
+            FILTER_BOUNDS.y - (index + 1) * FILTER_OPTION_HEIGHT,
+            FILTER_BOUNDS.width,
+            FILTER_OPTION_HEIGHT
         )
+    }
+
+    override fun resize(width: Int, height: Int) {
+        if (width > 0 && height > 0) viewport.update(width, height, true)
+    }
+
+    override fun hide() {
+        if (Gdx.input.inputProcessor === inputProcessor) Gdx.input.inputProcessor = previousInputProcessor
+        previousInputProcessor = null
     }
 
     override fun dispose() {
-
+        hide()
+        renderer.dispose()
         batch.dispose()
-        shapeRenderer.dispose()
         font.dispose()
     }
 }

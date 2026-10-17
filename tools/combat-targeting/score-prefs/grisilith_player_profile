@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="encountered_enemy_ids"></entry>
+<entry key="purchased_stat_points">0</entry>
+<entry key="defeated_hard_final_boss_ids"></entry>
+<entry key="encountered_map_ids">MAP_ROAD_TO_HOME</entry>
+<entry key="grisilith_coins">0</entry>
+<entry key="version">4</entry>
+<entry key="unlocked_ids"></entry>
+</properties>

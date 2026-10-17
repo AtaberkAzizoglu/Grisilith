@@ -50,6 +50,13 @@ class PersistentAreaRuntime {
         return true
     }
 
+    /** Stop following without restarting duration or damage ticks. */
+    fun freezeAtCurrentPosition(): Boolean {
+        val current = activeArea ?: return false
+        activeArea = current.copy(anchor = PersistentAreaAnchor.FIXED_WORLD_POSITION)
+        return true
+    }
+
     fun update(
         delta: Float,
 

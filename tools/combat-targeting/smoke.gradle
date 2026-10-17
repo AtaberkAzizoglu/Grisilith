@@ -1,0 +1,40 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':lwjgl3')
+    desktop.kotlin.sourceSets.main.kotlin.srcDir(gradle.rootProject.file('tools/combat-targeting/qa'))
+    desktop.tasks.register('targetingSmoke', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.TargetingSmoke'
+        if (gradle.rootProject.hasProperty('smokeOutputPrefix')) systemProperty 'qa.outputPrefix', gradle.rootProject.property('smokeOutputPrefix')
+        workingDir = gradle.rootProject.file('assets')
+        jvmArgs '--enable-native-access=ALL-UNNAMED'
+    }
+    desktop.tasks.register('descriptionExport', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.DescriptionExport'
+        if (gradle.rootProject.hasProperty('descriptionOutput')) args gradle.rootProject.property('descriptionOutput')
+        workingDir = gradle.rootProject.file('assets')
+    }
+    desktop.tasks.register('collectionCopySmoke', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.CollectionCopySmoke'
+        workingDir = gradle.rootProject.file('assets')
+        jvmArgs '--enable-native-access=ALL-UNNAMED'
+    }
+    desktop.tasks.register('summonArchiveSmoke', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.SummonArchiveSmoke'
+        workingDir = gradle.rootProject.file('assets')
+        jvmArgs '--enable-native-access=ALL-UNNAMED'
+    }
+    desktop.tasks.register('scoreSmoke', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.ScoreSmoke'
+        workingDir = gradle.rootProject.file('assets')
+        jvmArgs '--enable-native-access=ALL-UNNAMED'
+    }
+}

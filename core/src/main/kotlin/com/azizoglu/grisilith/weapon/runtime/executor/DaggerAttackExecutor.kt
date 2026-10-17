@@ -1,7 +1,6 @@
 package com.azizoglu.grisilith.weapon.runtime.executor
 
 import com.azizoglu.grisilith.content.DamageType
-import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
@@ -10,7 +9,6 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
 import com.azizoglu.grisilith.weapon.runtime.WeaponTargetSelector
 import com.badlogic.gdx.math.Vector2
 import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
-import kotlin.math.roundToInt
 
 class DaggerAttackExecutor(
     private val damageCalculator:
@@ -22,11 +20,6 @@ class DaggerAttackExecutor(
     private val playerStats:
     PlayerStats
 ) : WeaponAttackExecutor {
-
-    private data class AbilityDamageResult(
-        val damage: Int,
-        val abilityTriggered: Boolean
-    )
 
     override fun execute(
         context: WeaponAttackContext
@@ -67,210 +60,8 @@ class DaggerAttackExecutor(
 
         context.weapon.registerNormalAttack()
 
-        executeAttackAgainstTarget(
-            context = context,
-            target = target
-        )
-    }
-
-    private fun executeAttackAgainstTarget(
-        context: WeaponAttackContext,
-        target: Enemy,
-        throwAngleOffsetDegrees: Float = 0f
-    ) {
-        val definition =
-            context.weapon.definition
-
-        val levelStats =
-            context.weapon.currentLevelStats
-
-        val targetDistance =
-            Vector2.dst(
-                context.attackOriginX,
-                context.attackOriginY,
-                target.centerX,
-                target.centerY
-            )
-
-        val effectiveMeleeRange =
-            (
-                context.effectiveWeaponRange(
-                    definition.baseRange *
-                        levelStats.rangeMultiplier
-                )
-                )
-                .coerceAtLeast(0f)
-
-        if (
-            targetDistance <=
-            effectiveMeleeRange
-        ) {
-            executeMeleeAttack(
-                context = context,
-                target = target
-            )
-        } else {
-            executeThrowAttack(
-                context = context,
-                targetX = target.centerX,
-                targetY = target.centerY,
-                angleOffsetDegrees =
-                    throwAngleOffsetDegrees
-            )
-        }
-    }
-
-    private fun abilityModifiedDamage(
-        context: WeaponAttackContext,
-        baseDamage: Int,
-        isCriticalHit: Boolean
-    ): AbilityDamageResult {
-
-        if (!isCriticalHit || !context.weapon.hasBasicAttackUpgrade) {
-            return AbilityDamageResult(
-                damage =
-                    baseDamage
-                        .coerceAtLeast(
-                            1
-                        ),
-
-                abilityTriggered =
-                    false
-            )
-        }
-
-        return AbilityDamageResult(
-            damage =
-                (
-                    baseDamage *
-                        DefaultWeaponAbilities
-                            .DAGGER_BASIC_CRITICAL_DAMAGE_MULTIPLIER
-                    )
-                    .roundToInt()
-                    .coerceAtLeast(
-                        1
-                    ),
-
-            abilityTriggered =
-                true
-        )
-    }
-
-    private fun executeMeleeAttack(
-        context: WeaponAttackContext,
-        target: Enemy
-    ) {
-        if (target.isDead) {
-            return
-        }
-
-        val damageType =
-            context.weapon
-                .definition
-                .damageTypes
-                .firstOrNull { type ->
-                    type != DamageType.NONE
-                }
-                ?: DamageType.NONE
-
-        val damageResult =
-            damageCalculator
-                .calculateForHit(
-                    weapon =
-                        context.weapon,
-
-                    damageType =
-                        damageType,
-
-                    allowCritical =
-                        true,
-
-                    /*
-                     * Dagger yakın mesafede
-                     * Strength kullanır.
-                     */
-                    primaryPhysicalStatOverride =
-                        com.azizoglu.grisilith.statistics
-                            .StatType.STRENGTH
-                )
-
-        val definition =
-            context.weapon.definition
-
-        val levelStats =
-            context.weapon.currentLevelStats
-
-        val wasAliveBeforeAttack =
-            !target.isDead
-
-        val abilityDamage =
-            abilityModifiedDamage(
-                context =
-                    context,
-
-                baseDamage =
-                    damageResult.damage,
-
-                isCriticalHit =
-                    damageResult.isCriticalHit
-            )
-
-        val finalDamage =
-            context.modifiedDamageAgainst(
-                enemy = target,
-                baseDamage =
-                    abilityDamage.damage
-            )
-
-        val appliedDamage =
-            target.takeDamage(
-                finalDamage
-            )
-
-        if (appliedDamage > 0) {
-            context.onDamageDealt(
-                appliedDamage,
-                context.weapon.displayName
-            )
-
-            target.applyKnockback(
-                directionX =
-                    target.centerX -
-                        context.attackOriginX,
-
-                directionY =
-                    target.centerY -
-                        context.attackOriginY,
-
-                strength =
-                    definition.baseKnockback *
-                        levelStats.knockbackMultiplier
-            )
-        }
-
-        if (
-            wasAliveBeforeAttack &&
-            target.isDead
-        ) {
-            context.onEnemyKilled(
-                target
-            )
-        }
-
-        context.reportWeaponHit(
-            enemy = target,
-            appliedDamage =
-                appliedDamage,
-            damageType =
-                context.weapon
-                    .definition
-                    .damageTypes
-                    .firstOrNull { type ->
-                        type !=
-                            DamageType.NONE
-                    }
-                    ?: DamageType.NONE
-        )
+        // Every normal attack throws, including targets at point-blank range.
+        executeThrowAttack(context, target.centerX, target.centerY)
     }
 
     private fun executeThrowAttack(
@@ -304,9 +95,7 @@ class DaggerAttackExecutor(
                 .coerceAtLeast(1f)
 
         /*
-         * Oyuncudan hedefe olan yön.
-         * Üçüncü saldırının iki bıçağında
-         * küçük açı farkı uygulanabilir.
+         * Direction from the player to the throw target.
          */
         val throwDirection =
             Vector2(

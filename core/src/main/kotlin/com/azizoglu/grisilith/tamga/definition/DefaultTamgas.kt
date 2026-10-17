@@ -18,12 +18,7 @@ object DefaultTamgas {
                 "Charger",
 
             description =
-                "Activate to gradually increase Movement Speed while building up " +
-                    "an explosive charge. Stopping or colliding with an obstacle " +
-                    "causes an early explosion whose damage and radius scale with " +
-                    "the time spent charging. Completing the full charge produces " +
-                    "the largest explosion and grants additional damage and radius. " +
-                    "Sharp turns become harder while charging.",
+                "Build up speed, then explode around you. Charging longer makes the blast stronger and larger; stopping or hitting an obstacle ends it early. Turning is harder while charging.",
 
             slotType =
                 TamgaSlotType.WEAPON,
@@ -62,10 +57,7 @@ object DefaultTamgas {
                 "Height Insecurity",
 
             description =
-                "Deal additional damage to creatures larger than the " +
-                    "player, including Unique enemies, Mini Bosses and " +
-                    "Final Bosses. The damage bonus begins at 5% and " +
-                    "increases by another 5% for every 10 stages reached.",
+                "Deal extra damage to Unique enemies, Mini Bosses and Final Bosses. The bonus grows as you advance through stages.",
 
             slotType =
                 TamgaSlotType.GENERAL,
@@ -100,13 +92,7 @@ object DefaultTamgas {
                 "Phantom Steed",
 
             description =
-                "Activate to summon a mount for 15 seconds. While mounted, " +
-                    "Weapon Range, Max HP and Movement Speed increase, while " +
-                    "Harvest decreases. It initially grants +50 px Weapon " +
-                    "Range, +2 Max HP, +2 Movement Speed and -5 Harvest. Every " +
-                    "10 stages, Range gains another 10 px, Max HP and Movement " +
-                    "Speed gain another +1, and Harvest loses another 1 point. " +
-                    "This Tamga has a 120-second cooldown.",
+                "Ride a spectral mount for a short time. Gain weapon range, Max HP and Movement Speed at the cost of Harvest. The bonuses grow with stage progress.",
 
             slotType =
                 TamgaSlotType.ARMOR,
@@ -145,14 +131,7 @@ object DefaultTamgas {
                 "Holy Lights",
 
             description =
-                "Creates a permanent aura centered on the player. Its " +
-                    "behavior is determined by the highest value among " +
-                    "Armor Class, Wisdom and Life Steal. Armor Class creates " +
-                    "a defensive light that deals low damage and slightly " +
-                    "increases Armor Class. Wisdom creates a stronger damaging " +
-                    "aura. Life Steal creates a low-damage aura whose hits can " +
-                    "trigger Life Steal. The selected Stat gains a stage-based " +
-                    "bonus beginning at +1 and increasing every 5 stages.",
+                "A constant aura adapts to your highest Armor Class, Wisdom or Life Steal. It strengthens that stat and damages nearby enemies; the Life Steal version can also restore health.",
 
             slotType =
                 TamgaSlotType.ARMOR,
@@ -191,13 +170,7 @@ object DefaultTamgas {
                 "Arcane Aura",
 
             description =
-                "Creates a permanent damaging aura centered on the player. " +
-                    "Its damage type and appearance are determined by the " +
-                    "highest value among Shepherd, Elemental Damage and " +
-                    "Might of Nature. Shepherd produces a dark-green Nature " +
-                    "aura, Elemental Damage produces a blue Water aura, and " +
-                    "Might of Nature produces a purple Necrotic aura. Damage " +
-                    "slowly increases as stages advance.",
+                "A constant aura damages nearby enemies. Its appearance and strength follow your highest Shepherd, Elemental Damage or Might of Nature, and it grows stronger with stage progress.",
 
             slotType =
                 TamgaSlotType.ARMOR,
@@ -234,11 +207,7 @@ object DefaultTamgas {
                 "Flame Blades",
 
             description =
-                "Melee attacks made by the Weapon in the first Weapon slot " +
-                    "apply Burned to every enemy they damage. Burned enemies " +
-                    "also receive additional Fire damage whenever they are " +
-                    "damaged by any equipped Weapon. The additional damage is " +
-                    "equal to 5 plus 110% of Elemental Damage.",
+                "Your first-slot melee weapon burns enemies. Any equipped weapon deals extra damage when hitting a Burned target, scaling with Elemental Damage.",
 
             slotType =
                 TamgaSlotType.WEAPON,
@@ -280,12 +249,7 @@ object DefaultTamgas {
                 "Quick Shot",
 
             description =
-                "Whenever the ranged Weapon in the first Weapon slot " +
-                    "performs an attack, gain +1 Attack Speed. The bonus " +
-                    "stacks up to 3 times at first, increases to 4 stacks " +
-                    "at Stage 11, and reaches its maximum of 5 stacks at " +
-                    "Stage 21. All stacks are lost if the first Weapon slot " +
-                    "does not attack for 1 second.",
+                "Repeated attacks with your first-slot ranged weapon build Attack Speed. Keep firing to maintain the stacks; later stages allow more stacks.",
 
             slotType =
                 TamgaSlotType.WEAPON,
@@ -326,9 +290,7 @@ object DefaultTamgas {
                 "Panic",
 
             description =
-                "When at least 8 living enemies enter a 160 px radius, " +
-                    "release a powerful knockback pulse. The pulse deals no " +
-                    "damage and has a 22-second cooldown.",
+                "When a crowd gets too close, automatically push it away with a knockback pulse. Creates breathing room, but deals no damage.",
 
             slotType =
                 TamgaSlotType.GENERAL,

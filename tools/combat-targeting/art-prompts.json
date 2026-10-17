@@ -1,0 +1,46 @@
+{
+  "mode": "built-in imagegen",
+  "assets": [
+    {
+      "id": "koba",
+      "prompt": "Use case: stylized-concept. Asset: preview-only high-quality 2D fantasy game sprite sheet. Image 1 is identity, costume and directional pose reference. Redesign rendering to match richly shaded hand-painted enemy sprites, crisp detailed outlines, readable at small in-game size; not 3D, not blurred. Muscular gray-green half-orc, long black hair, tusks, red tribal shoulder marks, bare chest, fur/leather brown-red outfit. Improve walking cycle, clearly alternating planted and raised feet. Transparent background. Exactly 5 columns by 4 rows of evenly spaced full-body sprites: each row = idle then four coherent walking frames. Rows facing camera/down, left, right, away/up. Same body proportions and uniform sprite size, fixed feet baseline in each cell, generous transparent gutters, full weapons/cloak/feet not cropped, no touching adjacent cells. No text, labels, border or ground. Preserve motion scheme and theme. Smooth believable alternating gait.",
+      "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-3a30f9e0-7259-4142-bdb0-d0867250c4a9.png",
+      "previewOnly": true
+    },
+    {
+      "id": "linlos_dustman",
+      "prompt": "Use case: stylized-concept. Asset: preview-only high-quality 2D fantasy game sprite sheet. Image 1 is identity, costume and directional pose reference. Redesign rendering to match richly shaded hand-painted enemy sprites, crisp detailed outlines, readable at small in-game size; not 3D, not blurred. Short adult halfling druid, shaggy brown hair and beard, green leaf cloak, mushroom backpack, bare hairy feet, crooked staff with lantern. Improve gait with clearly alternating feet, natural small body bob, no gliding. Transparent background. Exactly 5 columns by 4 rows of evenly spaced full-body sprites: each row = idle then four coherent walking frames. Rows facing camera/down, left, right, away/up. Same body proportions and uniform sprite size, fixed feet baseline in each cell, generous transparent gutters, full weapons/cloak/feet not cropped, no touching adjacent cells. No text, labels, border or ground. Preserve motion scheme and theme. Smooth believable alternating gait.",
+      "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-b7659217-83b2-46aa-9953-631924ca4637.png",
+      "previewOnly": true
+    },
+    {
+      "id": "sir_imbert",
+      "prompt": "Use case: stylized-concept. Asset: preview-only high-quality 2D fantasy game sprite sheet. Image 1 is identity, costume and directional pose reference. Redesign rendering to match richly shaded hand-painted enemy sprites, crisp detailed outlines, readable at small in-game size; not 3D, not blurred. White-haired mustached male knight, dark bronze armor and gold cape. Preserve identity and outfit. Transparent background. Exactly 5 columns by 4 rows of evenly spaced full-body sprites: each row = idle then four coherent walking frames. Rows facing camera/down, left, right, away/up. Same body proportions and uniform sprite size, fixed feet baseline in each cell, generous transparent gutters, full weapons/cloak/feet not cropped, no touching adjacent cells. No text, labels, border or ground. Preserve motion scheme and theme. Smooth believable alternating gait.",
+      "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-39163e12-186d-4ed6-ae8b-4ac5bdbda13b.png",
+      "previewOnly": true
+    },
+    {
+      "id": "ywaleth_yoster",
+      "prompt": "Use case: stylized-concept. Asset: preview-only high-quality 2D fantasy game sprite sheet. Image 1 is identity, costume and directional pose reference. Redesign rendering to match richly shaded hand-painted enemy sprites, crisp detailed outlines, readable at small in-game size; not 3D, not blurred. Black-haired female ranger, ponytail, green scarf, dark brown leather armor, quiver. Preserve identity and outfit. Transparent background. Exactly 5 columns by 4 rows of evenly spaced full-body sprites: each row = idle then four coherent walking frames. Rows facing camera/down, left, right, away/up. Same body proportions and uniform sprite size, fixed feet baseline in each cell, generous transparent gutters, full weapons/cloak/feet not cropped, no touching adjacent cells. No text, labels, border or ground. Preserve motion scheme and theme. Smooth believable alternating gait.",
+      "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-2587af57-389f-4ccc-a334-421de2cfa2a9.png",
+      "previewOnly": true
+    },
+    {
+      "id": "lavena_vol",
+      "prompt": "Use case: stylized-concept. Asset: preview-only high-quality 2D fantasy game sprite sheet. Image 1 is identity, costume and directional pose reference. Redesign rendering to match richly shaded hand-painted enemy sprites, crisp detailed outlines, readable at small in-game size; not 3D, not blurred. Pale silver-haired female elf mage, pointed ears, silver crown, black-purple ornate robes. Preserve identity and outfit. Transparent background. Exactly 5 columns by 4 rows of evenly spaced full-body sprites: each row = idle then four coherent walking frames. Rows facing camera/down, left, right, away/up. Same body proportions and uniform sprite size, fixed feet baseline in each cell, generous transparent gutters, full weapons/cloak/feet not cropped, no touching adjacent cells. No text, labels, border or ground. Preserve motion scheme and theme. Smooth believable alternating gait.",
+      "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-efc52e9b-fc91-40e2-9540-ccab6e509cc7.png",
+      "previewOnly": true
+    },
+    {
+      "id": "lance",
+      "prompt": "Use case: stylized-concept. Preview-only game ability sprite sheet: 16 frames, 4 by 4 equal grid on genuine transparency. Image 1 reference: Lance spin ability violet-purple magical circular sweep with luminous ivory-gold blade edge. Redesign completely at high quality matching hand-painted fantasy weapon VFX. Chronological clockwise rotating lance slash forms an elliptical ground ring, builds from thin crescent to full bright energetic ring, then dissipates into small violet sparks. Detailed crisp violet flowing ribbons, sharp ivory-gold edge, distinct evolving frames not duplicates. Keep same purple/ivory-gold theme. Each cell contains whole effect with transparent margin, same center/perspective, no lance item icon, characters, text, backgrounds, borders or baked checkerboard.",
+      "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-b74f3ba6-b353-4efe-9c8e-858bb14ab47a.png",
+      "previewOnly": true
+    },
+    {
+      "id": "tamgas",
+      "prompt": "Use case: stylized-concept. Asset: one transparent 4 columns by 2 rows atlas of eight small fantasy status emblems, no text/borders. Match image1 carved dark silver tamga rune style but clear colored accent and clean strong silhouette, readable at 15 pixel render size. Equal square cells generous transparent gutters. Reading order: Charger upward silver triple chevrons; Height Insecurity silver rising spear above a small giant silhouette; Phantom Steed pale silver spectral horse head; Holy Lights ivory-gold radiant sun; Arcane Aura blue-violet circular eye rune; Flame Blades red-orange crossed burning swords; Quick Shot silver-gold arrow with speed trails; Panic purple-grey burst and startled skull. Crisp hand-painted metal/stone motifs, simple internal detail, full opacity emblems, genuine transparent background, no checkerboard, no ground, no labels. Consistent centered scale.",
+      "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-08415e82-836c-481b-ba9a-360e57a85508.png"
+    }
+  ]
+}

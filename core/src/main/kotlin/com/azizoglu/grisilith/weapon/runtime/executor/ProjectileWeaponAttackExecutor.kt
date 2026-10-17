@@ -79,12 +79,8 @@ class ProjectileWeaponAttackExecutor(
         private const val STEAM_WAND_FAN_ANGLE_STEP =
             8f
 
-        /*
-         * 5 × 0.24 = normal saldırının
-         * yaklaşık %120 toplam hasarı.
-         */
-        private const val STEAM_WAND_FAN_DAMAGE_MULTIPLIER =
-            0.24f
+        private const val STEAM_WAND_FAN_CENTER_DAMAGE_MULTIPLIER = 0.70f
+        private const val STEAM_WAND_FAN_SIDE_DAMAGE_MULTIPLIER = 0.25f
 
         private const val TOTEM_OF_DARK_CLOUDS_ID =
             "WPN_TOTEM_OF_DARK_CLOUDS"
@@ -92,13 +88,7 @@ class ProjectileWeaponAttackExecutor(
         private const val ENCHANTED_CHALK_DUST_ID =
             "WPN_ENCHANTED_CHALK_DUST"
 
-        private const val CHALK_DUST_PROJECTILE_COUNT =
-            3
-
-        private const val CHALK_DUST_ANGLE_STEP =
-            10f
-
-        /* Lv.4: three projectiles, each with a 30% damage penalty. */
+        /* Lv.4: only the central shot remains; its existing damage is unchanged. */
         private const val CHALK_DUST_DAMAGE_MULTIPLIER =
             0.70f
 
@@ -327,7 +317,8 @@ class ProjectileWeaponAttackExecutor(
                 targetX = adjustedTargetX,
                 targetY = adjustedTargetY,
                 damageMultiplier =
-                    STEAM_WAND_FAN_DAMAGE_MULTIPLIER,
+                    if (indexOffset == 0) STEAM_WAND_FAN_CENTER_DAMAGE_MULTIPLIER
+                    else STEAM_WAND_FAN_SIDE_DAMAGE_MULTIPLIER,
                 forcedDamageType =
                     DamageType.WATER
             )
@@ -340,87 +331,12 @@ class ProjectileWeaponAttackExecutor(
         targetY: Float,
         effectiveRange: Float
     ) {
-        val baseDirection =
-            Vector2(
-                targetX -
-                    context.attackOriginX,
-
-                targetY -
-                    context.attackOriginY
-            )
-
-        if (baseDirection.isZero) {
-            baseDirection.set(
-                1f,
-                0f
-            )
-        }
-
-        baseDirection.nor()
-
-        val middleIndex =
-            CHALK_DUST_PROJECTILE_COUNT /
-                2
-
-        repeat(
-            CHALK_DUST_PROJECTILE_COUNT
-        ) { projectileIndex ->
-
-            /*
-             * Üç projectile için:
-             *
-             * index 0 → -10°
-             * index 1 →   0°
-             * index 2 → +10°
-             */
-            val indexOffset =
-                projectileIndex -
-                    middleIndex
-
-            val angleOffset =
-                indexOffset *
-                    CHALK_DUST_ANGLE_STEP
-
-            val projectileDirection =
-                Vector2(
-                    baseDirection
-                )
-                    .rotateDeg(
-                        angleOffset
-                    )
-
-            val adjustedTargetX =
-                context.attackOriginX +
-                    projectileDirection.x *
-                    effectiveRange
-
-            val adjustedTargetY =
-                context.attackOriginY +
-                    projectileDirection.y *
-                    effectiveRange
-
-            createProjectile(
-                context = context,
-
-                targetX =
-                    adjustedTargetX,
-
-                targetY =
-                    adjustedTargetY,
-
-                damageMultiplier =
-                    CHALK_DUST_DAMAGE_MULTIPLIER,
-
-                forcedDamageType =
-                    DamageType.AIR,
-
-                wallBounceCount =
-                    CHALK_DUST_WALL_BOUNCES,
-
-                travelRangeMultiplier =
-                    CHALK_DUST_RANGE_MULTIPLIER
-            )
-        }
+        // Keep the existing central shot's damage, two wall bounces and extended travel.
+        createProjectile(context, targetX, targetY,
+            damageMultiplier = CHALK_DUST_DAMAGE_MULTIPLIER,
+            forcedDamageType = DamageType.AIR,
+            wallBounceCount = CHALK_DUST_WALL_BOUNCES,
+            travelRangeMultiplier = CHALK_DUST_RANGE_MULTIPLIER)
     }
 
     private fun createProjectile(

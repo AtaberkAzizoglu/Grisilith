@@ -464,7 +464,9 @@ class SummonedEntity(
 
     fun takeDamage(
         amount: Int,
-        damageType: DamageType = DamageType.NONE
+        damageType: DamageType = DamageType.NONE,
+        attackerPiercingIgnoreRatio: Float = 0f,
+        defenseTimeScale: Float = 1f
     ): Int {
 
         if (
@@ -474,23 +476,10 @@ class SummonedEntity(
             return 0
         }
 
-        val defense = when (damageType) {
-            DamageType.SLASHING,
-            DamageType.PIERCING,
-            DamageType.BLUDGEONING -> stats.armorClass
-
-            DamageType.FIRE,
-            DamageType.AIR,
-            DamageType.WATER,
-            DamageType.LIGHTNING,
-            DamageType.NECROTIC,
-            DamageType.ACID -> stats.magicResistance
-
-            else -> 0
-        }
-
-        val appliedDamage =
-            health.takeDamage((amount - defense).coerceAtLeast(1))
+        val defendedDamage = com.azizoglu.grisilith.combat.DamageDefense.resolve(
+            amount, damageType, stats.baseArmor, stats.armorClass, stats.baseMagicResistance,
+            stats.magicResistance, attackerPiercingIgnoreRatio, defenseTimeScale)
+        val appliedDamage = health.takeDamage(defendedDamage)
 
         if (appliedDamage > 0) {
             pendingDamageNumberEvents +=
@@ -978,91 +967,38 @@ class SummonedEntity(
         ) -> Unit
     ) {
 
-        val playerDistanceSquared =
-            Vector2.dst2(
-                center.x,
-                center.y,
-                playerCenterX,
-                playerCenterY
-            )
-
-        if (
-            !knightPlayerTargetLocked &&
-            playerDistanceSquared <=
-            KNIGHT_PLAYER_ACQUIRE_RANGE *
-            KNIGHT_PLAYER_ACQUIRE_RANGE
-        ) {
-            knightPlayerTargetLocked =
-                true
+        fun enemyRank(enemy: Enemy) = when(enemy.type) {
+            com.azizoglu.grisilith.enemy.EnemyType.FINAL_BOSS,
+            com.azizoglu.grisilith.enemy.EnemyType.MINI_BOSS -> 0
+            com.azizoglu.grisilith.enemy.EnemyType.UNIQUE -> 1
+            com.azizoglu.grisilith.enemy.EnemyType.NORMAL -> 2
         }
-
-        if (
-            knightPlayerTargetLocked &&
-            playerDistanceSquared >=
-            KNIGHT_PLAYER_RELEASE_RANGE *
-            KNIGHT_PLAYER_RELEASE_RANGE
-        ) {
-            knightPlayerTargetLocked =
-                false
-        }
-
-        if (knightPlayerTargetLocked) {
-            if (
-                playerDistanceSquared <=
-                stats.attackRange *
-                stats.attackRange
-            ) {
-                tryAttack(
-                    cooldownSeconds =
-                        KNIGHT_ATTACK_INTERVAL_SECONDS
-                ) {
-                    onPlayerAttack(
-                        this
-                    )
-                }
-            } else {
-                moveKnightToward(
-                    targetX =
-                        playerCenterX,
-
-                    targetY =
-                        playerCenterY,
-
-                    delta =
-                        delta,
-
-                    worldWidth =
-                        worldWidth,
-
-                    worldHeight =
-                        worldHeight,
-
-                    mapObstacles =
-                        mapObstacles
-                )
-            }
-
+        val enemyTarget = enemies.filter { !it.isDead }.minWithOrNull(
+            compareBy<Enemy> { enemyRank(it) }.thenBy { Vector2.dst2(center.x,center.y,it.centerX,it.centerY) })
+        // Oathbreaker is rogue: any other living summon is a valid target.
+        val summonTarget = otherSummons.filter { it.runtimeId != runtimeId && !it.isExpired }
+            .minByOrNull { Vector2.dst2(center.x,center.y,it.centerX,it.centerY) }
+        val enemyDistance = enemyTarget?.let { Vector2.dst2(center.x,center.y,it.centerX,it.centerY) } ?: Float.POSITIVE_INFINITY
+        val summonDistance = summonTarget?.let { Vector2.dst2(center.x,center.y,it.centerX,it.centerY) } ?: Float.POSITIVE_INFINITY
+        val playerDistanceSquared = Vector2.dst2(center.x,center.y,playerCenterX,playerCenterY)
+        val acquireRange = if(knightPlayerTargetLocked)KNIGHT_PLAYER_RELEASE_RANGE else KNIGHT_PLAYER_ACQUIRE_RANGE
+        knightPlayerTargetLocked = playerDistanceSquared <= acquireRange*acquireRange &&
+            (enemyTarget == null || enemyRank(enemyTarget)>0 || playerDistanceSquared <= enemyDistance)
+        if(knightPlayerTargetLocked) {
+            if(playerDistanceSquared <= stats.attackRange*stats.attackRange) {
+                tryAttack(KNIGHT_ATTACK_INTERVAL_SECONDS) { onPlayerAttack(this) }
+            } else moveKnightToward(playerCenterX,playerCenterY,delta,worldWidth,worldHeight,mapObstacles)
             return
         }
+        val selectedKind = when {
+            enemyTarget == null && summonTarget == null -> TargetKind.NONE
+            enemyTarget == null -> TargetKind.SUMMON
+            summonTarget == null -> TargetKind.ENEMY
+            enemyRank(enemyTarget)<2 || enemyDistance <= summonDistance -> TargetKind.ENEMY
+            else -> TargetKind.SUMMON
+        }
 
-        val enemyTarget =
-            nearestLivingEnemy(
-                enemies
-            )
-
-        val summonTarget =
-            nearestHostileSummon(
-                otherSummons
-            )
-
-        when (
-            chooseCloserTarget(
-                enemyTarget =
-                    enemyTarget,
-                summonTarget =
-                    summonTarget
-            )
-        ) {
+        when (selectedKind) {
             TargetKind.NONE -> {
                 /*
                  * Rogue Knight has no formation behavior.

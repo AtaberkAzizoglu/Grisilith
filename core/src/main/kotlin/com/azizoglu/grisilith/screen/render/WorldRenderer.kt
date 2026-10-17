@@ -167,6 +167,7 @@ class WorldRenderer(
         TroubleAtHomeDefenseRuntime? = null,
 
         showEnemyHealthBars: Boolean = true,
+        playerTamgaIcons: List<String> = emptyList(),
 
         renderGroundLayer:
         (() -> Unit)? = null,
@@ -703,7 +704,8 @@ class WorldRenderer(
             conditions = player.conditions,
             centerX = player.centerX,
             symbolY = playerSymbolY,
-            camera = camera
+            camera = camera,
+            leadingIcons = playerTamgaIcons
         )
 
         enemyManager.allEnemies

@@ -13,10 +13,17 @@ object DefaultCharacters {
                 ContentId("CHR_SIR_IMBERT"),
 
             displayName =
-                "Sir Imbert \"the Yellow\"",
+                "Sir Imbert",
 
             description =
-                "The magic-phobic yellow knight will not stop until he and his comrades are the only ones left on the world who practice magic.",
+                "Sir Imbert, the Yellow One, the Yellow Commander, the Hypocrite... " +
+                    "this warrior, known by many titles, is one of the great fighters " +
+                    "of the \"Yellow Knights,\" an organization that rose up against " +
+                    "the Empire. He has spent his entire life in fear of magic, much " +
+                    "like every other Yellow Knight. He dedicated his life to the " +
+                    "organization at a young age and swore an oath to eradicate magic " +
+                    "from the face of the earth, kinda. Yet there is a reason he is " +
+                    "called the Hypocrite...",
 
             minionDescription =
                 "Small armored weapon bearers.",
@@ -81,7 +88,12 @@ object DefaultCharacters {
                 "Ywaleth Yoster",
 
             description =
-                "When she died, the gods did not accept it and decided that the revenge she deserved was the revenge of the gods as well. She will continue to be among us, suffering until she finishes his work.",
+                "Ywaleth Yoster was born into an ordinary family, just like anyone " +
+                    "else. That changed when a raid destroyed her village and everyone " +
+                    "perished. The gods refused to accept Ywaleth's death. They " +
+                    "commanded her to exact vengeance for herself and for them, then " +
+                    "returned her to the realm of the living. Since that day, she has " +
+                    "prepared herself for a reckoning far closer than she anticipates.",
 
             minionDescription =
                 "Small hooded weapon bearers wearing dark cloaks.",
@@ -143,7 +155,13 @@ object DefaultCharacters {
                 "Lavena Vol",
 
             description =
-                "One of the greatest wizard of the time specialized in forbidden spells for the approaching danger. Now the approaching danger is her.",
+                "Lavena Vol, one of the five founders of the legendary Ha'la'tha " +
+                    "School of Magic, has practiced magic since the day she was born. " +
+                    "She mastered the arcane arts at a young age, instructed great " +
+                    "wizards and repeatedly protected her city, country and companions, " +
+                    "sometimes even from themselves. She was the first to foresee the " +
+                    "approaching danger; after being expelled for researching forbidden " +
+                    "spells, she became that very approaching danger.",
 
             minionDescription =
                 "Small mage weapon bearers.",
@@ -204,9 +222,13 @@ object DefaultCharacters {
             displayName =
                 "Koba",
             description =
-                "A half-orc barbarian who fights almost bare-skinned, " +
-                    "turning his remaining vitality into savage force. " +
-                    "Cannot equip armor; intrinsic Base HP 14 and Base Armor 9.",
+                "Koba's life story is simple to tell: war and victory. He was a " +
+                    "rising star of Splingald, a city-state that mastered warfare and " +
+                    "magic. Rather than merely following the path of the ancestor whose " +
+                    "name he bore, Koba embraced that ancestor's ideals and vowed to " +
+                    "protect his kin from monsters of every kind. Two-legged or " +
+                    "four-legged, speaking or spellcasting, they are all targets. His " +
+                    "ultimate goal is to destroy the Dead Wizard...",
             minionDescription =
                 "Half-naked barbarian weapon bearers.",
             trait =
@@ -251,7 +273,7 @@ object DefaultCharacters {
             preferredMarketWeaponGroup =
                 CharacterWeaponPreference.MELEE,
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 
     val linlosDustman =
@@ -261,8 +283,11 @@ object DefaultCharacters {
             displayName =
                 "Linlos Dustman",
             description =
-                "A halfling druid who lets poison, dust and fragile Toads " +
-                    "fight in his place.",
+                "Little is known about Linlos; there are only rumors. He is a hero " +
+                    "who protects villagers, a ranger who guards the forests and a " +
+                    "monster who hunts the worst of the worst. The only certainty is " +
+                    "that he emerged from nowhere and poisoned everything and everyone. " +
+                    "All for a good cause, right?",
             minionDescription =
                 "Small druids carrying weapons among leaves and spores.",
             trait =
@@ -304,7 +329,7 @@ object DefaultCharacters {
             preferredMarketWeaponGroup =
                 CharacterWeaponPreference.SPELL_FOCUS,
             initialUnlockState =
-                ContentUnlockState.UNLOCKED
+                ContentUnlockState.LOCKED
         )
 
     val all:

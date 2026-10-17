@@ -1,0 +1,11 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':lwjgl3')
+    desktop.kotlin.sourceSets.main.kotlin.srcDir(gradle.rootProject.file('tools/windows-shell-smoke'))
+    desktop.tasks.register('windowsShellSmoke', JavaExec) {
+        dependsOn desktop.tasks.named('classes')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.WindowsShellSmoke'
+        workingDir = gradle.rootProject.file('assets')
+        jvmArgs '--enable-native-access=ALL-UNNAMED'
+    }
+}

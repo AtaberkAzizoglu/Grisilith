@@ -4,9 +4,11 @@ import com.azizoglu.grisilith.GrisilithGame
 import com.azizoglu.grisilith.character.CharacterDefinition
 import com.azizoglu.grisilith.character.DefaultCharacters
 import com.azizoglu.grisilith.content.ContentUnlockState
+import com.azizoglu.grisilith.content.ContentDefinition
 import com.azizoglu.grisilith.screen.components.MenuButton
 import com.azizoglu.grisilith.screen.components.MenuPointer
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.statistics.StatPresentationGroup
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.ScreenAdapter
@@ -21,6 +23,9 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.scenes.scene2d.utils.ScissorStack
 import com.badlogic.gdx.utils.viewport.FitViewport
+import com.azizoglu.grisilith.ui.icon.ContentIconRenderer
+import com.azizoglu.grisilith.ui.stat.StatSymbolRenderer
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
 import com.azizoglu.grisilith.armor.definition.ArmorDefinition
 import com.azizoglu.grisilith.armor.definition.DefaultArmors
 import com.azizoglu.grisilith.weapon.definition.DefaultWeapons
@@ -49,6 +54,7 @@ import com.azizoglu.grisilith.tamga.definition.TamgaDefinition
 import com.azizoglu.grisilith.tamga.definition.TamgaPresetSlot
 import com.azizoglu.grisilith.tamga.definition.TamgaSlotType
 import com.azizoglu.grisilith.content.ContentUnlockResolver
+import com.azizoglu.grisilith.ui.typography.UiFontFactory
 
 class CreatePresetScreen(
     private val game:
@@ -79,10 +85,10 @@ class CreatePresetScreen(
             5f
 
         private const val LIST_ROW_HEIGHT =
-            34f
+            46f
 
         private const val LIST_ROW_GAP =
-            5f
+            6f
 
         private const val LIST_ROW_PITCH =
             LIST_ROW_HEIGHT +
@@ -109,7 +115,7 @@ class CreatePresetScreen(
         SpriteBatch()
 
     private val font =
-        BitmapFont()
+        UiFontFactory.createBody()
 
     private val pointer =
         MenuPointer(
@@ -1738,42 +1744,20 @@ class CreatePresetScreen(
             row
         ) in statEditorRows()
         ) {
-            if (
-                statMinusRectangle(
-                    row
-                )
-                    .contains(
-                        pointer.position
-                    )
-            ) {
-                interactionState
-                    .decreaseStat(
-                        statType
-                    )
-
-                return
-            }
-
-            if (
-                statPlusRectangle(
-                    row
-                )
-                    .contains(
-                        pointer.position
-                    )
-            ) {
-                interactionState
-                    .increaseStat(
-                        statType =
-                            statType,
-
-                        characterBaseScore =
-                            character.baseStat(
-                                statType
-                            )
-                    )
-
-                return
+            val adjustments = listOf(-5, -1, 1, 5)
+            adjustments.forEachIndexed { index, amount ->
+                if (statAdjustmentRectangle(row, index).contains(pointer.position)) {
+                    if (amount < 0) {
+                        interactionState.decreaseStat(statType, -amount)
+                    } else {
+                        interactionState.increaseStat(
+                            statType = statType,
+                            characterBaseScore = character.baseStat(statType),
+                            amount = amount
+                        )
+                    }
+                    return
+                }
             }
 
             /*
@@ -2167,7 +2151,7 @@ class CreatePresetScreen(
             )
 
             val gearBonuses =
-                StatType.entries
+                StatType.alphabetical
                     .associateWith { 0 }
                     .toMutableMap()
 
@@ -2574,6 +2558,9 @@ class CreatePresetScreen(
         subtitle:
         String,
 
+        definition:
+        ContentDefinition,
+
         unlocked:
         Boolean,
 
@@ -2618,9 +2605,9 @@ class CreatePresetScreen(
                 rectangle.x +
                     6f,
                 rectangle.y +
-                    4f,
-                26f,
-                26f
+                    6f,
+                34f,
+                34f
             )
 
         drawPanel(
@@ -2645,23 +2632,33 @@ class CreatePresetScreen(
                 }
         )
 
-        drawCenteredText(
-            text =
-                "IMG",
+        if (
+            !ContentIconRenderer.draw(
+                batch = batch,
+                definition = definition,
+                bounds = imageRectangle,
+                locked = !unlocked,
+                alpha = if (unlocked) 1f else 0.72f
+            )
+        ) {
+            drawCenteredText(
+                text =
+                    "IMG",
 
-            rectangle =
-                imageRectangle,
+                rectangle =
+                    imageRectangle,
 
-            color =
-                if (unlocked) {
-                    Color.GRAY
-                } else {
-                    Color.DARK_GRAY
-                },
+                color =
+                    if (unlocked) {
+                        Color.GRAY
+                    } else {
+                        Color.DARK_GRAY
+                    },
 
-            scale =
-                0.38f
-        )
+                scale =
+                    0.38f
+            )
+        }
 
         font.color =
             if (unlocked) {
@@ -2682,11 +2679,11 @@ class CreatePresetScreen(
                 "$title — LOCKED"
             },
             rectangle.x +
-                40f,
+                48f,
             rectangle.y +
-                23f,
+                31f,
             rectangle.width -
-                50f,
+                58f,
             Align.left,
             false
         )
@@ -2702,11 +2699,11 @@ class CreatePresetScreen(
             batch,
             subtitle,
             rectangle.x +
-                40f,
+                48f,
             rectangle.y +
-                9f,
+                13f,
             rectangle.width -
-                50f,
+                58f,
             Align.left,
             false
         )
@@ -2926,6 +2923,9 @@ class CreatePresetScreen(
                                 weapon
                             ),
 
+                        definition =
+                            weapon,
+
                         unlocked =
                             ContentUnlockResolver
                                 .isUnlocked(
@@ -3002,6 +3002,9 @@ class CreatePresetScreen(
                         subtitle =
                             "Armor",
 
+                        definition =
+                            armor,
+
                         unlocked =
                             ContentUnlockResolver
                                 .isUnlocked(
@@ -3068,6 +3071,9 @@ class CreatePresetScreen(
                 selectedWeapon()
                     ?.displayName,
 
+            selectedDefinition =
+                selectedWeapon(),
+
             isValidDropTarget =
                 interactionState
                     .draggedContent
@@ -3085,6 +3091,9 @@ class CreatePresetScreen(
             selectedName =
                 selectedWeaponTamga()
                     ?.displayName,
+
+            selectedDefinition =
+                selectedWeaponTamga(),
 
             isValidDropTarget =
                 isTamgaSlotValidDropTarget(
@@ -3104,6 +3113,9 @@ class CreatePresetScreen(
                 selectedArmor()
                     ?.displayName,
 
+            selectedDefinition =
+                selectedArmor(),
+
             isValidDropTarget =
                 interactionState.canEquipArmor && interactionState
                     .draggedContent
@@ -3122,6 +3134,9 @@ class CreatePresetScreen(
                 selectedArmorTamga()
                     ?.displayName,
 
+            selectedDefinition =
+                selectedArmorTamga(),
+
             isValidDropTarget =
                 isTamgaSlotValidDropTarget(
                     TamgaPresetSlot
@@ -3139,6 +3154,9 @@ class CreatePresetScreen(
             selectedName =
                 selectedItem()
                     ?.displayName,
+
+            selectedDefinition =
+                selectedItem(),
 
             isValidDropTarget =
                 interactionState
@@ -3213,19 +3231,27 @@ class CreatePresetScreen(
             return
         }
 
-        drawCenteredText(
-            text =
-                "CHARACTER\nPORTRAIT",
+        if (
+            !ContentIconRenderer.draw(
+                batch = batch,
+                definition = selectedCharacter,
+                bounds = characterPortrait
+            )
+        ) {
+            drawCenteredText(
+                text =
+                    "CHARACTER\nPORTRAIT",
 
-            rectangle =
-                characterPortrait,
+                rectangle =
+                    characterPortrait,
 
-            color =
-                Color.LIGHT_GRAY,
+                color =
+                    Color.LIGHT_GRAY,
 
-            scale =
-                0.85f
-        )
+                scale =
+                    0.85f
+            )
+        }
 
         font.color =
             Color.CYAN
@@ -3261,6 +3287,9 @@ class CreatePresetScreen(
 
         selectedName:
         String?,
+
+        selectedDefinition:
+        ContentDefinition?,
 
         isValidDropTarget:
         Boolean
@@ -3300,27 +3329,37 @@ class CreatePresetScreen(
                 }
         )
 
-        drawCenteredText(
-            text =
-                selectedName
-                    ?: emptyTitle,
+        val renderedIcon =
+            selectedDefinition != null &&
+                ContentIconRenderer.draw(
+                    batch = batch,
+                    definition = selectedDefinition,
+                    bounds = rectangle
+                )
 
-            rectangle =
-                rectangle,
+        if (!renderedIcon) {
+            drawCenteredText(
+                text =
+                    selectedName
+                        ?: emptyTitle,
 
-            color =
-                if (
-                    selectedName != null ||
-                    isValidDropTarget
-                ) {
-                    Color.WHITE
-                } else {
-                    Color.GRAY
-                },
+                rectangle =
+                    rectangle,
 
-            scale =
-                0.58f
-        )
+                color =
+                    if (
+                        selectedName != null ||
+                        isValidDropTarget
+                    ) {
+                        Color.WHITE
+                    } else {
+                        Color.GRAY
+                    },
+
+                scale =
+                    0.58f
+            )
+        }
     }
 
     private fun renderEquipmentSlot(
@@ -3493,6 +3532,9 @@ class CreatePresetScreen(
                         subtitle =
                             "${item.rarity.displayName} Item",
 
+                        definition =
+                            item,
+
                         unlocked =
                             ContentUnlockResolver
                                 .isUnlocked(
@@ -3578,6 +3620,9 @@ class CreatePresetScreen(
                             tamgaListSubtitle(
                                 tamga
                             ),
+
+                        definition =
+                            tamga,
 
                         unlocked =
                             ContentUnlockResolver
@@ -4472,34 +4517,21 @@ class CreatePresetScreen(
             font.color =
                 Color.LIGHT_GRAY
 
-            font.draw(
-                batch,
-                statText,
-                modalRectangle().x +
-                    24f,
-                modalRectangle().y +
-                    modalRectangle().height -
-                    78f,
-                330f,
-                Align.left,
-                true
+            StatSymbolRenderer.drawRichText(
+                batch, font, statText,
+                modalRectangle().x + 24f,
+                modalRectangle().y + modalRectangle().height - 78f,
+                330f
             )
 
             /*
              * Weapon açıklaması sağda.
              */
-            font.draw(
-                batch,
-                description,
-                modalRectangle().x +
-                    395f,
-                modalRectangle().y +
-                    modalRectangle().height -
-                    78f,
-                modalRectangle().width -
-                    425f,
-                Align.left,
-                true
+            StatSymbolRenderer.drawRichText(
+                batch, font, description,
+                modalRectangle().x + 395f,
+                modalRectangle().y + modalRectangle().height - 78f,
+                modalRectangle().width - 425f
             )
         } else {
             /*
@@ -4508,34 +4540,21 @@ class CreatePresetScreen(
             font.color =
                 Color.LIGHT_GRAY
 
-            font.draw(
-                batch,
-                description,
-                modalRectangle().x +
-                    24f,
-                modalRectangle().y +
-                    modalRectangle().height -
-                    78f,
-                modalRectangle().width -
-                    48f,
-                Align.left,
-                true
+            StatSymbolRenderer.drawRichText(
+                batch, font, description,
+                modalRectangle().x + 24f,
+                modalRectangle().y + modalRectangle().height - 78f,
+                modalRectangle().width - 48f
             )
 
             font.color =
                 Color.WHITE
 
-            font.draw(
-                batch,
-                statText,
-                modalRectangle().x +
-                    24f,
-                modalRectangle().y +
-                    220f,
-                modalRectangle().width -
-                    48f,
-                Align.left,
-                true
+            StatSymbolRenderer.drawRichText(
+                batch, font, statText,
+                modalRectangle().x + 24f,
+                modalRectangle().y + 220f,
+                modalRectangle().width - 48f
             )
         }
     }
@@ -4864,6 +4883,8 @@ class CreatePresetScreen(
             WeaponAttackPattern.TOTEM_PROJECTILE_OR_DRAIN ->
                 "Projectile / Drain"
 
+            WeaponAttackPattern.EXTENDED_PHYSICAL ->
+                com.azizoglu.grisilith.weapon.definition.catalog.NewPhysicalWeapons.patternLabel(weapon.definition.id.value)
             WeaponAttackPattern.NONE ->
                 "Passive"
         }
@@ -4931,7 +4952,9 @@ class CreatePresetScreen(
 
         font.draw(
             batch,
-            character.description,
+            character.trait.displayName +
+                ": " +
+                character.trait.description,
             270f,
             520f,
             360f,
@@ -4944,8 +4967,7 @@ class CreatePresetScreen(
 
         font.draw(
             batch,
-            "Minions:\n" +
-                character.minionDescription,
+            com.azizoglu.grisilith.character.CharacterPresentation.summary(character),
             270f,
             355f,
             360f,
@@ -5005,65 +5027,32 @@ class CreatePresetScreen(
             0.72f
         )
 
-        val stats =
-            StatType.entries
-
-        val rowsPerColumn =
-            (
-                stats.size +
-                    1
-                ) /
-                2
-
-        stats.forEachIndexed {
-                index,
-                statType ->
-
-            val column =
-                index /
-                    rowsPerColumn
-
-            val row =
-                index %
-                    rowsPerColumn
-
-            val x =
-                665f +
-                    column *
-                    185f
-
-            val y =
-                520f -
-                    row *
-                    28f
-
-            font.color =
-                Color.LIGHT_GRAY
-
-            font.draw(
-                batch,
-                statType.displayName,
-                x,
-                y
-            )
-
-            font.color =
-                Color.WHITE
-
-            font.draw(
-                batch,
-                character.baseStat(
-                    statType
-                )
-                    .toString(),
-                x +
-                    125f,
-                y,
-                42f,
-                Align.right,
-                false
-            )
+        fun drawGroupedColumn(groups: List<StatPresentationGroup>, x: Float) {
+            var y = 520f
+            groups.forEach { group ->
+                font.data.setScale(0.52f)
+                font.color = Color(0.72f, 0.78f, 0.90f, 1f)
+                font.draw(batch, group.title, x, y, 168f, Align.center, false)
+                y -= 22f
+                font.data.setScale(0.64f)
+                group.stats.forEach { statType ->
+                    StatSymbolRenderer.drawLabel(batch, font, statType, x, y, 16f, 124f)
+                    font.color = Color.WHITE
+                    font.draw(batch, character.baseStat(statType).toString(), x + 125f, y, 42f, Align.right, false)
+                    y -= 23f
+                }
+                y -= 7f
+            }
         }
+
+        drawGroupedColumn(
+            listOf(StatPresentationGroup.magicalDamage, StatPresentationGroup.defensive),
+            665f
+        )
+        drawGroupedColumn(
+            listOf(StatPresentationGroup.physicalDamage, StatPresentationGroup.utility),
+            850f
+        )
     }
 
     private fun renderStatEditor() {
@@ -5124,6 +5113,21 @@ class CreatePresetScreen(
             false
         )
 
+        statGroupRectangles().forEach { (group, bounds) ->
+            drawPanel(bounds, Color(0.075f, 0.105f, 0.155f, 1f))
+            font.data.setScale(0.66f)
+            font.color = Color(0.72f, 0.78f, 0.90f, 1f)
+            font.draw(
+                batch,
+                group.title,
+                bounds.x,
+                bounds.y + bounds.height - 9f,
+                bounds.width,
+                Align.center,
+                false
+            )
+        }
+
         statEditorRows()
             .forEach {
                     statType,
@@ -5155,103 +5159,47 @@ class CreatePresetScreen(
                     base +
                         bonus
 
-                font.color =
-                    Color.LIGHT_GRAY
-
-                font.draw(
-                    batch,
-                    statType.displayName,
-                    row.x +
-                        12f,
-                    row.y +
-                        22f
+                StatSymbolRenderer.drawLabel(
+                    batch = batch,
+                    font = font,
+                    statType = statType,
+                    x = row.x + 12f,
+                    baselineY = row.y + 22f,
+                    iconSize = 20f,
+                    width = 138f
                 )
 
+                font.data.setScale(0.66f)
                 font.color =
                     Color.WHITE
 
                 font.draw(
                     batch,
                     "$base + $bonus = $finalScore",
-                    row.x +
-                        145f,
+                    row.x + row.width - 165f,
                     row.y +
-                        22f,
-                    row.width -
-                        230f,
+                        18f,
+                    48f,
                     Align.right,
                     false
                 )
 
-                drawPanel(
-                    statMinusRectangle(
-                        row
-                    ),
-                    Color(
-                        0.29f,
-                        0.10f,
-                        0.10f,
-                        1f
+                listOf(-5, -1, 1, 5).forEachIndexed { index, amount ->
+                    val adjustment = statAdjustmentRectangle(row, index)
+                    drawPanel(
+                        adjustment,
+                        if (amount < 0) Color(0.29f, 0.10f, 0.10f, 1f)
+                        else Color(0.08f, 0.30f, 0.16f, 1f)
                     )
-                )
-
-                drawCenteredText(
-                    text =
-                        "-",
-
-                    rectangle =
-                        statMinusRectangle(
-                            row
-                        ),
-
-                    color =
-                        if (bonus > 0) {
-                            Color.WHITE
-                        } else {
-                            Color.GRAY
-                        },
-
-                    scale =
-                        0.9f
-                )
-
-                drawPanel(
-                    statPlusRectangle(
-                        row
-                    ),
-                    Color(
-                        0.08f,
-                        0.30f,
-                        0.16f,
-                        1f
+                    val enabled = if (amount < 0) bonus > 0
+                    else interactionState.remainingStatPoints > 0 && finalScore < 25
+                    drawCenteredText(
+                        text = if (amount > 0) "+$amount" else amount.toString(),
+                        rectangle = adjustment,
+                        color = if (enabled) Color.WHITE else Color.GRAY,
+                        scale = 0.58f
                     )
-                )
-
-                drawCenteredText(
-                    text =
-                        "+",
-
-                    rectangle =
-                        statPlusRectangle(
-                            row
-                        ),
-
-                    color =
-                        if (
-                            interactionState
-                                .remainingStatPoints >
-                            0 &&
-                            finalScore <
-                            25
-                        ) {
-                            Color.WHITE
-                        } else {
-                            Color.GRAY
-                        },
-
-                    scale =
-                        0.9f
-                )
+                }
             }
 
         font.color =
@@ -5320,17 +5268,14 @@ class CreatePresetScreen(
             0.95f
         )
 
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            statType.displayName,
-            panel.x +
-                16f,
-            panel.y +
-                panel.height -
-                22f
+        StatSymbolRenderer.drawLabel(
+            batch = batch,
+            font = font,
+            statType = statType,
+            x = panel.x + 16f,
+            baselineY = panel.y + panel.height - 22f,
+            iconSize = 20f,
+            width = panel.width - 32f
         )
 
         font.data.setScale(
@@ -5664,113 +5609,42 @@ class CreatePresetScreen(
     private fun statEditorRows():
         Map<StatType, Rectangle> {
 
-        val panel =
-            statEditorRectangle()
-
-        val stats =
-            StatType.entries
-
-        val rowsPerColumn =
-            (
-                stats.size +
-                    1
-                ) /
-                2
-
-        val columnGap =
-            18f
-
-        val horizontalPadding =
-            20f
-
-        val columnWidth =
-            (
-                panel.width -
-                    horizontalPadding * 2f -
-                    columnGap
-                ) /
-                2f
-
-        val rowHeight =
-            38f
-
-        val rowGap =
-            7f
-
-        val firstY =
-            panel.y +
-                panel.height -
-                112f -
-                rowHeight
-
-        return stats
-            .associateWith {
-                    statType ->
-
-                val index =
-                    stats.indexOf(
-                        statType
-                    )
-
-                val column =
-                    index /
-                        rowsPerColumn
-
-                val row =
-                    index %
-                        rowsPerColumn
-
-                Rectangle(
-                    panel.x +
-                        horizontalPadding +
-                        column *
-                        (
-                            columnWidth +
-                                columnGap
-                            ),
-
-                    firstY -
-                        row *
-                        (
-                            rowHeight +
-                                rowGap
-                            ),
-
-                    columnWidth,
-
-                    rowHeight
+        val rows = linkedMapOf<StatType, Rectangle>()
+        statGroupRectangles().forEach { (group, bounds) ->
+            group.stats.forEachIndexed { index, statType ->
+                rows[statType] = Rectangle(
+                    bounds.x + 7f,
+                    bounds.y + bounds.height - 62f - index * 27f,
+                    bounds.width - 14f,
+                    24f
                 )
             }
+        }
+        return rows
     }
 
-    private fun statMinusRectangle(
-        row:
-        Rectangle
-    ) =
-        Rectangle(
-            row.x +
-                row.width -
-                76f,
-            row.y +
-                4f,
-            30f,
-            row.height -
-                8f
-        )
+    private fun statGroupRectangles(): Map<StatPresentationGroup, Rectangle> {
+        val panel = statEditorRectangle()
+        val groupWidth = (panel.width - 40f) / 2f
+        val groupHeight = 210f
+        return StatPresentationGroup.ordered.mapIndexed { index, group ->
+            val column = index % 2
+            val row = index / 2
+            group to Rectangle(
+                panel.x + 14f + column * (groupWidth + 12f),
+                panel.y + if (row == 0) 268f else 42f,
+                groupWidth,
+                groupHeight
+            )
+        }.toMap(LinkedHashMap())
+    }
 
-    private fun statPlusRectangle(
-        row:
-        Rectangle
-    ) =
+    private fun statAdjustmentRectangle(row: Rectangle, index: Int) =
         Rectangle(
-            row.x +
-                row.width -
-                38f,
-            row.y +
-                4f,
-            30f,
-            row.height -
-                8f
+            row.x + row.width - 112f + index * 28f,
+            row.y + 1f,
+            25f,
+            row.height - 2f
         )
 
     private fun characterPickerRectangle() =
@@ -5855,28 +5729,9 @@ class CreatePresetScreen(
         fillColor:
         Color
     ) {
-        drawFilledRectangle(
-            rectangle,
-            Color(
-                0.34f,
-                0.52f,
-                0.73f,
-                1f
-            )
-        )
-
-        drawFilledRectangle(
-            Rectangle(
-                rectangle.x +
-                    2f,
-                rectangle.y +
-                    2f,
-                rectangle.width -
-                    4f,
-                rectangle.height -
-                    4f
-            ),
-            fillColor
+        UiComponentRenderer.drawPanel(
+            batch = batch,
+            bounds = rectangle
         )
     }
 

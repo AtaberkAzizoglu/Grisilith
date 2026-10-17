@@ -8,6 +8,8 @@ object EnemyAttackDamageTypes {
     fun contactDamageType(kindId: ContentId?): DamageType = when (kindId) {
         EnemyKindIds.GRAY_WOLF,
         EnemyKindIds.BOAR,
+        EnemyKindIds.BEE_SWARM,
+        EnemyKindIds.MIMIC,
         EnemyKindIds.BALD_EAGLE,
         EnemyKindIds.GRIZZLY_BEAR,
         EnemyKindIds.CROCODILE,
@@ -27,7 +29,8 @@ object EnemyAttackDamageTypes {
 
         EnemyKindIds.SLIME -> DamageType.ACID
 
-        // Witch attacks declare their element per projectile/spell.
-        else -> DamageType.NONE
+        // Individual Witch spells/projectiles override this contact/fallback element.
+        EnemyKindIds.WITCH -> DamageType.LIGHTNING
+        else -> DamageType.BLUDGEONING
     }
 }

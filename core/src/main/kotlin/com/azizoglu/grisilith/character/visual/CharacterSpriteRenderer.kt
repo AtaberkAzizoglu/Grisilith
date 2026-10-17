@@ -134,7 +134,7 @@ class CharacterSpriteRenderer {
          * sprite side inside the player's 48 world-unit footprint.
          */
         val sourceLargestSide =
-            max(
+            definition.contentHeightPixels?.toFloat() ?: max(
                 frame.width,
                 frame.height
             )
@@ -168,7 +168,7 @@ class CharacterSpriteRenderer {
         val drawY =
             player.centerY -
                 CHARACTER_VISUAL_WORLD_SIZE /
-                2f
+                2f - definition.feetInsetPixels * scale
 
         batch.color =
             if (

@@ -66,6 +66,9 @@ class IgniteDashRuntime(
             activeWeapon !=
                 null
 
+    val aimingWeapon: WeaponInstance?
+        get() = activeWeapon
+
     val hasExplosionVisual: Boolean
         get() =
             explosionRemainingSeconds >
@@ -169,20 +172,16 @@ class IgniteDashRuntime(
             weaponRuntime
 
         remainingAimSeconds =
-            DefaultWeaponAbilities
-                .IGNITE_DASH_AIM_DURATION_SECONDS
+            if (com.azizoglu.grisilith.settings.GameSettings.prepareAbilities) 1f else 0f
 
         executionRequested =
-            false
+            !com.azizoglu.grisilith.settings.GameSettings.prepareAbilities
 
         mouseConfirmBlockedUntilRelease =
             Gdx.input
                 .isButtonPressed(
                     Input.Buttons.LEFT
                 )
-
-        hasAimPosition =
-            false
 
         return true
     }
@@ -194,6 +193,8 @@ class IgniteDashRuntime(
         obstacleBounds: List<Rectangle>,
         worldWidth: Float,
         worldHeight: Float,
+        castOriginX: Float = player.centerX,
+        castOriginY: Float = player.centerY,
         onDamageDealt: (
             damage: Int,
             weaponName: String
@@ -237,7 +238,9 @@ class IgniteDashRuntime(
                 worldWidth,
 
             worldHeight =
-                worldHeight
+                worldHeight,
+            originX = castOriginX,
+            originY = castOriginY
         )
 
         if (
@@ -337,7 +340,9 @@ class IgniteDashRuntime(
 
     fun render(
         shapeRenderer: ShapeRenderer,
-        player: Player
+        player: Player,
+        originX: Float = player.centerX,
+        originY: Float = player.centerY
     ) {
         if (isAiming) {
             shapeRenderer.color =
@@ -349,12 +354,18 @@ class IgniteDashRuntime(
                 )
 
             shapeRenderer.rectLine(
-                player.centerX,
-                player.centerY,
+                originX,
+                originY,
                 resolvedTargetPosition.x,
                 resolvedTargetPosition.y,
                 4f
             )
+            shapeRenderer.setColor(1f, .08f, .08f, .5f)
+            shapeRenderer.circle(resolvedTargetPosition.x, resolvedTargetPosition.y,
+                DefaultWeaponAbilities.IGNITE_DASH_OUTER_EXPLOSION_RADIUS, 120)
+            shapeRenderer.setColor(1f, .08f, .08f, .85f)
+            shapeRenderer.circle(resolvedTargetPosition.x, resolvedTargetPosition.y,
+                DefaultWeaponAbilities.IGNITE_DASH_EXPLOSION_RADIUS, 100)
         }
 
         /*
@@ -367,7 +378,9 @@ class IgniteDashRuntime(
         player: Player,
         obstacleBounds: List<Rectangle>,
         worldWidth: Float,
-        worldHeight: Float
+        worldHeight: Float,
+        originX: Float,
+        originY: Float
     ) {
         val maximumRange =
             if (activeWeapon?.hasWeaponAbilityUpgrade == true) {
@@ -383,20 +396,20 @@ class IgniteDashRuntime(
                 requestedAimPosition
             } else {
                 Vector2(
-                    player.centerX +
+                    originX +
                         maximumRange,
 
-                    player.centerY
+                    originY
                 )
             }
 
         val direction =
             Vector2(
                 desiredTarget.x -
-                    player.centerX,
+                    originX,
 
                 desiredTarget.y -
-                    player.centerY
+                    originY
             )
 
         if (
@@ -434,7 +447,7 @@ class IgniteDashRuntime(
 
         val requestedX =
             (
-                player.centerX +
+                originX +
                     direction.x *
                     distance
                 )
@@ -446,7 +459,7 @@ class IgniteDashRuntime(
 
         val requestedY =
             (
-                player.centerY +
+                originY +
                     direction.y *
                     distance
                 )
@@ -462,10 +475,10 @@ class IgniteDashRuntime(
         var candidateDistance =
             Vector2(
                 requestedX -
-                    player.centerX,
+                    originX,
 
                 requestedY -
-                    player.centerY
+                    originY
             )
                 .len()
 
@@ -474,12 +487,12 @@ class IgniteDashRuntime(
             0f
         ) {
             val candidateX =
-                player.centerX +
+                originX +
                     direction.x *
                     candidateDistance
 
             val candidateY =
-                player.centerY +
+                originY +
                     direction.y *
                     candidateDistance
 
@@ -517,8 +530,8 @@ class IgniteDashRuntime(
         }
 
         resolvedTargetPosition.set(
-            player.centerX,
-            player.centerY
+            originX,
+            originY
         )
     }
 
@@ -584,7 +597,7 @@ class IgniteDashRuntime(
                     1
                 )
 
-        enemyManager.allEnemies
+        enemyManager.weaponTargets
             .toList()
             .forEach {
                     enemy ->

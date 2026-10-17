@@ -1,15 +1,24 @@
 package com.azizoglu.grisilith.screen.render
 
+import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatCard
+import com.azizoglu.grisilith.settings.GameSettings
+import com.azizoglu.grisilith.ui.icon.ContentIconRenderer
+import com.azizoglu.grisilith.ui.stat.StatSymbolRenderer
+import com.azizoglu.grisilith.ui.theme.PanelVisualStyle
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
 import com.badlogic.gdx.graphics.Color
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Polygon
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Align
-import kotlin.math.sin
 
 class StageStatRewardRenderer(
     private val camera: OrthographicCamera,
@@ -18,869 +27,116 @@ class StageStatRewardRenderer(
     private val shapeRenderer: ShapeRenderer,
     private val batch: SpriteBatch,
     private val font: BitmapFont,
-    private val characterNameProvider: () -> String,
-    private val characterStatsProvider:
-        () -> List<ChestCharacterStatRow>
+    characterNameProvider: () -> String,
+    playerStatsProvider: () -> PlayerStats,
+    private val pointerPositionProvider: () -> Vector2?
 ) {
-
-    data class Layout(
-        val panelBounds: Rectangle,
-        val portraitBounds: Rectangle,
-        val statsBounds: Rectangle,
-        val cardPolygons: List<Polygon>
-    )
+    data class Layout(val panelBounds: Rectangle, val portraitBounds: Rectangle, val statsBounds: Rectangle, val cardPolygons: List<Polygon>)
 
     companion object {
-
-        private const val PANEL_WIDTH =
-            1060f
-
-        private const val PANEL_HEIGHT =
-            620f
-
-        private const val CARD_SIZE =
-            148f
+        private const val PANEL_WIDTH = 1240f
+        private const val PANEL_HEIGHT = 650f
+        private const val CARD_SIZE = 132f
     }
 
-    private val panelBounds =
-        Rectangle()
-
-    private val portraitBounds =
-        Rectangle()
-
-    private val statsBounds =
-        Rectangle()
-
-    private val cardPolygons =
-        List(
-            4
-        ) {
-            Polygon()
+    private val panelBounds = Rectangle()
+    private val portraitBounds = Rectangle()
+    private val statsBounds = Rectangle()
+    private val screenBounds = Rectangle()
+    private val cardPolygons = List(4) { Polygon() }
+    private val statsRenderer = CharacterStatsPanelRenderer(batch, font, playerStatsProvider)
+    private val characterName = characterNameProvider
+    private val stagePanelTexture by lazy {
+        Texture(Gdx.files.internal("ui/rewards/stage_reward_panel_v2.png")).also {
+            it.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
         }
-
-    private var animationTimeSeconds =
-        0f
-
-    fun update(
-        delta: Float
-    ) {
-
-        animationTimeSeconds +=
-            delta.coerceAtLeast(
-                0f
-            )
     }
 
-    fun currentLayout():
-        Layout {
+    fun update(delta: Float) = Unit
 
+    fun currentLayout(): Layout {
         updateLayout()
-
-        return Layout(
-            panelBounds =
-                panelBounds,
-
-            portraitBounds =
-                portraitBounds,
-
-            statsBounds =
-                statsBounds,
-
-            cardPolygons =
-                cardPolygons
-        )
+        return Layout(panelBounds, portraitBounds, statsBounds, cardPolygons)
     }
 
-    fun renderShapes(
-        cards: List<StatCard>,
-        hoveredCardIndex: Int?
-    ) {
-
+    fun renderShapes(cards: List<StatCard>, hoveredCardIndex: Int?) {
         updateLayout()
-
-        renderFog()
-        renderPanel()
-        renderPortrait()
-        renderStatsPanel()
-
-        cards
-            .take(
-                4
-            )
-            .forEachIndexed {
-                    index,
-                    card ->
-
-                renderDiamondCard(
-                    polygon =
-                        cardPolygons[index],
-
-                    hovered =
-                        hoveredCardIndex ==
-                            index,
-
-                    amount =
-                        card.amount
-                )
-            }
-    }
-
-    fun renderTexts(
-        cards: List<StatCard>
-    ) {
-
-        updateLayout()
-
-        val oldScaleX =
-            font.data.scaleX
-
-        val oldScaleY =
-            font.data.scaleY
-
-        val oldColor =
-            Color(
-                font.color
-            )
-
-        renderHeader()
-        renderPortraitText()
-        renderStatRows()
-
-        cards
-            .take(
-                4
-            )
-            .forEachIndexed {
-                    index,
-                    card ->
-
-                renderCardText(
-                    polygon =
-                        cardPolygons[index],
-
-                    card =
-                        card,
-
-                    shortcutNumber =
-                        index +
-                            1
-                )
-            }
-
-        font.data.setScale(
-            oldScaleX,
-            oldScaleY
-        )
-
-        font.color =
-            oldColor
-    }
-
-    private fun renderFog() {
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.17f,
-                0.06f,
-                0.24f,
-                0.72f
-            )
-
-        shapeRenderer.rect(
-            camera.position.x -
-                cameraWidth /
-                2f,
-
-            camera.position.y -
-                cameraHeight /
-                2f,
-
-            cameraWidth,
-            cameraHeight
-        )
-
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+        shapeRenderer.color = Color(0.08f, 0.025f, 0.12f, 0.78f)
+        shapeRenderer.rect(screenBounds.x, screenBounds.y, screenBounds.width, screenBounds.height)
         shapeRenderer.end()
-    }
-
-    private fun renderPanel() {
-
-        val pulse =
-            0.68f +
-                (
-                    sin(
-                        animationTimeSeconds *
-                            2.8f
-                    ) *
-                        0.5f +
-                        0.5f
-                    ) *
-                0.20f
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
+        batch.projectionMatrix = camera.combined
+        batch.begin()
+        batch.draw(stagePanelTexture, panelBounds.x, panelBounds.y, panelBounds.width, panelBounds.height)
+        UiComponentRenderer.drawSimpleVerticalSeparator(
+            batch,
+            Rectangle(statsBounds.x - 15f, panelBounds.y + 35f, 5f, panelBounds.height - 70f)
         )
-
-        shapeRenderer.color =
-            Color(
-                0.035f,
-                0.025f,
-                0.055f,
-                0.84f
-            )
-
-        shapeRenderer.rect(
-            panelBounds.x,
-            panelBounds.y,
-            panelBounds.width,
-            panelBounds.height
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.46f,
-                0.30f,
-                0.62f,
-                0.10f
-            )
-
-        shapeRenderer.rect(
-            panelBounds.x +
-                10f,
-
-            panelBounds.y +
-                10f,
-
-            panelBounds.width -
-                20f,
-
-            panelBounds.height -
-                20f
-        )
-
-        shapeRenderer.end()
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Line
-        )
-
-        repeat(
-            4
-        ) { index ->
-
-            val inset =
-                index *
-                    5f
-
-            shapeRenderer.color =
-                Color(
-                    0.60f,
-                    0.40f,
-                    0.80f,
-                    (
-                        pulse -
-                            index *
-                            0.12f
-                        )
-                        .coerceIn(
-                            0.16f,
-                            1f
-                        )
-                )
-
-            shapeRenderer.rect(
-                panelBounds.x +
-                    inset,
-
-                panelBounds.y +
-                    inset,
-
-                panelBounds.width -
-                    inset *
-                    2f,
-
-                panelBounds.height -
-                    inset *
-                    2f
-            )
+        UiComponentRenderer.drawPanel(batch, portraitBounds, PanelVisualStyle.INNER)
+        cards.take(4).forEachIndexed { index, card ->
+            val p = cardPolygons[index]
+            ContentIconRenderer.drawStatRewardFrame(batch, Rectangle(p.x - CARD_SIZE / 2f, p.y - CARD_SIZE / 2f, CARD_SIZE, CARD_SIZE), card.amount, 45f, hoveredCardIndex == index)
         }
-
-        shapeRenderer.end()
+        batch.end()
     }
 
-    private fun renderPortrait() {
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.075f,
-                0.060f,
-                0.095f,
-                1f
-            )
-
-        shapeRenderer.rect(
-            portraitBounds.x,
-            portraitBounds.y,
-            portraitBounds.width,
-            portraitBounds.height
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.25f,
-                0.20f,
-                0.31f,
-                1f
-            )
-
-        shapeRenderer.rect(
-            portraitBounds.x +
-                15f,
-
-            portraitBounds.y +
-                15f,
-
-            portraitBounds.width -
-                30f,
-
-            portraitBounds.height -
-                30f
-        )
-
-        shapeRenderer.end()
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Line
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.62f,
-                0.42f,
-                0.80f,
-                1f
-            )
-
-        shapeRenderer.rect(
-            portraitBounds.x,
-            portraitBounds.y,
-            portraitBounds.width,
-            portraitBounds.height
-        )
-
-        shapeRenderer.end()
-    }
-
-    private fun renderStatsPanel() {
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.045f,
-                0.035f,
-                0.060f,
-                0.96f
-            )
-
-        shapeRenderer.rect(
-            statsBounds.x,
-            statsBounds.y,
-            statsBounds.width,
-            statsBounds.height
-        )
-
-        shapeRenderer.end()
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Line
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.50f,
-                0.40f,
-                0.62f,
-                1f
-            )
-
-        shapeRenderer.rect(
-            statsBounds.x,
-            statsBounds.y,
-            statsBounds.width,
-            statsBounds.height
-        )
-
-        shapeRenderer.end()
-    }
-
-    private fun renderDiamondCard(
-        polygon: Polygon,
-        hovered: Boolean,
-        amount: Int
-    ) {
-
-        val vertices =
-            polygon.transformedVertices
-
-        val intensity =
-            when (amount) {
-
-                5 ->
-                    Color(
-                        1f,
-                        0.74f,
-                        0.18f,
-                        1f
-                    )
-
-                3 ->
-                    Color(
-                        0.44f,
-                        0.70f,
-                        1f,
-                        1f
-                    )
-
-                2 ->
-                    Color(
-                        0.42f,
-                        0.88f,
-                        0.50f,
-                        1f
-                    )
-
-                else ->
-                    Color(
-                        0.72f,
-                        0.72f,
-                        0.76f,
-                        1f
-                    )
-            }
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
-
-        shapeRenderer.color =
-            Color(
-                intensity.r,
-                intensity.g,
-                intensity.b,
-                if (hovered) {
-                    0.52f
-                } else {
-                    0.28f
-                }
-            )
-
-        shapeRenderer.triangle(
-            vertices[0],
-            vertices[1],
-            vertices[2],
-            vertices[3],
-            vertices[4],
-            vertices[5]
-        )
-
-        shapeRenderer.triangle(
-            vertices[0],
-            vertices[1],
-            vertices[4],
-            vertices[5],
-            vertices[6],
-            vertices[7]
-        )
-
-        shapeRenderer.end()
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Line
-        )
-
-        shapeRenderer.color =
-            if (hovered) {
-                Color.WHITE
-            } else {
-                intensity
-            }
-
-        shapeRenderer.polygon(
-            vertices
-        )
-
-        if (hovered) {
-            val centerX =
-                polygon.x
-
-            val centerY =
-                polygon.y
-
-            val extra =
-                CARD_SIZE /
-                    2f +
-                    7f
-
-            shapeRenderer.polygon(
-                floatArrayOf(
-                    centerX,
-                    centerY +
-                        extra,
-
-                    centerX +
-                        extra,
-                    centerY,
-
-                    centerX,
-                    centerY -
-                        extra,
-
-                    centerX -
-                        extra,
-                    centerY
-                )
-            )
+    fun renderTexts(cards: List<StatCard>, hoveredCardIndex: Int?) {
+        updateLayout()
+        val oldScaleX = font.data.scaleX
+        val oldScaleY = font.data.scaleY
+        val oldColor = Color(font.color)
+        statsRenderer.render(statsBounds, pointerPositionProvider(), screenBounds, drawBackground = false)
+        ContentIconRenderer.drawCharacterPortrait(batch, characterName(), portraitBounds)
+        font.data.setScale(0.72f)
+        font.color = Color(0.20f, 0.90f, 0.92f, 1f)
+        font.draw(batch, characterName(), portraitBounds.x - 12f, portraitBounds.y - 12f, portraitBounds.width + 24f, Align.center, false)
+        cards.take(4).forEachIndexed { index, card ->
+            renderCardText(cardPolygons[index], card, index + 1, hoveredCardIndex == index)
         }
-
-        shapeRenderer.end()
+        font.data.setScale(oldScaleX, oldScaleY)
+        font.color = oldColor
     }
 
-    private fun renderHeader() {
+    private fun renderCardText(polygon: Polygon, card: StatCard, shortcut: Int, hovered: Boolean) {
+        val x = polygon.x
+        val y = polygon.y
+        val hoverScale = if (hovered) 1.06f else 1f
+        font.data.setScale(0.92f * hoverScale)
+        font.color = Color.GOLD
+        font.draw(batch, "+${card.amount}", x - 48f, y + 39f * hoverScale, 96f, Align.center, false)
 
-        font.data.setScale(
-            1.18f
-        )
+        font.data.setScale(0.54f * hoverScale)
+        val label = card.type.statType.displayName
+        val textWidth = GlyphLayout(font, label).width
+        val iconSize = 18f * hoverScale
+        val totalWidth = iconSize + 3f + textWidth
+        val startX = x - totalWidth / 2f
+        StatSymbolRenderer.drawIcon(batch, card.type.statType, startX, y - 7f * hoverScale, iconSize)
+        font.color = Color(0.92f, 0.18f, 0.16f, 1f)
+        font.draw(batch, label, startX + iconSize + 3.7f, y + 9f * hoverScale)
+        font.draw(batch, label, startX + iconSize + 3f, y + 9f * hoverScale)
 
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            "CHOOSE A STAT REWARD",
-            panelBounds.x - 350f,
-            panelBounds.y +
-                panelBounds.height -
-                38f,
-            panelBounds.width,
-            Align.center,
-            false
-        )
-
-        font.data.setScale(
-            0.72f
-        )
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            "Select one card. The bonus remains for the current run.",
-            panelBounds.x - 350f,
-            panelBounds.y +
-                panelBounds.height -
-                72f,
-            panelBounds.width,
-            Align.center,
-            false
-        )
-    }
-
-    private fun renderPortraitText() {
-
-        font.data.setScale(
-            0.82f
-        )
-
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            characterNameProvider(),
-            portraitBounds.x -
-                15f,
-            portraitBounds.y +
-                portraitBounds.height +
-                27f,
-            portraitBounds.width +
-                30f,
-            Align.center,
-            true
-        )
-
-        font.data.setScale(
-            0.68f
-        )
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            "PORTRAIT",
-            portraitBounds.x,
-            portraitBounds.y +
-                portraitBounds.height /
-                2f +
-                5f,
-            portraitBounds.width,
-            Align.center,
-            false
-        )
-    }
-
-    private fun renderStatRows() {
-
-        font.data.setScale(
-            0.74f
-        )
-
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            "CURRENT STATS",
-            statsBounds.x,
-            statsBounds.y +
-                statsBounds.height -
-                22f,
-            statsBounds.width,
-            Align.center,
-            false
-        )
-
-        var y =
-            statsBounds.y +
-                statsBounds.height -
-                49f
-
-        characterStatsProvider()
-            .forEach {
-                    row ->
-
-                font.data.setScale(
-                    0.49f
-                )
-
-                font.color =
-                    Color.LIGHT_GRAY
-
-                font.draw(
-                    batch,
-                    row.label,
-                    statsBounds.x +
-                        10f,
-                    y
-                )
-
-                font.color =
-                    Color.WHITE
-
-                font.draw(
-                    batch,
-                    row.value,
-                    statsBounds.x +
-                        110f,
-                    y,
-                    statsBounds.width -
-                        120f,
-                    Align.right,
-                    false
-                )
-
-                y -=
-                    18f
-            }
-    }
-
-    private fun renderCardText(
-        polygon: Polygon,
-        card: StatCard,
-        shortcutNumber: Int
-    ) {
-
-        val centerX =
-            polygon.x
-
-        val centerY =
-            polygon.y
-
-        font.data.setScale(
-            0.72f
-        )
-
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            card.title,
-            centerX -
-                85f,
-            centerY +
-                31f,
-            170f,
-            Align.center,
-            true
-        )
-
-        font.data.setScale(
-            1.25f
-        )
-
-        font.color =
-            Color.GOLD
-
-        font.draw(
-            batch,
-            "+${card.amount}",
-            centerX -
-                70f,
-            centerY +
-                1f,
-            140f,
-            Align.center,
-            false
-        )
-
-        font.data.setScale(
-            0.62f
-        )
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            "[$shortcutNumber]",
-            centerX -
-                50f,
-            centerY -
-                38f,
-            100f,
-            Align.center,
-            false
-        )
+        if (GameSettings.showAbilityShortcuts) {
+            font.data.setScale(0.48f * hoverScale)
+            font.color = Color.LIGHT_GRAY
+            font.draw(batch, "[$shortcut]", x - 35f, y - 51f * hoverScale, 70f, Align.center, false)
+        }
     }
 
     private fun updateLayout() {
-
-        val centerX =
-            camera.position.x
-
-        val centerY =
-            camera.position.y
-
-        panelBounds.set(
-            centerX -
-                PANEL_WIDTH /
-                2f,
-
-            centerY -
-                PANEL_HEIGHT /
-                2f,
-
-            PANEL_WIDTH,
-            PANEL_HEIGHT
-        )
-
-        portraitBounds.set(
-            centerX -
-                95f,
-
-            centerY -
-                95f,
-
-            190f,
-            190f
-        )
-
-        statsBounds.set(
-            centerX +
-                300f,
-
-            centerY -
-                230f,
-
-            220f,
-            455f
-        )
-
-        val cardCenters =
-            arrayOf(
-                centerX to
-                    (
-                        centerY +
-                            205f
-                        ),
-
-                (
-                    centerX +
-                        205f
-                    ) to
-                    centerY,
-
-                centerX to
-                    (
-                        centerY -
-                            205f
-                        ),
-
-                (
-                    centerX -
-                        205f
-                    ) to
-                    centerY
-            )
-
-        val halfSize =
-            CARD_SIZE /
-                2f
-
-        cardPolygons
-            .forEachIndexed {
-                    index,
-                    polygon ->
-
-                val cardCenterX =
-                    cardCenters[index]
-                        .first
-
-                val cardCenterY =
-                    cardCenters[index]
-                        .second
-
-                polygon.vertices =
-                    floatArrayOf(
-                        0f,
-                        halfSize,
-
-                        halfSize,
-                        0f,
-
-                        0f,
-                        -halfSize,
-
-                        -halfSize,
-                        0f
-                    )
-
-                polygon.setPosition(
-                    cardCenterX,
-                    cardCenterY
-                )
-            }
+        val centerX = camera.position.x
+        val centerY = camera.position.y
+        screenBounds.set(centerX - cameraWidth / 2f, centerY - cameraHeight / 2f, cameraWidth, cameraHeight)
+        panelBounds.set(centerX - PANEL_WIDTH / 2f, centerY - PANEL_HEIGHT / 2f, PANEL_WIDTH, PANEL_HEIGHT)
+        statsBounds.set(panelBounds.x + panelBounds.width - 500f, panelBounds.y + 22f, 478f, panelBounds.height - 44f)
+        val clusterX = panelBounds.x + 365f
+        val clusterY = centerY + 5f
+        portraitBounds.set(clusterX - 92f, clusterY - 92f, 184f, 184f)
+        val centers = arrayOf(clusterX to (clusterY + 205f), (clusterX + 205f) to clusterY, clusterX to (clusterY - 205f), (clusterX - 205f) to clusterY)
+        val half = CARD_SIZE / 2f
+        cardPolygons.forEachIndexed { index, polygon ->
+            polygon.vertices = floatArrayOf(0f, half, half, 0f, 0f, -half, -half, 0f)
+            polygon.setPosition(centers[index].first, centers[index].second)
+        }
     }
 }

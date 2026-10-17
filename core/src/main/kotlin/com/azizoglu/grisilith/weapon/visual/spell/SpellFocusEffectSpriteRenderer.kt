@@ -29,18 +29,19 @@ class SpellFocusEffectSpriteRenderer {
         erasingSoulsRuntime: ErasingSoulsRuntime,
         vortexPullRuntime: VortexPullRuntime,
         acidicPoolRuntime: AcidicPoolRuntime,
-        glyphSpellRuntime: GlyphSpellRuntime
+        glyphSpellRuntime: GlyphSpellRuntime,
+        includeSharedEffects: Boolean = true
     ): Boolean {
         return staticCloudsRuntime.isActive ||
             igniteDashRuntime.isAiming ||
             igniteDashRuntime.hasExplosionVisual ||
-            erasingSoulsRuntime.visualSnapshots().isNotEmpty() ||
+            (includeSharedEffects && erasingSoulsRuntime.visualSnapshots().isNotEmpty()) ||
             vortexPullRuntime.isActive ||
             acidicPoolRuntime.isActive ||
-            glyphSpellRuntime.pulseVisualSnapshots().isNotEmpty() ||
+            (includeSharedEffects && (glyphSpellRuntime.pulseVisualSnapshots().isNotEmpty() ||
             glyphSpellRuntime.tsunamiVisualSnapshot() != null ||
             glyphSpellRuntime.singularityVisualSnapshot() != null ||
-            glyphSpellRuntime.singularityExplosionVisualSnapshot() != null
+            glyphSpellRuntime.singularityExplosionVisualSnapshot() != null))
     }
 
     fun render(
@@ -50,7 +51,8 @@ class SpellFocusEffectSpriteRenderer {
         erasingSoulsRuntime: ErasingSoulsRuntime,
         vortexPullRuntime: VortexPullRuntime,
         acidicPoolRuntime: AcidicPoolRuntime,
-        glyphSpellRuntime: GlyphSpellRuntime
+        glyphSpellRuntime: GlyphSpellRuntime,
+        includeSharedEffects: Boolean = true
     ) {
         if (
             !hasAnythingToRender(
@@ -59,7 +61,8 @@ class SpellFocusEffectSpriteRenderer {
                 erasingSoulsRuntime,
                 vortexPullRuntime,
                 acidicPoolRuntime,
-                glyphSpellRuntime
+                glyphSpellRuntime,
+                includeSharedEffects
             )
         ) {
             return
@@ -86,7 +89,7 @@ class SpellFocusEffectSpriteRenderer {
             igniteDashRuntime
         )
 
-        renderErasingSouls(
+        if(includeSharedEffects) renderErasingSouls(
             erasingSoulsRuntime
         )
 
@@ -94,7 +97,7 @@ class SpellFocusEffectSpriteRenderer {
             acidicPoolRuntime
         )
 
-        renderGlyphSpells(
+        if(includeSharedEffects) renderGlyphSpells(
             glyphSpellRuntime
         )
 
@@ -212,69 +215,9 @@ class SpellFocusEffectSpriteRenderer {
         )
     }
 
-    private fun renderIgniteDashAim(
-        runtime: IgniteDashRuntime
-    ) {
-        if (!runtime.isAiming) {
-            return
-        }
-
-        val diameter =
-            DefaultWeaponAbilities
-                .IGNITE_DASH_OUTER_EXPLOSION_RADIUS *
-                2f
-
-        drawCentered(
-            path =
-                IGNITE_AIM_MARKER_PATH,
-
-            centerX =
-                runtime.aimVisualCenterX,
-
-            centerY =
-                runtime.aimVisualCenterY,
-
-            worldWidth =
-                diameter,
-
-            worldHeight =
-                diameter,
-
-            alpha =
-                0.36f
-        )
-
-        /*
-         * Second supplied cast marker:
-         * centered on the same destination but sized exactly to the
-         * inner full-damage radius.
-         */
-        val innerDiameter =
-            DefaultWeaponAbilities
-                .IGNITE_DASH_EXPLOSION_RADIUS *
-                2f
-
-        drawCentered(
-            path =
-                IGNITE_AIM_INNER_MARKER_PATH,
-
-            centerX =
-                runtime.aimVisualCenterX,
-
-            centerY =
-                runtime.aimVisualCenterY,
-
-            worldWidth =
-                innerDiameter,
-
-            worldHeight =
-                innerDiameter,
-
-            alpha =
-                0.56f
-        )
+    private fun renderIgniteDashAim(runtime: IgniteDashRuntime) {
+        // Exact damage-area preview is rendered without texture padding by the runtime.
     }
-
     private fun renderIgniteDash(
         runtime: IgniteDashRuntime
     ) {

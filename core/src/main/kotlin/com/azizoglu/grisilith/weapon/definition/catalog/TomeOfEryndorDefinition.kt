@@ -73,10 +73,6 @@ object TomeOfEryndorDefinition {
             levelStats =
                 WeaponLevelProgressionFactory
                     .create(
-                        level2Damage = 1.10f,
-                        level3Damage = 1.20f,
-                        level4Damage = 1.35f,
-                        level5Damage = 1.50f,
 
                         level2AttackSpeed = 1.15f,
                         level3AttackSpeed = 1.22f,
@@ -85,7 +81,7 @@ object TomeOfEryndorDefinition {
 
 
                         /*
-                         * Lv.3 ışını eski saldırıdan daha
+                         * Lv.4 ışını eski saldırıdan daha
                          * kısa menzilli olacağı için range
                          * artışı vermiyoruz.
                          */

@@ -6,6 +6,7 @@ enum class ContentCategory {
     ARMOR,
     ITEM,
     TAMGA,
+    SUMMON,
     ENEMY,
     MAP
 }

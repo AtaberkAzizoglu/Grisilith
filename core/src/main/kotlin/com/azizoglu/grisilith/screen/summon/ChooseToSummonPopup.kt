@@ -13,6 +13,9 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.azizoglu.grisilith.ui.theme.ButtonVisualState
+import com.azizoglu.grisilith.ui.theme.PanelVisualStyle
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
 
 class ChooseToSummonPopup(
     private val camera: OrthographicCamera,
@@ -181,76 +184,26 @@ class ChooseToSummonPopup(
             viewport.worldHeight
         )
 
-        shapeRenderer.color =
-            Color(
-                0.08f,
-                0.055f,
-                0.11f,
-                0.98f
-            )
-
-        shapeRenderer.rect(
-            left,
-            bottom,
-            PANEL_WIDTH,
-            PANEL_HEIGHT
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.46f,
-                0.76f,
-                0.26f,
-                1f
-            )
-
-        shapeRenderer.rectLine(
-            left,
-            bottom,
-            left +
-                PANEL_WIDTH,
-            bottom,
-            4f
-        )
-
-        optionBounds.forEach {
-                bounds ->
-
-            shapeRenderer.color =
-                if (
-                    bounds.contains(
-                        pointer
-                    )
-                ) {
-                    Color(
-                        0.30f,
-                        0.42f,
-                        0.20f,
-                        1f
-                    )
-                } else {
-                    Color(
-                        0.16f,
-                        0.12f,
-                        0.19f,
-                        1f
-                    )
-                }
-
-            shapeRenderer.rect(
-                bounds.x,
-                bounds.y,
-                bounds.width,
-                bounds.height
-            )
-        }
-
         shapeRenderer.end()
 
         batch.projectionMatrix =
             camera.combined
 
         batch.begin()
+
+        UiComponentRenderer.drawPanel(
+            batch,
+            Rectangle(left, bottom, PANEL_WIDTH, PANEL_HEIGHT),
+            PanelVisualStyle.MODAL
+        )
+
+        optionBounds.forEach { bounds ->
+            UiComponentRenderer.drawButton(
+                batch,
+                bounds,
+                if (bounds.contains(pointer)) ButtonVisualState.HOVERED else ButtonVisualState.NORMAL
+            )
+        }
 
         font.color =
             Color.WHITE
@@ -271,29 +224,6 @@ class ChooseToSummonPopup(
             false
         )
 
-        font.data.setScale(
-            0.80f
-        )
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            weapon.displayName +
-                " reached Level V. This choice belongs only to this weapon.",
-
-            left +
-                42f,
-            bottom +
-                PANEL_HEIGHT -
-                82f,
-            PANEL_WIDTH -
-                84f,
-            Align.center,
-            true
-        )
-
         IvySummonChoice.entries
             .forEachIndexed {
                     index,
@@ -311,58 +241,30 @@ class ChooseToSummonPopup(
 
                 font.draw(
                     batch,
-                    "${index + 1}. ${choice.displayName}",
-                    bounds.x +
-                        18f,
-                    bounds.y +
-                        bounds.height -
-                        22f
-                )
-
-                font.data.setScale(
-                    0.74f
-                )
-
-                font.color =
-                    Color.LIGHT_GRAY
-
-                font.draw(
-                    batch,
-                    choice.description,
-                    bounds.x +
-                        18f,
-                    bounds.y +
-                        bounds.height -
-                        49f,
-                    bounds.width -
-                        36f,
-                    Align.left,
-                    true
+                    choice.displayName,
+                    bounds.x,
+                    bounds.y + (bounds.height + font.capHeight) / 2f,
+                    bounds.width,
+                    Align.center,
+                    false
                 )
             }
-
-        font.data.setScale(
-            0.72f
-        )
-
-        font.color =
-            Color.GRAY
-
-        font.draw(
-            batch,
-            "The stage will begin after a choice is made.",
-            left,
-            bottom +
-                24f,
-            PANEL_WIDTH,
-            Align.center,
-            false
-        )
 
         font.data.setScale(
             1f
         )
 
+        optionBounds.indexOfFirst { it.contains(pointer) }.takeIf { it >= 0 }?.let { index ->
+            val choice = IvySummonChoice.entries[index]
+            com.azizoglu.grisilith.screen.render.AdaptiveTooltipRenderer.draw(
+                batch, font,
+                com.badlogic.gdx.math.Rectangle(camera.position.x-viewport.worldWidth/2f,
+                    camera.position.y-viewport.worldHeight/2f,viewport.worldWidth,viewport.worldHeight),
+                pointer, choice.displayName,
+                com.azizoglu.grisilith.summon.SummonPresentation.choice(choice),
+                490f, .88f, .73f
+            )
+        }
         batch.end()
 
         Gdx.gl.glDisable(
@@ -425,7 +327,7 @@ class ChooseToSummonPopup(
 
                         bottom +
                             PANEL_HEIGHT -
-                            150f -
+                            175f -
                             index *
                             (
                                 OPTION_HEIGHT +

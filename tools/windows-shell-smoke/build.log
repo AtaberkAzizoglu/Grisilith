@@ -1,0 +1,124 @@
+
+------------------------------------------------------------
+Tasks runnable from project ':lwjgl3'
+------------------------------------------------------------
+
+Application tasks
+-----------------
+run - Runs this project as a JVM application
+
+Build tasks
+-----------
+assemble - Assembles the outputs of this project.
+build - Assembles and tests this project.
+buildDependents - Assembles and tests this project and all projects that depend on it.
+buildKotlinToolingMetadata - Build metadata json file containing information about the used Kotlin tooling
+buildNeeded - Assembles and tests this project and all projects it depends on.
+classes - Assembles main classes.
+clean - Deletes the build directory.
+jar - Assembles a jar archive containing the classes of the 'main' feature.
+jarLinux
+jarMac
+jarWin
+kotlinSourcesJar - Assembles a jar archive containing the sources of target 'kotlin'.
+testClasses - Assembles test classes.
+
+Construo tasks
+--------------
+buildMacAppBundleMacM1
+buildMacAppBundleMacX64
+createRuntimeImageLinuxX64
+createRuntimeImageMacM1
+createRuntimeImageMacX64
+createRuntimeImageWinX64
+downloadJdkLinuxX64
+downloadJdkMacM1
+downloadJdkMacX64
+downloadJdkWinX64
+downloadRoastLinuxX64
+downloadRoastMacM1
+downloadRoastMacX64
+downloadRoastWinX64
+generatePListMacM1
+generatePListMacX64
+packageLinuxX64
+packageMacM1
+packageMacX64
+packageWinX64
+replaceIconWinX64
+roastLinuxX64
+roastMacM1
+roastMacX64
+roastWinX64
+unzipJdkLinuxX64
+unzipJdkMacM1
+unzipJdkMacX64
+unzipJdkWinX64
+unzipRoastLinuxX64
+unzipRoastMacM1
+unzipRoastMacX64
+unzipRoastWinX64
+
+Distribution tasks
+------------------
+assembleDist - Assembles the main distributions
+distTar - Bundles the project as a distribution.
+distZip - Bundles the project as a distribution.
+installDist - Installs the project as a distribution as-is.
+
+Documentation tasks
+-------------------
+javadoc - Generates Javadoc API documentation for the 'main' feature.
+
+Help tasks
+----------
+artifactTransforms - Displays the Artifact Transforms that can be executed in project ':lwjgl3'.
+buildEnvironment - Displays all buildscript dependencies declared in project ':lwjgl3'.
+dependencies - Displays all dependencies declared in project ':lwjgl3'.
+dependencyInsight - Displays the insight into a specific dependency in project ':lwjgl3'.
+help - Displays a help message.
+javaToolchains - Displays the detected java toolchains.
+outgoingVariants - Displays the outgoing variants of project ':lwjgl3'.
+projects - Displays the sub-projects of project ':lwjgl3'.
+properties - Displays the properties of project ':lwjgl3'.
+resolvableConfigurations - Displays the configurations that can be resolved in project ':lwjgl3'.
+tasks - Displays the tasks runnable from project ':lwjgl3'.
+
+IDE tasks
+---------
+cleanEclipse - Cleans all Eclipse files.
+cleanIdea - Cleans IDEA project files (IML, IPR)
+eclipse - Generates all Eclipse files.
+idea - Generates IDEA project files (IML, IPR, IWS)
+
+Verification tasks
+------------------
+check - Runs all checks.
+checkKotlinGradlePluginConfigurationErrors - Checks that Kotlin Gradle Plugin hasn't reported project configuration errors, failing otherwise. This task always runs before compileKotlin* or similar tasks.
+test - Runs the test suite.
+
+Other tasks
+-----------
+cleanEclipseClasspath
+cleanEclipseJdt
+cleanEclipseProject
+cleanIdeaModule
+compileJava - Compiles main Java source.
+compileKotlin - Compiles the compilation 'main' in target ''.
+compileTestJava - Compiles test Java source.
+compileTestKotlin - Compiles the compilation 'test' in target ''.
+dist
+eclipseClasspath - Generates the Eclipse classpath file.
+eclipseJdt - Generates the Eclipse JDT settings file.
+eclipseProject - Generates the Eclipse project file.
+generateAssetList
+ideaModule - Generates IDEA module files (IML)
+mainClasses
+processResources - Processes main resources.
+processTestResources - Processes test resources.
+startScripts - Creates OS specific scripts to run the project as a JVM application.
+
+Rules
+-----
+Pattern: clean<TaskName>: Cleans the output files of a task.
+Pattern: build<ConfigurationName>: Assembles the artifacts of a configuration.

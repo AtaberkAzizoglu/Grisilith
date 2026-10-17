@@ -15,6 +15,7 @@ import com.azizoglu.grisilith.character.visual.CharacterVisualState
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.item.runtime.ActiveItemEffects
+import com.azizoglu.grisilith.input.RunInputBindings
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Color
@@ -631,7 +632,8 @@ class Player(
 
     fun takeDamage(
         amount: Int,
-        damageType: DamageType
+        damageType: DamageType,
+        attackerPiercingIgnoreRatio: Float = 0f
     ): Int {
         val itemModifiedDamage =
             (amount * ActiveItemEffects.incomingDamageMultiplier())
@@ -657,11 +659,9 @@ class Player(
             return 0
         }
 
-        val defendedDamage =
-            if (damageType.isMagical) {
-                (affinityResolvedDamage - stats.rawMagicDamageReduction())
-                    .roundToInt().coerceAtLeast(1)
-            } else affinityResolvedDamage
+        val defendedDamage = com.azizoglu.grisilith.combat.DamageDefense.resolve(
+            affinityResolvedDamage, damageType, stats.armorBaseArmor(), stats.totalScore(StatType.ARMOR_CLASS),
+            stats.armorBaseMagicResistance(), stats.totalScore(StatType.MAGIC_RESISTANCE), attackerPiercingIgnoreRatio)
 
         return applyHealthDamage(ActiveItemEffects.resolveDamageBeforeHealth(defendedDamage))
     }
@@ -679,64 +679,13 @@ class Player(
     }
 
     /*
-     * Yalnızca uygun Melee/Ranged fiziksel saldırılar için
-     * düz Armor azaltması uygulanır.
+     * Compatibility entry point; all typed damage shares the same defense pipeline.
      */
     fun takePhysicalWeaponDamage(
         amount: Int,
-        attackerPiercingIgnoreRatio:
-        Float,
-        damageType: DamageType =
-            DamageType.SLASHING
-    ): Int {
-        if (amount <= 0) {
-            return 0
-        }
-
-        // Magical attacks never use physical Armor, even through an older caller.
-        if (damageType.isMagical) return takeDamage(amount, damageType)
-
-        val itemModifiedDamage =
-            (amount * ActiveItemEffects.incomingDamageMultiplier())
-                .roundToInt()
-
-        val affinityResolvedDamage =
-            DamageAffinityResolver
-                .resolve(
-                    requestedDamage =
-                        itemModifiedDamage,
-
-                    damageType =
-                        damageType,
-
-                    profile =
-                        damageAffinityProfile
-                )
-
-        if (
-            affinityResolvedDamage <=
-            0
-        ) {
-            return 0
-        }
-
-        val damageReduction =
-            stats.effectiveArmorDamageReduction(
-                attackerPiercingIgnoreRatio =
-                    attackerPiercingIgnoreRatio
-            )
-
-        val reducedDamage =
-            (
-                affinityResolvedDamage
-                    .toFloat() -
-                    damageReduction
-                )
-                .roundToInt()
-                .coerceAtLeast(1)
-
-        return applyHealthDamage(ActiveItemEffects.resolveDamageBeforeHealth(reducedDamage))
-    }
+        attackerPiercingIgnoreRatio: Float,
+        damageType: DamageType = DamageType.SLASHING
+    ): Int = takeDamage(amount, damageType, attackerPiercingIgnoreRatio)
 
     private fun applyHealthDamage(amount: Int): Int {
         val applied = health.takeDamage(amount)
@@ -915,7 +864,7 @@ class Player(
 
         if (
             Gdx.input.isKeyPressed(
-                Input.Keys.W
+                RunInputBindings.moveUpKey
             ) ||
             Gdx.input.isKeyPressed(
                 Input.Keys.UP
@@ -927,7 +876,7 @@ class Player(
 
         if (
             Gdx.input.isKeyPressed(
-                Input.Keys.S
+                RunInputBindings.moveDownKey
             ) ||
             Gdx.input.isKeyPressed(
                 Input.Keys.DOWN
@@ -939,7 +888,7 @@ class Player(
 
         if (
             Gdx.input.isKeyPressed(
-                Input.Keys.A
+                RunInputBindings.moveLeftKey
             ) ||
             Gdx.input.isKeyPressed(
                 Input.Keys.LEFT
@@ -951,7 +900,7 @@ class Player(
 
         if (
             Gdx.input.isKeyPressed(
-                Input.Keys.D
+                RunInputBindings.moveRightKey
             ) ||
             Gdx.input.isKeyPressed(
                 Input.Keys.RIGHT

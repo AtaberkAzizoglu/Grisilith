@@ -9,7 +9,6 @@ import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionSource
-
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.enemy.runtime.EnemyAdaptiveScalingRuntime
@@ -23,6 +22,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.azizoglu.grisilith.enemy.EnemySpawner
 import com.azizoglu.grisilith.statistics.RunStatistics
+import com.azizoglu.grisilith.statistics.RunDamageTypeTelemetry
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.azizoglu.grisilith.util.GameTimeController
@@ -49,13 +49,14 @@ import com.azizoglu.grisilith.map.MapEnvironmentEffects
 import com.azizoglu.grisilith.map.TroubleAtHomeDefenseRuntime
 import com.azizoglu.grisilith.map.enemy.MapEnemyRuntimeContext
 import com.azizoglu.grisilith.statistics.PlayerStats
+import com.azizoglu.grisilith.ui.stat.StatSymbolRenderer
 import com.azizoglu.grisilith.character.CharacterDefinition
 import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.azizoglu.grisilith.weapon.runtime.WeaponInventory
 import com.azizoglu.grisilith.screen.render.HudRenderer
 import com.azizoglu.grisilith.screen.render.MarketRenderer
 import com.azizoglu.grisilith.screen.render.RunSummaryRenderer
-import com.azizoglu.grisilith.summary.RunGradeCalculator
+import com.azizoglu.grisilith.summary.RunScoreCalculator
 import com.azizoglu.grisilith.summary.RunSummaryArmorEntry
 import com.azizoglu.grisilith.summary.RunSummaryItemEntry
 import com.azizoglu.grisilith.summary.RunSummarySnapshot
@@ -89,6 +90,7 @@ import com.azizoglu.grisilith.chest.ChestRewardRoller
 import com.azizoglu.grisilith.chest.ChestRewardType
 import com.azizoglu.grisilith.screen.controller.ChestRewardController
 import com.azizoglu.grisilith.statistics.StatType
+import com.azizoglu.grisilith.statistics.StatPresentationGroup
 import com.azizoglu.grisilith.screen.pause.PauseAction
 import com.azizoglu.grisilith.screen.pause.PauseInputController
 import com.azizoglu.grisilith.screen.pause.PauseInteractionState
@@ -103,21 +105,24 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.MathUtils
+import com.azizoglu.grisilith.ui.icon.ContentIconRenderer
+import com.azizoglu.grisilith.ui.theme.ButtonVisualState
+import com.azizoglu.grisilith.ui.theme.PanelVisualStyle
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
+import com.azizoglu.grisilith.ui.typography.UiFontFactory
+import com.azizoglu.grisilith.input.RunInputBindings
 import com.azizoglu.grisilith.enemy.definition.EnemyTag
 import com.azizoglu.grisilith.reward.RunRewardTracker
 import com.azizoglu.grisilith.content.CollectionEncounterIds
 import com.azizoglu.grisilith.profile.PlayerProfileRepository
 import com.azizoglu.grisilith.statistics.career.CompletedRunStatistics
 import com.azizoglu.grisilith.statistics.career.HighScoreRepository
-import com.azizoglu.grisilith.screen.render.ChestCharacterStatRow
 import com.azizoglu.grisilith.screen.render.RunSummaryStatRenderer
 import com.azizoglu.grisilith.screen.controller.RunSummaryStatInteractionController
 import com.azizoglu.grisilith.summary.RunSummaryStatEntry
 import com.azizoglu.grisilith.summary.StatContributionSource
 import com.azizoglu.grisilith.summary.StatSourceContribution
-import com.azizoglu.grisilith.save.RunSaveBuilder
-import com.azizoglu.grisilith.save.RunSaveRepository
-import com.azizoglu.grisilith.save.RunSaveSnapshot
 import com.azizoglu.grisilith.armor.definition.DefaultArmors
 import com.azizoglu.grisilith.tamga.definition.DefaultTamgas
 import com.azizoglu.grisilith.settings.GameSettings
@@ -139,15 +144,13 @@ class FirstScreen(
     CharacterDefinition,
 
     private val selectedPreset:
-    ResolvedPresetContent? = null,
-
-    private val restoredRun:
-    RunSaveSnapshot? = null
+    ResolvedPresetContent? = null
 ) : ScreenAdapter() {
 
     companion object {
         private const val CAMERA_WIDTH = 1280f
         private const val CAMERA_HEIGHT = 720f
+        private const val DAMAGE_FEEDBACK_DURATION = 0.46f
     }
 
     private val worldWidth =
@@ -161,6 +164,9 @@ class FirstScreen(
 
     private val camera =
         OrthographicCamera()
+
+    private var damageFeedbackRemaining = 0f
+    private var damageFeedbackStrength = 0f
 
     private val worldRenderer =
         WorldRenderer(
@@ -419,7 +425,9 @@ class FirstScreen(
         }
 
     private val hudBatch = SpriteBatch()
-    private val hudFont = BitmapFont()
+    private val hudFont = UiFontFactory.createNumeric()
+    private val uiBodyFont = UiFontFactory.createBody()
+    private val summaryTitleFont = UiFontFactory.createDecorative()
     private val damageNumberManager =
         DamageNumberManager()
 
@@ -446,6 +454,15 @@ class FirstScreen(
         )
 
     private var isRunSummaryOpen = false
+
+    private var runEndTransitionElapsed = -1f
+    private var summaryScoreElapsed = 0f
+
+    private var summaryPreviousInputProcessor: InputProcessor? = null
+
+    private val isRunEndTransitionActive: Boolean
+        get() = runEndTransitionElapsed >= 0f &&
+            runEndTransitionElapsed < RunSummaryRenderer.TRANSITION_DURATION
 
     private var isMarketOpen = false
 
@@ -495,9 +512,6 @@ class FirstScreen(
     private var hasInitializedRun =
         false
 
-    private val checkpointSavingEnabled =
-        restoredRun == null
-
     private var marketSlots =
         emptyList<MarketSlot>()
 
@@ -509,7 +523,7 @@ class FirstScreen(
 
     private var marketRerollsUsed = 0
 
-    private var itemScrollOffset = 0
+    private var itemScrollOffset = 0f
 
     private var previousInputProcessor:
         InputProcessor? = null
@@ -543,6 +557,8 @@ class FirstScreen(
         PickupRangeController()
 
     init {
+        RunDamageTypeTelemetry.bind(runStatistics)
+
         ActiveItemEffects.bind(
             inventory = itemInventory,
             weaponInventory = weaponInventory,
@@ -620,15 +636,6 @@ class FirstScreen(
         stageController.currentStage
 
 
-    /*
-     * A loaded checkpoint already contains the wallet state for its stage.
-     * The first observed stage after restore must therefore NOT receive the
-     * pre-boss growth for a second time.
-     */
-    private var skipFirstBossGrowthAfterRestore =
-        restoredRun !=
-            null
-
     private val chestRewardQueue =
         ChestRewardQueue()
 
@@ -705,6 +712,9 @@ class FirstScreen(
             cameraHeight =
                 CAMERA_HEIGHT,
 
+            viewport =
+                viewport,
+
             shapeRenderer =
                 shapeRenderer,
 
@@ -712,13 +722,56 @@ class FirstScreen(
                 hudBatch,
 
             font =
-                hudFont
+                uiBodyFont,
+
+            titleFont =
+                summaryTitleFont
         )
+
+    private val runSummaryInputProcessor = object : InputAdapter() {
+        private var dragLastY: Float? = null
+
+        override fun scrolled(amountX: Float, amountY: Float): Boolean {
+            if (!isRunSummaryOpen) return false
+            val pointer = Vector2(Gdx.input.x.toFloat(), Gdx.input.y.toFloat())
+            viewport.unproject(pointer)
+            if (!runSummaryRenderer.itemViewport().contains(pointer)) return false
+            runSummaryRenderer.scrollItems(amountY * 42f, currentRunSummarySnapshot().items.size)
+            return true
+        }
+
+        override fun touchDown(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
+            if (!isRunSummaryOpen || button != Input.Buttons.LEFT) return false
+            val world = Vector2(screenX.toFloat(), screenY.toFloat())
+            viewport.unproject(world)
+            if (!runSummaryRenderer.itemViewport().contains(world)) return false
+            dragLastY = world.y
+            return true
+        }
+
+        override fun touchDragged(screenX: Int, screenY: Int, pointer: Int): Boolean {
+            val previousY = dragLastY ?: return false
+            val world = Vector2(screenX.toFloat(), screenY.toFloat())
+            viewport.unproject(world)
+            runSummaryRenderer.scrollItems(world.y - previousY, currentRunSummarySnapshot().items.size)
+            dragLastY = world.y
+            return true
+        }
+
+        override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
+            val wasDragging = dragLastY != null
+            dragLastY = null
+            return wasDragging
+        }
+    }
 
     private val runSummaryStatRenderer =
         RunSummaryStatRenderer(
             camera =
                 camera,
+
+            viewport =
+                viewport,
 
             shapeRenderer =
                 shapeRenderer,
@@ -761,7 +814,7 @@ class FirstScreen(
                 hudBatch,
 
             font =
-                hudFont,
+                uiBodyFont,
 
             sessionWallet =
                 sessionWallet,
@@ -779,7 +832,11 @@ class FirstScreen(
                 weaponInventory,
 
             itemInventory =
-                itemInventory
+                itemInventory,
+
+            runGrisilithCoinsProvider = {
+                runRewardTracker.grisilithCoinsEarned
+            }
         )
 
     private val marketInputController =
@@ -793,7 +850,15 @@ class FirstScreen(
             },
 
             interactionState =
-                marketInteractionState
+                marketInteractionState,
+
+            itemScrollPixelsProvider = {
+                itemScrollOffset
+            },
+
+            groupedItemCountProvider = {
+                itemInventory.allItems().distinctBy { it.definition.id }.size
+            }
         )
 
     private val pauseInteractionState =
@@ -814,7 +879,7 @@ class FirstScreen(
                 hudBatch,
 
             font =
-                hudFont,
+                uiBodyFont,
 
             selectedCharacter =
                 selectedCharacter,
@@ -829,8 +894,18 @@ class FirstScreen(
                 itemInventory,
 
             equippedArmor =
-                equippedArmor
+                equippedArmor,
+
+            weaponTamga =
+                selectedPreset?.weaponTamga,
+
+            armorTamga =
+                selectedPreset?.armorTamga
         )
+
+    private val pauseWeaponInventoryController = com.azizoglu.grisilith.screen.pause.PauseWeaponInventoryController(
+        weaponInventory, pauseInteractionState, ::synchronizeWeaponInventoryEffects
+    )
 
     private val pauseInputController =
         PauseInputController(
@@ -858,8 +933,12 @@ class FirstScreen(
             groupedItemCountProvider = {
                 pauseRenderer
                     .groupedItemCount()
-            }
+            },
+            onWeaponDrop = pauseWeaponInventoryController::drop,
+            onConfirmWeaponMerge = pauseWeaponInventoryController::confirm
         )
+
+    private var pausePreviousInputProcessor: InputProcessor? = null
 
     private val statCardController =
         StatCardController(
@@ -901,220 +980,15 @@ class FirstScreen(
                     .displayName
             },
 
-            characterStatsProvider = {
-                chestCharacterStatRows()
-            },
-
             onOpenMarket = {
                 openMarket()
             }
         )
 
-    private fun chestCharacterStatRows():
-        List<ChestCharacterStatRow> {
-
-        return listOf(
-            ChestCharacterStatRow(
-                label = "Max HP",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.MAX_HP
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Armor",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.ARMOR_CLASS
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Magic Resist",
-                value = playerStats.totalScore(StatType.MAGIC_RESISTANCE).toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "STR",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.STRENGTH
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "DEX",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.DEXTERITY
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "WIS",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.WISDOM
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Haste",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.HASTE
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Atk Speed",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.ATTACK_SPEED
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Crit Rate",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.CRIT_RATE
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Crit Dmg",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.CRIT_DAMAGE
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Move Spd",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.MOVEMENT_SPEED
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Luck",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.LUCK
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Harvest",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.HARVEST
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Elemental",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.ELEMENTAL_DAMAGE
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Nature",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.MIGHT_OF_NATURE
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Shepherd",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.SHEPHERD
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Piercing",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.PIERCING
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Enemy #",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.ENEMY_COUNT
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "HP Regen",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.HP_REGENERATION
-                        )
-                        .toString()
-            ),
-
-            ChestCharacterStatRow(
-                label = "Life Steal",
-                value =
-                    playerStats
-                        .totalScore(
-                            StatType.LIFE_STEAL
-                        )
-                        .toString()
-            )
-        )
-    }
-
     private fun currentRunSummaryStats():
         List<RunSummaryStatEntry> {
 
-        return StatType.entries
+        return StatType.grouped
             .map { statType ->
 
                 /*
@@ -1286,6 +1160,9 @@ class FirstScreen(
                         displayName =
                             weapon.displayName,
 
+                        description =
+                            com.azizoglu.grisilith.weapon.definition.WeaponPresentation.hover(weapon),
+
                         level =
                             weapon.level,
 
@@ -1335,6 +1212,11 @@ class FirstScreen(
                         ?.displayName
                         ?: "No Armor",
 
+                description =
+                    armorDefinition
+                        ?.description
+                        ?: "No armor is equipped.",
+
                 /*
                  * ArmorDefinition içinde tür etiketi için public
                  * alan bulunmadığından bu aşamada güvenli genel etiket.
@@ -1366,7 +1248,13 @@ class FirstScreen(
                         selectedPreset
                             ?.weaponTamga
                             ?.displayName
-                            ?: "No Weapon Tamga"
+                            ?: "No Weapon Tamga",
+
+                    description =
+                        selectedPreset
+                            ?.weaponTamga
+                            ?.description
+                            ?: "No weapon Tamga is equipped."
                 ),
 
                 RunSummaryTamgaEntry(
@@ -1383,7 +1271,13 @@ class FirstScreen(
                         selectedPreset
                             ?.armorTamga
                             ?.displayName
-                            ?: "No Armor Tamga"
+                            ?: "No Armor Tamga",
+
+                    description =
+                        selectedPreset
+                            ?.armorTamga
+                            ?.description
+                            ?: "No armor Tamga is equipped."
                 )
             )
 
@@ -1410,6 +1304,10 @@ class FirstScreen(
                             firstItem.definition
                                 .displayName,
 
+                        description =
+                            firstItem.definition
+                                .description,
+
                         count =
                             groupedItems.size
                     )
@@ -1418,40 +1316,7 @@ class FirstScreen(
                     it.displayName
                 }
 
-        val gradeResult =
-            RunGradeCalculator
-                .calculate(
-                    difficulty =
-                        difficulty,
-
-                    wasSuccessful =
-                        stageController
-                            .isRunComplete,
-
-                    stageReached =
-                        displayedStage(),
-
-                    enemiesKilled =
-                        runStatistics
-                            .totalEnemiesKilled,
-
-                    miniBossesDefeated =
-                        runStatistics
-                            .totalBossesDefeated,
-
-                    finalBossesDefeated =
-                        runStatistics
-                            .totalFinalBossesDefeated,
-
-                    totalDamageDealt =
-                        runStatistics
-                            .totalDamageDealt
-                            .toFloat(),
-
-                    grisilithCoinsEarned =
-                        runRewardTracker
-                            .grisilithCoinsEarned
-                )
+        val score = currentRunScore()
 
         return RunSummarySnapshot(
             wasSuccessful =
@@ -1490,6 +1355,20 @@ class FirstScreen(
                     .totalDamageTaken
                     .toFloat(),
 
+            totalDamageReduced =
+                runStatistics
+                    .totalDamageReduced
+                    .toFloat(),
+
+            damageDealtByType =
+                runStatistics.damageDealtTypeStatistics.mapValues { it.value.toFloat() },
+
+            damageTakenByType =
+                runStatistics.damageTakenTypeStatistics.mapValues { it.value.toFloat() },
+
+            damageReducedByType =
+                runStatistics.damageReducedTypeStatistics.mapValues { it.value.toFloat() },
+
             goldCollected =
                 runStatistics
                     .totalGoldCollected,
@@ -1502,8 +1381,11 @@ class FirstScreen(
                 runStatistics
                     .totalChestsOpened,
 
-            gradeResult =
-                gradeResult,
+            score = score,
+            enemyScore = currentEnemyScore(),
+            scoreBeforeStageBonus = currentRunScoreForStage(0),
+            scoreStageMultiplier = if(gameMap==GameMap.TEST_MAP)1f else RunScoreCalculator.stageMultiplier(difficulty,displayedStage()),
+            scoreDifficultyMultiplier = if(gameMap==GameMap.TEST_MAP)1f else RunScoreCalculator.difficultyMultiplier(difficulty),
 
             stats =
                 currentRunSummaryStats(),
@@ -1548,7 +1430,7 @@ class FirstScreen(
             },
 
             availableStatTypesProvider = {
-                StatType.entries
+                StatType.alphabetical
                     .filter {
                             statType ->
 
@@ -1600,14 +1482,8 @@ class FirstScreen(
             font =
                 hudFont,
 
-            characterNameProvider = {
-                selectedCharacter
-                    .displayName
-            },
-
-            characterStatsProvider = {
-                chestCharacterStatRows()
-            },
+            playerStats =
+                playerStats,
 
             onChestCompleted = {
                 runStatistics
@@ -1615,18 +1491,12 @@ class FirstScreen(
             },
 
             remainingRunDiscardCountProvider = {
-                remainingRunChestDiscards
+                remainingRunChestDiscards + itemInventory.countByDefinitionId(DefaultItems.discardVoucher.id)
             },
 
             onRunDiscardUsed = {
-                remainingRunChestDiscards =
-                    (
-                        remainingRunChestDiscards -
-                            1
-                        )
-                        .coerceAtLeast(
-                            0
-                        )
+                if (remainingRunChestDiscards > 0) remainingRunChestDiscards--
+                else itemInventory.consumeOneDefinition(DefaultItems.discardVoucher.id)
             },
 
             onApplyReward = {
@@ -1655,7 +1525,7 @@ class FirstScreen(
             viewport = viewport,
             shapeRenderer = shapeRenderer,
             batch = hudBatch,
-            font = hudFont
+            font = uiBodyFont
         )
 
     private val chooseToSummonPopup =
@@ -1673,13 +1543,16 @@ class FirstScreen(
                 hudBatch,
 
             font =
-                hudFont
+                uiBodyFont
         )
 
     override fun show() {
         viewport.apply()
 
-        if (gameMap == GameMap.TEST_MAP && Gdx.input.inputProcessor == null) {
+        if (isPauseMenuOpen) {
+            pausePreviousInputProcessor = Gdx.input.inputProcessor
+            Gdx.input.inputProcessor = pauseInputController
+        } else if (gameMap == GameMap.TEST_MAP && Gdx.input.inputProcessor == null) {
             Gdx.input.inputProcessor = testMapScrollProcessor
         }
 
@@ -1694,13 +1567,8 @@ class FirstScreen(
             hasInitializedRun =
                 true
 
-            if (
-                restoredRun ==
-                null
-            ) {
-                HighScoreRepository
-                    .recordRunStarted()
-            }
+            HighScoreRepository
+                .recordRunStarted()
 
             PlayerProfileRepository
                 .markMapEncountered(
@@ -1709,19 +1577,7 @@ class FirstScreen(
                     )
                 )
 
-            val snapshot =
-                restoredRun
-
-            if (
-                snapshot ==
-                null
-            ) {
-                initializeStartingLoadout()
-            } else {
-                restoreRunCheckpoint(
-                    snapshot
-                )
-            }
+            initializeStartingLoadout()
 
             recordCurrentEnemyEncounters()
         }
@@ -1730,227 +1586,6 @@ class FirstScreen(
     }
 
 
-
-    private fun restoreRunCheckpoint(
-        snapshot:
-        RunSaveSnapshot
-    ) {
-
-        summonManager.clear()
-        enemyManager.clearAll()
-        damageNumberManager.clear()
-        projectiles.clear()
-        currencyPickupManager
-            .clearAll()
-
-        /*
-         * Uncollected chests intentionally survive stage transitions.
-         * They remain at their world positions until the player picks them up
-         * or the run itself ends/resets.
-         */
-
-        chestRewardQueue.clear()
-
-        stageController
-            .restoreCheckpointStage(
-                snapshot.checkpointStage
-            )
-
-        gameTimeController
-            .restoreElapsedGameTime(
-                snapshot.elapsedRunTimeSeconds
-            )
-
-        playerStats
-            .restoreSaveLayers(
-                snapshot.statLayers
-            )
-
-        weaponInventory
-            .clearAllSlots()
-
-        snapshot.weaponSlots
-            .sortedBy {
-                it.slotIndex
-            }
-            .forEach {
-                    savedSlot ->
-
-                val definition =
-                    DefaultWeapons.all
-                        .firstOrNull {
-                            it.id.toString() ==
-                                savedSlot.weaponDefinitionId ||
-                                it.id.value ==
-                                savedSlot.weaponDefinitionId
-                        }
-                        ?: return@forEach
-
-                val weapon =
-                    WeaponInstance(
-                        definition =
-                            definition,
-
-                        level =
-                            savedSlot.level
-                                .coerceIn(
-                                    WeaponInstance.MINIMUM_LEVEL,
-                                    WeaponInstance.MAXIMUM_LEVEL
-                                )
-                    )
-
-                weapon.restoreIvySummonChoice(
-                    IvySummonChoice
-                        .fromSavedName(
-                            savedSlot
-                                .ivySummonChoiceName
-                        )
-                )
-
-                weapon.restoreChalkDustSpellChoice(
-                    ChalkDustSpellChoice
-                        .fromSavedName(
-                            savedSlot
-                                .chalkDustSpellChoiceName
-                        )
-                )
-
-                weaponInventory
-                    .addPurchasedWeaponToSlot(
-                        weapon =
-                            weapon,
-
-                        targetSlotIndex =
-                            savedSlot.slotIndex
-                    )
-            }
-
-        itemInventory.clear()
-
-        snapshot.itemStacks
-            .forEach {
-                    savedStack ->
-
-                val definition =
-                    DefaultItems.all
-                        .firstOrNull {
-                            it.id.toString() ==
-                                savedStack.itemDefinitionId ||
-                                it.id.value ==
-                                savedStack.itemDefinitionId
-                        }
-                        ?: return@forEach
-
-                repeat(
-                    savedStack.count
-                        .coerceAtLeast(
-                            0
-                        )
-                ) {
-                    itemInventory.addItem(
-                        ItemInstance(
-                            definition =
-                                definition
-                        )
-                    )
-                }
-            }
-
-        equippedArmor.clear()
-
-        snapshot.armorDefinitionId
-            ?.takeIf { selectedCharacter.canEquipArmor }
-            ?.let {
-                    savedArmorId ->
-
-                DefaultArmors.all
-                    .firstOrNull {
-                        it.id.toString() ==
-                            savedArmorId ||
-                            it.id.value ==
-                            savedArmorId
-                    }
-                    ?.let {
-                            definition ->
-
-                        equippedArmor.equip(
-                            definition
-                        )
-                    }
-            }
-
-        sessionWallet
-            .restoreGold(
-                snapshot.sessionGold
-            )
-
-        runStatistics
-            .restoreSaveState(
-                snapshot.statistics
-            )
-
-        runRewardTracker
-            .restoreSaveState(
-                snapshot.rewardState
-            )
-
-        remainingRunChestDiscards =
-            snapshot.remainingChestDiscards
-                .coerceAtLeast(
-                    0
-                )
-
-        armorStatBonusSynchronizer
-            .invalidate()
-
-        armorStatBonusSynchronizer
-            .synchronize()
-
-        weaponStatBonusSynchronizer
-            .invalidate()
-
-        weaponStatBonusSynchronizer
-            .synchronize()
-
-        itemStatSynchronizer
-            .synchronize()
-
-        ActiveItemEffects.restoreSaveState(
-            snapshot.itemEffectState
-        )
-
-        pickupRangeController.setMultiplier(
-            ActiveItemEffects.pickupRangeMultiplier()
-        )
-
-        player
-            .synchronizeMaximumHealthWithStats(
-                healAddedHealth =
-                    false
-            )
-
-        player.health
-            .restoreCurrentHealth(
-                snapshot.currentHealth
-            )
-
-        tamgaRuntimeManager.reset()
-
-        weaponRuntimeManager
-            .resetAllTimers()
-
-        enemySpawner.resetTimer()
-
-        troubleAtHomeDefenseRuntime.restoreCheckpoint(
-            gateCurrentHealth = snapshot.troubleAtHomeGateHealth,
-            guardCount = snapshot.villageGuardCount,
-            currentStage = snapshot.checkpointStage,
-            summonManager = summonManager,
-            guardProfileProvider = ::randomVillageGuardProfile
-        )
-
-        updateCamera()
-    }
 
     private fun initializeStartingLoadout() {
         val preset =
@@ -2048,6 +1683,10 @@ class FirstScreen(
     override fun render(
         delta: Float
     ) {
+        val healthBeforeFrame = player.health.currentHealth
+        damageFeedbackRemaining =
+            (damageFeedbackRemaining - delta.coerceAtLeast(0f)).coerceAtLeast(0f)
+
         handleGameControls(
             delta
         )
@@ -2075,43 +1714,34 @@ class FirstScreen(
                 delta
             )
 
-        if (
-            player.health.isDead ||
-            stageController.isRunComplete
-        ) {
+        val runHasEnded = player.health.isDead || stageController.isRunComplete
 
-            if (
-                !isRunSummaryOpen
-            ) {
+        if (runHasEnded && runEndTransitionElapsed < 0f && !isRunSummaryOpen) {
 
-                /*
-                 * Önce run sonunda kalıcı hâle gelmesi gereken
-                 * ödül ve istatistikleri kaydediyoruz.
-                 */
-                runRewardTracker
-                    .commitToProfile()
+            runRewardTracker.commitToProfile()
+            commitCareerStatistics()
+            runEndTransitionElapsed = 0f
+        }
 
-                commitCareerStatistics()
-
-                /*
-                 * Run artık başarıyla veya başarısızlıkla sona erdi.
-                 * Devam ettirilebilecek aktif bir checkpoint kalmadığı
-                 * için Load Game save'i tamamen silinir.
-                 */
-                RunSaveRepository
-                    .delete()
+        if (isRunEndTransitionActive) {
+            runEndTransitionElapsed = (runEndTransitionElapsed + delta.coerceAtLeast(0f))
+                .coerceAtMost(RunSummaryRenderer.TRANSITION_DURATION)
+            if (runEndTransitionElapsed >= RunSummaryRenderer.SUMMARY_REVEAL_START && !isRunSummaryOpen) {
+                isRunSummaryOpen = true
+                summaryPreviousInputProcessor = Gdx.input.inputProcessor
+                Gdx.input.inputProcessor = runSummaryInputProcessor
             }
-
-            isRunSummaryOpen =
-                true
         }
 
         openPendingChalkDustSpellChoiceIfReady()
+        if(isRunSummaryOpen && runEndTransitionElapsed>=RunSummaryRenderer.TRANSITION_DURATION) {
+            summaryScoreElapsed=(summaryScoreElapsed+(delta.takeIf { it.isFinite() }?.coerceAtLeast(0f) ?: 0f))
+                .coerceAtMost(com.azizoglu.grisilith.summary.ScoreReveal.TOTAL_SECONDS)
+        }
         openPendingIvySummonChoiceIfReady()
 
         val gameplayStopped =
-            player.health.isDead ||
-                stageController.isRunComplete ||
+            runHasEnded ||
                 chestRewardController.isOpen ||
                 statCardController.isOpen ||
                 chooseToSummonPopup.isOpen ||
@@ -2152,8 +1782,30 @@ class FirstScreen(
             )
         }
 
+        val damageTakenThisFrame = healthBeforeFrame - player.health.currentHealth
+        if (damageTakenThisFrame > 0) {
+            triggerDamageFeedback(damageTakenThisFrame)
+            updateCamera()
+        }
+
         renderGame()
     }
+
+    private fun currentEnemyScore(): Long = RunScoreCalculator.enemyScore(gameMap,
+        runStatistics.totalNormalEnemiesKilled,runStatistics.totalUniqueEnemiesKilled,
+        runStatistics.totalBossesDefeated,runStatistics.totalFinalBossesDefeated)
+
+    private fun currentRunScore(): Long = currentRunScoreForStage(displayedStage())
+
+    private fun currentRunScoreForStage(stage: Int): Long = RunScoreCalculator.calculate(
+        map = gameMap,
+        difficulty = difficulty,
+        normalEnemiesKilled = runStatistics.totalNormalEnemiesKilled,
+        uniqueEnemiesKilled = runStatistics.totalUniqueEnemiesKilled,
+        miniBossesDefeated = runStatistics.totalBossesDefeated,
+        finalBossesDefeated = runStatistics.totalFinalBossesDefeated,
+        stageReached = stage
+    )
 
     private fun commitCareerStatistics() {
 
@@ -2211,7 +1863,8 @@ class FirstScreen(
 
                     grisilithCoinsEarned =
                         runRewardTracker
-                            .grisilithCoinsEarned
+                            .grisilithCoinsEarned,
+                    score = currentRunScore()
                 )
             )
     }
@@ -2283,6 +1936,8 @@ class FirstScreen(
     private fun handleGameControls(
         delta: Float
     ) {
+        if (isRunEndTransitionActive) return
+
         if (gameMap == GameMap.TEST_MAP && canShowTestMapControls() && handleTestMapControls()) return
         if (!canShowTestMapControls()) testPointerWasDown = false
 
@@ -2333,22 +1988,29 @@ class FirstScreen(
         }
 
         if (
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.ESCAPE
-            )
+            Gdx.input.isKeyJustPressed(RunInputBindings.pauseKey)
         ) {
             openPauseMenu()
             return
         }
 
-        /*
-         * Active Tamga kısayolları:
-         * Weapon Tamga -> Z
-         * Armor Tamga  -> X
-         */
+        if (handlePauseButtonInput()) {
+            return
+        }
+
+        if (Gdx.input.isKeyJustPressed(RunInputBindings.gameSpeedKey)) {
+            cycleGameSpeed()
+        }
+
+        if (gameMap == GameMap.TEST_MAP &&
+            Gdx.input.isKeyJustPressed(RunInputBindings.resetCooldownsKey)
+        ) {
+            resetAllRunCooldowns()
+        }
+
         if (
             Gdx.input.isKeyJustPressed(
-                Input.Keys.Q
+                RunInputBindings.weaponTamgaKey
             )
         ) {
             tamgaRuntimeManager
@@ -2357,7 +2019,7 @@ class FirstScreen(
 
         if (
             Gdx.input.isKeyJustPressed(
-                Input.Keys.E
+                RunInputBindings.armorTamgaKey
             )
         ) {
             tamgaRuntimeManager
@@ -2369,6 +2031,20 @@ class FirstScreen(
         handleGameSpeedButtonInput()
         handleWeaponAbilityInput()
 
+    }
+
+    private fun handlePauseButtonInput(): Boolean {
+        if (!Gdx.input.justTouched()) return false
+
+        val pointerPosition = Vector2(
+            Gdx.input.x.toFloat(),
+            Gdx.input.y.toFloat()
+        )
+        viewport.unproject(pointerPosition)
+        if (!hudRenderer.isPauseButtonAt(pointerPosition.x, pointerPosition.y)) return false
+
+        openPauseMenu()
+        return true
     }
 
     private fun canShowTestMapControls(): Boolean =
@@ -2390,6 +2066,12 @@ class FirstScreen(
                 isTestOwnedItemsOpen -> isTestOwnedItemsOpen = false
                 else -> isTestSettingsOpen = false
             }
+            return true
+        }
+        if (!isTestSettingsOpen &&
+            Gdx.input.isKeyJustPressed(RunInputBindings.testPauseKey)
+        ) {
+            isTestRunFrozen = !isTestRunFrozen
             return true
         }
         val pointerDown = Gdx.input.isButtonPressed(Input.Buttons.LEFT)
@@ -2437,18 +2119,16 @@ class FirstScreen(
             if (completedDrag) return true
         }
 
-        if (!isTestSettingsOpen && justPressed && hit(right - 300f, bottom + 18f, 150f, 42f)) {
+        if (!isTestSettingsOpen && justPressed && hit(right - 350f, bottom + 18f, 205f, 44f)) {
             isTestSettingsOpen = !isTestSettingsOpen
             return true
         }
-        if (!isTestSettingsOpen && justPressed && hit(right - 140f, bottom + 18f, 120f, 42f)) {
+        if (!isTestSettingsOpen && justPressed && hit(right - 135f, bottom + 18f, 115f, 44f)) {
             isTestRunFrozen = !isTestRunFrozen
             return true
         }
-        if (!isTestSettingsOpen && justPressed && hit(right - 300f, bottom + 66f, 280f, 38f)) {
-            weaponRuntimeManager.reduceAllAbilityCooldowns(Float.MAX_VALUE)
-            tamgaRuntimeManager.resetAllActiveCooldowns()
-            ActiveItemEffects.resetAllCooldowns()
+        if (!isTestSettingsOpen && justPressed && hit(right - 350f, bottom + 70f, 330f, 44f)) {
+            resetAllRunCooldowns()
             return true
         }
         if (!isTestSettingsOpen) return false
@@ -2511,7 +2191,12 @@ class FirstScreen(
                     if (entry is com.azizoglu.grisilith.item.definition.ItemDefinition) {
                         itemInventory.addItem(ItemInstance(entry)); itemStatSynchronizer.synchronize()
                     } else if (entry is com.azizoglu.grisilith.weapon.definition.WeaponDefinition) {
-                        weaponInventory.addPurchasedWeapon(WeaponInstance(entry)); weaponStatBonusSynchronizer.synchronize()
+                        val level = when {
+                            hit(left + 835f, bottom + 501f - row * 36f, 50f, 28f) -> 5
+                            hit(left + 780f, bottom + 501f - row * 36f, 50f, 28f) -> 3
+                            else -> 1
+                        }
+                        addTestWeapon(entry, level)
                     }
                 }
                 return true
@@ -2529,15 +2214,13 @@ class FirstScreen(
         }
         if (isTestStatEditorOpen) {
             if (isShortRelease) {
-                StatType.entries.forEachIndexed { i, stat ->
-                    val column = i / 10
-                    val row = i % 10
-                    val x = left + 145f + column * 500f
-                    val y = bottom + 555f - row * 48f
-                    if (hit(x + 250f, y, 32f, 30f)) playerStats.adjustRunBonus(stat, -5)
-                    if (hit(x + 286f, y, 32f, 30f)) playerStats.adjustRunBonus(stat, -1)
-                    if (hit(x + 322f, y, 32f, 30f)) playerStats.adjustRunBonus(stat, 1)
-                    if (hit(x + 358f, y, 32f, 30f)) playerStats.adjustRunBonus(stat, 5)
+                testStatRows(left, bottom).forEach { (stat, rowBounds) ->
+                    listOf(-5, -1, 1, 5).forEachIndexed { index, amount ->
+                        val button = testStatAdjustmentBounds(rowBounds, index)
+                        if (hit(button.x, button.y, button.width, button.height)) {
+                            playerStats.adjustRunBonus(stat, amount)
+                        }
+                    }
                 }
                 if (hit(right - 230f, bottom + 85f, 150f, 38f)) isTestStatEditorOpen = false
             }
@@ -2622,6 +2305,39 @@ class FirstScreen(
         portalStageCompletionRequested = false
     }
 
+    private fun testStatGroupBounds(
+        left: Float,
+        bottom: Float
+    ): Map<StatPresentationGroup, Rectangle> =
+        StatPresentationGroup.ordered.mapIndexed { index, group ->
+            val column = index % 2
+            val row = index / 2
+            group to Rectangle(
+                left + 135f + column * 505f,
+                bottom + if (row == 0) 350f else 90f,
+                490f,
+                245f
+            )
+        }.toMap(LinkedHashMap())
+
+    private fun testStatRows(left: Float, bottom: Float): Map<StatType, Rectangle> {
+        val rows = linkedMapOf<StatType, Rectangle>()
+        testStatGroupBounds(left, bottom).forEach { (group, bounds) ->
+            group.stats.forEachIndexed { index, stat ->
+                rows[stat] = Rectangle(
+                    bounds.x + 10f,
+                    bounds.y + bounds.height - 65f - index * 30f,
+                    bounds.width - 20f,
+                    27f
+                )
+            }
+        }
+        return rows
+    }
+
+    private fun testStatAdjustmentBounds(row: Rectangle, index: Int) =
+        Rectangle(row.x + row.width - 148f + index * 37f, row.y, 33f, row.height)
+
     private fun filteredTestCatalogEntries(): List<Any> =
         when (testCatalogKind) {
             "ITEM" ->
@@ -2660,6 +2376,22 @@ class FirstScreen(
 
             else -> emptyList()
         }
+
+    private fun addTestWeapon(
+        definition: com.azizoglu.grisilith.weapon.definition.WeaponDefinition,
+        level: Int
+    ) {
+        val result = weaponInventory.addPurchasedWeapon(WeaponInstance(definition, level))
+        if (result == WeaponInventoryResult.MERGED) {
+            weaponInventory.weaponSlots
+                .firstOrNull { it.weapon?.definition?.id == definition.id }
+                ?.weapon
+                ?.let { weapon ->
+                    if (weapon.level < level) weapon.setLevel(level)
+                }
+        }
+        weaponStatBonusSynchronizer.synchronize()
+    }
 
     private fun restartTestStage() {
         val stage = stageController.currentStage
@@ -2739,25 +2471,23 @@ class FirstScreen(
             return
         }
 
-        val nextSpeed =
-            when (
-                gameTimeController
-                    .gameSpeed
-            ) {
-                0.5f -> 1f
-                1f -> 2f
-                else -> 0.5f
-            }
+        cycleGameSpeed()
+    }
 
-        gameTimeController
-            .setGameSpeed(
-                nextSpeed
-            )
+    private fun cycleGameSpeed() {
+        val nextSpeed = when (gameTimeController.gameSpeed) {
+            0.5f -> 1f
+            1f -> 2f
+            else -> 0.5f
+        }
+        gameTimeController.setGameSpeed(nextSpeed)
+        GameSettings.setGameSpeed(nextSpeed)
+    }
 
-        GameSettings
-            .setGameSpeed(
-                nextSpeed
-            )
+    private fun resetAllRunCooldowns() {
+        weaponRuntimeManager.reduceAllAbilityCooldowns(Float.MAX_VALUE)
+        tamgaRuntimeManager.resetAllActiveCooldowns()
+        ActiveItemEffects.resetAllCooldowns()
     }
 
     private fun updateActiveWeaponSkillAim() {
@@ -2784,20 +2514,10 @@ class FirstScreen(
     }
 
     private fun handleWeaponAbilityInput() {
-        val weaponSkillKeys =
-            intArrayOf(
-                Input.Keys.NUM_1,
-                Input.Keys.NUM_2,
-                Input.Keys.NUM_3,
-                Input.Keys.NUM_4,
-                Input.Keys.NUM_5,
-                Input.Keys.NUM_6
-            )
+        (0 until WeaponInventory.WEAPON_SLOT_COUNT)
+            .forEach { slotIndex ->
 
-        weaponSkillKeys
-            .forEachIndexed {
-                    slotIndex,
-                    keyCode ->
+                val keyCode = RunInputBindings.weaponAbilityKey(slotIndex)
 
                 if (
                     Gdx.input
@@ -2888,7 +2608,7 @@ class FirstScreen(
 
         if (clickedSlot == null) {
             weaponRuntimeManager
-                .releaseAimedPhysicalAbilityEarly()
+                .confirmPreparedAbilityAtMouse(player, enemyManager, worldWidth, worldHeight)
 
             return
         }
@@ -2960,6 +2680,9 @@ class FirstScreen(
             true
 
         pauseInputController.reset()
+
+        pausePreviousInputProcessor = Gdx.input.inputProcessor
+        Gdx.input.inputProcessor = pauseInputController
     }
 
     private fun closePauseMenu() {
@@ -2967,13 +2690,18 @@ class FirstScreen(
             false
 
         pauseInputController.reset()
+
+        if (Gdx.input.inputProcessor === pauseInputController) {
+            Gdx.input.inputProcessor = pausePreviousInputProcessor
+        }
+        pausePreviousInputProcessor = null
     }
 
     private fun handlePauseControls() {
 
         if (
             Gdx.input.isKeyJustPressed(
-                Input.Keys.ESCAPE
+                RunInputBindings.pauseKey
             )
         ) {
             if (
@@ -3003,18 +2731,22 @@ class FirstScreen(
             }
 
             PauseAction.OPEN_SETTINGS -> {
+                if (Gdx.input.inputProcessor === pauseInputController) {
+                    Gdx.input.inputProcessor = pausePreviousInputProcessor
+                }
+                pausePreviousInputProcessor = null
                 game.showSettingsFromPausedRun(
                     pausedRun =
                         this
                 )
             }
 
-            PauseAction.QUIT_GAME -> {
-
-                RunSaveRepository.delete()
-
+            PauseAction.MAIN_MENU -> {
                 game.showMainMenu()
+            }
 
+            PauseAction.QUIT_GAME -> {
+                Gdx.app.exit()
             }
 
             null -> {
@@ -3023,7 +2755,10 @@ class FirstScreen(
     }
     private fun restartRun() {
 
-        RunSaveRepository.delete()
+        if (Gdx.input.inputProcessor === runSummaryInputProcessor) {
+            Gdx.input.inputProcessor = summaryPreviousInputProcessor
+        }
+        summaryPreviousInputProcessor = null
 
         val preset =
             selectedPreset
@@ -3058,6 +2793,8 @@ class FirstScreen(
     }
 
     private fun handleRunSummaryControls() {
+
+        if (isRunEndTransitionActive) return
 
         /*
          * Stat detay kartının input'u her şeyden önce işlenir.
@@ -3095,8 +2832,6 @@ class FirstScreen(
                 Input.Keys.ENTER
             )
         ) {
-            RunSaveRepository.delete()
-
             game.showMainMenu()
             return
         }
@@ -3145,11 +2880,15 @@ class FirstScreen(
                     pointerPosition
                 ) -> {
 
-                RunSaveRepository.delete()
-
                 game.showMainMenu()
             }
         }
+    }
+
+    private fun runSummaryRevealAlpha(): Float {
+        if (!isRunSummaryOpen || runEndTransitionElapsed < 0f) return 1f
+        return ((runEndTransitionElapsed - RunSummaryRenderer.SUMMARY_REVEAL_START) /
+            RunSummaryRenderer.SUMMARY_FADE_DURATION).coerceIn(0f, 1f)
     }
 
     private fun handleChargerEndEvent() {
@@ -3318,14 +3057,7 @@ class FirstScreen(
                         runStatistics
                 )
 
-            if (
-                skipFirstBossGrowthAfterRestore
-            ) {
-                skipFirstBossGrowthAfterRestore =
-                    false
-            } else {
-                applyPreBossStageGoldGrowth()
-            }
+            applyPreBossStageGoldGrowth()
 
             lastCurrencyTransferStage =
                 stageController.currentStage
@@ -3541,7 +3273,9 @@ class FirstScreen(
 
                 runStatistics
                     .recordDamageTaken(
-                        appliedDamage
+                        amount = appliedDamage,
+                        requestedAmount = requestedDamage,
+                        damageType = com.azizoglu.grisilith.content.DamageType.NONE
                     )
             }
         )
@@ -3579,6 +3313,10 @@ class FirstScreen(
 
         handleChargerEndEvent()
 
+        enemyManager.allEnemies.forEach { enemy ->
+            enemy.vortexMovementSpeedMultiplier = weaponRuntimeManager.vortexMovementMultiplier(enemy)
+            enemy.projectileVelocityBender = weaponRuntimeManager::bendVortexProjectileVelocity
+        }
         enemyManager.update(
             delta =
                 delta,
@@ -3633,7 +3371,8 @@ class FirstScreen(
                 val appliedDamage =
                     player.takeDamage(
                         damage,
-                        damageType
+                        damageType,
+                        sourceEnemy.piercingIgnoreRatio
                     )
 
                 if (appliedDamage > 0) {
@@ -3664,7 +3403,9 @@ class FirstScreen(
                 }
 
                 runStatistics.recordDamageTaken(
-                    appliedDamage
+                    amount = appliedDamage,
+                    requestedAmount = damage,
+                    damageType = damageType
                 )
             },
 
@@ -3676,7 +3417,8 @@ class FirstScreen(
 
                 val appliedDamage = summon.takeDamage(
                     damage,
-                    damageType
+                    damageType,
+                    sourceEnemy.piercingIgnoreRatio
                 )
                 if (appliedDamage > 0) {
                     com.azizoglu.grisilith.combat.condition.DamageConditionRules
@@ -3839,6 +3581,7 @@ class FirstScreen(
         )
 
         if (!player.health.isDead) {
+            enemyManager.synchronizeWeaponSummons(summonManager.activeSummons)
             weaponRuntimeManager.update(
                 delta = delta,
 
@@ -4252,8 +3995,9 @@ class FirstScreen(
     private fun handleEnemyKilled(
         killedEnemy: Enemy
     ) {
-        val chainedDeaths =
-            weaponRuntimeManager.resolveErasingSoulsChain(
+        if(killedEnemy.weaponTargetSummon != null) return
+        val explosionDeaths =
+            weaponRuntimeManager.resolveErasingSoulsExplosion(
                 initialDeadEnemy = killedEnemy,
                 player = player,
                 enemyManager = enemyManager,
@@ -4266,7 +4010,8 @@ class FirstScreen(
             )
 
         recordEnemyDeath(killedEnemy)
-        chainedDeaths.forEach(::recordEnemyDeath)
+        // Register deaths only: secondary victims must never trigger another explosion.
+        explosionDeaths.forEach(::recordEnemyDeath)
     }
 
     private fun recordEnemyDeath(
@@ -4664,6 +4409,7 @@ class FirstScreen(
 
             showEnemyHealthBars =
                 !worldItemRuntime.hidesEnemyHealthBars,
+            playerTamgaIcons = tamgaRuntimeManager.activeStatusIconPaths(),
 
             renderGroundLayer = {
                 worldItemRenderer.renderGround(
@@ -4741,6 +4487,8 @@ class FirstScreen(
                     tamgaRuntimeManager
                         .hasActiveWeaponTamga,
 
+                weaponContentId = selectedPreset?.weaponTamga?.id?.value,
+
                 weaponState =
                     tamgaRuntimeManager
                         .activeWeaponTamgaState,
@@ -4756,6 +4504,8 @@ class FirstScreen(
                 showArmorButton =
                     tamgaRuntimeManager
                         .hasActiveArmorTamga,
+
+                armorContentId = selectedPreset?.armorTamga?.id?.value,
 
                 armorState =
                     tamgaRuntimeManager
@@ -4809,7 +4559,9 @@ class FirstScreen(
 
                     selectedEntry =
                         runSummaryStatInteractionController
-                            .selectedStat
+                            .selectedStat,
+
+                    alpha = runSummaryRevealAlpha()
                 )
         }
 
@@ -4854,6 +4606,7 @@ class FirstScreen(
         )
 
         hudRenderer.render(
+            currentScore = currentEnemyScore(),
             displayedStage =
                 displayedStage(),
 
@@ -4893,7 +4646,9 @@ class FirstScreen(
                 ) {
                     runSummaryRenderer
                         .renderTexts(
-                            summarySnapshot
+                            summarySnapshot,
+                            runSummaryRevealAlpha(),
+                            summaryScoreElapsed
                         )
                 }
 
@@ -4902,9 +4657,19 @@ class FirstScreen(
                         stats =
                             summarySnapshot.stats,
 
+                        hoveredIndex =
+                            runSummaryStatInteractionController
+                                .hoveredStatIndex,
+
                         selectedEntry =
-                            selectedSummaryStat
+                            selectedSummaryStat,
+
+                        alpha = runSummaryRevealAlpha()
                     )
+
+                if (selectedSummaryStat == null) {
+                    runSummaryRenderer.renderHoveredTooltip()
+                }
             },
 
             renderMarket = {
@@ -4944,6 +4709,8 @@ class FirstScreen(
                 )
         }
 
+        if (showGameplayHud) renderDamageFeedback()
+
         if (isPauseMenuOpen) {
             hudBatch.projectionMatrix =
                 camera.combined
@@ -4960,10 +4727,18 @@ class FirstScreen(
         chooseToSummonPopup.render()
         chooseGlyphSpellPopup.render()
 
+        if (isRunEndTransitionActive) {
+            runSummaryRenderer.renderTransitionOverlay(
+                currentRunSummarySnapshot(),
+                runEndTransitionElapsed
+            )
+        }
+
         if (canShowTestMapControls()) renderTestMapControls()
     }
 
     private fun renderTestMapControls() {
+        val renderLegacyTestControlShapes = false
         val left = camera.position.x - CAMERA_WIDTH / 2f
         val bottom = camera.position.y - CAMERA_HEIGHT / 2f
         val right = left + CAMERA_WIDTH
@@ -4989,7 +4764,7 @@ class FirstScreen(
                 val index = (testCatalogScroll / 36f).toInt() + row
                 tooltip = when (val entry = entries.getOrNull(index)) {
                     is com.azizoglu.grisilith.item.definition.ItemDefinition -> entry.description
-                    is com.azizoglu.grisilith.weapon.definition.WeaponDefinition -> entry.description
+                    is com.azizoglu.grisilith.weapon.definition.WeaponDefinition -> com.azizoglu.grisilith.weapon.definition.WeaponPresentation.hover(entry)
                     else -> null
                 }
             }
@@ -4998,7 +4773,7 @@ class FirstScreen(
                 val column = i % 3
                 val row = i / 3
                 contains(right - 315f + column * 96f, bottom + 358f - row * 104f, 82f, 82f)
-            }?.let { slot -> tooltip = weaponInventory.weaponAt(slot)?.definition?.description }
+            }?.let { slot -> tooltip = weaponInventory.weaponAt(slot)?.let { com.azizoglu.grisilith.weapon.definition.WeaponPresentation.hover(it) } }
             if (contains(right - 315f, bottom + 82f, 82f, 45f)) tooltip = selectedPreset?.weaponTamga?.description
             if (contains(right - 219f, bottom + 82f, 82f, 45f)) tooltip = selectedPreset?.armorTamga?.description
             if (contains(right - 123f, bottom + 82f, 82f, 45f)) tooltip = equippedArmor.definition?.description
@@ -5006,7 +4781,7 @@ class FirstScreen(
 
         shapeRenderer.projectionMatrix = camera.combined
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
-        if (!isTestSettingsOpen) {
+        if (!isTestSettingsOpen && renderLegacyTestControlShapes) {
             shapeRenderer.color = Color(0.10f, 0.12f, 0.20f, 0.94f)
             shapeRenderer.rect(right - 300f, bottom + 18f, 150f, 42f)
             shapeRenderer.color = if (isTestRunFrozen) Color(0.75f, 0.18f, 0.18f, 0.95f) else Color(0.18f, 0.48f, 0.30f, 0.95f)
@@ -5014,7 +4789,7 @@ class FirstScreen(
             shapeRenderer.color = Color(0.24f, 0.20f, 0.45f, 0.96f)
             shapeRenderer.rect(right - 300f, bottom + 66f, 280f, 38f)
         }
-        if (isTestSettingsOpen) {
+        if (isTestSettingsOpen && renderLegacyTestControlShapes) {
             shapeRenderer.color = Color(0.055f, 0.06f, 0.10f, 0.97f)
             shapeRenderer.rect(left + 20f, bottom + 20f, CAMERA_WIDTH - 40f, CAMERA_HEIGHT - 40f)
             fun panel(x: Float, y: Float, width: Float, height: Float, color: Color = Color(0.13f, 0.15f, 0.24f, 1f)) {
@@ -5074,12 +4849,21 @@ class FirstScreen(
             panel(left + 255f, bottom + 65f, 180f, 48f, Color(0.56f, 0.18f, 0.10f, 1f))
 
             if (hasTestSettingsModal) {
-                panel(left + 20f, bottom + 20f, CAMERA_WIDTH - 40f, CAMERA_HEIGHT - 40f, Color(0.035f, 0.04f, 0.07f, 1f))
+                val modalWidth = if (testCatalogKind != null) 905f else CAMERA_WIDTH - 40f
+                panel(left + 20f, bottom + 20f, modalWidth, CAMERA_HEIGHT - 40f, Color(0.035f, 0.04f, 0.07f, 1f))
             }
 
             if (testCatalogKind != null) {
                 panel(left + 255f, bottom + 95f, 660f, 525f, Color(0.035f, 0.04f, 0.075f, 0.995f))
                 panel(left + 275f, bottom + 135f, 620f, 405f, Color(0.09f, 0.10f, 0.16f, 1f))
+                if (testCatalogKind == "WEAPON") {
+                    val start = (testCatalogScroll / 36f).toInt()
+                    filteredTestCatalogEntries().drop(start).take(11).forEachIndexed { row, _ ->
+                        panel(left + 725f, bottom + 501f - row * 36f, 50f, 28f, Color(0.16f, 0.32f, 0.45f, 1f))
+                        panel(left + 780f, bottom + 501f - row * 36f, 50f, 28f, Color(0.22f, 0.38f, 0.25f, 1f))
+                        panel(left + 835f, bottom + 501f - row * 36f, 50f, 28f, Color(0.42f, 0.30f, 0.12f, 1f))
+                    }
+                }
             }
             if (isTestOwnedItemsOpen) {
                 panel(left + 305f, bottom + 105f, 560f, 515f, Color(0.035f, 0.04f, 0.075f, 0.995f))
@@ -5092,13 +4876,13 @@ class FirstScreen(
             if (isTestResetConfirmationOpen) panel(left + 275f, bottom + 275f, 330f, 120f, Color(0.07f, 0.08f, 0.13f, 1f))
             if (isTestStatEditorOpen) {
                 panel(left + 120f, bottom + 70f, 1030f, 580f, Color(0.06f, 0.07f, 0.12f, 0.995f))
-                StatType.entries.forEachIndexed { i, _ ->
-                    val column = i / 10
-                    val row = i % 10
-                    val x = left + 145f + column * 500f
-                    val y = bottom + 555f - row * 48f
+                testStatGroupBounds(left, bottom).values.forEach { bounds ->
+                    panel(bounds.x, bounds.y, bounds.width, bounds.height, Color(0.08f, 0.10f, 0.17f, 1f))
+                }
+                testStatRows(left, bottom).values.forEach { rowBounds ->
                     repeat(4) { button ->
-                        panel(x + 250f + button * 36f, y, 32f, 30f, Color(0.20f, 0.25f, 0.40f, 1f))
+                        val bounds = testStatAdjustmentBounds(rowBounds, button)
+                        panel(bounds.x, bounds.y, bounds.width, bounds.height, Color(0.20f, 0.25f, 0.40f, 1f))
                     }
                 }
                 panel(right - 230f, bottom + 85f, 150f, 38f, Color(0.32f, 0.18f, 0.24f, 1f))
@@ -5118,11 +4902,134 @@ class FirstScreen(
         shapeRenderer.end()
         hudBatch.projectionMatrix = camera.combined
         hudBatch.begin()
+
+        fun uiPanel(x: Float, y: Float, width: Float, height: Float, style: PanelVisualStyle = PanelVisualStyle.ADAPTIVE) {
+            UiComponentRenderer.drawPanel(hudBatch, Rectangle(x, y, width, height), style)
+        }
+
+        fun uiButton(x: Float, y: Float, width: Float, height: Float, selected: Boolean = false) {
+            UiComponentRenderer.drawButton(
+                hudBatch,
+                Rectangle(x, y, width, height),
+                if (selected) ButtonVisualState.SELECTED else ButtonVisualState.NORMAL
+            )
+        }
+
+        if (!isTestSettingsOpen) {
+            UiComponentRenderer.drawCompactButton(
+                hudBatch, Rectangle(right - 350f, bottom + 18f, 205f, 44f))
+            UiComponentRenderer.drawCompactButton(
+                hudBatch, Rectangle(right - 135f, bottom + 18f, 115f, 44f), isTestRunFrozen)
+            UiComponentRenderer.drawCompactButton(
+                hudBatch, Rectangle(right - 350f, bottom + 70f, 330f, 44f))
+        } else {
+            uiPanel(left + 20f, bottom + 20f, CAMERA_WIDTH - 40f, CAMERA_HEIGHT - 40f, PanelVisualStyle.MAIN)
+            uiPanel(left + 40f, bottom + 565f, 850f, 70f)
+            uiPanel(left + 40f, bottom + 490f, 330f, 62f)
+            uiPanel(left + 385f, bottom + 490f, 505f, 62f)
+            uiPanel(left + 40f, bottom + 270f, 850f, 208f, PanelVisualStyle.INNER)
+            uiPanel(left + 40f, bottom + 195f, 850f, 65f)
+            uiPanel(right - 330f, bottom + 75f, 290f, 555f, PanelVisualStyle.MAIN)
+            uiPanel(right - 315f, bottom + 482f, 92f, 100f)
+            uiButton(right - 213f, bottom + 482f, 173f, 34f)
+
+            repeat(6) { i ->
+                val column = i % 3
+                val row = i / 3
+                UiComponentRenderer.drawSlot(
+                    hudBatch,
+                    Rectangle(right - 315f + column * 96f, bottom + 358f - row * 104f, 82f, 82f)
+                )
+            }
+
+            uiButton(right - 315f, bottom + 135f, 274f, 62f)
+            repeat(3) { i ->
+                UiComponentRenderer.drawSlot(
+                    hudBatch,
+                    Rectangle(right - 315f + i * 96f, bottom + 82f, 82f, 45f)
+                )
+            }
+
+            fun themedCheck(x: Float, y: Float, selected: Boolean) {
+                UiComponentRenderer.drawCheckbox(hudBatch, Rectangle(x, y, 20f, 20f), selected)
+            }
+            themedCheck(left + 55f, bottom + 600f, isTestEnemySpawningEnabled)
+            themedCheck(left + 220f, bottom + 600f, !testDummySelected && testEnemyTag == EnemyTag.BEAST)
+            themedCheck(left + 365f, bottom + 600f, !testDummySelected && testEnemyTag == EnemyTag.HUMANOID)
+            themedCheck(left + 510f, bottom + 600f, !testDummySelected && testEnemyTag == EnemyTag.UNDEAD)
+            themedCheck(left + 655f, bottom + 600f, testDummySelected)
+            themedCheck(left + 55f, bottom + 510f, testObstaclesEnabled)
+            themedCheck(left + 170f, bottom + 510f, !testObstaclesEnabled)
+            TestDeathMode.entries.forEachIndexed { i, mode ->
+                themedCheck(left + 430f + i * 145f, bottom + 510f, testDeathMode == mode)
+            }
+            themedCheck(left + 690f, bottom + 221f, isTestInfiniteStage)
+
+            repeat(50) { index ->
+                val stage = index + 1
+                val column = index % 10
+                val row = index / 10
+                uiButton(
+                    left + 55f + column * 78f,
+                    bottom + 440f - row * 38f,
+                    70f,
+                    30f,
+                    stageController.currentStage == stage
+                )
+            }
+            uiButton(left + 55f, bottom + 210f, 170f, 40f)
+            uiButton(left + 245f, bottom + 210f, 190f, 40f)
+            uiButton(left + 455f, bottom + 210f, 190f, 40f)
+            uiButton(left + 55f, bottom + 65f, 180f, 48f)
+            uiButton(left + 255f, bottom + 65f, 180f, 48f)
+
+            if (hasTestSettingsModal) {
+                val modalWidth = if (testCatalogKind != null) 905f else CAMERA_WIDTH - 40f
+                uiPanel(left + 20f, bottom + 20f, modalWidth, CAMERA_HEIGHT - 40f, PanelVisualStyle.MODAL)
+            }
+            if (testCatalogKind != null) {
+                uiPanel(left + 255f, bottom + 95f, 660f, 525f, PanelVisualStyle.MAIN)
+                uiPanel(left + 275f, bottom + 135f, 620f, 405f, PanelVisualStyle.INNER)
+            }
+            if (isTestOwnedItemsOpen) {
+                uiPanel(left + 305f, bottom + 105f, 560f, 515f, PanelVisualStyle.MAIN)
+                uiPanel(left + 325f, bottom + 145f, 520f, 390f, PanelVisualStyle.INNER)
+            }
+            if (isTestResetConfirmationOpen) {
+                uiPanel(left + 275f, bottom + 275f, 330f, 120f, PanelVisualStyle.MODAL)
+            }
+            if (isTestStatEditorOpen) {
+                uiPanel(left + 120f, bottom + 70f, 1030f, 580f, PanelVisualStyle.MODAL)
+                testStatGroupBounds(left, bottom).values.forEach { bounds ->
+                    UiComponentRenderer.drawPanel(hudBatch, bounds, PanelVisualStyle.INNER)
+                }
+                testStatRows(left, bottom).values.forEach { rowBounds ->
+                    repeat(4) { button ->
+                        UiComponentRenderer.drawButton(
+                            hudBatch,
+                            testStatAdjustmentBounds(rowBounds, button),
+                            ButtonVisualState.NORMAL
+                        )
+                    }
+                }
+            }
+            tooltip?.let {
+                uiPanel(tooltipX, tooltipY, 340f, 82f, PanelVisualStyle.TOOLTIP)
+            }
+        }
+
         hudFont.color = Color.WHITE
         if (!isTestSettingsOpen) {
-            hudFont.draw(hudBatch, "RUN SETTINGS", right - 286f, bottom + 46f)
-            hudFont.draw(hudBatch, if (isTestRunFrozen) "RESUME" else "PAUSE", right - 125f, bottom + 46f)
-            hudFont.draw(hudBatch, "RESET ALL COOLDOWNS", right - 282f, bottom + 92f)
+            val oldX = hudFont.data.scaleX
+            val oldY = hudFont.data.scaleY
+            hudFont.data.setScale(0.68f)
+            hudFont.draw(hudBatch, "RUN SETTINGS", right - 350f, bottom + 47f, 205f,
+                com.badlogic.gdx.utils.Align.center, false)
+            hudFont.draw(hudBatch, if (isTestRunFrozen) "RESUME [P]" else "PAUSE [P]",
+                right - 135f, bottom + 47f, 115f, com.badlogic.gdx.utils.Align.center, false)
+            hudFont.draw(hudBatch, "RESET ALL COOLDOWNS [R]", right - 350f, bottom + 99f, 330f,
+                com.badlogic.gdx.utils.Align.center, false)
+            hudFont.data.setScale(oldX, oldY)
         }
         if (isTestSettingsOpen) {
             hudFont.data.setScale(0.78f)
@@ -5143,6 +5050,44 @@ class FirstScreen(
                 if (current.isNotEmpty()) lines += current
                 return lines
             }
+            fun renderInventorySidebar() {
+                text(selectedCharacter.displayName, right - 305f, bottom + 610f)
+                ContentIconRenderer.draw(hudBatch, selectedCharacter, Rectangle(right - 315f, bottom + 482f, 92f, 100f))
+                text("Stage ${stageController.currentStage}", right - 210f, bottom + 566f)
+                text("Gold ${sessionWallet.goldCoins.toInt()}", right - 210f, bottom + 535f)
+                text("EDIT STATS", right - 192f, bottom + 504f)
+                weaponInventory.weaponSlots.forEachIndexed { i, slot ->
+                    val column = i % 3
+                    val row = i / 3
+                    val weapon = slot.weapon
+                    weapon?.let {
+                        ContentIconRenderer.draw(
+                            hudBatch,
+                            it.definition,
+                            Rectangle(right - 263f + column * 96f, bottom + 412f - row * 104f, 24f, 24f)
+                        )
+                    }
+                    hudFont.data.setScale(0.55f)
+                    wrapName(weapon?.definition?.displayName ?: "Empty").take(3).forEachIndexed { lineIndex, line ->
+                        text(line, right - 309f + column * 96f, bottom + 429f - row * 104f - lineIndex * 14f)
+                    }
+                    if (weapon != null) text("Level ${weapon.level}", right - 309f + column * 96f, bottom + 371f - row * 104f)
+                    hudFont.data.setScale(0.78f)
+                }
+                text("ITEMS (${itemInventory.allItems().size}) — OPEN LIST", right - 305f, bottom + 171f)
+                text(short(selectedPreset?.weaponTamga?.displayName ?: "Tamga", 9), right - 310f, bottom + 109f)
+                text(short(selectedPreset?.armorTamga?.displayName ?: "Tamga", 9), right - 214f, bottom + 109f)
+                text(short(equippedArmor.definition?.displayName ?: "Armor", 9), right - 118f, bottom + 109f)
+                selectedPreset?.weaponTamga?.let {
+                    ContentIconRenderer.draw(hudBatch, it, Rectangle(right - 315f, bottom + 82f, 45f, 45f))
+                }
+                selectedPreset?.armorTamga?.let {
+                    ContentIconRenderer.draw(hudBatch, it, Rectangle(right - 219f, bottom + 82f, 45f, 45f))
+                }
+                equippedArmor.definition?.let {
+                    ContentIconRenderer.draw(hudBatch, it, Rectangle(right - 123f, bottom + 82f, 45f, 45f))
+                }
+            }
             if (!hasTestSettingsModal) {
             text("Return to Game", right - 185f, bottom + 680f)
             text("ENEMY SPAWN", left + 50f, bottom + 630f)
@@ -5162,25 +5107,7 @@ class FirstScreen(
             text("ADD 10,000 GOLD (${sessionWallet.goldCoins.toInt()})", left + 64f, bottom + 236f)
             text("ADD ITEM", left + 292f, bottom + 236f); text("ADD WEAPON", left + 492f, bottom + 236f)
             text("RESET MAP", left + 92f, bottom + 95f); text("RESET ENEMIES", left + 278f, bottom + 95f)
-            text(selectedCharacter.displayName, right - 305f, bottom + 610f)
-            text("PORTRAIT", right - 300f, bottom + 535f)
-            text("Stage ${stageController.currentStage}", right - 210f, bottom + 566f); text("Gold ${sessionWallet.goldCoins.toInt()}", right - 210f, bottom + 535f)
-            text("EDIT STATS", right - 192f, bottom + 504f)
-            weaponInventory.weaponSlots.forEachIndexed { i, slot ->
-                val column = i % 3; val row = i / 3
-                val weapon = slot.weapon
-                hudFont.data.setScale(0.55f)
-                val lines = wrapName(weapon?.definition?.displayName ?: "Empty")
-                lines.take(3).forEachIndexed { lineIndex, line ->
-                    text(line, right - 309f + column * 96f, bottom + 429f - row * 104f - lineIndex * 14f)
-                }
-                if (weapon != null) text("Level ${weapon.level}", right - 309f + column * 96f, bottom + 371f - row * 104f)
-                hudFont.data.setScale(0.78f)
-            }
-            text("ITEMS (${itemInventory.allItems().size}) — OPEN LIST", right - 305f, bottom + 171f)
-            text(short(selectedPreset?.weaponTamga?.displayName ?: "Tamga", 9), right - 310f, bottom + 109f)
-            text(short(selectedPreset?.armorTamga?.displayName ?: "Tamga", 9), right - 214f, bottom + 109f)
-            text(short(equippedArmor.definition?.displayName ?: "Armor", 9), right - 118f, bottom + 109f)
+            renderInventorySidebar()
             draggedTestWeaponSlot?.let { slot ->
                 weaponInventory.weaponAt(slot)?.let { weapon ->
                     hudFont.data.setScale(0.62f)
@@ -5190,6 +5117,7 @@ class FirstScreen(
                 }
             }
             }
+            if (testCatalogKind != null) renderInventorySidebar()
             if (isTestResetConfirmationOpen) {
                 text("Reset all Test Map changes and return to Stage 1?", left + 300f, bottom + 370f)
                 text("YES", left + 340f, bottom + 325f)
@@ -5197,16 +5125,27 @@ class FirstScreen(
             }
             if (isTestStatEditorOpen) {
                 text("STAT EDITOR", left + 520f, bottom + 640f)
-                StatType.entries.forEachIndexed { i, stat ->
-                    val column = i / 10
-                    val row = i % 10
-                    val x = left + 145f + column * 500f
-                    val y = bottom + 555f - row * 48f
-                    text("${stat.displayName}: ${playerStats.totalScore(stat)}", x, y + 21f)
-                    text("-5", x + 258f, y + 21f)
-                    text("-1", x + 294f, y + 21f)
-                    text("+1", x + 329f, y + 21f)
-                    text("+5", x + 365f, y + 21f)
+                testStatGroupBounds(left, bottom).forEach { (group, bounds) ->
+                    hudFont.data.setScale(0.68f)
+                    hudFont.color = Color(0.72f, 0.78f, 0.90f, 1f)
+                    hudFont.draw(hudBatch, group.title, bounds.x, bounds.y + bounds.height - 12f, bounds.width, com.badlogic.gdx.utils.Align.center, false)
+                }
+                testStatRows(left, bottom).forEach { (stat, rowBounds) ->
+                    hudFont.data.setScale(0.68f)
+                    StatSymbolRenderer.drawLabel(
+                        batch = hudBatch,
+                        font = hudFont,
+                        statType = stat,
+                        x = rowBounds.x,
+                        baselineY = rowBounds.y + 20f,
+                        iconSize = 18f,
+                        width = rowBounds.width - 190f
+                    )
+                    text(playerStats.totalScore(stat).toString(), rowBounds.x + rowBounds.width - 185f, rowBounds.y + 20f)
+                    listOf("-5", "-1", "+1", "+5").forEachIndexed { index, label ->
+                        val button = testStatAdjustmentBounds(rowBounds, index)
+                        hudFont.draw(hudBatch, label, button.x, button.y + 20f, button.width, com.badlogic.gdx.utils.Align.center, false)
+                    }
                 }
                 text("CLOSE", right - 200f, bottom + 110f)
             }
@@ -5229,11 +5168,33 @@ class FirstScreen(
                                 ContentTag.RANGED_WEAPON in entry.tags -> "RANGED"
                                 else -> "SPELL FOCUS"
                             }
-                            "$group  ${entry.displayName}"
+                            "$group  ${short(entry.displayName, 24)}"
                         }
                         else -> entry.toString()
                     }
-                    text(label, left + 292f, bottom + 526f - row * 36f)
+                    when (entry) {
+                        is com.azizoglu.grisilith.item.definition.ItemDefinition ->
+                            ContentIconRenderer.draw(
+                                hudBatch,
+                                entry,
+                                Rectangle(left + 282f, bottom + 505f - row * 36f, 28f, 28f)
+                            )
+
+                        is com.azizoglu.grisilith.weapon.definition.WeaponDefinition ->
+                            ContentIconRenderer.draw(
+                                hudBatch,
+                                entry,
+                                Rectangle(left + 282f, bottom + 505f - row * 36f, 28f, 28f)
+                            )
+                    }
+                    text(label, left + 318f, bottom + 526f - row * 36f)
+                    if (entry is com.azizoglu.grisilith.weapon.definition.WeaponDefinition) {
+                        hudFont.data.setScale(0.58f)
+                        text("Lv1", left + 738f, bottom + 521f - row * 36f)
+                        text("Lv3", left + 793f, bottom + 521f - row * 36f)
+                        text("Lv5", left + 848f, bottom + 521f - row * 36f)
+                        hudFont.data.setScale(0.78f)
+                    }
                 }
             }
             if (isTestOwnedItemsOpen) {
@@ -5241,7 +5202,12 @@ class FirstScreen(
                 text("CLOSE", left + 800f, bottom + 602f)
                 val ownedStart = (testCatalogScroll / 34f).toInt()
                 itemInventory.allItems().drop(ownedStart).take(11).forEachIndexed { row, item ->
-                    text("${ownedStart + row + 1}. ${short(item.displayName, 42)}", left + 342f, bottom + 526f - row * 34f)
+                    ContentIconRenderer.draw(
+                        hudBatch,
+                        item.definition,
+                        Rectangle(left + 334f, bottom + 506f - row * 34f, 27f, 27f)
+                    )
+                    text("${ownedStart + row + 1}. ${short(item.displayName, 42)}", left + 368f, bottom + 526f - row * 34f)
                     text("DELETE", left + 765f, bottom + 526f - row * 34f)
                 }
             }
@@ -5295,19 +5261,64 @@ class FirstScreen(
         val maximumCameraY =
             worldHeight - halfCameraHeight
 
-        camera.position.x =
+        val baseX =
             player.centerX.coerceIn(
                 minimumCameraX,
                 maximumCameraX
             )
 
-        camera.position.y =
+        val baseY =
             player.centerY.coerceIn(
                 minimumCameraY,
                 maximumCameraY
             )
 
+        val shakeRatio = (damageFeedbackRemaining / DAMAGE_FEEDBACK_DURATION).coerceIn(0f, 1f)
+        val shakeX = if (GameSettings.screenShake && shakeRatio > 0f) {
+            MathUtils.random(-damageFeedbackStrength, damageFeedbackStrength) * shakeRatio
+        } else 0f
+        val shakeY = if (GameSettings.screenShake && shakeRatio > 0f) {
+            MathUtils.random(-damageFeedbackStrength, damageFeedbackStrength) * shakeRatio
+        } else 0f
+
+        camera.position.x = baseX + shakeX
+        camera.position.y = baseY + shakeY
+
         camera.update()
+    }
+
+    private fun triggerDamageFeedback(damage: Int) {
+        val damageRatio = damage.toFloat() / player.health.maximumHealth.coerceAtLeast(1).toFloat()
+        damageFeedbackStrength = (2.2f + damageRatio * 42f).coerceIn(2.2f, 8.5f)
+        damageFeedbackRemaining = DAMAGE_FEEDBACK_DURATION
+    }
+
+    private fun renderDamageFeedback() {
+        if (damageFeedbackRemaining <= 0f) return
+        val ratio = (damageFeedbackRemaining / DAMAGE_FEEDBACK_DURATION).coerceIn(0f, 1f)
+        val fullEffect = GameSettings.screenShake
+        val maximumThickness = if (fullEffect) 48f else 20f
+        val maximumAlpha = if (fullEffect) 0.30f else 0.16f
+        val left = camera.position.x - CAMERA_WIDTH / 2f
+        val bottom = camera.position.y - CAMERA_HEIGHT / 2f
+
+        Gdx.gl.glEnable(GL20.GL_BLEND)
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+        shapeRenderer.projectionMatrix = camera.combined
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+        repeat(4) { index ->
+            val progress = index / 4f
+            val inset = maximumThickness * progress
+            val thickness = maximumThickness / 4f
+            val alpha = maximumAlpha * ratio * (1f - progress) * (1f - progress)
+            shapeRenderer.color = Color(0.72f, 0.015f, 0.025f, alpha)
+            shapeRenderer.rect(left + inset, bottom + inset, CAMERA_WIDTH - inset * 2f, thickness)
+            shapeRenderer.rect(left + inset, bottom + CAMERA_HEIGHT - inset - thickness, CAMERA_WIDTH - inset * 2f, thickness)
+            shapeRenderer.rect(left + inset, bottom + inset, thickness, CAMERA_HEIGHT - inset * 2f)
+            shapeRenderer.rect(left + CAMERA_WIDTH - inset - thickness, bottom + inset, thickness, CAMERA_HEIGHT - inset * 2f)
+        }
+        shapeRenderer.end()
+        Gdx.gl.glDisable(GL20.GL_BLEND)
     }
 
     override fun resize(
@@ -5326,6 +5337,7 @@ class FirstScreen(
     }
 
     override fun dispose() {
+        RunDamageTypeTelemetry.unbind(runStatistics)
         ActiveItemEffects.unbind(playerStats)
 
         com.azizoglu.grisilith.weapon.visual.attack
@@ -5351,6 +5363,16 @@ class FirstScreen(
             Gdx.input.inputProcessor = null
         }
 
+        if (Gdx.input.inputProcessor === pauseInputController) {
+            Gdx.input.inputProcessor = pausePreviousInputProcessor
+        }
+        pausePreviousInputProcessor = null
+
+        if (Gdx.input.inputProcessor === runSummaryInputProcessor) {
+            Gdx.input.inputProcessor = summaryPreviousInputProcessor
+        }
+        summaryPreviousInputProcessor = null
+
         marketRenderer.dispose()
         pauseRenderer.dispose()
 
@@ -5361,6 +5383,8 @@ class FirstScreen(
         shapeRenderer.dispose()
         hudBatch.dispose()
         hudFont.dispose()
+        uiBodyFont.dispose()
+        summaryTitleFont.dispose()
     }
 
     private fun formatGameTime(): String {
@@ -5505,7 +5529,7 @@ class FirstScreen(
     private fun openMarket() {
         isMarketOpen = true
         marketRerollsUsed = 0
-        itemScrollOffset = 0
+        itemScrollOffset = 0f
 
         marketInputController.reset()
 
@@ -5695,10 +5719,9 @@ class FirstScreen(
             emptyList()
 
         marketRerollsUsed = 0
-        itemScrollOffset = 0
+        itemScrollOffset = 0f
 
         enemySpawner.resetTimer()
-        saveCheckpoint()
     }
 
     private fun handleWeaponDrop(
@@ -6108,19 +6131,19 @@ class FirstScreen(
                 },
 
                 onItemClicked = {
-                        visibleRowIndex ->
+                        actualItemIndex ->
 
                     openItemDetailsByVisibleRow(
-                        visibleRowIndex
+                        actualItemIndex
                     )
                 },
 
                 onItemScroll = {
-                        scrollSteps ->
+                        scrollPixels ->
 
                     scrollMarketItems(
-                        requestedSteps =
-                            scrollSteps
+                        requestedPixels =
+                            scrollPixels
                     )
                 },
 
@@ -6186,9 +6209,9 @@ class FirstScreen(
     }
 
     private fun scrollMarketItems(
-        requestedSteps: Int
+        requestedPixels: Float
     ) {
-        if (requestedSteps == 0) {
+        if (requestedPixels == 0f) {
             return
         }
 
@@ -6204,30 +6227,17 @@ class FirstScreen(
             marketRenderer
                 .currentLayout()
 
-        val maximumVisibleRows =
-            (
-                (
-                    layout.itemPanel.height -
-                        48f
-                    ) / 24f
-                )
-                .toInt()
-                .coerceAtLeast(1)
-
         val maximumOffset =
-            (
-                groupedItemCount -
-                    maximumVisibleRows
-                )
-                .coerceAtLeast(0)
+            com.azizoglu.grisilith.screen.market.MarketLayout
+                .maximumItemScrollPixels(groupedItemCount, layout.itemPanel)
 
         itemScrollOffset =
             (
                 itemScrollOffset +
-                    requestedSteps
+                    requestedPixels
                 )
                 .coerceIn(
-                    0,
+                    0f,
                     maximumOffset
                 )
     }
@@ -6247,14 +6257,10 @@ class FirstScreen(
                     item.definition.id
                 }
 
-        val actualItemIndex =
-            itemScrollOffset +
-                visibleRowIndex
-
         val itemDefinition =
             groupedDefinitions
                 .getOrNull(
-                    actualItemIndex
+                    visibleRowIndex
                 )
                 ?.definition
                 ?: return
@@ -6950,153 +6956,6 @@ class FirstScreen(
             }
     }
 
-    private fun buildCheckpointSnapshot() =
-        RunSaveBuilder.createSnapshot(
-            difficulty =
-                difficulty,
-
-            gameMap =
-                gameMap,
-
-            characterDefinitionId =
-                selectedCharacter
-                    .id
-                    .toString(),
-
-            characterDisplayName =
-                selectedCharacter
-                    .displayName,
-
-            presetId =
-                selectedPreset
-                    ?.preset
-                    ?.presetId,
-
-            checkpointStage =
-                stageController
-                    .currentStage,
-
-            maximumStage =
-                stageController
-                    .maximumStage,
-
-            elapsedRunTimeSeconds =
-                gameTimeController
-                    .elapsedGameTimeSeconds,
-
-            currentHealth =
-                player
-                    .health
-                    .currentHealth,
-
-            playerStats =
-                playerStats,
-
-            weaponInventory =
-                weaponInventory,
-
-            equippedArmor =
-                equippedArmor,
-
-            itemInventory =
-                itemInventory,
-
-            itemEffectState =
-                ActiveItemEffects.exportSaveState(),
-
-            sessionWallet =
-                sessionWallet,
-
-            runStatistics =
-                runStatistics,
-
-            runRewardTracker =
-                runRewardTracker,
-
-            remainingChestDiscards =
-                remainingRunChestDiscards,
-
-            troubleAtHomeGateHealth =
-                troubleAtHomeDefenseRuntime
-                    .gateHealth
-                    .currentHealth,
-
-            villageGuardCount =
-                summonManager.livingVillageGuardCount,
-
-            weaponTamgaDefinitionId =
-                selectedPreset
-                    ?.weaponTamga
-                    ?.id
-                    ?.toString(),
-
-            armorTamgaDefinitionId =
-                selectedPreset
-                    ?.armorTamga
-                    ?.id
-                    ?.toString(),
-
-            weaponTamgaRuntimeState =
-                null,
-
-            armorTamgaRuntimeState =
-                null
-        )
-
-    private fun saveCheckpoint() {
-
-        if (
-            !checkpointSavingEnabled
-        ) {
-
-            Gdx.app.log(
-                "RunSave",
-                "Checkpoint skipped because this run was loaded from a consumed save."
-            )
-
-            return
-        }
-
-        try {
-
-            val snapshot =
-                buildCheckpointSnapshot()
-
-            val saveSuccessful =
-                RunSaveRepository.save(
-                    snapshot
-                )
-
-            if (saveSuccessful) {
-
-                Gdx.app.log(
-                    "RunSave",
-                    "Checkpoint saved successfully. " +
-                        "Stage: ${snapshot.checkpointStage}"
-                )
-
-            } else {
-
-                Gdx.app.error(
-                    "RunSave",
-                    "Checkpoint save returned false. " +
-                        "Stage: ${snapshot.checkpointStage}, " +
-                        "validationErrors: " +
-                        snapshot.validationErrors()
-                            .joinToString()
-                )
-            }
-
-        } catch (exception: Exception) {
-
-            Gdx.app.error(
-                "RunSave",
-                "Checkpoint creation or save failed.",
-                exception
-            )
-        }
-    }
-
     private fun recordCurrentEnemyEncounters() {
 
         enemyManager
@@ -7105,9 +6964,10 @@ class FirstScreen(
 
                 PlayerProfileRepository
                     .markEnemyEncountered(
-                        CollectionEncounterIds.enemy(
-                            enemy.type
-                        )
+                        enemy.kindId?.value
+                            ?: CollectionEncounterIds.enemy(
+                                enemy.type
+                            )
                     )
             }
     }

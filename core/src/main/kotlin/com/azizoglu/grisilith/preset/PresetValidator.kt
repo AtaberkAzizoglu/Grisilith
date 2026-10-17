@@ -85,6 +85,10 @@ object PresetValidator {
                         )
                 }
 
+        if (item != null && !PresetItemRules.canStartWith(item)) {
+            return invalid("Legendary and Artifact Items can only be obtained during a run.")
+        }
+
         if (
             preset.statPointBudget <
             PresetConstants

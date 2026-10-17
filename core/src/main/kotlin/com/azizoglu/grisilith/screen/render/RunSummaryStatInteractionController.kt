@@ -4,7 +4,6 @@ import com.azizoglu.grisilith.screen.render.RunSummaryStatRenderer
 import com.azizoglu.grisilith.summary.RunSummarySnapshot
 import com.azizoglu.grisilith.summary.RunSummaryStatEntry
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.viewport.Viewport
 
@@ -44,13 +43,6 @@ class RunSummaryStatInteractionController(
 
         updatePointerPosition()
 
-        if (isDetailOpen) {
-            hoveredStatIndex =
-                null
-
-            return
-        }
-
         val snapshot =
             snapshotProvider()
 
@@ -78,104 +70,7 @@ class RunSummaryStatInteractionController(
      * aynı frame'de Restart/Main Menu işlemi yapmamalıdır.
      */
     fun handleInput():
-        Boolean {
-
-        if (
-            selectedStat !=
-            null
-        ) {
-            return handleDetailInput()
-        }
-
-        if (
-            !Gdx.input.isButtonJustPressed(
-                Input.Buttons.LEFT
-            )
-        ) {
-            return false
-        }
-
-        updatePointerPosition()
-
-        val snapshot =
-            snapshotProvider()
-
-        val selectedIndex =
-            renderer
-                .currentLayout(
-                    snapshot.stats.size
-                )
-                .statRowBounds
-                .indexOfFirst {
-                        bounds ->
-
-                    bounds.contains(
-                        pointerPosition
-                    )
-                }
-
-        if (
-            selectedIndex <
-            0
-        ) {
-            return false
-        }
-
-        selectedStat =
-            snapshot.stats
-                .getOrNull(
-                    selectedIndex
-                )
-
-        return selectedStat !=
-            null
-    }
-
-    private fun handleDetailInput():
-        Boolean {
-
-        if (
-            Gdx.input.isKeyJustPressed(
-                Input.Keys.ESCAPE
-            )
-        ) {
-            closeDetail()
-
-            return true
-        }
-
-        if (
-            !Gdx.input.isButtonJustPressed(
-                Input.Buttons.LEFT
-            )
-        ) {
-            /*
-             * Detay açıkken klavye Restart/Main Menu de
-             * çalışmasın. Modal input tamamen tüketir.
-             */
-            return true
-        }
-
-        updatePointerPosition()
-
-        val layout =
-            renderer.currentLayout(
-                snapshotProvider()
-                    .stats
-                    .size
-            )
-
-        if (
-            !layout.detailBounds
-                .contains(
-                    pointerPosition
-                )
-        ) {
-            closeDetail()
-        }
-
-        return true
-    }
+        Boolean = false
 
     fun closeDetail() {
 

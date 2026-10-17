@@ -151,7 +151,7 @@ class LanceAttackExecutor(
 
         val targets =
             context.enemyManager
-                .allEnemies
+                .weaponTargets
                 .filter { enemy ->
                     isInsideAttackLine(
                         enemy = enemy,

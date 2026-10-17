@@ -100,7 +100,8 @@ class AcidicPoolRuntime(
         playerCenterX: Float,
         playerCenterY: Float,
         enemies: List<Enemy>,
-        upgraded: Boolean
+        upgraded: Boolean,
+        aimPosition: Vector2? = null
     ): Boolean {
 
         if (isActive) {
@@ -154,21 +155,14 @@ class AcidicPoolRuntime(
                 }
                 .toList()
 
-        val bossCandidates =
-            candidates.filter { (enemy, _) ->
-                enemy.type == EnemyType.MINI_BOSS ||
-                    enemy.type == EnemyType.FINAL_BOSS
-            }
-
         val target =
-            (if (bossCandidates.isNotEmpty()) bossCandidates else candidates)
-                .minByOrNull {
-                        (_, distanceSquared) ->
-
-                    distanceSquared
-                }
-                ?.first
-                ?: return false
+            com.azizoglu.grisilith.weapon.runtime.AbilityTargeting.select(
+                candidates.map { it.first }, playerCenterX, playerCenterY,
+                kotlin.math.sqrt(placementRangeSquared))
+        if (target == null && aimPosition == null) return false
+        val center = aimPosition?.cpy()?.sub(playerCenterX, playerCenterY)
+            ?.limit(kotlin.math.sqrt(placementRangeSquared))?.add(playerCenterX, playerCenterY)
+            ?: Vector2(target!!.centerX, target.centerY)
 
         val began = areaRuntime.begin(
             PersistentArea(
@@ -177,8 +171,8 @@ class AcidicPoolRuntime(
 
                 center =
                     Vector2(
-                        target.centerX,
-                        target.centerY
+                        center.x,
+                        center.y
                     ),
 
                 radius =

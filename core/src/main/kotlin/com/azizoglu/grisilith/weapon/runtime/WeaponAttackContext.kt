@@ -53,7 +53,8 @@ data class WeaponAttackContext(
      * unlocked, ready and successfully triggered.
      */
     val tryTriggerAutomaticAbility:
-        () -> Boolean
+        () -> Boolean,
+    val normalAttackIntervalSeconds: Float = 1f
 ) {
 
     fun modifiedDamageAgainst(

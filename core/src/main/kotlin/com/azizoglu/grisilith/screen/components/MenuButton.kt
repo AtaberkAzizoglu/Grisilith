@@ -1,8 +1,8 @@
 package com.azizoglu.grisilith.screen.components
 
 import com.badlogic.gdx.graphics.Color
-import com.badlogic.gdx.graphics.Pixmap
-import com.badlogic.gdx.graphics.Texture
+import com.azizoglu.grisilith.ui.theme.ButtonVisualState
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -24,6 +24,12 @@ class MenuButton(
     height: Float,
 
     var isEnabled: Boolean = true,
+
+    val visualStyle: MenuButtonVisualStyle = MenuButtonVisualStyle.STANDARD,
+
+    val isSelected: Boolean = false,
+
+    private val textOffsetY: Float = 0f,
 
     private val onClick:
         () -> Unit
@@ -74,36 +80,6 @@ class MenuButton(
         private const val BORDER_SIZE =
             2f
 
-        private val whitePixel:
-            Texture by lazy {
-            createWhitePixel()
-        }
-
-        private fun createWhitePixel():
-            Texture {
-
-            val pixmap =
-                Pixmap(
-                    1,
-                    1,
-                    Pixmap.Format.RGBA8888
-                )
-
-            pixmap.setColor(
-                Color.WHITE
-            )
-
-            pixmap.fill()
-
-            val texture =
-                Texture(
-                    pixmap
-                )
-
-            pixmap.dispose()
-
-            return texture
-        }
     }
 
     val bounds =
@@ -181,60 +157,61 @@ class MenuButton(
                     pointerPosition
                 )
 
-        val fillColor =
+        val visualState =
             when {
                 !isEnabled -> {
-                    disabledColor
+                    ButtonVisualState.DISABLED
                 }
 
                 pointerInside &&
                     pointerHeld &&
                     pointerWasPressedInside -> {
-                    pressedColor
+                    ButtonVisualState.PRESSED
                 }
 
                 pointerInside -> {
-                    hoveredColor
+                    ButtonVisualState.HOVERED
                 }
 
                 else -> {
-                    normalColor
+                    ButtonVisualState.NORMAL
                 }
             }
 
-        drawRectangle(
-            batch =
-                batch,
+        when (visualStyle) {
+            MenuButtonVisualStyle.ARROW_LEFT, MenuButtonVisualStyle.ARROW_RIGHT ->
+                UiComponentRenderer.drawStepperArrow(batch,bounds,visualStyle==MenuButtonVisualStyle.ARROW_RIGHT,visualState)
+            MenuButtonVisualStyle.STANDARD ->
+                UiComponentRenderer.drawButton(
+                    batch = batch,
+                    bounds = bounds,
+                    state = if (isSelected && visualState == ButtonVisualState.NORMAL) {
+                        ButtonVisualState.SELECTED
+                    } else {
+                        visualState
+                    }
+                )
 
-            rectangle =
-                bounds,
+            MenuButtonVisualStyle.TOGGLE ->
+                UiComponentRenderer.drawToggle(
+                    batch = batch,
+                    bounds = bounds,
+                    enabled = isEnabled,
+                    selected = isSelected
+                )
 
-            color =
-                borderColor
-        )
-
-        drawRectangle(
-            batch =
-                batch,
-
-            rectangle =
-                Rectangle(
-                    bounds.x +
-                        BORDER_SIZE,
-
-                    bounds.y +
-                        BORDER_SIZE,
-
-                    bounds.width -
-                        BORDER_SIZE * 2f,
-
-                    bounds.height -
-                        BORDER_SIZE * 2f
-                ),
-
-            color =
-                fillColor
-        )
+            MenuButtonVisualStyle.KEY_SLOT ->
+                UiComponentRenderer.drawSlot(
+                    batch = batch,
+                    bounds = bounds,
+                    selected = isSelected || visualState == ButtonVisualState.HOVERED,
+                    locked = !isEnabled
+                )
+            MenuButtonVisualStyle.DROPDOWN -> UiComponentRenderer.drawDropdown(batch, bounds,
+                isSelected || visualState == ButtonVisualState.HOVERED)
+            MenuButtonVisualStyle.DROPDOWN_ROW -> UiComponentRenderer.drawDropdownRow(batch, bounds,
+                isSelected || visualState == ButtonVisualState.HOVERED)
+        }
 
         val oldScaleX =
             font.data.scaleX
@@ -242,14 +219,29 @@ class MenuButton(
         val oldScaleY =
             font.data.scaleY
 
-        font.data.setScale(
-            1.15f
-        )
+        var textScale = 1.02f
+        font.data.setScale(textScale)
 
         glyphLayout.setText(
             font,
             text
         )
+
+        val horizontalPadding = when (visualStyle) {
+            MenuButtonVisualStyle.TOGGLE -> 12f
+            MenuButtonVisualStyle.KEY_SLOT, MenuButtonVisualStyle.ARROW_LEFT, MenuButtonVisualStyle.ARROW_RIGHT -> 8f
+            MenuButtonVisualStyle.STANDARD -> minOf(42f, bounds.width * 0.28f)
+            MenuButtonVisualStyle.DROPDOWN, MenuButtonVisualStyle.DROPDOWN_ROW -> 30f
+        }
+        val availableWidth = (bounds.width - horizontalPadding).coerceAtLeast(1f)
+        val availableHeight = (bounds.height - 18f).coerceAtLeast(1f)
+        if (glyphLayout.width > availableWidth || glyphLayout.height > availableHeight) {
+            val widthRatio = availableWidth / glyphLayout.width.coerceAtLeast(1f)
+            val heightRatio = availableHeight / glyphLayout.height.coerceAtLeast(1f)
+            textScale = (textScale * minOf(widthRatio, heightRatio)).coerceAtLeast(0.42f)
+            font.data.setScale(textScale)
+            glyphLayout.setText(font, text)
+        }
 
         font.color =
             if (isEnabled) {
@@ -261,16 +253,16 @@ class MenuButton(
         font.draw(
             batch,
             text,
-            bounds.x +
-                (
-                    bounds.width -
-                        glyphLayout.width
-                    ) / 2f,
+            bounds.x,
             bounds.y +
                 (
                     bounds.height +
                         glyphLayout.height
-                    ) / 2f
+                    ) / 2f +
+                textOffsetY,
+            bounds.width,
+            com.badlogic.gdx.utils.Align.center,
+            false
         )
 
         font.data.setScale(
@@ -279,28 +271,14 @@ class MenuButton(
         )
     }
 
-    private fun drawRectangle(
-        batch:
-        SpriteBatch,
+}
 
-        rectangle:
-        Rectangle,
-
-        color:
-        Color
-    ) {
-        batch.color =
-            color
-
-        batch.draw(
-            whitePixel,
-            rectangle.x,
-            rectangle.y,
-            rectangle.width,
-            rectangle.height
-        )
-
-        batch.color =
-            Color.WHITE
-    }
+enum class MenuButtonVisualStyle {
+    STANDARD,
+    TOGGLE,
+    KEY_SLOT,
+    DROPDOWN,
+    DROPDOWN_ROW,
+    ARROW_LEFT,
+    ARROW_RIGHT
 }

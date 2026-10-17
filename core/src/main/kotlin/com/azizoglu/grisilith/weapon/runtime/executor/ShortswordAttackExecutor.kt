@@ -173,9 +173,9 @@ class ShortswordAttackExecutor(
                         .DOUBLE_SLASH
                 },
             centerX =
-                context.attackOriginX + playerToTarget.x * visualSize * 0.35f,
+                primaryTarget.centerX,
             centerY =
-                context.attackOriginY + playerToTarget.y * visualSize * 0.35f,
+                primaryTarget.centerY,
             rotationDegrees =
                 attackAngle,
             worldWidth =
@@ -415,7 +415,7 @@ class ShortswordAttackExecutor(
                 halfLength
 
         return context.enemyManager
-            .allEnemies
+            .weaponTargets
             .filter { enemy ->
                 !enemy.isDead &&
                     distanceFromPointToSegment(

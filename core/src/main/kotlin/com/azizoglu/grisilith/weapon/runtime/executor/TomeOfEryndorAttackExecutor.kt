@@ -24,7 +24,7 @@ class TomeOfEryndorAttackExecutor(
     WeaponTargetSelector,
 
     /*
-     * Lv.1–2 normal projectile davranışını
+     * Lv.1–3 normal projectile davranışını
      * mevcut ortak executor üzerinden çalıştırır.
      */
     private val projectileExecutor:
@@ -37,7 +37,7 @@ class TomeOfEryndorAttackExecutor(
     companion object {
 
         /*
-         * Lv.3 sonrasında ışın menzili,
+         * Lv.4 basic attack upgrade: beam range
          * normal projectile menzilinden biraz kısa.
          */
         private const val BEAM_RANGE_MULTIPLIER =
@@ -62,7 +62,7 @@ class TomeOfEryndorAttackExecutor(
         context: WeaponAttackContext
     ) {
         /*
-         * Lv.1–2 eski Fire/Necrotic projectile
+         * Lv.1–3 eski Fire/Necrotic projectile
          * sistemini kullanmaya devam eder.
          */
         if (
@@ -172,7 +172,7 @@ class TomeOfEryndorAttackExecutor(
          */
         val targets =
             context.enemyManager
-                .allEnemies
+                .weaponTargets
                 .asSequence()
                 .filter { enemy ->
                     isEnemyInsideBeam(

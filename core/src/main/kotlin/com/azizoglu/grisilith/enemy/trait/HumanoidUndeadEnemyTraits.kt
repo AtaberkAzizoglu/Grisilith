@@ -18,8 +18,8 @@ import kotlin.math.atan2
 private data class EnemySkillProjectile(
     var x: Float,
     var y: Float,
-    val velocityX: Float,
-    val velocityY: Float,
+    var velocityX: Float,
+    var velocityY: Float,
     val damage: Int,
     val sourceName: String,
     val damageType: DamageType,
@@ -523,8 +523,8 @@ internal class WitchcraftEnemyTrait : EnemyTrait {
     private data class TsunamiWave(
         var x: Float,
         var y: Float,
-        val velocityX: Float,
-        val velocityY: Float,
+        var velocityX: Float,
+        var velocityY: Float,
         var remaining: Float = 2.3f,
         var animationSeconds: Float = 0f,
         val hitTargets: MutableSet<Pair<EnemyTraitTargetType, Int>> = mutableSetOf()
@@ -548,7 +548,12 @@ internal class WitchcraftEnemyTrait : EnemyTrait {
         pulses.removeAll { it.remaining <= 0f }
         if (chargeRemaining > 0f) {
             chargeRemaining -= dt
-            if (chargeRemaining <= 0f) cast(context)
+            if (chargeRemaining <= 0f) {
+                // Warning geometry belongs only to the charging phase. The cast
+                // itself is rendered solely with the spell's animated artwork.
+                chargeRemaining = 0f
+                cast(context)
+            }
             return
         }
         cooldown -= dt
@@ -627,6 +632,10 @@ internal class WitchcraftEnemyTrait : EnemyTrait {
         val iterator = tsunamiWaves.iterator()
         while (iterator.hasNext()) {
             val wave = iterator.next()
+            val velocity = Vector2(wave.velocityX, wave.velocityY)
+            context.owner.projectileVelocityBender?.invoke(wave.x, wave.y, velocity, dt)
+            wave.velocityX = velocity.x
+            wave.velocityY = velocity.y
             wave.x += wave.velocityX * dt
             wave.y += wave.velocityY * dt
             wave.remaining -= dt
@@ -1003,6 +1012,10 @@ private fun updateProjectiles(
     val iterator = projectiles.iterator()
     while (iterator.hasNext()) {
         val projectile = iterator.next()
+        val velocity = Vector2(projectile.velocityX, projectile.velocityY)
+        context.owner.projectileVelocityBender?.invoke(projectile.x, projectile.y, velocity, dt)
+        projectile.velocityX = velocity.x
+        projectile.velocityY = velocity.y
         projectile.x += projectile.velocityX * dt
         projectile.y += projectile.velocityY * dt
         projectile.remainingSeconds -= dt

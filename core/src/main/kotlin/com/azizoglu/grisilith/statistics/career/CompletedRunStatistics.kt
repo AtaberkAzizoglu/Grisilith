@@ -14,5 +14,6 @@ data class CompletedRunStatistics(
     val goldCollected: Float,
     val goldSpent: Float,
 
-    val grisilithCoinsEarned: Int
+    val grisilithCoinsEarned: Int,
+    val score: Long = 0L
 )

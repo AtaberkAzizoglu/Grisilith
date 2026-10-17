@@ -351,7 +351,10 @@ class CreatePresetInteractionState {
         StatType,
 
         characterBaseScore:
-        Int
+        Int,
+
+        amount:
+        Int = 1
     ) {
         statAllocation =
             statAllocation.increase(
@@ -362,17 +365,24 @@ class CreatePresetInteractionState {
                     characterBaseScore,
 
                 pointBudget =
-                    statPointBudget
+                    statPointBudget,
+
+                amount =
+                    amount
             )
     }
 
     fun decreaseStat(
         statType:
-        StatType
+        StatType,
+
+        amount:
+        Int = 1
     ) {
         statAllocation =
             statAllocation.decrease(
-                statType
+                statType,
+                amount
             )
     }
 

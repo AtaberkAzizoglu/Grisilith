@@ -6,7 +6,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.graphics.g2d.TextureRegion
 
 class SummonSpriteRenderer {
 
@@ -24,10 +23,6 @@ class SummonSpriteRenderer {
             return
         }
 
-        if (summon.type == SummonType.GUARD) {
-            renderGuard(summon, camera)
-            return
-        }
 
         val definition =
             definitionFor(
@@ -88,7 +83,7 @@ class SummonSpriteRenderer {
             }
 
         val worldHeight =
-            definition.worldHeight
+            texture.height * definition.pixelToWorldScale
 
         val worldWidth =
             worldHeight *
@@ -97,20 +92,15 @@ class SummonSpriteRenderer {
                         texture.height.toFloat()
                     )
 
-        /*
-         * Cell crops intentionally retain transparent padding.
-         * A small Y anchor adjustment places the character's feet/body around
-         * the gameplay entity center without changing combat bounds.
-         */
+        // Repaired cuts share an eight-pixel feet margin. Keep original native
+        // artwork scale and a stable feet pivot; transparent canvas size is irrelevant.
         val drawX =
             summon.centerX -
                 worldWidth /
                 2f
 
         val drawY =
-            summon.centerY -
-                worldHeight *
-                definition.centerAnchorRatio
+            summon.centerY - definition.feetOffset - 8f * definition.pixelToWorldScale
 
         batch.projectionMatrix =
             camera.combined
@@ -174,78 +164,6 @@ class SummonSpriteRenderer {
         }
     }
 
-    private fun renderGuard(
-        summon: SummonedEntity,
-        camera: OrthographicCamera
-    ) {
-        val definition = GUARD
-        val frameIndex =
-            if (summon.isVisuallyMoving) {
-                (summon.walkAnimationTime / definition.secondsPerFrame)
-                    .toInt()
-                    .mod(definition.frameCount)
-            } else {
-                0
-            }
-
-        val texture =
-            textures.getOrPut(GUARD_SHEET_PATH) {
-                Texture(
-                    Gdx.files.internal(GUARD_SHEET_PATH)
-                ).also {
-                    it.setFilter(
-                        Texture.TextureFilter.Nearest,
-                        Texture.TextureFilter.Nearest
-                    )
-                }
-            }
-
-        val rowIndex =
-            when (summon.visualDirection) {
-                SummonVisualDirection.SOUTH -> 0
-                SummonVisualDirection.EAST -> 1
-                SummonVisualDirection.NORTH -> 2
-                SummonVisualDirection.WEST -> 3
-            }
-
-        val sourceX = GUARD_FRAME_X[frameIndex]
-        val sourceY = GUARD_ROW_Y[rowIndex]
-        val sourceHeight = GUARD_ROW_HEIGHT[rowIndex]
-
-        val region =
-            TextureRegion(
-                texture,
-                sourceX,
-                sourceY,
-                GUARD_FRAME_WIDTH,
-                sourceHeight
-            )
-
-        val worldHeight =
-            sourceHeight * GUARD_PIXEL_TO_WORLD_SCALE
-
-        val worldWidth =
-            GUARD_FRAME_WIDTH * GUARD_PIXEL_TO_WORLD_SCALE
-
-        val drawY =
-            summon.centerY -
-                GUARD_FEET_OFFSET_FROM_CENTER -
-                GUARD_BOTTOM_PADDING[rowIndex] *
-                    GUARD_PIXEL_TO_WORLD_SCALE
-
-        batch.projectionMatrix = camera.combined
-        batch.begin()
-        batch.setColor(1f, 1f, 1f, 1f)
-        batch.draw(
-            region,
-            summon.centerX - worldWidth / 2f,
-            drawY,
-            worldWidth,
-            worldHeight
-        )
-        batch.end()
-    }
-
     fun dispose() {
         textures.values
             .forEach {
@@ -262,116 +180,16 @@ class SummonSpriteRenderer {
         val prefix: String,
         val frameCount: Int,
         val secondsPerFrame: Float,
-        val worldHeight: Float,
-        val centerAnchorRatio: Float
+        val pixelToWorldScale: Float,
+        val feetOffset: Float
     )
 
     companion object {
-        private val COW =
-            VisualDefinition(
-                root =
-                    "summon_visuals/cow/",
-
-                prefix =
-                    "cow",
-
-                frameCount =
-                    4,
-
-                secondsPerFrame =
-                    0.15f,
-
-                worldHeight =
-                    58f,
-
-                centerAnchorRatio =
-                    0.43f
-            )
-
-        private val IMP =
-            VisualDefinition(
-                root =
-                    "summon_visuals/imp/",
-
-                prefix =
-                    "imp",
-
-                frameCount =
-                    4,
-
-                secondsPerFrame =
-                    0.13f,
-
-                worldHeight =
-                    52f,
-
-                centerAnchorRatio =
-                    0.44f
-            )
-
-        private val KNIGHT =
-            VisualDefinition(
-                root =
-                    "summon_visuals/knight/",
-
-                prefix =
-                    "knight",
-
-                frameCount =
-                    5,
-
-                secondsPerFrame =
-                    0.14f,
-
-                worldHeight =
-                    72f,
-
-                centerAnchorRatio =
-                    0.44f
-            )
-
-        private val TOAD =
-            VisualDefinition(
-                root = "summon_visuals/toad/",
-                prefix = "toad",
-                frameCount = 4,
-                secondsPerFrame = 0.16f,
-                worldHeight = 38f,
-                centerAnchorRatio = 0.45f
-            )
-
-        private val GUARD =
-            VisualDefinition(
-                root = "",
-                prefix = "",
-                frameCount = 5,
-                secondsPerFrame = 0.14f,
-                worldHeight = 76f,
-                centerAnchorRatio = 0.46f
-            )
-
-        private const val GUARD_SHEET_PATH =
-            "summon_visuals/guard_sheet.png"
-
-        private const val GUARD_FRAME_WIDTH =
-            196
-
-        private val GUARD_FRAME_X =
-            intArrayOf(438, 632, 836, 1034, 1233)
-
-        private val GUARD_ROW_Y =
-            intArrayOf(0, 277, 525, 772)
-
-        private val GUARD_ROW_HEIGHT =
-            intArrayOf(277, 248, 247, 252)
-
-        private val GUARD_BOTTOM_PADDING =
-            intArrayOf(9, 4, 0, 28)
-
-        private const val GUARD_PIXEL_TO_WORLD_SCALE =
-            0.274f
-
-        private const val GUARD_FEET_OFFSET_FROM_CENTER =
-            18f
+        // Preserve each family's original native artwork scale, independent of packing.
+        private val COW = VisualDefinition("summon_visuals/cow/", "cow", 4, .15f, 58f/140f, 22f)
+        private val IMP = VisualDefinition("summon_visuals/imp/", "imp", 4, .13f, 52f/145f, 16f)
+        private val KNIGHT = VisualDefinition("summon_visuals/knight/", "knight", 5, .14f, 72f/175f, 29f)
+        private val TOAD = VisualDefinition("summon_visuals/toad/", "toad", 4, .16f, 38f/256f, 15f)
+        private val GUARD = VisualDefinition("summon_visuals/guard/", "guard", 5, .14f, .274f, 18f)
     }
 }

@@ -1,0 +1,10 @@
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':lwjgl3')
+    desktop.kotlin.sourceSets.main.kotlin.srcDir(gradle.rootProject.file('tools/weapon-balance'))
+    desktop.tasks.register('weaponBalance', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.WeaponBalance'
+        workingDir = gradle.rootProject.projectDir
+    }
+}

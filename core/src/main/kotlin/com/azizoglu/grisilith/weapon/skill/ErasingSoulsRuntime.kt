@@ -10,7 +10,6 @@ import com.azizoglu.grisilith.weapon.runtime.WeaponInstance
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
-import java.util.ArrayDeque
 
 class ErasingSoulsRuntime {
 
@@ -32,15 +31,10 @@ class ErasingSoulsRuntime {
         mutableListOf<ExplosionVisual>()
 
     /*
-     * Bir ölüm zincirini iteratif şekilde çözer.
-     *
-     * Böylece çok sayıda düşmanın aynı anda ölmesi halinde
-     * derin recursive callback zinciri oluşmaz.
-     *
-     * Dönen liste initialDeadEnemy HARİÇ olmak üzere,
-     * patlamalarla yeni ölen düşmanları içerir.
+     * Resolves one corpse explosion. Victims are returned for bookkeeping
+     * only, never to trigger secondary explosions.
      */
-    fun resolveChain(
+    fun resolveExplosion(
         initialDeadEnemy: Enemy,
         sourceWeapon: WeaponInstance,
         playerCenterX: Float,
@@ -83,190 +77,141 @@ class ErasingSoulsRuntime {
             return emptyList()
         }
 
-        val pendingDeaths =
-            ArrayDeque<Enemy>()
-
-        val processedDeaths =
-            mutableSetOf<Enemy>()
-
         val newlyKilledEnemies =
             mutableListOf<Enemy>()
+        val deadEnemy = initialDeadEnemy
 
-        pendingDeaths.addLast(
-            initialDeadEnemy
+        val explosionVisualRadius =
+            maxOf(
+                deadEnemy.bounds.width,
+                deadEnemy.bounds.height
+            ) /
+                2f +
+                DefaultWeaponAbilities
+                    .ERASING_SOULS_EXPLOSION_RADIUS
+
+        addExplosionVisual(
+            centerX =
+                deadEnemy.centerX,
+
+            centerY =
+                deadEnemy.centerY,
+
+            radius =
+                explosionVisualRadius
         )
 
-        while (
-            pendingDeaths.isNotEmpty()
-        ) {
-            val deadEnemy =
-                pendingDeaths.removeFirst()
+        onExplosionStarted(
+            deadEnemy
+        )
 
-            if (
-                !processedDeaths.add(
-                    deadEnemy
-                )
-            ) {
-                continue
-            }
+        /*
+         * Snapshot keeps callbacks from invalidating iteration.
+         */
+        enemies
+            .toList()
+            .forEach {
+                    target ->
 
-            /*
-             * Zincirin her halkası da oyuncunun Erasing Souls
-             * tetik alanı içinde olmalıdır.
-             */
-            if (
-                !isInsideTriggerArea(
-                    enemy =
-                        deadEnemy,
+                if (
+                    target === deadEnemy ||
+                    target.isDead ||
+                    !isInsideExplosion(
+                        sourceEnemy =
+                            deadEnemy,
 
-                    playerCenterX =
-                        playerCenterX,
-
-                    playerCenterY =
-                        playerCenterY,
-
-                    sourceWeapon =
-                        sourceWeapon
-                )
-            ) {
-                continue
-            }
-
-            val explosionVisualRadius =
-                maxOf(
-                    deadEnemy.bounds.width,
-                    deadEnemy.bounds.height
-                ) /
-                    2f +
-                    DefaultWeaponAbilities
-                        .ERASING_SOULS_EXPLOSION_RADIUS
-
-            addExplosionVisual(
-                centerX =
-                    deadEnemy.centerX,
-
-                centerY =
-                    deadEnemy.centerY,
-
-                radius =
-                    explosionVisualRadius
-            )
-
-            onExplosionStarted(
-                deadEnemy
-            )
-
-            /*
-             * Snapshot kullanılır:
-             * Aynı patlamada oluşan yeni ölümler liste üzerinde
-             * güvenli şekilde kuyruğa eklenebilir.
-             */
-            enemies
-                .toList()
-                .forEach {
-                        target ->
-
-                    if (
-                        target === deadEnemy ||
-                        target.isDead ||
-                        !isInsideExplosion(
-                            sourceEnemy =
-                                deadEnemy,
-
-                            target =
-                                target
-                        )
-                    ) {
-                        return@forEach
-                    }
-
-                    val wasAlive =
-                        !target.isDead
-
-                    val appliedDamage =
-                        target.takeDamage(
-                            amount =
-                                explosionDamage,
-
-                            damageContext =
-                                EnemyDamageContext(
-                                    damageType =
-                                        DamageType.NECROTIC,
-
-                                    sourceWeaponRuntimeId =
-                                        sourceWeapon.runtimeId,
-
-                                    sourceWeaponDefinitionId =
-                                        sourceWeapon
-                                            .definition
-                                            .id
-                                            .value,
-
-                                    sourceName =
-                                        sourceWeapon.displayName +
-                                            " — Erasing the Souls"
-                                )
-                        )
-
-                    if (
-                        appliedDamage >
-                        0
-                    ) {
-                        /*
-                         * Ölü hedefte applyCondition zaten güvenli
-                         * şekilde hiçbir şey yapmaz.
-                         */
-                        target.applyCondition(
-                            ConditionDamageCalculator
-                                .createApplication(
-                                    type =
-                                        ConditionType.NECROSIS,
-
-                                    playerStats =
-                                        playerStats,
-
-                                    durationSeconds =
-                                        DefaultWeaponAbilities
-                                            .ERASING_SOULS_NECROSIS_DURATION_SECONDS,
-
-                                    sourceWeaponRuntimeId =
-                                        sourceWeapon.runtimeId,
-
-                                    sourceWeaponDefinitionId =
-                                        sourceWeapon.definition.id.value,
-
-                                    sourceName =
-                                        sourceWeapon.displayName +
-                                            " — Erasing the Souls",
-
-                                    sourceCenterX =
-                                        deadEnemy.centerX,
-
-                                    sourceCenterY =
-                                        deadEnemy.centerY
-                                )
-                        )
-
-                        onDamageDealt(
-                            appliedDamage,
-                            sourceWeapon.displayName +
-                                " — Erasing the Souls"
-                        )
-                    }
-
-                    if (
-                        wasAlive &&
-                        target.isDead
-                    ) {
-                        newlyKilledEnemies.add(
+                        target =
                             target
-                        )
-
-                        /* Lv.3 and Lv.5 explosions no longer chain. */
-                    }
+                    )
+                ) {
+                    return@forEach
                 }
-        }
 
+                val wasAlive =
+                    !target.isDead
+
+                val appliedDamage =
+                    target.takeDamage(
+                        amount =
+                            explosionDamage,
+
+                        damageContext =
+                            EnemyDamageContext(
+                                damageType =
+                                    DamageType.NECROTIC,
+
+                                sourceWeaponRuntimeId =
+                                    sourceWeapon.runtimeId,
+
+                                sourceWeaponDefinitionId =
+                                    sourceWeapon
+                                        .definition
+                                        .id
+                                        .value,
+
+                                sourceName =
+                                    sourceWeapon.displayName +
+                                        " — Erasing the Souls"
+                            )
+                    )
+
+                if (
+                    appliedDamage >
+                    0
+                ) {
+                    /*
+                     * Ölü hedefte applyCondition zaten güvenli
+                     * şekilde hiçbir şey yapmaz.
+                     */
+                    target.applyCondition(
+                        ConditionDamageCalculator
+                            .createApplication(
+                                type =
+                                    ConditionType.NECROSIS,
+
+                                playerStats =
+                                    playerStats,
+
+                                durationSeconds =
+                                    DefaultWeaponAbilities
+                                        .ERASING_SOULS_NECROSIS_DURATION_SECONDS,
+
+                                sourceWeaponRuntimeId =
+                                    sourceWeapon.runtimeId,
+
+                                sourceWeaponDefinitionId =
+                                    sourceWeapon.definition.id.value,
+
+                                sourceName =
+                                    sourceWeapon.displayName +
+                                        " — Erasing the Souls",
+
+                                sourceCenterX =
+                                    deadEnemy.centerX,
+
+                                sourceCenterY =
+                                    deadEnemy.centerY
+                            )
+                    )
+
+                    onDamageDealt(
+                        appliedDamage,
+                        sourceWeapon.displayName +
+                            " — Erasing the Souls"
+                    )
+                }
+
+                if (
+                    wasAlive &&
+                    target.isDead
+                ) {
+                    newlyKilledEnemies.add(
+                        target
+                    )
+
+                    /* Lv.3 and Lv.5 explosions no longer chain. */
+                }
+            }
         return newlyKilledEnemies
             .distinct()
     }

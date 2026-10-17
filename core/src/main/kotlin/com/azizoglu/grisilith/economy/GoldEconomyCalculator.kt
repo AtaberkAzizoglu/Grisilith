@@ -117,9 +117,7 @@ object GoldEconomyCalculator {
 
         val bossGrowth =
             defeatedMiniBossCount
-                .coerceAtLeast(
-                    0
-                ) *
+                .coerceIn(0, MAXIMUM_MINI_BOSS_GROWTH_STACKS) *
                 GROWTH_PER_DEFEATED_MINI_BOSS
 
         val totalGrowth =
@@ -252,6 +250,10 @@ object GoldEconomyCalculator {
 
     private const val GROWTH_PER_DEFEATED_MINI_BOSS =
         0.03f
+
+    /* Prevents cumulative run-long boss history from making late-stage gold jump close to 2x. */
+    private const val MAXIMUM_MINI_BOSS_GROWTH_STACKS =
+        5
 
     private const val BOSS_STAGE_INTERVAL =
         5

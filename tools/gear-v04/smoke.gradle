@@ -1,0 +1,18 @@
+gradle.projectsEvaluated {
+    def desktop=gradle.rootProject.project(':lwjgl3')
+    desktop.kotlin.sourceSets.main.kotlin.srcDir(gradle.rootProject.file('tools/gear-v04/qa'))
+    desktop.tasks.register('gearAdditionSmoke',JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath=desktop.sourceSets.main.runtimeClasspath
+        mainClass='qa.GearAdditionSmoke'
+        workingDir=gradle.rootProject.file('assets')
+        jvmArgs '--enable-native-access=ALL-UNNAMED'
+    }
+    desktop.tasks.register('characterRenderingSmoke',JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath=desktop.sourceSets.main.runtimeClasspath
+        mainClass='qa.CharacterRenderingSmoke'
+        workingDir=gradle.rootProject.file('assets')
+        jvmArgs '--enable-native-access=ALL-UNNAMED'
+    }
+}

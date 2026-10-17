@@ -11,6 +11,24 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 
 class VortexPullRuntime {
 
+    // Directional gravity is applied inside Enemy's own voluntary movement.
+    fun movementMultiplier(enemy: Enemy): Float = 1f
+
+    fun bendProjectileVelocity(x: Float, y: Float, velocity: Vector2, delta: Float) {
+        val area = field ?: return
+        com.azizoglu.grisilith.weapon.ProjectileTrajectoryInfluence.bendToward(
+            velocity, x, y, area.center.x, area.center.y,
+            area.radius * DefaultWeaponAbilities.VORTEX_PROJECTILE_INFLUENCE_RADIUS_MULTIPLIER,
+            DefaultWeaponAbilities.VORTEX_PROJECTILE_TURN_DEGREES_PER_SECOND, delta)
+    }
+
+    fun bendProjectiles(projectiles: List<com.azizoglu.grisilith.weapon.Projectile>, delta: Float) {
+        val area = field ?: return
+        projectiles.forEach { it.bendByVortex(area.center.x, area.center.y,
+            area.radius * DefaultWeaponAbilities.VORTEX_PROJECTILE_INFLUENCE_RADIUS_MULTIPLIER,
+            DefaultWeaponAbilities.VORTEX_PROJECTILE_TURN_DEGREES_PER_SECOND, delta) }
+    }
+
     private val reactiveTarget =
         ReactiveSpellFieldTarget(DamageType.NECROTIC)
 
@@ -166,7 +184,8 @@ class VortexPullRuntime {
         enemies: List<Enemy>,
         worldWidth: Float,
         worldHeight: Float,
-        upgraded: Boolean
+        upgraded: Boolean,
+        aimPosition: Vector2? = null
     ): Boolean {
         if (isActive) {
             return false
@@ -192,38 +211,24 @@ class VortexPullRuntime {
             }
 
         if (
-            livingCandidates.isEmpty()
+            livingCandidates.isEmpty() && aimPosition == null
         ) {
             return false
         }
 
-        /*
-         * Vortex Pull artık menzil içindeki EN YAKIN yaşayan Enemy'yi
-         * hedefler ve alan merkezini doğrudan o Enemy'nin merkezine koyar.
-         * Rastgele anchor / random offset yoktur.
-         */
-        val bossCandidates =
-            livingCandidates.filter { enemy ->
-                enemy.type == EnemyType.MINI_BOSS ||
-                    enemy.type == EnemyType.FINAL_BOSS
-            }
-
+        // Automatic casts share rank priority; manual casts use the clamped cursor.
         val anchor =
-            (if (bossCandidates.isNotEmpty()) bossCandidates else livingCandidates)
-                .minByOrNull { enemy ->
-                    Vector2.dst2(
-                        playerCenterX,
-                        playerCenterY,
-                        enemy.centerX,
-                        enemy.centerY
-                    )
-                }
-                ?: return false
+            com.azizoglu.grisilith.weapon.runtime.AbilityTargeting.select(
+                livingCandidates, playerCenterX, playerCenterY,
+                DefaultWeaponAbilities.VORTEX_PULL_PLACEMENT_RANGE)
+        if (anchor == null && aimPosition == null) return false
 
         selectedCenter.set(
-            anchor.centerX,
-            anchor.centerY
+            aimPosition?.x ?: anchor!!.centerX,
+            aimPosition?.y ?: anchor!!.centerY
         )
+        if (aimPosition != null) selectedCenter.sub(playerCenterX, playerCenterY)
+            .limit(DefaultWeaponAbilities.VORTEX_PULL_PLACEMENT_RANGE).add(playerCenterX, playerCenterY)
 
         val radius =
             DefaultWeaponAbilities
@@ -273,7 +278,7 @@ class VortexPullRuntime {
                     radius
             }
 
-        if (!containsLivingEnemy) {
+        if (!containsLivingEnemy && aimPosition == null && anchor != null) {
             selectedCenter.set(
                 anchor.centerX
                     .coerceIn(
@@ -402,19 +407,8 @@ class VortexPullRuntime {
                         !hasEnemyInside
                     ) {
                         val nearestEnemy =
-                            enemies
-                                .asSequence()
-                                .filter {
-                                    !it.isDead
-                                }
-                                .minByOrNull {
-                                    Vector2.dst2(
-                                        area.center.x,
-                                        area.center.y,
-                                        it.centerX,
-                                        it.centerY
-                                    )
-                                }
+                            com.azizoglu.grisilith.weapon.runtime.AbilityTargeting.select(
+                                enemies, area.center.x, area.center.y, Float.MAX_VALUE)
 
                         nearestEnemy
                             ?.let {
@@ -465,7 +459,9 @@ class VortexPullRuntime {
                     .forEach {
                             enemy ->
 
-                        onPullEnemy(
+                        if (enemy.type == EnemyType.MINI_BOSS || enemy.type == EnemyType.FINAL_BOSS) {
+                            enemy.applyBossGravity("vortex:${System.identityHashCode(this)}",area.center.x,area.center.y)
+                        } else onPullEnemy(
                             enemy,
                             area.center.x,
                             area.center.y,

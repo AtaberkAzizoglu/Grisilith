@@ -18,6 +18,26 @@ import com.badlogic.gdx.math.MathUtils
 class EnemyManager {
 
     private val enemies = mutableListOf<Enemy>()
+    private val summonWeaponTargets = mutableMapOf<String,Enemy>()
+    /** Combat adapters only: never spawn, render, count or reward a summon as an enemy. */
+    val weaponTargets: List<Enemy>
+        get() {
+            if(summonWeaponTargets.isEmpty())return enemies
+            summonWeaponTargets.values.forEach { proxy -> proxy.weaponTargetSummon?.let(proxy::bindWeaponTarget) }
+            return enemies + summonWeaponTargets.values.filter { !it.isDead }
+        }
+
+    fun synchronizeWeaponSummons(summons: List<SummonedEntity>) {
+        val hostile=summons.filter { !it.isExpired && it.faction==com.azizoglu.grisilith.summon.SummonCombatFaction.ROGUE }
+        summonWeaponTargets.keys.retainAll(hostile.map { it.runtimeId }.toSet())
+        hostile.forEach { summon ->
+            val proxy=summonWeaponTargets.getOrPut(summon.runtimeId) {
+                Enemy(summon.centerX-summon.combatRadius,summon.centerY-summon.combatRadius,
+                    EnemyStats(EnemyType.NORMAL,summon.health.maximumHealth,0,0f,summon.combatRadius*2f,0f))
+            }
+            proxy.bindWeaponTarget(summon)
+        }
+    }
 
     /*
      * Trouble at Home adds the gate as a third combat target family.
@@ -246,15 +266,18 @@ class EnemyManager {
                     }
                 },
                 onTraitTargetDamage = { event ->
+                    val attackType = if (event.damageType == com.azizoglu.grisilith.content.DamageType.NONE) {
+                        enemy.contactDamageType
+                    } else event.damageType
                     if (event.amount > 0) when (event.targetType) {
                         EnemyTraitTargetType.PLAYER ->
-                            onPlayerDamaged(enemy, event.amount, event.damageType)
+                            onPlayerDamaged(enemy, event.amount, attackType)
 
                         EnemyTraitTargetType.SUMMON ->
                             targetableSummons
                                 .getOrNull(event.targetIndex)
                                 ?.takeIf { !it.isExpired }
-                                ?.let { onSummonDamaged(it, event.amount, event.damageType, enemy) }
+                                ?.let { onSummonDamaged(it, event.amount, attackType, enemy) }
 
                         EnemyTraitTargetType.GATE -> {
                             val amount =
@@ -644,6 +667,7 @@ class EnemyManager {
     }
 
     fun clearAll() {
+        summonWeaponTargets.clear()
         enemies.clear()
     }
 

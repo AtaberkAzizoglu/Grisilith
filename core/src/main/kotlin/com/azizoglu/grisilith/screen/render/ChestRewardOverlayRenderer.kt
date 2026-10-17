@@ -3,21 +3,25 @@ package com.azizoglu.grisilith.screen.render
 import com.azizoglu.grisilith.chest.ChestOpeningState
 import com.azizoglu.grisilith.chest.ChestRewardRoll
 import com.azizoglu.grisilith.chest.ChestRewardType
+import com.azizoglu.grisilith.statistics.PlayerStats
+import com.azizoglu.grisilith.statistics.StatDetailPresentation
+import com.azizoglu.grisilith.ui.icon.ContentIconRenderer
+import com.azizoglu.grisilith.ui.stat.StatSymbolRenderer
+import com.azizoglu.grisilith.ui.theme.ButtonVisualState
+import com.azizoglu.grisilith.ui.theme.PanelVisualStyle
+import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
+import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Rectangle
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Align
-import kotlin.math.sin
+import kotlin.math.ceil
 
-/*
- * Chest ekranının yalnızca görsel katmanı.
- *
- * Gerçek chest, item ve character görselleri geldiğinde
- * yalnızca placeholder çizim fonksiyonları değiştirilecek.
- */
 class ChestRewardOverlayRenderer(
     private val camera: OrthographicCamera,
     private val cameraWidth: Float,
@@ -25,11 +29,9 @@ class ChestRewardOverlayRenderer(
     private val shapeRenderer: ShapeRenderer,
     private val batch: SpriteBatch,
     private val font: BitmapFont,
-    private val characterNameProvider: () -> String,
-    private val characterStatsProvider:
-        () -> List<ChestCharacterStatRow>
+    playerStatsProvider: () -> PlayerStats,
+    private val pointerPositionProvider: () -> Vector2?
 ) {
-
     data class Layout(
         val panelBounds: Rectangle,
         val chestBounds: Rectangle,
@@ -38,1440 +40,292 @@ class ChestRewardOverlayRenderer(
         val characterStatsBounds: Rectangle,
         val takeButtonBounds: Rectangle,
         val discardButtonBounds: Rectangle,
-        val itemDetailBounds: Rectangle
+        val itemDetailBounds: Rectangle,
+        val openFiveButtonBounds: Rectangle,
+        val openTenButtonBounds: Rectangle,
+        val openAllButtonBounds: Rectangle,
+        val rewardBounds: List<Rectangle>,
+        val rewardDiscardButtonBounds: List<Rectangle>
     )
 
-    private val layout =
-        Layout(
-            panelBounds = Rectangle(),
-            chestBounds = Rectangle(),
-            rewardVisualBounds = Rectangle(),
-            characterPortraitBounds = Rectangle(),
-            characterStatsBounds = Rectangle(),
-            takeButtonBounds = Rectangle(),
-            discardButtonBounds = Rectangle(),
-            itemDetailBounds = Rectangle()
-        )
+    private val panel = Rectangle()
+    private val chest = Rectangle()
+    private val rewardVisual = Rectangle()
+    private val characterPanel = Rectangle()
+    private val take = Rectangle()
+    private val discard = Rectangle()
+    private val openFive = Rectangle()
+    private val openTen = Rectangle()
+    private val openAll = Rectangle()
+    private val screen = Rectangle()
+    private val rewardCells = mutableListOf<Rectangle>()
+    private val rewardDiscardButtons = mutableListOf<Rectangle>()
+    private val sealedChest by lazy { Texture(Gdx.files.internal("ui/chests/chest_sealed.png")) }
+    private val openedChest by lazy { Texture(Gdx.files.internal("ui/chests/chest_open.png")) }
+    private val legendaryGlow by lazy { Texture(Gdx.files.internal("ui/chests/effects/legendary_reward_glow.png")) }
+    private val artifactGlow by lazy { Texture(Gdx.files.internal("ui/chests/effects/artifact_reward_glow.png")) }
+    private val mainPanelTexture by lazy {
+        Texture(Gdx.files.internal("ui/rewards/stage_reward_panel_v2.png")).also {
+            it.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
+        }
+    }
+    private val statsRenderer = CharacterStatsPanelRenderer(batch, font, playerStatsProvider)
+    private val playerStats = playerStatsProvider
 
-    private var animationTimeSeconds =
-        0f
+    fun update(delta: Float) = Unit
 
-    fun update(
-        delta: Float
-    ) {
-        animationTimeSeconds +=
-            delta.coerceAtLeast(
-                0f
-            )
+    fun currentLayout(rewardCount: Int = 1): Layout {
+        updateLayout(rewardCount)
+        return layout()
     }
 
-    fun currentLayout():
-        Layout {
-
-        updateLayout()
-        return layout
-    }
+    private fun layout() = Layout(panel, chest, rewardVisual, characterPanel, characterPanel, take, discard, Rectangle(), openFive, openTen, openAll, rewardCells, rewardDiscardButtons)
 
     fun renderShapes(
         state: ChestOpeningState,
         reward: ChestRewardRoll?,
+        rewards: List<ChestRewardRoll>,
         revealProgress: Float,
         discardEnabled: Boolean,
-        itemDetailOpen: Boolean
+        discardedRewardIndices: Set<Int>,
+        remainingDiscardCount: Int,
+        remainingChestCount: Int
     ) {
+        val shown = if (rewards.isNotEmpty()) rewards else if (state == ChestOpeningState.REWARD_SHOWN) listOfNotNull(reward) else emptyList()
+        updateLayout(shown.size.coerceAtLeast(1))
+        val pointer = pointerPositionProvider()
+        fun buttonState(bounds: Rectangle): ButtonVisualState =
+            if (pointer?.let(bounds::contains) == true) ButtonVisualState.HOVERED else ButtonVisualState.NORMAL
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled)
+        shapeRenderer.color = Color(0.08f, 0.025f, 0.12f, 0.80f)
+        shapeRenderer.rect(screen.x, screen.y, screen.width, screen.height)
+        shapeRenderer.end()
 
-        updateLayout()
-
-        renderFog()
-        renderPanel(
-            accentColor =
-                accentColor(
-                    reward
-                )
-        )
-
-        when (state) {
-            ChestOpeningState.LOCKED,
-            ChestOpeningState.UNLOCKED,
-            ChestOpeningState.REVEALING -> {
-                renderChestPlaceholder(
-                    state =
-                        state,
-
-                    accentColor =
-                        accentColor(
-                            reward
-                        ),
-
-                    revealProgress =
-                        revealProgress
+        batch.projectionMatrix = camera.combined
+        batch.begin()
+        batch.draw(mainPanelTexture, panel.x, panel.y, panel.width, panel.height)
+        UiComponentRenderer.drawPanel(batch, openedCounterBounds(), PanelVisualStyle.TITLE)
+        if (shown.isNotEmpty()) {
+            UiComponentRenderer.drawSimpleVerticalSeparator(
+                batch,
+                Rectangle(characterPanel.x - 18f, panel.y + 35f, 5f, panel.height - 70f)
+            )
+            shown.forEachIndexed { index, current ->
+                drawRarityGlow(current, rewardCells[index])
+                val disabled = index in discardedRewardIndices || remainingDiscardCount <= 0
+                UiComponentRenderer.drawDangerButton(
+                    batch,
+                    rewardDiscardButtons[index],
+                    if (disabled) ButtonVisualState.DISABLED else buttonState(rewardDiscardButtons[index])
                 )
             }
-
-            ChestOpeningState.REWARD_SHOWN -> {
-                renderRewardPlaceholder(
-                    reward =
-                        reward,
-
-                    accentColor =
-                        accentColor(
-                            reward
-                        )
-                )
-
-                renderCharacterPanel()
-
-                renderButton(
-                    bounds =
-                        layout.takeButtonBounds,
-
-                    enabled =
-                        true,
-
-                    emphasized =
-                        true
-                )
-
-                renderButton(
-                    bounds =
-                        layout.discardButtonBounds,
-
-                    enabled =
-                        discardEnabled,
-
-                    emphasized =
-                        false
-                )
-
-                if (
-                    itemDetailOpen &&
-                    reward?.rewardType ==
-                    ChestRewardType.ITEM
-                ) {
-                    renderItemDetailBackground(
-                        accentColor(
-                            reward
-                        )
-                    )
-                }
-            }
-
-            ChestOpeningState.COMPLETED -> {
+            UiComponentRenderer.drawButton(batch, take, buttonState(take))
+        } else {
+            val alpha = if (state == ChestOpeningState.REVEALING) (1f - revealProgress).coerceIn(0f, 1f) else 1f
+            batch.color = Color(1f, 1f, 1f, alpha)
+            batch.draw(if (state == ChestOpeningState.UNLOCKED || state == ChestOpeningState.REVEALING) openedChest else sealedChest, chest.x, chest.y, chest.width, chest.height)
+            batch.color = Color.WHITE
+            if (state == ChestOpeningState.LOCKED) {
+                if (remainingChestCount >= 5) UiComponentRenderer.drawButton(batch, openFive, buttonState(openFive))
+                if (remainingChestCount >= 10) UiComponentRenderer.drawButton(batch, openTen, buttonState(openTen))
+                UiComponentRenderer.drawButton(batch, openAll, buttonState(openAll))
             }
         }
+        batch.end()
     }
 
     fun renderTexts(
         state: ChestOpeningState,
         reward: ChestRewardRoll?,
-        currentChestNumber: Int,
+        rewards: List<ChestRewardRoll>,
+        openedChestCount: Int,
         totalChestCount: Int,
         remainingDiscardCount: Int,
-        itemDetailOpen: Boolean
+        discardedRewardIndices: Set<Int>,
+        remainingChestCount: Int
     ) {
+        val shown = if (rewards.isNotEmpty()) rewards else if (state == ChestOpeningState.REWARD_SHOWN) listOfNotNull(reward) else emptyList()
+        updateLayout(shown.size.coerceAtLeast(1))
+        val oldX = font.data.scaleX
+        val oldY = font.data.scaleY
+        val oldColor = Color(font.color)
 
-        updateLayout()
+        val counter = openedCounterBounds()
+        font.data.setScale(0.62f)
+        font.color = Color(1f, 0.78f, 0.20f, 1f)
+        val counterBaseline = counter.y + (counter.height + font.capHeight) / 2f
+        font.draw(batch, "CHESTS OPENED  $openedChestCount / $totalChestCount", counter.x, counterBaseline, counter.width, Align.center, false)
 
-        val oldScaleX =
-            font.data.scaleX
-
-        val oldScaleY =
-            font.data.scaleY
-
-        val oldColor =
-            Color(
-                font.color
-            )
-
-        renderHeader(
-            currentChestNumber =
-                currentChestNumber,
-
-            totalChestCount =
-                totalChestCount
-        )
-
-        when (state) {
-            ChestOpeningState.LOCKED -> {
-                renderCenteredInstruction(
-                    title =
-                        "SEALED CHEST",
-
-                    instruction =
-                        "Click the chest to unlock it"
-                )
+        if (shown.isEmpty()) {
+            font.data.setScale(0.70f)
+            font.color = Color.WHITE
+            val instruction = when (state) {
+                ChestOpeningState.LOCKED -> "Click the chest to open one reward"
+                ChestOpeningState.UNLOCKED -> "Click again to reveal the reward"
+                ChestOpeningState.REVEALING -> "OPENING..."
+                else -> ""
             }
-
-            ChestOpeningState.UNLOCKED -> {
-                renderCenteredInstruction(
-                    title =
-                        rewardTypeLabel(
-                            reward
-                        ),
-
-                    instruction =
-                        "Click the chest again to open it",
-
-                    color =
-                        accentColor(
-                            reward
-                        )
-                )
+            font.draw(batch, instruction, chest.x - 80f, chest.y - 16f, chest.width + 160f, Align.center, false)
+            if (state == ChestOpeningState.LOCKED) {
+                font.data.setScale(0.56f)
+                if (remainingChestCount >= 5) font.draw(batch, "OPEN 5", openFive.x, openFive.y + 38f, openFive.width, Align.center, false)
+                if (remainingChestCount >= 10) font.draw(batch, "OPEN 10", openTen.x, openTen.y + 38f, openTen.width, Align.center, false)
+                font.draw(batch, "OPEN ALL CHESTS", openAll.x, openAll.y + 38f, openAll.width, Align.center, false)
             }
-
-            ChestOpeningState.REVEALING -> {
-                renderCenteredInstruction(
-                    title =
-                        "OPENING...",
-
-                    instruction =
-                        ""
-                )
-            }
-
-            ChestOpeningState.REWARD_SHOWN -> {
-
-                if (
-                    itemDetailOpen &&
-                    reward?.rewardType ==
-                    ChestRewardType.ITEM
-                ) {
-                    /*
-                     * Detay kartı açıkken alttaki ödül adı,
-                     * açıklama, TAKE / DISCARD ve karakter
-                     * paneli yazıları tekrar çizilmez.
-                     */
-                    renderItemDetailTexts(
-                        reward
-                    )
-                } else {
-                    renderRewardTexts(
-                        reward =
-                            reward,
-
-                        remainingDiscardCount =
-                            remainingDiscardCount
-                    )
-                }
-            }
-
-            ChestOpeningState.COMPLETED -> {
-            }
-        }
-
-        font.data.setScale(
-            oldScaleX,
-            oldScaleY
-        )
-
-        font.color =
-            oldColor
-    }
-
-    private fun renderFog() {
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
-
-        /*
-         * Dünya görüntüsünü koruyan hafif mor sis.
-         */
-        shapeRenderer.color =
-            Color(
-                0.17f,
-                0.06f,
-                0.24f,
-                0.72f
-            )
-
-        shapeRenderer.rect(
-            camera.position.x -
-                cameraWidth /
-                2f,
-            camera.position.y -
-                cameraHeight /
-                2f,
-            cameraWidth,
-            cameraHeight
-        )
-
-        shapeRenderer.end()
-    }
-
-    private fun renderPanel(
-        accentColor: Color
-    ) {
-
-        val panel =
-            layout.panelBounds
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
-
-        /*
-         * "Yaklaşık %20 transparan" hissi:
-         * arka plan hâlâ görünür, panel daha koyu bir merkez oluşturur.
-         */
-        shapeRenderer.color =
-            Color(
-                0.035f,
-                0.025f,
-                0.055f,
-                0.82f
-            )
-
-        shapeRenderer.rect(
-            panel.x,
-            panel.y,
-            panel.width,
-            panel.height
-        )
-
-        /*
-         * Panelin iç kenarında yumuşak accent katmanı.
-         */
-        shapeRenderer.color =
-            Color(
-                accentColor.r,
-                accentColor.g,
-                accentColor.b,
-                0.10f
-            )
-
-        shapeRenderer.rect(
-            panel.x +
-                10f,
-            panel.y +
-                10f,
-            panel.width -
-                20f,
-            panel.height -
-                20f
-        )
-
-        shapeRenderer.end()
-
-        val pulseAlpha =
-            0.72f +
-                0.22f *
-                (
-                    sin(
-                        animationTimeSeconds *
-                            3.5f
-                    ) *
-                        0.5f +
-                        0.5f
-                    )
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Line
-        )
-
-        repeat(
-            4
-        ) { index ->
-
-
-        val inset =
-                index *
-                    5f
-
-            shapeRenderer.color =
-                Color(
-                    accentColor.r,
-                    accentColor.g,
-                    accentColor.b,
-                    (
-                        pulseAlpha -
-                            index *
-                            0.13f
-                        )
-                        .coerceIn(
-                            0.15f,
-                            1f
-                        )
-                )
-        }
-
-        shapeRenderer.end()
-    }
-
-    private fun renderChestPlaceholder(
-        state: ChestOpeningState,
-        accentColor: Color,
-        revealProgress: Float
-    ) {
-
-        val chest =
-            layout.chestBounds
-
-        val safeRevealProgress =
-            revealProgress.coerceIn(
-                0f,
-                1f
-            )
-
-        val verticalOffset =
-            if (
-                state ==
-                ChestOpeningState.REVEALING
-            ) {
-                -220f *
-                    safeRevealProgress
-            } else {
-                0f
-            }
-
-        val alpha =
-            if (
-                state ==
-                ChestOpeningState.REVEALING
-            ) {
-                1f -
-                    safeRevealProgress
-            } else {
-                1f
-            }
-
-        val x =
-            chest.x
-
-        val y =
-            chest.y +
-                verticalOffset
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
-
-        /*
-         * Chest body.
-         */
-        shapeRenderer.color =
-            Color(
-                0.34f,
-                0.16f,
-                0.055f,
-                alpha
-            )
-
-        shapeRenderer.rect(
-            x,
-            y,
-            chest.width,
-            chest.height *
-                0.58f
-        )
-
-        /*
-         * Chest lid.
-         */
-        shapeRenderer.color =
-            Color(
-                0.46f,
-                0.23f,
-                0.07f,
-                alpha
-            )
-
-        shapeRenderer.rect(
-            x,
-            y +
-                chest.height *
-                0.58f,
-            chest.width,
-            chest.height *
-                0.42f
-        )
-
-        /*
-         * Metal strips.
-         */
-        shapeRenderer.color =
-            Color(
-                accentColor.r,
-                accentColor.g,
-                accentColor.b,
-                alpha
-            )
-
-        shapeRenderer.rect(
-            x +
-                chest.width *
-                0.12f,
-            y,
-            18f,
-            chest.height
-        )
-
-        shapeRenderer.rect(
-            x +
-                chest.width *
-                0.80f,
-            y,
-            18f,
-            chest.height
-        )
-
-        shapeRenderer.rect(
-            x,
-            y +
-                chest.height *
-                0.52f,
-            chest.width,
-            14f
-        )
-
-        /*
-         * Lock.
-         */
-        shapeRenderer.color =
-            if (
-                state ==
-                ChestOpeningState.LOCKED
-            ) {
-                Color(
-                    0.95f,
-                    0.78f,
-                    0.18f,
-                    alpha
-                )
-            } else {
-                Color(
-                    accentColor.r,
-                    accentColor.g,
-                    accentColor.b,
-                    alpha
-                )
-            }
-
-        shapeRenderer.rect(
-            x +
-                chest.width /
-                2f -
-                22f,
-            y +
-                chest.height *
-                0.40f,
-            44f,
-            48f
-        )
-
-        shapeRenderer.end()
-    }
-
-    private fun renderRewardPlaceholder(
-        reward: ChestRewardRoll?,
-        accentColor: Color
-    ) {
-
-        val visual =
-            layout.rewardVisualBounds
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.055f,
-                0.045f,
-                0.075f,
-                1f
-            )
-
-        shapeRenderer.rect(
-            visual.x,
-            visual.y,
-            visual.width,
-            visual.height
-        )
-
-        shapeRenderer.color =
-            Color(
-                accentColor.r,
-                accentColor.g,
-                accentColor.b,
-                0.28f
-            )
-
-        shapeRenderer.rect(
-            visual.x +
-                10f,
-            visual.y +
-                10f,
-            visual.width -
-                20f,
-            visual.height -
-                20f
-        )
-
-        /*
-         * Geçici görsel:
-         * Item için kare icon, Stat için elmas benzeri blok.
-         */
-        shapeRenderer.color =
-            accentColor
-
-        if (
-            reward?.rewardType ==
-            ChestRewardType.STAT
-        ) {
-            val centerX =
-                visual.x +
-                    visual.width /
-                    2f
-
-            val centerY =
-                visual.y +
-                    visual.height /
-                    2f
-
-            shapeRenderer.triangle(
-                centerX,
-                centerY +
-                    62f,
-                centerX +
-                    62f,
-                centerY,
-                centerX,
-                centerY -
-                    62f
-            )
-
-            shapeRenderer.triangle(
-                centerX,
-                centerY +
-                    62f,
-                centerX,
-                centerY -
-                    62f,
-                centerX -
-                    62f,
-                centerY
-            )
         } else {
-            shapeRenderer.rect(
-                visual.x +
-                    visual.width /
-                    2f -
-                    62f,
-                visual.y +
-                    visual.height /
-                    2f -
-                    62f,
-                124f,
-                124f
-            )
+            shown.forEachIndexed { index, current -> renderReward(current, rewardCells[index]) }
+            rewardDiscardButtons.forEachIndexed { index, button ->
+                font.data.setScale(0.47f)
+                font.color = when {
+                    index in discardedRewardIndices -> Color(0.84f, 0.74f, 0.74f, 1f)
+                    remainingDiscardCount <= 0 -> Color(0.72f, 0.68f, 0.68f, 1f)
+                    else -> Color.WHITE
+                }
+                val discardBaseline = button.y + (button.height + font.capHeight) / 2f - 0.5f
+                font.draw(batch, if (index in discardedRewardIndices) "DISCARDED" else "DISCARD", button.x, discardBaseline, button.width, Align.center, false)
+            }
+            font.data.setScale(0.64f)
+            font.color = Color.WHITE
+            font.draw(batch, if (shown.size > 1) "TAKE ALL" else "TAKE", take.x, take.y + 42f, take.width, Align.center, false)
+            font.data.setScale(0.50f)
+            font.color = Color.LIGHT_GRAY
+            font.draw(batch, "DISCARDS LEFT  $remainingDiscardCount", take.x + take.width + 20f, take.y + 39f, 210f, Align.left, false)
+            statsRenderer.render(characterPanel, pointerPositionProvider(), screen, drawBackground = false)
+            renderHoveredRewardTooltip(shown)
         }
 
-        shapeRenderer.end()
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Line
-        )
-
-        shapeRenderer.color =
-            accentColor
-
-        shapeRenderer.rect(
-            visual.x,
-            visual.y,
-            visual.width,
-            visual.height
-        )
-
-        shapeRenderer.end()
+        font.data.setScale(oldX, oldY)
+        font.color = oldColor
     }
 
-    private fun renderCharacterPanel() {
-
-        val portrait =
-            layout.characterPortraitBounds
-
-        val stats =
-            layout.characterStatsBounds
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.065f,
-                0.055f,
-                0.085f,
-                1f
-            )
-
-        shapeRenderer.rect(
-            portrait.x,
-            portrait.y,
-            portrait.width,
-            portrait.height
-        )
-
-        shapeRenderer.rect(
-            stats.x,
-            stats.y,
-            stats.width,
-            stats.height
-        )
-
-        /*
-         * Portrait placeholder.
-         */
-        shapeRenderer.color =
-            Color(
-                0.24f,
-                0.20f,
-                0.30f,
-                1f
-            )
-
-        shapeRenderer.rect(
-            portrait.x +
-                15f,
-            portrait.y +
-                15f,
-            portrait.width -
-                30f,
-            portrait.height -
-                30f
-        )
-
-        shapeRenderer.end()
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Line
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.45f,
-                0.38f,
-                0.56f,
-                1f
-            )
-
-        shapeRenderer.rect(
-            portrait.x,
-            portrait.y,
-            portrait.width,
-            portrait.height
-        )
-
-        shapeRenderer.rect(
-            stats.x,
-            stats.y,
-            stats.width,
-            stats.height
-        )
-
-        shapeRenderer.end()
-    }
-
-    private fun renderButton(
-        bounds: Rectangle,
-        enabled: Boolean,
-        emphasized: Boolean
-    ) {
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
-
-        shapeRenderer.color =
-            when {
-                !enabled -> {
-                    Color(
-                        0.08f,
-                        0.075f,
-                        0.09f,
-                        1f
-                    )
-                }
-
-                emphasized -> {
-                    Color(
-                        0.15f,
-                        0.29f,
-                        0.20f,
-                        1f
-                    )
-                }
-
-                else -> {
-                    Color(
-                        0.25f,
-                        0.12f,
-                        0.16f,
-                        1f
-                    )
-                }
+    private fun renderReward(reward: ChestRewardRoll, bounds: Rectangle) {
+        val iconBounds = rewardIconBounds(bounds, reward)
+        val iconSize = iconBounds.width
+        if (reward.rewardType == ChestRewardType.ITEM) {
+            reward.itemDefinition?.let {
+                ContentIconRenderer.draw(batch, it, iconBounds)
+                renderItemTitle(reward.title, iconBounds)
             }
-
-        shapeRenderer.rect(
-            bounds.x,
-            bounds.y,
-            bounds.width,
-            bounds.height
-        )
-
-        shapeRenderer.end()
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Line
-        )
-
-        shapeRenderer.color =
-            if (enabled) {
-                Color(
-                    0.65f,
-                    0.58f,
-                    0.75f,
-                    1f
-                )
-            } else {
-                Color.DARK_GRAY
-            }
-
-        shapeRenderer.rect(
-            bounds.x,
-            bounds.y,
-            bounds.width,
-            bounds.height
-        )
-
-        shapeRenderer.end()
+        } else {
+            reward.statType?.let { StatSymbolRenderer.drawIcon(batch, it, iconBounds.x, iconBounds.y, iconSize) }
+        }
     }
 
-    private fun renderItemDetailBackground(
-        accentColor: Color
-    ) {
-
-        val bounds =
-            layout.itemDetailBounds
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Filled
-        )
-
-        shapeRenderer.color =
-            Color(
-                0.025f,
-                0.018f,
-                0.038f,
-                0.98f
-            )
-
-        shapeRenderer.rect(
-            bounds.x,
-            bounds.y,
-            bounds.width,
-            bounds.height
-        )
-
-        shapeRenderer.end()
-
-        shapeRenderer.begin(
-            ShapeRenderer.ShapeType.Line
-        )
-
-        shapeRenderer.color =
-            accentColor
-
-        shapeRenderer.rect(
-            bounds.x,
-            bounds.y,
-            bounds.width,
-            bounds.height
-        )
-
-        shapeRenderer.end()
-    }
-
-    private fun renderHeader(
-        currentChestNumber: Int,
-        totalChestCount: Int
-    ) {
-
-        font.data.setScale(
-            0.92f
-        )
-
-        font.color =
-            Color.GOLD
-
-        font.draw(
-            batch,
-            "$currentChestNumber / $totalChestCount",
-            0f,
-            layout.panelBounds.y +
-                layout.panelBounds.height -
-                70f,
-            cameraWidth,
-            Align.center,
-            false
-        )
-    }
-
-    private fun renderCenteredInstruction(
-        title: String,
-        instruction: String,
-        color: Color = Color.WHITE
-    ) {
-
-        font.data.setScale(
-            1.05f
-        )
-
-        font.color =
-            color
-
+    private fun renderItemTitle(title: String, iconBounds: Rectangle) {
+        val oldScaleX = font.data.scaleX
+        val oldScaleY = font.data.scaleY
+        val oldColor = Color(font.color)
+        font.data.setScale(0.56f)
+        font.color = Color(1f, 0.78f, 0.10f, 1f)
         font.draw(
             batch,
             title,
-            layout.chestBounds.x -
-                80f,
-            layout.chestBounds.y +
-                layout.chestBounds.height +
-                55f,
-            layout.chestBounds.width +
-                160f,
+            iconBounds.x - 24f,
+            iconBounds.y + iconBounds.height + 20f,
+            iconBounds.width + 48f,
             Align.center,
             false
         )
-
-        if (
-            instruction.isNotBlank()
-        ) {
-            font.data.setScale(
-                0.78f
-            )
-
-            font.color =
-                Color.LIGHT_GRAY
-
-            font.draw(
-                batch,
-                instruction,
-                layout.panelBounds.x +
-                    60f,
-                layout.panelBounds.y +
-                    58f,
-                layout.panelBounds.width -
-                    120f,
-                Align.center,
-                false
-            )
-        }
+        font.data.setScale(oldScaleX, oldScaleY)
+        font.color = oldColor
     }
 
-    private fun renderRewardTexts(
-        reward: ChestRewardRoll?,
-        remainingDiscardCount: Int
-    ) {
-
-        if (
-            reward == null
-        ) {
-            return
+    private fun drawRarityGlow(reward: ChestRewardRoll, bounds: Rectangle) {
+        val rarity = reward.itemDefinition?.rarity?.name ?: return
+        val texture = when (rarity) {
+            "LEGENDARY" -> legendaryGlow
+            "ARTIFACT" -> artifactGlow
+            else -> return
         }
-
-        val accent =
-            accentColor(
-                reward
-            )
-
-        font.data.setScale(
-            1.05f
-        )
-
-        font.color =
-            accent
-
-        font.draw(
-            batch,
-            reward.title,
-            layout.rewardVisualBounds.x -
-                20f,
-            layout.rewardVisualBounds.y +
-                layout.rewardVisualBounds.height +
-                42f,
-            layout.rewardVisualBounds.width +
-                40f,
-            Align.center,
-            true
-        )
-
-        font.data.setScale(
-            0.76f
-        )
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            reward.description,
-            layout.rewardVisualBounds.x -
-                10f,
-            layout.rewardVisualBounds.y -
-                18f,
-            layout.rewardVisualBounds.width +
-                20f,
-            Align.center,
-            true
-        )
-
-        renderCharacterTexts()
-
-        font.data.setScale(
-            0.86f
-        )
-
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            "TAKE",
-            layout.takeButtonBounds.x,
-            layout.takeButtonBounds.y +
-                40f,
-            layout.takeButtonBounds.width,
-            Align.center,
-            false
-        )
-
-        font.color =
-            if (
-                remainingDiscardCount >
-                0
-            ) {
-                Color.WHITE
-            } else {
-                Color.DARK_GRAY
-            }
-
-        font.draw(
-            batch,
-            "DISCARD",
-            layout.discardButtonBounds.x,
-            layout.discardButtonBounds.y +
-                40f,
-            layout.discardButtonBounds.width,
-            Align.center,
-            false
-        )
-
-        font.data.setScale(
-            0.70f
-        )
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            "Discards left: $remainingDiscardCount",
-            layout.discardButtonBounds.x,
-            layout.discardButtonBounds.y -
-                16f,
-            layout.discardButtonBounds.width,
-            Align.center,
-            false
-        )
-
-        if (
-            reward.rewardType ==
-            ChestRewardType.ITEM
-        ) {
-            font.color =
-                accent
-
-            font.draw(
-                batch,
-                "Click the item to inspect it",
-                layout.rewardVisualBounds.x -
-                    10f,
-                layout.rewardVisualBounds.y +
-                    18f,
-                layout.rewardVisualBounds.width +
-                    20f,
-                Align.center,
-                false
-            )
-        }
+        val multiplier = if (rarity == "ARTIFACT") 1.34f else 1.08f
+        val size = minOf(bounds.width, bounds.height) * multiplier
+        val centerX = bounds.x + bounds.width / 2f
+        val centerY = bounds.y + 44f + (bounds.height - 44f) / 2f
+        val oldColor = Color(batch.color)
+        batch.color = Color(1f, 1f, 1f, if (rarity == "ARTIFACT") 0.92f else 0.72f)
+        batch.draw(texture, centerX - size / 2f, centerY - size / 2f, size, size)
+        batch.color = oldColor
     }
 
-    private fun renderCharacterTexts() {
-
-        val portrait =
-            layout.characterPortraitBounds
-
-        val stats =
-            layout.characterStatsBounds
-
-        font.data.setScale(
-            0.82f
-        )
-
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            characterNameProvider(),
-            portrait.x,
-            portrait.y +
-                portrait.height +
-                25f,
-            portrait.width,
-            Align.center,
-            true
-        )
-
-        font.data.setScale(
-            0.70f
-        )
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            "PORTRAIT",
-            portrait.x,
-            portrait.y +
-                portrait.height /
-                2f +
-                6f,
-            portrait.width,
-            Align.center,
-            false
-        )
-
-        font.data.setScale(
-            0.78f
-        )
-
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            "CURRENT STATS",
-            stats.x,
-            stats.y +
-                stats.height -
-                22f,
-            stats.width,
-            Align.center,
-            false
-        )
-
-        var rowY =
-            stats.y +
-                stats.height -
-                45f
-
-        characterStatsProvider()
-            .forEach { row ->
-
-                font.data.setScale(
-                    0.48f
-                )
-
-                font.color =
-                    Color.LIGHT_GRAY
-
-                font.draw(
-                    batch,
-                    row.label,
-                    stats.x +
-                        10f,
-                    rowY
-                )
-
-                font.color =
-                    Color.WHITE
-
-                font.draw(
-                    batch,
-                    row.value,
-                    stats.x +
-                        78f,
-                    rowY,
-                    stats.width -
-                        88f,
-                    Align.right,
-                    false
-                )
-
-                rowY -=
-                    18f
-            }
-    }
-
-    private fun renderItemDetailTexts(
-
-        reward: ChestRewardRoll
-    ) {
-
-        val item =
-            reward.itemDefinition
-                ?: return
-
-        val bounds =
-            layout.itemDetailBounds
-
-        font.data.setScale(
-            1f
-        )
-
-        font.color =
-            accentColor(
-                reward
-            )
-
-        font.draw(
-            batch,
-            item.displayName,
-            bounds.x +
-                28f,
-            bounds.y +
-                bounds.height -
-                38f,
-            bounds.width -
-                56f,
-            Align.center,
-            true
-        )
-
-        font.data.setScale(
-            0.76f
-        )
-
-        font.color =
-            Color.LIGHT_GRAY
-
-        font.draw(
-            batch,
-            item.description,
-            bounds.x +
-                35f,
-            bounds.y +
-                bounds.height -
-                92f,
-            bounds.width -
-                70f,
-            Align.left,
-            true
-        )
-
-        font.color =
-            Color.GRAY
-
-        font.draw(
-            batch,
-            "Click outside the detail card to close",
-            bounds.x +
-                35f,
-            bounds.y +
-                35f,
-            bounds.width -
-                70f,
-            Align.center,
-            false
+    private fun renderHoveredRewardTooltip(rewards: List<ChestRewardRoll>) {
+        val pointer = pointerPositionProvider() ?: return
+        val index = rewardCells.indices.firstOrNull { index ->
+            val reward = rewards.getOrNull(index) ?: return@firstOrNull false
+            rewardIconBounds(rewardCells[index], reward).contains(pointer)
+        } ?: -1
+        val reward = rewards.getOrNull(index) ?: return
+        val text = if (reward.rewardType == ChestRewardType.STAT && reward.statType != null) {
+            StatDetailPresentation.tooltipText(playerStats(), reward.statType)
+        } else reward.description
+        AdaptiveTooltipRenderer.draw(
+            batch, font, camera, cameraWidth, cameraHeight, pointer,
+            reward.title, text, maxWidth = 450f
         )
     }
 
-    private fun rewardTypeLabel(
-        reward: ChestRewardRoll?
-    ): String {
+    private fun openedCounterBounds() = Rectangle(
+        rewardVisual.x + (rewardVisual.width - 370f) / 2f,
+        panel.y + panel.height - 78f,
+        370f,
+        50f
+    )
 
-        if (
-            reward == null
-        ) {
-            return "UNLOCKED"
-        }
-
-        return when (
-            reward.rewardType
-        ) {
-            ChestRewardType.STAT -> {
-                "STAT REWARD"
-            }
-
-            ChestRewardType.ITEM -> {
-                val rarity =
-                    reward.itemDefinition
-                        ?.rarity
-                        ?.displayName
-                        ?: "Item"
-
-                "$rarity ITEM"
-            }
-        }
+    private fun rewardIconBounds(bounds: Rectangle, reward: ChestRewardRoll): Rectangle {
+        val titleSpace = if (reward.rewardType == ChestRewardType.ITEM) 28f else 0f
+        val availableHeight = (bounds.height - 44f - titleSpace).coerceAtLeast(48f)
+        val iconSize = minOf(
+            (minOf(bounds.width, bounds.height) * 0.72f).coerceIn(48f, 250f),
+            availableHeight
+        )
+        return Rectangle(
+            bounds.x + (bounds.width - iconSize) / 2f,
+            bounds.y + 44f + (availableHeight - iconSize) / 2f,
+            iconSize,
+            iconSize
+        )
     }
 
-    fun accentColor(
-        reward: ChestRewardRoll?
-    ): Color {
-
-        /*
-         * Reward henüz belirlenmediyse nötr gri.
-         * Stat reward da nötr gri kalır.
-         */
-        if (
-            reward == null ||
-            reward.rewardType ==
-            ChestRewardType.STAT
-        ) {
-            return Color(
-                0.72f,
-                0.72f,
-                0.76f,
-                1f
-            )
+    private fun updateLayout(rewardCount: Int) {
+        val cx = camera.position.x
+        val cy = camera.position.y
+        screen.set(cx - cameraWidth / 2f, cy - cameraHeight / 2f, cameraWidth, cameraHeight)
+        panel.set(cx - 650f, cy - 330f, 1300f, 660f)
+        chest.set(cx - 260f, cy - 170f, 520f, 390f)
+        characterPanel.set(panel.x + panel.width - 500f, panel.y + 24f, 475f, panel.height - 48f)
+        take.set(panel.x + 190f, panel.y + 28f, 230f, 68f)
+        discard.set(panel.x + 480f, panel.y + 28f, 230f, 68f)
+        openFive.set(cx - 430f, panel.y + 35f, 230f, 68f)
+        openTen.set(cx - 115f, panel.y + 35f, 230f, 68f)
+        openAll.set(cx + 200f, panel.y + 35f, 230f, 68f)
+        rewardVisual.set(panel.x + 28f, panel.y + 120f, panel.width - characterPanel.width - 75f, panel.height - 165f)
+        rewardCells.clear()
+        rewardDiscardButtons.clear()
+        val columns = rewardCount.coerceAtMost(5)
+        val rows = ceil(rewardCount / columns.toFloat()).toInt().coerceAtLeast(1)
+        val gap = 10f
+        val maximumCellWidth = when (rewardCount) {
+            1 -> 390f
+            in 2..3 -> 285f
+            else -> 250f
         }
-
-        return when (
-            reward.itemDefinition
-                ?.rarity
-                ?.name
-                ?.uppercase()
-        ) {
-            "COMMON",
-            "UNCOMMON" -> {
-                Color(
-                    0.25f,
-                    0.90f,
-                    0.35f,
-                    1f
-                )
-            }
-
-            "RARE" -> {
-                Color(
-                    0.20f,
-                    0.55f,
-                    1f,
-                    1f
-                )
-            }
-
-            "LEGENDARY" -> {
-                Color(
-                    1f,
-                    0.82f,
-                    0.15f,
-                    1f
-                )
-            }
-
-            "ARTIFACT" -> {
-                Color(
-                    0.95f,
-                    0.18f,
-                    0.18f,
-                    1f
-                )
-            }
-
-            else -> {
-                Color(
-                    0.72f,
-                    0.72f,
-                    0.76f,
-                    1f
-                )
-            }
+        val maximumCellHeight = when (rewardCount) {
+            1 -> 390f
+            in 2..5 -> 300f
+            else -> 220f
         }
-    }
-
-    private fun updateLayout() {
-
-        val centerX =
-            camera.position.x
-
-        val centerY =
-            camera.position.y
-
-        layout.panelBounds.set(
-            centerX -
-                510f,
-            centerY -
-                300f,
-            1020f,
-            600f
-        )
-
-        layout.chestBounds.set(
-            centerX -
-                145f,
-            centerY -
-                105f,
-            290f,
-            210f
-        )
-
-        layout.rewardVisualBounds.set(
-            centerX -
-                385f,
-            centerY -
-                95f,
-            300f,
-            300f
-        )
-
-        layout.characterPortraitBounds.set(
-            centerX +
-                35f,
-            centerY +
-                35f,
-            170f,
-            170f
-        )
-
-        layout.characterStatsBounds.set(
-            centerX +
-                230f,
-            centerY -
-                125f,
-            245f,
-            400f
-        )
-
-        layout.takeButtonBounds.set(
-            centerX -
-                250f,
-            centerY -
-                235f,
-            220f,
-            66f
-        )
-
-        layout.discardButtonBounds.set(
-            centerX +
-                30f,
-            centerY -
-                235f,
-            220f,
-            66f
-        )
-
-        layout.itemDetailBounds.set(
-            centerX -
-                340f,
-            centerY -
-                225f,
-            680f,
-            450f
-        )
+        val cellWidth = ((rewardVisual.width - gap * (columns - 1)) / columns).coerceAtMost(maximumCellWidth)
+        val cellHeight = ((rewardVisual.height - gap * (rows - 1)) / rows).coerceAtMost(maximumCellHeight)
+        val gridWidth = columns * cellWidth + (columns - 1) * gap
+        val gridHeight = rows * cellHeight + (rows - 1) * gap
+        val startX = rewardVisual.x + (rewardVisual.width - gridWidth) / 2f
+        val startY = rewardVisual.y + (rewardVisual.height - gridHeight) / 2f
+        repeat(rewardCount) { index ->
+            val col = index % columns
+            val row = index / columns
+            val cell = Rectangle(startX + col * (cellWidth + gap), startY + gridHeight - (row + 1) * cellHeight - row * gap, cellWidth, cellHeight)
+            rewardCells += cell
+            val discardWidth = minOf(cell.width + 4f, 224f)
+            rewardDiscardButtons += Rectangle(cell.x + (cell.width - discardWidth) / 2f, cell.y + 1f, discardWidth, 46f)
+        }
     }
 }

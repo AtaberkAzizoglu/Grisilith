@@ -19,10 +19,14 @@ data class CharacterSpriteSheetDefinition(
     Map<
         CharacterVisualDirection,
         CharacterSpriteAnimationDefinition
-        >
+        >,
+    val feetInsetPixels: Int = 0,
+    val contentHeightPixels: Int? = null
 ) {
 
     init {
+        require(feetInsetPixels >= 0)
+        require(contentHeightPixels == null || contentHeightPixels > 0)
         require(
             texturePath.isNotBlank()
         )

@@ -106,6 +106,14 @@ class WeaponDamageCalculator(
             damageType.canCriticallyHit
     }
 
+    /** Physical weapon abilities may crit even when their damage type is elemental (Air Slash).
+     * Keep normal elemental attacks / spell-focus critical rules unchanged.
+     */
+    fun canAbilityCriticallyHit(weapon: WeaponInstance): Boolean =
+        weapon.definition.tags.any {
+            it == ContentTag.MELEE_WEAPON || it == ContentTag.RANGED_WEAPON
+        }
+
     fun criticalHitChance(
         weapon: WeaponInstance? = null
     ): Float {
@@ -209,8 +217,8 @@ class WeaponDamageCalculator(
      *
      * Level multiplier ayrıca uygulanır.
      *
-     * Dagger melee/throw ayrımı executor tarafından
-     * primaryStatOverride ile belirtilir.
+     * Dagger normal attacks use Dexterity. Knife Swarm explicitly preserves
+     * its existing Strength-based formula until a separate balance decision.
      */
     private fun calculatePhysicalNormalDamage(
         weapon: WeaponInstance,
@@ -310,9 +318,7 @@ class WeaponDamageCalculator(
         /*
          * Saf Ranged Weapon -> Dexterity.
          *
-         * Dagger hem MELEE hem RANGED olduğu için
-         * gerçek saldırı türü executor tarafından
-         * override edilir.
+         * Ability-specific legacy scaling can still override this selection.
          */
         if (
             ContentTag.RANGED_WEAPON in tags &&
@@ -435,7 +441,7 @@ class WeaponDamageCalculator(
     ): Int {
         val wisdom = playerStats.totalScore(StatType.WISDOM).coerceAtLeast(0)
         val related = playerStats.totalScore(relatedSpellDamageStat(damageType)).coerceAtLeast(0)
-        return (targetMaximumHealth.coerceAtLeast(1) * (wisdom + related) * ratioPerStatPoint)
+        return (targetMaximumHealth.coerceAtLeast(1).toDouble() * (wisdom + related) * ratioPerStatPoint)
             .roundToInt().coerceAtLeast(1)
     }
 

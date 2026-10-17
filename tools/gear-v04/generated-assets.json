@@ -1,0 +1,102 @@
+[
+  {
+    "key": "warhammer",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-74a730a0-c3fc-468b-bdf8-b31ee048d481.png",
+    "target": "assets/weapon_visuals/carriers_v4/warhammer.png"
+  },
+  {
+    "key": "whip",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-6f4c6033-e248-4cdf-836a-8fda675c3d44.png",
+    "target": "assets/weapon_visuals/carriers_v4/whip.png"
+  },
+  {
+    "key": "sling",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-7b69fcd9-5574-42c0-9c80-51057647c58f.png",
+    "target": "assets/weapon_visuals/carriers_v4/sling.png"
+  },
+  {
+    "key": "boomerang",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-6a63a894-5dd7-4aac-bedb-972c4b08f637.png",
+    "target": "assets/weapon_visuals/carriers_v4/boomerang.png"
+  },
+  {
+    "key": "double_swords",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-8c4e35f3-f749-4d65-85f2-33e102fcffbf.png",
+    "target": "assets/weapon_visuals/carriers_v4/double_swords.png"
+  },
+  {
+    "key": "longsword",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-adaa036f-05a9-42b9-90ef-ec7481f973e0.png",
+    "target": "assets/weapon_visuals/carriers_v4/longsword.png"
+  },
+  {
+    "key": "lance",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-ab421c58-1e1c-4b2d-915f-1b1bcc98aaee.png",
+    "target": "assets/weapon_visuals/carriers_v4/lance.png"
+  },
+  {
+    "key": "shield",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-950a35ac-172c-43bd-ab40-e8033279295a.png",
+    "target": "assets/weapon_visuals/carriers_v4/shield.png"
+  },
+  {
+    "key": "dagger",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-280a6995-6ee0-4411-9aa7-9fa356c55c62.png",
+    "target": "assets/weapon_visuals/carriers_v4/dagger.png"
+  },
+  {
+    "key": "longbow",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-591f4b5c-6be7-46d0-86e6-b8853a9cc13a.png",
+    "target": "assets/weapon_visuals/carriers_v4/longbow.png"
+  },
+  {
+    "key": "crossbow",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-24250045-2ec8-422b-b550-65efa2f02f92.png",
+    "target": "assets/weapon_visuals/carriers_v4/crossbow.png"
+  },
+  {
+    "key": "ivy_staff",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-5a324c97-999f-4440-b86f-bd814d960883.png",
+    "target": "assets/weapon_visuals/carriers_v4/ivy_staff.png"
+  },
+  {
+    "key": "steam_wand",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-1c33a39b-3637-48f1-9c86-e528141e5e40.png",
+    "target": "assets/weapon_visuals/carriers_v4/steam_wand.png"
+  },
+  {
+    "key": "tome_of_eryndor",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-938554c3-ab2f-4b82-99c9-7d3d4a0aa02c.png",
+    "target": "assets/weapon_visuals/carriers_v4/tome_of_eryndor.png"
+  },
+  {
+    "key": "orb_of_sky",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-9993db9c-aaae-4a7e-b99c-cf7a088d58b8.png",
+    "target": "assets/weapon_visuals/carriers_v4/orb_of_sky.png"
+  },
+  {
+    "key": "totem_of_dark_clouds",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-28b96a6a-2970-46d3-883c-1520f5e97dd0.png",
+    "target": "assets/weapon_visuals/carriers_v4/totem_of_dark_clouds.png"
+  },
+  {
+    "key": "amulet_of_troll_king",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-0eda684e-a28a-463f-a699-691c3c2bd867.png",
+    "target": "assets/weapon_visuals/carriers_v4/amulet_of_troll_king.png"
+  },
+  {
+    "key": "enchanted_chalk_dust",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-6687560b-651d-4a5e-a7b7-56cdb7ea6169.png",
+    "target": "assets/weapon_visuals/carriers_v4/enchanted_chalk_dust.png"
+  },
+  {
+    "key": "sling_stone",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-ca70deab-2fd0-4dbb-a354-2845b619ef67.png",
+    "target": "assets/weapon_visuals/carriers_v4/sling_stone.png"
+  },
+  {
+    "key": "discard_voucher",
+    "source": "C:\\Users\\aaata\\.codex\\generated_images\\01a06715-881d-79a1-a298-234d89d6359b\\exec-c61d0cd0-61bd-489b-a600-56d5987aa023.png",
+    "target": "assets/ui/content_icons/items/item_discard_voucher.png"
+  }
+]

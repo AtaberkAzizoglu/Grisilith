@@ -20,6 +20,7 @@ import kotlin.math.roundToInt
 class GlyphSpellRuntime(
     private val playerStats: PlayerStats
 ) {
+    var projectileVelocityBender: ((Float, Float, Vector2, Float) -> Unit)? = null
 
     data class PulseVisualSnapshot(
         val type: GlyphType,
@@ -65,6 +66,7 @@ class GlyphSpellRuntime(
         val totalDistance: Float,
         var travelledDistance: Float = 0f,
         var visualAnimationSeconds: Float = 0f,
+        val center: Vector2 = Vector2(start),
         val hitEnemies: MutableSet<Enemy> =
             mutableSetOf()
     )
@@ -85,7 +87,8 @@ class GlyphSpellRuntime(
             damage: Int,
             sourceName: String
         ) -> Unit,
-        onEnemyKilled: (Enemy) -> Unit
+        onEnemyKilled: (Enemy) -> Unit,
+        manuallyAimed: Boolean = false
     ) {
 
         when (
@@ -93,7 +96,7 @@ class GlyphSpellRuntime(
         ) {
             GlyphType.CALL_LIGHTNING -> {
                 val targetedRequest =
-                    requestForPriorityTarget(
+                    if (manuallyAimed) request else requestForPriorityTarget(
                         request = request,
                         enemyManager = enemyManager,
                         maximumRange = CALL_LIGHTNING_TARGETING_RANGE
@@ -109,7 +112,7 @@ class GlyphSpellRuntime(
 
             GlyphType.METEOR -> {
                 val targetedRequest =
-                    requestForPriorityTarget(
+                    if (manuallyAimed) request else requestForPriorityTarget(
                         request = request,
                         enemyManager = enemyManager,
                         maximumRange =
@@ -375,7 +378,7 @@ class GlyphSpellRuntime(
 
         val enemies =
             enemyManager
-                .allEnemies
+                .weaponTargets
                 .filter {
                     !it.isDead
                 }
@@ -447,14 +450,10 @@ class GlyphSpellRuntime(
                                 sourceEnemy &&
                                 !it.isDead
                         }
-                        .minByOrNull {
-                            Vector2.dst2(
-                                sourceEnemy.centerX,
-                                sourceEnemy.centerY,
-                                it.centerX,
-                                it.centerY
-                            )
-                        }
+                        .filter { Vector2.dst2(sourceEnemy.centerX, sourceEnemy.centerY,
+                            it.centerX, it.centerY) <= LIGHTNING_CHAIN_RANGE * LIGHTNING_CHAIN_RANGE }
+                        .minWithOrNull(compareBy<Enemy> { com.azizoglu.grisilith.weapon.runtime.AbilityTargeting.priority(it) }
+                            .thenBy { Vector2.dst2(sourceEnemy.centerX, sourceEnemy.centerY, it.centerX, it.centerY) })
                         ?.takeIf {
                             Vector2.dst2(
                                 sourceEnemy.centerX,
@@ -538,7 +537,7 @@ class GlyphSpellRuntime(
                 )
 
         enemyManager
-            .allEnemies
+            .weaponTargets
             .toList()
             .forEach {
                     enemy ->
@@ -638,44 +637,17 @@ class GlyphSpellRuntime(
         worldHeight: Float
     ) {
 
-        val angle =
-            MathUtils.random(
-                0f,
-                MathUtils.PI2
-            )
-
-        val direction =
-            Vector2(
-                MathUtils.cos(
-                    angle
-                ),
-                MathUtils.sin(
-                    angle
-                )
-            )
-                .nor()
-
-        val perpendicular =
-            Vector2(
-                -direction.y,
-                direction.x
-            )
-
-        val mapDiagonal =
-            Vector2.len(
-                worldWidth,
-                worldHeight
-            )
-
-        val start =
-            Vector2(
-                request.centerX,
-                request.centerY
-            )
-                .mulAdd(
-                    direction,
-                    -mapDiagonal
-                )
+        val start = when(MathUtils.random(3)) {
+            0 -> Vector2(0f,MathUtils.random(0f,worldHeight))
+            1 -> Vector2(worldWidth,MathUtils.random(0f,worldHeight))
+            2 -> Vector2(MathUtils.random(0f,worldWidth),0f)
+            else -> Vector2(MathUtils.random(0f,worldWidth),worldHeight)
+        }
+        val direction = Vector2(request.centerX,request.centerY).sub(start)
+        if(direction.isZero(.001f))direction.set(worldWidth/2f,worldHeight/2f).sub(start)
+        direction.nor()
+        val perpendicular = Vector2(-direction.y,direction.x)
+        val mapDiagonal = Vector2.len(worldWidth,worldHeight)
 
         tsunamiWave =
             TsunamiWave(
@@ -704,7 +676,7 @@ class GlyphSpellRuntime(
     ): GlyphCastRequest? {
         val rangeSquared = maximumRange * maximumRange
         val candidates =
-            enemyManager.allEnemies
+            enemyManager.weaponTargets
                 .asSequence()
                 .filter { enemy ->
                     !enemy.isDead &&
@@ -719,22 +691,9 @@ class GlyphSpellRuntime(
 
         if (candidates.isEmpty()) return null
 
-        val bosses =
-            candidates.filter { enemy ->
-                enemy.type == EnemyType.MINI_BOSS ||
-                    enemy.type == EnemyType.FINAL_BOSS
-            }
-
         val target =
-            (if (bosses.isNotEmpty()) bosses else candidates)
-                .minByOrNull { enemy ->
-                    Vector2.dst2(
-                        request.centerX,
-                        request.centerY,
-                        enemy.centerX,
-                        enemy.centerY
-                    )
-                } ?: return null
+            com.azizoglu.grisilith.weapon.runtime.AbilityTargeting.select(
+                candidates, request.centerX, request.centerY, maximumRange) ?: return null
 
         return request.copy(
             centerX = target.centerX,
@@ -758,6 +717,9 @@ class GlyphSpellRuntime(
             tsunamiWave
                 ?: return
 
+        projectileVelocityBender?.invoke(wave.center.x, wave.center.y, wave.direction, delta)
+        wave.perpendicular.set(-wave.direction.y, wave.direction.x)
+        wave.center.mulAdd(wave.direction, TSUNAMI_SPEED * delta)
         wave.travelledDistance +=
             TSUNAMI_SPEED *
                 delta
@@ -793,7 +755,7 @@ class GlyphSpellRuntime(
                 )
 
         enemyManager
-            .allEnemies
+            .weaponTargets
             .toList()
             .forEach {
                     enemy ->
@@ -918,10 +880,12 @@ class GlyphSpellRuntime(
                 }
             }
 
-        if (
-            wave.travelledDistance >=
-            wave.totalDistance
-        ) {
+        val halfFront = (if(wave.request.sourceWeapon.hasWeaponAbilityUpgrade)TSUNAMI_UPGRADED_FRONT_LENGTH else TSUNAMI_FRONT_LENGTH)/2f
+        val halfThickness = TSUNAMI_FRONT_THICKNESS/2f
+        val extentX = kotlin.math.abs(wave.perpendicular.x)*halfFront + kotlin.math.abs(wave.direction.x)*halfThickness
+        val extentY = kotlin.math.abs(wave.perpendicular.y)*halfFront + kotlin.math.abs(wave.direction.y)*halfThickness
+        if (wave.center.x+extentX<0f || wave.center.x-extentX>worldWidth ||
+            wave.center.y+extentY<0f || wave.center.y-extentY>worldHeight) {
             tsunamiWave =
                 null
         }
@@ -931,13 +895,7 @@ class GlyphSpellRuntime(
         wave: TsunamiWave
     ): Vector2 {
 
-        return Vector2(
-            wave.start
-        )
-            .mulAdd(
-                wave.direction,
-                wave.travelledDistance
-            )
+        return Vector2(wave.center)
     }
 
     private fun damageEnemy(

@@ -375,28 +375,29 @@ object EnemyAdaptiveScalingRuntime {
         )
 
     private const val MAXIMUM_MAIN_DURABILITY_BONUS =
-        0.40f
+        // All maximum additive contributions are reduced by 12.5%, not percentage points.
+        0.35f
 
     private const val MAXIMUM_SECONDARY_DURABILITY_BONUS =
-        0.20f
+        0.175f
 
     private const val MAXIMUM_WEAPON_DURABILITY_BONUS =
-        0.25f
+        0.21875f
 
     private const val ARMOR_SHARE_OF_DURABILITY_BONUS =
         0.35f
 
     private const val MAXIMUM_DEFENSE_TO_ENEMY_OFFENSE_BONUS =
-        0.30f
+        0.2625f
 
     private const val MAXIMUM_WEAPON_TO_ENEMY_OFFENSE_BONUS =
-        0.10f
+        0.0875f
 
     private const val MAXIMUM_DEFENSE_TO_ENEMY_ATTACK_SPEED_BONUS =
-        0.05f
+        0.04375f
 
     private const val MAXIMUM_WEAPON_TO_ENEMY_ATTACK_SPEED_BONUS =
-        0.025f
+        0.021875f
 
     private const val FREE_WEAPON_POWER =
         1.5f

@@ -155,7 +155,7 @@ class LongswordAttackExecutor(
 
         val targets =
             context.enemyManager
-                .allEnemies
+                .weaponTargets
                 .filter { enemy ->
                     isInsideCone(
                         enemy = enemy,

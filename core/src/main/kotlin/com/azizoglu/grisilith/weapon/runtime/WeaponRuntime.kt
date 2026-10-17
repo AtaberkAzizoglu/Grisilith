@@ -64,6 +64,8 @@ class WeaponRuntime(
     private var relentlessConsecutiveHits =
         0
 
+    private var boomerangClockRate: Float? = null
+
     val abilityState:
         WeaponAbilityState
         get() =
@@ -140,7 +142,8 @@ class WeaponRuntime(
             delta = delta,
 
             attacksPerSecond =
-                currentAttacksPerSecond
+                if(definition.id.value == "WPN_BOOMERANG") boomerangClockRate ?: currentAttacksPerSecond
+                else currentAttacksPerSecond
         ) {
             val attacksBeforeExecution =
                 weapon.completedNormalAttackCount
@@ -191,6 +194,11 @@ class WeaponRuntime(
                 attacksAfterExecution >
                 attacksBeforeExecution
             ) {
+                // Boomerang flight and the next throw use the same period, without timer carry drift.
+                if(weapon.definition.id.value == "WPN_BOOMERANG") {
+                    attackTimer.reset()
+                    boomerangClockRate=currentAttacksPerSecond
+                }
                 onNormalAttackPerformed(
                     weapon,
                     currentAttacksPerSecond,
@@ -297,7 +305,8 @@ class WeaponRuntime(
             },
             tryTriggerAutomaticAbility = {
                 abilityRuntime.triggerAutomatic()
-            }
+            },
+            normalAttackIntervalSeconds = 1f / calculateAttacksPerSecond().coerceAtLeast(.01f)
         )
     }
 
@@ -471,10 +480,12 @@ class WeaponRuntime(
     }
 
     fun resetAttackTimer() {
+        boomerangClockRate=null
         attackTimer.reset()
         resetRelentless()
     }
     fun resetTimer() {
+        boomerangClockRate=null
         attackTimer.reset()
 
         abilityRuntime.reset()

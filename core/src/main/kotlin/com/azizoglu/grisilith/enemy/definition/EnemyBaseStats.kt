@@ -37,10 +37,15 @@ data class EnemyBaseStats(
         EnemyCombatTuning.DEFAULT_PROJECTILE_SPEED_MULTIPLIER,
 
     val damageAffinities: DamageAffinityProfile =
-        DamageAffinityProfile.NONE
+        DamageAffinityProfile.NONE,
+
+    val baseMagicResistance: Int = 0,
+    val magicResistance: Int = 0
 ) {
 
     init {
+        require(baseMagicResistance >= 0)
+        require(magicResistance >= 0)
         require(maximumHealth > 0) {
             "Enemy maximum health must be greater than zero."
         }

@@ -82,6 +82,13 @@ class ItemInventory {
         return true
     }
 
+    fun consumeOneDefinition(definitionId: ContentId): Boolean {
+        val index = items.indexOfFirst { it.definition.id == definitionId }
+        if (index < 0) return false
+        items.removeAt(index)
+        return true
+    }
+
     fun removeItem(
         runtimeId: String
     ): ItemInstance? {

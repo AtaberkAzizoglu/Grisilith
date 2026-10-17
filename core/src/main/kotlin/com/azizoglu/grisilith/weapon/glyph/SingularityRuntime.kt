@@ -2,6 +2,7 @@ package com.azizoglu.grisilith.weapon.glyph
 
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.enemy.EnemyType
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.enemy.EnemyManager
 import com.azizoglu.grisilith.player.Player
@@ -346,7 +347,7 @@ class SingularityRuntime(
                 )
 
         enemyManager
-            .allEnemies
+            .weaponTargets
             .forEach {
                     enemy ->
 
@@ -407,7 +408,10 @@ class SingularityRuntime(
                             return@forEach
                     }
 
-                enemy.pullToward(
+                if(enemy.type==EnemyType.MINI_BOSS || enemy.type==EnemyType.FINAL_BOSS) {
+                    enemy.applyBossGravity("singularity:${singularity.request.sourceWeapon.runtimeId}",
+                        singularity.request.centerX,singularity.request.centerY)
+                } else enemy.pullToward(
                     targetCenterX =
                         singularity
                             .request
@@ -600,7 +604,7 @@ class SingularityRuntime(
     ) {
 
         enemyManager
-            .allEnemies
+            .weaponTargets
             .toList()
             .forEach {
                     enemy ->
@@ -641,6 +645,7 @@ class SingularityRuntime(
 
                     attackName =
                         "Singularity",
+                    defenseIntervalSeconds = damageTickSeconds(singularity),
 
                     onDamageDealt =
                         onDamageDealt,
@@ -703,7 +708,7 @@ class SingularityRuntime(
                 )
 
         enemyManager
-            .allEnemies
+            .weaponTargets
             .toList()
             .forEach {
                     enemy ->
@@ -775,7 +780,8 @@ class SingularityRuntime(
             damage: Int,
             sourceName: String
         ) -> Unit,
-        onEnemyKilled: (Enemy) -> Unit
+        onEnemyKilled: (Enemy) -> Unit,
+        defenseIntervalSeconds: Float = 1f
     ) {
 
         if (
@@ -802,6 +808,7 @@ class SingularityRuntime(
 
                 damageContext =
                     EnemyDamageContext(
+                        defenseTimeScale = defenseIntervalSeconds,
                         damageType =
                             DamageType.NECROTIC,
 

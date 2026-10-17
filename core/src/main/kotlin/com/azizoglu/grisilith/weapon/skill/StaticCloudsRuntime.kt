@@ -65,7 +65,9 @@ class StaticCloudsRuntime(
 
     fun tryBegin(
         player: Player,
-        upgraded: Boolean
+        upgraded: Boolean,
+        originX: Float = player.centerX,
+        originY: Float = player.centerY
     ): Boolean {
         return areaRuntime.begin(
             PersistentArea(
@@ -74,8 +76,8 @@ class StaticCloudsRuntime(
 
                 center =
                     Vector2(
-                        player.centerX,
-                        player.centerY
+                        originX,
+                        originY
                     ),
 
                 radius =
@@ -100,10 +102,14 @@ class StaticCloudsRuntime(
         )
     }
 
+    fun freezeAtCurrentPosition(): Boolean = areaRuntime.freezeAtCurrentPosition()
+
     fun update(
         delta: Float,
         player: Player,
         enemies: List<Enemy>,
+        originX: Float = player.centerX,
+        originY: Float = player.centerY,
         onDamageTick: (
             enemy: Enemy,
             tickIntervalSeconds: Float
@@ -141,10 +147,10 @@ class StaticCloudsRuntime(
                 delta,
 
             followCenterX =
-                player.centerX,
+                originX,
 
             followCenterY =
-                player.centerY,
+                originY,
 
             onFrame = {
                     _,

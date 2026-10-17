@@ -104,26 +104,40 @@ class ConditionVisualRenderer {
         conditions: ConditionContainer,
         centerX: Float,
         symbolY: Float,
-        camera: OrthographicCamera
+        camera: OrthographicCamera,
+        leadingIcons: List<String> = emptyList()
     ) {
-        val active = activeVisualTypes(conditions)
-        if (active.isEmpty()) return
+        val active = symbolTypes(conditions)
+        if (active.isEmpty() && leadingIcons.isEmpty()) return
 
         val size = 15f
         val gap = 2f
-        val totalWidth = active.size * size + (active.size - 1).coerceAtLeast(0) * gap
+        val count = active.size + leadingIcons.size
+        val totalWidth = count * size + (count - 1).coerceAtLeast(0) * gap
         var x = centerX - totalWidth / 2f
 
         batch.projectionMatrix = camera.combined
         batch.begin()
         batch.setColor(Color.WHITE)
+        leadingIcons.forEach { path ->
+            batch.draw(textureFor(path), x, symbolY, size, size)
+            x += size + gap
+        }
         active.forEach { type ->
-            val d = ConditionVisualRegistry.definitionFor(type) ?: return@forEach
-            batch.draw(textureFor(d.symbolTexturePath), x, symbolY, size, size)
+            if(type==ConditionType.ARMOR_BREAK) {
+                com.azizoglu.grisilith.ui.stat.SemanticSymbolRenderer.drawIcon(batch,
+                    com.azizoglu.grisilith.ui.stat.SemanticSymbolRenderer.ARMOR_BREAK,x,symbolY,size)
+            }else {
+                val d = ConditionVisualRegistry.definitionFor(type) ?: return@forEach
+                batch.draw(textureFor(d.symbolTexturePath), x, symbolY, size, size)
+            }
             x += size + gap
         }
         batch.end()
     }
+
+    fun symbolTypes(conditions:ConditionContainer):List<ConditionType> =
+        (if(conditions.contains(ConditionType.ARMOR_BREAK))listOf(ConditionType.ARMOR_BREAK) else emptyList())+activeVisualTypes(conditions)
 
     private fun activeVisualTypes(conditions: ConditionContainer): List<ConditionType> =
         stableOrder.filter { conditions.contains(it) && ConditionVisualRegistry.definitionFor(it) != null }

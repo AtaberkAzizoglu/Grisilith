@@ -17,9 +17,10 @@ enum class GameMap(
     val enemyTags: Set<EnemyTag>
 ) {
     ROAD_TO_HOME(
-        displayName = "Road to Home",
+        displayName = "Crolymnos Forest",
         description =
-            "A green wilderness crossed by a worn road.",
+            "Ancient paths wind beneath Crolymnos' towering trees, where hungry beasts stalk every shadow. " +
+                "Few travelers cross the forest after sundown and return unchanged.",
         worldWidth = 2200f,
         worldHeight = 1500f,
         isInitiallyUnlocked = true,
@@ -30,9 +31,10 @@ enum class GameMap(
     ),
 
     TROUBLE_AT_HOME(
-        displayName = "Trouble at Home",
+        displayName = "Vogtsweier Siege",
         description =
-            "Defend the village gate against relentless bandits.",
+            "Vogtsweier's gates have held for generations, but raiders now press the village from every side. " +
+                "Its defenders must endure until the last war horn falls silent.",
         worldWidth = 2500f,
         worldHeight = 2000f,
         isInitiallyUnlocked = true,
@@ -43,9 +45,10 @@ enum class GameMap(
     ),
 
     FOLLOWING_THE_DUNGEON_DELVER(
-        displayName = "Following the Dungeon Delver",
+        displayName = "Hollowgrave Depths",
         description =
-            "A wide underground chamber filled with undead.",
+            "A vanished delver opened passages that should have remained sealed beneath Hollowgrave. " +
+                "Now the dead wander its halls, guarding whatever woke in the dark.",
         worldWidth = 1750f,
         worldHeight = 1250f,
         isInitiallyUnlocked = true,
