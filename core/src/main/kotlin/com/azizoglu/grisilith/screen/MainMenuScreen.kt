@@ -18,6 +18,10 @@ import com.badlogic.gdx.math.Rectangle
 import com.azizoglu.grisilith.ui.theme.PanelVisualStyle
 import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
 import com.azizoglu.grisilith.statistics.career.HighScoreRepository
+import com.azizoglu.grisilith.online.OnlineBackend
+import com.azizoglu.grisilith.online.OnlineUi
+import com.azizoglu.grisilith.online.OnlineNameDialog
+import com.badlogic.gdx.utils.JsonValue
 
 class MainMenuScreen(
     private val game:
@@ -100,6 +104,15 @@ class MainMenuScreen(
     private var nextBackgroundPressed = false
 
     private var quitConfirmationOpen = false
+    private val onlineUi = OnlineUi()
+    private var nameDialog: OnlineNameDialog? = null
+    private var nameAttemptedThisVisit = false
+    private var board: JsonValue? = null
+    private var boardLoading = false
+    private var boardFailed = false
+    private var nextBoardAt = 0L
+    private var visible = false
+    private var visit = 0
 
     private val menuButtons =
         listOf(
@@ -232,6 +245,11 @@ class MainMenuScreen(
         )
 
     override fun show() {
+        visible = true
+        visit++
+        nameAttemptedThisVisit = false
+        nextBoardAt = 0L
+        if (nameDialog == null) game.online?.let { nameDialog = OnlineNameDialog(it, onlineUi) }
         viewport.apply()
 
         camera.position.set(
@@ -254,8 +272,32 @@ class MainMenuScreen(
         Float
     ) {
         pointer.update()
+        val online = game.online
+        if (online?.status == OnlineBackend.Status.READY) {
+            if (!online.nameConfirmed && !nameAttemptedThisVisit && !quitConfirmationOpen) {
+                nameAttemptedThisVisit = true
+                nameDialog?.show(true) { nextBoardAt = 0L }
+            }
+            val now = System.nanoTime()/1_000_000L
+            if (!boardLoading && now >= nextBoardAt) {
+                boardLoading = true
+                nextBoardAt = now + 30_000L
+                val requestVisit = visit
+                online.leaderboardAll { result ->
+                    boardLoading = false
+                    if (visible && requestVisit == visit) {
+                        boardFailed = result.isFailure
+                        board = result.getOrNull()
+                    }
+                }
+            }
+        } else {
+            board = null
+        }
+        nameDialog?.update(pointer)
+        val naming = nameDialog?.open == true
 
-        if (!quitConfirmationOpen) {
+        if (!quitConfirmationOpen && !naming) {
             backgroundElapsed += delta.coerceAtMost(1f)
             if (backgroundElapsed >= BACKGROUND_CHANGE_SECONDS) {
                 showNextBackground()
@@ -265,7 +307,7 @@ class MainMenuScreen(
             nextBackgroundPressed = false
         }
 
-        val activeButtons = if (quitConfirmationOpen) quitButtons else menuButtons
+        val activeButtons = if (naming) emptyList() else if (quitConfirmationOpen) quitButtons else menuButtons
         activeButtons.forEach { button ->
             val screenChanged =
                 button.update(
@@ -324,6 +366,8 @@ class MainMenuScreen(
             false,
             false
         )
+        onlineUi.connection(batch, game.online, 38f, 676f)
+        onlineUi.leaderboard(batch, board, game.online, boardLoading, boardFailed)
 
         val oldScaleX =
             font.data.scaleX
@@ -403,7 +447,14 @@ class MainMenuScreen(
             )
         }
 
+        nameDialog?.render(batch,pointer)
         batch.end()
+    }
+
+    override fun hide() {
+        visible = false
+        visit++
+        nameDialog?.close()
     }
 
     override fun resize(
@@ -466,6 +517,9 @@ class MainMenuScreen(
     }
 
     override fun dispose() {
+        hide()
+        nameDialog?.dispose()
+        onlineUi.dispose()
         batch.dispose()
         font.dispose()
         titleTexture.dispose()

@@ -427,6 +427,7 @@ class FirstScreen(
     private val hudBatch = SpriteBatch()
     private val hudFont = UiFontFactory.createNumeric()
     private val uiBodyFont = UiFontFactory.createBody()
+    private val onlineUi = com.azizoglu.grisilith.online.OnlineUi()
     private val summaryTitleFont = UiFontFactory.createDecorative()
     private val damageNumberManager =
         DamageNumberManager()
@@ -530,6 +531,8 @@ class FirstScreen(
 
     private var hasCommittedCareerStatistics =
         false
+
+    private var onlineRun: com.azizoglu.grisilith.online.OnlineRun? = null
 
     private var remainingRunChestDiscards =
         2
@@ -1579,6 +1582,13 @@ class FirstScreen(
 
             initializeStartingLoadout()
 
+            if (gameMap != GameMap.TEST_MAP) {
+                onlineRun = game.online?.begin(
+                    gameMap, difficulty, selectedCharacter.id.value,
+                    com.azizoglu.grisilith.online.OnlineProtocol.build(currentRunSummarySnapshot())
+                )
+            }
+
             recordCurrentEnemyEncounters()
         }
 
@@ -1687,9 +1697,9 @@ class FirstScreen(
         damageFeedbackRemaining =
             (damageFeedbackRemaining - delta.coerceAtLeast(0f)).coerceAtLeast(0f)
 
-        handleGameControls(
-            delta
-        )
+        if (onlineRun?.isPreparing != true) {
+            handleGameControls(delta)
+        }
 
         if (gameMap == GameMap.TEST_MAP) {
             handleTestMapDeathPolicy()
@@ -1720,6 +1730,12 @@ class FirstScreen(
 
             runRewardTracker.commitToProfile()
             commitCareerStatistics()
+            onlineRun?.let { run ->
+                game.online?.finish(run, com.azizoglu.grisilith.online.OnlineProtocol.result(
+                    currentRunSummarySnapshot(), runStatistics,
+                    gameTimeController.elapsedGameTimeSeconds.toInt()
+                ))
+            }
             runEndTransitionElapsed = 0f
         }
 
@@ -1741,7 +1757,8 @@ class FirstScreen(
         openPendingIvySummonChoiceIfReady()
 
         val gameplayStopped =
-            runHasEnded ||
+            onlineRun?.isPreparing == true ||
+                runHasEnded ||
                 chestRewardController.isOpen ||
                 statCardController.isOpen ||
                 chooseToSummonPopup.isOpen ||
@@ -4709,7 +4726,23 @@ class FirstScreen(
                 )
         }
 
-        if (showGameplayHud) renderDamageFeedback()
+        if (showGameplayHud) {
+            renderDamageFeedback()
+            hudBatch.projectionMatrix = camera.combined
+            hudBatch.begin()
+            val warning = if (game.online?.status == com.azizoglu.grisilith.online.OnlineBackend.Status.READY) {
+                when {
+                    gameMap == GameMap.TEST_MAP -> "Not ranked: Test Map"
+                    onlineRun?.reason == "not_connected_at_start" -> "Not ranked: started offline"
+                    onlineRun?.reason == "connection_lost" -> "Not ranked: connection interrupted"
+                    onlineRun?.state == com.azizoglu.grisilith.online.OnlineRun.State.OFFLINE -> "Not ranked: online verification failed"
+                    else -> null
+                }
+            } else null
+            onlineUi.connection(hudBatch,game.online,camera.position.x-CAMERA_WIDTH/2f+22f,
+                camera.position.y+CAMERA_HEIGHT/2f-23f,warning)
+            hudBatch.end()
+        }
 
         if (isPauseMenuOpen) {
             hudBatch.projectionMatrix =
@@ -5337,6 +5370,7 @@ class FirstScreen(
     }
 
     override fun dispose() {
+        onlineRun?.let { game.online?.abandon(it) }
         RunDamageTypeTelemetry.unbind(runStatistics)
         ActiveItemEffects.unbind(playerStats)
 
@@ -5384,6 +5418,7 @@ class FirstScreen(
         hudBatch.dispose()
         hudFont.dispose()
         uiBodyFont.dispose()
+        onlineUi.dispose()
         summaryTitleFont.dispose()
     }
 

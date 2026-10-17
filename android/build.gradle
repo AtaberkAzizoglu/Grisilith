@@ -13,7 +13,7 @@ android {
   compileSdk 36
   sourceSets {
     main {
-      manifest.srcFile 'AndroidManifest.xml'
+      manifest.srcFile 'src/main/AndroidManifest.xml'
       java.setSrcDirs(['src/main/java', 'src/main/kotlin'])
       aidl.setSrcDirs(['src/main/java', 'src/main/kotlin'])
       renderscript.setSrcDirs(['src/main/java', 'src/main/kotlin'])

@@ -1,0 +1,199 @@
+GRISILITH — OYUNCU ADI WHITELIST / POLİTİKA v1
+
+Kaynak: Kullanıcının filtre.txt dosyası. Yeni yasak kök eklenmedi.
+Bu liste kapsamlı bir başlangıç listesidir; bütün Türkçe/İngilizce kelimeleri veya bütün özel isimleri kapsama iddiası yoktur.
+Tek başına ASS kaynak listede bulunmadığından ASSASSIN için istisna gerekmiyor.
+
+KURALLAR
+- Görünen isim otomatik büyük harf olur. ICE ile İCE görünümünü korur.
+- Filtrede yalnızca I/İ eşdeğerdir; diğer Türkçe harfler sadeleştirilmez.
+- Rakamlar harflere dönüştürülmez; kaynakta açıkça yazılı S1K gibi ifadeler yine engellenir.
+- İzin verilen semboller filtrede yok sayılır. Boşluklar genel olarak korunur.
+- Yalnızca art arda 1–2 karakterli parçalardan oluşan bölümler birleştirilip ayrıca denetlenir.
+- F U C K / FU CK / F.U.C.K engellenir; KAS SESİ ve KANAL istisna sayesinde kabul edilir.
+- FUC K bu özel birleştirme kuralına girmez: FUC üç karakterlidir. Bu, seçtiğin kuralın bilinçli sınırıdır.
+- Whitelist birleşik oyuncu isimlerinde de kendi kapsadığı eşleşmeleri affeder (DARKPHOENIX, SHADOWHUNTER gibi).
+- İstisna sadece kendi kapsadığı yasak eşleşmeleri affeder; PEACOCK FUCK hâlâ reddedilir.
+- Çekimli kelimeler otomatik dilbilgisiyle tahmin edilmez; gereken yeni tam kelimeler listeye eklenebilir.
+- Özellikle kısa HO, OC, MENİ ve SİK kökleri nedeniyle beklenmedik masum isimler hâlâ çıkabilir.
+
+EŞLEŞME İÇEREN GERÇEK KELİME / ÖZEL İSİM İSTİSNALARI
+PEACOCK — kapsanan eşleşme: COCK, OC
+PEACOCKS — kapsanan eşleşme: COCK, OC
+COCKPIT — kapsanan eşleşme: COCK, OC
+COCKTAIL — kapsanan eşleşme: COCK, OC
+COCKEREL — kapsanan eşleşme: COCK, OC
+COCKATOO — kapsanan eşleşme: COCK, OC
+SHUTTLECOCK — kapsanan eşleşme: COCK, OC
+WOODCOCK — kapsanan eşleşme: COCK, OC
+HANCOCK — kapsanan eşleşme: COCK, OC
+HITCHCOCK — kapsanan eşleşme: COCK, OC
+DICKENS — kapsanan eşleşme: DICK
+DICKINSON — kapsanan eşleşme: DICK
+DICKSON — kapsanan eşleşme: DICK
+DOCUMENT — kapsanan eşleşme: OC, CUM
+DOCUMENTARY — kapsanan eşleşme: OC, CUM
+DOCUMENTATION — kapsanan eşleşme: OC, CUM
+ACCUMULATE — kapsanan eşleşme: CUM
+ACCUMULATION — kapsanan eşleşme: CUM
+CUMULUS — kapsanan eşleşme: CUM
+CUMULATIVE — kapsanan eşleşme: CUM
+CIRCUMSTANCE — kapsanan eşleşme: CUM
+CIRCUMFERENCE — kapsanan eşleşme: CUM
+CIRCUMVENT — kapsanan eşleşme: CUM
+SUCCUMB — kapsanan eşleşme: CUM
+CUCUMBER — kapsanan eşleşme: CUM
+ANALYSIS — kapsanan eşleşme: ANAL
+ANALYSES — kapsanan eşleşme: ANAL
+ANALYST — kapsanan eşleşme: ANAL
+ANALYTIC — kapsanan eşleşme: ANAL
+ANALYTICS — kapsanan eşleşme: ANAL
+ANALOG — kapsanan eşleşme: ANAL
+ANALOGUE — kapsanan eşleşme: ANAL
+CANAL — kapsanan eşleşme: ANAL
+BANAL — kapsanan eşleşme: ANAL
+KANAL — kapsanan eşleşme: ANAL
+ANALİZ — kapsanan eşleşme: ANAL
+ANALİTİK — kapsanan eşleşme: ANAL
+ANALOJİ — kapsanan eşleşme: ANAL
+ANALOG — kapsanan eşleşme: ANAL
+THOR — kapsanan eşleşme: HO
+PHOENIX — kapsanan eşleşme: HOE, HO
+HONOR — kapsanan eşleşme: HO
+HONOUR — kapsanan eşleşme: HO
+HOUSE — kapsanan eşleşme: HO
+HOPE — kapsanan eşleşme: HO
+CHOIR — kapsanan eşleşme: HO
+HORIZON — kapsanan eşleşme: HO
+HOLLOW — kapsanan eşleşme: HO
+HORSE — kapsanan eşleşme: HO
+HORSEMAN — kapsanan eşleşme: HO
+HOUND — kapsanan eşleşme: HO
+HONEY — kapsanan eşleşme: HO
+HOBBIT — kapsanan eşleşme: HO
+HORN — kapsanan eşleşme: HO
+HOSPITAL — kapsanan eşleşme: HO
+HOST — kapsanan eşleşme: HO
+GHOST — kapsanan eşleşme: HO
+SCHOOL — kapsanan eşleşme: HO
+SCHOLAR — kapsanan eşleşme: HO
+ANCHOR — kapsanan eşleşme: HO
+AUTHOR — kapsanan eşleşme: HO
+THORN — kapsanan eşleşme: HO
+HOUR — kapsanan eşleşme: HO
+HOLIDAY — kapsanan eşleşme: HO
+HOLY — kapsanan eşleşme: HO
+HEROHOOD — kapsanan eşleşme: HO
+CHOSEN — kapsanan eşleşme: HO
+SHOES — kapsanan eşleşme: HOE, HO
+SHOE — kapsanan eşleşme: HOE, HO
+SHOOT — kapsanan eşleşme: HO
+SHORT — kapsanan eşleşme: HO
+SHOP — kapsanan eşleşme: HO
+SHOW — kapsanan eşleşme: HO
+ECHO — kapsanan eşleşme: HO
+PSYCHOLOGY — kapsanan eşleşme: HO
+PSYCHOLOGIST — kapsanan eşleşme: HO
+OCEAN — kapsanan eşleşme: OC
+OCEANIC — kapsanan eşleşme: OC
+DOCTOR — kapsanan eşleşme: OC
+ROCK — kapsanan eşleşme: OC
+ROCKET — kapsanan eşleşme: OC
+FOCUS — kapsanan eşleşme: OC
+LOCAL — kapsanan eşleşme: OC
+LOCATION — kapsanan eşleşme: OC
+SOCIAL — kapsanan eşleşme: OC
+SOCIETY — kapsanan eşleşme: OC
+PROCESS — kapsanan eşleşme: OC
+BLOCK — kapsanan eşleşme: OC
+CLOCK — kapsanan eşleşme: OC
+CHOCOLATE — kapsanan eşleşme: OC, HO
+DOCUMENT — kapsanan eşleşme: OC, CUM
+VOCAL — kapsanan eşleşme: OC
+OCTOPUS — kapsanan eşleşme: OC
+OCTOBER — kapsanan eşleşme: OC
+OCTAGON — kapsanan eşleşme: OC
+SOCCER — kapsanan eşleşme: OC
+SOCKET — kapsanan eşleşme: OC
+POCKET — kapsanan eşleşme: OC
+LOCK — kapsanan eşleşme: OC
+DOCK — kapsanan eşleşme: OC
+FLOCK — kapsanan eşleşme: OC
+STOCK — kapsanan eşleşme: OC
+BROCCOLI — kapsanan eşleşme: OC
+PROCLAIM — kapsanan eşleşme: OC
+OCCASION — kapsanan eşleşme: OC
+INNOCENT — kapsanan eşleşme: OC
+MOCK — kapsanan eşleşme: OC
+ADVOCATE — kapsanan eşleşme: OC
+EPOCH — kapsanan eşleşme: OC
+COCONUT — kapsanan eşleşme: OC
+VOCATION — kapsanan eşleşme: OC
+ROCHELLE — kapsanan eşleşme: OC
+ROCHESTER — kapsanan eşleşme: OC
+STAMINA — kapsanan eşleşme: AMINA
+LAMINA — kapsanan eşleşme: AMINA
+LAMINATE — kapsanan eşleşme: AMINA
+VITAMINI — kapsanan eşleşme: AMINI
+VİTAMİNİ — kapsanan eşleşme: AMINI
+TAMINA — kapsanan eşleşme: AMINA
+BİSİKLET — kapsanan eşleşme: SIK
+BİSİKLETÇİ — kapsanan eşleşme: SIK
+PSİKOLOJİ — kapsanan eşleşme: SIK
+PSİKOLOG — kapsanan eşleşme: SIK
+PSİKİYATRİ — kapsanan eşleşme: SIK
+ANSİKLOPEDİ — kapsanan eşleşme: SIK
+KLASİK — kapsanan eşleşme: SIK
+MUSİKİ — kapsanan eşleşme: SIK
+SİKLON — kapsanan eşleşme: SIK
+SİKKE — kapsanan eşleşme: SIK
+EKSİK — kapsanan eşleşme: SIK
+KESİK — kapsanan eşleşme: SIK
+ERMENİ — kapsanan eşleşme: MENI
+ERMENİCE — kapsanan eşleşme: MENI
+SKYSCRAPER — kapsanan eşleşme: KYS
+SKYSHIP — kapsanan eşleşme: KYS
+SPICE — kapsanan eşleşme: SPIC
+SPICY — kapsanan eşleşme: SPIC
+SPICED — kapsanan eşleşme: SPIC
+SUSPICIOUS — kapsanan eşleşme: SPIC
+CONSPICUOUS — kapsanan eşleşme: SPIC
+AUSPICIOUS — kapsanan eşleşme: SPIC
+RETARDANT — kapsanan eşleşme: RETARD
+NAZİK — kapsanan eşleşme: NAZI
+NAZİRE — kapsanan eşleşme: NAZI
+NAZİFE — kapsanan eşleşme: NAZI
+NAZİLLİ — kapsanan eşleşme: NAZI
+SAKSOFON — kapsanan eşleşme: SAKSO
+SAKSOFONCU — kapsanan eşleşme: SAKSO
+MEMELİ — kapsanan eşleşme: MEME
+MEMELİLER — kapsanan eşleşme: MEME
+GÖTÜR — kapsanan eşleşme: GÖT, GÖTÜ
+GÖTÜRMEK — kapsanan eşleşme: GÖT, GÖTÜ
+GÖTÜRÜ — kapsanan eşleşme: GÖT, GÖTÜ
+FIREBALLS — kapsanan eşleşme: BALLS
+SNOWBALLS — kapsanan eşleşme: BALLS
+EYEBALLS — kapsanan eşleşme: BALLS
+URANUS — kapsanan eşleşme: ANUS
+JANUS — kapsanan eşleşme: ANUS
+ROMANUS — kapsanan eşleşme: ANUS
+OCEANUS — kapsanan eşleşme: OC, ANUS
+TOCCATA — kapsanan eşleşme: OC
+FOÇA — kapsanan eşleşme: OÇ
+KOCA — kapsanan eşleşme: OC
+KOCAMAN — kapsanan eşleşme: OC
+HOCAM — kapsanan eşleşme: OC, HO
+HOCA — kapsanan eşleşme: OC, HO
+HOŞ — kapsanan eşleşme: HO
+HOŞGÖRÜ — kapsanan eşleşme: HO
+HOKKABAZ — kapsanan eşleşme: HO
+HOŞGELDİN — kapsanan eşleşme: HO
+KOCATEPE — kapsanan eşleşme: OC
+PAKİSTAN — kapsanan eşleşme: PAKI
+
+EK ONAYLI KELİMELER (mevcut yasaklarla zaten çakışmadıkları için şu anda istisna gerektirmezler)
+SHADOW, FİZİKSEL, SOKAK
+
+Tüm uygulanan ham veriler: assets/online/name-policy.json (banned ve whitelist dizileri).
+Bu dosya inceleme içindir; hem oyun hem sunucu aynı sürümlü JSON politikasını kullanır.
+İlk kullanıcı geri bildirimlerinde yeni istisnalar eklenebilir; yasaklı kökler sessizce kaldırılmaz.

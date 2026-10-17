@@ -33,6 +33,9 @@ import com.badlogic.gdx.Preferences
 
 class GrisilithGame : Game() {
 
+    var online: com.azizoglu.grisilith.online.OnlineBackend? = null
+        private set
+
     companion object {
 
         private const val BETA_RESET_PREFERENCES_NAME =
@@ -126,6 +129,10 @@ class GrisilithGame : Game() {
 
             {
                 HighScoreRepository.load()
+            },
+
+            {
+                online = com.azizoglu.grisilith.online.OnlineBackend.create().also { it.bootstrap() }
             },
 
             )
@@ -476,7 +483,14 @@ class GrisilithGame : Game() {
         }
     }
 
+    override fun render() {
+        // Keep connection checks running in menus/settings too, independent of game speed.
+        online?.update()
+        super.render()
+    }
+
     override fun dispose() {
+        online?.close()
         screen?.dispose()
         com.azizoglu.grisilith.ui.icon.ContentIconRenderer.dispose()
         com.azizoglu.grisilith.ui.stat.SemanticSymbolRenderer.dispose()

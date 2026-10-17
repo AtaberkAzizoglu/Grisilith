@@ -167,5 +167,13 @@ Thumbs.db
 .gradle-user/
 **/build/
 
+# Local online-auth credentials, Supabase CLI state and backend test runtime.
+**/grisilith_online_session*
+/supabase/.temp/
+/supabase/.branches/
+/supabase/.env*
+/tools/online-backend/runtime/
+/tools/online-backend/test-prefs/
+
 .gradle-user/
 **/build/

@@ -26,6 +26,9 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.FitViewport
 import kotlin.math.roundToInt
+import com.azizoglu.grisilith.online.OnlineUi
+import com.azizoglu.grisilith.online.OnlineNameDialog
+import com.azizoglu.grisilith.online.OnlineBackend
 
 class SettingsScreen(
     @Suppress("unused") private val game: GrisilithGame,
@@ -39,7 +42,7 @@ class SettingsScreen(
         val NAV_PANEL = Rectangle(70f, 82f, 240f, 520f)
     }
 
-    private enum class Page { GENERAL, CONTROLS, COMBAT }
+    private enum class Page { GENERAL, CONTROLS, COMBAT, ACCOUNT }
     private enum class VolumeSlider { MASTER, MUSIC, EFFECTS }
 
     private val camera = OrthographicCamera()
@@ -61,6 +64,8 @@ class SettingsScreen(
     }
 
     private var page = Page.GENERAL
+    private val onlineUi = OnlineUi()
+    private var nameDialog: OnlineNameDialog? = null
     private var buttons: List<MenuButton> = emptyList()
     private var listeningAction: RunInputAction? = null
     private var exitConfirmationOpen = false
@@ -107,10 +112,12 @@ class SettingsScreen(
         draftBindings = appliedBindings.toMutableMap()
         previousInputProcessor = Gdx.input.inputProcessor
         Gdx.input.inputProcessor = keyboardInput
+        if (nameDialog == null) game.online?.let { nameDialog = OnlineNameDialog(it, onlineUi) }
         rebuildButtons()
     }
 
     override fun hide() {
+        nameDialog?.close()
         if (Gdx.input.inputProcessor === keyboardInput) {
             Gdx.input.inputProcessor = previousInputProcessor
         }
@@ -119,8 +126,9 @@ class SettingsScreen(
 
     override fun render(delta: Float) {
         pointer.update()
-        handleVolumeSliders()
-        val currentButtons = buttons
+        nameDialog?.update(pointer)
+        if (nameDialog?.open != true) handleVolumeSliders()
+        val currentButtons = if(nameDialog?.open == true) emptyList() else buttons
         currentButtons.forEach { button ->
             if (button.update(pointer.position, pointer.justPressed, pointer.justReleased)) return
         }
@@ -143,6 +151,7 @@ class SettingsScreen(
             Page.GENERAL -> drawGeneralText()
             Page.CONTROLS -> drawControlsText()
             Page.COMBAT -> drawCombatText()
+            Page.ACCOUNT -> drawAccountText()
         }
         if (page == Page.GENERAL) drawVolumeSliders()
 
@@ -150,6 +159,7 @@ class SettingsScreen(
         if (exitConfirmationOpen) drawExitConfirmation()
         currentButtons.forEach { it.render(batch, font, pointer.position, pointer.isHeld) }
         if(page==Page.COMBAT)drawCombatTooltip()
+        nameDialog?.render(batch,pointer)
         batch.end()
     }
 
@@ -194,6 +204,17 @@ class SettingsScreen(
         stateLabel(if (draftSettings.showGameSpeedButton) "ON" else "OFF", 985f, 318f)
         stateLabel(if (draftSettings.showAbilityShortcuts) "ON" else "OFF", 985f, 266f)
         stateLabel(if (draftSettings.showAbilityCooldowns) "ON" else "OFF", 985f, 214f)
+    }
+
+    private fun drawAccountText() {
+        sectionHeader("PLAYER IDENTITY",348f,564f,812f)
+        onlineUi.connection(batch,game.online,350f,510f)
+        label("Display Name",350f,465f)
+        onlineUi.text(batch,game.online?.displayName ?: "Connect to create your identity.",350f,425f,790f,1.2f)
+        label("Unique ID (permanent)",350f,365f)
+        onlineUi.text(batch,game.online?.playerId?.let(com.azizoglu.grisilith.online.PlayerNamePolicy::uppercase) ?: "Available after your first connection.",
+            350f,328f,790f,.95f)
+        onlineUi.text(batch,"Renaming updates your previous leaderboard entries too.",350f,267f,790f,.78f)
     }
 
     private fun drawControlsText() {
@@ -274,14 +295,17 @@ class SettingsScreen(
     }
 
     private fun regularButtons(): List<MenuButton> = buildList {
-        add(navButton("GENERAL", 76f, 505f, 222f, 62f, page == Page.GENERAL) {
+        add(navButton("GENERAL", 76f, 515f, 222f, 52f, page == Page.GENERAL) {
             page = Page.GENERAL; rebuildButtons()
         })
-        add(navButton("KEY BINDINGS", 76f, 430f, 222f, 62f, page == Page.CONTROLS) {
+        add(navButton("KEY BINDINGS", 76f, 450f, 222f, 52f, page == Page.CONTROLS) {
             page = Page.CONTROLS; rebuildButtons()
         })
-        add(navButton("COMBAT", 76f, 355f, 222f, 62f, page == Page.COMBAT) {
+        add(navButton("COMBAT", 76f, 385f, 222f, 52f, page == Page.COMBAT) {
             page = Page.COMBAT; rebuildButtons()
+        })
+        add(navButton("ACCOUNT",76f,320f,222f,52f,page==Page.ACCOUNT) {
+            page=Page.ACCOUNT;rebuildButtons()
         })
         add(button("RESET ALL", 76f, 225f, 222f, 58f) {
             draftSettings = GameSettings.defaults()
@@ -294,6 +318,9 @@ class SettingsScreen(
             Page.GENERAL -> addGeneralButtons()
             Page.CONTROLS -> addControlButtons()
             Page.COMBAT -> addCombatButtons()
+            Page.ACCOUNT -> add(button("CHANGE NAME / RESET",350f,175f,385f,58f) {
+                if(game.online?.status==OnlineBackend.Status.READY) nameDialog?.show(false)
+            })
         }
     }
 
@@ -565,5 +592,7 @@ class SettingsScreen(
         background.dispose()
         settingsPanel.dispose()
         solidPixel.dispose()
+        nameDialog?.dispose()
+        onlineUi.dispose()
     }
 }
