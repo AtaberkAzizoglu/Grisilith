@@ -82,7 +82,7 @@ class EnemyManager {
         enemies.add(enemy)
     }
 
-    fun remove(enemy: Enemy): Boolean = enemies.remove(enemy)
+    fun remove(enemy: Enemy): Boolean {com.azizoglu.grisilith.audio.EnemyAudio.clear(enemy);return enemies.remove(enemy)}
 
     fun update(
         delta: Float,
@@ -114,8 +114,8 @@ class EnemyManager {
             )
         },
         onGateDamaged: (Enemy, Int) -> Unit = { _, _ -> },
-        onPlayerCondition: (ConditionType, Float?, Int) -> Unit = { _, _, _ -> },
-        onSummonCondition: (SummonedEntity, ConditionType, Float?, Int) -> Unit = { _, _, _, _ -> }
+        onPlayerCondition: (ConditionType, Float?, Int, Enemy) -> Unit = { _, _, _, _ -> },
+        onSummonCondition: (SummonedEntity, ConditionType, Float?, Int, Enemy) -> Unit = { _, _, _, _, _ -> }
     ) {
         /*
          * Only living/active Ivy summons are candidate targets.
@@ -141,6 +141,8 @@ class EnemyManager {
 
         enemies.forEach {
                 enemy ->
+
+            com.azizoglu.grisilith.audio.EnemyAudio.update(enemy,delta)
 
             if (enemy.isDead) {
                 /*
@@ -242,6 +244,8 @@ class EnemyManager {
                 nearbyEnemies = enemies,
                 combatTargets = traitTargets,
                 onContactDamage = { damage, damageType ->
+                    enemy.audioAttackSourceName=""
+                    enemy.audioAttackDamageType=damageType
                     when (selectedTarget.type) {
                         CombatTargetType.PLAYER ->
                             onPlayerDamaged(enemy, damage, damageType)
@@ -256,7 +260,8 @@ class EnemyManager {
                                             it,
                                             ConditionType.NECROSIS,
                                             5f,
-                                            enemy.conditionDamageStatScore
+                                            enemy.conditionDamageStatScore,
+                                            enemy
                                         )
                                     }
                                 }
@@ -269,6 +274,8 @@ class EnemyManager {
                     val attackType = if (event.damageType == com.azizoglu.grisilith.content.DamageType.NONE) {
                         enemy.contactDamageType
                     } else event.damageType
+                    enemy.audioAttackSourceName=event.sourceName
+                    enemy.audioAttackDamageType=attackType
                     if (event.amount > 0) when (event.targetType) {
                         EnemyTraitTargetType.PLAYER ->
                             onPlayerDamaged(enemy, event.amount, attackType)
@@ -297,7 +304,8 @@ class EnemyManager {
                                 onPlayerCondition(
                                     condition,
                                     event.conditionDurationSeconds,
-                                    event.conditionStatScore
+                                    event.conditionStatScore,
+                                    enemy
                                 )
                             EnemyTraitTargetType.SUMMON ->
                                 targetableSummons.getOrNull(event.targetIndex)
@@ -307,7 +315,8 @@ class EnemyManager {
                                             it,
                                             condition,
                                             event.conditionDurationSeconds,
-                                            event.conditionStatScore
+                                            event.conditionStatScore,
+                                            enemy
                                         )
                                     }
                             EnemyTraitTargetType.GATE -> Unit
@@ -586,6 +595,7 @@ class EnemyManager {
             }
 
             onEnemyRemoved(enemy)
+            com.azizoglu.grisilith.audio.EnemyAudio.clear(enemy)
             iterator.remove()
         }
     }
@@ -630,10 +640,12 @@ class EnemyManager {
                 val position = nearbySpawnPosition(parent, 62f, worldWidth, worldHeight, obstacles)
                     ?: return@repeat
                 additions += runtimeFactory.createBabyCrocodile(parent, position.first, position.second)
+                com.azizoglu.grisilith.audio.EnemyAudio.play(parent,com.azizoglu.grisilith.audio.UiSound.CROCODILE_EGG,position.first,position.second)
             }
 
             if (parent.consumeSwarmSplitRequest()) {
                 parent.applySwarmSplit()
+                com.azizoglu.grisilith.audio.EnemyAudio.play(parent,com.azizoglu.grisilith.audio.UiSound.SWARM_SPLIT)
                 val position = nearbySpawnPosition(parent, parent.visualSize * 0.8f, worldWidth, worldHeight, emptyList())
                     ?: ((parent.centerX + parent.visualSize * 0.65f) to parent.centerY)
                 additions += runtimeFactory.createSwarmSplitChild(
@@ -667,6 +679,7 @@ class EnemyManager {
     }
 
     fun clearAll() {
+        enemies.forEach(com.azizoglu.grisilith.audio.EnemyAudio::clear)
         summonWeaponTargets.clear()
         enemies.clear()
     }

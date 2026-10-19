@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.enemy.trait
 
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.audio.EnemyAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.weapon.skill.DefaultWeaponAbilities
@@ -274,14 +276,17 @@ internal class HorsemanSwipeAroundEnemyTrait : EnemyTrait {
         if (
             context.owner.kindId == com.azizoglu.grisilith.enemy.definition.EnemyKindIds.VAMPIRE_LORD &&
             (!context.owner.isVampireSecondForm || context.owner.isActiveSkillLocked)
-        ) return
+        ) { EnemyAudio.sustain(this,context.owner,null);return }
         val dt = context.delta.coerceAtLeast(0f)
 
         impactRemaining = (impactRemaining - dt).coerceAtLeast(0f)
 
         if (chargeRemaining > 0f) {
+            if(context.owner.kindId==com.azizoglu.grisilith.enemy.definition.EnemyKindIds.VAMPIRE_LORD)
+                EnemyAudio.sustain(this,context.owner,UiSound.VAMPIRE_SWIPE_CHARGE)
             chargeRemaining -= dt
             if (chargeRemaining <= 0f) {
+                EnemyAudio.sustain(this,context.owner,null)
                 applyHit(context, chargingMask)
                 if (chargingSpecial) {
                     specialCooldown = SPECIAL_INTERVAL_SECONDS
@@ -309,7 +314,7 @@ internal class HorsemanSwipeAroundEnemyTrait : EnemyTrait {
             }
             val mask = sequence[sequenceIndex]
             if (nextStepDelay <= 0f && playerIsInsideMask(context, mask)) {
-                beginCharge(mask, special = false)
+                beginCharge(context,mask, special = false)
             }
             return
         }
@@ -317,22 +322,24 @@ internal class HorsemanSwipeAroundEnemyTrait : EnemyTrait {
         normalCooldown = (normalCooldown - dt).coerceAtLeast(0f)
 
         if (specialCooldown <= 0f && playerIsInsideMask(context, ALL_SEGMENTS)) {
-            beginCharge(ALL_SEGMENTS, special = true)
+            beginCharge(context,ALL_SEGMENTS, special = true)
             return
         }
 
         if (normalCooldown <= 0f && playerIsInsideMask(context, sequence.first())) {
             normalSequenceActive = true
             sequenceIndex = 0
-            beginCharge(sequence.first(), special = false)
+            beginCharge(context,sequence.first(), special = false)
         }
     }
 
-    private fun beginCharge(mask: Int, special: Boolean) {
+    private fun beginCharge(context:EnemyTraitUpdateContext,mask: Int, special: Boolean) {
         chargingMask = mask
         chargingSpecial = special
         chargeDuration = if (mask == ALL_SEGMENTS) NORMAL_CHARGE_SECONDS * 1.5f else NORMAL_CHARGE_SECONDS
         chargeRemaining = chargeDuration
+        if(context.owner.kindId==com.azizoglu.grisilith.enemy.definition.EnemyKindIds.VAMPIRE_LORD)
+            EnemyAudio.once(this,context.owner,UiSound.VAMPIRE_SWIPE_CHARGE)
     }
 
     private fun finishNormalSequence() {
@@ -775,6 +782,7 @@ internal class GhostStormEnemyTrait : EnemyTrait {
                 }
             }
         }
+        EnemyAudio.sustain(this,context.owner,if(phase==Phase.WAITING)null else UiSound.GHOST_STORM,looping=true)
     }
 
     override fun resolveMovementOverride(owner: Enemy, output: Vector2): Boolean {

@@ -313,7 +313,10 @@ class SummonManager(
 
         entities
             .filter { it.health.isDead }
-            .forEach(ActiveItemEffects::onSummonDied)
+            .forEach {
+                ActiveItemEffects.onSummonDied(it)
+                com.azizoglu.grisilith.audio.SummonAudio.death(it.type,it.centerX,it.centerY)
+            }
 
         villageGuardDeathsSinceLastCheck +=
             entities.count {
@@ -940,6 +943,9 @@ class SummonManager(
                     burnedApplication
             )
         )
+        com.azizoglu.grisilith.audio.GameAudio.projectile(
+            com.azizoglu.grisilith.audio.ProjectileSound.FIRE,summon.centerX,summon.centerY
+        )
     }
 
     private fun spawnToadPoisonProjectile(
@@ -982,6 +988,9 @@ class SummonManager(
                 sizeMultiplier = TOAD_PROJECTILE_SIZE_MULTIPLIER,
                 conditionApplication = poison
             )
+        )
+        com.azizoglu.grisilith.audio.GameAudio.projectile(
+            com.azizoglu.grisilith.audio.ProjectileSound.POISON,summon.centerX,summon.centerY
         )
     }
 

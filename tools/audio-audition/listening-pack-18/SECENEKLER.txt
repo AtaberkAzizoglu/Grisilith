@@ -1,0 +1,121 @@
+Beast trait auditions: PREVIEW ONLY, NOT INSTALLED
+BC1 · 1,15s · homurtu ve dört koşu adımı · 1.15s
+beast-voices/boar.ogg speed=0.8, offset=0.0s, max=0.9s, gain=1.0 + impact-sounds/footstep_grass_000.ogg speed=1.0, offset=0.1s, max=0.25s, gain=0.55 + impact-sounds/footstep_grass_001.ogg speed=1.0, offset=0.35s, max=0.25s, gain=0.55 + impact-sounds/footstep_grass_002.ogg speed=1.0, offset=0.6s, max=0.25s, gain=0.55 + impact-sounds/footstep_grass_003.ogg speed=1.0, offset=0.85s, max=0.25s, gain=0.55
+BC2 · 1,15s · ağır koşu ve hava yarma · 1.15s
+impact-sounds/footstep_grass_004.ogg speed=0.8, offset=0.0s, max=0.25s, gain=0.55 + impact-sounds/footstep_grass_002.ogg speed=0.8, offset=0.28s, max=0.25s, gain=0.55 + impact-sounds/footstep_grass_000.ogg speed=0.8, offset=0.56s, max=0.25s, gain=0.55 + impact-sounds/footstep_grass_003.ogg speed=0.8, offset=0.84s, max=0.25s, gain=0.55 + swishes/swishes/swish-8.wav speed=0.7, offset=0.2s, max=0.65s, gain=0.65
+BC3 · 1,15s · sert nefes ve hızlanan koşu · 1.15s
+beast-voices/boar.ogg speed=0.65, offset=0.0s, max=0.5s, gain=1.0 + impact-sounds/footstep_grass_001.ogg speed=1.0, offset=0.3s, max=0.25s, gain=0.55 + impact-sounds/footstep_grass_002.ogg speed=1.0, offset=0.55s, max=0.25s, gain=0.55 + impact-sounds/footstep_grass_003.ogg speed=1.0, offset=0.75s, max=0.25s, gain=0.55 + impact-sounds/footstep_grass_004.ogg speed=1.0, offset=0.9s, max=0.25s, gain=0.55 + swishes/swishes/swish-12.wav speed=0.9, offset=0.45s, max=0.65s, gain=0.45
+BC4 · Kısa · sert burun nefesi · 0.30s
+beast-voices/boar.ogg speed=1.15, offset=0.0s, max=0.3s, gain=1.0
+BC5 · Kısa · gövdeli hücum çıkışı · 0.25s
+swishes/swishes/swish-4.wav speed=0.8, offset=0.0s, max=0.3s, gain=1.0 + impact-sounds/impactSoft_heavy_002.ogg speed=0.8, offset=0.0s, max=0.25s, gain=0.35
+BP1 · Pes, sabit tehdit homurtusu · 1.00s
+beast-voices/boar.ogg speed=0.65, offset=0.0s, max=1.0s, gain=1.0
+BP2 · Boğuk burun hırıltısı · 1.00s
+beast-voices/boar.ogg speed=0.8, offset=0.0s, max=0.9s, gain=1.0
+BP3 · İki kısa nefesle hazırlanma · 1.00s
+beast-voices/boar.ogg speed=0.75, offset=0.0s, max=0.4s, gain=1.0 + beast-voices/boar.ogg speed=0.95, offset=0.5s, max=0.4s, gain=0.65
+BP4 · Kısa, kuru uyarı · 0.45s
+beast-voices/boar.ogg speed=0.9, offset=0.0s, max=0.45s, gain=1.0
+BP5 · Kalın, hırıltılı başlangıç · 0.65s
+beast-voices/boar.ogg speed=0.55, offset=0.0s, max=0.65s, gain=1.0
+CJ1 · 0,55s · ağır gövdenin havayı yarması · 0.55s
+swishes/swishes/swish-4.wav speed=0.65, offset=0.0s, max=0.55s, gain=1.0
+CJ2 · 0,55s · nefes ve hızlı sıçrama · 0.55s
+beast-voices/croc-call-3.wav speed=1.2, offset=0.0s, max=0.2s, gain=0.35 + swishes/swishes/swish-8.wav speed=0.9, offset=0.0s, max=0.5s, gain=1.0
+CJ3 · 0,55s · kalkış, hava ve hafif iniş · 0.55s
+swishes/swishes/swish-12.wav speed=0.8, offset=0.0s, max=0.45s, gain=1.0 + impact-sounds/impactSoft_heavy_001.ogg speed=0.8, offset=0.35s, max=0.2s, gain=0.3
+CJ4 · Kısa · keskin sıçrama çıkışı · 0.12s
+swishes/swishes/swish-8.wav speed=1.3, offset=0.0s, max=0.22s, gain=1.0
+CJ5 · Kısa · tok sürüngen fırlaması · 0.20s
+beast-voices/croc-call-4.wav speed=1.0, offset=0.0s, max=0.2s, gain=1.0 + swishes/swishes/swish-4.wav speed=1.2, offset=0.0s, max=0.2s, gain=0.5
+CP1 · 2s · derin, bekleyen sürüngen · 2.00s
+beast-voices/croc-call-1.wav speed=0.65, offset=0.0s, max=2.0s, gain=1.0
+CP2 · 2s · giderek koyulaşan hırıltı · 2.00s
+beast-voices/croc-call-2.wav speed=0.7, offset=0.0s, max=1.1s, gain=1.0 + beast-voices/croc-call-4.wav speed=0.65, offset=0.9s, max=1.0s, gain=0.7
+CP3 · 2s · boğazdan iki tehdit nefesi · 2.00s
+beast-voices/croc-call-4.wav speed=0.75, offset=0.0s, max=0.8s, gain=1.0 + beast-voices/croc-call-1.wav speed=0.6, offset=1.0s, max=1.0s, gain=0.8
+CP4 · Kısa · koyu sürüngen homurtusu · 0.65s
+beast-voices/croc-call-2.wav speed=0.65, offset=0.0s, max=0.65s, gain=1.0
+CP5 · Kısa · pürüzlü tehdit hırıltısı · 0.55s
+beast-voices/croc-call-1.wav speed=0.9, offset=0.0s, max=0.55s, gain=1.0
+EG1 · Doğal, tek kabuk çatlaması · 0.12s
+beast-traits/egg.wav speed=1.0, offset=0.0s, max=0.8s, gain=1.0
+EG2 · Kalın kabuklu büyük yumurta · 0.18s
+beast-traits/egg.wav speed=0.7, offset=0.0s, max=1.1s, gain=1.0
+EG3 · Hızlı, kuru kabuk çıtırtısı · 0.10s
+beast-traits/egg.wav speed=1.25, offset=0.0s, max=0.5s, gain=1.0
+EG4 · Kabuk çatlaması ve küçük parçalar · 0.47s
+beast-traits/egg.wav speed=0.9, offset=0.0s, max=0.8s, gain=1.0 + beast-traits/bfh1_rock_breaking_01.ogg speed=1.8, offset=0.12s, max=0.35s, gain=0.12
+EG5 · İki adımda yumurtadan çıkış · 0.41s
+beast-traits/egg.wav speed=1.0, offset=0.0s, max=0.25s, gain=1.0 + beast-traits/egg.wav speed=0.8, offset=0.25s, max=0.55s, gain=0.7
+SB1 · Kısa, kuru vızıltı sekmesi · 0.25s
+beast-voices/bee-call.wav speed=1.2, offset=0.0s, max=0.25s, gain=1.0
+SB2 · Yoğun, tok sürü kalkanı · 0.35s
+beast-voices/bee-call.wav speed=0.8, offset=0.0s, max=0.35s, gain=1.0 + beast-voices/bee-call.wav speed=1.15, offset=0.03s, max=0.25s, gain=0.45
+SB3 · İnce, hızlı dağılma · 0.25s
+beast-voices/bee-call.wav speed=1.5, offset=0.0s, max=0.25s, gain=1.0
+SB4 · Vızıltı ve hafif hava sekmesi · 0.35s
+beast-voices/bee-call.wav speed=0.95, offset=0.0s, max=0.35s, gain=1.0 + swishes/swishes/swish-8.wav speed=1.8, offset=0.0s, max=0.18s, gain=0.15
+SB5 · Boğuk, kısa sürü toparlanması · 0.40s
+beast-voices/bee-call.wav speed=0.7, offset=0.0s, max=0.4s, gain=1.0
+SS1 · İkiye açılan doğal sürü · 0.70s
+beast-voices/bee-call.wav speed=0.9, offset=0.0s, max=0.7s, gain=1.0 + beast-voices/bee-call.wav speed=1.3, offset=0.12s, max=0.55s, gain=0.7
+SS2 · Keskin bölünme ve ince sürü · 0.85s
+beast-voices/bee-call.wav speed=1.4, offset=0.0s, max=0.35s, gain=1.0 + beast-voices/bee-call.wav speed=1.05, offset=0.2s, max=0.65s, gain=0.8
+SS3 · Derin sürüden iki ayrı vızıltı · 0.80s
+beast-voices/bee-call.wav speed=0.65, offset=0.0s, max=0.8s, gain=1.0 + beast-voices/bee-call.wav speed=1.25, offset=0.18s, max=0.6s, gain=0.55 + swishes/swishes/swish-4.wav speed=1.5, offset=0.0s, max=0.25s, gain=0.12
+SS4 · Hızlı, kısa sürü çatallanması · 0.45s
+beast-voices/bee-call.wav speed=1.1, offset=0.0s, max=0.4s, gain=1.0 + beast-voices/bee-call.wav speed=1.5, offset=0.1s, max=0.35s, gain=0.65
+SS5 · Yoğun, uzun bölünme dalgası · 1.00s
+beast-voices/bee-call.wav speed=0.8, offset=0.0s, max=1.0s, gain=1.0 + beast-voices/bee-call.wav speed=1.15, offset=0.15s, max=0.8s, gain=0.7 + beast-voices/bee-call.wav speed=1.35, offset=0.3s, max=0.6s, gain=0.4
+RG1 · Uzun ve derin öfke hırlaması · 1.53s
+beast-voices/bear-call-1.wav speed=0.7, offset=0.0s, max=2.0s, gain=1.0
+RG2 · Sert, pürüzlü ayı tehdidi · 1.58s
+beast-voices/bear-call-2.wav speed=0.75, offset=0.0s, max=1.8s, gain=1.0
+RG3 · İki nefesli öfkeli ayı · 1.65s
+beast-voices/bear-call-1.wav speed=0.85, offset=0.0s, max=0.8s, gain=1.0 + beast-voices/bear-call-2.wav speed=0.7, offset=0.65s, max=1.0s, gain=0.8
+RG4 · Boğuk ve ağır öfke · 1.98s
+beast-voices/bear-call-2.wav speed=0.6, offset=0.0s, max=2.0s, gain=1.0
+RG5 · Keskin başlangıçlı, doğal hırlama · 1.07s
+beast-voices/bear-call-1.wav speed=1.0, offset=0.0s, max=1.5s, gain=1.0
+GC1 · Doğal, güçlü goril kükremesi · 1.30s
+beast-voices/gorilla/ogg/gorilla_roar.ogg speed=1.0, offset=0.0s, max=1.3s, gain=1.0
+GC2 · Daha kalın göğüslü kükreme · 1.60s
+beast-voices/gorilla/ogg/gorilla_roar.ogg speed=0.75, offset=0.0s, max=1.6s, gain=1.0
+GC3 · Sert, boğazdan tehdit · 1.00s
+beast-voices/gorilla/ogg/gorilla_snarl_04.ogg speed=0.85, offset=0.0s, max=1.0s, gain=1.0
+GC4 · Homurtudan kükremeye · 1.25s
+beast-voices/gorilla/ogg/gorilla_grunt.ogg speed=0.8, offset=0.0s, max=0.25s, gain=1.0 + beast-voices/gorilla/ogg/gorilla_roar.ogg speed=0.9, offset=0.15s, max=1.1s, gain=0.9
+GC5 · Kısa, saldırgan goril haykırışı · 0.80s
+beast-voices/gorilla/ogg/gorilla_snarl_03.ogg speed=0.75, offset=0.0s, max=0.8s, gain=1.0
+GT1 · Ağır kayanın hava yarışı · 0.27s
+swishes/swishes/swish-4.wav speed=0.55, offset=0.0s, max=0.75s, gain=1.0 + beast-traits/bfh1_rock_falling_01.ogg speed=0.8, offset=0.0s, max=0.2s, gain=0.2
+GT2 · Kaba, sürtünmeli taş fırlatma · 0.26s
+rubberduck-rpg/stones_01.ogg speed=1.0, offset=0.0s, max=0.25s, gain=0.45 + swishes/swishes/swish-8.wav speed=0.7, offset=0.04s, max=0.65s, gain=1.0
+GT3 · Hızlı ve tok kaya geçişi · 0.10s
+swishes/swishes/swish-12.wav speed=0.75, offset=0.0s, max=0.55s, gain=1.0
+GT4 · Geniş, pes hava kütlesi · 0.31s
+swishes/swishes/swish-8.wav speed=0.5, offset=0.0s, max=0.85s, gain=1.0 + swishes/swishes/swish-4.wav speed=1.2, offset=0.06s, max=0.4s, gain=0.3
+GT5 · Taş kaldırışından kısa fırlatma · 0.30s
+rubberduck-rpg/item_stone_03.ogg speed=1.0, offset=0.0s, max=0.25s, gain=0.5 + swishes/swishes/swish-4.wav speed=0.8, offset=0.12s, max=0.55s, gain=1.0
+GS1 · Kuru, ağır toprak darbesi · 1.19s
+impact-sounds/impactSoft_heavy_003.ogg speed=0.6, offset=0.0s, max=0.6s, gain=1.0 + beast-traits/bfh1_rock_falling_01.ogg speed=0.8, offset=0.04s, max=1.3s, gain=0.4
+GS2 · Taş çatlatan yere vuruş · 1.30s
+beast-traits/bfh1_rock_breaking_01.ogg speed=0.75, offset=0.0s, max=1.3s, gain=1.0 + impact-sounds/impactSoft_heavy_004.ogg speed=0.65, offset=0.0s, max=0.6s, gain=0.7
+GS3 · Parçalanan kaya ve ağır gövde · 1.32s
+beast-traits/bfh1_rock_breaking_02.ogg speed=0.8, offset=0.0s, max=1.3s, gain=1.0 + beast-traits/bfh1_rock_falling_03.ogg speed=0.7, offset=0.1s, max=1.3s, gain=0.55
+GS4 · Çok pes, tek yumruk · 0.60s
+impact-sounds/impactSoft_heavy_000.ogg speed=0.45, offset=0.0s, max=0.6s, gain=1.0 + beast-traits/bfh1_rock_hit_01.ogg speed=0.65, offset=0.0s, max=1.3s, gain=0.5
+GS5 · Kısa, keskin deprem çatlağı · 0.60s
+beast-traits/bfh1_rock_breaking_03.ogg speed=1.0, offset=0.0s, max=1.3s, gain=1.0 + impact-sounds/impactSoft_heavy_001.ogg speed=0.7, offset=0.0s, max=0.6s, gain=0.45
+GS6 · Geniş alana yayılan moloz · 0.81s
+beast-traits/bfh1_rock_falling_05.ogg speed=0.7, offset=0.0s, max=1.3s, gain=1.0 + beast-traits/bfh1_rock_falling_08.ogg speed=0.9, offset=0.15s, max=1.3s, gain=0.65 + impact-sounds/impactSoft_heavy_002.ogg speed=0.55, offset=0.0s, max=0.6s, gain=0.7
+GS7 · Toprak yumruğu, az taş · 0.60s
+tinysized/sfx-cc0/soil-steps-01.wav speed=0.6, offset=0.0s, max=0.5s, gain=0.45 + impact-sounds/impactSoft_heavy_004.ogg speed=0.55, offset=0.0s, max=0.6s, gain=1.0
+GS8 · İki yumruk hissi, kısa çift darbe · 0.60s
+impact-sounds/impactSoft_heavy_003.ogg speed=0.7, offset=0.0s, max=0.6s, gain=1.0 + beast-traits/bfh1_rock_hit_01.ogg speed=0.8, offset=0.1s, max=1.3s, gain=0.8
+GS9 · Sinematik bass ve kırılan zemin · 1.34s
+impact-sounds/impactSoft_heavy_002.ogg speed=0.35, offset=0.0s, max=0.6s, gain=1.0 + beast-traits/bfh1_rock_breaking_02.ogg speed=0.65, offset=0.04s, max=1.3s, gain=0.65 + beast-traits/bfh1_rock_falling_09.ogg speed=0.7, offset=0.12s, max=1.3s, gain=0.35
+GS10 · Doğal kaba kaya, uzun kırıntı kuyruğu · 0.64s
+beast-traits/bfh1_rock_hit_01.ogg speed=0.85, offset=0.0s, max=1.3s, gain=1.0 + beast-traits/bfh1_rock_falling_06.ogg speed=0.8, offset=0.06s, max=1.3s, gain=0.8 + beast-traits/bfh1_rock_breaking_03.ogg speed=0.9, offset=0.1s, max=1.3s, gain=0.4

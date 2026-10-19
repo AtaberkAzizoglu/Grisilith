@@ -1,5 +1,111 @@
 # Grisilith — Faz 9 ses seçim planı
 
+## Faz 9e — LV3 / YW10 / LD1 seçildi, kurulum bekliyor
+
+Lavena LV3, Ywaleth YW10 ve Linlos LD1 kullanıcı tarafından seçildi; henüz
+oyuna eklenmeyecek. Imbert ve Koba için Seçki 24'te 10'ar yeni aday:
+IMB1–10 daha olgun, kalın, askerî; son üçü bağırış hedefli işlenmiş taslak.
+ORC1–10 daha canavarımsı ve korkutucu ork tasarımları.
+Yerel sentetik ses / işlem sınırları dinleme sayfasında belirtilir.
+Önce bu ikisi seçilecek, sonra seçilen tınılara uygun hasar alma ve ölüm adayları.
+
+## Güncel — Enemy tamamlandı; Faz 9e Character sesleri
+
+Seçki 22'den SLS4 (SL4), BRC5, SR5, BRH2, GRH1, SPH1, HOH3 kuruldu.
+Bee Swarm, Crocodile, Witch, Ghost, Slime hurt vokali olmayacak.
+Yedi cue için birebir dosya, olay zamanlaması, tek sefer/tekrar aralığı,
+ölümcül hasar önceliği, boss +%35 ve mevcut ses akışı testleri geçti.
+
+Seçki 23: Sir Imbert, Lavena Vol, Ywaleth Yoster, Koba ve Linlos Dustman'ın
+kullanıcı tarafından yazılmış seçim cümleleri için 10'ar sentetik ses taslağı.
+Henüz karakter sesi kurulmuyor; yalnız dinleme/karşılaştırma.
+Sırayla: seçim repliği onayı -> seçilen tınıya uygun hasar alma ve ölüm
+adayları -> birlikte kurulum -> oyun içinde deneme.
+Ardından harita atmosferi/run müziği, Summary victory/defeat,
+yoğun savaş son miksajı ve Son kontroller ve yapılacak eklemeler.
+Alttaki bekleme maddeleri önceki turların tarihçesidir.
+
+## Güncel seçim — Seçki 22 / Enemy turunun son ayrıntıları
+
+60 yeni aday: 9 boss hurt grubu + Sling split / Boomerang catch / Shield max-stack,
+her birinde 5 seçenek. 17 mevcut normal/ability/ölüm sesi karşılaştırma için eklendi.
+Eksik mini boss hurt: Bear, Bee Swarm, Crocodile, Spearman, Horseman, Ghost, Slime.
+Eksik final boss hurt: Gorilla, Witch. Vampire Lord VP5 zaten tamam.
+Tüm boss ölümleri zaten oyunda; seçkide yeniden seçim değil referans olarak duruyor.
+Seçim sonrası bu son adaylar bağlanacak; sonra Enemy ses turu kapatılabilir.
+Bu tur yeni seslerin runtime kurulumu yok; kurulu oyun sesleri korunuyor.
+
+## Güncel — seçilmiş Enemy / Summon sesleri kuruldu
+
+Undead ve Seçki 21 kararları uygulandı; Witch xl57 / Freesound 671201 ile güncellendi.
+Vampire VS5 son ölüm, VP5 hasar alma; ilk ölümcül darbe yalnız Misty Escape tetikler.
+19 enemy türü death eşlemesi, 18 weapon normal/ability akışı, 5 summon bağlantısı
+kontrol edildi. Tekrar/hız/volume/offscreen testleri ve yeni gerçek trait testi geçti.
+Kalan Enemy seçimi: Vampire Lord dışındaki mini/final boss hasar alma vokalleri.
+Opsiyonel gelişmiş normal saldırı ayrıntıları ayrıca değerlendirilecek; bu tur
+Sling parçalanma / Boomerang catch / Shield max-stack sesi kendiliğinden eklenmedi.
+Sonra oyuncu hasar/ölüm, harita atmosfer/run müziği, victory/defeat müziği,
+yoğun savaşta son miksaj ve 'Son kontroller ve yapılacak eklemeler'.
+Alt bölümlerdeki bekletme notları tarihçedir; bu kayıt günceldir.
+
+## Güncel — Undead seçimleri beklemede; Seçki 21 hazır
+
+WD2, SK3, ZA1, ZD1, GA2, GD1, GC7, LD4, LP5 seçildi; kullanıcı bu tur
+hiçbirini kurmamamızı istedi. LD4 büyük ve küçük Slime ölümlerinde ortak olacak.
+Önce GS/MA/MD 10'ar yeni aday ve Vampire Lord'un tüm ses grupları seçilecek.
+Seçki 21: 90 öneri; VF/VD 10'ar, diğer Vampire grupları 5'er aday.
+Konik kılıç normal Longsword, Swipe Around Lance isabeti kullanacak.
+Sonraki açık uygulama talimatında bekleyen tüm seçimler birlikte bağlanacak.
+
+## Güncel — Humanoid seçimleri kuruldu; Witch / Undead seçimi
+
+BD4, AD2, GD2, SD1, ST3, HD5, HA1, HS5, MX3 tamamlandı.
+Guard ölümünü seçme hatırlatması GD2 ile kapandı. Skeleton saldırıları mevcut
+Longsword/Bow; Slime menzilli isabeti gerçek hasar tipine göre ortak projectile sesi.
+Seçki 20: 85 aday. Witch ölüm 5; Skeleton ortak ölüm 10; Zombie saldırı/ölüm 5'er;
+Ghost saldırı/ölüm/ability 10'ar; Slime ölüm/asit temas/split 5'er.
+Bekleyen GS/MA/MD 5'er seçenek önceki turdan aynı seçkiye taşındı.
+Vampire Lord için önce olay listesi değerlendirilecek, ses önerilmedi/kurulmadı.
+Boss hasar alma vokalleri halen seçilmedi; normal/unique hit vokali eklemiyoruz.
+Alt bölümdeki eski 'bekliyor' kayıtları tarihçedir; bu üst kayıt günceldir.
+
+## Güncel — Beast trait'leri kuruldu; Humanoid + Mimic seçimi
+
+Seçki 18'den 10 trait cue'su bağlı. Stomp seçilmedi; Seçki 19'da daha tok/ağır 5 yeni aday var.
+Tüm enemy hit sesleri gerçek hasarda, tüm mini/final boss cue'ları +%35.
+Bandit/Archer/Spearman ve Witch ortak silah/element/büyü cue'larını kullanır.
+Seçki 19: 65 aday — Humanoid ölüm, Spearman/Horseman ability, Horseman normal,
+Mimic transform/attack/death ve 5 yeni Stomp. Henüz bu adaylar kurulmadı.
+GUARD ÖLÜMÜ ARTIK GD1–5 GRUBUNDA; HUMANOID TURUNDA SEÇİLMESİ BEKLENİYOR.
+Sonra Undead; eski bekleme notları altta tarihçedir.
+
+## Güncel — Beast normal saldırı/ölüm tamam; Trait seçimi bekliyor
+
+Seçki 17'nin 15 seçimi kuruldu. Beast saldırıları yalnız gerçek hasarda çalar.
+Mini/final boss ölüm sesleri +%35. Toad Poison / Guard Lance bağlı.
+Player-relative stereo + varsayılan açık Audio toggle tamamlandı.
+Seçki 18: 60 trait/ability adayı hazır, kullanıcı seçiminden önce eklenmeyecek.
+Sonraki grup Humanoid + Mimic; GUARD ÖLÜM SESİNİ BU TURDA MUTLAKA HATIRLAT.
+Ardından Undead. Daha aşağıdaki 'bekliyor' notları önceki turların tarihçesidir.
+
+## Şimdiki seçim — Seçki 17, Toad ölümü ve Beast saldırı/ölüm
+
+TD + EA/ED, WA/WD, BA/BD, CA/CD, SA/SD, RA/RD, GA/GD: 15 grup, 75 aday.
+Toad Poison ve Guard Lance saldırı sesleri seçildi; henüz uygulanmadı.
+Player-relative stereo ve Settings Audio toggle (default açık) uygulama bekliyor.
+Sonraki tur: Beast trait/ability sesleri. Ardından Humanoid + Mimic, sonra Undead.
+HUMANOID TURUNDA GUARD ÖLÜM SESİNİ MUTLAKA HATIRLAT.
+Bu tur core/ veya assets/ değişikliği yok; seçki önizleme amaçlıdır.
+
+## Güncel durum — Summon entegrasyonu tamamlandı
+
+CA5, CD5, ID1, OA2, OD2 eklendi; Imp saldırısı ortak FL5 fire projectile sesini kullanır.
+Projectile sesleri kaynak bağımsız ortak API'ye taşındı; seçilen sesler değiştirilmedi.
+Önceki karar doğrultusunda yönlü stereo bu entegrasyonda eklendi.
+Summon çağrı sesleri önceki aşamada hazırdı; Cow/Imp/Oathbreaker saldırı ve ölümü de bağlı.
+Enemy seslerine geçilmedi; sonraki aşama için kullanıcı yönlendirmesi beklenecek.
+Alttaki bekleme durumları tarihçedir.
+
 ## Şimdiki seçim — Summon saldırı / ölüm
 
 Mevcut spell seçim ve Singularity sesleri kullanıcı tarafından beğenildi, korunacak.

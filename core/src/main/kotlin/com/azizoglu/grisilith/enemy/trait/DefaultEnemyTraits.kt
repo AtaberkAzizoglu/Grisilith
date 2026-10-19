@@ -1,5 +1,8 @@
 package com.azizoglu.grisilith.enemy.trait
 
+import com.azizoglu.grisilith.audio.EnemyAudio
+import com.azizoglu.grisilith.audio.UiSound
+
 import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.content.DamageType
@@ -251,6 +254,7 @@ private class GrizzlyAngryTrait :
         ) {
             activated =
                 true
+            EnemyAudio.once(this,context.owner,UiSound.BEAR_RAGE)
         }
     }
 
@@ -371,6 +375,7 @@ private class VampireHungerTrait :
                 )
             if (applied > 0) {
                 enemyRetargetCooldowns[other] = TARGET_RETARGET_LOCK_SECONDS
+                EnemyAudio.feedback(owner,UiSound.VAMPIRE_HUNGER,1.2f)
                 successfulHits++
                 visuals += ActiveHungerVisual(other.centerX, other.centerY)
             }
@@ -530,6 +535,16 @@ private abstract class LockedRushTrait :
     protected abstract fun rushSpeedMultiplier(): Float
     protected abstract fun baseContactDamageMultiplier(): Float
 
+    private fun syncAudio(owner:Enemy) {
+        val boar=owner.kindId==com.azizoglu.grisilith.enemy.definition.EnemyKindIds.BOAR
+        val cue=when(phase) {
+            Phase.COOLDOWN -> null
+            Phase.TELEGRAPH -> if(boar)UiSound.BOAR_PREPARE else UiSound.CROCODILE_PREPARE
+            Phase.RUSH -> if(boar)UiSound.BOAR_CHARGE else UiSound.CROCODILE_JUMP
+        }
+        EnemyAudio.sustain(this,owner,cue)
+    }
+
     override fun update(
         context: EnemyTraitUpdateContext
     ) {
@@ -538,6 +553,8 @@ private abstract class LockedRushTrait :
         ) {
             return
         }
+
+        syncAudio(context.owner)
 
         phaseSeconds -=
             context.delta
@@ -639,6 +656,7 @@ private abstract class LockedRushTrait :
                     cooldownSeconds()
             }
         }
+        syncAudio(context.owner)
     }
 
     override fun resolveMovementOverride(
@@ -792,6 +810,8 @@ private class CrocodileJumpTrait :
 private class GorillaThrowTrait :
     EnemyTrait {
 
+    private val throwAudioKey=Any()
+
     override val id =
         EnemyTraitIds.GORILLA_THROW
 
@@ -873,6 +893,8 @@ private class GorillaThrowTrait :
                     phase =
                         Phase.WINDUP
 
+                    EnemyAudio.once(this,context.owner,UiSound.GORILLA_PREPARE)
+
                     phaseSeconds =
                         WINDUP_SECONDS
                 }
@@ -887,6 +909,9 @@ private class GorillaThrowTrait :
                         context
                     )
 
+                    EnemyAudio.sustain(this,context.owner,null)
+                    EnemyAudio.once(throwAudioKey,context.owner,UiSound.GORILLA_THROW)
+
                     phase =
                         Phase.COOLDOWN
 
@@ -899,6 +924,7 @@ private class GorillaThrowTrait :
         updateRocks(
             context
         )
+        if(phase==Phase.WINDUP)EnemyAudio.sustain(this,context.owner,UiSound.GORILLA_PREPARE)
     }
 
     private fun launchRock(
@@ -1242,6 +1268,7 @@ private class MimicryTrait : EnemyTrait {
                 if (dx * dx + dy * dy <= REVEAL_RADIUS * REVEAL_RADIUS) {
                     phase = Phase.TRANSFORMING
                     phaseRemaining = TRANSFORMATION_SECONDS
+                    EnemyAudio.once(this,context.owner,UiSound.MIMIC_TRANSFORM)
                 }
             }
 
@@ -1249,6 +1276,7 @@ private class MimicryTrait : EnemyTrait {
                 phaseRemaining -= context.delta.coerceAtLeast(0f)
                 if (phaseRemaining <= 0f) {
                     phase = Phase.ACTIVE
+                    EnemyAudio.sustain(this,context.owner,null)
                     ambushBuffRemaining = AMBUSH_BUFF_SECONDS
                 }
             }
@@ -1386,6 +1414,10 @@ private class GorillaStompTheEarthTrait : EnemyTrait {
 
 private class VampireMistyEscapeTrait : EnemyTrait {
     override val id = EnemyTraitIds.MISTY_ESCAPE
+    private val phaseAudioKey=Any()
+    private val teleportAudioKey=Any()
+    private val arrivalAudioKey=Any()
+    private val coneAudioKey=Any()
 
     private enum class TeleportPhase {
         READY,
@@ -1411,17 +1443,21 @@ private class VampireMistyEscapeTrait : EnemyTrait {
         val dt = context.delta.coerceAtLeast(0f)
 
         if (owner.isVampireEscaping) {
+            EnemyAudio.sustain(phaseAudioKey,owner,UiSound.VAMPIRE_MIST)
             val dx = owner.vampireEscapeTargetX - owner.centerX
             val dy = owner.vampireEscapeTargetY - owner.centerY
             if (dx * dx + dy * dy <= VAMPIRE_ESCAPE_STOP_DISTANCE * VAMPIRE_ESCAPE_STOP_DISTANCE) {
                 owner.startVampireSecondFormTransformation()
+                EnemyAudio.sustain(phaseAudioKey,owner,UiSound.VAMPIRE_FORM)
             }
             return
         }
+        EnemyAudio.sustain(phaseAudioKey,owner,if(owner.isVampireTransforming)UiSound.VAMPIRE_FORM else null)
         if (!owner.isVampireSecondForm || owner.isVampireTransforming) return
 
         when (teleportPhase) {
             TeleportPhase.PREPARING -> {
+                EnemyAudio.sustain(teleportAudioKey,owner,UiSound.VAMPIRE_TELEPORT)
                 teleportPhaseRemaining = (teleportPhaseRemaining - dt).coerceAtLeast(0f)
                 if (teleportPhaseRemaining <= 0f) {
                     owner.teleportCenter(
@@ -1430,6 +1466,8 @@ private class VampireMistyEscapeTrait : EnemyTrait {
                         context.worldWidth,
                         context.worldHeight
                     )
+                    EnemyAudio.sustain(teleportAudioKey,owner,null)
+                    EnemyAudio.once(arrivalAudioKey,owner,UiSound.VAMPIRE_TELEPORT)
                     teleportPhase = TeleportPhase.ARRIVAL_WAIT
                     teleportPhaseRemaining = TELEPORT_ARRIVAL_WAIT_SECONDS
                 }
@@ -1481,14 +1519,18 @@ private class VampireMistyEscapeTrait : EnemyTrait {
             longswordTelegraphActive = false
             longswordTelegraphRemaining = 0f
             longswordCooldown = LONGSWORD_INTERVAL_SECONDS
+            EnemyAudio.sustain(coneAudioKey,owner,null)
+            EnemyAudio.once(teleportAudioKey,owner,UiSound.VAMPIRE_TELEPORT)
             return
         }
 
         if (longswordTelegraphActive) {
+            EnemyAudio.sustain(coneAudioKey,owner,UiSound.VAMPIRE_CONE_CHARGE)
             longswordTelegraphRemaining =
                 (longswordTelegraphRemaining - dt).coerceAtLeast(0f)
             if (longswordTelegraphRemaining <= 0f) {
                 performLongswordCone(context, longswordDirection)
+                EnemyAudio.sustain(coneAudioKey,owner,null)
                 longswordTelegraphActive = false
                 longswordCooldown = LONGSWORD_INTERVAL_SECONDS
             }
@@ -1510,6 +1552,7 @@ private class VampireMistyEscapeTrait : EnemyTrait {
                     MathUtils.atan2(longswordDirection.y, longswordDirection.x) * MathUtils.radiansToDegrees
                 longswordTelegraphActive = true
                 longswordTelegraphRemaining = LONGSWORD_TELEGRAPH_SECONDS
+                EnemyAudio.once(coneAudioKey,owner,UiSound.VAMPIRE_CONE_CHARGE)
             }
         }
     }

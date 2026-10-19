@@ -1,0 +1,138 @@
+Boss hasar tepkileri · son silah ayrıntıları — PREVIEW ONLY, NOT INSTALLED
+REFERENCE SLS-reference-1.wav · Sling · mevcut normal saldırı · exact copy of assets\audio\sfx\sling_throw.wav
+REFERENCE SLS-reference-2.wav · Sling · mevcut ability inişi; level 5'te her inişte aynı ses · exact copy of assets\audio\sfx\sling_impact.wav
+SLS1 · Kuru ve kısa taş çatlaması · 0.30s
+beast-traits/bfh1_rock_breaking_01.ogg: speed=1.5, offset=0.0s, max=0.3s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + finishing-preview/sling_impact.wav: speed=1.25, offset=0.0s, max=0.12s, gain=0.16, lowPass=0.0, highPass=0.0, take=0
+SLS2 · Küçük taşların hafifçe saçılması · 0.30s
+beast-traits/bfh1_rock_falling_02.ogg: speed=1.7, offset=0.0s, max=0.34s, gain=1.0, lowPass=0.0, highPass=450.0, take=0
+SLS3 · Gevrek, çok kısa taş kırıntısı · 0.23s
+beast-traits/bfh1_rock_breaking_02.ogg: speed=1.8, offset=0.0s, max=0.23s, gain=1.0, lowPass=0.0, highPass=250.0, take=0 + beast-traits/bfh1_rock_falling_03.ogg: speed=2.0, offset=0.05s, max=0.16s, gain=0.25, lowPass=0.0, highPass=0.0, take=0
+SLS4 · Biraz daha tok taş çatlağı · 0.32s
+finishing-preview/sling_impact.wav: speed=1.35, offset=0.0s, max=0.16s, gain=0.45, lowPass=0.0, highPass=0.0, take=0 + beast-traits/bfh1_rock_breaking_01.ogg: speed=1.1, offset=0.0s, max=0.32s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+SLS5 · Hızlı, dağınık ve ince taş parçacıkları · 0.17s
+beast-traits/bfh1_rock_falling_04.ogg: speed=1.9, offset=0.0s, max=0.3s, gain=1.0, lowPass=0.0, highPass=550.0, take=0 + beast-traits/bfh1_rock_breaking_02.ogg: speed=1.4, offset=0.0s, max=0.14s, gain=0.35, lowPass=0.0, highPass=0.0, take=0
+REFERENCE BRC-reference-1.wav · Boomerang · mevcut normal saldırı · exact copy of assets\audio\sfx\boomerang_throw.wav
+REFERENCE BRC-reference-2.wav · Boomerang · mevcut ability; normalle aynı dosya · exact copy of assets\audio\sfx\boomerang_throw.wav
+BRC1 · Yumuşak ahşap tık ve kısa hava kapanışı · 0.20s
+rubberduck-rpg/wood_01.ogg: speed=1.2, offset=0.0s, max=0.22s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + finishing-preview/boomerang_throw.wav: speed=1.25, offset=0.0s, max=0.12s, gain=0.22, lowPass=0.0, highPass=0.0, take=0
+BRC2 · Kuru, sade elde yakalama · 0.14s
+rubberduck-rpg/wood_02.ogg: speed=1.35, offset=0.0s, max=0.16s, gain=1.0, lowPass=3200.0, highPass=0.0, take=0
+BRC3 · Daha tok ama hafif tutuş · 0.20s
+rubberduck-rpg/wood_04.ogg: speed=0.95, offset=0.0s, max=0.2s, gain=1.0, lowPass=2200.0, highPass=0.0, take=0 + finishing-preview/boomerang_throw.wav: speed=1.0, offset=0.0s, max=0.1s, gain=0.15, lowPass=0.0, highPass=0.0, take=0
+BRC4 · Hızlı, ince ahşap kapanışı · 0.14s
+rubberduck-rpg/wood_05.ogg: speed=1.65, offset=0.0s, max=0.14s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + finishing-preview/boomerang_throw.wav: speed=1.4, offset=0.0s, max=0.1s, gain=0.18, lowPass=0.0, highPass=0.0, take=0
+BRC5 · Yumuşak bez/el teması, az ahşap · 0.18s
+tinysized/sfx-cc0/cloth-pouch-shake-02.wav: speed=1.4, offset=0.0s, max=0.18s, gain=1.0, lowPass=1900.0, highPass=0.0, take=1 + rubberduck-rpg/wood_03.ogg: speed=1.3, offset=0.0s, max=0.12s, gain=0.3, lowPass=0.0, highPass=0.0, take=0
+REFERENCE SR-reference-1.wav · Shield · mevcut normal saldırı · exact copy of assets\audio\sfx\shield_strike.wav
+REFERENCE SR-reference-2.wav · Shield · mevcut Defensive Burst · exact copy of assets\audio\sfx\defensive_burst.wav
+SR1 · Kalkan mekanizması yerine oturuyor · 0.23s
+rpg-audio/metalLatch: speed=1.15, offset=0.0s, max=0.26s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + finishing-preview/shield_strike.wav: speed=1.3, offset=0.0s, max=0.1s, gain=0.18, lowPass=0.0, highPass=0.0, take=0
+SR2 · Kısa, temiz metalik hazır tınısı · 0.38s
+rpg-audio/metalPot1: speed=1.5, offset=0.0s, max=0.38s, gain=1.0, lowPass=0.0, highPass=500.0, take=0
+SR3 · Çift, hafif kilit tıkırtısı · 0.18s
+rpg-audio/metalClick: speed=1.1, offset=0.0s, max=0.11s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + rpg-audio/metalClick: speed=1.35, offset=0.075s, max=0.11s, gain=0.65, lowPass=0.0, highPass=0.0, take=0
+SR4 · Tok kilit, çok hafif metal çınlaması · 0.38s
+rpg-audio/metalLatch: speed=0.9, offset=0.0s, max=0.23s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + rpg-audio/metalPot3: speed=1.4, offset=0.08s, max=0.3s, gain=0.2, lowPass=0.0, highPass=0.0, take=0
+SR5 · Kendi kalkan sesinden ince hazır vurgusu · 0.18s
+finishing-preview/shield_strike.wav: speed=1.5, offset=0.0s, max=0.18s, gain=1.0, lowPass=0.0, highPass=600.0, take=0 + rpg-audio/metalClick: speed=1.25, offset=0.0s, max=0.11s, gain=0.35, lowPass=0.0, highPass=0.0, take=0
+REFERENCE BRH-reference-1.wav · Bear · mevcut ölüm · exact copy of assets\audio\sfx\bear_death.wav
+BRH1 · Kısa, tok ayı homurtusu · 0.40s
+beast-voices/bear-call-1.wav: speed=1.15, offset=0.0s, max=0.4s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+BRH2 · Boğuk, nefesi kesilen ayı · 0.48s
+beast-voices/bear-call-2.wav: speed=0.95, offset=0.0s, max=0.48s, gain=1.0, lowPass=2400.0, highPass=0.0, take=0
+BRH3 · Daha keskin, hızlı tepki · 0.32s
+finishing-preview/bear_attack.wav: speed=1.25, offset=0.0s, max=0.32s, gain=1.0, lowPass=0.0, highPass=120.0, take=0
+BRH4 · Pes, küçük bir göğüs homurtusu · 0.50s
+beast-voices/bear-call-1.wav: speed=0.8, offset=0.0s, max=0.5s, gain=1.0, lowPass=1800.0, highPass=0.0, take=0
+BRH5 · Kuru, kısa ve hırıltılı tepki · 0.35s
+beast-voices/bear-call-2.wav: speed=1.3, offset=0.0s, max=0.35s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+REFERENCE BSH-reference-1.wav · Bee Swarm · mevcut ölüm · exact copy of assets\audio\sfx\swarm_death.wav
+BSH1 · Kısa vızıltı kırılması · 0.25s
+beast-voices/bee-call.wav: speed=1.2, offset=0.0s, max=0.25s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+BSH2 · Daha tok, kısa sürü sarsılması · 0.30s
+beast-voices/bee-call.wav: speed=0.85, offset=0.0s, max=0.3s, gain=1.0, lowPass=2600.0, highPass=0.0, take=0
+BSH3 · İnce, anlık kanat telaşı · 0.20s
+beast-voices/bee-call.wav: speed=1.45, offset=0.0s, max=0.2s, gain=1.0, lowPass=0.0, highPass=300.0, take=0
+BSH4 · Boğuk ve çok kısa sürü darbesi · 0.22s
+finishing-preview/swarm_attack.wav: speed=0.95, offset=0.0s, max=0.22s, gain=1.0, lowPass=1700.0, highPass=0.0, take=0
+BSH5 · Dalgalanan kısa vızıltı tepkisi · 0.32s
+beast-voices/bee-call.wav: speed=1.05, offset=0.0s, max=0.32s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+REFERENCE CRH-reference-1.wav · Crocodile · mevcut ölüm · exact copy of assets\audio\sfx\crocodile_death.wav
+CRH1 · Kısa, boğazdan sürüngen homurtusu · 0.40s
+beast-voices/croc-call-1.wav: speed=1.1, offset=0.0s, max=0.4s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+CRH2 · Kuru ve keskin tıslama · 0.32s
+beast-voices/croc-call-3.wav: speed=1.2, offset=0.0s, max=0.32s, gain=1.0, lowPass=0.0, highPass=450.0, take=0
+CRH3 · Tok, kısa sürüngen hırıltısı · 0.50s
+beast-voices/croc-call-4.wav: speed=0.9, offset=0.0s, max=0.5s, gain=1.0, lowPass=2400.0, highPass=0.0, take=0
+CRH4 · Hızlı ve çatallı darbe tepkisi · 0.30s
+beast-voices/croc-call-2.wav: speed=1.35, offset=0.0s, max=0.3s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+CRH5 · Daha pes, kontrollü çene homurtusu · 0.45s
+finishing-preview/crocodile_attack.wav: speed=0.85, offset=0.0s, max=0.45s, gain=1.0, lowPass=2100.0, highPass=0.0, take=0
+REFERENCE GRH-reference-1.wav · Gorilla · mevcut ölüm · exact copy of assets\audio\sfx\gorilla_death.wav
+GRH1 · Kısa, tok goril homurtusu · 0.40s
+beast-voices/gorilla/ogg/gorilla_grunt.ogg: speed=1.05, offset=0.0s, max=0.4s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GRH2 · Sert ve kuru diş gösterme · 0.35s
+beast-voices/gorilla/ogg/gorilla_snarl_01.ogg: speed=1.15, offset=0.0s, max=0.35s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GRH3 · Kalın, boğuk goril tepkisi · 0.50s
+beast-voices/gorilla/ogg/gorilla_snarl_02.ogg: speed=0.8, offset=0.0s, max=0.5s, gain=1.0, lowPass=2300.0, highPass=0.0, take=0
+GRH4 · Keskin, çabuk nefes kırılması · 0.30s
+beast-voices/gorilla/ogg/gorilla_snarl_03.ogg: speed=1.2, offset=0.0s, max=0.3s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GRH5 · Daha yırtıcı, kısa hırlama · 0.48s
+beast-voices/gorilla/ogg/gorilla_snarl_04.ogg: speed=0.95, offset=0.0s, max=0.48s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+REFERENCE SPH-reference-1.wav · Spearman · mevcut ölüm · exact copy of assets\audio\sfx\spearman_death.wav
+SPH1 · Kısa, derin savaşçı eforu · 0.36s
+summon-voices/humans/yelling sounds/3grunt1.wav: speed=0.88, offset=0.0s, max=0.36s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+SPH2 · Diş sıkan, tok asker tepkisi · 0.38s
+summon-voices/humans/yelling sounds/3grunt2.wav: speed=0.92, offset=0.0s, max=0.38s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+SPH3 · Nefesi kesilen kısa homurtu · 0.30s
+summon-voices/humans/yelling sounds/3grunt3.wav: speed=1.0, offset=0.0s, max=0.3s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+SPH4 · Daha sert ve pürüzlü darbe tepkisi · 0.29s
+summon-voices/humans/yelling sounds/3grunt4.wav: speed=0.85, offset=0.0s, max=0.42s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+SPH5 · Sert başlayan, hızlı sönen tepki · 0.32s
+summon-voices/humans/yelling sounds/3grunt5.wav: speed=1.1, offset=0.0s, max=0.32s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+REFERENCE HOH-reference-1.wav · Horseman · mevcut ölüm · exact copy of assets\audio\sfx\horseman_death.wav
+HOH1 · Ölüm sesine yakın kısa binici tepkisi · 0.30s
+summon-voices/humans/yelling sounds/2yell4.wav: speed=0.95, offset=0.0s, max=0.3s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+HOH2 · Kuru, nefesli asker acısı · 0.27s
+summon-voices/humans/yelling sounds/2yell1.wav: speed=1.05, offset=0.0s, max=0.27s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+HOH3 · Kalın, kısa binici homurtusu · 0.45s
+summon-voices/humans/yelling sounds/3grunt6.wav: speed=0.8, offset=0.0s, max=0.45s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+HOH4 · Keskin ve hızlı erkek tepki sesi · 0.25s
+summon-voices/humans/yelling sounds/2yell3.wav: speed=1.1, offset=0.0s, max=0.25s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+HOH5 · Daha tok, düşük tonlu darbe tepkisi · 0.40s
+summon-voices/humans/yelling sounds/2yell2.wav: speed=0.82, offset=0.0s, max=0.4s, gain=1.0, lowPass=2800.0, highPass=0.0, take=1
+REFERENCE WIH-reference-1.wav · Witch · mevcut xl57 ölüm çığlığı · exact copy of assets\audio\sfx\witch_death.wav
+WIH1 · Kısa, keskin cadı tepkisi · 0.28s
+finishing-preview/witch-hurt-1.wav: speed=1.05, offset=0.0s, max=0.28s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+WIH2 · Biraz daha kalın, boğazdan tepki · 0.42s
+finishing-preview/witch-hurt-2.wav: speed=0.85, offset=0.0s, max=0.42s, gain=1.0, lowPass=4800.0, highPass=0.0, take=0
+WIH3 · İnce, çok kısa irkilme · 0.22s
+finishing-preview/witch-hurt-3.wav: speed=1.2, offset=0.0s, max=0.22s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+WIH4 · Çatallı, alçalan kadın feryadı · 0.38s
+finishing-preview/witch-hurt-4.wav: speed=0.95, offset=0.0s, max=0.38s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+WIH5 · Daha boğuk ve kontrollü cadı acısı · 0.45s
+finishing-preview/witch-hurt-5.wav: speed=0.75, offset=0.0s, max=0.45s, gain=1.0, lowPass=3000.0, highPass=0.0, take=0
+REFERENCE GHH-reference-1.wav · Ghost · mevcut ölüm · exact copy of assets\audio\sfx\ghost_death.wav
+GHH1 · Kısa ve keskin hayalet irkilmesi · 0.30s
+finishing-preview/ghost_death.wav: speed=1.1, offset=0.0s, max=0.3s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GHH2 · Daha pes, nefesi kırılan ruh · 0.40s
+finishing-preview/ghost_death.wav: speed=0.8, offset=0.0s, max=0.4s, gain=1.0, lowPass=3400.0, highPass=0.0, take=0
+GHH3 · Fısıltılı, kuru hayalet tepkisi · 0.30s
+finishing-preview/ghost_attack.wav: speed=1.15, offset=0.0s, max=0.3s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GHH4 · Tiz, anlık ruh çığlığı · 0.23s
+finishing-preview/ghost_death.wav: speed=1.3, offset=0.0s, max=0.23s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GHH5 · Boğuk, kısa fısıltı ve sönüş · 0.40s
+finishing-preview/ghost_attack.wav: speed=0.85, offset=0.0s, max=0.4s, gain=1.0, lowPass=2100.0, highPass=0.0, take=0
+REFERENCE SLH-reference-1.wav · Slime · mevcut büyük/küçük ortak ölüm · exact copy of assets\audio\sfx\slime_death.wav
+SLH1 · Kısa jöle gövde dalgalanması · 0.27s
+finishing-preview/slime_death.wav: speed=1.35, offset=0.0s, max=0.27s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+SLH2 · İnce, hızlı ıslak pıtırtı · 0.23s
+rubberduck-rpg/creature_slime_01.ogg: speed=1.5, offset=0.0s, max=0.23s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+SLH3 · Daha tok, kısa sümüksü darbe · 0.35s
+rubberduck-rpg/creature_slime_03.ogg: speed=1.15, offset=0.0s, max=0.35s, gain=1.0, lowPass=2600.0, highPass=0.0, take=0
+SLH4 · Yumuşak, kabarcıklı sarsılma · 0.28s
+rubberduck-rpg/creature_slime_02.ogg: speed=1.4, offset=0.0s, max=0.28s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+SLH5 · Hızlı, yapışkan gövde titremesi · 0.25s
+rubberduck-rpg/creature_slime_04.ogg: speed=1.55, offset=0.0s, max=0.25s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+REFERENCE VAMPIRE-reference-1.wav · Vampire Lord · VP5 hasar alma zaten tamam · exact copy of assets\audio\sfx\vampire_hurt.wav
+REFERENCE VAMPIRE-reference-2.wav · Vampire Lord · VS5 son ölüm zaten tamam · exact copy of assets\audio\sfx\vampire_death.wav

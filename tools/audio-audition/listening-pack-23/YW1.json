@@ -1,0 +1,17 @@
+{
+  "id": "YW1",
+  "recipe": {
+    "character": "Ywaleth Yoster",
+    "text": "The footprints lead in this direction. I'm on the trail!",
+    "voice": "af_heart",
+    "label": "Amerikan tabanlı; canlı ve hevesli iz sürücü hedef",
+    "speed": 1.1,
+    "pitch": 0.2,
+    "lang": "en-us",
+    "pause": 0.2,
+    "rough": false
+  },
+  "duration": 2.9233786848072563,
+  "sha256": "41d8bbe96e3303228bd779a80891328051d1dfe19715c94df72843eda96f5d89",
+  "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs dᵻɹˈɛkʃən. aɪm ɔnðə tɹˈeɪl!"
+}

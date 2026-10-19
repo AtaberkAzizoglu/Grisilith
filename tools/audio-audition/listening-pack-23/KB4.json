@@ -1,0 +1,17 @@
+{
+  "id": "KB4",
+  "recipe": {
+    "character": "Koba",
+    "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the real monster!",
+    "voice": "bm_fable",
+    "label": "Britanya tabanlı; kaba ve ağır anlatım hedef",
+    "speed": 0.8,
+    "pitch": -1.6,
+    "lang": "en-gb",
+    "pause": 0.48,
+    "rough": true
+  },
+  "duration": 10.006893424036281,
+  "sha256": "796d445dcc29f20e46559bf61825f5bb4e6bc54d89b6a4d4e6867199dd98cd5a",
+  "phonemes": "ˌɒn bɪhˈɑːf ɒv ˈɔːl ðɪ ˈaʊtkasts, ˌɒn bɪhˈɑːf ɒv ˈɔːl ðəʊz hˌuː hɐvbɪn kˈɔːld mˈɒnstəz... aɪ wɪl ʃˈəʊ ðˌɛm ðə ɹˈiəl mˈɒnstə!"
+}

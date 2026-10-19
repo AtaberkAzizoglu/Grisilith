@@ -1,5 +1,217 @@
 # Ses seçimleri — güncel durum
 
+## Faz 9e — Karakter seçimleri bekletiliyor / Seçki 24
+
+LV3 (Lavena Vol), YW10 (Ywaleth Yoster), LD1 (Linlos Dustman) SEÇİLDİ.
+Kullanıcının açık talimatı: HENÜZ OYUNA EKLEME. WAV'lar Seçki 23'te korunuyor.
+Sir Imbert ve Koba için önceki seçenekler onaylanmadı.
+Yeni yön: Imbert 50'lerinde, kalın ve asker sertliğinde; birkaç bağırış hedefli
+varyant. Koba korkutucu, çok kalın ve gerçek anlamda ork/barbar tınısı.
+Seçki 24 IMB1–10, ORC1–10; yeni sesler de yalnız dinleme, kurulum yok.
+Sentetik motorun yaş/bağırış kontrolü sınırlı; bağırış taslakları ve yaratık
+işlemesi dürüstçe etiketlenir. Hasar/ölüm sesleri henüz seçilmiyor.
+
+## Uygulandı — Seçki 22 / Enemy turu kapandı; Faz 9e dinleme aşaması
+
+Kullanıcının SL4 yazımı SLS4 olarak alındı. SLS4 Sling gelişmiş taş
+parçalanmasında bir kez; BRC5 Boomerang'ın gerçek son yakalamasında bir kez
+(gelişmiş normalin ara geçişinde değil); SR5 Shield maksimum birikime ilk
+ulaştığında çalar. BRH2 Bear, GRH1 Gorilla, SPH1 Spearman, HOH3 Horseman
+pozitif ve ölümcül olmayan hasarda, düşman başına en fazla .8 saniyede bir.
+Vampire mevcut VP5 ve .7 saniye sınırını korur. Boss gain +%35 korunur.
+Bee Swarm, Crocodile, Witch, Ghost ve Slime için hurt vokali EKLENMEYECEK.
+Bu karar resist/ability/ölüm efektlerini kaldırmaz. Normal/unique hurt eklenmedi.
+Yedi kurulu WAV seçilenlerle birebir, lisanslar FINISHING-LICENSES.txt içinde.
+
+Seçki 23: 5 karakter için 10'ar sentetik seçim repliği, toplam 50 aday;
+10 toplu karşılaştırma WAV'ı ve DINLE.html. Karakter sesleri OYUNA KURULMADI.
+IM Sir Imbert; LV Lavena Vol; YW Ywaleth Yoster; KB Koba; LD Linlos Dustman.
+Koba MOSTER -> MONSTER düzeltildi. Replik anlamları korunur.
+Kokoro yerel ve ücretsiz sentetik model, rol/duygu etiketleri hedef tınıdır;
+gerçek aktör performansı veya otantik aksan garantisi değildir.
+YW8–10 ve KB8–10 farklı dil ses bankalarının İngilizce okumalarıdır, deneysel
+olarak etiketlendi. Model/araç lisansları, her adayın metni, ayarları ve hash'i
+seçkide bulunur. Hasar/ölüm adayları seçilen karakter sesine göre sonraki turda.
+Finishing, Undead/Vampire ve ekran ses testleri geçti; estetik ses onayı değildir.
+
+Alttaki bekleme kayıtları tarihçedir; bu üst kayıt günceldir.
+
+## Seçki 22 — hazır, henüz seçilmedi / kurulmadı
+
+60 yeni aday, her grupta 5. SLS Sling gelişmiş taş parçalanması; BRC Boomerang
+son yakalama; SR Shield maksimum Defensive Line birikimi.
+Boss hurt: BRH Bear, BSH Bee Swarm, CRH Crocodile, GRH Gorilla, SPH Spearman,
+HOH Horseman, WIH Witch, GHH Ghost, SLH Slime. Vampire Lord VP5 zaten kurulu.
+Her boss grubunun başında mevcut ölüm sesi var; bu referans yeniden seçilmeyecek.
+Sling/Boomerang/Shield normal ve ability sesleri de birebir referans olarak
+eklendi. Boomerang normal/ability aynı dosya; iki etiketle açıkça gösteriliyor.
+Vampire Lord VP5/VS5 tamamlanmış referans bölümünde. Toplam 17 mevcut ses kopyası.
+Yeni adaylar yalnız tools/audio-audition içinde; core/assets bu tur değiştirilmedi.
+Witch hurt kesitleri mevcut xl57 kaydının sessiz başlangıcını atlayarak gerçek
+vokal foreground bölgelerinden alındı; kaynak/lisans atıfları seçkide mevcut.
+Bağlantı kuralları seçimden sonra: gerçek hasar; boss başına tekrar sınırı;
+ölümcül darbede yalnız ölüm önceliği; Bee Swarm resist/hurt aynı hit'te çift değil.
+SLS ana taş parçalanmasında bir kez, BRC son yakalamada bir kez, SR maksimuma
+ilk ulaşmada bir kez. Normal/unique hit, spawn/adım sesleri istenmedi/eklenmedi.
+
+## Uygulandı — Undead + Vampire Lord + yeni Witch kaydı
+
+Seçki 20: SK3, ZA1, ZD1, GA2, GD1, GC7, LD4, LP5 kuruldu.
+LD4 büyük Slime ile tüm küçük Slime parçalarının ortak ölümüdür; LS seçilmedi.
+Witch'in bekleyen WD2 seçimi yerine xl57 / Freesound 671201 kullanıldı:
+short scream no effects.wav, CC BY 4.0. Kaynak/atıf/değişiklikler CREDITS ve
+UNDEAD-VAMPIRE-LICENSES içinde; oyunun Audio Credits sayfasına da eklendi.
+Seçki 21: GS9, MA3, MD2, VH5, VB1, ME1, VF5, TP1, LC2, SC5, VS5, VP5 kuruldu.
+VS5 tek gerçek son ölüm sesidir; VD grubundan seçim yok, ikinci ölüm sesi çalmaz.
+VF5 3.2s forma, TP1 0.75s teleporta, LC2 1s cone charge'a uyarlandı.
+Diğer seçilmiş WAV'lar birebir. SC5 kısa bir charge başlangıç vurgusudur;
+3/4.5s charge boyunca konuşma tekrarı veya aşırı zaman esnetme yapılmadı.
+Ghost ağlaması charge+storm boyunca owner-bound loop, evre bitince/ölümde kapanır.
+Hunger yalnız başarılı can çalma hasarında en fazla 1.2s'de bir; Vampire hurt
+pozitif ve ölümcül olmayan hasarda en fazla .7s'de bir. İlk form kaçışı ölüm değildir.
+Vampire cone hit Longsword, Swipe Around hit Lance; normal isabet vampir ısırığı.
+Acidic Path sesi oyuncu/summon condition tick'inde gerçekten HP kaybı varsa çalar;
+boss kaynağı snapshot olarak taşınır, canlı enemy referansı tutulmaz.
+Boss +%35, Master/SFX, oyun hızı, player-relative stereo, offscreen mute korunur.
+
+Kontrol: 19 enemy türünün tamamında death cue var; Witch/Slime element bazlı
+isabet kullanır, diğerleri normal cue eşlemeli. 18 weapon'ın normal/ability
+akışları ve 5 summon'ın saldırı/ölüm bağlantıları incelendi. Süre dolumu/despawn
+ölüm sesi değildir. Kalan seçim: Vampire dışındaki mini/final boss hasar alma
+vokalleri. İsteğe bağlı ayrıntılar: Archer/Skeleton aim uyarısı, Sling parçalanma,
+Boomerang yakalama, Shield maksimum stack; bu ayrıntılar henüz eklenmedi.
+
+## Seçki 20 kararları — NOT ALINDI, KURULMAYACAK (kullanıcının sonraki mesajına kadar)
+
+WD2 Witch ölüm; SK3 iki Skeleton ortak ölüm; ZA1/ZD1 Zombie saldırı/ölüm;
+GA2/GD1/GC7 Ghost fısıltılı saldırı/ölüm/ability ağlaması;
+LD4 Slime ölümü: hem ilk büyük Slime hem de küçükler AYNI sesi kullanacak;
+LP5 Acidic Path teması. Bu seçimlerin hiçbiri bu tur core/assets içine eklenmedi.
+LS split sesi seçilmedi, kendiliğinden eklenmeyecek.
+
+## Seçki 21 — yalnız yeni öneriler; oyuna kurulum YOK
+
+90 aday, 13 grup. GS1–10 patlamalı/sert Gorilla Stomp; MA1–10 dil/yalama
+Mimic saldırısı; MD1–10 tiz+kalın gövdeli canavar ölümü. Önceki GS/MA/MD reddedildi.
+Vampire: VH1–5 Hunger, VB1–5 ısırık, ME1–5 Misty Escape, VF1–10 ikinci forma
+dönüşüm, TP1–5 teleport, LC1–5 konik kılıç charge, SC1–5 Swipe Around charge,
+VS1–5 çığlıklı ölüm alternatifi, VP1–5 erkek hasar alma, VD1–10 son erkek vampir ölümü.
+VS / VD alternatif ölüm aileleridir; birlikte çalmaları varsayılmayacak.
+Konik saldırı isabeti Longsword; Swipe Around isabeti Lance olacak, bu tur bağlanmadı.
+Tahm Kench / Vladimir yalnız estetik referans; ticari oyun sesleri kullanılmadı.
+Yeni yardımcı hazırlama kodu ve kaynaklar yalnız tools/audio-audition altındadır;
+kurulu ses dosyaları / gameplay kodu değiştirilmeden öneri üretildi.
+
+## Uygulandı — Seçki 19 ve Undead ortak saldırılar
+
+BD4 Bandit ölüm, AD2 Archer ölüm, GD2 Guard SUMMON ölüm, SD1 Spearman ölüm,
+ST3 Throw the Spear, HD5 Horseman ölüm, HA1 normal saldırı, HS5 Swipe Around,
+MX3 Mimic dönüşümü kuruldu. Guard için bekleyen ölüm seçimi tamamlandı.
+MX3 0.85s dönüşüme uyarlandı; diğer sekiz ses birebir kopyadır.
+Spearman/Horseman normal ve ability isabet sesleri yalnız gerçek hasarda çalar.
+Mimic dönüşümü gerçek disguised->transforming geçişinde bir kez başlar,
+aktif evreye geçince veya ölüm/despawn olunca durur.
+Skeleton Warrior normal saldırısı Longsword; Skeleton Archer Bow ortak sesidir.
+Slime Spit / Acid Projectile gerçek hasar tipinin ortak projectile sesini kullanır.
+Acidic Path bu eşlemeye dahil değildir; condition teması için ayrı ses seçilecek.
+Mini/final boss +%35, oyuncu merkezli stereo, offscreen/speed/Master/SFX korunur.
+
+## Seçki 20 — HAZIR, önizleme; yeni adaylar henüz kurulmadı
+
+85 aday / 13 grup: WD1–5 yeni cadı çığlıkları; SK1–10 iki iskeletin ortak ölümü;
+ZA/ZD1–5 Zombie saldırı/ölüm; GA/GD/GC1–10 Ghost fısıltı/çığlık/ağlama;
+LD/LP1–5 Slime ölüm/Acidic Path teması; LS1–5 isteğe bağlı ölümde parçalanma.
+GS/MA/MD1–5 önceki seçkiden birebir taşınan henüz seçilmemiş Stomp/Mimic saldırı/ölüm.
+ÖNEMLİ: Bu sayfadaki WD/GD/GA/GC kodları Seçki 20'ye aittir;
+önceki pack'lerde aynı kısa kodlarla seçilen sesler değiştirilmedi.
+Vampire Lord için ses adayı yok; yalnız koddan çıkarılan olay listesi hazırlandı.
+Ghost ability: 1.25s hazırlık + 5s Necrotic Storm; ağlama seçimi buna uyarlanacak.
+Normal/Unique enemy hasar alma ve doğma sesleri bu tur eklenmedi.
+
+## Uygulandı — Seçki 18 trait sesleri ve tüm enemy hit/boss kuralları
+
+BC1, BP2, CJ2, CP1, EG5, SB3, SS3, RG2, GC3, GT4 kuruldu.
+GC3 0.5s hazırlığa uyarlandı; diğer dokuz dosya seçkidekinin birebir kopyası.
+Hücum/hazırlık kanalları phase ile başlar-biter, ölüm/despawn/stage clear temizler.
+SB3 yalnız gerçek hasarda direnç devreye girdiyse (en fazla 0.5s'de bir);
+SS3 yalnız gerçek split oluştuğunda, EG5 yavru gerçekten spawn olunca çalar.
+RG2 öfke eşiğinde bir kez; Gorilla hazırlık ve atış ayrı olaydır.
+Mini + final boss için TÜM enemy cue'ları (normal hit, trait/ability, ölüm) +%35.
+Ortak weapon/büyü dosyaları tek asset olarak kalır; enemy miks tabanı .6,
+boss .81; tavanın artışı bozmasını önlemek için shared cue gain'i normalize edilir.
+TÜM enemy normal saldırı sesleri gerçek appliedDamage > 0 kapısından geçer;
+hazırlık/uyarı/hareket trait sesleri ilgili phase'in sesidir, saldırı isabet sesi değildir.
+Bandit Longsword, Archer Bow, Spearman Lance normal sesleri bağlı.
+Witch isabeti gerçek damage type'a göre ortak projectile sesini kullanır;
+Static Cloud / Meteor / Tsunami / Call Lightning kendi mevcut cue'larını kullanır.
+Cloud gibi tekrarlanan hit'ler aynı cue'yu sürekli üst üste başlatmaz.
+
+## Seçki 19 — HAZIR, henüz kurulmadı
+
+65 aday, 13 grup: GS1–5 YENİ ağır Stomp; BD Bandit ölüm; AD Archer ölüm;
+GD Guard SUMMON ölümü (bu tur mutlaka seçilecek); SD Spearman ölüm, ST spear throw;
+HD Horseman ölüm, HA normal uzun-silah savurma, HS Swipe Around;
+WD Witch ölüm; MX Mimic dönüşüm, MA saldırı, MD ölüm (hepsi 1–5).
+Normal enemy'lere ability önerisi yok. Witch ability'leri mevcut büyü sesleri, yeniden seçilmiyor.
+Horseman'ın eski Battle Cry kod kimliği gerçek çalışma şeklini anlatmıyor:
+bu bir çevresel sektör savuruşudur. Mimic D&D SRD'deki nesne taklidi/yapışkan
+beden/ısırık kimliğinden sadece ses tasarımı ilhamı aldı; yeni mekanik eklenmedi.
+
+## Uygulandı — Seçki 17 ve oyuncu merkezli stereo
+
+TD5; EA2/ED5; WA5/WD3; BA4/BD2; CA3/CD4; SA3/SD3; RA2/RD4; GA1/GD1.
+Toad saldırısı ortak Poison projectile, Guard saldırısı Lance sesi.
+Beast normal saldırı cue'ları yalnız FirstScreen'deki gerçek appliedDamage > 0
+sonucunda tetiklenir (player/summon/gate); kaçırma, bağışıklık/0 hasar sessizdir.
+Bu kural yeni Beast saldırı seslerine uygulandı; mevcut oyuncu/summon projectile
+fırlatma sesleri launch anında kalır. Ölümler enemy başına bir defa, mini/final
+boss ölüm gain'i normalin 1.35 katı. SFX/Master, hız ve ekran dışı sessizlik ortak.
+Stereo referansı artık oyuncudur; kamera merkezine/genişliğine bağlı değildir.
+Settings > General > Audio > Directional Stereo, varsayılan ON, kayıt/preview/revert/reset bağlı.
+Varsayım: 'boss' = MINI_BOSS ve FINAL_BOSS.
+GUARD ÖLÜM SESİ HUMANOID ENEMY TURUNDA MUTLAKA HATIRLATILACAK.
+
+## Seçki 18 — Beast Trait / Ability önizlemeleri HAZIR (henüz eklenmedi)
+
+60 aday: BC1–5 Boar Charge (1–3 1.15s, 4–5 kısa), BP1–5 Boar hazırlık;
+CJ1–5 Jump (1–3 .55s, 4–5 kısa), CP1–5 Crocodile hazırlık; EG1–5 yumurta;
+SB1–5 Swarm Being tepki, SS1–5 Split; RG1–5 Bear Angry; GC1–5 Gorilla hazırlık
+kükremesi, GT1–5 uçan kaya; GS1–10 Stomp the Earth.
+'Charge başlamadan önce' isteği iki hayvanı da kapsayacak şekilde iki hazırlık
+grubu ile sunuldu; hiçbir trait cue'su otomatik seçilmedi veya runtime'a bağlanmadı.
+Swarm Being pasif olduğundan sürekli loop değil hasar azaltma tepkisi önerildi.
+
+## Seçki 17 — Beast normal saldırı/ölüm + Toad ölüm HAZIR
+
+75 aday: TD1–5 Toad ölüm; EA/ED Eagle, WA/WD Wolf, BA/BD Boar,
+CA/CD Crocodile, SA/SD Bee Swarm, RA/RD Bear, GA/GD Gorilla (her grupta 1–5).
+Kodlar seçki 17'ye özeldir; CA/CD burada önceki Cow grubunu ifade etmez.
+Toad saldırısı mevcut Poison sesi olarak SEÇİLDİ, henüz runtime'a eklenmedi.
+Guard saldırısı mevcut Lance sesi olarak SEÇİLDİ, henüz runtime'a eklenmedi.
+ÖNEMLİ: Guard ölüm sesini humanoid enemy seçim turunda MUTLAKA hatırlat ve seçtir.
+Oyuncu merkezli stereo + Audio altında varsayılan açık toggle BEKLİYOR;
+kullanıcının önceki 'henüz yapma' talimatı gereği bu tur uygulanmadı.
+Oyun assets/ ve core/ dosyalarına bu tur dokunulmadı; yalnız audition araçları/çıktıları.
+Sonraki seçim: Boar Charge, Crocodile Jump/Baby Crocodiles, Swarm Being/
+Split the Swarm, Grizzly Angry, Gorilla Throw/Stomp the Earth için trait sesleri.
+Lisanslar ve gerçek hayvan/taklit/işlenmiş tasarım ayrımları dinleme sayfasında ve
+beast-combat-source-credits.txt dosyasında. Normal çağrılardan ölüm tasarımları.
+
+## Uygulandı — Summon saldırı/ölüm ve ortak projectile sesleri
+
+Cow CA5/CD5, Imp ID1, Oathbreaker OA2/OD2 oyuna eklendi (Seçki 16).
+Imp saldırısı weapon fire projectile FL5 / magic_fire.wav dosyasını paylaşır.
+Onaylı WAV'lar birebir kopyalandı; eski seçimler yeniden tasarlanmadı.
+ProjectileSound + GameAudio.projectile ortak API'si tüm ranged normal/ability
+atışlarını ve element bazlı sesleri kapsar; magicalShot son hasar tipini çözer.
+Yeni kaynağın konumu verilebilir; Settings Master/SFX, oyun hızı ve ekran dışı
+sessizlik ortak mikserden gelir. Kaynağa göre ölçülü sağ/sol stereo eklendi.
+Ölüm sesi sadece health death içindir; süre dolumu, clear ve silah kaldırma sessiz.
+Cow/Oathbreaker efor sesi gerçek saldırı başlangıcında, Imp ateşi projectile oluşunca çalar.
+Toad/Guard veya enemy sesleri eklenmedi; enemy aşamasına geçilmedi.
+Lisanslar: assets/audio/SUMMON-COMBAT-LICENSES.txt.
+Alttaki onay-bekliyor bölümleri önceki turların tarihçesidir.
+
 ## Kullanıcı onayı — Mevcut seçim/Singularity seslerini KORU
 
 Kullanıcı mevcut ortak spell seçim sesini ve Singularity seslerini beğendi;

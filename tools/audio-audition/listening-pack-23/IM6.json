@@ -1,0 +1,17 @@
+{
+  "id": "IM6",
+  "recipe": {
+    "character": "Sir Imbert",
+    "text": "It is my oath! I will fight until the magic is gone from this realm!",
+    "voice": "am_onyx",
+    "label": "Daha koyu ve ağır şövalye hedef",
+    "speed": 0.87,
+    "pitch": -1.0,
+    "lang": "en-us",
+    "pause": 0.3,
+    "rough": false
+  },
+  "duration": 5.607392290249433,
+  "sha256": "04f4e5d0a25ce10aee53e50a5c18e18ea87a723e59e9687619d7b284393c367c",
+  "phonemes": "ɪɾ ɪz maɪ ˈoʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈædʒɪk ɪz ɡɔn fɹʌm ðɪs ɹˈɛlm!"
+}

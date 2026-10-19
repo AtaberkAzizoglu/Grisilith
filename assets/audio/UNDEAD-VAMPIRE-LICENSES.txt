@@ -1,0 +1,124 @@
+INSTALLED SELECTIONS: skeleton_death=20/SK3, zombie_attack=20/ZA1, zombie_death=20/ZD1, ghost_attack=20/GA2, ghost_death=20/GD1, ghost_storm=20/GC7, slime_death=20/LD4, slime_path=20/LP5, gorilla_stomp=21/GS9, mimic_attack=21/MA3, mimic_death=21/MD2, vampire_hunger=21/VH5, vampire_bite=21/VB1, vampire_mist=21/ME1, vampire_form=21/VF5, vampire_teleport=21/TP1, vampire_cone_charge=21/LC2, vampire_swipe_charge=21/SC5, vampire_death=21/VS5, vampire_hurt=21/VP5
+LD4 is shared by full-size and fragment Slimes. VF5 fitted 3200ms, TP1 750ms, LC2 1000ms. Other selected WAVs copied exactly.
+
+WITCH: short scream no effects.wav by xl57 — CC BY 4.0.
+https://freesound.org/people/xl57/sounds/671201/
+https://creativecommons.org/licenses/by/4.0/
+Public HQ MP3 preview converted to mono PCM16/44.1kHz, peak matched -12dBFS, 10ms edge fades. No pitch change.
+
+PACK 20 — WITCH / UNDEAD PREVIEW OPTIONS — SELECTED CUES INSTALLED
+
+NEW SOURCES (CC0):
+artisticdude — Zombies Sound Pack
+https://opengameart.org/content/zombies-sound-pack
+ianzazz — Zombie noises and moans
+https://opengameart.org/content/zombie-noises-and-moans
+qubodup — Ghost Monster Voice Moaning & Growling; Ghost breath
+https://opengameart.org/content/ghost-monster-voice-moaning-growling
+https://opengameart.org/content/ghost-breath
+AuraVoice / Nocturnal_Vanguard — Female Scream 1
+https://opengameart.org/content/female-scream-1
+kanaizo — Loud Witch Scream
+https://freesound.org/people/kanaizo/sounds/724988/
+Litruv — Ghost Whispers (backwards invented words)
+https://freesound.org/people/Litruv/sounds/175944/
+IENBA — Ghost Whispers (Sound Design Workshop students, Playa Hermosa, Uruguay)
+https://freesound.org/people/IENBA/sounds/656439/
+BlueSiren — indistinctwhispering.wav (nonsense / dark phrases, source already layered)
+https://freesound.org/people/BlueSiren/sounds/377743/
+Amaiguri — Female_Fake_Crying.mp3 (acted crying)
+https://freesound.org/people/Amaiguri/sounds/518993/
+purplereptar — Woman Crying.wav
+https://freesound.org/people/purplereptar/sounds/449439/
+Freesound inputs above are publicly offered HQ MP3 previews, not original WAV downloads.
+
+EXISTING SOURCES REUSED:
+Cici Fyre — RPG Voice Starter Pack — CC0
+https://cicifyre.itch.io/rpg-voice-starter-pack
+rubberduck — 80 CC0 RPG SFX; 75 CC0 breaking/falling/hit SFX — CC0
+https://opengameart.org/node/86018
+https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx
+Kenney — Impact Sounds — CC0
+https://kenney.nl/assets/impact-sounds
+Vehicle / Jan Schupke — Fantasy Sound Effects (Tinysized SFX) — CC0
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+HaelDB — Male Grunt/Yelling sounds — CC0 option selected
+https://opengameart.org/content/male-gruntyelling-sounds
+spookymodem — Bubbling Acid — CC BY 3.0
+https://opengameart.org/content/bubbling-acid
+https://creativecommons.org/licenses/by/3.0/
+CC0: https://creativecommons.org/publicdomain/zero/1.0/
+
+EDITS: selected excerpts, mono/44.1kHz PCM16 conversion, pitch/speed, filters,
+short fades, gentle amplitude flutter for Witch, ghost echo / tremolo, optional
+foley layers. Skeleton options are bone-like designs from wood/rock/chain foley,
+not recordings of actual bones. Ghost voices are processed vocal performances;
+10 options does not imply 10 actors. Female performers' actual age is not claimed.
+All clips peak matched to -12dBFS; not perceived loudness normalization.
+GS/MA/MD are carried forward from pack 19, not newly selected sounds.
+GS4 includes an original damped 52Hz sine body, same as pack 19.
+Candidate-level recipes: SECENEKLER.txt / PrepareUndeadAudition.kt.
+Nothing from this audition is installed until selected.
+
+
+PACK 21 — 90 PREVIEW CANDIDATES — SELECTED CUES INSTALLED
+
+NEW SOURCES:
+Breviceps — Cartoon - Slurp! / Cartoon Slurp — CC0
+https://freesound.org/people/Breviceps/sounds/445974/
+https://freesound.org/people/Breviceps/sounds/573583/
+needleballista — fast slurp — CC0
+https://freesound.org/people/needleballista/sounds/728585/
+Manuel Graf — comic lick — CC BY 4.0
+https://freesound.org/people/ManuelGraf/sounds/176798/
+https://creativecommons.org/licenses/by/4.0/
+Freesound inputs are the publicly offered HQ MP3 previews, converted to mono WAV,
+not a claim to have downloaded original WAV files requiring login.
+
+Independent.nu (submitted by qubodup) — 8 wet squish, slurp impacts — CC0
+https://opengameart.org/content/8-wet-squish-slurp-impacts
+Ogrebane — Monster Sound Effects 2 — CC0
+https://opengameart.org/content/monster-sound-effects-2
+marcelofg55 — Monster SFX — CC0
+https://opengameart.org/content/monster-sfx
+Michel Baradari / apollo-music.de (submitted by qubodup) — Rumble/explosion — CC BY 3.0
+https://opengameart.org/content/rumbleexplosion
+https://creativecommons.org/licenses/by/3.0/
+
+EXISTING LICENSED SOURCES REUSED:
+Michel Baradari — 2 High Quality Explosions — CC BY 3.0
+https://opengameart.org/content/2-high-quality-explosions
+HaelDB — Male Grunt/Yelling sounds — CC0 option selected
+https://opengameart.org/content/male-gruntyelling-sounds
+qubodup — 3 dark magic spells; Ghost breath; Ghost Monster Voice Moaning & Growling — CC0
+https://opengameart.org/content/3-dark-magic-spells
+https://opengameart.org/content/ghost-breath
+https://opengameart.org/content/ghost-monster-voice-moaning-growling
+Ogrebane — Teleport Spell — CC0
+https://opengameart.org/content/teleport-spell
+artisticdude — Swishes Sound Pack — CC0; Fire & Evil Spell — CC BY 3.0
+https://opengameart.org/content/swishes-sound-pack
+https://opengameart.org/content/fire-evil-spell
+rubberduck — 75 CC0 breaking/falling/hit SFX; 80 CC0 RPG SFX — CC0
+https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx
+https://opengameart.org/node/86018
+Kenney — Impact Sounds — CC0
+https://kenney.nl/assets/impact-sounds
+Vehicle / Jan Schupke — Fantasy Sound Effects (Tinysized SFX) — CC0
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+spookymodem — Goblin Scream — CC BY 3.0
+https://opengameart.org/content/goblin-scream
+CC0: https://creativecommons.org/publicdomain/zero/1.0/
+
+DESIGN / EDITS:
+Excerpts, pitch/speed, EQ, mono/44.1kHz PCM16 conversion, fades, optional coherent
+voice doubling, quiet delayed resonance and original synthesized low-frequency
+impact bodies. Some previews share source recordings, not 90 unrelated field
+recordings or actors. GS uses actual explosion transients and designed impact
+bodies, not the rejected GS recordings from packs 18-20. MA1/MA2 target an elastic,
+wet tongue-slap character; no audio was extracted from League of Legends or any
+other commercial game. Vampire designs use licensed human/monster performances
+and original processing, not another game's character voice or cloned actor.
+Recipes are in SECENEKLER.txt and PrepareVampireAudition.kt.
+All previews peak matched to -12dBFS, not perceived loudness normalized.
+No gameplay code, installed game audio or preferences changed by this task.

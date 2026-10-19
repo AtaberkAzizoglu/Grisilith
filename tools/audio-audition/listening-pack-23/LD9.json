@@ -1,0 +1,20 @@
+{
+  "id": "LD9",
+  "recipe": {
+    "character": "Linlos Dustman",
+    "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+    "voice": {
+      "am_liam": 0.4,
+      "am_puck": 0.6
+    },
+    "label": "Tek sentetik ses: daha atak, meraklı hedef",
+    "speed": 1.1,
+    "pitch": 1.0,
+    "lang": "en-us",
+    "pause": 0.25,
+    "rough": false
+  },
+  "duration": 5.718684807256236,
+  "sha256": "edf94f06a609f42b58638378f8be2ec0f263fda52e19151efb6c34e141881cee",
+  "phonemes": "aɪ spˈoʊk wɪð ɐn ˈænt ðɪ ˈʌðɚ dˈeɪ, bˌʌt aɪ dˈɪdnt ˌʌndɚstˈænd wʌt hiː sˈɛd. aɪ ɡˈɛs aɪm nˌɑːt sˌoʊ ɡˈʊd æt tˈɔːkɪŋ tʊ ˈænɪməlz."
+}

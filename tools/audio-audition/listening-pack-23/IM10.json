@@ -1,0 +1,20 @@
+{
+  "id": "IM10",
+  "recipe": {
+    "character": "Sir Imbert",
+    "text": "It is my oath! I will fight until the magic is gone from this realm!",
+    "voice": {
+      "am_fenrir": 0.7,
+      "bm_fable": 0.3
+    },
+    "label": "Tek sentetik ses: sert, tok yemin hedef",
+    "speed": 0.88,
+    "pitch": -1.0,
+    "lang": "en-us",
+    "pause": 0.3,
+    "rough": false
+  },
+  "duration": 4.926462585034014,
+  "sha256": "c4612fbc739871f933cbfce397b84f43b7369c6568779dbb775aafff28162ec0",
+  "phonemes": "ɪɾ ɪz maɪ ˈoʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈædʒɪk ɪz ɡɔn fɹʌm ðɪs ɹˈɛlm!"
+}

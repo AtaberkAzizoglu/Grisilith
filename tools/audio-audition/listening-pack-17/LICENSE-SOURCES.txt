@@ -1,0 +1,45 @@
+BEAST COMBAT + TOAD AUDITIONS — PACK 17 — NOT INSTALLED
+
+Free sources, preview designs only. No real animal injury/death recordings are used.
+Death cues are edits of ordinary calls/growls, not documentation of animal death.
+
+AntumDeluge / U.S. Fish & Wildlife Service — Bear Growls — CC0.
+https://opengameart.org/content/bear-growls
+AntumDeluge / J0ck0 / mediacollege.com — Gorilla Sounds — CC0.
+https://opengameart.org/content/gorilla-sounds
+fvcalderan — Boar (human vocal imitation + EQ) — CC0.
+https://opengameart.org/content/boar-0
+EZduzziteh — Ribbit Frog Sounds — CC0.
+https://opengameart.org/content/ribbit-frog-sounds
+D.jones — Alligator Growls 02.wav — CC0.
+https://freesound.org/people/D.jones/sounds/527844/
+Uses the public HQ MP3 preview, not the original uncompressed WAV.
+Alligator recordings are adapted as Crocodile designs; not claimed to be crocodile recordings.
+
+pla1554alaska, submitted/extracted by qubodup — Bald Eagle Screams — CC BY 3.0 option.
+https://opengameart.org/content/bald-eagle-screams
+congusbongus — Dog growls — CC BY 3.0.
+https://opengameart.org/content/dog-growls
+Dog growls are adapted as Wolf designs; not claimed to be actual wolf recordings.
+Vinrax — Pig SFX Pack (idle recordings only) — CC BY 3.0.
+https://opengameart.org/content/pig-sfx-pack
+IMadeIt — Single Bee sound — CC BY 3.0.
+https://opengameart.org/content/single-bee-sound
+
+Existing CC0 supporting sources: Kenney Impact Sounds; artisticdude Swishes Sound Pack.
+https://kenney.nl/assets/impact-sounds
+https://opengameart.org/content/swishes-sound-pack
+
+LICENSES
+https://creativecommons.org/publicdomain/zero/1.0/
+https://creativecommons.org/licenses/by/3.0/
+If a CC BY candidate is installed, credit its author, title, link, license and edits in game credits.
+
+EDITS
+Mono 44.1kHz PCM16 WAV; excerpts/foreground selection, pitch/speed changes,
+EQ/low-pass/high-pass, short fades; optional one animal vocal + impact/air texture.
+Bee swarm designs mix time/pitch-shifted copies of a single bee recording and fade
+the swarm away for death (bees do not have a vocal death cry).
+Peak matched to -12dBFS; not perceived loudness matched.
+Five options per group are sound designs, not five unrelated recording sessions.
+Full recipes in SECENEKLER.txt and PrepareBeastCombatAudition.kt.

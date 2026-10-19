@@ -1782,7 +1782,8 @@ class FirstScreen(
         GameAudio.worldView(camera.position.x-CAMERA_WIDTH/2f,camera.position.y-CAMERA_HEIGHT/2f,
             CAMERA_WIDTH,CAMERA_HEIGHT,player.centerX,player.centerY)
         GameAudio.combatPlayback(gameTimeController.gameSpeed,
-            gameplayStopped || gameTimeController.isPaused)
+            gameplayStopped || gameTimeController.isPaused,
+            deathTails = runHasEnded || isRunSummaryOpen || isRunEndTransitionActive)
 
         if (
             !gameTimeController.isPaused &&
@@ -3401,6 +3402,7 @@ class FirstScreen(
                         sourceEnemy.piercingIgnoreRatio
                     )
 
+                com.azizoglu.grisilith.audio.EnemyAudio.attack(sourceEnemy,appliedDamage,damageType)
                 if (appliedDamage > 0) {
                     com.azizoglu.grisilith.combat.condition.DamageConditionRules
                         .conditionFor(damageType)
@@ -3446,6 +3448,7 @@ class FirstScreen(
                     damageType,
                     sourceEnemy.piercingIgnoreRatio
                 )
+                com.azizoglu.grisilith.audio.EnemyAudio.attack(sourceEnemy,appliedDamage,damageType)
                 if (appliedDamage > 0) {
                     com.azizoglu.grisilith.combat.condition.DamageConditionRules
                         .conditionFor(damageType)
@@ -3461,7 +3464,7 @@ class FirstScreen(
                 }
             },
 
-            onPlayerCondition = { condition, duration, conditionStatScore ->
+            onPlayerCondition = { condition, duration, conditionStatScore, sourceEnemy ->
                 if (condition == ConditionType.ACIDIC_PATH_DAMAGE) {
                     player.applyCondition(
                         com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator.createApplication(
@@ -3478,11 +3481,11 @@ class FirstScreen(
                         sourceStatScore = conditionStatScore,
                         durationSeconds = duration ?: 3f,
                         sourceName = condition.displayName
-                    )
+                    ).let { it.copy(source=it.source.copy(sourceEnemyBoss=sourceEnemy.type==com.azizoglu.grisilith.enemy.EnemyType.MINI_BOSS || sourceEnemy.type==com.azizoglu.grisilith.enemy.EnemyType.FINAL_BOSS)) }
                 )
             },
 
-            onSummonCondition = { summon, condition, duration, conditionStatScore ->
+            onSummonCondition = { summon, condition, duration, conditionStatScore, sourceEnemy ->
                 if (condition == ConditionType.ACIDIC_PATH_DAMAGE) {
                     summon.applyCondition(
                         com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator.createApplication(
@@ -3499,7 +3502,7 @@ class FirstScreen(
                         sourceStatScore = conditionStatScore,
                         durationSeconds = duration ?: 3f,
                         sourceName = condition.displayName
-                    )
+                    ).let { it.copy(source=it.source.copy(sourceEnemyBoss=sourceEnemy.type==com.azizoglu.grisilith.enemy.EnemyType.MINI_BOSS || sourceEnemy.type==com.azizoglu.grisilith.enemy.EnemyType.FINAL_BOSS)) }
                 )
             },
 
@@ -3514,8 +3517,8 @@ class FirstScreen(
                         .toInt()
                         .coerceAtLeast(1)
 
-                troubleAtHomeDefenseRuntime
-                    .takeDamage(resolvedGateDamage)
+                val appliedGateDamage = troubleAtHomeDefenseRuntime.takeDamage(resolvedGateDamage)
+                com.azizoglu.grisilith.audio.EnemyAudio.attack(sourceEnemy,appliedGateDamage)
 
                 if (
                     troubleAtHomeDefenseRuntime
@@ -5379,6 +5382,7 @@ class FirstScreen(
     }
 
     override fun dispose() {
+        enemyManager.allEnemies.forEach(com.azizoglu.grisilith.audio.EnemyAudio::clear)
         onlineRun?.let { game.online?.abandon(it) }
         RunDamageTypeTelemetry.unbind(runStatistics)
         ActiveItemEffects.unbind(playerStats)

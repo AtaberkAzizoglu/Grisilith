@@ -309,6 +309,16 @@ class Enemy(
     val isDead: Boolean
         get() = weaponTargetSummon?.isExpired ?: health.isDead
 
+    private var deathAudioPlayed = false
+    internal var audioAttackSourceName = ""
+    internal var audioAttackDamageType = DamageType.NONE
+    private fun playDeathAudioIfNeeded() {
+        if(isDead && !deathAudioPlayed && weaponTargetSummon==null) {
+            deathAudioPlayed=true
+            com.azizoglu.grisilith.audio.EnemyAudio.death(this)
+        }
+    }
+
     val isDeathFadeComplete: Boolean
         get() =
             isDead &&
@@ -619,6 +629,7 @@ class Enemy(
         }
 
         if (isDead) {
+            playDeathAudioIfNeeded()
             deathFadeRemainingSeconds =
                 (
                     deathFadeRemainingSeconds -
@@ -1337,6 +1348,10 @@ class Enemy(
                 health.takeDamage(traitResolvedFinalDamage)
             }
 
+        playDeathAudioIfNeeded()
+        if(appliedDamage>0 && !triggersVampireMistyEscape)
+            com.azizoglu.grisilith.audio.EnemyAudio.hurt(this)
+
         if (
             appliedDamage > 0 &&
             health.isDead &&
@@ -1354,6 +1369,10 @@ class Enemy(
                 appliedDamage,
                 resolvedDamageContext.damageType
             )
+
+            if(!isDead && kindId==EnemyKindIds.BEE_SWARM && traitModifiedDamage<reactionResult.resolvedDamage) {
+                com.azizoglu.grisilith.audio.EnemyAudio.feedback(this,com.azizoglu.grisilith.audio.UiSound.SWARM_RESIST,.5f)
+            }
 
             if (resolvedDamageContext.appliesAutomaticCondition && !isDead) {
                 DamageConditionRules.conditionFor(resolvedDamageContext.damageType)?.let { condition ->

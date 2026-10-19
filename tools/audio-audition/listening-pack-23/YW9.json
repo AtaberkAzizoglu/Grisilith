@@ -1,0 +1,17 @@
+{
+  "id": "YW9",
+  "recipe": {
+    "character": "Ywaleth Yoster",
+    "text": "The footprints lead in this direction. I'm on the trail!",
+    "voice": "jf_alpha",
+    "label": "Deneysel: Doğu Asya/Japonca taban sesinin İngilizce okuması",
+    "speed": 1.07,
+    "pitch": 0.0,
+    "lang": "en-us",
+    "pause": 0.2,
+    "rough": false
+  },
+  "duration": 3.298684807256236,
+  "sha256": "f664ee469dca97dca9e70e11c6c849f769b830f189f8db412e68b2be14fb8c52",
+  "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs dᵻɹˈɛkʃən. aɪm ɔnðə tɹˈeɪl!"
+}

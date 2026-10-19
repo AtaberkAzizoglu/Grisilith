@@ -49,7 +49,8 @@ object GameSettings {
         val abilityCasting: AbilityCasting = AbilityCasting.PREPARE,
         val normalRange: NormalRange = NormalRange.OFF,
         val abilityRange: AbilityRange = AbilityRange.OFF,
-        val showScore: Boolean = true
+        val showScore: Boolean = true,
+        val directionalStereo: Boolean = true
     )
 
     private const val PREFERENCES_NAME =
@@ -151,6 +152,9 @@ object GameSettings {
         Float = DEFAULT_SOUND_EFFECTS_VOLUME
         private set
 
+    var directionalStereo: Boolean = true
+        private set
+
     var fullscreen:
         Boolean = DEFAULT_FULLSCREEN
         private set
@@ -196,6 +200,7 @@ object GameSettings {
      * çağrılmalıdır.
      */
     fun load() {
+        directionalStereo = preferences.getBoolean("directional_stereo",true)
         showScore = preferences.getBoolean(KEY_SHOW_SCORE,true)
         targeting = Targeting.entries.firstOrNull { it.name == preferences.getString("targeting", "CLOSEST") } ?: Targeting.CLOSEST
         abilityCasting = AbilityCasting.entries.firstOrNull { it.name == preferences.getString("ability_casting", "") }
@@ -419,6 +424,7 @@ object GameSettings {
     }
 
     fun resetToDefaults() {
+        directionalStereo = true
         targeting = Targeting.CLOSEST
         abilityCasting = AbilityCasting.PREPARE
         normalRange = NormalRange.OFF
@@ -478,7 +484,8 @@ object GameSettings {
         bossPriorityAbilities = bossPriorityAbilities,
         targeting = targeting, abilityCasting = abilityCasting,
         normalRange = normalRange, abilityRange = abilityRange,
-        showScore = showScore
+        showScore = showScore,
+        directionalStereo = directionalStereo
     )
 
     fun defaults(): Snapshot = Snapshot(
@@ -498,6 +505,7 @@ object GameSettings {
     )
 
     fun restore(snapshot: Snapshot) {
+        directionalStereo = snapshot.directionalStereo
         targeting = snapshot.targeting
         abilityCasting = snapshot.abilityCasting
         normalRange = snapshot.normalRange
@@ -619,6 +627,7 @@ object GameSettings {
 
     private fun save() {
         preferences
+            .putBoolean("directional_stereo",directionalStereo)
             .putString("targeting", targeting.name)
             .putString("ability_casting", abilityCasting.name)
             .putString("normal_range", normalRange.name)

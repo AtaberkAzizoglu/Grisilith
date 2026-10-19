@@ -1,6 +1,87 @@
 // Audio audition preparation and isolated integration checks.
 gradle.projectsEvaluated {
     def desktop = gradle.rootProject.project(':lwjgl3')
+    ['installFinishingAudio':'qa.InstallFinishingAudio','finishingAudioSmoke':'qa.FinishingAudioSmoke'].each { taskName, entry ->
+        desktop.tasks.register(taskName, JavaExec) {
+            dependsOn desktop.tasks.named('compileKotlin')
+            classpath = desktop.sourceSets.main.runtimeClasspath
+            mainClass = entry
+            workingDir = taskName == 'finishingAudioSmoke' ? gradle.rootProject.file('assets') : gradle.rootProject.projectDir
+        }
+    }
+    desktop.tasks.register('prepareFinishingAudioAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        def flac = desktop.configurations.detachedConfiguration(desktop.dependencies.create('org.jflac:jflac-codec:1.5.2'))
+        classpath = desktop.sourceSets.main.runtimeClasspath + flac
+        mainClass = 'qa.PrepareFinishingAudioAudition'
+        workingDir = gradle.rootProject.projectDir
+    }
+    ['installUndeadVampireAudio':'qa.InstallUndeadVampireAudio','undeadVampireAudioSmoke':'qa.UndeadVampireAudioSmoke'].each { taskName, entry ->
+        desktop.tasks.register(taskName, JavaExec) {
+            dependsOn desktop.tasks.named('compileKotlin')
+            classpath = desktop.sourceSets.main.runtimeClasspath
+            mainClass = entry
+            workingDir = taskName == 'undeadVampireAudioSmoke' ? gradle.rootProject.file('assets') : gradle.rootProject.projectDir
+        }
+    }
+    desktop.tasks.register('prepareVampireAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        def flac = desktop.configurations.detachedConfiguration(desktop.dependencies.create('org.jflac:jflac-codec:1.5.2'))
+        classpath = desktop.sourceSets.main.runtimeClasspath + flac
+        mainClass = 'qa.PrepareVampireAudition'
+        workingDir = gradle.rootProject.projectDir
+    }
+    ['installHumanoidAudio':'qa.InstallHumanoidAudio','humanoidAudioSmoke':'qa.HumanoidAudioSmoke','prepareUndeadAudition':'qa.PrepareUndeadAudition'].each { taskName, entry ->
+        desktop.tasks.register(taskName, JavaExec) {
+            dependsOn desktop.tasks.named('compileKotlin')
+            classpath = desktop.sourceSets.main.runtimeClasspath
+            mainClass = entry
+            workingDir = taskName == 'humanoidAudioSmoke' ? gradle.rootProject.file('assets') : gradle.rootProject.projectDir
+            if (taskName == 'prepareUndeadAudition') {
+                def flac = desktop.configurations.detachedConfiguration(desktop.dependencies.create('org.jflac:jflac-codec:1.5.2'))
+                classpath += flac
+            }
+        }
+    }
+    ['installBeastTraitAudio':'qa.InstallBeastTraitAudio','beastTraitAudioSmoke':'qa.BeastTraitAudioSmoke','prepareHumanoidAudition':'qa.PrepareHumanoidAudition'].each { taskName, entry ->
+        desktop.tasks.register(taskName, JavaExec) {
+            dependsOn desktop.tasks.named('compileKotlin')
+            classpath = desktop.sourceSets.main.runtimeClasspath
+            mainClass = entry
+            workingDir = taskName == 'beastTraitAudioSmoke' ? gradle.rootProject.file('assets') : gradle.rootProject.projectDir
+        }
+    }
+    desktop.tasks.register('prepareBeastTraitAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PrepareBeastTraitAudition'
+        workingDir = gradle.rootProject.projectDir
+    }
+    ['installBeastAudio':'qa.InstallBeastAudio','beastAudioSmoke':'qa.BeastAudioSmoke'].each { taskName, entry ->
+        desktop.tasks.register(taskName, JavaExec) {
+            dependsOn desktop.tasks.named('compileKotlin')
+            classpath = desktop.sourceSets.main.runtimeClasspath
+            mainClass = entry
+            workingDir = taskName == 'beastAudioSmoke' ? gradle.rootProject.file('assets') : gradle.rootProject.projectDir
+        }
+    }
+    desktop.tasks.register('prepareBeastCombatAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        def flac = desktop.configurations.detachedConfiguration(desktop.dependencies.create('org.jflac:jflac-codec:1.5.2'))
+        classpath = desktop.sourceSets.main.runtimeClasspath + flac
+        mainClass = 'qa.PrepareBeastCombatAudition'
+        if (gradle.rootProject.hasProperty('inspectBeasts')) args '--inspect'
+        workingDir = gradle.rootProject.projectDir
+    }
+    ['installSummonAudio':'qa.InstallSummonAudio','summonAudioSmoke':'qa.SummonAudioSmoke'].each { taskName, entry ->
+        desktop.tasks.register(taskName, JavaExec) {
+            dependsOn desktop.tasks.named('compileKotlin')
+            classpath = desktop.sourceSets.main.runtimeClasspath
+            mainClass = entry
+            workingDir = gradle.rootProject.projectDir
+            if (taskName == 'summonAudioSmoke') workingDir = gradle.rootProject.file('assets')
+        }
+    }
     desktop.tasks.register('prepareSummonCombatAudition', JavaExec) {
         dependsOn desktop.tasks.named('compileKotlin')
         classpath = desktop.sourceSets.main.runtimeClasspath

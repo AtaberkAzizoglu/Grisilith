@@ -1,0 +1,34 @@
+PACK 24 — SYNTHETIC CHARACTER VOICE AUDITIONS ONLY — NOT INSTALLED
+
+Kokoro-82M by hexgrad — Apache License 2.0 (model/voice weights).
+https://huggingface.co/hexgrad/Kokoro-82M
+https://huggingface.co/hexgrad/Kokoro-82M/blob/main/VOICES.md
+https://www.apache.org/licenses/LICENSE-2.0
+ONNX runtime integration: thewh1teagle/kokoro-onnx — MIT.
+https://github.com/thewh1teagle/kokoro-onnx
+Model/voice conversion release: model-files-v1.1, kokoro-v1.0.onnx / voices-v1.0.bin.
+https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.1
+Runtime/model dependencies are audition tools, NOT shipped with the game.
+Speech is synthetic, not a new recording of any actor, not targeted voice cloning.
+Texts supplied by user; names/punctuation and MOSTER -> MONSTER corrected.
+Edits: engine speed, optional averaged style vectors, small pitch resampling,
+subtle tanh saturation for Koba, mono/44.1kHz PCM16, peak matching -12dBFS,
+10ms edge fades. Not perceived loudness normalization.
+Asian/Italian/Hindi voice-bank English readings are experimental cross-language
+renderings, not a claim of authentic regional accents. No stereotype performance
+or imitation of a specific person is intended. Linlos is an adult, no child recording.
+Full settings / input text / phonemes / hashes: SECENEKLER.json and per-clip JSON.
+No gameplay, character-selection UI, hurt/death audio or installed asset changed
+by this preview generator. If selected, preserve relevant model/runtime notices.
+
+PACK 24 OVERRIDE: preceding pack23 default edits are historical where different.
+Imbert: adult male voice banks, lower pitch, restrained bass/presence EQ, compression,
+light saturation; 8-10 alternate emphatic punctuation/case, more aggressive saturation.
+Koba: lower pitch (-4 to -6.8 semitones), high/low-pass, bass/body and presence EQ,
+compressed/soft-clipped vocal grit. Some use a quiet subharmonic from the analytic
+phase of the SAME voice's bass band, not a second actor, plus controlled 34Hz modulation.
+Pitch uses resampling (also affects duration); no claim of independent formant control.
+All normalized to -12dBFS peak, 10ms edge fades, mono44.1kHz PCM16.
+Labels describe intended timbre; no guaranteed precise age, emotion or real shouting.
+All words from user lines; capitalization/punctuation only vary. No voice cloning.
+Approved LV3/YW10/LD1 are referenced, never rewritten or installed by this pack.

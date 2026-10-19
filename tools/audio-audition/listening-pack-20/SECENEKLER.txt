@@ -1,0 +1,171 @@
+Witch + Undead — PREVIEW ONLY, NOT INSTALLED
+WD1 · Keskin, kuru cadı çığlığı · 0.83s
+undead-voices/witch.wav: speed=0.95, offset=0.0s, max=1.2s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+WD2 · Boğazdan gelen kadın çığlığı · 0.90s
+undead-voices/female_scream.ogg: speed=0.82, offset=0.0s, max=2.1s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+WD3 · Tiz ve çatallı cadı feryadı · 0.69s
+undead-voices/witch.wav: speed=1.15, offset=0.0s, max=1.0s, gain=1.0, lowPass=0.0, highPass=180.0, take=0
+WD4 · Daha yaşlı, pürüzlü ve alçalan feryat · 1.10s
+undead-voices/female_scream.ogg: speed=0.67, offset=0.0s, max=2.4s, gain=1.0, lowPass=4800.0, highPass=0.0, take=1
+WD5 · Kısa, kırılgan ve hırçın kapanış · 0.36s
+human-casting/female/RPG Voice Starter Pack/Type 3/damaged3.wav: speed=1.08, offset=0.0s, max=1.4s, gain=1.0, lowPass=0.0, highPass=250.0, take=0
+SK1 · Kuru ve kısa kemik kırılması · 0.22s
+beast-traits/bfh1_wood_breaking_01.ogg: speed=1.35, offset=0.0s, max=0.65s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+SK2 · Küçük kemiklerin yere saçılması · 0.63s
+beast-traits/bfh1_rock_falling_01.ogg: speed=1.45, offset=0.0s, max=1.0s, gain=1.0, lowPass=0.0, highPass=400.0, take=0
+SK3 · Ağır iskeletin bütün hâlde çökmesi · 0.53s
+beast-traits/bfh1_wood_falling_02.ogg: speed=0.85, offset=0.0s, max=1.2s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + beast-traits/bfh1_rock_falling_02.ogg: speed=1.25, offset=0.12s, max=0.7s, gain=0.45, lowPass=0.0, highPass=0.0, take=0
+SK4 · İçi boş, tok kafatası çatlağı · 0.61s
+beast-traits/bfh1_wood_breaking_03.ogg: speed=0.8, offset=0.0s, max=0.7s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + rubberduck-rpg/wood_02.ogg: speed=0.8, offset=0.0s, max=0.4s, gain=0.5, lowPass=0.0, highPass=0.0, take=0
+SK5 · İnce kemik çıtırtısı ve son tıkırtı · 0.68s
+beast-traits/bfh1_wood_breaking_04.ogg: speed=1.65, offset=0.0s, max=0.6s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + beast-traits/bfh1_rock_falling_03.ogg: speed=1.7, offset=0.18s, max=0.6s, gain=0.45, lowPass=0.0, highPass=0.0, take=0
+SK6 · Zırhlı iskeletin kemik-zincir çöküşü · 0.56s
+beast-traits/bfh1_wood_falling_01.ogg: speed=1.25, offset=0.0s, max=1.0s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + rubberduck-rpg/chain_01.ogg: speed=0.9, offset=0.0s, max=0.75s, gain=0.35, lowPass=0.0, highPass=0.0, take=0
+SK7 · Gevrek kemikler, çok kısa kapanış · 0.14s
+beast-traits/bfh1_wood_breaking_02.ogg: speed=1.8, offset=0.0s, max=0.45s, gain=1.0, lowPass=0.0, highPass=350.0, take=0
+SK8 · Kemiksi bir yığının genişçe dağılması · 0.35s
+beast-traits/bfh1_rock_falling_05.ogg: speed=1.6, offset=0.0s, max=1.3s, gain=1.0, lowPass=0.0, highPass=300.0, take=0 + beast-traits/bfh1_wood_breaking_01.ogg: speed=1.1, offset=0.0s, max=0.5s, gain=0.35, lowPass=0.0, highPass=0.0, take=0
+SK9 · Hafif lanetli iskelet çözülmesi · 0.80s
+beast-traits/bfh1_wood_breaking_03.ogg: speed=1.3, offset=0.0s, max=0.6s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + undead-voices/ghostbreath.flac: speed=1.8, offset=0.0s, max=0.8s, gain=0.18, lowPass=0.0, highPass=450.0, take=0
+SK10 · Ağır çatlak, ardından küçük kemikler · 0.49s
+beast-traits/bfh1_wood_breaking_04.ogg: speed=0.65, offset=0.0s, max=0.8s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + beast-traits/bfh1_rock_falling_04.ogg: speed=1.6, offset=0.25s, max=0.8s, gain=0.6, lowPass=0.0, highPass=0.0, take=0
+ZA1 · Kuru, kısa boğaz hırıltısı · 0.65s
+undead-voices/zombies/zombies/zombie-2.wav: speed=1.0, offset=0.0s, max=0.65s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+ZA2 · Hızlı, öfkeli zombi ısırığı · 0.27s
+undead-voices/zombienoises/fastzombie1.ogg: speed=1.1, offset=0.0s, max=0.7s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+ZA3 · Kalın, ağır zombi eforu · 0.79s
+undead-voices/zombies/zombies/zombie-7.wav: speed=0.72, offset=0.0s, max=0.85s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+ZA4 · Islak, boğuk saldırı sesi · 0.80s
+undead-voices/zombienoises/zombienoise2.ogg: speed=0.9, offset=0.0s, max=0.8s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+ZA5 · Daha keskin, aç zombi hırlaması · 0.70s
+undead-voices/zombies/zombies/zombie-15.wav: speed=1.08, offset=0.0s, max=0.7s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+ZD1 · Uzun ve pürüzlü zombi feryadı · 1.69s
+undead-voices/zombies/zombies/zombie-16.wav: speed=0.85, offset=0.0s, max=2.4s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+ZD2 · Keskin, hızlı çığlıklı ölüm · 0.36s
+undead-voices/zombienoises/fastzombie1.ogg: speed=0.82, offset=0.0s, max=2.1s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+ZD3 · Pesleşen, boğazdan ölüm hırıltısı · 1.49s
+undead-voices/zombies/zombies/zombie-18.wav: speed=0.72, offset=0.0s, max=2.3s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+ZD4 · Açık ağızlı, bozuk zombi haykırışı · 1.67s
+undead-voices/zombies/zombies/zombie-17.wav: speed=0.95, offset=0.0s, max=2.2s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+ZD5 · Kaba, nefesi tükenen kapanış · 0.60s
+undead-voices/zombienoises/zombienoise3.ogg: speed=0.8, offset=0.0s, max=2.4s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+GA1 · Ters/anlamsız, kuru fısıltı · 1.05s
+undead-voices/whispers_litruv.wav: speed=1.0, offset=0.0s, max=0.8s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GA2 · Boğuk, derinden fısıldama · 1.35s
+undead-voices/whispers_litruv.wav: speed=0.72, offset=0.0s, max=1.1s, gain=1.0, lowPass=2500.0, highPass=0.0, take=0
+GA3 · Birden çok uzaktan fısıltı · 1.25s
+undead-voices/whispers_ienba.wav: speed=1.0, offset=0.0s, max=1.0s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GA4 · Kadınsı, karanlık fısıltı · 1.35s
+undead-voices/whispers_bluesiren.wav: speed=0.9, offset=0.0s, max=1.1s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GA5 · Hafif tiz, kısa hayalet sözü · 0.90s
+undead-voices/whispers_litruv.wav: speed=1.2, offset=0.0s, max=0.65s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GA6 · Daha yakın ve nefesli fısıltı · 1.15s
+undead-voices/whispers_ienba.wav: speed=0.9, offset=0.0s, max=0.9s, gain=1.0, lowPass=0.0, highPass=180.0, take=0
+GA7 · Pes, sürünen hayalet sesi · 1.55s
+undead-voices/whispers_bluesiren.wav: speed=0.65, offset=0.0s, max=1.3s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GA8 · Kesik kesik, uğursuz fısıltı · 1.15s
+undead-voices/whispers_litruv.wav: speed=0.85, offset=0.0s, max=0.9s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GA9 · Uzak, geniş yankılı mırıldanma · 1.35s
+undead-voices/whispers_ienba.wav: speed=0.8, offset=0.0s, max=1.1s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GA10 · İnce ve rahatsız edici son hece · 1.00s
+undead-voices/whispers_bluesiren.wav: speed=1.15, offset=0.0s, max=0.75s, gain=1.0, lowPass=0.0, highPass=350.0, take=0
+GD1 · Uzaklaşan kadın hayalet çığlığı · 1.24s
+undead-voices/female_scream.ogg: speed=1.0, offset=0.0s, max=2.0s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+GD2 · Derin ve bozuk ruh feryadı · 2.91s
+undead-voices/ghostmoans/qubodup-GhostMoans/wav/qubodup-GhostMoan01.wav: speed=0.65, offset=0.0s, max=2.4s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+GD3 · Tiz, ani ruh kopuşu · 1.10s
+undead-voices/witch.wav: speed=1.35, offset=0.0s, max=0.8s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GD4 · İnce, yükselen hayalet haykırışı · 2.21s
+undead-voices/ghostmoans/qubodup-GhostMoans/wav/qubodup-GhostMoan02.wav: speed=1.3, offset=0.0s, max=1.7s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+GD5 · Kalın, uzun ve karanlık hayalet ölümü · 3.31s
+undead-voices/ghostmoans/qubodup-GhostMoans/wav/qubodup-GhostMoan03.wav: speed=0.62, offset=0.0s, max=2.8s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+GD6 · Nefesli kadın feryadı, uzun kuyruk · 1.36s
+undead-voices/female_scream.ogg: speed=0.86, offset=0.0s, max=2.7s, gain=1.0, lowPass=0.0, highPass=450.0, take=1
+GD7 · Kısa, canavarımsı ruh çığlığı · 2.01s
+undead-voices/ghostmoans/qubodup-GhostMoans/wav/qubodup-GhostMoan04.wav: speed=0.9, offset=0.0s, max=1.5s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+GD8 · Yırtıcı, yankılı hayalet çığlığı · 1.57s
+undead-voices/witch.wav: speed=0.75, offset=0.0s, max=1.5s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GD9 · Çok pes ve içten gelen ruh çözülmesi · 2.83s
+undead-voices/ghostmoans/qubodup-GhostMoans/wav/qubodup-GhostMoan05.wav: speed=0.58, offset=0.0s, max=3.0s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+GD10 · Uzun, titreşimli hayalet feryadı · 3.11s
+undead-voices/ghostmoans/qubodup-GhostMoans/wav/qubodup-GhostMoan02.wav: speed=0.77, offset=0.0s, max=2.6s, gain=1.0, lowPass=0.0, highPass=180.0, take=1
+GC1 · Kısa, uzak kadın hıçkırığı · 2.31s
+undead-voices/cry_amaiguri.wav: speed=1.0, offset=0.0s, max=1.8s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GC2 · Uzun ve ince hayalet ağlaması · 5.51s
+undead-voices/cry_amaiguri.wav: speed=1.15, offset=0.0s, max=5.0s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GC3 · Alçak, korkutucu kadın ağıdı · 5.01s
+undead-voices/cry_purplereptar.wav: speed=0.7, offset=0.0s, max=4.5s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GC4 · Kısa ve nefesli hayalet sızlanması · 2.31s
+undead-voices/cry_purplereptar.wav: speed=1.0, offset=0.0s, max=1.8s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GC5 · Uzayan, yankılı kadın ağlaması · 5.51s
+undead-voices/cry_amaiguri.wav: speed=0.82, offset=0.0s, max=5.0s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GC6 · İnsanlıktan uzak, pes ruh ağıdı · 4.51s
+undead-voices/ghostmoans/qubodup-GhostMoans/wav/qubodup-GhostMoan01.wav: speed=0.55, offset=0.0s, max=4.0s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+GC7 · Tiz, kırılgan ve kesik hayalet ağlaması · 3.51s
+undead-voices/cry_purplereptar.wav: speed=1.2, offset=0.0s, max=3.0s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GC8 · Çok derin, yavaş hayalet iniltisi · 5.51s
+undead-voices/ghostmoans/qubodup-GhostMoans/wav/qubodup-GhostMoan03.wav: speed=0.48, offset=0.0s, max=5.0s, gain=1.0, lowPass=0.0, highPass=0.0, take=1
+GC9 · Daha doğal, uzun nefesli ağlama · 5.51s
+undead-voices/cry_purplereptar.wav: speed=0.9, offset=0.0s, max=5.0s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+GC10 · Kısa, gölgeli ruh hıçkırığı · 2.51s
+undead-voices/cry_amaiguri.wav: speed=0.68, offset=0.0s, max=2.0s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+LD1 · Kısa, ıslak baloncuk ölümü · 0.67s
+rubberduck-rpg/creature_slime_01.ogg: speed=1.0, offset=0.0s, max=0.8s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+LD2 · Kalın jöle gövdesinin çöküşü · 0.80s
+rubberduck-rpg/creature_slime_03.ogg: speed=0.6, offset=0.0s, max=1.3s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+LD3 · Patlayan, asitli küçük gövde · 0.54s
+rubberduck-rpg/creature_slime_04.ogg: speed=1.15, offset=0.0s, max=0.8s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + focus-ability/acid_bubble.wav: speed=1.2, offset=0.0s, max=0.5s, gain=0.35, lowPass=0.0, highPass=0.0, take=0
+LD4 · Yavaşça çözülen slime · 1.35s
+rubberduck-rpg/creature_slime_02.ogg: speed=0.55, offset=0.0s, max=1.5s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+LD5 · Tok patlama ve sıvı dağılması · 0.89s
+rubberduck-rpg/creature_slime_04.ogg: speed=0.7, offset=0.0s, max=1.0s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + tinysized/sfx-cc0/water-drop-02.wav: speed=0.6, offset=0.0s, max=0.5s, gain=0.3, lowPass=0.0, highPass=0.0, take=1
+LP1 · Kısa, ince asit cızırtısı · 0.55s
+focus-ability/acid_bubble.wav: speed=1.35, offset=0.0s, max=0.55s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+LP2 · Kabarcıklı, tok asit teması · 0.80s
+focus-ability/acid_bubble.wav: speed=0.75, offset=0.0s, max=0.8s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+LP3 · Daha kuru ve keskin yanma · 0.65s
+focus-ability/acid_bubble.wav: speed=1.05, offset=0.0s, max=0.65s, gain=1.0, lowPass=0.0, highPass=800.0, take=0 + tinysized/sfx-cc0/compressed-air-spray-01.wav: speed=1.5, offset=0.0s, max=0.3s, gain=0.2, lowPass=0.0, highPass=0.0, take=1
+LP4 · Yavaş ve ıslak asit kabarcığı · 0.80s
+rubberduck-rpg/creature_slime_02.ogg: speed=1.3, offset=0.0s, max=0.4s, gain=0.4, lowPass=0.0, highPass=0.0, take=0 + focus-ability/acid_bubble.wav: speed=0.65, offset=0.0s, max=0.8s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+LP5 · Hızlı püsküren asit yakması · 0.50s
+tinysized/sfx-cc0/compressed-air-spray-02.wav: speed=1.1, offset=0.0s, max=0.4s, gain=1.0, lowPass=0.0, highPass=0.0, take=1 + focus-ability/acid_bubble.wav: speed=1.6, offset=0.0s, max=0.5s, gain=0.55, lowPass=0.0, highPass=0.0, take=0
+LS1 · İnce, hızlı parçacık pıtlaması · 0.45s
+rubberduck-rpg/creature_slime_01.ogg: speed=1.45, offset=0.0s, max=0.45s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+LS2 · Islak, geniş parçalanma · 0.69s
+rubberduck-rpg/creature_slime_04.ogg: speed=0.9, offset=0.0s, max=0.7s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+LS3 · Küçük asit baloncuklarının saçılması · 0.55s
+focus-ability/acid_bubble.wav: speed=1.8, offset=0.0s, max=0.55s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+LS4 · Kısa ve tok jöle ayrılması · 0.39s
+rubberduck-rpg/creature_slime_03.ogg: speed=1.25, offset=0.0s, max=0.5s, gain=1.0, lowPass=0.0, highPass=0.0, take=0
+LS5 · Sıvı parçaların hafif püskürmesi · 0.45s
+rubberduck-rpg/creature_slime_02.ogg: speed=1.55, offset=0.0s, max=0.45s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + tinysized/sfx-cc0/compressed-air-spray-01.wav: speed=1.6, offset=0.0s, max=0.25s, gain=0.15, lowPass=0.0, highPass=0.0, take=1
+GS1 · Küt, ağır toprak yumruğu · 0.80s
+impact-sounds/impactSoft_heavy_003.ogg: speed=0.35, offset=0.0s, max=0.8s, gain=1.0, lowPass=1200.0, highPass=0.0, take=0 + beast-traits/bfh1_rock_hit_01.ogg: speed=0.55, offset=0.0s, max=0.7s, gain=0.45, lowPass=1900.0, highPass=0.0, take=0
+GS2 · Dev kaya zemine düşüyor · 0.80s
+beast-traits/bfh1_rock_falling_05.ogg: speed=0.4, offset=0.0s, max=0.7s, gain=1.0, lowPass=1600.0, highPass=0.0, take=0 + impact-sounds/impactSoft_heavy_004.ogg: speed=0.4, offset=0.0s, max=0.8s, gain=0.8, lowPass=0.0, highPass=0.0, take=0
+GS3 · Kalın, kapalı gövdeli çarpma · 0.80s
+impact-sounds/impactSoft_heavy_000.ogg: speed=0.3, offset=0.0s, max=0.8s, gain=1.0, lowPass=950.0, highPass=0.0, take=0 + impact-sounds/impactWood_heavy_003.ogg: speed=0.5, offset=0.0s, max=0.6s, gain=0.35, lowPass=1700.0, highPass=0.0, take=0
+GS4 · En pes, kısa ve sert gövde · 0.80s
+impact-sounds/impactSoft_heavy_002.ogg: speed=0.4, offset=0.0s, max=0.8s, gain=1.0, lowPass=900.0, highPass=0.0, take=0 + beast-traits/bfh1_rock_hit_01.ogg: speed=0.6, offset=0.0s, max=0.7s, gain=0.35, lowPass=0.0, highPass=0.0, take=0
+GS5 · Ağır darbe, az ve boğuk zemin dokusu · 0.80s
+impact-sounds/impactSoft_heavy_004.ogg: speed=0.32, offset=0.0s, max=0.8s, gain=1.0, lowPass=1500.0, highPass=0.0, take=0 + beast-traits/bfh1_rock_falling_02.ogg: speed=0.5, offset=0.03s, max=0.7s, gain=0.25, lowPass=900.0, highPass=0.0, take=0
+MA1 · Tok çene kapanışı ve ıslak ısırık · 0.30s
+rubberduck-rpg/wood_02.ogg: speed=1.1, offset=0.0s, max=0.25s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + rubberduck-rpg/creature_slime_01.ogg: speed=1.1, offset=0.0s, max=0.3s, gain=0.55, lowPass=0.0, highPass=0.0, take=0
+MA2 · Kalın, yapışkan uzantı darbesi · 0.40s
+rubberduck-rpg/creature_slime_02.ogg: speed=0.7, offset=0.0s, max=0.4s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + impact-sounds/impactSoft_heavy_002.ogg: speed=0.9, offset=0.0s, max=0.25s, gain=0.45, lowPass=0.0, highPass=0.0, take=0
+MA3 · Kısa hırlama ve diş vurgusu · 0.26s
+rubberduck-rpg/creature_monster_01.ogg: speed=1.0, offset=0.0s, max=0.3s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + rubberduck-rpg/wood_04.ogg: speed=1.2, offset=0.0s, max=0.2s, gain=0.55, lowPass=0.0, highPass=0.0, take=0
+MA4 · Islak, sert canavar ısırığı · 0.40s
+rubberduck-rpg/creature_slime_04.ogg: speed=1.0, offset=0.0s, max=0.4s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + impact-sounds/impactSoft_heavy_000.ogg: speed=1.1, offset=0.0s, max=0.2s, gain=0.35, lowPass=0.0, highPass=0.0, take=0
+MA5 · Ahşap dişli kuru çene darbesi · 0.35s
+rubberduck-rpg/wood_05.ogg: speed=0.85, offset=0.0s, max=0.35s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + rubberduck-rpg/creature_monster_04.ogg: speed=1.15, offset=0.0s, max=0.25s, gain=0.4, lowPass=0.0, highPass=0.0, take=0
+MD1 · Boğuk canavar çöküşü ve ahşap · 1.50s
+rubberduck-rpg/creature_die_01.ogg: speed=0.7, offset=0.0s, max=1.5s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + rubberduck-rpg/wood_03.ogg: speed=0.65, offset=0.35s, max=0.5s, gain=0.35, lowPass=0.0, highPass=0.0, take=0
+MD2 · Yapışkan bedenin sönmesi · 0.88s
+rubberduck-rpg/creature_slime_03.ogg: speed=0.55, offset=0.0s, max=1.4s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + rubberduck-rpg/creature_monster_02.ogg: speed=0.6, offset=0.12s, max=1.0s, gain=0.45, lowPass=0.0, highPass=0.0, take=0
+MD3 · Kısa, dişli sandık kapanışı · 0.80s
+rubberduck-rpg/creature_monster_04.ogg: speed=0.65, offset=0.0s, max=0.8s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + rubberduck-rpg/wood_02.ogg: speed=0.65, offset=0.25s, max=0.5s, gain=0.7, lowPass=0.0, highPass=0.0, take=0
+MD4 · Ağır ve ıslak gövde çöküşü · 1.20s
+rubberduck-rpg/creature_slime_04.ogg: speed=0.5, offset=0.0s, max=1.2s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + impact-sounds/impactSoft_heavy_003.ogg: speed=0.65, offset=0.3s, max=0.8s, gain=0.45, lowPass=0.0, highPass=0.0, take=0
+MD5 · Daha ahşap, kuru canavar ölümü · 0.90s
+rubberduck-rpg/wood_05.ogg: speed=0.55, offset=0.0s, max=0.5s, gain=1.0, lowPass=0.0, highPass=0.0, take=0 + tinysized/sfx-cc0/floor-creak-01.wav: speed=0.6, offset=0.1s, max=0.8s, gain=0.6, lowPass=0.0, highPass=0.0, take=0 + rubberduck-rpg/creature_monster_03.ogg: speed=0.7, offset=0.0s, max=0.9s, gain=0.55, lowPass=0.0, highPass=0.0, take=0

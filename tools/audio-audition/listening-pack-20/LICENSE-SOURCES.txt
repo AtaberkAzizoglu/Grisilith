@@ -1,0 +1,53 @@
+PACK 20 — WITCH / UNDEAD PREVIEW OPTIONS — NOT INSTALLED
+
+NEW SOURCES (CC0):
+artisticdude — Zombies Sound Pack
+https://opengameart.org/content/zombies-sound-pack
+ianzazz — Zombie noises and moans
+https://opengameart.org/content/zombie-noises-and-moans
+qubodup — Ghost Monster Voice Moaning & Growling; Ghost breath
+https://opengameart.org/content/ghost-monster-voice-moaning-growling
+https://opengameart.org/content/ghost-breath
+AuraVoice / Nocturnal_Vanguard — Female Scream 1
+https://opengameart.org/content/female-scream-1
+kanaizo — Loud Witch Scream
+https://freesound.org/people/kanaizo/sounds/724988/
+Litruv — Ghost Whispers (backwards invented words)
+https://freesound.org/people/Litruv/sounds/175944/
+IENBA — Ghost Whispers (Sound Design Workshop students, Playa Hermosa, Uruguay)
+https://freesound.org/people/IENBA/sounds/656439/
+BlueSiren — indistinctwhispering.wav (nonsense / dark phrases, source already layered)
+https://freesound.org/people/BlueSiren/sounds/377743/
+Amaiguri — Female_Fake_Crying.mp3 (acted crying)
+https://freesound.org/people/Amaiguri/sounds/518993/
+purplereptar — Woman Crying.wav
+https://freesound.org/people/purplereptar/sounds/449439/
+Freesound inputs above are publicly offered HQ MP3 previews, not original WAV downloads.
+
+EXISTING SOURCES REUSED:
+Cici Fyre — RPG Voice Starter Pack — CC0
+https://cicifyre.itch.io/rpg-voice-starter-pack
+rubberduck — 80 CC0 RPG SFX; 75 CC0 breaking/falling/hit SFX — CC0
+https://opengameart.org/node/86018
+https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx
+Kenney — Impact Sounds — CC0
+https://kenney.nl/assets/impact-sounds
+Vehicle / Jan Schupke — Fantasy Sound Effects (Tinysized SFX) — CC0
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+HaelDB — Male Grunt/Yelling sounds — CC0 option selected
+https://opengameart.org/content/male-gruntyelling-sounds
+spookymodem — Bubbling Acid — CC BY 3.0
+https://opengameart.org/content/bubbling-acid
+https://creativecommons.org/licenses/by/3.0/
+CC0: https://creativecommons.org/publicdomain/zero/1.0/
+
+EDITS: selected excerpts, mono/44.1kHz PCM16 conversion, pitch/speed, filters,
+short fades, gentle amplitude flutter for Witch, ghost echo / tremolo, optional
+foley layers. Skeleton options are bone-like designs from wood/rock/chain foley,
+not recordings of actual bones. Ghost voices are processed vocal performances;
+10 options does not imply 10 actors. Female performers' actual age is not claimed.
+All clips peak matched to -12dBFS; not perceived loudness normalization.
+GS/MA/MD are carried forward from pack 19, not newly selected sounds.
+GS4 includes an original damped 52Hz sine body, same as pack 19.
+Candidate-level recipes: SECENEKLER.txt / PrepareUndeadAudition.kt.
+Nothing from this audition is installed until selected.

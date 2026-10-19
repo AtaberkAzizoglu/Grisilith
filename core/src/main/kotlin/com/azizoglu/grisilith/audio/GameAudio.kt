@@ -40,6 +40,73 @@ enum class UiSound(val path:String, val durationMs:Long, val priority:Int, val g
     MAGIC_NECROTIC("magic_necrotic.wav",650,5,.6f,true),
     MAGIC_LIGHTNING("magic_lightning.wav",400,5,.6f,true),
     MAGIC_POISON("magic_poison.wav",400,5,.6f,true),
+    COW_ATTACK("cow_attack.wav",800,4,.6f,true),
+    COW_DEATH("cow_death.wav",2600,9,.6f,true),
+    IMP_DEATH("imp_death.wav",881,9,.6f,true),
+    OATHBREAKER_ATTACK("oathbreaker_attack.wav",507,4,.6f,true),
+    OATHBREAKER_DEATH("oathbreaker_death.wav",967,9,.6f,true),
+    TOAD_DEATH("toad_death.wav",950,9,.6f,true),
+    EAGLE_ATTACK("eagle_attack.wav",650,4,.6f,true),
+    EAGLE_DEATH("eagle_death.wav",1000,9,.6f,true),
+    WOLF_ATTACK("wolf_attack.wav",750,4,.6f,true),
+    WOLF_DEATH("wolf_death.wav",800,9,.6f,true),
+    BOAR_ATTACK("boar_attack.wav",558,4,.6f,true),
+    BOAR_DEATH("boar_death.wav",795,9,.6f,true),
+    CROCODILE_ATTACK("crocodile_attack.wav",550,4,.6f,true),
+    CROCODILE_DEATH("crocodile_death.wav",1800,9,.6f,true),
+    SWARM_ATTACK("swarm_attack.wav",400,4,.6f,true),
+    SWARM_DEATH("swarm_death.wav",650,9,.6f,true),
+    BEAR_ATTACK("bear_attack.wav",850,4,.6f,true),
+    BEAR_DEATH("bear_death.wav",1800,9,.6f,true),
+    GORILLA_ATTACK("gorilla_attack.wav",700,4,.6f,true),
+    GORILLA_DEATH("gorilla_death.wav",2000,9,.6f,true),
+    BOAR_CHARGE("boar_charge.wav",1150,5,.6f,true),
+    BOAR_PREPARE("boar_prepare.wav",1000,5,.6f,true),
+    CROCODILE_JUMP("crocodile_jump.wav",550,5,.6f,true),
+    CROCODILE_PREPARE("crocodile_prepare.wav",2000,5,.6f,true),
+    CROCODILE_EGG("crocodile_egg.wav",407,5,.6f,true),
+    SWARM_RESIST("swarm_resist.wav",250,5,.6f,true),
+    SWARM_SPLIT("swarm_split.wav",800,5,.6f,true),
+    BEAR_RAGE("bear_rage.wav",1581,5,.6f,true),
+    GORILLA_PREPARE("gorilla_prepare.wav",500,5,.6f,true),
+    GORILLA_THROW("gorilla_throw.wav",308,5,.6f,true),
+    BANDIT_DEATH("bandit_death.wav",430,9,.6f,true),
+    ARCHER_DEATH("archer_death.wav",377,9,.6f,true),
+    GUARD_DEATH("guard_death.wav",736,9,.6f,true),
+    SPEARMAN_DEATH("spearman_death.wav",1600,9,.6f,true),
+    SPEARMAN_THROW("spearman_throw.wav",200,5,.6f,true),
+    HORSEMAN_DEATH("horseman_death.wav",1600,9,.6f,true),
+    HORSEMAN_ATTACK("horseman_attack.wav",225,5,.6f,true),
+    HORSEMAN_SWIPE("horseman_swipe.wav",364,5,.6f,true),
+    MIMIC_TRANSFORM("mimic_transform.wav",850,5,.6f,true),
+    WITCH_DEATH("witch_death.wav",3408,9,.6f,true),
+    SKELETON_DEATH("skeleton_death.wav",529,9,.6f,true),
+    ZOMBIE_ATTACK("zombie_attack.wav",650,4,.6f,true),
+    ZOMBIE_DEATH("zombie_death.wav",1691,9,.6f,true),
+    GHOST_ATTACK("ghost_attack.wav",1355,4,.6f,true),
+    GHOST_DEATH("ghost_death.wav",1245,9,.6f,true),
+    GHOST_STORM("ghost_storm.wav",3510,5,.6f,true),
+    SLIME_DEATH("slime_death.wav",1348,9,.6f,true),
+    SLIME_PATH("slime_path.wav",500,4,.6f,true),
+    GORILLA_STOMP("gorilla_stomp.wav",1800,5,.6f,true),
+    MIMIC_ATTACK("mimic_attack.wav",525,4,.6f,true),
+    MIMIC_DEATH("mimic_death.wav",714,9,.6f,true),
+    VAMPIRE_HUNGER("vampire_hunger.wav",1200,5,.6f,true),
+    VAMPIRE_BITE("vampire_bite.wav",350,4,.6f,true),
+    VAMPIRE_MIST("vampire_mist.wav",800,5,.6f,true),
+    VAMPIRE_FORM("vampire_form.wav",3200,5,.6f,true),
+    VAMPIRE_TELEPORT("vampire_teleport.wav",750,5,.6f,true),
+    VAMPIRE_CONE_CHARGE("vampire_cone_charge.wav",1000,5,.6f,true),
+    VAMPIRE_SWIPE_CHARGE("vampire_swipe_charge.wav",400,5,.6f,true),
+    VAMPIRE_DEATH("vampire_death.wav",1970,9,.6f,true),
+    VAMPIRE_HURT("vampire_hurt.wav",494,4,.6f,true),
+    SLING_SPLIT("sling_split.wav",320,4,.45f,true),
+    BOOMERANG_CATCH("boomerang_catch.wav",180,4,.4f,true),
+    SHIELD_READY("shield_ready.wav",180,5,.5f,true),
+    BEAR_HURT("bear_hurt.wav",480,4,.6f,true),
+    GORILLA_HURT("gorilla_hurt.wav",400,4,.6f,true),
+    SPEARMAN_HURT("spearman_hurt.wav",360,4,.6f,true),
+    HORSEMAN_HURT("horseman_hurt.wav",450,4,.6f,true),
     IGNITE_DASH("focus_ignite.wav",780,7,.65f,true),
     ERASING_SOUL("focus_erasing.wav",650,7,.65f,true),
     VORTEX("focus_vortex.wav",2316,7,.32f,true),
@@ -68,6 +135,8 @@ enum class UiSound(val path:String, val durationMs:Long, val priority:Int, val g
 
 /** World-space footprint; UI/audio previews intentionally have no world source. */
 data class AudioSource(val x:Float,val y:Float,val radius:Float=0f)
+private val UiSound.isDeathCue:Boolean get()=name.endsWith("_DEATH")
+internal fun UiSound.playbackGain(ability:Boolean=false)=gain*if(combat&&(ability||priority in 6..8))1.35f else 1f
 data class AudioView(val left:Float,val bottom:Float,val width:Float,val height:Float) {
     fun contains(s:AudioSource):Boolean {
         val dx=s.x-s.x.coerceIn(left,left+width);val dy=s.y-s.y.coerceIn(bottom,bottom+height)
@@ -75,11 +144,11 @@ data class AudioView(val left:Float,val bottom:Float,val width:Float,val height:
     }
 }
 
-data class AudioLevels(val master:Float,val music:Float,val effects:Float) {
+data class AudioLevels(val master:Float,val music:Float,val effects:Float,val directionalStereo:Boolean=true) {
     val musicGain get() = (master*music).coerceIn(0f,1f)
     val effectsGain get() = (master*effects).coerceIn(0f,1f)
     companion object {
-        fun saved()=AudioLevels(GameSettings.masterVolume,GameSettings.musicVolume,GameSettings.soundEffectsVolume)
+        fun saved()=AudioLevels(GameSettings.masterVolume,GameSettings.musicVolume,GameSettings.soundEffectsVolume,GameSettings.directionalStereo)
     }
 }
 
@@ -91,24 +160,31 @@ class AudioController(
     private val millis:()->Long={System.nanoTime()/1_000_000L},
     private val seekSound:((Sound,Long,Float)->Boolean)?=null
 ):Disposable {
-    private data class Event(val kind:UiSound,val source:AudioSource?,val ability:Boolean)
-    private data class Voice(val kind:UiSound,val sound:Sound,val id:Long,var remaining:Double,val source:AudioSource?,val ability:Boolean)
+    private data class Event(val kind:UiSound,val source:AudioSource?,val ability:Boolean,val gainMultiplier:Float)
+    private data class Voice(val kind:UiSound,val sound:Sound,val id:Long,var remaining:Double,val source:AudioSource?,val ability:Boolean,val gainMultiplier:Float)
     private val sounds=mutableMapOf<UiSound,Sound>()
     private val voices=mutableListOf<Voice>()
-    private data class Channel(val kind:UiSound,val looping:Boolean,var source:AudioSource?,var sound:Sound?=null,var id:Long=-1L,var elapsedSeconds:Double=0.0)
+    private data class Channel(val kind:UiSound,val looping:Boolean,var source:AudioSource?,var sound:Sound?=null,var id:Long=-1L,var elapsedSeconds:Double=0.0,var gainMultiplier:Float=1f)
     private val channels=linkedMapOf<Any,Channel>()
     private var view:AudioView?=null
     private var playerSource:AudioSource?=null
     fun worldView(value:AudioView,player:AudioSource) {advanceVoices(millis());view=value;playerSource=player;syncVolumesAndMusic()}
     private fun visible(source:AudioSource?)=source==null || view?.contains(source)!=false
-    private fun cueGain(kind:UiSound,ability:Boolean=false)=kind.gain*if(kind.combat&&(ability||kind.priority in 6..8))1.35f else 1f
+    // Restrained stereo spread; UI remains centered and visibility still controls audibility.
+    private fun pan(source:AudioSource?):Float {
+        val listener=playerSource ?: return 0f
+        if(source==null || !effective().directionalStereo)return 0f
+        // Fixed world-space falloff: moving the camera cannot move the listener or change stereo.
+        return ((source.x-listener.x)/500f).coerceIn(-1f,1f)*.75f
+    }
+    private fun cueGain(kind:UiSound,ability:Boolean=false)=kind.playbackGain(ability)
 
     /** Owner-bound loops are separate from disposable attack transients, so attacks cannot cut a chant. */
-    fun sustain(owner:Any,kind:UiSound?,looping:Boolean=true,source:AudioSource?=null) {
+    fun sustain(owner:Any,kind:UiSound?,looping:Boolean=true,source:AudioSource?=null,gainMultiplier:Float=1f) {
         if(disposed)return
         advanceVoices(millis())
         if(kind==null || channels[owner]?.kind!=kind) stopSustain(owner)
-        if(kind!=null && !menu) { require(kind.combat);channels.getOrPut(owner){Channel(kind,looping,source?:playerSource)}.also{if(source!=null)it.source=source} }
+        if(kind!=null && !menu) { require(kind.combat);channels.getOrPut(owner){Channel(kind,looping,source?:playerSource)}.also{if(source!=null)it.source=source;it.gainMultiplier=gainMultiplier.coerceIn(0f,2f)} }
         syncChannels()
     }
     fun stopSustain(owner:Any) {channels.remove(owner)?.let{if(it.id>=0)it.sound?.stop(it.id)}}
@@ -123,11 +199,11 @@ class AudioController(
             // Backends without seeking keep the source running silently (never pause/restart it).
             if(!audible && seekSound!=null) {if(c.id>=0)c.sound?.stop(c.id);c.id=-1L;return@forEach}
             if(!c.looping && c.elapsedSeconds*1000>=c.kind.durationMs) {if(c.id>=0)c.sound?.stop(c.id);c.id=-1L;return@forEach}
-            val volume=if(audible)(gain*cueGain(c.kind)/kotlin.math.sqrt((counts[c.kind]?:1).toFloat())).coerceAtMost(1f) else 0f
+            val volume=if(audible)(gain*cueGain(c.kind)*c.gainMultiplier/kotlin.math.sqrt((counts[c.kind]?:1).toFloat())).coerceAtMost(1f) else 0f
             if(c.id<0 && !paused && !combatStopped && c.kind !in failedSounds) {
                 val sound=sounds[c.kind]?:runCatching{loadSound(c.kind)}.getOrElse{failedSounds+=c.kind;return@forEach}.also{sounds[c.kind]=it}
                 val startVolume=if(seekSound!=null&&c.elapsedSeconds>0.001)0f else volume
-                c.sound=sound;c.id=runCatching{if(c.looping)sound.loop(startVolume,combatSpeed,0f) else sound.play(startVolume,combatSpeed,0f)}.getOrDefault(-1L)
+                c.sound=sound;c.id=runCatching{if(c.looping)sound.loop(startVolume,combatSpeed,pan(c.source)) else sound.play(startVolume,combatSpeed,pan(c.source))}.getOrDefault(-1L)
                 if(c.id>=0 && seekSound!=null && c.elapsedSeconds>0.001) {
                     val duration=c.kind.durationMs/1000.0
                     val offset=if(c.looping&&duration>0)c.elapsedSeconds%duration else c.elapsedSeconds
@@ -136,7 +212,7 @@ class AudioController(
                     }
                 }
             }
-            if(c.id>=0) {c.sound?.setVolume(c.id,volume);c.sound?.setPitch(c.id,combatSpeed)}
+            if(c.id>=0) {c.sound?.setPan(c.id,pan(c.source),volume);c.sound?.setPitch(c.id,combatSpeed)}
         }
     }
     private var music:Music?=null
@@ -150,6 +226,7 @@ class AudioController(
     private var combatCursor=0
     private var combatSpeed=1f
     private var combatStopped=false
+    private var allowDeathTails=false
     private var lastVoiceUpdate:Long?=null
     private var lastSoundAt=Long.MIN_VALUE/2
     private var previewOwner:Any?=null
@@ -161,21 +238,24 @@ class AudioController(
         val elapsed=(now-(lastVoiceUpdate?:now)).coerceAtLeast(0).toDouble()
         lastVoiceUpdate=now
         voices.forEach { it.remaining-=elapsed*if(it.kind.combat) {
-            if(combatStopped)0.0 else combatSpeed.toDouble()
+            if(combatStopped && !(allowDeathTails && it.kind.isDeathCue))0.0 else combatSpeed.toDouble()
         } else 1.0 }
         voices.filter{it.remaining<=0.0}.forEach{it.sound.stop(it.id)}
         voices.removeAll{it.remaining<=0.0}
         if(!paused&&!combatStopped) channels.values.forEach{it.elapsedSeconds+=elapsed*combatSpeed/1000.0}
     }
-    fun combatPlayback(speed:Float,stopped:Boolean) {
+    fun combatPlayback(speed:Float,stopped:Boolean,deathTails:Boolean=false) {
         if(disposed)return
         advanceVoices(millis())
         combatSpeed=if(speed.isFinite())speed.coerceIn(.5f,2f) else 1f
-        val wasStopped=combatStopped;combatStopped=stopped
+        val wasStopped=combatStopped;val previouslyAllowedDeathTails=allowDeathTails
+        combatStopped=stopped;allowDeathTails=deathTails
         voices.filter{it.kind.combat}.forEach {
             it.sound.setPitch(it.id,combatSpeed)
-            if(stopped&&!wasStopped)it.sound.pause(it.id)
-            else if(!stopped&&wasStopped)it.sound.resume(it.id)
+            val previouslyFrozen=wasStopped && !(previouslyAllowedDeathTails && it.kind.isDeathCue)
+            val frozen=stopped && !(deathTails && it.kind.isDeathCue)
+            if(frozen&&!previouslyFrozen)it.sound.pause(it.id)
+            else if(!frozen&&previouslyFrozen)it.sound.resume(it.id)
         }
         if(stopped)pendingCombat.clear()
         channels.values.forEach{c->if(c.id>=0){c.sound?.setPitch(c.id,combatSpeed)
@@ -203,10 +283,16 @@ class AudioController(
         if(previewOwner===owner) { previewOwner=null;preview=null;syncVolumesAndMusic() }
     }
     /** Coalesce competing UI events in a frame: failures override click/confirm, chest overrides clicks. */
-    fun request(kind:UiSound,source:AudioSource?=null,ability:Boolean=false) {
+    fun request(kind:UiSound,source:AudioSource?=null,ability:Boolean=false,gainMultiplier:Float=1f) {
         if(disposed||paused)return
-        val event=Event(kind,if(kind.combat)source?:playerSource else null,ability)
-        if(kind.combat) {if(!menu&&!combatStopped && (pendingCombat[kind]?.ability!=true || ability))pendingCombat[kind]=event;return}
+        val event=Event(kind,if(kind.combat)source?:playerSource else null,ability,gainMultiplier.coerceIn(0f,2f))
+        if(kind.combat) {
+            // A hidden Imp/weapon must not replace an audible shot sharing the same sample.
+            val previous=pendingCombat[kind]
+            if(!menu&&!combatStopped && visible(event.source) &&
+                (previous?.ability!=true || ability) && (previous==null || event.gainMultiplier>=previous.gainMultiplier))pendingCombat[kind]=event
+            return
+        }
         if(pending==null || kind.priority>pending!!.kind.priority) pending=event
     }
     fun update() {
@@ -227,7 +313,7 @@ class AudioController(
     }
     private fun playEvent(request:Event,now:Long) {
         val event=request.kind
-        val volume=(effective().effectsGain*cueGain(event,request.ability)).coerceAtMost(1f)
+        val volume=(effective().effectsGain*cueGain(event,request.ability)*request.gainMultiplier).coerceAtMost(1f)
         if(!visible(request.source))return
         val previous=if(event.combat)lastCombatAt[event]?:Long.MIN_VALUE/2 else lastSoundAt
         if(volume<=0f || now-previous<(if(event.combat)80L/combatSpeed else 80f))return
@@ -240,9 +326,9 @@ class AudioController(
             if(oldestLowPriority.kind.priority>event.priority)return
             voices.remove(oldestLowPriority);oldestLowPriority.sound.stop(oldestLowPriority.id)
         }
-        val id=runCatching{sound.play(volume,if(event.combat)combatSpeed else 1f,0f)}.getOrDefault(-1L)
+        val id=runCatching{sound.play(volume,if(event.combat)combatSpeed else 1f,pan(request.source))}.getOrDefault(-1L)
         if(id>=0) {
-            voices+=Voice(event,sound,id,event.durationMs.toDouble(),request.source,request.ability)
+            voices+=Voice(event,sound,id,event.durationMs.toDouble(),request.source,request.ability,request.gainMultiplier)
             if(event.combat)lastCombatAt[event]=now else lastSoundAt=now
         }
     }
@@ -251,8 +337,8 @@ class AudioController(
         syncChannels()
         val current=effective()
         voices.forEach { voice ->
-            val gain=if(visible(voice.source))(current.effectsGain*cueGain(voice.kind,voice.ability)).coerceAtMost(1f) else 0f
-            if(current.effectsGain<=0f)voice.sound.stop(voice.id) else voice.sound.setVolume(voice.id,gain)
+            val gain=if(visible(voice.source))(current.effectsGain*cueGain(voice.kind,voice.ability)*voice.gainMultiplier).coerceAtMost(1f) else 0f
+            if(current.effectsGain<=0f)voice.sound.stop(voice.id) else voice.sound.setPan(voice.id,pan(voice.source),gain)
         }
         if(current.effectsGain<=0f) voices.clear()
         if(!menu||paused) {if(music?.isPlaying==true)music?.pause();return}
@@ -295,9 +381,12 @@ object GameAudio {
         )
     }
     fun play(kind:UiSound) {controller?.request(kind)}
-    fun playAt(kind:UiSound,x:Float,y:Float,radius:Float=0f) {controller?.request(kind,AudioSource(x,y,radius))}
+    fun playAt(kind:UiSound,x:Float,y:Float,radius:Float=0f,gainMultiplier:Float=1f) {controller?.request(kind,AudioSource(x,y,radius),gainMultiplier=gainMultiplier)}
+    fun projectile(sound:ProjectileSound,x:Float?=null,y:Float?=null,ability:Boolean=false) {
+        controller?.request(sound.cue,if(x!=null&&y!=null)AudioSource(x,y) else null,ability)
+    }
     fun ability(kind:UiSound,x:Float?=null,y:Float?=null,radius:Float=0f) {controller?.request(kind,if(x!=null&&y!=null)AudioSource(x,y,radius) else null,true)}
-    fun sustain(owner:Any,kind:UiSound?,looping:Boolean=true,source:AudioSource?=null) {controller?.sustain(owner,kind,looping,source)}
+    fun sustain(owner:Any,kind:UiSound?,looping:Boolean=true,source:AudioSource?=null,gainMultiplier:Float=1f) {controller?.sustain(owner,kind,looping,source,gainMultiplier)}
     fun worldView(left:Float,bottom:Float,width:Float,height:Float,playerX:Float,playerY:Float) {
         controller?.worldView(AudioView(left,bottom,width,height),AudioSource(playerX,playerY))
     }
@@ -312,7 +401,7 @@ object GameAudio {
         com.azizoglu.grisilith.weapon.summon.IvySummonChoice.SUMMON_DEMONS->UiSound.DEMON_CHOICE
         com.azizoglu.grisilith.weapon.summon.IvySummonChoice.CALL_THE_KNIGHT->UiSound.OATHBREAKER_CHOICE
     })}
-    /** Shared placeholder until the user chooses one of the new spoken NS audition cues. */
+    /** The user chose to retain the shared confirmation cue for glyph selection. */
     fun glyphChoice() {play(UiSound.CONFIRM)}
     fun castCue(type:com.azizoglu.grisilith.weapon.glyph.GlyphType)=when(type) {
         com.azizoglu.grisilith.weapon.glyph.GlyphType.CALL_LIGHTNING->UiSound.CAST_LIGHTNING
@@ -320,23 +409,14 @@ object GameAudio {
         com.azizoglu.grisilith.weapon.glyph.GlyphType.TSUNAMI->UiSound.CAST_TSUNAMI
         com.azizoglu.grisilith.weapon.glyph.GlyphType.SINGULARITY->UiSound.CAST_SINGULARITY
     }
-    fun magicalShot(type:com.azizoglu.grisilith.content.DamageType) {
-        val cue=when(type) {
-            com.azizoglu.grisilith.content.DamageType.AIR->UiSound.MAGIC_AIR
-            com.azizoglu.grisilith.content.DamageType.WATER->UiSound.MAGIC_WATER
-            com.azizoglu.grisilith.content.DamageType.FIRE->UiSound.MAGIC_FIRE
-            com.azizoglu.grisilith.content.DamageType.ACID->UiSound.MAGIC_ACID
-            com.azizoglu.grisilith.content.DamageType.NECROTIC->UiSound.MAGIC_NECROTIC
-            com.azizoglu.grisilith.content.DamageType.LIGHTNING->UiSound.MAGIC_LIGHTNING
-            com.azizoglu.grisilith.content.DamageType.POISON->UiSound.MAGIC_POISON
-            else->return
-        }
-        play(cue)
+    fun magicalShot(type:com.azizoglu.grisilith.content.DamageType,x:Float?=null,y:Float?=null) {
+        ProjectileSound.magical(type)?.let{projectile(it,x,y)}
     }
-    fun combatPlayback(speed:Float,stopped:Boolean) {controller?.combatPlayback(speed,stopped)}
+
+    fun combatPlayback(speed:Float,stopped:Boolean,deathTails:Boolean=false) {controller?.combatPlayback(speed,stopped,deathTails)}
     fun menuContext(value:Boolean) {controller?.setMenuContext(value)}
     fun inMenus()=controller?.inMenus?:false
-    fun preview(owner:Any,master:Float,music:Float,effects:Float) {controller?.preview(owner,AudioLevels(master,music,effects))}
+    fun preview(owner:Any,master:Float,music:Float,effects:Float,directionalStereo:Boolean=GameSettings.directionalStereo) {controller?.preview(owner,AudioLevels(master,music,effects,directionalStereo))}
     fun clearPreview(owner:Any) {controller?.clearPreview(owner)}
     fun update() {controller?.update()}
     fun pause() {controller?.pause()}

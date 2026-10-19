@@ -1,0 +1,870 @@
+[
+  {
+    "id": "IM1",
+    "recipe": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": "bm_george",
+      "label": "Britanya tabanlı; ağırbaşlı, otoriter hedef",
+      "speed": 0.92,
+      "pitch": -0.5,
+      "lang": "en-gb",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 5.341428571428572,
+    "sha256": "28e53a48b0a36c063a5339d2b1638e5ff84c0eef5bb12b47b4bd0472fb38c3d7",
+    "phonemes": "ɪt ɪz maɪ ˈəʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈadʒɪk ɪz ɡɒn fɹɒm ðɪs ɹˈɛlm!"
+  },
+  {
+    "id": "IM2",
+    "recipe": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": "bm_fable",
+      "label": "Britanya tabanlı; kararlı savaşçı hedef",
+      "speed": 0.93,
+      "pitch": -0.8,
+      "lang": "en-gb",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 5.3795918367346935,
+    "sha256": "ca223ed6173622de322e48a3c891bf83d25b363a0411dac05ee56bee942c3eb7",
+    "phonemes": "ɪt ɪz maɪ ˈəʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈadʒɪk ɪz ɡɒn fɹɒm ðɪs ɹˈɛlm!"
+  },
+  {
+    "id": "IM3",
+    "recipe": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": "am_fenrir",
+      "label": "Amerikan tabanlı; sert ve doğrudan hedef",
+      "speed": 0.9,
+      "pitch": -0.7,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 4.770385487528345,
+    "sha256": "c9c7c851c0b63bdf7b4665d140a7a2948ec72e27535529b56de10bcee1bc3656",
+    "phonemes": "ɪɾ ɪz maɪ ˈoʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈædʒɪk ɪz ɡɔn fɹʌm ðɪs ɹˈɛlm!"
+  },
+  {
+    "id": "IM4",
+    "recipe": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": "am_michael",
+      "label": "Amerikan tabanlı; tok komutan hedef",
+      "speed": 0.91,
+      "pitch": -0.5,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 5.187052154195011,
+    "sha256": "668e16018f6a94c9c0b7c444aff28ab7f032d31c8d5bbce662aa41bb6e37076d",
+    "phonemes": "ɪɾ ɪz maɪ ˈoʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈædʒɪk ɪz ɡɔn fɹʌm ðɪs ɹˈɛlm!"
+  },
+  {
+    "id": "IM5",
+    "recipe": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": "bm_daniel",
+      "label": "Britanya tabanlı; kontrollü emir hedef",
+      "speed": 0.94,
+      "pitch": -0.6,
+      "lang": "en-gb",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 4.580634920634921,
+    "sha256": "5dd6c4f6bf689a9a918092af5d8a1185cb143c9567f65d6d245047c860817176",
+    "phonemes": "ɪt ɪz maɪ ˈəʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈadʒɪk ɪz ɡɒn fɹɒm ðɪs ɹˈɛlm!"
+  },
+  {
+    "id": "IM6",
+    "recipe": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": "am_onyx",
+      "label": "Daha koyu ve ağır şövalye hedef",
+      "speed": 0.87,
+      "pitch": -1.0,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 5.607392290249433,
+    "sha256": "04f4e5d0a25ce10aee53e50a5c18e18ea87a723e59e9687619d7b284393c367c",
+    "phonemes": "ɪɾ ɪz maɪ ˈoʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈædʒɪk ɪz ɡɔn fɹʌm ðɪs ɹˈɛlm!"
+  },
+  {
+    "id": "IM7",
+    "recipe": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": "bm_lewis",
+      "label": "Britanya tabanlı; daha çevik savaşçı hedef",
+      "speed": 0.97,
+      "pitch": -0.6,
+      "lang": "en-gb",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 4.954104308390023,
+    "sha256": "dab0b85f252cf8b824e453b9e4f317deae1dfe92ac49dc0090a4caeba8bff295",
+    "phonemes": "ɪt ɪz maɪ ˈəʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈadʒɪk ɪz ɡɒn fɹɒm ðɪs ɹˈɛlm!"
+  },
+  {
+    "id": "IM8",
+    "recipe": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": "am_eric",
+      "label": "Daha kuru ve ölçülü otorite hedef",
+      "speed": 0.91,
+      "pitch": -0.8,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 4.329501133786848,
+    "sha256": "0f0b72fd34bd659c7deffb77175a67da3acd6ac10dcf5f92470c702f6a0e1fe6",
+    "phonemes": "ɪɾ ɪz maɪ ˈoʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈædʒɪk ɪz ɡɔn fɹʌm ðɪs ɹˈɛlm!"
+  },
+  {
+    "id": "IM9",
+    "recipe": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": {
+        "bm_george": 0.6,
+        "am_michael": 0.4
+      },
+      "label": "Tek sentetik ses: Britanya/Amerikan tını karışımı",
+      "speed": 0.9,
+      "pitch": -0.7,
+      "lang": "en-gb",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 5.261179138321996,
+    "sha256": "1be08db68131efa9964a841f3214d8ff76629164ccfba63d1a1e2293b634ec9e",
+    "phonemes": "ɪt ɪz maɪ ˈəʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈadʒɪk ɪz ɡɒn fɹɒm ðɪs ɹˈɛlm!"
+  },
+  {
+    "id": "IM10",
+    "recipe": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": {
+        "am_fenrir": 0.7,
+        "bm_fable": 0.3
+      },
+      "label": "Tek sentetik ses: sert, tok yemin hedef",
+      "speed": 0.88,
+      "pitch": -1.0,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 4.926462585034014,
+    "sha256": "c4612fbc739871f933cbfce397b84f43b7369c6568779dbb775aafff28162ec0",
+    "phonemes": "ɪɾ ɪz maɪ ˈoʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈædʒɪk ɪz ɡɔn fɹʌm ðɪs ɹˈɛlm!"
+  },
+  {
+    "id": "LV1",
+    "recipe": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "bf_emma",
+      "label": "Britanya tabanlı; sakin, soğuk büyücü hedef",
+      "speed": 0.95,
+      "pitch": -0.3,
+      "lang": "en-gb",
+      "pause": 0.38,
+      "rough": false
+    },
+    "duration": 5.177687074829932,
+    "sha256": "42b15dfdb58b29233a865dc35e9e52ed22c8ac0eae87f45d0e3835a0c84ca6f1",
+    "phonemes": "and ðeɪ kˈɔːl ðiːz spˈɛlz \"fəbˈɪdən mˈadʒɪk.\" hˈɑː! wˌɒts ðə wˈɜːst ðat kʊd hˈapən, ˈɛnɪwˌeɪ?"
+  },
+  {
+    "id": "LV2",
+    "recipe": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "bf_isabella",
+      "label": "Britanya tabanlı; donuk, aristokratik hedef",
+      "speed": 0.92,
+      "pitch": -0.5,
+      "lang": "en-gb",
+      "pause": 0.4,
+      "rough": false
+    },
+    "duration": 5.931541950113378,
+    "sha256": "368937db733883c5308fb4afdf17aeb3dd851b0effb501d83301c85bc398df06",
+    "phonemes": "and ðeɪ kˈɔːl ðiːz spˈɛlz \"fəbˈɪdən mˈadʒɪk.\" hˈɑː! wˌɒts ðə wˈɜːst ðat kʊd hˈapən, ˈɛnɪwˌeɪ?"
+  },
+  {
+    "id": "LV3",
+    "recipe": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "af_nicole",
+      "label": "Amerikan tabanlı; nefesli ve kontrollü hedef",
+      "speed": 0.95,
+      "pitch": -0.4,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 8.432630385487528,
+    "sha256": "91e584184dde54f8799b5927d797a9c70bf6bf9d9cd51a22730389aa7f3eb80e",
+    "phonemes": "ænd ðeɪ kˈɔːl ðiːz spˈɛlz \"fɚbˈɪdən mˈædʒɪk.\" hˈɑː! wˌʌts ðə wˈɜːst ðæt kʊd hˈæpən, ˈɛnɪwˌeɪ?"
+  },
+  {
+    "id": "LV4",
+    "recipe": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "af_kore",
+      "label": "Amerikan tabanlı; koyu ve katı hedef",
+      "speed": 0.92,
+      "pitch": -0.5,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 6.032380952380953,
+    "sha256": "3d93483f8be236ca51159923d0f8c130480146d4c45cddb5b07e9c9ebcd4fed1",
+    "phonemes": "ænd ðeɪ kˈɔːl ðiːz spˈɛlz \"fɚbˈɪdən mˈædʒɪk.\" hˈɑː! wˌʌts ðə wˈɜːst ðæt kʊd hˈæpən, ˈɛnɪwˌeɪ?"
+  },
+  {
+    "id": "LV5",
+    "recipe": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "bf_lily",
+      "label": "Britanya tabanlı; kuru, ölçülü alay hedef",
+      "speed": 0.94,
+      "pitch": -0.2,
+      "lang": "en-gb",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 5.43984126984127,
+    "sha256": "a2ae9a2698627418c948946c92604e603f0272735bb9140edeeae1f86a00b5c9",
+    "phonemes": "and ðeɪ kˈɔːl ðiːz spˈɛlz \"fəbˈɪdən mˈadʒɪk.\" hˈɑː! wˌɒts ðə wˈɜːst ðat kʊd hˈapən, ˈɛnɪwˌeɪ?"
+  },
+  {
+    "id": "LV6",
+    "recipe": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "af_aoede",
+      "label": "Amerikan tabanlı; sakin ama tehditkâr hedef",
+      "speed": 0.93,
+      "pitch": -0.4,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 5.667460317460318,
+    "sha256": "396fece4d59d309c9ecea3bdc75990acae1fe927a8da39dfb40b58b5863e1e10",
+    "phonemes": "ænd ðeɪ kˈɔːl ðiːz spˈɛlz \"fɚbˈɪdən mˈædʒɪk.\" hˈɑː! wˌʌts ðə wˈɜːst ðæt kʊd hˈæpən, ˈɛnɪwˌeɪ?"
+  },
+  {
+    "id": "LV7",
+    "recipe": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "af_bella",
+      "label": "Amerikan tabanlı; daha tok ve etkileyici hedef",
+      "speed": 0.95,
+      "pitch": -0.8,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 5.845351473922903,
+    "sha256": "26e7479db4134238769c5710747be491691b8034d8413cc9fbbf22dd526277cf",
+    "phonemes": "ænd ðeɪ kˈɔːl ðiːz spˈɛlz \"fɚbˈɪdən mˈædʒɪk.\" hˈɑː! wˌʌts ðə wˈɜːst ðæt kʊd hˈæpən, ˈɛnɪwˌeɪ?"
+  },
+  {
+    "id": "LV8",
+    "recipe": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "bf_alice",
+      "label": "Britanya tabanlı; net ve mesafeli hedef",
+      "speed": 0.94,
+      "pitch": -0.4,
+      "lang": "en-gb",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 5.7758956916099775,
+    "sha256": "79d9b71bd448b540fe17bd36c0d31fd06ff8d7a186c823e15051040dd52be2a6",
+    "phonemes": "and ðeɪ kˈɔːl ðiːz spˈɛlz \"fəbˈɪdən mˈadʒɪk.\" hˈɑː! wˌɒts ðə wˈɜːst ðat kʊd hˈapən, ˈɛnɪwˌeɪ?"
+  },
+  {
+    "id": "LV9",
+    "recipe": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": {
+        "bf_emma": 0.6,
+        "bf_isabella": 0.4
+      },
+      "label": "Tek sentetik ses: soğuk elf tınısı hedef",
+      "speed": 0.93,
+      "pitch": -0.5,
+      "lang": "en-gb",
+      "pause": 0.4,
+      "rough": false
+    },
+    "duration": 5.456009070294785,
+    "sha256": "a5dcf14c5cec1e6be93255f9ed7a76be0e8254e408b8dc9dfcb4810b4037a851",
+    "phonemes": "and ðeɪ kˈɔːl ðiːz spˈɛlz \"fəbˈɪdən mˈadʒɪk.\" hˈɑː! wˌɒts ðə wˈɜːst ðat kʊd hˈapən, ˈɛnɪwˌeɪ?"
+  },
+  {
+    "id": "LV10",
+    "recipe": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": {
+        "af_kore": 0.6,
+        "af_nicole": 0.4
+      },
+      "label": "Tek sentetik ses: alçak, büyüsel sakinlik hedef",
+      "speed": 0.9,
+      "pitch": -0.6,
+      "lang": "en-us",
+      "pause": 0.4,
+      "rough": false
+    },
+    "duration": 7.112312925170068,
+    "sha256": "3c68ac8a5e620dfbefdab64c81ad61ca1f5f708ba1b48ccd4fe9cc58e1bbbed7",
+    "phonemes": "ænd ðeɪ kˈɔːl ðiːz spˈɛlz \"fɚbˈɪdən mˈædʒɪk.\" hˈɑː! wˌʌts ðə wˈɜːst ðæt kʊd hˈæpən, ˈɛnɪwˌeɪ?"
+  },
+  {
+    "id": "YW1",
+    "recipe": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "af_heart",
+      "label": "Amerikan tabanlı; canlı ve hevesli iz sürücü hedef",
+      "speed": 1.1,
+      "pitch": 0.2,
+      "lang": "en-us",
+      "pause": 0.2,
+      "rough": false
+    },
+    "duration": 2.9233786848072563,
+    "sha256": "41d8bbe96e3303228bd779a80891328051d1dfe19715c94df72843eda96f5d89",
+    "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs dᵻɹˈɛkʃən. aɪm ɔnðə tɹˈeɪl!"
+  },
+  {
+    "id": "YW2",
+    "recipe": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "af_sarah",
+      "label": "Amerikan tabanlı; net, hızlı ve kararlı hedef",
+      "speed": 1.1,
+      "pitch": 0.0,
+      "lang": "en-us",
+      "pause": 0.2,
+      "rough": false
+    },
+    "duration": 2.978684807256236,
+    "sha256": "f0aeb9575c4d5543e7ace8e7027060ead676184be8354996ebc1ca0778267b3b",
+    "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs dᵻɹˈɛkʃən. aɪm ɔnðə tɹˈeɪl!"
+  },
+  {
+    "id": "YW3",
+    "recipe": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "af_bella",
+      "label": "Amerikan tabanlı; özgüvenli kolcu hedef",
+      "speed": 1.08,
+      "pitch": 0.3,
+      "lang": "en-us",
+      "pause": 0.2,
+      "rough": false
+    },
+    "duration": 2.9262131519274375,
+    "sha256": "83f4f89d7cff9582cf4e29fd79241dbe6053fcb44cae06e186240845fd5548d5",
+    "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs dᵻɹˈɛkʃən. aɪm ɔnðə tɹˈeɪl!"
+  },
+  {
+    "id": "YW4",
+    "recipe": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "af_nova",
+      "label": "Amerikan tabanlı; atak ve heyecanlı hedef",
+      "speed": 1.13,
+      "pitch": 0.3,
+      "lang": "en-us",
+      "pause": 0.18,
+      "rough": false
+    },
+    "duration": 3.2472108843537413,
+    "sha256": "5c6ce6c08a316f4d6c109f9cb37f55e4a58e1e9671b44c3dbbcf22bea00b4450",
+    "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs dᵻɹˈɛkʃən. aɪm ɔnðə tɹˈeɪl!"
+  },
+  {
+    "id": "YW5",
+    "recipe": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "bf_alice",
+      "label": "Britanya tabanlı; hafif aksanlı, çevik hedef",
+      "speed": 1.1,
+      "pitch": 0.2,
+      "lang": "en-gb",
+      "pause": 0.2,
+      "rough": false
+    },
+    "duration": 3.3016326530612243,
+    "sha256": "c6163ca30a2c3257a1341132292ae21a3804d2fc5f02d40bc6437cbbdbb269c5",
+    "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs daɪɹˈɛkʃən. aɪm ɒnðə tɹˈeɪl!"
+  },
+  {
+    "id": "YW6",
+    "recipe": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "bf_emma",
+      "label": "Britanya tabanlı; kararlı ve hevesli hedef",
+      "speed": 1.08,
+      "pitch": 0.5,
+      "lang": "en-gb",
+      "pause": 0.2,
+      "rough": false
+    },
+    "duration": 2.9768027210884354,
+    "sha256": "d970da179ed71682ca64c03427b454c029ac1fef0865f4094283c3fbfa19f503",
+    "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs daɪɹˈɛkʃən. aɪm ɒnðə tɹˈeɪl!"
+  },
+  {
+    "id": "YW7",
+    "recipe": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "af_sky",
+      "label": "Daha hafif ve enerjik yetişkin kadın hedef",
+      "speed": 1.05,
+      "pitch": 0.0,
+      "lang": "en-us",
+      "pause": 0.2,
+      "rough": false
+    },
+    "duration": 3.2,
+    "sha256": "3c7a8688bb80bfa6cd95abf62807df068e34373004ab468a79805358e3857c3c",
+    "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs dᵻɹˈɛkʃən. aɪm ɔnðə tɹˈeɪl!"
+  },
+  {
+    "id": "YW8",
+    "recipe": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "hf_alpha",
+      "label": "Deneysel: Hint/Hindi taban sesinin İngilizce okuması",
+      "speed": 1.07,
+      "pitch": 0.0,
+      "lang": "en-us",
+      "pause": 0.2,
+      "rough": false
+    },
+    "duration": 3.3486848072562356,
+    "sha256": "aa0d81b1efba6457d9df61630962b57fa0791588ecd7da9944067361a25b94f2",
+    "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs dᵻɹˈɛkʃən. aɪm ɔnðə tɹˈeɪl!"
+  },
+  {
+    "id": "YW9",
+    "recipe": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "jf_alpha",
+      "label": "Deneysel: Doğu Asya/Japonca taban sesinin İngilizce okuması",
+      "speed": 1.07,
+      "pitch": 0.0,
+      "lang": "en-us",
+      "pause": 0.2,
+      "rough": false
+    },
+    "duration": 3.298684807256236,
+    "sha256": "f664ee469dca97dca9e70e11c6c849f769b830f189f8db412e68b2be14fb8c52",
+    "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs dᵻɹˈɛkʃən. aɪm ɔnðə tɹˈeɪl!"
+  },
+  {
+    "id": "YW10",
+    "recipe": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "zf_xiaobei",
+      "label": "Deneysel: Doğu Asya/Mandarin taban sesinin İngilizce okuması",
+      "speed": 1.09,
+      "pitch": 0.0,
+      "lang": "en-us",
+      "pause": 0.2,
+      "rough": false
+    },
+    "duration": 3.308684807256236,
+    "sha256": "23ef5b3afa115953ebfde01016776449ad8cb2dd304c39095a9d1a1ba010d528",
+    "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs dᵻɹˈɛkʃən. aɪm ɔnðə tɹˈeɪl!"
+  },
+  {
+    "id": "KB1",
+    "recipe": {
+      "character": "Koba",
+      "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the real monster!",
+      "voice": "am_fenrir",
+      "label": "Ağır, koyu ve sert barbar hedef",
+      "speed": 0.8,
+      "pitch": -1.5,
+      "lang": "en-us",
+      "pause": 0.48,
+      "rough": true
+    },
+    "duration": 10.430226757369615,
+    "sha256": "3fff4b835aa0263906bb62b56ecb5e4e6c9dba41ad85adf39bec3ac7116c55e0",
+    "phonemes": "ˌɔn bᵻhˈæf ʌv ˈɔːl ðɪ ˈaʊtkæsts, ˌɔn bᵻhˈæf ʌv ˈɔːl ðoʊz hˌuː hɐvbɪn kˈɔːld mˈɔnstɚz... aɪ wɪl ʃˈoʊ ðˌɛm ðə ɹˈiːəl mˈɔnstɚ!"
+  },
+  {
+    "id": "KB2",
+    "recipe": {
+      "character": "Koba",
+      "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the real monster!",
+      "voice": "am_onyx",
+      "label": "Daha derin, yavaş ve emredici hedef",
+      "speed": 0.79,
+      "pitch": -2.0,
+      "lang": "en-us",
+      "pause": 0.5,
+      "rough": true
+    },
+    "duration": 12.02968253968254,
+    "sha256": "0affa5db5ee63944b7bbb32f7d936e78caa08dee4e26fc36c1f69d22eb192b7f",
+    "phonemes": "ˌɔn bᵻhˈæf ʌv ˈɔːl ðɪ ˈaʊtkæsts, ˌɔn bᵻhˈæf ʌv ˈɔːl ðoʊz hˌuː hɐvbɪn kˈɔːld mˈɔnstɚz... aɪ wɪl ʃˈoʊ ðˌɛm ðə ɹˈiːəl mˈɔnstɚ!"
+  },
+  {
+    "id": "KB3",
+    "recipe": {
+      "character": "Koba",
+      "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the real monster!",
+      "voice": "bm_george",
+      "label": "Britanya tabanlı; kalın, otoriter hedef",
+      "speed": 0.82,
+      "pitch": -1.4,
+      "lang": "en-gb",
+      "pause": 0.45,
+      "rough": true
+    },
+    "duration": 9.952562358276644,
+    "sha256": "150d371d87ef8f663641d6e802c4f72e5f62154c0fa92a4b3093875f0a3bb088",
+    "phonemes": "ˌɒn bɪhˈɑːf ɒv ˈɔːl ðɪ ˈaʊtkasts, ˌɒn bɪhˈɑːf ɒv ˈɔːl ðəʊz hˌuː hɐvbɪn kˈɔːld mˈɒnstəz... aɪ wɪl ʃˈəʊ ðˌɛm ðə ɹˈiəl mˈɒnstə!"
+  },
+  {
+    "id": "KB4",
+    "recipe": {
+      "character": "Koba",
+      "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the real monster!",
+      "voice": "bm_fable",
+      "label": "Britanya tabanlı; kaba ve ağır anlatım hedef",
+      "speed": 0.8,
+      "pitch": -1.6,
+      "lang": "en-gb",
+      "pause": 0.48,
+      "rough": true
+    },
+    "duration": 10.006893424036281,
+    "sha256": "796d445dcc29f20e46559bf61825f5bb4e6bc54d89b6a4d4e6867199dd98cd5a",
+    "phonemes": "ˌɒn bɪhˈɑːf ɒv ˈɔːl ðɪ ˈaʊtkasts, ˌɒn bɪhˈɑːf ɒv ˈɔːl ðəʊz hˌuː hɐvbɪn kˈɔːld mˈɒnstəz... aɪ wɪl ʃˈəʊ ðˌɛm ðə ɹˈiəl mˈɒnstə!"
+  },
+  {
+    "id": "KB5",
+    "recipe": {
+      "character": "Koba",
+      "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the real monster!",
+      "voice": "am_michael",
+      "label": "Amerikan tabanlı; gövdeli ve talepkâr hedef",
+      "speed": 0.81,
+      "pitch": -1.6,
+      "lang": "en-us",
+      "pause": 0.48,
+      "rough": true
+    },
+    "duration": 10.78047619047619,
+    "sha256": "4f2836be2190ceb9cf0bc3487faca2e3c7920215a1e5a40de7a3b4e11c61e28a",
+    "phonemes": "ˌɔn bᵻhˈæf ʌv ˈɔːl ðɪ ˈaʊtkæsts, ˌɔn bᵻhˈæf ʌv ˈɔːl ðoʊz hˌuː hɐvbɪn kˈɔːld mˈɔnstɚz... aɪ wɪl ʃˈoʊ ðˌɛm ðə ɹˈiːəl mˈɔnstɚ!"
+  },
+  {
+    "id": "KB6",
+    "recipe": {
+      "character": "Koba",
+      "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the real monster!",
+      "voice": "am_adam",
+      "label": "Hırıltıya yakın, daha karanlık taslak",
+      "speed": 0.82,
+      "pitch": -1.0,
+      "lang": "en-us",
+      "pause": 0.5,
+      "rough": true
+    },
+    "duration": 8.419229024943311,
+    "sha256": "8d95545be34d3abac605eb148d8b15b6b69883d310999f1b7587b0e4f373a0d3",
+    "phonemes": "ˌɔn bᵻhˈæf ʌv ˈɔːl ðɪ ˈaʊtkæsts, ˌɔn bᵻhˈæf ʌv ˈɔːl ðoʊz hˌuː hɐvbɪn kˈɔːld mˈɔnstɚz... aɪ wɪl ʃˈoʊ ðˌɛm ðə ɹˈiːəl mˈɔnstɚ!"
+  },
+  {
+    "id": "KB7",
+    "recipe": {
+      "character": "Koba",
+      "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the real monster!",
+      "voice": "bm_daniel",
+      "label": "Britanya tabanlı; kontrollü, ağır öfke hedef",
+      "speed": 0.81,
+      "pitch": -1.4,
+      "lang": "en-gb",
+      "pause": 0.45,
+      "rough": true
+    },
+    "duration": 8.746893424036282,
+    "sha256": "069c0a147f61dd3965b90e005feaa6f0e9a3e22b13783c17685922817c22c302",
+    "phonemes": "ˌɒn bɪhˈɑːf ɒv ˈɔːl ðɪ ˈaʊtkasts, ˌɒn bɪhˈɑːf ɒv ˈɔːl ðəʊz hˌuː hɐvbɪn kˈɔːld mˈɒnstəz... aɪ wɪl ʃˈəʊ ðˌɛm ðə ɹˈiəl mˈɒnstə!"
+  },
+  {
+    "id": "KB8",
+    "recipe": {
+      "character": "Koba",
+      "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the real monster!",
+      "voice": "hm_omega",
+      "label": "Deneysel güçlü tını: Hindi taban sesinin İngilizce okuması",
+      "speed": 0.8,
+      "pitch": -1.5,
+      "lang": "en-us",
+      "pause": 0.5,
+      "rough": true
+    },
+    "duration": 10.673922902494331,
+    "sha256": "69f8808a2b2b89e4ff83774eae7f5a529f98a88b8147660a28021d7c409721ad",
+    "phonemes": "ˌɔn bᵻhˈæf ʌv ˈɔːl ðɪ ˈaʊtkæsts, ˌɔn bᵻhˈæf ʌv ˈɔːl ðoʊz hˌuː hɐvbɪn kˈɔːld mˈɔnstɚz... aɪ wɪl ʃˈoʊ ðˌɛm ðə ɹˈiːəl mˈɔnstɚ!"
+  },
+  {
+    "id": "KB9",
+    "recipe": {
+      "character": "Koba",
+      "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the real monster!",
+      "voice": "im_nicola",
+      "label": "Deneysel güçlü tını: İtalyanca taban sesinin İngilizce okuması",
+      "speed": 0.8,
+      "pitch": -1.5,
+      "lang": "en-us",
+      "pause": 0.5,
+      "rough": true
+    },
+    "duration": 10.657936507936508,
+    "sha256": "c16714552f38de2c3a8a9642eac139de15f4635b82b147a1dd3b6d714e200d35",
+    "phonemes": "ˌɔn bᵻhˈæf ʌv ˈɔːl ðɪ ˈaʊtkæsts, ˌɔn bᵻhˈæf ʌv ˈɔːl ðoʊz hˌuː hɐvbɪn kˈɔːld mˈɔnstɚz... aɪ wɪl ʃˈoʊ ðˌɛm ðə ɹˈiːəl mˈɔnstɚ!"
+  },
+  {
+    "id": "KB10",
+    "recipe": {
+      "character": "Koba",
+      "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the real monster!",
+      "voice": "hm_psi",
+      "label": "Deneysel güçlü tını: ikinci Hindi taban sesinin İngilizce okuması",
+      "speed": 0.8,
+      "pitch": -1.6,
+      "lang": "en-us",
+      "pause": 0.5,
+      "rough": true
+    },
+    "duration": 11.029727891156462,
+    "sha256": "62a4043114f046127c5cdd41035e780feca50455369636cf31ea9a035f81a32b",
+    "phonemes": "ˌɔn bᵻhˈæf ʌv ˈɔːl ðɪ ˈaʊtkæsts, ˌɔn bᵻhˈæf ʌv ˈɔːl ðoʊz hˌuː hɐvbɪn kˈɔːld mˈɔnstɚz... aɪ wɪl ʃˈoʊ ðˌɛm ðə ɹˈiːəl mˈɔnstɚ!"
+  },
+  {
+    "id": "LD1",
+    "recipe": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": "am_puck",
+      "label": "Hafif, meraklı yetişkin erkek hedef",
+      "speed": 1.05,
+      "pitch": 1.2,
+      "lang": "en-us",
+      "pause": 0.28,
+      "rough": false
+    },
+    "duration": 6.180476190476191,
+    "sha256": "d70ce96284cefabd189215cda65da6074109f7dccc9615beca8d8b52a31df1b2",
+    "phonemes": "aɪ spˈoʊk wɪð ɐn ˈænt ðɪ ˈʌðɚ dˈeɪ, bˌʌt aɪ dˈɪdnt ˌʌndɚstˈænd wʌt hiː sˈɛd. aɪ ɡˈɛs aɪm nˌɑːt sˌoʊ ɡˈʊd æt tˈɔːkɪŋ tʊ ˈænɪməlz."
+  },
+  {
+    "id": "LD2",
+    "recipe": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": "bm_lewis",
+      "label": "Britanya tabanlı; heyecanlı ve ince tını hedef",
+      "speed": 1.06,
+      "pitch": 1.0,
+      "lang": "en-gb",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 6.468730158730159,
+    "sha256": "3a9f6eb57500610e840b59e81c6de734c2f4ccae8d745690b6edecbf07576d35",
+    "phonemes": "aɪ spˈəʊk wɪð ɐn ˈant ðɪ ˈʌðə dˈeɪ, bˌʌt aɪ dˈɪdnt ˌʌndəstˈand wɒt hiː sˈɛd. aɪ ɡˈɛs aɪm nˌɒt sˌəʊ ɡˈʊd at tˈɔːkɪŋ tʊ ˈanɪməlz."
+  },
+  {
+    "id": "LD3",
+    "recipe": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": "am_liam",
+      "label": "Çocuksulaşmadan daha genç tını hedef",
+      "speed": 1.05,
+      "pitch": 1.2,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 5.559637188208617,
+    "sha256": "05ad19d583474dff6ba768158d8ab4726f42a27b5f1ee79c6f5fa00781523c44",
+    "phonemes": "aɪ spˈoʊk wɪð ɐn ˈænt ðɪ ˈʌðɚ dˈeɪ, bˌʌt aɪ dˈɪdnt ˌʌndɚstˈænd wʌt hiː sˈɛd. aɪ ɡˈɛs aɪm nˌɑːt sˌoʊ ɡˈʊd æt tˈɔːkɪŋ tʊ ˈænɪməlz."
+  },
+  {
+    "id": "LD4",
+    "recipe": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": "am_echo",
+      "label": "Hızlı, tuhaf biçimde ciddi druid hedef",
+      "speed": 1.07,
+      "pitch": 0.8,
+      "lang": "en-us",
+      "pause": 0.35,
+      "rough": false
+    },
+    "duration": 6.032630385487528,
+    "sha256": "eb204f80452e1be0aa0c13664127859e02c6503d76615ae829c4ec9986c9277e",
+    "phonemes": "aɪ spˈoʊk wɪð ɐn ˈænt ðɪ ˈʌðɚ dˈeɪ, bˌʌt aɪ dˈɪdnt ˌʌndɚstˈænd wʌt hiː sˈɛd. aɪ ɡˈɛs aɪm nˌɑːt sˌoʊ ɡˈʊd æt tˈɔːkɪŋ tʊ ˈænɪməlz."
+  },
+  {
+    "id": "LD5",
+    "recipe": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": "am_eric",
+      "label": "Doğal ve hafif çekingen hedef",
+      "speed": 1.03,
+      "pitch": 0.9,
+      "lang": "en-us",
+      "pause": 0.4,
+      "rough": false
+    },
+    "duration": 5.902380952380953,
+    "sha256": "e22422ca20bb95dd91ce9a6607639c42b84a731b5b3d2255ce7a3582144cbba4",
+    "phonemes": "aɪ spˈoʊk wɪð ɐn ˈænt ðɪ ˈʌðɚ dˈeɪ, bˌʌt aɪ dˈɪdnt ˌʌndɚstˈænd wʌt hiː sˈɛd. aɪ ɡˈɛs aɪm nˌɑːt sˌoʊ ɡˈʊd æt tˈɔːkɪŋ tʊ ˈænɪməlz."
+  },
+  {
+    "id": "LD6",
+    "recipe": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": "bm_daniel",
+      "label": "Britanya tabanlı; ince ve biraz şaşkın hedef",
+      "speed": 1.06,
+      "pitch": 1.3,
+      "lang": "en-gb",
+      "pause": 0.32,
+      "rough": false
+    },
+    "duration": 5.8146031746031746,
+    "sha256": "953eacbad69e536670a643697f5625fa1c69309dec982a5605396119c5a0a2ba",
+    "phonemes": "aɪ spˈəʊk wɪð ɐn ˈant ðɪ ˈʌðə dˈeɪ, bˌʌt aɪ dˈɪdnt ˌʌndəstˈand wɒt hiː sˈɛd. aɪ ɡˈɛs aɪm nˌɒt sˌəʊ ɡˈʊd at tˈɔːkɪŋ tʊ ˈanɪməlz."
+  },
+  {
+    "id": "LD7",
+    "recipe": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": {
+        "am_puck": 0.6,
+        "bm_lewis": 0.4
+      },
+      "label": "Tek sentetik ses: sevimli ve heyecanlı hedef",
+      "speed": 1.08,
+      "pitch": 1.0,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "duration": 6.0062131519274375,
+    "sha256": "036b574c361c9fcc5b6ad18476c6c46e8874b286a19fa9f666275be9f41df2d3",
+    "phonemes": "aɪ spˈoʊk wɪð ɐn ˈænt ðɪ ˈʌðɚ dˈeɪ, bˌʌt aɪ dˈɪdnt ˌʌndɚstˈænd wʌt hiː sˈɛd. aɪ ɡˈɛs aɪm nˌɑːt sˌoʊ ɡˈʊd æt tˈɔːkɪŋ tʊ ˈænɪməlz."
+  },
+  {
+    "id": "LD8",
+    "recipe": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": "am_puck",
+      "label": "Daha duraksamalı, sosyal açıdan tuhaf hedef",
+      "speed": 0.99,
+      "pitch": 1.2,
+      "lang": "en-us",
+      "pause": 0.65,
+      "rough": false
+    },
+    "duration": 6.988480725623583,
+    "sha256": "bcf277e2754bec44ad4066194687406470cdf2c7280aa211ce607346e79438c1",
+    "phonemes": "aɪ spˈoʊk wɪð ɐn ˈænt ðɪ ˈʌðɚ dˈeɪ, bˌʌt aɪ dˈɪdnt ˌʌndɚstˈænd wʌt hiː sˈɛd. aɪ ɡˈɛs aɪm nˌɑːt sˌoʊ ɡˈʊd æt tˈɔːkɪŋ tʊ ˈænɪməlz."
+  },
+  {
+    "id": "LD9",
+    "recipe": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": {
+        "am_liam": 0.4,
+        "am_puck": 0.6
+      },
+      "label": "Tek sentetik ses: daha atak, meraklı hedef",
+      "speed": 1.1,
+      "pitch": 1.0,
+      "lang": "en-us",
+      "pause": 0.25,
+      "rough": false
+    },
+    "duration": 5.718684807256236,
+    "sha256": "edf94f06a609f42b58638378f8be2ec0f263fda52e19151efb6c34e141881cee",
+    "phonemes": "aɪ spˈoʊk wɪð ɐn ˈænt ðɪ ˈʌðɚ dˈeɪ, bˌʌt aɪ dˈɪdnt ˌʌndɚstˈænd wʌt hiː sˈɛd. aɪ ɡˈɛs aɪm nˌɑːt sˌoʊ ɡˈʊd æt tˈɔːkɪŋ tʊ ˈænɪməlz."
+  },
+  {
+    "id": "LD10",
+    "recipe": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": "bm_lewis",
+      "label": "Britanya tabanlı; düşünerek ve duraksayarak hedef",
+      "speed": 1.0,
+      "pitch": 1.3,
+      "lang": "en-gb",
+      "pause": 0.65,
+      "rough": false
+    },
+    "duration": 7.053310657596372,
+    "sha256": "eb8fed0d13144559427d900b89cbe465d57a47114cc470b62c7388d16af1bcbe",
+    "phonemes": "aɪ spˈəʊk wɪð ɐn ˈant ðɪ ˈʌðə dˈeɪ, bˌʌt aɪ dˈɪdnt ˌʌndəstˈand wɒt hiː sˈɛd. aɪ ɡˈɛs aɪm nˌɒt sˌəʊ ɡˈʊd at tˈɔːkɪŋ tʊ ˈanɪməlz."
+  }
+]

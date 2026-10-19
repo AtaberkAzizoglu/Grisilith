@@ -1,0 +1,17 @@
+{
+  "id": "KB8",
+  "recipe": {
+    "character": "Koba",
+    "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the real monster!",
+    "voice": "hm_omega",
+    "label": "Deneysel güçlü tını: Hindi taban sesinin İngilizce okuması",
+    "speed": 0.8,
+    "pitch": -1.5,
+    "lang": "en-us",
+    "pause": 0.5,
+    "rough": true
+  },
+  "duration": 10.673922902494331,
+  "sha256": "69f8808a2b2b89e4ff83774eae7f5a529f98a88b8147660a28021d7c409721ad",
+  "phonemes": "ˌɔn bᵻhˈæf ʌv ˈɔːl ðɪ ˈaʊtkæsts, ˌɔn bᵻhˈæf ʌv ˈɔːl ðoʊz hˌuː hɐvbɪn kˈɔːld mˈɔnstɚz... aɪ wɪl ʃˈoʊ ðˌɛm ðə ɹˈiːəl mˈɔnstɚ!"
+}

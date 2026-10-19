@@ -1,0 +1,23 @@
+{
+  "id": "IMB1",
+  "recipe": {
+    "character": "Sir Imbert",
+    "text": "It is my oath! I will fight until the magic is gone from this realm!",
+    "voice": "bm_george",
+    "label": "Tecrübeli Britanyalı komutan · göğüslü, katı",
+    "speed": 0.96,
+    "pitch": -2.2,
+    "lang": "en-gb",
+    "pause": 0.34,
+    "rough": true,
+    "grit": 1.5,
+    "bass": 0.22,
+    "presence": 0.1,
+    "shadow": 0.0,
+    "rumble": 0.0,
+    "processing_version": "orc-veteran-v1"
+  },
+  "duration": 5.781269841269841,
+  "sha256": "dba21254e5cd210b60a30de911aa7cc8396344d96558434e86dfd7b1ad42bc12",
+  "phonemes": "ɪt ɪz maɪ ˈəʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈadʒɪk ɪz ɡɒn fɹɒm ðɪs ɹˈɛlm!"
+}

@@ -134,7 +134,7 @@ class TomeOfEryndorAttackExecutor(
         attackDirection.nor()
         val beamDamageType = com.azizoglu.grisilith.item.runtime.ActiveItemEffects
             .resolveNormalProjectileDamageType(DamageType.FIRE)
-        com.azizoglu.grisilith.audio.GameAudio.magicalShot(beamDamageType)
+        com.azizoglu.grisilith.audio.GameAudio.magicalShot(beamDamageType,context.attackOriginX,context.attackOriginY)
 
         val startX =
             context.attackOriginX

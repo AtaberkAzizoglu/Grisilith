@@ -11,7 +11,9 @@ data class ConditionSource(
     val sourceWeaponDefinitionId: String? = null,
     val sourceName: String? = null,
     val sourceCenterX: Float? = null,
-    val sourceCenterY: Float? = null
+    val sourceCenterY: Float? = null,
+    /** Audio-only snapshot; does not alter condition damage or retain an enemy reference. */
+    val sourceEnemyBoss: Boolean = false
 ) {
     init {
         require(tickDamage >= 0) {

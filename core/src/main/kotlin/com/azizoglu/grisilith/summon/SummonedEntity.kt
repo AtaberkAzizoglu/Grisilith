@@ -253,7 +253,9 @@ class SummonedEntity(
             onTick = { tick ->
                 val tickDamage = tick.source.resolvedTickDamage(health.maximumHealth)
                 if (tickDamage > 0) {
-                    takeDamage(tickDamage, tick.source.damageType)
+                    val applied=takeDamage(tickDamage, tick.source.damageType)
+                    if(tick.type==ConditionType.ACIDIC_PATH_DAMAGE)
+                        com.azizoglu.grisilith.audio.EnemyAudio.pathDamage(applied,center.x,center.y,tick.source.sourceEnemyBoss)
                 }
             }
         )
@@ -1479,6 +1481,8 @@ class SummonedEntity(
         }
 
         action()
+
+        com.azizoglu.grisilith.audio.SummonAudio.attack(type,centerX,centerY)
 
         attackCooldownRemainingSeconds =
             (

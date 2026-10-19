@@ -1,0 +1,28 @@
+SUMMON COMBAT AUDIO — approved pack 16 selections
+
+CA5 cow_attack.wav / CD5 cow_death.wav:
+spurioustransients — Cow moo #5 — CC0.
+https://freesound.org/people/spurioustransients/sounds/513563/
+Public HQ MP3 preview used. These are ordinary cow calls, not recordings of injury.
+CA5 also layers Kenney Impact Sounds (thud4), CC0.
+https://kenney.nl/assets/impact-sounds
+
+ID1 imp_death.wav:
+"Goblin Scream" by spookymodem — Creative Commons Attribution 3.0.
+https://opengameart.org/content/goblin-scream
+https://creativecommons.org/licenses/by/3.0/
+Edits: excerpt, pitch/speed raised, transient treatment, mono conversion,
+peak normalization to -12 dBFS and edge fades.
+
+OA2 oathbreaker_attack.wav / OD2 oathbreaker_death.wav:
+HaelDB — Male Grunt/Yelling sounds — CC0 option selected.
+https://opengameart.org/content/male-gruntyelling-sounds
+OA2 also layers artisticdude — Swishes Sound Pack — CC0.
+https://opengameart.org/content/swishes-sound-pack
+Edits: excerpts, lowered pitch/speed, OA2 swish mix, OD2 low-pass,
+mono 44.1kHz PCM16 WAV, -12 dBFS peak normalization and edge fades.
+
+CC0 license: https://creativecommons.org/publicdomain/zero/1.0/
+Installed files are exact copies of the approved auditions, not newly synthesized sounds.
+Imp attacks reuse the existing magic_fire.wav (FL5); its attribution remains in
+audio/CREDITS.txt. No duplicate fire asset is shipped.

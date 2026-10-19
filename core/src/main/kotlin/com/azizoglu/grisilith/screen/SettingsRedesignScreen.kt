@@ -191,8 +191,10 @@ class SettingsScreen(
         sectionHeader("DISPLAY", 770f, 564f, 390f)
         sectionHeader("GAMEPLAY & HUD", 348f, 360f, 812f)
         label("Master Volume", 350f, 525f)
-        label("Music Volume", 350f, 473f)
-        label("Sound Effects", 350f, 421f)
+        label("Music Volume", 350f, 481f)
+        label("Sound Effects", 350f, 437f)
+        label("Directional Stereo", 350f, 389f)
+        stateLabel(if(draftSettings.directionalStereo) "ON" else "OFF", 535f, 389f)
         label("Display Mode", 772f, 525f)
         label("VSYNC", 772f, 473f)
         label("Screen Shake", 350f, 318f)
@@ -330,6 +332,9 @@ class SettingsScreen(
     }
 
     private fun MutableList<MenuButton>.addGeneralButtons() {
+        addSettingToggle(650f, 365f, draftSettings.directionalStereo) {
+            draftSettings = draftSettings.copy(directionalStereo = !draftSettings.directionalStereo)
+        }
         add(toggleButton("", 1082f, 497f, 86f, 35f, draftSettings.fullscreen) {
             GameSettings.toggleFullscreen()
             appliedSettings = appliedSettings.copy(fullscreen = GameSettings.fullscreen)
@@ -466,7 +471,7 @@ class SettingsScreen(
     }
 
     private fun previewAudio() {
-        if(::draftSettings.isInitialized) GameAudio.preview(this,draftSettings.masterVolume,draftSettings.musicVolume,draftSettings.soundEffectsVolume)
+        if(::draftSettings.isInitialized) GameAudio.preview(this,draftSettings.masterVolume,draftSettings.musicVolume,draftSettings.soundEffectsVolume,draftSettings.directionalStereo)
     }
 
     private fun assignDraftBinding(action: RunInputAction, keyCode: Int) {
@@ -481,8 +486,8 @@ class SettingsScreen(
 
     private fun sliderBounds(slider: VolumeSlider): Rectangle = when (slider) {
         VolumeSlider.MASTER -> Rectangle(530f, 495f, 190f, 24f)
-        VolumeSlider.MUSIC -> Rectangle(530f, 443f, 190f, 24f)
-        VolumeSlider.EFFECTS -> Rectangle(530f, 391f, 190f, 24f)
+        VolumeSlider.MUSIC -> Rectangle(530f, 451f, 190f, 24f)
+        VolumeSlider.EFFECTS -> Rectangle(530f, 407f, 190f, 24f)
     }
 
     private fun handleVolumeSliders() {

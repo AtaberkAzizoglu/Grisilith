@@ -1,0 +1,17 @@
+{
+  "id": "LV2",
+  "recipe": {
+    "character": "Lavena Vol",
+    "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+    "voice": "bf_isabella",
+    "label": "Britanya tabanlı; donuk, aristokratik hedef",
+    "speed": 0.92,
+    "pitch": -0.5,
+    "lang": "en-gb",
+    "pause": 0.4,
+    "rough": false
+  },
+  "duration": 5.931541950113378,
+  "sha256": "368937db733883c5308fb4afdf17aeb3dd851b0effb501d83301c85bc398df06",
+  "phonemes": "and ðeɪ kˈɔːl ðiːz spˈɛlz \"fəbˈɪdən mˈadʒɪk.\" hˈɑː! wˌɒts ðə wˈɜːst ðat kʊd hˈapən, ˈɛnɪwˌeɪ?"
+}

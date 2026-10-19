@@ -1,0 +1,33 @@
+INSTALLED PACK 19: BD4, AD2, GD2, SD1, ST3, HD5, HA1, HS5, MX3. MX3 fitted to 850ms transform; others exact.
+
+PACK 19 SOURCE PROVENANCE — SELECTED CUES INSTALLED
+
+HaelDB — Male Grunt/Yelling sounds — CC0 option selected.
+https://opengameart.org/content/male-gruntyelling-sounds
+Recorded human performances. Different files/voice styles and pitch variants;
+not a claim of five unrelated performers per enemy.
+Cici Fyre — RPG Voice Starter Pack — CC0.
+https://cicifyre.itch.io/rpg-voice-starter-pack
+Witch candidates: nonverbal damaged vocal takes adapted as death designs;
+not five recordings originally labeled as death or five unrelated actresses.
+rubberduck — 80 CC0 RPG SFX — CC0.
+https://opengameart.org/node/86018
+rubberduck — 75 CC0 breaking/falling/hit SFX — CC0.
+https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx
+Kenney — Impact Sounds — CC0.
+https://kenney.nl/assets/impact-sounds
+artisticdude — Swishes Sound Pack — CC0.
+https://opengameart.org/content/swishes-sound-pack
+Vehicle / Jan Schupke — Fantasy Sound Effects (Tinysized SFX) — CC0.
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+CC0: https://creativecommons.org/publicdomain/zero/1.0/
+
+EDITS: excerpts, foreground extraction, mono/44.1kHz/PCM16 conversion, pitch/speed,
+EQ, short fades, optional one vocal + wood/air/body layers. Peak matched -12dBFS,
+not perceived loudness normalization. GS4 adds an original damped 52Hz sine body.
+Full candidate recipes in SECENEKLER.txt / PrepareHumanoidAudition.kt.
+
+Mimic design reference only: official D&D SRD / D&D Beyond Mimic description:
+object imitation, adhesive body, pseudopod and bite. No D&D game audio copied,
+no text reproduced and no new D&D mechanics implemented.
+https://www.dndbeyond.com/monsters/16957-mimic

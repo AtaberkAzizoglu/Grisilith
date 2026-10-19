@@ -1,5 +1,7 @@
 package com.azizoglu.grisilith.weapon.runtime
 
+import com.azizoglu.grisilith.audio.ProjectileSound
+
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.audio.GameAudio
 import com.azizoglu.grisilith.audio.UiSound
@@ -73,8 +75,8 @@ class ExtendedPhysicalWeaponRuntime(private val stats: PlayerStats) : WeaponAtta
                 lash(ctx,point,if(upgraded).75f else 1f)
                 if(upgraded) events += Event(.15f,ctx) { lash(ctx,point,.75f) }
             }
-            "WPN_SLING" -> { GameAudio.play(UiSound.SLING_THROW);stone(ctx,point) }
-            "WPN_BOOMERANG" -> { GameAudio.play(UiSound.BOOMERANG_THROW);launchBoomerang(ctx,point,true) }
+            "WPN_SLING" -> { GameAudio.projectile(ProjectileSound.STONE,ctx.attackOriginX,ctx.attackOriginY);stone(ctx,point) }
+            "WPN_BOOMERANG" -> { GameAudio.projectile(ProjectileSound.BOOMERANG,ctx.attackOriginX,ctx.attackOriginY);launchBoomerang(ctx,point,true) }
         }
     }
     private fun hit(ctx: WeaponAttackContext, enemy: Enemy, multiplier: Float, projectile: Boolean = false) {
@@ -200,7 +202,7 @@ class ExtendedPhysicalWeaponRuntime(private val stats: PlayerStats) : WeaponAtta
                 boulders += Boulder(ctx,a,end,dir,ctx.weapon.hasWeaponAbilityUpgrade)
             }
             NewPhysicalWeapons.GUIDED_HUNT -> {
-                GameAudio.ability(UiSound.BOOMERANG_THROW,a.x,a.y)
+                GameAudio.projectile(ProjectileSound.BOOMERANG,a.x,a.y,ability=true)
                 guidance[ctx.weapon.runtimeId]=if(ctx.weapon.hasWeaponAbilityUpgrade)6f else 5f
                 launchBoomerang(ctx,aimPoint,false)
             }
@@ -213,6 +215,7 @@ class ExtendedPhysicalWeaponRuntime(private val stats: PlayerStats) : WeaponAtta
         flashes.forEach { it.remaining-=dt }; flashes.removeAll { it.remaining<=0f }
         fragments.toList().forEach { request ->
             if(request.ctx.weapon.runtimeId in ownedIds) {
+                GameAudio.playAt(UiSound.SLING_SPLIT,request.center.x,request.center.y)
                 val count=MathUtils.random(3,8); val initial=MathUtils.random(360f)
                 repeat(count) { index ->
                 val dir=Vector2(1f,0f).rotateDeg(initial+index*360f/count)
@@ -283,6 +286,7 @@ class ExtendedPhysicalWeaponRuntime(private val stats: PlayerStats) : WeaponAtta
             if(f.remaining<=.00001f) {
                 if(f.phase==1 || f.phase==3) f.position.set(player)
                 if(f.phase==1 && (!f.normal || !f.ctx.weapon.hasBasicAttackUpgrade) || f.phase==3) {
+                    GameAudio.playAt(UiSound.BOOMERANG_CATCH,player.x,player.y)
                     boomerangs.remove(f)
                 } else {
                     f.phase++;f.remaining=f.legDuration;f.hitEnemies.clear()

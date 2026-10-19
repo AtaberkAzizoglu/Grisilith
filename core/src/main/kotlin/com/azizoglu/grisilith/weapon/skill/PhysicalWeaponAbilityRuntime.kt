@@ -1,5 +1,7 @@
 package com.azizoglu.grisilith.weapon.skill
 
+import com.azizoglu.grisilith.audio.ProjectileSound
+
 import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.audio.GameAudio
 import com.azizoglu.grisilith.audio.UiSound
@@ -460,7 +462,7 @@ class PhysicalWeaponAbilityRuntime(
         context: WeaponAttackContext,
         angleOffsetDegrees: Float
     ) {
-        GameAudio.ability(UiSound.DAGGER_THROW,context.attackOriginX,context.attackOriginY)
+        GameAudio.projectile(ProjectileSound.DAGGER,context.attackOriginX,context.attackOriginY,ability=true)
         val count = DefaultWeaponAbilities.KNIFE_SWARM_PROJECTILES
         repeat(count) { index ->
             val direction = Vector2(1f, 0f).rotateDeg(
@@ -485,7 +487,7 @@ class PhysicalWeaponAbilityRuntime(
         aimY: Float,
         upgraded: Boolean
     ) {
-        GameAudio.ability(UiSound.BOW_VOLLEY,context.attackOriginX,context.attackOriginY)
+        GameAudio.projectile(ProjectileSound.ARROW_VOLLEY,context.attackOriginX,context.attackOriginY,ability=true)
         val baseDirection = direction(context, aimX, aimY)
         val range = context.effectiveWeaponRange(
             context.weapon.definition.baseRange * context.weapon.currentLevelStats.rangeMultiplier
@@ -508,7 +510,7 @@ class PhysicalWeaponAbilityRuntime(
     }
 
     private fun fireHeavyBolt(context: WeaponAttackContext, aimX: Float, aimY: Float) {
-        GameAudio.ability(UiSound.CROSSBOW_SHOT,context.attackOriginX,context.attackOriginY)
+        GameAudio.projectile(ProjectileSound.BOLT,context.attackOriginX,context.attackOriginY,ability=true)
         val upgraded = context.weapon.hasWeaponAbilityUpgrade
         val baseRange = context.effectiveWeaponRange(
             context.weapon.definition.baseRange * context.weapon.currentLevelStats.rangeMultiplier

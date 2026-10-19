@@ -99,10 +99,13 @@ class DefensiveLineRuntime(
                     )
             }
 
+        val wasAtMaximum=currentBonus>=maximumBonus
         setBonus(
             earnedBonus,
             maximumBonus
         )
+        if(!wasAtMaximum && currentBonus>=maximumBonus)
+            com.azizoglu.grisilith.audio.GameAudio.playAt(com.azizoglu.grisilith.audio.UiSound.SHIELD_READY,player.centerX,player.centerY)
     }
 
     fun reset() {

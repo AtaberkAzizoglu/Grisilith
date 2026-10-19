@@ -33,10 +33,12 @@ object AudioSmoke {
     }
     class FakeSound {
         val played=mutableListOf<Float>();val volumes=mutableListOf<Float>();val pitches=mutableListOf<Float>()
+        val pans=mutableListOf<Float>()
         var stops=0;var disposed=0;var pauses=0;var resumes=0
         val api=Proxy.newProxyInstance(Sound::class.java.classLoader,arrayOf(Sound::class.java)) { _, method, args ->
             when(method.name) {
-                "play", "loop" -> {played+=args[0] as Float;pitches+=if(args.size>1)args[1] as Float else 1f;played.size.toLong()}
+                "play", "loop" -> {played+=args[0] as Float;pitches+=if(args.size>1)args[1] as Float else 1f;pans+=if(args.size>2)args[2] as Float else 0f;played.size.toLong()}
+                "setPan" -> {pans+=args[1] as Float;volumes+=args[2] as Float;null}
                 "setPitch" -> {pitches+=args[1] as Float;null}
                 "pause" -> {pauses++;null}
                 "resume" -> {resumes++;null}

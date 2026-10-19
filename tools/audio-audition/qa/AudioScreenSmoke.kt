@@ -50,6 +50,13 @@ object AudioScreenSmoke {
         val settings=SettingsScreen(game){ };settings.resize(1280,720);game.screen=settings
         check(music.plays==1)
         val original=GameSettings.snapshot()
+        check(GameSettings.defaults().directionalStereo)
+        field(settings,"draftSettings").set(settings,original.copy(directionalStereo=false))
+        settings.javaClass.getDeclaredMethod("rebuildButtons").apply{isAccessible=true}.invoke(settings)
+        settings.render(.016f)
+        Pixmap.createFromFrameBuffer(0,0,1280,720).also {
+            PixmapIO.writePNG(Gdx.files.local("../tools/audio-audition/audio-settings.png"),it,-1,true);it.dispose()
+        }
         field(settings,"draftSettings").set(settings,original.copy(masterVolume=.2f,musicVolume=.3f,soundEffectsVolume=.4f))
         settings.render(.016f);check(kotlin.math.abs(music.volume-.027f)<.0001f)
         settings.javaClass.getDeclaredMethod("discardPendingChanges").apply{isAccessible=true}.invoke(settings)

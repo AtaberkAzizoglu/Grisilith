@@ -1,0 +1,20 @@
+{
+  "id": "LV9",
+  "recipe": {
+    "character": "Lavena Vol",
+    "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+    "voice": {
+      "bf_emma": 0.6,
+      "bf_isabella": 0.4
+    },
+    "label": "Tek sentetik ses: soğuk elf tınısı hedef",
+    "speed": 0.93,
+    "pitch": -0.5,
+    "lang": "en-gb",
+    "pause": 0.4,
+    "rough": false
+  },
+  "duration": 5.456009070294785,
+  "sha256": "a5dcf14c5cec1e6be93255f9ed7a76be0e8254e408b8dc9dfcb4810b4037a851",
+  "phonemes": "and ðeɪ kˈɔːl ðiːz spˈɛlz \"fəbˈɪdən mˈadʒɪk.\" hˈɑː! wˌɒts ðə wˈɜːst ðat kʊd hˈapən, ˈɛnɪwˌeɪ?"
+}

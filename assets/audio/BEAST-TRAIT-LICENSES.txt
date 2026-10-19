@@ -1,0 +1,46 @@
+BEAST TRAIT AUDIO — INSTALLED PACK 18 SELECTIONS
+
+All new sources are free, CC0:
+Anthousai — egg - crack 02.wav (real egg cracked into a glass bowl).
+https://freesound.org/people/Anthousai/sounds/336612/
+Public HQ MP3 preview used, not the original 96kHz/24-bit WAV.
+rubberduck — 75 CC0 breaking / falling / hit sfx.
+https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx
+
+Previously verified sources reused:
+fvcalderan — Boar (human imitation), CC0.
+https://opengameart.org/content/boar-0
+D.jones — Alligator Growls 02, CC0 (HQ MP3 preview adapted for Crocodile).
+https://freesound.org/people/D.jones/sounds/527844/
+AntumDeluge / U.S. Fish & Wildlife Service — Bear Growls, CC0.
+https://opengameart.org/content/bear-growls
+AntumDeluge / J0ck0 / mediacollege.com — Gorilla Sounds, CC0.
+https://opengameart.org/content/gorilla-sounds
+IMadeIt — Single Bee sound, CC BY 3.0.
+https://opengameart.org/content/single-bee-sound
+Kenney — Impact Sounds, CC0.
+https://kenney.nl/assets/impact-sounds
+artisticdude — Swishes Sound Pack, CC0.
+https://opengameart.org/content/swishes-sound-pack
+Vehicle / Jan Schupke — Fantasy Sound Effects (Tinysized SFX), CC0.
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+rubberduck — 80 CC0 RPG SFX, CC0.
+https://opengameart.org/node/86018
+
+https://creativecommons.org/publicdomain/zero/1.0/
+https://creativecommons.org/licenses/by/3.0/
+Bee candidates require IMadeIt attribution/source/license/edit disclosure if installed.
+
+EDITS
+Excerpts, mono/44.1kHz PCM16 conversion, pitch/speed and EQ, short fades,
+occasional vocal + foley layers. Some full-length cues use repeated footstep/air
+textures and duration fitting (BC1-3 1.15s, CJ1-3 0.55s). Others are short onsets.
+Egg options are five edits of one real egg recording, sometimes with fine debris.
+Swarm Being is a passive: suggestions are short mitigation/deflection cues, not a
+permanent loop. Split suggestions are brief widening swarm textures.
+Gorilla stomp options include natural foley and designed bass/body impacts;
+they are sound designs, not recordings of an actual gorilla striking earth.
+Peak normalized to -12dBFS, not perceived loudness matched. Full recipes included.
+No paid pack, no animal injury/death recordings; no automatic game installation.
+
+Installed: BC1, BP2, CJ2, CP1, EG5, SB3, SS3, RG2, GC3, GT4. GC3 fitted to 500ms windup; other selections exact.

@@ -1,0 +1,17 @@
+{
+  "id": "IM2",
+  "recipe": {
+    "character": "Sir Imbert",
+    "text": "It is my oath! I will fight until the magic is gone from this realm!",
+    "voice": "bm_fable",
+    "label": "Britanya tabanlı; kararlı savaşçı hedef",
+    "speed": 0.93,
+    "pitch": -0.8,
+    "lang": "en-gb",
+    "pause": 0.3,
+    "rough": false
+  },
+  "duration": 5.3795918367346935,
+  "sha256": "ca223ed6173622de322e48a3c891bf83d25b363a0411dac05ee56bee942c3eb7",
+  "phonemes": "ɪt ɪz maɪ ˈəʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈadʒɪk ɪz ɡɒn fɹɒm ðɪs ɹˈɛlm!"
+}

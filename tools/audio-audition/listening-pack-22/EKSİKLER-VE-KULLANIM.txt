@@ -1,0 +1,8 @@
+HASAR ALMA EKSİK BOSSLAR: Grizzly Bear, Bee Swarm, Crocodile, Silverback Gorilla, Spearman, Horseman, Witch, Ghost, Slime
+Vampire Lord VP5 hazır. Tüm boss ölüm sesleri hazır ve referans olarak eklendi.
+Normal/unique düşmana yeni hit vokali, spawn/adım sesi eklenmeyecek.
+SLS: ana Sling taşının gelişmiş parçalanmasında bir kere.
+BRC: gerçek son yakalamada bir kere.
+SR: maksimum birikime ilk ulaşmada bir kere.
+BSH: Swarm Being ve hasar alma tepkisi aynı hit'te iki kere çalmamalı.
+Ölümcül darbede hasar alma vokali yerine ölüm önceliklendirilecek.

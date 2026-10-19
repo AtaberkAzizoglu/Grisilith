@@ -1,0 +1,415 @@
+INSTALLED PACK 22: SLS4, BRC5, SR5, BRH2, GRH1, SPH1, HOH3
+SL4 interpreted as SLS4. Byte-exact chosen WAVs.
+Swarm/Crocodile/Witch/Ghost/Slime hurt voices deliberately omitted.
+
+PACK 22 — 60 NEW PREVIEW CANDIDATES + 17 EXACT INSTALLED REFERENCES.
+No new cue installed. Reference files are unchanged copies of assets/audio/sfx.
+Finishing-preview inputs are snapshots of those same installed licensed assets.
+
+NEW CANDIDATE DESIGN: short excerpts, pitch/speed, EQ, fades, light stone/wood/metal layers.
+Animal hurt designs use ordinary calls, not real animal injury recordings.
+Witch hurt uses excerpts of short scream no effects.wav by xl57, CC BY 4.0:
+https://freesound.org/people/xl57/sounds/671201/
+https://creativecommons.org/licenses/by/4.0/
+Current installed licenses, including attribution and edit details, follow.
+
+=== CREDITS.txt ===
+GRISILITH — AUDIO CREDITS
+
+CURRENT — SPELL FOCUS NORMAL AND UPGRADED NORMAL SHOTS
+Air AI3, Acid AC2, Lightning LI3, Poison PO3 (pack09): original previews unchanged.
+Water WV4, Fire FL5, Necrotic CU4 (pack10): original previews unchanged.
+Each actual normal projectile chooses audio/art from its launch-resolved damage type.
+No Spell Focus ability, glyph-spell or summon sounds selected by this update.
+
+Water WV4: Thimras Ocean splash + Almitory Air Woosh Move, CC0.
+https://opengameart.org/content/ocean-splash
+Fire FL5: "Fire & Evil Spell" — artisticdude (submitted by qubodup), CC BY 3.0.
+https://opengameart.org/content/fire-evil-spell
+https://creativecommons.org/licenses/by/3.0/
+Edits: speed .7, low-pass 2200Hz, 650ms excerpt, gust envelope; layered CC0 air at .9 speed,
+450ms lower-gain excerpt. Mono conversion, -12dBFS peak matching and end fade.
+Necrotic CU4: qubodup, 3 dark magic spells, CC0.
+https://opengameart.org/content/3-dark-magic-spells
+Reversed fout-01, .8 speed, high-pass 180Hz, 650ms excerpt, gust envelope, peak match/end fade.
+Acid/Poison layers include rubberduck 80 CC0 RPG SFX:
+https://opengameart.org/node/86018
+Lightning LI3: Augmentality (Brandon Morris), submitted by HaelDB, CC0 option chosen:
+https://opengameart.org/content/spell-sounds
+Air AI3: SketchMan3 wind whoosh loop, CC0; other source links below apply.
+Full layer recipes: listening-pack-09/10 LICENSE-SOURCES.txt and PrepareAudioAudition.kt.
+
+ANIMATION TIMING UPDATE (supersedes earlier duration descriptions)
+Existing approved melee sources now fitted to visual duration: Longsword250ms, DoubleSwords240ms,
+Lance240ms, Shield270ms, Whip240ms, Warhammer240ms; Burst550ms, Earthbreaker wave350ms.
+Spin420ms unchanged; Whip Sweep two 175ms selected crack excerpts, total350ms.
+Air Slash base673ms/upgraded865ms. Long quiet tails are excerpted around the selected transient,
+shorter recordings are resampled, end fades avoid abrupt clicks. Originals retained in audition archives.
+Combat pitch/duration follows actual run speed; UI/music remain independent.
+
+CURRENT OVERRIDES — ranged ability selections completed
+Rapid Strokes now reuses the normal Double Swords single/upgraded cue; old grouped WAVs removed.
+Crossbow Heavy Bolts and Dagger Knife Swarm reuse their own selected normal cues.
+Bow Leisurely Shot BV2: five layered BW3 English Longbow shots, 35ms spacing, peak matched.
+Sling Shatterstone ST1: Kenney impactMining_000 + Jordan Irwin thwack-06 (gain .3), CC0.
+ST1 is triggered once per actual landing; the upgraded second landing reuses the same recording.
+Boomerang normal and Guided Hunt GH3: Vehicle tube-plastic-whoosh-02 at .85 speed,
+artisticdude swish-8 at .10s, gain .65; CC0. Replaces the former BR3 game asset.
+Original recordings and license links below also cover these derivatives.
+No human whistle recording is shipped or loaded.
+The following older selections are historical where superseded by these overrides.
+
+MELEE ABILITIES — selected packs 06/07
+Rapid Strokes: exact DS1 texture (artisticdude CC0), grouped 1–7 strokes actually performed.
+Stroke starts within 110ms; complete sound remains within the 240ms visual.
+Spin Attack SP1: artisticdude swish-3 and swish-6, three repeats, fitted to the 420ms visual.
+Defensive Burst SB5: Kenney impactPlate_heavy_003 + Jordan Irwin thwack-06 + Vehicle sword-clash-05.
+Earthbreaker EB1: Jordan Irwin thwack-06 + Kenney impactMining_000, one layer pair per actual wave.
+Kenney Impact Sounds (CC0): https://kenney.nl/assets/impact-sounds
+Whip Sweep WS2: artisticdude swish-13 + Tuomo Untinen/Reemax whip, two full consecutive copies.
+Whip attribution and CC BY 4.0 link below also apply to this derivative.
+Air Slash AW5: Almitory Air Woosh Move + SketchMan3 wind whoosh loop, CC0.
+https://opengameart.org/content/air-woosh-move
+https://opengameart.org/content/wind-whoosh-loop
+AW5 and SB5 use the exact approved preview WAVs; other approved repetition edits are documented above.
+All abilities use Master x Sound Effects; audition-only ranged/whistle files are not shipped assets.
+
+MENU MUSIC
+"Gregorian Chant" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+Source: https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1600052
+Original audio: https://incompetech.com/music/royalty-free/mp3-royaltyfree/Gregorian%20Chant.mp3
+ISRC: USUAN1600052
+The recording is used unmodified; the game controls playback volume and loops it.
+
+SOUND EFFECTS
+Kenney Vleugels (Kenney.nl) — RPG Audio and Interface Sounds
+Creative Commons Zero (CC0): https://creativecommons.org/publicdomain/zero/1.0/
+Sources: https://kenney.nl/assets/rpg-audio
+         https://kenney.nl/assets/interface-sounds
+
+Approved selections from listening pack 01:
+A1 / ui_click.wav   = RPG Audio / metalClick.ogg
+B5 / ui_confirm.wav = RPG Audio / metalLatch.ogg
+C2 / ui_back.wav    = Interface Sounds / back_002.ogg
+D2 / ui_error.wav   = Interface Sounds / error_002.ogg
+E1 / page_turn.wav  = RPG Audio / bookFlip1.ogg
+F1 / chest_open.wav = RPG Audio / metalLatch.ogg + creak1.ogg
+
+Effects were converted to mono 44.1 kHz / 16-bit WAV, peak-matched to -12 dBFS,
+and given a 5 ms end fade. F1 is a layered preview mix, not an original chest recording.
+The exact approved listening files are used. No Impact Sounds recordings were selected.
+
+LONGSWORD NORMAL ATTACK
+Selected G1 from listening pack 02: Kenney RPG Audio / knifeSlice.ogg.
+assets/audio/sfx/longsword_swing.wav is the exact approved G1 WAV (CC0).
+This does not change the Longsword ability sound or other weapons' sounds.
+
+ADDITIONAL NORMAL WEAPON ATTACKS
+Double Swords DS1 (single and doubled) / Lance LN1:
+Swishes Sound Pack — artisticdude — CC0
+https://opengameart.org/content/swishes-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+Double Swords upgraded uses a second stroke at 120 ms. Converted to mono WAV; peak matched, end fade.
+
+Shield SH1: Fantasy Sound Effects (Tinysized SFX) — Vehicle / Jan Schupke — CC0
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Source sword-clash-01.wav. Converted to mono WAV, peak matched, end fade.
+
+Whip WP5: "Whipping sound by Tuomo Untinen" (Reemax)
+https://opengameart.org/content/whip-sound
+Licensed under Creative Commons Attribution 4.0: https://creativecommons.org/licenses/by/4.0/
+Combined with artisticdude's CC0 swish-4.wav at lower gain; whip begins at 100 ms.
+Converted to mono WAV, peak matched, end fade. The exact approved WP5 preview is used.
+
+WARHAMMER NORMAL ATTACK — TH3
+Thwack Sounds — Jordan Irwin (AntumDeluge) — CC0
+https://opengameart.org/content/thwack-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+Source thwack-06.wav; source-pack processing retained. Mono WAV, peak matched, end fade.
+
+RANGED NORMAL ATTACKS — BW3 / CB4 / DG4 / SL1 / BR3
+Bow BW3 and Crossbow CB4: Still North Media — Ben Jaszczak and Brian Nelson — CC0
+https://opengameart.org/content/medieval-sound-effects-weapon-textures
+https://creativecommons.org/publicdomain/zero/1.0/
+Individual shots isolated from English Longbow Shoot.wav (third) and Crossbow Shoot.wav (fourth).
+Dagger DG4: artisticdude Swishes / swish-12.wav, 135% speed, CC0 (source link above).
+Sling SL1: Vehicle Tinysized / tube-plastic-whoosh-01.wav, 110% speed, CC0 (source link above).
+Boomerang BR3: Vehicle tube-plastic-whoosh-02.wav at 85% speed + artisticdude swish-8.wav at 180 ms / lower gain.
+All converted to mono WAV, peak matched, end fade. Exact selected previews are used.
+These choices apply to normal attacks only; active ability sounds are selected separately.
+
+SPELL FOCUS ABILITIES / GLYPH CASTING
+Full selected-source credits, per-asset licenses, source links and edit disclosures:
+audio/FOCUS-ABILITY-LICENSES.txt (included with the game).
+New CC BY 3.0 sources: spookymodem (Bubbling Acid, Goblin Scream), Jerimee (Thunder),
+Michel Baradari (2 High Quality Explosions); artisticdude (Fire & Evil Spell).
+CC BY-SA 3.0 AUDIO ASSETS: Secretlondon (Farm animals / focus_animal.wav),
+pal.zoltan.illes (Male encounter voice pieces / focus_oathbreaker.wav).
+https://creativecommons.org/licenses/by/3.0/
+https://creativecommons.org/licenses/by-sa/3.0/
+Additional CC0 sources: frosthardr, Bananaboatman33, PagDev, TinyWorlds, transitking,
+Ogrebane, Kenney, qubodup, SketchMan3, Almitory, Vehicle / Jan Schupke.
+Approved glyph casting: HL2 / HM3 / SV2 / SV3. No HS3 casting asset installed.
+
+SUMMON COMBAT ADDITIONS
+Cow CA5/CD5, Imp ID1 and Oathbreaker OA2/OD2: attribution, licenses and edits
+are listed in audio/SUMMON-COMBAT-LICENSES.txt, included with this game.
+Imp attacks share the existing FL5 magical fire projectile cue.
+
+UNDEAD, VAMPIRE LORD, WITCH / STOMP / MIMIC
+Installed selections and full source/author/license/edit details:
+audio/UNDEAD-VAMPIRE-LICENSES.txt.
+"short scream no effects.wav" by xl57 — CC BY 4.0
+https://freesound.org/people/xl57/sounds/671201/
+"comic lick" by Manuel Graf — CC BY 4.0
+https://freesound.org/people/ManuelGraf/sounds/176798/
+https://creativecommons.org/licenses/by/4.0/
+Witch source: public HQ MP3 preview converted to mono PCM16, normalized/faded;
+no pitch change. Mimic lick: mono PCM16 conversion, peak matching/fades.
+Michel Baradari — Rumble/explosion / 2 High Quality Explosions — CC BY 3.0
+https://opengameart.org/content/rumbleexplosion
+https://opengameart.org/content/2-high-quality-explosions
+Selected Stomp includes edited licensed explosion sources and original bass synthesis.
+Additional CC0 authors: Independent.nu, Ogrebane, Breviceps, needleballista,
+ianzazz, Litruv, IENBA, BlueSiren, Amaiguri, purplereptar, AuraVoice / Nocturnal_Vanguard.
+Full descriptions and modifications are in the license file above.
+
+HUMANOID + GUARD DEATH / MIMIC TRANSFORM
+Pack 19 installed: BD4, AD2, GD2, SD1, ST3, HD5, HA1, HS5, MX3.
+HaelDB (male vocals), artisticdude (Swishes), rubberduck (RPG SFX),
+Vehicle / Jan Schupke (Tinysized SFX) — CC0. Full sources and edits:
+audio/HUMANOID-LICENSES.txt. Witch/Mimic/Stomp additions are credited above.
+
+BEAST TRAIT AUDIO
+Installed pack 18: BC1, BP2, CJ2, CP1, EG5, SB3, SS3, RG2, GC3, GT4.
+Sources, licenses and edits: audio/BEAST-TRAIT-LICENSES.txt.
+Anthousai (egg crack), rubberduck (breaking/falling/hit) — CC0;
+IMadeIt (Single Bee sound) — CC BY 3.0; other sources already credited above/below.
+
+BEAST COMBAT + TOAD DEATH
+Approved pack 17: TD5, EA2/ED5, WA5/WD3, BA4/BD2, CA3/CD4, SA3/SD3,
+RA2/RD4, GA1/GD1. Full source/author/license/edit disclosures are included in
+audio/BEAST-COMBAT-LICENSES.txt. Attack/death assets are exact audition copies.
+CC BY 3.0 additions: pla1554alaska / qubodup (Bald Eagle Screams),
+congusbongus (Dog growls), Vinrax (Pig SFX Pack), IMadeIt (Single Bee sound).
+https://creativecommons.org/licenses/by/3.0/
+CC0 additions: AntumDeluge / U.S. Fish & Wildlife Service (Bear Growls),
+AntumDeluge / J0ck0 / mediacollege.com (Gorilla Sounds), fvcalderan (Boar),
+EZduzziteh (Ribbit Frog Sounds), D.jones (Alligator Growls 02).
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+=== BEAST-COMBAT-LICENSES.txt ===
+BEAST COMBAT + TOAD DEATH — INSTALLED PACK 17 SELECTIONS
+
+Free sources, preview designs only. No real animal injury/death recordings are used.
+Death cues are edits of ordinary calls/growls, not documentation of animal death.
+
+AntumDeluge / U.S. Fish & Wildlife Service — Bear Growls — CC0.
+https://opengameart.org/content/bear-growls
+AntumDeluge / J0ck0 / mediacollege.com — Gorilla Sounds — CC0.
+https://opengameart.org/content/gorilla-sounds
+fvcalderan — Boar (human vocal imitation + EQ) — CC0.
+https://opengameart.org/content/boar-0
+EZduzziteh — Ribbit Frog Sounds — CC0.
+https://opengameart.org/content/ribbit-frog-sounds
+D.jones — Alligator Growls 02.wav — CC0.
+https://freesound.org/people/D.jones/sounds/527844/
+Uses the public HQ MP3 preview, not the original uncompressed WAV.
+Alligator recordings are adapted as Crocodile designs; not claimed to be crocodile recordings.
+
+pla1554alaska, submitted/extracted by qubodup — Bald Eagle Screams — CC BY 3.0 option.
+https://opengameart.org/content/bald-eagle-screams
+congusbongus — Dog growls — CC BY 3.0.
+https://opengameart.org/content/dog-growls
+Dog growls are adapted as Wolf designs; not claimed to be actual wolf recordings.
+Vinrax — Pig SFX Pack (idle recordings only) — CC BY 3.0.
+https://opengameart.org/content/pig-sfx-pack
+IMadeIt — Single Bee sound — CC BY 3.0.
+https://opengameart.org/content/single-bee-sound
+
+Existing CC0 supporting sources: Kenney Impact Sounds; artisticdude Swishes Sound Pack.
+https://kenney.nl/assets/impact-sounds
+https://opengameart.org/content/swishes-sound-pack
+
+LICENSES
+https://creativecommons.org/publicdomain/zero/1.0/
+https://creativecommons.org/licenses/by/3.0/
+If a CC BY candidate is installed, credit its author, title, link, license and edits in game credits.
+
+EDITS
+Mono 44.1kHz PCM16 WAV; excerpts/foreground selection, pitch/speed changes,
+EQ/low-pass/high-pass, short fades; optional one animal vocal + impact/air texture.
+Bee swarm designs mix time/pitch-shifted copies of a single bee recording and fade
+the swarm away for death (bees do not have a vocal death cry).
+Peak matched to -12dBFS; not perceived loudness matched.
+Five options per group are sound designs, not five unrelated recording sessions.
+Full recipes in SECENEKLER.txt and PrepareBeastCombatAudition.kt.
+
+Installed selections: TD5, EA2, ED5, WA5, WD3, BA4, BD2, CA3, CD4, SA3, SD3, RA2, RD4, GA1, GD1.
+
+
+=== HUMANOID-LICENSES.txt ===
+INSTALLED PACK 19: BD4, AD2, GD2, SD1, ST3, HD5, HA1, HS5, MX3. MX3 fitted to 850ms transform; others exact.
+
+PACK 19 SOURCE PROVENANCE — SELECTED CUES INSTALLED
+
+HaelDB — Male Grunt/Yelling sounds — CC0 option selected.
+https://opengameart.org/content/male-gruntyelling-sounds
+Recorded human performances. Different files/voice styles and pitch variants;
+not a claim of five unrelated performers per enemy.
+Cici Fyre — RPG Voice Starter Pack — CC0.
+https://cicifyre.itch.io/rpg-voice-starter-pack
+Witch candidates: nonverbal damaged vocal takes adapted as death designs;
+not five recordings originally labeled as death or five unrelated actresses.
+rubberduck — 80 CC0 RPG SFX — CC0.
+https://opengameart.org/node/86018
+rubberduck — 75 CC0 breaking/falling/hit SFX — CC0.
+https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx
+Kenney — Impact Sounds — CC0.
+https://kenney.nl/assets/impact-sounds
+artisticdude — Swishes Sound Pack — CC0.
+https://opengameart.org/content/swishes-sound-pack
+Vehicle / Jan Schupke — Fantasy Sound Effects (Tinysized SFX) — CC0.
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+CC0: https://creativecommons.org/publicdomain/zero/1.0/
+
+EDITS: excerpts, foreground extraction, mono/44.1kHz/PCM16 conversion, pitch/speed,
+EQ, short fades, optional one vocal + wood/air/body layers. Peak matched -12dBFS,
+not perceived loudness normalization. GS4 adds an original damped 52Hz sine body.
+Full candidate recipes in SECENEKLER.txt / PrepareHumanoidAudition.kt.
+
+Mimic design reference only: official D&D SRD / D&D Beyond Mimic description:
+object imitation, adhesive body, pseudopod and bite. No D&D game audio copied,
+no text reproduced and no new D&D mechanics implemented.
+https://www.dndbeyond.com/monsters/16957-mimic
+
+
+=== UNDEAD-VAMPIRE-LICENSES.txt ===
+INSTALLED SELECTIONS: skeleton_death=20/SK3, zombie_attack=20/ZA1, zombie_death=20/ZD1, ghost_attack=20/GA2, ghost_death=20/GD1, ghost_storm=20/GC7, slime_death=20/LD4, slime_path=20/LP5, gorilla_stomp=21/GS9, mimic_attack=21/MA3, mimic_death=21/MD2, vampire_hunger=21/VH5, vampire_bite=21/VB1, vampire_mist=21/ME1, vampire_form=21/VF5, vampire_teleport=21/TP1, vampire_cone_charge=21/LC2, vampire_swipe_charge=21/SC5, vampire_death=21/VS5, vampire_hurt=21/VP5
+LD4 is shared by full-size and fragment Slimes. VF5 fitted 3200ms, TP1 750ms, LC2 1000ms. Other selected WAVs copied exactly.
+
+WITCH: short scream no effects.wav by xl57 — CC BY 4.0.
+https://freesound.org/people/xl57/sounds/671201/
+https://creativecommons.org/licenses/by/4.0/
+Public HQ MP3 preview converted to mono PCM16/44.1kHz, peak matched -12dBFS, 10ms edge fades. No pitch change.
+
+PACK 20 — WITCH / UNDEAD PREVIEW OPTIONS — SELECTED CUES INSTALLED
+
+NEW SOURCES (CC0):
+artisticdude — Zombies Sound Pack
+https://opengameart.org/content/zombies-sound-pack
+ianzazz — Zombie noises and moans
+https://opengameart.org/content/zombie-noises-and-moans
+qubodup — Ghost Monster Voice Moaning & Growling; Ghost breath
+https://opengameart.org/content/ghost-monster-voice-moaning-growling
+https://opengameart.org/content/ghost-breath
+AuraVoice / Nocturnal_Vanguard — Female Scream 1
+https://opengameart.org/content/female-scream-1
+kanaizo — Loud Witch Scream
+https://freesound.org/people/kanaizo/sounds/724988/
+Litruv — Ghost Whispers (backwards invented words)
+https://freesound.org/people/Litruv/sounds/175944/
+IENBA — Ghost Whispers (Sound Design Workshop students, Playa Hermosa, Uruguay)
+https://freesound.org/people/IENBA/sounds/656439/
+BlueSiren — indistinctwhispering.wav (nonsense / dark phrases, source already layered)
+https://freesound.org/people/BlueSiren/sounds/377743/
+Amaiguri — Female_Fake_Crying.mp3 (acted crying)
+https://freesound.org/people/Amaiguri/sounds/518993/
+purplereptar — Woman Crying.wav
+https://freesound.org/people/purplereptar/sounds/449439/
+Freesound inputs above are publicly offered HQ MP3 previews, not original WAV downloads.
+
+EXISTING SOURCES REUSED:
+Cici Fyre — RPG Voice Starter Pack — CC0
+https://cicifyre.itch.io/rpg-voice-starter-pack
+rubberduck — 80 CC0 RPG SFX; 75 CC0 breaking/falling/hit SFX — CC0
+https://opengameart.org/node/86018
+https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx
+Kenney — Impact Sounds — CC0
+https://kenney.nl/assets/impact-sounds
+Vehicle / Jan Schupke — Fantasy Sound Effects (Tinysized SFX) — CC0
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+HaelDB — Male Grunt/Yelling sounds — CC0 option selected
+https://opengameart.org/content/male-gruntyelling-sounds
+spookymodem — Bubbling Acid — CC BY 3.0
+https://opengameart.org/content/bubbling-acid
+https://creativecommons.org/licenses/by/3.0/
+CC0: https://creativecommons.org/publicdomain/zero/1.0/
+
+EDITS: selected excerpts, mono/44.1kHz PCM16 conversion, pitch/speed, filters,
+short fades, gentle amplitude flutter for Witch, ghost echo / tremolo, optional
+foley layers. Skeleton options are bone-like designs from wood/rock/chain foley,
+not recordings of actual bones. Ghost voices are processed vocal performances;
+10 options does not imply 10 actors. Female performers' actual age is not claimed.
+All clips peak matched to -12dBFS; not perceived loudness normalization.
+GS/MA/MD are carried forward from pack 19, not newly selected sounds.
+GS4 includes an original damped 52Hz sine body, same as pack 19.
+Candidate-level recipes: SECENEKLER.txt / PrepareUndeadAudition.kt.
+Nothing from this audition is installed until selected.
+
+
+PACK 21 — 90 PREVIEW CANDIDATES — SELECTED CUES INSTALLED
+
+NEW SOURCES:
+Breviceps — Cartoon - Slurp! / Cartoon Slurp — CC0
+https://freesound.org/people/Breviceps/sounds/445974/
+https://freesound.org/people/Breviceps/sounds/573583/
+needleballista — fast slurp — CC0
+https://freesound.org/people/needleballista/sounds/728585/
+Manuel Graf — comic lick — CC BY 4.0
+https://freesound.org/people/ManuelGraf/sounds/176798/
+https://creativecommons.org/licenses/by/4.0/
+Freesound inputs are the publicly offered HQ MP3 previews, converted to mono WAV,
+not a claim to have downloaded original WAV files requiring login.
+
+Independent.nu (submitted by qubodup) — 8 wet squish, slurp impacts — CC0
+https://opengameart.org/content/8-wet-squish-slurp-impacts
+Ogrebane — Monster Sound Effects 2 — CC0
+https://opengameart.org/content/monster-sound-effects-2
+marcelofg55 — Monster SFX — CC0
+https://opengameart.org/content/monster-sfx
+Michel Baradari / apollo-music.de (submitted by qubodup) — Rumble/explosion — CC BY 3.0
+https://opengameart.org/content/rumbleexplosion
+https://creativecommons.org/licenses/by/3.0/
+
+EXISTING LICENSED SOURCES REUSED:
+Michel Baradari — 2 High Quality Explosions — CC BY 3.0
+https://opengameart.org/content/2-high-quality-explosions
+HaelDB — Male Grunt/Yelling sounds — CC0 option selected
+https://opengameart.org/content/male-gruntyelling-sounds
+qubodup — 3 dark magic spells; Ghost breath; Ghost Monster Voice Moaning & Growling — CC0
+https://opengameart.org/content/3-dark-magic-spells
+https://opengameart.org/content/ghost-breath
+https://opengameart.org/content/ghost-monster-voice-moaning-growling
+Ogrebane — Teleport Spell — CC0
+https://opengameart.org/content/teleport-spell
+artisticdude — Swishes Sound Pack — CC0; Fire & Evil Spell — CC BY 3.0
+https://opengameart.org/content/swishes-sound-pack
+https://opengameart.org/content/fire-evil-spell
+rubberduck — 75 CC0 breaking/falling/hit SFX; 80 CC0 RPG SFX — CC0
+https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx
+https://opengameart.org/node/86018
+Kenney — Impact Sounds — CC0
+https://kenney.nl/assets/impact-sounds
+Vehicle / Jan Schupke — Fantasy Sound Effects (Tinysized SFX) — CC0
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+spookymodem — Goblin Scream — CC BY 3.0
+https://opengameart.org/content/goblin-scream
+CC0: https://creativecommons.org/publicdomain/zero/1.0/
+
+DESIGN / EDITS:
+Excerpts, pitch/speed, EQ, mono/44.1kHz PCM16 conversion, fades, optional coherent
+voice doubling, quiet delayed resonance and original synthesized low-frequency
+impact bodies. Some previews share source recordings, not 90 unrelated field
+recordings or actors. GS uses actual explosion transients and designed impact
+bodies, not the rejected GS recordings from packs 18-20. MA1/MA2 target an elastic,
+wet tongue-slap character; no audio was extracted from League of Legends or any
+other commercial game. Vampire designs use licensed human/monster performances
+and original processing, not another game's character voice or cloned actor.
+Recipes are in SECENEKLER.txt and PrepareVampireAudition.kt.
+All previews peak matched to -12dBFS, not perceived loudness normalized.
+No gameplay code, installed game audio or preferences changed by this task.

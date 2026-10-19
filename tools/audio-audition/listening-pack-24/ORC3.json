@@ -1,0 +1,23 @@
+{
+  "id": "ORC3",
+  "recipe": {
+    "character": "Koba",
+    "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the REAL MONSTER!",
+    "voice": "am_michael",
+    "label": "Hırıltılı barbar · belirgin kelimeler",
+    "speed": 0.98,
+    "pitch": -4.7,
+    "lang": "en-us",
+    "pause": 0.34,
+    "rough": true,
+    "grit": 3.1,
+    "bass": 0.32,
+    "presence": 0.28,
+    "shadow": 0.0,
+    "rumble": 0.0,
+    "processing_version": "orc-veteran-v1"
+  },
+  "duration": 11.069002267573696,
+  "sha256": "dbca12a6a82d6ee3ef364755c8206a495187b6c4688772ab5578d40d008939da",
+  "phonemes": "ˌɔn bᵻhˈæf ʌv ˈɔːl ðɪ ˈaʊtkæsts, ˌɔn bᵻhˈæf ʌv ˈɔːl ðoʊz hˌuː hɐvbɪn kˈɔːld mˈɔnstɚz... aɪ wɪl ʃˈoʊ ðˌɛm ðə ɹˈiːəl mˈɔnstɚ!"
+}

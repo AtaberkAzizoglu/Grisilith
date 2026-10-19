@@ -1,0 +1,61 @@
+PACK 21 — 90 PREVIEW CANDIDATES — NOT INSTALLED
+
+NEW SOURCES:
+Breviceps — Cartoon - Slurp! / Cartoon Slurp — CC0
+https://freesound.org/people/Breviceps/sounds/445974/
+https://freesound.org/people/Breviceps/sounds/573583/
+needleballista — fast slurp — CC0
+https://freesound.org/people/needleballista/sounds/728585/
+Manuel Graf — comic lick — CC BY 4.0
+https://freesound.org/people/ManuelGraf/sounds/176798/
+https://creativecommons.org/licenses/by/4.0/
+Freesound inputs are the publicly offered HQ MP3 previews, converted to mono WAV,
+not a claim to have downloaded original WAV files requiring login.
+
+Independent.nu (submitted by qubodup) — 8 wet squish, slurp impacts — CC0
+https://opengameart.org/content/8-wet-squish-slurp-impacts
+Ogrebane — Monster Sound Effects 2 — CC0
+https://opengameart.org/content/monster-sound-effects-2
+marcelofg55 — Monster SFX — CC0
+https://opengameart.org/content/monster-sfx
+Michel Baradari / apollo-music.de (submitted by qubodup) — Rumble/explosion — CC BY 3.0
+https://opengameart.org/content/rumbleexplosion
+https://creativecommons.org/licenses/by/3.0/
+
+EXISTING LICENSED SOURCES REUSED:
+Michel Baradari — 2 High Quality Explosions — CC BY 3.0
+https://opengameart.org/content/2-high-quality-explosions
+HaelDB — Male Grunt/Yelling sounds — CC0 option selected
+https://opengameart.org/content/male-gruntyelling-sounds
+qubodup — 3 dark magic spells; Ghost breath; Ghost Monster Voice Moaning & Growling — CC0
+https://opengameart.org/content/3-dark-magic-spells
+https://opengameart.org/content/ghost-breath
+https://opengameart.org/content/ghost-monster-voice-moaning-growling
+Ogrebane — Teleport Spell — CC0
+https://opengameart.org/content/teleport-spell
+artisticdude — Swishes Sound Pack — CC0; Fire & Evil Spell — CC BY 3.0
+https://opengameart.org/content/swishes-sound-pack
+https://opengameart.org/content/fire-evil-spell
+rubberduck — 75 CC0 breaking/falling/hit SFX; 80 CC0 RPG SFX — CC0
+https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx
+https://opengameart.org/node/86018
+Kenney — Impact Sounds — CC0
+https://kenney.nl/assets/impact-sounds
+Vehicle / Jan Schupke — Fantasy Sound Effects (Tinysized SFX) — CC0
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+spookymodem — Goblin Scream — CC BY 3.0
+https://opengameart.org/content/goblin-scream
+CC0: https://creativecommons.org/publicdomain/zero/1.0/
+
+DESIGN / EDITS:
+Excerpts, pitch/speed, EQ, mono/44.1kHz PCM16 conversion, fades, optional coherent
+voice doubling, quiet delayed resonance and original synthesized low-frequency
+impact bodies. Some previews share source recordings, not 90 unrelated field
+recordings or actors. GS uses actual explosion transients and designed impact
+bodies, not the rejected GS recordings from packs 18-20. MA1/MA2 target an elastic,
+wet tongue-slap character; no audio was extracted from League of Legends or any
+other commercial game. Vampire designs use licensed human/monster performances
+and original processing, not another game's character voice or cloned actor.
+Recipes are in SECENEKLER.txt and PrepareVampireAudition.kt.
+All previews peak matched to -12dBFS, not perceived loudness normalized.
+No gameplay code, installed game audio or preferences changed by this task.

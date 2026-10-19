@@ -137,3 +137,56 @@ https://creativecommons.org/licenses/by-sa/3.0/
 Additional CC0 sources: frosthardr, Bananaboatman33, PagDev, TinyWorlds, transitking,
 Ogrebane, Kenney, qubodup, SketchMan3, Almitory, Vehicle / Jan Schupke.
 Approved glyph casting: HL2 / HM3 / SV2 / SV3. No HS3 casting asset installed.
+
+SUMMON COMBAT ADDITIONS
+Cow CA5/CD5, Imp ID1 and Oathbreaker OA2/OD2: attribution, licenses and edits
+are listed in audio/SUMMON-COMBAT-LICENSES.txt, included with this game.
+Imp attacks share the existing FL5 magical fire projectile cue.
+
+UNDEAD, VAMPIRE LORD, WITCH / STOMP / MIMIC
+Installed selections and full source/author/license/edit details:
+audio/UNDEAD-VAMPIRE-LICENSES.txt.
+"short scream no effects.wav" by xl57 — CC BY 4.0
+https://freesound.org/people/xl57/sounds/671201/
+"comic lick" by Manuel Graf — CC BY 4.0
+https://freesound.org/people/ManuelGraf/sounds/176798/
+https://creativecommons.org/licenses/by/4.0/
+Witch source: public HQ MP3 preview converted to mono PCM16, normalized/faded;
+no pitch change. Mimic lick: mono PCM16 conversion, peak matching/fades.
+Michel Baradari — Rumble/explosion / 2 High Quality Explosions — CC BY 3.0
+https://opengameart.org/content/rumbleexplosion
+https://opengameart.org/content/2-high-quality-explosions
+Selected Stomp includes edited licensed explosion sources and original bass synthesis.
+Additional CC0 authors: Independent.nu, Ogrebane, Breviceps, needleballista,
+ianzazz, Litruv, IENBA, BlueSiren, Amaiguri, purplereptar, AuraVoice / Nocturnal_Vanguard.
+Full descriptions and modifications are in the license file above.
+
+HUMANOID + GUARD DEATH / MIMIC TRANSFORM
+Pack 19 installed: BD4, AD2, GD2, SD1, ST3, HD5, HA1, HS5, MX3.
+HaelDB (male vocals), artisticdude (Swishes), rubberduck (RPG SFX),
+Vehicle / Jan Schupke (Tinysized SFX) — CC0. Full sources and edits:
+audio/HUMANOID-LICENSES.txt. Witch/Mimic/Stomp additions are credited above.
+
+FINISHING COMBAT CUES
+Pack 22 installed: SLS4, BRC5, SR5, BRH2, GRH1, SPH1, HOH3.
+Exact selected recordings/edits; sources and licenses: audio/FINISHING-LICENSES.txt.
+Bear, Gorilla, Spearman and Horseman hurt feedback only; no added hurt voice
+for Bee Swarm, Crocodile, Witch, Ghost or Slime.
+
+BEAST TRAIT AUDIO
+Installed pack 18: BC1, BP2, CJ2, CP1, EG5, SB3, SS3, RG2, GC3, GT4.
+Sources, licenses and edits: audio/BEAST-TRAIT-LICENSES.txt.
+Anthousai (egg crack), rubberduck (breaking/falling/hit) — CC0;
+IMadeIt (Single Bee sound) — CC BY 3.0; other sources already credited above/below.
+
+BEAST COMBAT + TOAD DEATH
+Approved pack 17: TD5, EA2/ED5, WA5/WD3, BA4/BD2, CA3/CD4, SA3/SD3,
+RA2/RD4, GA1/GD1. Full source/author/license/edit disclosures are included in
+audio/BEAST-COMBAT-LICENSES.txt. Attack/death assets are exact audition copies.
+CC BY 3.0 additions: pla1554alaska / qubodup (Bald Eagle Screams),
+congusbongus (Dog growls), Vinrax (Pig SFX Pack), IMadeIt (Single Bee sound).
+https://creativecommons.org/licenses/by/3.0/
+CC0 additions: AntumDeluge / U.S. Fish & Wildlife Service (Bear Growls),
+AntumDeluge / J0ck0 / mediacollege.com (Gorilla Sounds), fvcalderan (Boar),
+EZduzziteh (Ribbit Frog Sounds), D.jones (Alligator Growls 02).
+https://creativecommons.org/publicdomain/zero/1.0/
