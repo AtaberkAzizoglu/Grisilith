@@ -132,6 +132,9 @@ class TomeOfEryndorAttackExecutor(
         }
 
         attackDirection.nor()
+        val beamDamageType = com.azizoglu.grisilith.item.runtime.ActiveItemEffects
+            .resolveNormalProjectileDamageType(DamageType.FIRE)
+        com.azizoglu.grisilith.audio.GameAudio.magicalShot(beamDamageType)
 
         val startX =
             context.attackOriginX
@@ -160,7 +163,8 @@ class TomeOfEryndorAttackExecutor(
             rotationDegrees = attackAngle,
             worldWidth = effectiveRange,
             worldHeight = BEAM_HALF_WIDTH * 3.4f,
-            durationSeconds = 0.28f
+            durationSeconds = 0.28f,
+            damageType = beamDamageType
         )
 
         /*
@@ -208,7 +212,8 @@ class TomeOfEryndorAttackExecutor(
                 enemy = enemy,
                 context = context,
                 damageMultiplier =
-                    damageMultiplier
+                    damageMultiplier,
+                damageType = beamDamageType
             )
         }
     }
@@ -259,7 +264,8 @@ class TomeOfEryndorAttackExecutor(
     private fun damageEnemy(
         enemy: Enemy,
         context: WeaponAttackContext,
-        damageMultiplier: Float
+        damageMultiplier: Float,
+        damageType: DamageType
     ) {
         if (enemy.isDead) {
             return
@@ -301,7 +307,8 @@ class TomeOfEryndorAttackExecutor(
                 amount = tamgaModifiedDamage,
                 damageContext =
                     EnemyDamageContext(
-                        damageType = DamageType.FIRE,
+                        damageType = damageType,
+                        chaosDamageResolved = true,
                         sourceWeaponRuntimeId =
                             context.weapon.runtimeId,
                         sourceWeaponDefinitionId =
@@ -369,7 +376,7 @@ class TomeOfEryndorAttackExecutor(
             appliedDamage =
                 appliedDamage,
             damageType =
-                DamageType.FIRE
+                damageType
         )
     }
 

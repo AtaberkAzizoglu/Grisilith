@@ -1,0 +1,61 @@
+Grisilith listening pack 11: 35 preview candidates, NO GAME INTEGRATION.
+IG Ignite Dash, ER Erasing Soul, VP Vortex Pull, SC Static Clouds, AP Acidic Pool,
+PS Plague Storm, BL burning-pool layer only. No Ivy Staff/Chalk Dust choices included.
+
+NEW SOURCES:
+Ogrebane — Teleport Spell — CC0
+https://opengameart.org/content/teleport-spell
+https://opengameart.org/sites/default/files/teleport.wav
+spookymodem — Bubbling Acid — CC BY 3.0
+https://opengameart.org/content/bubbling-acid
+https://opengameart.org/sites/default/files/Acid%20Bubble.wav
+Jerimee — Thunder — CC BY 3.0
+https://opengameart.org/content/thunder
+https://opengameart.org/sites/default/files/thunderclap_0.ogg
+Thunder source is synthesized with a cSound instrument, not a claimed field recording.
+The original download is named .ogg but contains RIFF/WAVE PCM; stored locally as thunder.wav.
+PagDev — Fireplace Sound loop — CC0
+https://opengameart.org/content/fireplace-sound-loop
+https://opengameart.org/sites/default/files/fire.wav
+TinyWorlds — boiling water loops — CC0
+https://opengameart.org/content/boiling-water-loops
+https://opengameart.org/sites/default/files/cooking_with_cover_01.ogg
+https://opengameart.org/sites/default/files/cooking_without_cover_01_0.ogg
+
+EXISTING SOURCES REUSED FOR DESIGNS:
+artisticdude — Fire & Evil Spell — CC BY 3.0
+https://opengameart.org/content/fire-evil-spell
+qubodup — 3 dark magic spells — CC0
+https://opengameart.org/content/3-dark-magic-spells
+Almitory — Air Woosh Move — CC0
+https://opengameart.org/content/air-woosh-move
+remaxim — Short wind sound — CC0
+https://opengameart.org/content/short-wind-sound
+SketchMan3 — wind whoosh loop — CC0
+https://opengameart.org/content/wind-whoosh-loop
+Vehicle / Jan Schupke — Tinysized — CC0
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+Kenney — Impact Sounds — CC0
+https://kenney.nl/assets/impact-sounds
+Augmentality (Brandon Morris), submitted by HaelDB — Spell sounds — CC0 option selected
+https://opengameart.org/content/spell-sounds
+
+LICENSE LINKS:
+https://creativecommons.org/licenses/by/3.0/
+https://creativecommons.org/publicdomain/zero/1.0/
+CC BY recordings require creator/source/license attribution and edit disclosure if selected for shipping.
+They are free-to-use with attribution, NOT CC0. No paid sources.
+
+EDITS:
+Excerpts, mono/16-bit/44.1kHz conversion, speed/pitch changes, low/high-pass, reversal, layers,
+gust envelopes, 5ms end fade, peak match -12dBFS. Detailed recipes in PrepareFocusAbilityAudition.kt.
+Loop stems use ~83ms wrap crossfades plus a short boundary repair; preview demos contain two cycles.
+Short audition periods are NOT final spell durations. Some use repeated recording textures,
+not 35 unique original recordings. Sound quality/character still requires user selection.
+IG stems separate teleport from arrival burst so runtime can sync to actual teleport animation.
+BL is only the burn layer: no Acid Bubble/AP selected recording baked in.
+BL is designed from fire/boiling/hiss recordings, not literal burning-liquid field recordings.
+ER/PS dark layers are synthetic, not human voices. Low-pass processing favors a low, non-shrill tone.
+
+The jFLAC decoder is preview-task-only, not shipped. Its LGPL2.1 details are recorded in
+magic-refinement-source-credits.txt.

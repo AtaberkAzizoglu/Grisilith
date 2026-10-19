@@ -30,6 +30,7 @@ import com.azizoglu.grisilith.statistics.career.HighScoreRepository
 import com.azizoglu.grisilith.screen.HighScoreScreen
 import com.azizoglu.grisilith.save.RunSaveRepository
 import com.badlogic.gdx.Preferences
+import com.azizoglu.grisilith.audio.GameAudio
 
 class GrisilithGame : Game() {
 
@@ -111,6 +112,7 @@ class GrisilithGame : Game() {
             {
                 GameSettings.load()
                 RunInputBindings.load()
+                GameAudio.initialize()
             },
 
             {
@@ -144,6 +146,22 @@ class GrisilithGame : Game() {
                 this
             )
         )
+    }
+
+    fun showAudioCredits() {
+        changeScreen(com.azizoglu.grisilith.screen.AudioCreditsScreen(this))
+    }
+
+    override fun setScreen(screen: Screen?) {
+        // Settings opened from a paused run keeps the run's silent music context.
+        val menu = when(screen) {
+            is FirstScreen, is SplashLoadingScreen, null -> false
+            is SettingsScreen -> GameAudio.inMenus()
+            else -> true
+        }
+        GameAudio.menuContext(menu)
+        GameAudio.combatPlayback(1f,true)
+        super.setScreen(screen)
     }
 
     fun showPlayMenu(
@@ -487,9 +505,15 @@ class GrisilithGame : Game() {
         // Keep connection checks running in menus/settings too, independent of game speed.
         online?.update()
         super.render()
+        // Flush one highest-priority UI event after the screen reports its actual outcome.
+        GameAudio.update()
     }
 
+    override fun pause() {GameAudio.pause();super.pause()}
+    override fun resume() {super.resume();GameAudio.resume()}
+
     override fun dispose() {
+        GameAudio.dispose()
         online?.close()
         screen?.dispose()
         com.azizoglu.grisilith.ui.icon.ContentIconRenderer.dispose()

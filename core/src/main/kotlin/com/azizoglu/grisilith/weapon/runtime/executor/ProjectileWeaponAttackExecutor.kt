@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.weapon.runtime.executor
 
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.content.ConditionType
 import com.azizoglu.grisilith.combat.condition.ConditionApplication
 import com.azizoglu.grisilith.combat.condition.ConditionDamageCalculator
@@ -140,6 +142,10 @@ class ProjectileWeaponAttackExecutor(
 
         val attackNumber =
             context.weapon.registerNormalAttack()
+        when(weaponId) {
+            LONGBOW_ID -> GameAudio.play(UiSound.BOW_SHOT)
+            CROSSBOW_ID -> GameAudio.play(UiSound.CROSSBOW_SHOT)
+        }
 
         val isUpgradedSteamWand =
             weaponId == STEAM_WAND_ID &&
@@ -445,6 +451,12 @@ class ProjectileWeaponAttackExecutor(
                 }
             }
 
+        val isSpellFocus = com.azizoglu.grisilith.content.ContentTag.SPELL_FOCUS in definition.tags
+        val projectileDamageType = if(isSpellFocus)
+            com.azizoglu.grisilith.item.runtime.ActiveItemEffects.resolveNormalProjectileDamageType(selectedDamageType)
+            else selectedDamageType
+        if(isSpellFocus) GameAudio.magicalShot(projectileDamageType)
+
         val conditionApplication =
             conditionApplicationFor(
                 context = context,
@@ -696,7 +708,8 @@ class ProjectileWeaponAttackExecutor(
                     effectiveRange,
 
                 damageType =
-                    selectedDamageType,
+                    projectileDamageType,
+                chaosDamageResolved = isSpellFocus,
 
                 knockback =
                     effectiveKnockback,

@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.screen.pause
 
 import com.badlogic.gdx.Gdx
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -183,6 +185,7 @@ class PauseInputController(
         buttonType:
         PauseButtonType?
     ): PauseAction? {
+        if (buttonType != null) GameAudio.play(UiSound.CLICK)
         return when (buttonType) {
             PauseButtonType
                 .RETURN_TO_GAME -> {
@@ -249,6 +252,7 @@ class PauseInputController(
                     pointer
                 )
         ) {
+            GameAudio.play(UiSound.CLICK)
             interactionState
                 .closeAllModals()
 
@@ -264,6 +268,7 @@ class PauseInputController(
             return null
         }
 
+        GameAudio.play(UiSound.CONFIRM)
         return when (
             interactionState
                 .confirmationType

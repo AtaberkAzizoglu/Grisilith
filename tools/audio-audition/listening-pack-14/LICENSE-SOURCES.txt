@@ -1,0 +1,14 @@
+Female incantation auditions — NOT INSTALLED.
+TW1–5: cloyen, Female Gibberish, CC0.
+https://freesound.org/people/cloyen/sounds/800349/
+https://cdn.freesound.org/previews/800/800349_17223158-hq.mp3
+SV1–5: Bananaboatman33, evilwitch_Master.wav, CC0.
+https://freesound.org/people/Bananaboatman33/sounds/315655/
+https://cdn.freesound.org/previews/315/315655_3245819-hq.mp3
+The source author describes recorded/processed evil witch / female demon gibberish; tagged backwards.
+Existing source processing is retained. No added multi-voice layers, reversal, pitch change or synthetic syllables.
+License: https://creativecommons.org/publicdomain/zero/1.0/
+Public HQ MP3 previews used; not original uncompressed studio WAV files. Source metadata verified 2026-10-19.
+Five cuts per source, TWO source recordings total — not ten separate actors or recordings.
+Edits: pause-based excerpts, mono/resampling to 44.1kHz, peak matching -12dBFS (not perceived loudness matching), 20ms fades.
+No claim of authentic Elvish/Celestial or any other real language.

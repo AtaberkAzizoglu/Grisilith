@@ -1,5 +1,8 @@
 package com.azizoglu.grisilith.screen.preset
 
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
+
 import com.azizoglu.grisilith.GrisilithGame
 import com.azizoglu.grisilith.armor.definition.ArmorDefinition
 import com.azizoglu.grisilith.character.CharacterDefinition
@@ -246,8 +249,8 @@ class PresetJournalScreen(
     private fun save() {
         val current = draft ?: return
         val char = current.gear[Slot.CHARACTER] ?: return
-        val weapon = current.gear[Slot.WEAPON] ?: run { message = "Choose a weapon before saving."; return }
-        if (current.name.isBlank()) { message = "Enter a preset name."; return }
+        val weapon = current.gear[Slot.WEAPON] ?: run { message = "Choose a weapon before saving."; GameAudio.play(UiSound.ERROR); return }
+        if (current.name.isBlank()) { message = "Enter a preset name."; GameAudio.play(UiSound.ERROR); return }
         val preset = RunPreset(presetId = current.id, presetName = current.name.trim(), characterId = char, weaponId = weapon,
             armorId = current.gear[Slot.ARMOR], itemId = current.gear[Slot.ITEM],
             weaponTamgaId = current.gear[Slot.WEAPON_TAMGA], armorTamgaId = current.gear[Slot.ARMOR_TAMGA],
@@ -258,8 +261,9 @@ class PresetJournalScreen(
             is PresetRepositoryResult.Success -> {
                 val saved = result.preset ?: preset
                 draft = fromPreset(saved).also { drafts[it.id] = it }; editingName = false; message = "All changes saved"
+                GameAudio.play(UiSound.CONFIRM)
             }
-            is PresetRepositoryResult.Failure -> message = result.message
+            is PresetRepositoryResult.Failure -> { message = result.message; GameAudio.play(UiSound.ERROR) }
         }
     }
 
@@ -590,7 +594,7 @@ class PresetJournalScreen(
         if (pointer.justPressed) {
             pressedTarget = target(); editingName = pressedTarget == "name"
             statPress=statsOpen && (pressedTarget?.startsWith("plus:")==true || pressedTarget?.startsWith("minus:")==true)
-            if(statPress) { act(pressedTarget!!);statRepeat.begin(pressedTarget!!) } else statRepeat.reset()
+            if(statPress) { GameAudio.play(UiSound.CLICK); act(pressedTarget!!);statRepeat.begin(pressedTarget!!) } else statRepeat.reset()
             dragScroll = if (deleteConfirmation || leaveConfirmation || dropdown != null) null else listOf(leftScroll, rightScroll).firstOrNull {
                 (it != rightScroll || (rightActive() && !statsOpen)) && (it.area.contains(pointer.position) || Rectangle(it.rail.x - 6f, it.rail.y, it.rail.width + 12f, it.rail.height).contains(pointer.position))
             }
@@ -624,6 +628,15 @@ class PresetJournalScreen(
     }
 
     private fun act(target: String) {
+        val sound = when (target.substringBefore(':')) {
+            "preset", "new" -> UiSound.PAGE
+            "cancelDelete", "close", "back", "leave", "stay", "revert" -> UiSound.CLICK
+            "remove" -> UiSound.BACK
+            "confirmDelete", "content" -> UiSound.CONFIRM
+            "plus", "minus" -> null
+            else -> UiSound.CLICK
+        }
+        sound?.let(GameAudio::play)
         val current = draft
         val value = target.substringAfter(':', "")
         when (target.substringBefore(':')) {

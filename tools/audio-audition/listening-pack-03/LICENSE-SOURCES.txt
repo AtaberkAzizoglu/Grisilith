@@ -1,0 +1,31 @@
+GRISILITH — WEAPON AUDITION 03 SOURCES
+Confirmed game-installed: Longsword G1, Double Swords DS1 (single/upgraded), Lance LN1, Shield SH1, Whip WP5.
+Other candidates remain previews. Warhammer remains unassigned.
+
+Swishes Sound Pack — artisticdude — CC0
+https://opengameart.org/content/swishes-sound-pack
+https://opengameart.org/sites/default/files/swishes.zip
+https://creativecommons.org/publicdomain/zero/1.0/
+
+Fantasy Sound Effects (Tinysized SFX) — Vehicle / Jan Schupke — CC0
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+https://opengameart.org/sites/default/files/tinysized.zip
+https://creativecommons.org/publicdomain/zero/1.0/
+Original readme retained in sources/tinysized/Audio/readme.txt.
+
+Whip sound — Tuomo Untinen / Reemax — CC BY 4.0 (one of the offered licenses)
+https://opengameart.org/content/whip-sound
+https://opengameart.org/sites/default/files/whip.wav
+https://creativecommons.org/licenses/by/4.0/
+Author's requested attribution: "Whipping sound by Tuomo Untinen"
+Free commercial redistribution is allowed under the attribution license, not public domain.
+WP5 was chosen; this attribution was added to the game's credits and shipped audio credits.
+
+Processing: converted to mono 44.1 kHz / 16-bit WAV; peak matched to approximately -12 dBFS;
+5 ms end fade. Speed/pitch edits, doubled strokes and layered recordings are labeled in the UI.
+WH uses two original hammer recordings and three designed variations, not five original recordings.
+WP uses one original leather-belt whip recording and four designed variations, not five original recordings.
+SH uses metal sword-clash recordings suggested as shield textures, not actual shield recordings.
+LN uses air swishes/whooshes suggested for spear thrusts, not actual spear impact recordings.
+Sources and processing are documented in SECENEKLER.txt and the preparation code.
+Source web pages are retained under sources/<pack>/source-page.html for provenance.

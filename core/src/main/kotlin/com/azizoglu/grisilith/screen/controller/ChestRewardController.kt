@@ -1,5 +1,8 @@
 package com.azizoglu.grisilith.screen.controller
 
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
+
 import com.azizoglu.grisilith.chest.ChestDiscardAllowanceCalculator
 import com.azizoglu.grisilith.chest.ChestOpeningSession
 import com.azizoglu.grisilith.chest.ChestOpeningState
@@ -394,6 +397,7 @@ class ChestRewardController(
     }
 
     private fun unlockCurrentChest() {
+        GameAudio.play(UiSound.CHEST)
 
         val reward = rollReward()
 
@@ -432,13 +436,15 @@ class ChestRewardController(
             rolled += candidate
         }
         batchRewards = rolled
+        GameAudio.play(UiSound.CHEST)
         discardedBatchRewardIndices.clear()
         continueOpeningAll = continueAll
     }
 
     private fun discardBatchReward(index: Int) {
         if (index !in batchRewards.indices || index in discardedBatchRewardIndices) return
-        if (!openingSession.consumeBatchDiscard()) return
+        if (!openingSession.consumeBatchDiscard()) { GameAudio.play(UiSound.ERROR); return }
+        GameAudio.play(UiSound.BACK)
         discardedBatchRewardIndices += index
         onRunDiscardUsed()
     }
@@ -446,6 +452,7 @@ class ChestRewardController(
     private fun takeBatchRewards() {
         val rewards = batchRewards
         if (rewards.isEmpty()) return
+        GameAudio.play(UiSound.CONFIRM)
         rewards.forEachIndexed { index, reward ->
             if (index !in discardedBatchRewardIndices) onApplyReward(reward)
             onChestCompleted()
@@ -481,6 +488,7 @@ class ChestRewardController(
 
         onChestCompleted()
 
+        GameAudio.play(UiSound.CONFIRM)
         finishOrPrepareNextChest()
     }
 
@@ -490,11 +498,13 @@ class ChestRewardController(
             !openingSession
                 .completeWithDiscard()
         ) {
+            GameAudio.play(UiSound.ERROR)
             return
         }
 
         onRunDiscardUsed()
 
+        GameAudio.play(UiSound.BACK)
         finishOrPrepareNextChest()
     }
 

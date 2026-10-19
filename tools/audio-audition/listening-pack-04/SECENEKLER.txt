@@ -1,0 +1,111 @@
+GRISILITH · DİNLEME SEÇKİSİ 04
+30 aday / 6 grup. Bu seçkinin yeni adayları henüz oyuna eklenmedi.
+
+WM: Warhammer · daha küt, ağır ve kalın
+Önceki WH seçeneklerinin yerine yeni tasarımlar: metal çekiç kaydının çınlaması alçak geçiren filtreyle azaltıldı, bazılarına kısa gövde darbesi eklendi. Perde/hız düşürme ve katmanlama içeren taslaklardır; beş ayrı özgün kayıt değildir. Henüz oyuna eklenmedi.
+WM1 — Küt metal + tok gövde
+  Kaynaklar: tinysized/Audio/sfx-cc0/metal-hammer-hit-02.wav, impact-sounds/Audio/impactSoft_heavy_000.ogg
+  Toplu kayıtta: 1s ve 4s
+WM2 — Çok pes, kısa metal darbe
+  Kaynaklar: tinysized/Audio/sfx-cc0/metal-hammer-hit-01.wav
+  Toplu kayıtta: 7s ve 10s
+WM3 — Kalın metal + ağır gövde
+  Kaynaklar: tinysized/Audio/sfx-cc0/metal-hammer-hit-02.wav, impact-sounds/Audio/impactSoft_heavy_002.ogg
+  Toplu kayıtta: 13s ve 16s
+WM4 — Küt metal + kuru alt darbe
+  Kaynaklar: tinysized/Audio/sfx-cc0/metal-hammer-hit-01.wav, impact-sounds/Audio/impactWood_heavy_002.ogg
+  Toplu kayıtta: 19s ve 22s
+WM5 — Kısa vurgu + derin darbe
+  Kaynaklar: tinysized/Audio/sfx-cc0/metal-hammer-hit-02.wav, impact-sounds/Audio/impactSoft_heavy_003.ogg
+  Toplu kayıtta: 25s ve 28s
+
+BW: Bow · gerçek yay bırakışı
+Still North Media'nın gerçek yay kayıtlarından ayrı atışlar. BW1–BW3 English Longbow, BW4–BW5 Scythian Recurve kaydından kesildi. Yalnızca atış sesi; her ok çarpışmasına ses ekleme veya ability seçimi değildir.
+BW1 — English Longbow · atış 1
+  Kaynaklar: stillnorth-textures/Audio/English Longbow Shoot.wav
+  Toplu kayıtta: 1s ve 4s
+BW2 — English Longbow · atış 2
+  Kaynaklar: stillnorth-textures/Audio/English Longbow Shoot.wav
+  Toplu kayıtta: 7s ve 10s
+BW3 — English Longbow · atış 3
+  Kaynaklar: stillnorth-textures/Audio/English Longbow Shoot.wav
+  Toplu kayıtta: 13s ve 16s
+BW4 — Scythian Recurve · atış 1
+  Kaynaklar: stillnorth-textures/Audio/Scythian Recurve Shoot.wav
+  Toplu kayıtta: 19s ve 22s
+BW5 — Scythian Recurve · atış 2
+  Kaynaklar: stillnorth-textures/Audio/Scythian Recurve Shoot.wav
+  Toplu kayıtta: 25s ve 28s
+
+CB: Crossbow · gerçek mekanizma / bırakış
+Still North Media Crossbow Shoot kaydındaki beş farklı atış kesiti. Bow ile aynı ses kullanılmıyor. Çıkış mekanizması için adaylar; yeniden kurma veya projectile çarpışması değil.
+CB1 — Arbalet atışı · 1
+  Kaynaklar: stillnorth-textures/Audio/Crossbow Shoot.wav
+  Toplu kayıtta: 1s ve 4s
+CB2 — Arbalet atışı · 2
+  Kaynaklar: stillnorth-textures/Audio/Crossbow Shoot.wav
+  Toplu kayıtta: 7s ve 10s
+CB3 — Arbalet atışı · 3
+  Kaynaklar: stillnorth-textures/Audio/Crossbow Shoot.wav
+  Toplu kayıtta: 13s ve 16s
+CB4 — Arbalet atışı · 4
+  Kaynaklar: stillnorth-textures/Audio/Crossbow Shoot.wav
+  Toplu kayıtta: 19s ve 22s
+CB5 — Arbalet atışı · 5
+  Kaynaklar: stillnorth-textures/Audio/Crossbow Shoot.wav
+  Toplu kayıtta: 25s ve 28s
+
+DG: Dagger · kısa bıçak fırlatışı
+Kısa hava kesişi ve bazı adaylarda hafif metal ayrıntısı. Fırlatma hissi için tasarlanmış swish katmanlarıdır; gerçek hançer fırlatma kaydı oldukları iddia edilmiyor. Longsword, DS1 ve LN1 sesleri aynen paylaşılmıyor.
+DG1 — İnce kısa fırlatış
+  Kaynaklar: swishes/Audio/swishes/swish-4.wav
+  Toplu kayıtta: 1s ve 4s
+DG2 — Hızlı hava kesişi
+  Kaynaklar: swishes/Audio/swishes/swish-7.wav
+  Toplu kayıtta: 7s ve 10s
+DG3 — Metalik uçlu kısa savurma
+  Kaynaklar: swishes/Audio/swishes/swish-10.wav, tinysized/Audio/sfx-cc0/knife-unsheathe-02.wav
+  Toplu kayıtta: 13s ve 16s
+DG4 — Kuru hızlı fırlatış
+  Kaynaklar: swishes/Audio/swishes/swish-12.wav
+  Toplu kayıtta: 19s ve 22s
+DG5 — İnce metal + hava
+  Kaynaklar: swishes/Audio/swishes/swish-13.wav, tinysized/Audio/sfx-cc0/metal-knife-scrape-03.wav
+  Toplu kayıtta: 25s ve 28s
+
+SL: Sling · savurma / taş bırakışı
+Gerçek sapan kaydı değil: havada savrulan nesne, deri/kumaş ve kısa swish kayıtlarından hazırlanmış öneriler. Projectile parçalanması ve ability taşının iniş sesi bu seçimden ayrı ele alınacak.
+SL1 — Dairesel hava savurması · 1
+  Kaynaklar: tinysized/Audio/sfx-cc0/tube-plastic-whoosh-01.wav
+  Toplu kayıtta: 1s ve 4s
+SL2 — Dairesel hava savurması · 2
+  Kaynaklar: tinysized/Audio/sfx-cc0/tube-plastic-whoosh-02.wav
+  Toplu kayıtta: 7s ve 10s
+SL3 — Deri dokulu bırakış
+  Kaynaklar: tinysized/Audio/sfx-cc0/quiver-leather-squeeze-01.wav, swishes/Audio/swishes/swish-10.wav
+  Toplu kayıtta: 13s ve 16s
+SL4 — Kumaş dokulu bırakış
+  Kaynaklar: tinysized/Audio/sfx-cc0/cloth-pouch-shake-02.wav, swishes/Audio/swishes/swish-7.wav
+  Toplu kayıtta: 19s ve 22s
+SL5 — Kısa sade taş savurması
+  Kaynaklar: swishes/Audio/swishes/swish-12.wav
+  Toplu kayıtta: 25s ve 28s
+
+BR: Boomerang · dönerek savrulma
+Kısa aralıklı iki/üç hava geçişiyle dönme hissi veren taslaklar. Bunlar sürekli uçuş loop'u değil, tek atış için önerilerdir. Gelişmiş arka tur veya Guided Hunt ability sesi henüz seçilmiyor.
+BR1 — İki geçişli kısa dönüş
+  Kaynaklar: swishes/Audio/swishes/swish-6.wav, swishes/Audio/swishes/swish-6.wav
+  Toplu kayıtta: 1s ve 4s
+BR2 — İnce iki geçiş
+  Kaynaklar: swishes/Audio/swishes/swish-9.wav, swishes/Audio/swishes/swish-9.wav
+  Toplu kayıtta: 7s ve 10s
+BR3 — Geniş dönüş dokusu
+  Kaynaklar: tinysized/Audio/sfx-cc0/tube-plastic-whoosh-02.wav, swishes/Audio/swishes/swish-8.wav
+  Toplu kayıtta: 13s ve 16s
+BR4 — Üç kısa hava geçişi
+  Kaynaklar: swishes/Audio/swishes/swish-4.wav, swishes/Audio/swishes/swish-4.wav, swishes/Audio/swishes/swish-4.wav
+  Toplu kayıtta: 19s ve 22s
+BR5 — Tok iki geçiş
+  Kaynaklar: swishes/Audio/swishes/swish-13.wav, swishes/Audio/swishes/swish-11.wav
+  Toplu kayıtta: 25s ve 28s
+

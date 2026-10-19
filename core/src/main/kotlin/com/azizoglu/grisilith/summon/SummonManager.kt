@@ -1356,6 +1356,7 @@ class SummonManager(
             return false
         }
 
+        weapon.ivySummonChoice?.let{com.azizoglu.grisilith.audio.GameAudio.play(com.azizoglu.grisilith.audio.GameAudio.summonCue(it))}
         return true
     }
 

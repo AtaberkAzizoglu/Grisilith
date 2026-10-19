@@ -1,0 +1,68 @@
+Grisilith audition pack12 — 60 candidates / 12 groups. PREVIEW ONLY.
+No selected pack11 or pack12 audio installed; all prior choices remain on hold.
+
+NEW SOURCES AND LICENSES
+Secretlondon, submitted by qubodup — Farm animals — CC BY-SA 3.0
+https://opengameart.org/content/farm-animals
+https://opengameart.org/sites/default/files/mudchuteanimals.7z
+Original archive info: Secretlondon, Wikimedia Commons Mudchute Park/Farm, CC BY-SA 3.0 or later.
+Cow AN1..4 are variants of one real recorded moo; not four original cow recordings.
+
+pal.zoltan.illes — Male encounter voice pieces — CC BY-SA 3.0
+https://opengameart.org/content/male-encounter-voice-pieces
+https://opengameart.org/sites/default/files/male-test1_0.zip
+greetings.wav / wellmet1.wav used reversed, pitched and echoed, not as intelligible greetings.
+These and cow derivatives must retain CC BY-SA 3.0 if chosen and distributed.
+https://creativecommons.org/licenses/by-sa/3.0/
+
+Spring Spring / Julie Damsgaard / Spring Enterprises — Magic Words + Healing Sound Effect — CC0
+https://opengameart.org/content/magic-words-healing-sound-effect
+https://opengameart.org/sites/default/files/magic_words.wav
+Producer credit per page: Julie Damsgaard/Spring Spring/Spring Enterprises
+https://spring-enterprises.neocities.org
+Short reversed/pitched excerpts for feminine-timbre casting designs; not four new recorded actors.
+
+MirceaKitsune — Dialog vocal samples — CC0
+https://opengameart.org/content/dialog-vocal-samples
+https://opengameart.org/sites/default/files/vocal_samples.zip
+Source author generated samples using Espeak and Audacity, including male_deep, male_standard,
+female_standard, female_light and demon sets. These are synthetic voices, not human recordings.
+We arrange syllable/timbre fragments into rhythmic non-language phrases, with pitch edits and echoes.
+Not actual Elvish, Celestial, or any claimed authentic fictional language.
+
+spookymodem — Goblin Scream — CC BY 3.0
+https://opengameart.org/content/goblin-scream
+https://opengameart.org/sites/default/files/Goblin%20Scream.wav
+Michel Baradari (apollo-music.de), submitted by qubodup — 2 High Quality Explosions — CC BY 3.0
+https://opengameart.org/content/2-high-quality-explosions
+https://opengameart.org/sites/default/files/explosions.7z
+transitking, submitted by qubodup — Water Waves — CC0
+https://opengameart.org/content/water-waves
+wave_01/02/03_cc0-11505__transitking__wavesound.flac from the linked page.
+
+REUSED SOURCES
+artisticdude Fire & Evil Spell — CC BY 3.0: https://opengameart.org/content/fire-evil-spell
+Jerimee Thunder — CC BY 3.0: https://opengameart.org/content/thunder
+qubodup 3 dark magic spells — CC0: https://opengameart.org/content/3-dark-magic-spells
+Almitory Air Woosh Move — CC0: https://opengameart.org/content/air-woosh-move
+SketchMan3 wind whoosh loop — CC0: https://opengameart.org/content/wind-whoosh-loop
+Vehicle / Jan Schupke Tinysized — CC0: https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+Kenney Impact Sounds — CC0: https://kenney.nl/assets/impact-sounds
+JaggedStone Magic Spell SFX — CC0: https://opengameart.org/content/magic-spell-sfx
+Augmentality (Brandon Morris), submitted by HaelDB Spell sounds — CC0 option:
+https://opengameart.org/content/spell-sounds
+
+License links: https://creativecommons.org/licenses/by/3.0/
+https://creativecommons.org/publicdomain/zero/1.0/
+CC BY selections require source/creator/license and edit disclosure in shipped credits.
+
+EDIT DISCLOSURE
+Mono 44.1kHz/16-bit WAV; excerpts, speed/pitch, reverse, low/high-pass, layered/echo offsets,
+peak match ~-12dBFS, 5ms end fade. Not perceptual loudness matching or listening-quality approval.
+Detailed recipes: tools/audio-audition/qa/PrepareSummonGlyphAudition.kt.
+Most designs are variations/layers from these sources, not 60 unrelated original performances.
+Singularity is fictional sound design, not a literal space recording or scientific sonification.
+Tsunami/Meteor similarly are layered water/wind/thunder/impact designs, not genuine disaster recordings.
+No real religious prayer text is intentionally used; male speech is reversed or synthetic syllables.
+Casting examples are auditions; timing will be adapted to actual drawing/channel durations after approval.
+The jFLAC preparation-only decoder is documented in magic-refinement-source-credits.txt; not shipped.

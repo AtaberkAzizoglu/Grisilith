@@ -193,6 +193,16 @@ class WeaponRuntimeManager(
         var poolWeapon: WeaponInstance? = null
         val pending = ArrayDeque<PendingVitriolicIgnition>()
         val rules = mutableListOf<com.azizoglu.grisilith.combat.interaction.CombatInteractionRule>()
+        fun syncAudio() {
+            com.azizoglu.grisilith.audio.GameAudio.sustain(vortex,if(!vortex.isActive)null else
+                if(vortex.isPlagueStormActive)com.azizoglu.grisilith.audio.UiSound.PLAGUE_STORM else com.azizoglu.grisilith.audio.UiSound.VORTEX,
+                source=vortex.field?.let{com.azizoglu.grisilith.audio.AudioSource(it.center.x,it.center.y,it.radius)})
+            com.azizoglu.grisilith.audio.GameAudio.sustain(clouds,com.azizoglu.grisilith.audio.UiSound.STATIC_CLOUDS.takeIf{clouds.isActive},
+                source=com.azizoglu.grisilith.audio.AudioSource(clouds.visualCenterX,clouds.visualCenterY,clouds.visualRadius))
+            val poolSource=com.azizoglu.grisilith.audio.AudioSource(pool.visualCenterX,pool.visualCenterY,pool.visualRadius)
+            com.azizoglu.grisilith.audio.GameAudio.sustain(pool,com.azizoglu.grisilith.audio.UiSound.ACIDIC_POOL.takeIf{pool.isActive},source=poolSource)
+            com.azizoglu.grisilith.audio.GameAudio.sustain(pool.burningAudioOwner,com.azizoglu.grisilith.audio.UiSound.BURNING_POOL.takeIf{pool.isActive&&pool.isVitriolicIgnitionActive},source=poolSource)
+        }
         fun clear() {
             ignite.cancel();vortex.clear();clouds.clear();pool.clear();areas.clearAll();pending.clear()
             vortexOwner=null;vortexWeapon=null;cloudOwner=null;cloudWeapon=null;poolOwner=null;poolWeapon=null
@@ -736,7 +746,10 @@ class WeaponRuntimeManager(
                     }
                 )
             }
+        syncFocusAudio()
     }
+
+    private fun syncFocusAudio() { focusChannels.values.forEach { it.syncAudio() } }
 
     fun currentAttacksPerSecondFor(
         weapon: WeaponInstance
@@ -2393,6 +2406,9 @@ class WeaponRuntimeManager(
     }
 
     fun dispose() {
+        glyphMotionRuntime.clear()
+        glyphSpellRuntime.clear()
+        erasingSoulsRuntime.clear()
         focusChannels.values.forEach { it.clear() }
         focusChannels.clear()
         fallbackFocus.clear()

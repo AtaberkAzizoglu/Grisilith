@@ -211,6 +211,7 @@ class MainMenuScreen(
                 game.showSettings()
             },
 
+            MenuButton("AUDIO CREDITS",100f,24f,190f,48f) { game.showAudioCredits() },
             MenuButton(
                 text = "QUIT GAME",
                 x = 950f,

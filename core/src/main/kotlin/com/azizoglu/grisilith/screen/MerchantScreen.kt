@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.screen
 
 import com.azizoglu.grisilith.GrisilithGame
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.armor.definition.DefaultArmors
 import com.azizoglu.grisilith.content.ContentTag
 import com.azizoglu.grisilith.item.definition.DefaultItems
@@ -375,6 +377,7 @@ class MerchantScreen(
         if (pointer.justReleased) {
             if (ownedFilterPressed && inside) {
                 showOwned = !showOwned
+                GameAudio.play(UiSound.CLICK)
                 productScrollOffset = 0f
                 message = null
                 normalizeSelection()
@@ -420,6 +423,7 @@ class MerchantScreen(
         if (pointer.justReleased) {
             if (pressedCategory != null && pressedCategory == categoryAtPointer) {
                 selectedCategory = pressedCategory!!
+                GameAudio.play(UiSound.CLICK)
                 productScrollOffset = 0f
                 selectedUnlockId = productsForSelectedCategory().firstOrNull()?.id
                 hoveredUnlockId = null
@@ -452,13 +456,14 @@ class MerchantScreen(
         if (pointer.justReleased) {
             when {
                 MerchantRenderer.FILTER_DROPDOWN.contains(pointer.position) ->
-                    filterDropdownOpen = !filterDropdownOpen
+                    { filterDropdownOpen = !filterDropdownOpen; GameAudio.play(UiSound.CLICK) }
 
                 filterDropdownOpen -> {
                     val optionIndex =
                         renderer.filterOptionBounds(options.size)
                             .indexOfFirst { it.contains(pointer.position) }
                     if (optionIndex >= 0) {
+                        GameAudio.play(UiSound.CLICK)
                         selectedFilters[selectedCategory] = options[optionIndex]
                         productScrollOffset = 0f
                         normalizeSelection()
@@ -498,6 +503,7 @@ class MerchantScreen(
                 val releasedProduct = productAtPointer()
                 if (releasedProduct?.id == pressedUnlockId) {
                     selectedUnlockId = releasedProduct?.id
+                    GameAudio.play(UiSound.CLICK)
                     message = null
                     messageIsError = false
                 }
@@ -648,6 +654,7 @@ class MerchantScreen(
 
         if (!PlayerProfileRepository.profile.canSpendGrisilithCoins(product.cost * requestedQuantity)) {
             message = "NOT ENOUGH GRISILITH COINS"
+            GameAudio.play(UiSound.ERROR)
             messageIsError = true
             return
         }
@@ -670,6 +677,7 @@ class MerchantScreen(
                 UnlockPurchaseResult.UNKNOWN_UNLOCK -> "PRODUCT COULD NOT BE FOUND"
             }
         messageIsError = result != UnlockPurchaseResult.SUCCESS
+        GameAudio.play(if (messageIsError) UiSound.ERROR else UiSound.CONFIRM)
 
         if (result == UnlockPurchaseResult.SUCCESS) {
             purchaseFlashId = product.id

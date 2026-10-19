@@ -1,0 +1,31 @@
+Audition only; NOT INSTALLED.
+TW1: Kadın sesi / anlamsız sözler · ayrı kesit 1
+Kaynak aralığı: 0.06–3.69 s; doğal kaynak hızı/perdesi, ek ses katmanı yok.
+Duration: 3.63
+TW2: Kadın sesi / anlamsız sözler · ayrı kesit 2
+Kaynak aralığı: 3.69–7.35 s; doğal kaynak hızı/perdesi, ek ses katmanı yok.
+Duration: 3.66
+TW3: Kadın sesi / anlamsız sözler · ayrı kesit 3
+Kaynak aralığı: 7.35–10.85 s; doğal kaynak hızı/perdesi, ek ses katmanı yok.
+Duration: 3.5
+TW4: Kadın sesi / anlamsız sözler · ayrı kesit 4
+Kaynak aralığı: 10.85–14.53 s; doğal kaynak hızı/perdesi, ek ses katmanı yok.
+Duration: 3.68
+TW5: Kadın sesi / anlamsız sözler · ayrı kesit 5
+Kaynak aralığı: 14.53–18.34 s; doğal kaynak hızı/perdesi, ek ses katmanı yok.
+Duration: 3.81
+SV1: İşlenmiş cadı / demonik vokal · ayrı kesit 1
+Kaynak aralığı: 0.11–6.42 s; doğal kaynak hızı/perdesi, ek ses katmanı yok.
+Duration: 6.31
+SV2: İşlenmiş cadı / demonik vokal · ayrı kesit 2
+Kaynak aralığı: 6.42–12.82 s; doğal kaynak hızı/perdesi, ek ses katmanı yok.
+Duration: 6.4
+SV3: İşlenmiş cadı / demonik vokal · ayrı kesit 3
+Kaynak aralığı: 12.82–19.93 s; doğal kaynak hızı/perdesi, ek ses katmanı yok.
+Duration: 7.11
+SV4: İşlenmiş cadı / demonik vokal · ayrı kesit 4
+Kaynak aralığı: 19.93–25.74 s; doğal kaynak hızı/perdesi, ek ses katmanı yok.
+Duration: 5.81
+SV5: İşlenmiş cadı / demonik vokal · ayrı kesit 5
+Kaynak aralığı: 25.74–31.51 s; doğal kaynak hızı/perdesi, ek ses katmanı yok.
+Duration: 5.77

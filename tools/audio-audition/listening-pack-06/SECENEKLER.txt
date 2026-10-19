@@ -1,0 +1,111 @@
+GRISILITH · DİNLEME SEÇKİSİ 06
+30 aday / 6 grup. Bu seçkinin yeni adayları henüz oyuna eklenmedi.
+
+RS: Double Swords · Rapid Strokes
+Beş hızlı vuruşlu örnek taslaklar; farklı savurma ve metal ayrıntıları karşılaştırılıyor. Bunlar saldırı başına düşman sayısıyla çoğalmayacak. Seçilen doku oyuna bağlanırken gerçek vuruş zamanlamasına eşlenecek; gelişmiş ability'de yedi vuruşa uyarlanacak.
+RS1 — Beş kısa kesiş
+  Kaynaklar: swishes/Audio/swishes/swish-1.wav, swishes/Audio/swishes/swish-1.wav, swishes/Audio/swishes/swish-1.wav, swishes/Audio/swishes/swish-1.wav, swishes/Audio/swishes/swish-1.wav
+  Toplu kayıtta: 1s ve 4s
+RS2 — Daha kuru seri kesiş
+  Kaynaklar: swishes/Audio/swishes/swish-5.wav, swishes/Audio/swishes/swish-5.wav, swishes/Audio/swishes/swish-5.wav, swishes/Audio/swishes/swish-5.wav, swishes/Audio/swishes/swish-5.wav
+  Toplu kayıtta: 7s ve 10s
+RS3 — Keskin seri savurma
+  Kaynaklar: swishes/Audio/swishes/swish-8.wav, swishes/Audio/swishes/swish-8.wav, swishes/Audio/swishes/swish-8.wav, swishes/Audio/swishes/swish-8.wav, swishes/Audio/swishes/swish-8.wav
+  Toplu kayıtta: 13s ve 16s
+RS4 — Seri kesiş + metal final
+  Kaynaklar: swishes/Audio/swishes/swish-1.wav, swishes/Audio/swishes/swish-1.wav, swishes/Audio/swishes/swish-1.wav, swishes/Audio/swishes/swish-1.wav, swishes/Audio/swishes/swish-1.wav, tinysized/Audio/sfx-cc0/sword-clash-03.wav
+  Toplu kayıtta: 19s ve 22s
+RS5 — Tok seri + darbe finali
+  Kaynaklar: swishes/Audio/swishes/swish-11.wav, swishes/Audio/swishes/swish-11.wav, swishes/Audio/swishes/swish-11.wav, swishes/Audio/swishes/swish-11.wav, swishes/Audio/swishes/swish-11.wav, thwack/Audio/PCM/thwack-06.wav
+  Toplu kayıtta: 25s ve 28s
+
+SP: Lance · Spin Attack
+Dairesel süpürmeye uygun geniş hava hareketi; bazı adaylarda hafif metal temas. Gerçek mızrak dönüşü kaydı değil, kayıt katmanlarından ses tasarımı. Her düşmana ayrı çarpışma sesi eklenmeyecek.
+SP1 — Geniş çift hava süpürmesi
+  Kaynaklar: swishes/Audio/swishes/swish-3.wav, swishes/Audio/swishes/swish-6.wav
+  Toplu kayıtta: 1s ve 4s
+SP2 — Daha tok dairesel savurma
+  Kaynaklar: swishes/Audio/swishes/swish-6.wav, swishes/Audio/swishes/swish-9.wav
+  Toplu kayıtta: 7s ve 10s
+SP3 — Uzun hava hareketi
+  Kaynaklar: tinysized/Audio/sfx-cc0/tube-plastic-whoosh-01.wav, swishes/Audio/swishes/swish-11.wav
+  Toplu kayıtta: 13s ve 16s
+SP4 — Hava süpürmesi + metal temas
+  Kaynaklar: swishes/Audio/swishes/swish-3.wav, tinysized/Audio/sfx-cc0/sword-clash-02.wav
+  Toplu kayıtta: 19s ve 22s
+SP5 — Kısa güçlü dönüş
+  Kaynaklar: swishes/Audio/swishes/swish-13.wav, swishes/Audio/swishes/swish-8.wav
+  Toplu kayıtta: 25s ve 28s
+
+AS: Longsword · Air Slash
+Normal saldırıdan daha geniş ve uzun bir hava dalgası hissi. Bunlar mevcut gerçek swish kayıtlarının katmanlanmış varyasyonları; yeni büyü kaydı veya sentezlenmiş lazer sesi değil.
+AS1 — Tok hava dalgası
+  Kaynaklar: swishes/Audio/swishes/swish-13.wav, swishes/Audio/swishes/swish-9.wav
+  Toplu kayıtta: 1s ve 4s
+AS2 — Geniş hava geçişi
+  Kaynaklar: tinysized/Audio/sfx-cc0/tube-plastic-whoosh-01.wav, swishes/Audio/swishes/swish-11.wav
+  Toplu kayıtta: 7s ve 10s
+AS3 — Keskin başlangıç / geniş kuyruk
+  Kaynaklar: swishes/Audio/swishes/swish-5.wav, swishes/Audio/swishes/swish-8.wav
+  Toplu kayıtta: 13s ve 16s
+AS4 — İnce ıslıklı hava dalgası
+  Kaynaklar: tinysized/Audio/sfx-cc0/tin-whistle-whoosh-02.wav, swishes/Audio/swishes/swish-6.wav
+  Toplu kayıtta: 19s ve 22s
+AS5 — Kılıç kesişi + hava dalgası
+  Kaynaklar: rpg-audio/Audio/knifeSlice.ogg, swishes/Audio/swishes/swish-10.wav
+  Toplu kayıtta: 25s ve 28s
+
+SB: Shield · Defensive Burst
+Biriktirilen savunmayı tüketen tek, tok metal darbe taslağı. Pasif stack kazanımında sürekli ses çalması için değil; yalnızca aktif burst içindir.
+SB1 — Sert pat + metal kalkan
+  Kaynaklar: thwack/Audio/PCM/thwack-06.wav, tinysized/Audio/sfx-cc0/sword-clash-01.wav
+  Toplu kayıtta: 1s ve 4s
+SB2 — Tok metal plaka
+  Kaynaklar: impact-sounds/Audio/impactPlate_heavy_001.ogg, impact-sounds/Audio/impactPunch_heavy_001.ogg
+  Toplu kayıtta: 7s ve 10s
+SB3 — Metal vurgu + derin gövde
+  Kaynaklar: tinysized/Audio/sfx-cc0/metal-hammer-hit-02.wav, thwack/Audio/PCM/thwack-10.wav
+  Toplu kayıtta: 13s ve 16s
+SB4 — Kısa sert burst
+  Kaynaklar: thwack/Audio/PCM/thwack-01.wav, tinysized/Audio/sfx-cc0/sword-clash-04.wav
+  Toplu kayıtta: 19s ve 22s
+SB5 — Geniş metal patlaması
+  Kaynaklar: impact-sounds/Audio/impactPlate_heavy_003.ogg, thwack/Audio/PCM/thwack-06.wav, tinysized/Audio/sfx-cc0/sword-clash-05.wav
+  Toplu kayıtta: 25s ve 28s
+
+EB: Warhammer · Earthbreaker
+Üç ileri darbe için 180 ms aralıklı örnek seri. Normal saldırıda seçilen sert TH3 karakteri bazı adaylarda korunuyor, taş/maden darbesi dokusu ekleniyor. Bunlar gerçek deprem kayıtları değil; gelişmiş ability'de dört darbeye uyarlanacak.
+EB1 — Sert üç darbe + taş ayrıntısı
+  Kaynaklar: thwack/Audio/PCM/thwack-06.wav, impact-sounds/Audio/impactMining_000.ogg, thwack/Audio/PCM/thwack-06.wav, impact-sounds/Audio/impactMining_000.ogg, thwack/Audio/PCM/thwack-06.wav, impact-sounds/Audio/impactMining_000.ogg
+  Toplu kayıtta: 1s ve 4s
+EB2 — Kuru taş darbe serisi
+  Kaynaklar: thwack/Audio/PCM/thwack-01.wav, impact-sounds/Audio/impactMining_001.ogg, thwack/Audio/PCM/thwack-01.wav, impact-sounds/Audio/impactMining_001.ogg, thwack/Audio/PCM/thwack-01.wav, impact-sounds/Audio/impactMining_001.ogg
+  Toplu kayıtta: 7s ve 10s
+EB3 — Tok sert zemin serisi
+  Kaynaklar: thwack/Audio/PCM/thwack-10.wav, impact-sounds/Audio/impactMining_002.ogg, thwack/Audio/PCM/thwack-10.wav, impact-sounds/Audio/impactMining_002.ogg, thwack/Audio/PCM/thwack-10.wav, impact-sounds/Audio/impactMining_002.ogg
+  Toplu kayıtta: 13s ve 16s
+EB4 — Daha kuru zemin çatlağı
+  Kaynaklar: impact-sounds/Audio/impactWood_heavy_004.ogg, impact-sounds/Audio/impactMining_003.ogg, impact-sounds/Audio/impactWood_heavy_004.ogg, impact-sounds/Audio/impactMining_003.ogg, impact-sounds/Audio/impactWood_heavy_004.ogg, impact-sounds/Audio/impactMining_003.ogg
+  Toplu kayıtta: 19s ve 22s
+EB5 — Sert darbe + ağır gövde
+  Kaynaklar: thwack/Audio/PCM/thwack-06.wav, impact-sounds/Audio/impactPunch_heavy_002.ogg, thwack/Audio/PCM/thwack-06.wav, impact-sounds/Audio/impactPunch_heavy_002.ogg, thwack/Audio/PCM/thwack-06.wav, impact-sounds/Audio/impactPunch_heavy_002.ogg
+  Toplu kayıtta: 25s ve 28s
+
+WS: Whip · Whip Sweep
+Geniş savurma ve tek belirgin deri şaklama; normal iki vuruşlu saldırıdan farklı, tek geniş ability süpürmesi. Whip kaynak atfı geçerli; tüm adaylar kayıt katmanlarından tasarlanmış varyasyonlar.
+WS1 — Geniş hava + deri şaklama
+  Kaynaklar: swishes/Audio/swishes/swish-4.wav, reemax-whip/Audio/whip.wav
+  Toplu kayıtta: 1s ve 4s
+WS2 — Daha tok geniş savurma
+  Kaynaklar: swishes/Audio/swishes/swish-13.wav, reemax-whip/Audio/whip.wav
+  Toplu kayıtta: 7s ve 10s
+WS3 — Keskin kısa süpürme
+  Kaynaklar: swishes/Audio/swishes/swish-8.wav, reemax-whip/Audio/whip.wav
+  Toplu kayıtta: 13s ve 16s
+WS4 — Uzun hava hareketi + şaklama
+  Kaynaklar: tinysized/Audio/sfx-cc0/tube-plastic-whoosh-02.wav, reemax-whip/Audio/whip.wav
+  Toplu kayıtta: 19s ve 22s
+WS5 — Tok başlangıç / deri final
+  Kaynaklar: swishes/Audio/swishes/swish-6.wav, reemax-whip/Audio/whip.wav
+  Toplu kayıtta: 25s ve 28s
+

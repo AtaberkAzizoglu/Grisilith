@@ -277,9 +277,7 @@ class ChooseToSummonPopup(
         choice: IvySummonChoice
     ) {
 
-        weapon.chooseIvySummon(
-            choice
-        )
+        if(weapon.chooseIvySummon(choice)) com.azizoglu.grisilith.audio.GameAudio.summonChoice(choice)
 
         pendingWeapon =
             null

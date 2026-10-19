@@ -1,0 +1,111 @@
+GRISILITH · DİNLEME SEÇKİSİ 08
+30 aday / 6 grup. Bu seçkinin yeni adayları henüz oyuna eklenmedi.
+
+KS: Dagger · Knife Swarm
+DG4 dokusunun kalabalıklaştırılmış sürümleri. Tek salvo örnekleri; gelişmiş ikinci salvo oyunda ayrı tetiklenecek.
+KS1 — Sık, kısa bıçak çemberi
+  Kaynaklar: swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav
+  Toplu kayıtta: 1s ve 4s
+KS2 — Daha kalabalık çember
+  Kaynaklar: swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav
+  Toplu kayıtta: 7s ve 10s
+KS3 — Biraz yayılmış seri
+  Kaynaklar: swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav
+  Toplu kayıtta: 13s ve 16s
+KS4 — Tok katmanlı salvo
+  Kaynaklar: swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-7.wav
+  Toplu kayıtta: 19s ve 22s
+KS5 — Kısa, yoğun bıçak patlaması
+  Kaynaklar: swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav, swishes/Audio/swishes/swish-12.wav
+  Toplu kayıtta: 25s ve 28s
+
+BV: Bow · Leisurely Shot
+BW3 yay atışından beş oklu salvo tasarımları. Gelişmiş ikinci salvo burada çoğaltılmadı.
+BV1 — Beş sık yay bırakışı
+  Kaynaklar: stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav
+  Toplu kayıtta: 1s ve 4s
+BV2 — Beş belirgin yay bırakışı
+  Kaynaklar: stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav
+  Toplu kayıtta: 7s ve 10s
+BV3 — Tok, sık ok salvosu
+  Kaynaklar: stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav
+  Toplu kayıtta: 13s ve 16s
+BV4 — Yay + ince hava geçişi
+  Kaynaklar: stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, swishes/Audio/swishes/swish-4.wav
+  Toplu kayıtta: 19s ve 22s
+BV5 — Biraz tiz salvo
+  Kaynaklar: stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav, stillnorth-textures/Audio/English Longbow Shoot.wav
+  Toplu kayıtta: 25s ve 28s
+
+HB: Crossbow · Heavy Bolts
+CB4 normal atışının daha pes/kalın sürümleri; bazı seçeneklerde kısa gövde darbesi var.
+HB1 — CB4 · %85 hız
+  Kaynaklar: stillnorth-textures/Audio/Crossbow Shoot.wav
+  Toplu kayıtta: 1s ve 4s
+HB2 — CB4 · %70 hız
+  Kaynaklar: stillnorth-textures/Audio/Crossbow Shoot.wav
+  Toplu kayıtta: 7s ve 10s
+HB3 — Kalın mekanizma
+  Kaynaklar: stillnorth-textures/Audio/Crossbow Shoot.wav, impact-sounds/Audio/impactMetal_medium_000.ogg
+  Toplu kayıtta: 13s ve 16s
+HB4 — Tok gövdeli bırakış
+  Kaynaklar: stillnorth-textures/Audio/Crossbow Shoot.wav, impact-sounds/Audio/impactWood_heavy_002.ogg
+  Toplu kayıtta: 19s ve 22s
+HB5 — Ağır kısa vurgu
+  Kaynaklar: stillnorth-textures/Audio/Crossbow Shoot.wav, swishes/Audio/swishes/swish-12.wav
+  Toplu kayıtta: 25s ve 28s
+
+ST: Sling · Shatterstone
+Önce tek iniş, ardından gelişmiş iki iniş örneği. İkinci temas 350 ms sonra. Taş/mining ve darbe katmanlarından tasarımlar; gerçek kaya düşüş kaydı oldukları iddia edilmiyor.
+ST1 — Kuru taş ve kırıntı
+  Kaynaklar: impact-sounds/Audio/impactMining_000.ogg, thwack/Audio/PCM/thwack-06.wav
+  Toplu kayıtta: 1s ve 4s (ikinci ses gelişmiş ikili)
+ST2 — Kaba ağır taş
+  Kaynaklar: impact-sounds/Audio/impactMining_001.ogg, impact-sounds/Audio/impactWood_heavy_002.ogg
+  Toplu kayıtta: 7s ve 10s (ikinci ses gelişmiş ikili)
+ST3 — Tok taş inişi
+  Kaynaklar: impact-sounds/Audio/impactMining_002.ogg, impact-sounds/Audio/impactSoft_heavy_003.ogg
+  Toplu kayıtta: 13s ve 16s (ikinci ses gelişmiş ikili)
+ST4 — Sert pat ve kırıntılar
+  Kaynaklar: thwack/Audio/PCM/thwack-10.wav, impact-sounds/Audio/impactMining_003.ogg
+  Toplu kayıtta: 19s ve 22s (ikinci ses gelişmiş ikili)
+ST5 — Derin, kısa kaya teması
+  Kaynaklar: impact-sounds/Audio/impactMining_004.ogg, thwack/Audio/PCM/thwack-06.wav
+  Toplu kayıtta: 25s ve 28s (ikinci ses gelişmiş ikili)
+
+GH: Boomerang · Guided Hunt
+GH1 mevcut BR3 normal atışının aynısıdır. Diğerleri hava/perde varyasyonları; sürekli uçuş loop'u değildir.
+GH1 — Mevcut normal atış · BR3
+  Kaynaklar: tinysized/Audio/sfx-cc0/tube-plastic-whoosh-02.wav, swishes/Audio/swishes/swish-8.wav
+  Toplu kayıtta: 1s ve 4s
+GH2 — Biraz daha tok aynı doku
+  Kaynaklar: tinysized/Audio/sfx-cc0/tube-plastic-whoosh-02.wav, swishes/Audio/swishes/swish-8.wav
+  Toplu kayıtta: 7s ve 10s
+GH3 — Kısa yönlendirme vurgusu
+  Kaynaklar: tinysized/Audio/sfx-cc0/tube-plastic-whoosh-02.wav, swishes/Audio/swishes/swish-8.wav
+  Toplu kayıtta: 13s ve 16s
+GH4 — Üç hafif hava geçişi
+  Kaynaklar: swishes/Audio/swishes/swish-4.wav, swishes/Audio/swishes/swish-4.wav, swishes/Audio/swishes/swish-4.wav
+  Toplu kayıtta: 19s ve 22s
+GH5 — Rüzgâr ayrıntılı BR3
+  Kaynaklar: tinysized/Audio/sfx-cc0/tube-plastic-whoosh-02.wav, swishes/Audio/swishes/swish-8.wav, air-move/Audio/wind.wav
+  Toplu kayıtta: 25s ve 28s
+
+HW: Kısa insan ıslığı
+dklon Whistles paketinden dört ayrı kayıt ve bir pes varyasyon. Enstrüman/düdük değil insan ıslığı adayları. Ücretsiz CC BY 3.0; seçilirse dklon atfı eklenecek.
+HW1 — İnsan ıslığı · kayıt 1
+  Kaynaklar: dklon-whistles/Audio/whistle_1.wav
+  Toplu kayıtta: 1s ve 4s
+HW2 — İnsan ıslığı · kayıt 2
+  Kaynaklar: dklon-whistles/Audio/whistle_2.wav
+  Toplu kayıtta: 7s ve 10s
+HW3 — İnsan ıslığı · kayıt 3
+  Kaynaklar: dklon-whistles/Audio/whistle_3.wav
+  Toplu kayıtta: 13s ve 16s
+HW4 — İnsan ıslığı · kayıt 4
+  Kaynaklar: dklon-whistles/Audio/whistle_4.wav
+  Toplu kayıtta: 19s ve 22s
+HW5 — Kayıt 1 · biraz daha pes
+  Kaynaklar: dklon-whistles/Audio/whistle_1.wav
+  Toplu kayıtta: 25s ve 28s
+

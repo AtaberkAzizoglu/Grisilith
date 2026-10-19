@@ -1,0 +1,121 @@
+60 audition candidates; not installed. First four follow request; fifth alternative. SG has requested 2+3 exception.
+PX1: 1 · Tok alev patlaması
+spell-choices/explosions/explode.wav + fire-evil/spells/Fire.aif
+PX2: 2 · Kalın ve ağır alev
+spell-choices/explosions/explode.wav + fire-evil/spells/Fire.aif
+PX3: 3 · Hızlı alev infilakı
+spell-choices/explosions/explodemini.wav + fire-evil/spells/Fire.aif
+PX4: 4 · Geniş alev darbesi
+spell-choices/explosions/explode.wav + air-move/wind.wav + fire-evil/spells/Fire.aif
+PX5: 5 · Alternatif: buhar/basınç boşalması
+tinysized/sfx-cc0/compressed-air-spray-02.wav + focus-ability/thunder.wav
+AN1: 1 · Doğal kısa möö
+spell-choices/MudchuteAnimals/Mudchute_cow_1.ogg
+AN2: 2 · Biraz daha kalın möö
+spell-choices/MudchuteAnimals/Mudchute_cow_1.ogg
+AN3: 3 · Hafif yankılı çağrı
+spell-choices/MudchuteAnimals/Mudchute_cow_1.ogg
+AN4: 4 · Kısa ve daha canlı möö
+spell-choices/MudchuteAnimals/Mudchute_cow_1.ogg
+AN5: 5 · Alternatif: doğa çağrısı, moo yok
+magic-spells/magical_1.ogg + air-move/wind.wav
+DE1: 1 · Kısa imp çığlığı
+spell-choices/goblin_scream.wav
+DE2: 2 · Daha karanlık imp çığlığı
+spell-choices/goblin_scream.wav
+DE3: 3 · Sentetik demon heceleri
+spell-choices/demon_4.ogg + spell-choices/demon_1.ogg + spell-choices/demon_3.ogg + spell-choices/demon_2.ogg
+DE4: 4 · Boğuk demon mırıltısı
+spell-choices/demon_3.ogg + spell-choices/demon_2.ogg + spell-choices/demon_4.ogg + spell-choices/demon_1.ogg
+DE5: 5 · Alternatif: alevli portal
+fire-evil/spells/Fire.aif + dark-magic/dark_magic/fout-03.flac
+OA1: 1 · Çok pes ters ritüel
+spell-choices/greetings.wav
+OA2: 2 · Çift katmanlı ağır çağrı
+spell-choices/wellmet1.wav
+OA3: 3 · Sentetik bas dua dizisi
+spell-choices/male_deep_4.ogg + spell-choices/male_deep_1.ogg + spell-choices/male_deep_3.ogg + spell-choices/male_deep_2.ogg
+OA4: 4 · Sentetik derin erkek ayini
+spell-choices/male_deep_3.ogg + spell-choices/male_deep_2.ogg + spell-choices/male_deep_4.ogg + spell-choices/male_deep_1.ogg
+OA5: 5 · Alternatif: konuşmasız kadim mühür
+dark-magic/dark_magic/fout-03.flac + focus-ability/thunder.wav
+CL1: 1 · Net yıldırım ve gümbürtü
+focus-ability/thunder.wav
+CL2: 2 · Daha ağır yere iniş
+focus-ability/thunder.wav + spell-choices/explosions/explodemini.wav
+CL3: 3 · Keskin çakma, kalın kuyruk
+tinysized/sfx-cc0/paralyzer-discharge-01.wav + focus-ability/thunder.wav
+CL4: 4 · Çok katmanlı yıldırım darbesi
+focus-ability/thunder.wav
+CL5: 5 · Alternatif: kısa elektrik yarılması
+magic-spells/electricspell.ogg + spell-choices/explosions/explodemini.wav
+TS1: 1 · Derin dalga duvarı
+spell-choices/wave_01.flac + focus-ability/thunder.wav
+TS2: 2 · Ezici yaklaşan su kütlesi
+spell-choices/wave_02.flac + focus-ability/thunder.wav
+TS3: 3 · Geniş dalga ve basınç
+spell-choices/wave_03.flac + focus-ability/thunder.wav + air-move/wind.wav
+TS4: 4 · Karanlık, ağır dalga çöküşü
+spell-choices/wave_02.flac + spell-choices/wave_01.flac + focus-ability/thunder.wav
+TS5: 5 · Alternatif: su yerine yaklaşan basınç
+focus-ability/thunder.wav + wind-loop/wind.ogg
+MT1: 1 · Düşüş + ağır patlama
+air-move/wind.wav + spell-choices/explosions/explode.wav
+MT2: 2 · Hızlı düşüş + tok darbe
+air-move/wind.wav + spell-choices/explosions/explode.wav + focus-ability/thunder.wav
+MT3: 3 · Geniş, alevli meteor
+air-move/wind.wav + spell-choices/explosions/explode.wav + fire-evil/spells/Fire.aif
+MT4: 4 · Çok ağır göktaşı çarpışması
+air-move/wind.wav + spell-choices/explosions/explode.wav + focus-ability/thunder.wav
+MT5: 5 · Alternatif: kuru taş yarılması
+impact-sounds/impactMining_000 + impact-sounds/impactMining_003 + focus-ability/thunder.wav
+SG1: 1 · Boğuk uzaysal vızıltı
+magic-spells/electricspell.ogg + wind-loop/wind.ogg
+SG2: 2 · Kalın elektromanyetik gürültü
+magic-spells/electricspell.ogg + dark-magic/dark_magic/fout-01.flac
+SG3: 3 · Alternatif: içe çöken boşluk
+focus-ability/thunder.wav + air-move/wind.wav
+SG4: 4 · Alternatif: uzay yırtılması
+dark-magic/dark_magic/fout-02.flac + magic-spells/magical_1.ogg
+SG5: 5 · Alternatif: düşük kozmik nabız
+impact-sounds/impactSoft_heavy_003 + dark-magic/dark_magic/fout-03.flac
+VL1: 1 · Kayıttan mistik ters sözler
+spell-choices/greetings.wav
+VL2: 2 · Daha yankılı ve katmanlı sözler
+spell-choices/greetings.wav
+VL3: 3 · Sentetik ritüel heceleri
+spell-choices/male_deep_1.ogg + spell-choices/male_deep_3.ogg + spell-choices/male_deep_2.ogg + spell-choices/male_deep_4.ogg
+VL4: 4 · Sentetik farklı hece dizisi
+spell-choices/male_deep_2.ogg + spell-choices/male_deep_4.ogg + spell-choices/male_deep_1.ogg + spell-choices/male_deep_3.ogg
+VL5: 5 · Alternatif: sözsüz büyü hazırlığı
+dark-magic/dark_magic/fout-02.flac + magic-spells/magical_1.ogg
+VT1: 1 · Kayıttan mistik ters sözler
+spell-choices/magic_words.wav
+VT2: 2 · Daha yankılı ve katmanlı sözler
+spell-choices/magic_words.wav
+VT3: 3 · Sentetik ritüel heceleri
+spell-choices/female_light_1.ogg + spell-choices/female_light_3.ogg + spell-choices/female_light_2.ogg + spell-choices/female_light_4.ogg
+VT4: 4 · Sentetik farklı hece dizisi
+spell-choices/female_light_2.ogg + spell-choices/female_light_4.ogg + spell-choices/female_light_1.ogg + spell-choices/female_light_3.ogg
+VT5: 5 · Alternatif: sözsüz büyü hazırlığı
+dark-magic/dark_magic/fout-02.flac + magic-spells/magical_1.ogg
+VM1: 1 · Kayıttan mistik ters sözler
+spell-choices/greetings.wav
+VM2: 2 · Daha yankılı ve katmanlı sözler
+spell-choices/greetings.wav
+VM3: 3 · Sentetik ritüel heceleri
+spell-choices/male_standard_1.ogg + spell-choices/male_standard_3.ogg + spell-choices/male_standard_2.ogg + spell-choices/male_standard_4.ogg
+VM4: 4 · Sentetik farklı hece dizisi
+spell-choices/male_standard_2.ogg + spell-choices/male_standard_4.ogg + spell-choices/male_standard_1.ogg + spell-choices/male_standard_3.ogg
+VM5: 5 · Alternatif: sözsüz büyü hazırlığı
+dark-magic/dark_magic/fout-02.flac + magic-spells/magical_1.ogg
+VS1: 1 · Kayıttan mistik ters sözler
+spell-choices/magic_words.wav
+VS2: 2 · Daha yankılı ve katmanlı sözler
+spell-choices/magic_words.wav
+VS3: 3 · Sentetik ritüel heceleri
+spell-choices/female_standard_1.ogg + spell-choices/female_standard_3.ogg + spell-choices/female_standard_2.ogg + spell-choices/female_standard_4.ogg
+VS4: 4 · Sentetik farklı hece dizisi
+spell-choices/female_standard_2.ogg + spell-choices/female_standard_4.ogg + spell-choices/female_standard_1.ogg + spell-choices/female_standard_3.ogg
+VS5: 5 · Alternatif: sözsüz büyü hazırlığı
+dark-magic/dark_magic/fout-02.flac + magic-spells/magical_1.ogg

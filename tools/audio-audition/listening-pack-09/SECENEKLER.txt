@@ -1,0 +1,87 @@
+GRISILITH · DİNLEME SEÇKİSİ 09
+21 aday / 7 grup. Bu seçkinin yeni adayları henüz oyuna eklenmedi.
+
+AI: Air · Hava
+Normal projectile çıkışı için kısa hava hareketleri. Büyük Air Slash ability kaydı değil; rüzgâr kayıtlarının farklı kesit/perde düzenlemeleri.
+AI1 — Keskin, kısa hava itişi
+  Kaynaklar: air-move/Audio/wind.wav
+  Toplu kayıtta: 1s ve 4s
+AI2 — Doğal rüzgâr püskürtüsü
+  Kaynaklar: short-wind/Audio/wind.wav
+  Toplu kayıtta: 7s ve 10s
+AI3 — İnce mistik hava geçişi
+  Kaynaklar: wind-loop/Audio/wind.ogg
+  Toplu kayıtta: 13s ve 16s
+
+WA: Water · Su
+Su kayıtlarından kısa sıvı projectile dokuları. Bir dalganın sürekli loop'u veya her isabette çalan ayrı efekt değil.
+WA1 — Kısa su bırakışı
+  Kaynaklar: tinysized/Audio/sfx-cc0/water-drop-01.wav
+  Toplu kayıtta: 1s ve 4s
+WA2 — Akışkan su hamlesi
+  Kaynaklar: tinysized/Audio/sfx-cc0/water-pour-01.wav
+  Toplu kayıtta: 7s ve 10s
+WA3 — Su + hafif hava hareketi
+  Kaynaklar: tinysized/Audio/sfx-cc0/water-drop-03.wav, air-move/Audio/wind.wav
+  Toplu kayıtta: 13s ve 16s
+
+FI: Fire · Ateş
+Rubberduck'ın ayrı fire spell kayıtlarından kısa saldırı kesitleri. Normal atışlar için büyük patlamalar yerine kompakt başlangıçlar.
+FI1 — Kısa alev hamlesi
+  Kaynaklar: rubberduck-rpg/Audio/spell_fire_01.ogg
+  Toplu kayıtta: 1s ve 4s
+FI2 — Kuru, çatırdayan ateş çıkışı
+  Kaynaklar: rubberduck-rpg/Audio/spell_fire_03.ogg
+  Toplu kayıtta: 7s ve 10s
+FI3 — Daha tok alev atışı
+  Kaynaklar: rubberduck-rpg/Audio/spell_fire_05.ogg
+  Toplu kayıtta: 13s ve 16s
+
+AC: Acid · Asit
+Islak/fışkıran ve daha keskin tıslayan tasarımlar. Slime, su ve basınçlı hava katmanları; gerçek asit kaydı oldukları iddia edilmiyor.
+AC1 — Islak asit sıçraması
+  Kaynaklar: rubberduck-rpg/Audio/creature_slime_01.ogg
+  Toplu kayıtta: 1s ve 4s
+AC2 — Keskin sıvı püskürtüsü
+  Kaynaklar: tinysized/Audio/sfx-cc0/compressed-air-spray-01.wav, tinysized/Audio/sfx-cc0/water-drop-02.wav
+  Toplu kayıtta: 7s ve 10s
+AC3 — Tok, köpüklü asit
+  Kaynaklar: rubberduck-rpg/Audio/creature_slime_03.ogg, tinysized/Audio/sfx-cc0/compressed-air-spray-02.wav
+  Toplu kayıtta: 13s ve 16s
+
+NE: Necrotic · Nekrotik
+Karanlık büyü hissi veren pes ve soyut çıkışlar. Gerçek insan fısıltısı değil; spell ve rüzgâr kayıtlarının işlenmiş kısa kesitleri.
+NE1 — Pes karanlık büyü darbesi
+  Kaynaklar: rubberduck-rpg/Audio/spell_01.ogg
+  Toplu kayıtta: 1s ve 4s
+NE2 — Boğuk mistik enerji
+  Kaynaklar: magic-spells/Audio/magical_1.ogg
+  Toplu kayıtta: 7s ve 10s
+NE3 — Uğultulu karanlık çıkış
+  Kaynaklar: rubberduck-rpg/Audio/spell_02.ogg, wind-loop/Audio/wind.ogg
+  Toplu kayıtta: 13s ve 16s
+
+LI: Lightning · Yıldırım
+Kısa elektrik boşalmaları. Uzun gök gürültüsü veya büyük ability patlaması yerine normal projectile başlangıcı.
+LI1 — Kuru elektrik şaklaması
+  Kaynaklar: tinysized/Audio/sfx-cc0/paralyzer-discharge-01.wav
+  Toplu kayıtta: 1s ve 4s
+LI2 — İnce elektrik çatırdaması
+  Kaynaklar: tinysized/Audio/sfx-cc0/paralyzer-discharge-02.wav
+  Toplu kayıtta: 7s ve 10s
+LI3 — Soyut büyülü elektrik
+  Kaynaklar: magic-spells/Audio/electricspell.ogg
+  Toplu kayıtta: 13s ve 16s
+
+PO: Poison · Zehir
+Asitten daha boğuk, yapışkan ve yumuşak tıslayan adaylar. Slime ve hava katmanlarından tasarımlar; gerçek zehir sesi değil.
+PO1 — Boğuk zehir damlası
+  Kaynaklar: rubberduck-rpg/Audio/creature_slime_02.ogg
+  Toplu kayıtta: 1s ve 4s
+PO2 — Gazımsı zehir püskürtüsü
+  Kaynaklar: tinysized/Audio/sfx-cc0/compressed-air-spray-02.wav
+  Toplu kayıtta: 7s ve 10s
+PO3 — Yapışkan, mistik zehir atışı
+  Kaynaklar: rubberduck-rpg/Audio/creature_slime_04.ogg, rubberduck-rpg/Audio/spell_02.ogg
+  Toplu kayıtta: 13s ve 16s
+

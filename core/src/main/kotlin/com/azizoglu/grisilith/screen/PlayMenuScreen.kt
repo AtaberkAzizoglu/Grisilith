@@ -1,5 +1,8 @@
 package com.azizoglu.grisilith.screen
 
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
+
 import com.azizoglu.grisilith.GrisilithGame
 import com.azizoglu.grisilith.config.GameDifficulty
 import com.azizoglu.grisilith.config.GameMap
@@ -359,8 +362,8 @@ class PlayMenuScreen(
                 1 -> if (nextPageCorner.contains(pointer.position)) cyclePreset(1)
             }
             pressedPageDirection = 0
-            mapBounds[pressedMap]?.takeIf { it.contains(pointer.position) }?.let { selectedMap = pressedMap!! }
-            difficultyBounds[pressedDifficulty]?.takeIf { it.contains(pointer.position) }?.let { selectedDifficulty = pressedDifficulty!! }
+            mapBounds[pressedMap]?.takeIf { it.contains(pointer.position) }?.let { selectedMap = pressedMap!!; GameAudio.play(UiSound.CLICK) }
+            difficultyBounds[pressedDifficulty]?.takeIf { it.contains(pointer.position) }?.let { selectedDifficulty = pressedDifficulty!!; GameAudio.play(UiSound.CLICK) }
             pressedMap = null
             pressedDifficulty = null
             updateStartButton()
@@ -465,6 +468,7 @@ class PlayMenuScreen(
 
     private fun cyclePreset(direction: Int) {
         if (presets.isEmpty()) return
+        if (presets.size > 1) GameAudio.play(UiSound.PAGE)
         selectedPresetIndex = (selectedPresetIndex + direction + presets.size) % presets.size
         updateStartButton()
     }

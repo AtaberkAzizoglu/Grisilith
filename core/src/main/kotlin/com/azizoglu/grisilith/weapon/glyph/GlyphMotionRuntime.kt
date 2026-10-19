@@ -148,6 +148,8 @@ class GlyphMotionRuntime(
         pendingCastRequest =
             null
 
+        com.azizoglu.grisilith.audio.GameAudio.sustain(this,
+            com.azizoglu.grisilith.audio.GameAudio.castCue(weapon.chalkDustSpellChoice!!.glyphType))
         return ActivationResult.STARTED
     }
 
@@ -197,6 +199,9 @@ class GlyphMotionRuntime(
                 true
         }
 
+        com.azizoglu.grisilith.audio.GameAudio.sustain(this,
+            com.azizoglu.grisilith.audio.GameAudio.castCue(weapon.chalkDustSpellChoice!!.glyphType),
+            source=com.azizoglu.grisilith.audio.AudioSource(markerCenterX,markerCenterY))
         castRemainingSeconds =
             (
                 castRemainingSeconds -
@@ -217,6 +222,8 @@ class GlyphMotionRuntime(
             weapon
                 .chalkDustSpellChoice
                 ?.glyphType
+
+        com.azizoglu.grisilith.audio.GameAudio.stopSustain(this)
 
         if (
             glyphType !=
@@ -305,6 +312,7 @@ class GlyphMotionRuntime(
     }
 
     fun clear() {
+        com.azizoglu.grisilith.audio.GameAudio.stopSustain(this)
         sourceWeapon =
             null
 
@@ -322,6 +330,7 @@ class GlyphMotionRuntime(
     }
 
     fun cancelActiveDrawing() {
+        com.azizoglu.grisilith.audio.GameAudio.stopSustain(this)
         sourceWeapon =
             null
 

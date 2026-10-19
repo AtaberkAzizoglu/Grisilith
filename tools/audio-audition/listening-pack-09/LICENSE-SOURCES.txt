@@ -1,0 +1,31 @@
+Grisilith listening pack 09 — magical normal projectile candidates only.
+No game assets or runtime changes. No selection or shipping permission inferred.
+All sources below are used under CC0:
+https://creativecommons.org/publicdomain/zero/1.0/
+
+rubberduck — 80 CC0 RPG SFX
+https://opengameart.org/node/86018
+https://opengameart.org/sites/default/files/80-CC0-RPG-SFX_0.zip
+spell_fire_01/03/05, spell_01/02, creature_slime_01..04.
+JaggedStone — Magic Spell SFX
+https://opengameart.org/content/magic-spell-sfx
+https://opengameart.org/sites/default/files/magical_1_0.ogg
+Augmentality (Brandon Morris), submitted by HaelDB — Spell sounds
+https://opengameart.org/content/spell-sounds
+https://opengameart.org/sites/default/files/electricspell.ogg
+Page offers OGA-BY 3.0 or CC0; CC0 chosen here.
+Vehicle / Jan Schupke — Tinysized SFX
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+Almitory — Air Woosh Move
+https://opengameart.org/content/air-woosh-move
+remaxim — Short wind sound
+https://opengameart.org/content/short-wind-sound
+SketchMan3 — wind whoosh loop
+https://opengameart.org/content/wind-whoosh-loop
+
+Changes: mono 44.1kHz 16-bit WAV, short excerpts, speed/pitch edits, low/high-pass filters,
+layering and fade envelopes as labeled in DINLE.html and encoded in PrepareAudioAudition.kt groups09.
+Peak matched to .25 (-12dBFS), not perceptual loudness normalization.
+AC/PO are designed textures using slime/water/compressed air, not literal acid or poison recordings.
+NE uses pitched spell recordings, not human whisper recordings.
+These 21 candidates are not 21 unrelated original recordings.

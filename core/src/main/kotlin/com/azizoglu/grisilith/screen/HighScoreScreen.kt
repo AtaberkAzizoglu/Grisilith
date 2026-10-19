@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.screen
 
 import com.azizoglu.grisilith.GrisilithGame
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.screen.components.MenuButton
 import com.azizoglu.grisilith.screen.components.MenuPointer
 import com.azizoglu.grisilith.screen.render.HighScoreRenderer
@@ -148,6 +150,7 @@ class HighScoreScreen(
                 ) {
                     PlayerProfileRepository
                         .addGrisilithCoins(1)
+                    GameAudio.play(UiSound.CONFIRM)
                 }
             }
         }
@@ -213,6 +216,7 @@ class HighScoreScreen(
     private val claimAllButton = MenuButton("CLAIM ALL", 858f, 30f, 240f, 60f) {
         val rewards = HighScoreRepository.claimAllAchievementRewards()
         PlayerProfileRepository.addGrisilithCoins(rewards)
+        if (rewards > 0) GameAudio.play(UiSound.CONFIRM)
         updateAchievementButtons()
     }
 

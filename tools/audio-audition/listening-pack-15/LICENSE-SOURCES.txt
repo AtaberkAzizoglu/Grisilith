@@ -1,0 +1,13 @@
+NEW SPELL CHOICE — 16 CANDIDATES, NOT INSTALLED
+Synthetic speech generated locally with Piper (rhasspy), en_US-libritts_r-medium, speaker IDs 0–15.
+No claim of 16 newly recorded human actors. No target celebrity/person impersonation requested.
+Model: https://huggingface.co/rhasspy/piper-voices/tree/main/en/en_US/libritts_r/medium
+Model card: https://huggingface.co/rhasspy/piper-voices/blob/main/en/en_US/libritts_r/medium/MODEL_CARD
+Dataset: LibriTTS-R, https://www.openslr.org/141/ — CC BY 4.0 per upstream model card.
+https://creativecommons.org/licenses/by/4.0/
+Upstream tool (MIT release used): https://github.com/rhasspy/piper/releases/tag/2023.11.14-2
+Binary/model are audition-only tools; not packaged with the game. If selected, preserve model/dataset attribution.
+Phrases: IDs 0–7 'A new spell.'; IDs 8–15 'New spell learned.'; default model rate/prosody.
+Edits: mono/44.1kHz/16-bit WAV, peak matching -12dBFS (not perceived loudness), end fade.
+Singularity previews are installed phase sounds derived from previously approved SG3 and MT4.
+Their full sources/CC BY 3.0 and CC0 licenses: assets/audio/FOCUS-ABILITY-LICENSES.txt.

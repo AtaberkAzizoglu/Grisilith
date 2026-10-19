@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.weapon.runtime
 
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.enemy.*
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.Projectile
@@ -65,14 +67,14 @@ class ExtendedPhysicalWeaponRuntime(private val stats: PlayerStats) : WeaponAtta
         ctx.weapon.registerNormalAttack()
         val point = Vector2(target.centerX,target.centerY)
         when (ctx.weapon.definition.id.value) {
-            "WPN_WARHAMMER" -> hammer(ctx,point)
+            "WPN_WARHAMMER" -> { GameAudio.play(UiSound.WARHAMMER_IMPACT);hammer(ctx,point) }
             "WPN_WHIP" -> {
                 val upgraded = ctx.weapon.hasBasicAttackUpgrade
                 lash(ctx,point,if(upgraded).75f else 1f)
                 if(upgraded) events += Event(.15f,ctx) { lash(ctx,point,.75f) }
             }
-            "WPN_SLING" -> stone(ctx,point)
-            "WPN_BOOMERANG" -> launchBoomerang(ctx,point,true)
+            "WPN_SLING" -> { GameAudio.play(UiSound.SLING_THROW);stone(ctx,point) }
+            "WPN_BOOMERANG" -> { GameAudio.play(UiSound.BOOMERANG_THROW);launchBoomerang(ctx,point,true) }
         }
     }
     private fun hit(ctx: WeaponAttackContext, enemy: Enemy, multiplier: Float, projectile: Boolean = false) {
@@ -112,6 +114,7 @@ class ExtendedPhysicalWeaponRuntime(private val stats: PlayerStats) : WeaponAtta
         }
     }
     private fun lash(ctx: WeaponAttackContext, center: Vector2, damage: Float) {
+        GameAudio.play(UiSound.WHIP_LASH)
         val a=origin(ctx); val dir=direction(a,center)
         val coneLength=(if(ctx.weapon.hasBasicAttackUpgrade)80f else 65f)*1.25f
         val tip=Vector2(center).mulAdd(dir,coneLength*.5f)
@@ -166,6 +169,7 @@ class ExtendedPhysicalWeaponRuntime(private val stats: PlayerStats) : WeaponAtta
                 val center=Vector2(a).mulAdd(dir,90f+index*90f)
                 events += Event(index*.18f,ctx) {
                     val radius=70f*if(ctx.weapon.hasWeaponAbilityUpgrade)1.2f else 1f
+                    GameAudio.ability(UiSound.EARTHBREAKER_WAVE,center.x,center.y,radius)
                     flashes += Flash(center,center,radius,false,.35f)
                     ctx.enemyManager.weaponTargets.toList().filter { !it.isDead && Vector2.dst(center.x,center.y,it.centerX,it.centerY)<=radius+it.bounds.width/2f }
                         .forEach { enemy ->
@@ -178,6 +182,7 @@ class ExtendedPhysicalWeaponRuntime(private val stats: PlayerStats) : WeaponAtta
                 }
             }
             NewPhysicalWeapons.WHIP_SWEEP -> {
+                GameAudio.ability(UiSound.WHIP_SWEEP,a.x,a.y)
                 val range=ctx.effectiveWeaponRange(ctx.weapon.definition.baseRange)
                 val target=if (com.azizoglu.grisilith.settings.GameSettings.abilityCasting != com.azizoglu.grisilith.settings.GameSettings.AbilityCasting.AUTO) aim else
                     AbilityTargeting.select(ctx.enemyManager.weaponTargets,a.x,a.y,range)?.let { Vector2(it.centerX,it.centerY) } ?: aim
@@ -195,6 +200,7 @@ class ExtendedPhysicalWeaponRuntime(private val stats: PlayerStats) : WeaponAtta
                 boulders += Boulder(ctx,a,end,dir,ctx.weapon.hasWeaponAbilityUpgrade)
             }
             NewPhysicalWeapons.GUIDED_HUNT -> {
+                GameAudio.ability(UiSound.BOOMERANG_THROW,a.x,a.y)
                 guidance[ctx.weapon.runtimeId]=if(ctx.weapon.hasWeaponAbilityUpgrade)6f else 5f
                 launchBoomerang(ctx,aimPoint,false)
             }
@@ -224,6 +230,7 @@ class ExtendedPhysicalWeaponRuntime(private val stats: PlayerStats) : WeaponAtta
             if(rock.remaining<=0f) {
                 val multipliers=if(rock.upgraded)floatArrayOf(3.5f,2.5f) else floatArrayOf(3f)
                 val radius=75f*if(rock.upgraded)1.25f else 1f
+                GameAudio.ability(UiSound.SLING_IMPACT,rock.position.x,rock.position.y,radius)
                 val impact=Vector2(rock.position)
                 rock.ctx.enemyManager.weaponTargets.toList().filter { !it.isDead &&
                     Vector2.dst(impact.x,impact.y,it.centerX,it.centerY)<=radius+it.bounds.width/2f }

@@ -170,6 +170,7 @@ object ActiveItemEffects {
     }
 
     fun resolveDamageContext(context: EnemyDamageContext): EnemyDamageContext {
+        if (context.chaosDamageResolved) return context
         val copies = count(ItemEffectId.CHAOS_THEORY)
         if (copies <= 0 || context.damageType !in magicalDamageTypes) return context
 
@@ -179,6 +180,10 @@ object ActiveItemEffects {
         val alternatives = magicalDamageTypes - context.damageType
         return context.copy(damageType = alternatives.random())
     }
+
+    /** Normal magical shots resolve once at launch so their art, audio and every hit agree. */
+    fun resolveNormalProjectileDamageType(type: DamageType): DamageType =
+        resolveDamageContext(EnemyDamageContext(damageType=type)).damageType
 
     fun modifyOutgoingDamage(
         amount: Int,

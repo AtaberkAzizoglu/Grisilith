@@ -1,0 +1,66 @@
+GRISILITH · DİNLEME SEÇKİSİ 10
+18 aday / 3 grup. Bu seçkinin yeni adayları henüz oyuna eklenmedi.
+
+WV: Water · Su savurma / su bükme hissi
+Önceki WA1–3 kullanılmıyor. Damla yerine yeni splash ve dalga kayıtları, hava hareketiyle birleştirildi. Avatar kaydı veya birebir taklidi yok; hedef akışkan, kuvvetli su savurma hissi. Altı özgün ham kayıt değil; kaynaklar ve varyasyonlar etiketli.
+WV1 — Kısa su kamçısı
+  Kaynaklar: water-splash/Audio/splash_04.ogg, air-move/Audio/wind.wav
+  Toplu kayıtta: 1s ve 4s
+WV2 — Geniş su savurması
+  Kaynaklar: water-splash/Audio/splash_09.ogg, short-wind/Audio/wind.wav
+  Toplu kayıtta: 7s ve 10s
+WV3 — Basınçlı su yumruğu
+  Kaynaklar: water-splash/Audio/splash_12.ogg, air-move/Audio/wind.wav
+  Toplu kayıtta: 13s ve 16s
+WV4 — Kalın dalga geçişi
+  Kaynaklar: ocean-splash/Audio/cannon_miss.ogg, air-move/Audio/wind.wav
+  Toplu kayıtta: 19s ve 22s
+WV5 — Dönen su şeridi
+  Kaynaklar: water-splash/Audio/splash_06.ogg, water-splash/Audio/splash_14.ogg, wind-loop/Audio/wind.ogg
+  Toplu kayıtta: 25s ve 28s
+WV6 — Su çekişi ve ileri fırlatma
+  Kaynaklar: water-splash/Audio/splash_08.ogg, water-splash/Audio/splash_11.ogg, air-move/Audio/wind.wav
+  Toplu kayıtta: 31s ve 34s
+
+FL: Fire · Alev savurma / ateş bükme hissi
+Önceki FI1–3 kullanılmıyor. Yeni Fire kaydından basınçlı alev çıkışları; hava katmanı, hız/perde ve filtre varyasyonları. Büyük patlama veya ocak çıtırtısı yerine ileri savrulan alev hissi. Fire kaynağı ücretsiz CC BY 3.0; seçilirse artisticdude atfı oyuna eklenecek.
+FL1 — Keskin alev yumruğu
+  Kaynaklar: fire-evil/Audio/spells/Fire.aif, air-move/Audio/wind.wav
+  Toplu kayıtta: 1s ve 4s
+FL2 — Tok, geniş alev savurma
+  Kaynaklar: fire-evil/Audio/spells/Fire.aif, short-wind/Audio/wind.wav
+  Toplu kayıtta: 7s ve 10s
+FL3 — Kısa basınçlı alev jeti
+  Kaynaklar: fire-evil/Audio/spells/Fire.aif, tinysized/Audio/sfx-cc0/compressed-air-spray-01.wav
+  Toplu kayıtta: 13s ve 16s
+FL4 — Alev kamçısı
+  Kaynaklar: fire-evil/Audio/spells/Fire.aif, air-move/Audio/wind.wav
+  Toplu kayıtta: 19s ve 22s
+FL5 — Derin alev dalgası
+  Kaynaklar: fire-evil/Audio/spells/Fire.aif, air-move/Audio/wind.wav
+  Toplu kayıtta: 25s ve 28s
+FL6 — Hızlı, kızgın hava kesişi
+  Kaynaklar: fire-evil/Audio/spells/Fire.aif, wind-loop/Audio/wind.ogg
+  Toplu kayıtta: 31s ve 34s
+
+CU: Necrotic · Lanet / tekinsiz enerji
+Önceki NE1–3 ve bunların spell kaynakları kullanılmıyor. Yeni qubodup dark-magic kayıtlarından kısa, rahatsız edici soyut dokular. Gerçek insan fısıltısı veya konuşma değil; ters çevirme/perde/filtre katmanları etiketli. Önce düşük sesle dinle.
+CU1 — Kuru, tekinsiz lanet · kayıt 1
+  Kaynaklar: dark-magic/Audio/dark_magic/fout-01.flac
+  Toplu kayıtta: 1s ve 4s
+CU2 — İç burkan lanet · kayıt 2
+  Kaynaklar: dark-magic/Audio/dark_magic/fout-02.flac
+  Toplu kayıtta: 7s ve 10s
+CU3 — Yabancı, karanlık titreşim · kayıt 3
+  Kaynaklar: dark-magic/Audio/dark_magic/fout-03.flac
+  Toplu kayıtta: 13s ve 16s
+CU4 — Ters akan lanet
+  Kaynaklar: dark-magic/Audio/dark_magic/fout-01.flac
+  Toplu kayıtta: 19s ve 22s
+CU5 — Çift katmanlı huzursuzluk
+  Kaynaklar: dark-magic/Audio/dark_magic/fout-02.flac, dark-magic/Audio/dark_magic/fout-03.flac
+  Toplu kayıtta: 25s ve 28s
+CU6 — Boğuk lanet ve tiz gölge
+  Kaynaklar: dark-magic/Audio/dark_magic/fout-03.flac, dark-magic/Audio/dark_magic/fout-01.flac
+  Toplu kayıtta: 31s ve 34s
+

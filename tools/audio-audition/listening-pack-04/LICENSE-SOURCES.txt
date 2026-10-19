@@ -1,0 +1,25 @@
+GRISILITH — AUDITION 04: WARHAMMER FIRST, THEN RANGED NORMAL ATTACKS
+All candidates in this pack are previews; none is installed until selected.
+
+Still North Media — Ben Jaszczak and Brian Nelson — CC0
+https://opengameart.org/content/medieval-sound-effects-weapon-textures
+https://opengameart.org/sites/default/files/medieval_sfx_textures_1_of_2.7z
+https://creativecommons.org/publicdomain/zero/1.0/
+The source page is preserved in sources/stillnorth-textures/source-page.html.
+English Longbow Shoot, Scythian Recurve Shoot and Crossbow Shoot contain multiple real shots.
+BW/CB candidates are individually isolated shots, not a full multi-shot recording per attack.
+
+Additional CC0 sources:
+artisticdude — Swishes Sound Pack
+https://opengameart.org/content/swishes-sound-pack
+Vehicle / Jan Schupke — Fantasy Sound Effects (Tinysized SFX)
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+Kenney — Impact Sounds
+https://kenney.nl/assets/impact-sounds
+
+Processing: mono 44.1kHz / 16-bit WAV, peak matching around -12 dBFS, 5 ms end fade.
+Warhammer options use labeled low-pass filtering, speed/pitch lowering and recorded impact layers;
+they are five designed options, not five original hammer recordings. No synthesized tones added.
+Dagger, Sling and Boomerang use labeled swish/foley designs, not literal recordings of those weapons.
+Existing confirmed weapon sounds are NOT re-used as identical output files for these new weapons.
+Sources and timing are listed in SECENEKLER.txt and the preparation code.

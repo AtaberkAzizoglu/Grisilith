@@ -1,0 +1,71 @@
+35 candidates / 7 groups. Preview only; not installed.
+IG1 — Kısa teleport + tok alev
+focus-ability/teleport.wav + fire-evil/spells/Fire.aif
+IG2 — Pes teleport + basınçlı patlama
+focus-ability/teleport.wav + fire-evil/spells/Fire.aif + air-move/wind.wav
+IG3 — Hızlı geçiş + keskin alev
+focus-ability/teleport.wav + fire-evil/spells/Fire.aif
+IG4 — Ters geçiş + geniş alev darbesi
+focus-ability/teleport.wav + fire-evil/spells/Fire.aif + air-move/wind.wav
+IG5 — Boğuk teleport + ağır alev
+focus-ability/teleport.wav + fire-evil/spells/Fire.aif + impact-sounds/impactSoft_heavy_003
+ER1 — Tok lanetli darbe
+dark-magic/dark_magic/fout-01.flac
+ER2 — Ruh çekişi + boğuk çöküş
+dark-magic/dark_magic/fout-02.flac + dark-magic/dark_magic/fout-03.flac
+ER3 — Derin büyüsel patlama
+dark-magic/dark_magic/fout-03.flac + impact-sounds/impactSoft_heavy_003
+ER4 — İçe çöken lanet
+dark-magic/dark_magic/fout-01.flac + dark-magic/dark_magic/fout-02.flac
+ER5 — Kalın, uğultulu ruh emişi
+dark-magic/dark_magic/fout-02.flac + air-move/wind.wav
+VP1 — Sade sürekli hortum
+wind-loop/wind.ogg
+VP2 — Kalın rüzgâr gövdesi
+wind-loop/wind.ogg
+VP3 — İnce hızlı dönme
+wind-loop/wind.ogg
+VP4 — Derin + ince katmanlı girdap
+wind-loop/wind.ogg + wind-loop/wind.ogg
+VP5 — Doğal rüzgâr dokusu
+short-wind/wind.wav
+SC1 — Kısa yıldırım ve gök gürültüsü
+focus-ability/thunder.wav
+SC2 — Daha kalın yıldırım
+focus-ability/thunder.wav
+SC3 — Farklı yıldırım kesiti
+focus-ability/thunder.wav
+SC4 — Elektrik çakması + gök gürültüsü
+tinysized/sfx-cc0/paralyzer-discharge-01.wav + focus-ability/thunder.wav
+SC5 — Boğuk fırtına ve elektrik
+focus-ability/thunder.wav + magic-spells/electricspell.ogg
+AP1 — Sade asit kabarcıkları
+focus-ability/acid_bubble.wav
+AP2 — Kabarcık + belirgin cızırtı
+focus-ability/acid_bubble.wav + tinysized/sfx-cc0/compressed-air-spray-01.wav
+AP3 — Kalın, yavaş kaynayan asit
+focus-ability/acid_bubble.wav + focus-ability/boil_cover.ogg
+AP4 — İnce ve hareketli asit
+focus-ability/acid_bubble.wav + tinysized/sfx-cc0/compressed-air-spray-01.wav
+AP5 — Yoğun havuz kaynaması
+focus-ability/acid_bubble.wav + focus-ability/boil_open.ogg + tinysized/sfx-cc0/compressed-air-spray-01.wav
+PS1 — Boğuk lanet rüzgârı
+wind-loop/wind.ogg + dark-magic/dark_magic/fout-01.flac
+PS2 — Ters akan karanlık fırtına
+wind-loop/wind.ogg + dark-magic/dark_magic/fout-02.flac
+PS3 — Derin uğultulu salgın
+wind-loop/wind.ogg + dark-magic/dark_magic/fout-03.flac
+PS4 — Huzursuz, çift katmanlı fırtına
+wind-loop/wind.ogg + dark-magic/dark_magic/fout-01.flac + dark-magic/dark_magic/fout-03.flac
+PS5 — Sert ve kuru necrotic rüzgâr
+wind-loop/wind.ogg + dark-magic/dark_magic/fout-02.flac
+BL1 — Yumuşak sıvı alevi
+focus-ability/fire.wav + focus-ability/boil_open.ogg
+BL2 — Yoğun sıcak sıvı cızırtısı
+focus-ability/fire.wav + focus-ability/boil_open.ogg
+BL3 — Kalın ve ağır yanma
+focus-ability/fire.wav + focus-ability/boil_cover.ogg
+BL4 — İnce alev uğultusu
+focus-ability/fire.wav + tinysized/sfx-cc0/compressed-air-spray-01.wav
+BL5 — Daha hareketli sıvı yanması
+focus-ability/fire.wav + focus-ability/boil_open.ogg + tinysized/sfx-cc0/compressed-air-spray-01.wav

@@ -517,6 +517,7 @@ class VortexPullRuntime {
     }
 
     fun clear() {
+        com.azizoglu.grisilith.audio.GameAudio.stopSustain(this)
         areaRuntime.clear()
         reactiveTarget.clear()
 

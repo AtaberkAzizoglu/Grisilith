@@ -293,6 +293,7 @@ class IgniteDashRuntime(
     }
 
     fun cancel() {
+        com.azizoglu.grisilith.audio.GameAudio.stopSustain(this)
         activeWeaponRuntime
             ?.endActiveAbilityEarly()
 
@@ -316,6 +317,7 @@ class IgniteDashRuntime(
     }
 
     fun reset() {
+        com.azizoglu.grisilith.audio.GameAudio.stopSustain(this)
         activeWeapon =
             null
 
@@ -561,6 +563,8 @@ class IgniteDashRuntime(
 
         explosionRemainingSeconds =
             EXPLOSION_VISUAL_SECONDS
+        com.azizoglu.grisilith.audio.GameAudio.sustain(this,com.azizoglu.grisilith.audio.UiSound.IGNITE_DASH,false,
+            com.azizoglu.grisilith.audio.AudioSource(player.centerX,player.centerY,DefaultWeaponAbilities.IGNITE_DASH_OUTER_EXPLOSION_RADIUS))
 
         val baseDamage =
             damageCalculator
@@ -738,6 +742,7 @@ class IgniteDashRuntime(
                 .coerceAtLeast(
                     0f
                 )
+        if(explosionRemainingSeconds<=0f) com.azizoglu.grisilith.audio.GameAudio.stopSustain(this)
     }
 
     companion object {

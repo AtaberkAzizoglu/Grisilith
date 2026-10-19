@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.weapon.runtime.executor
 
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.weapon.Projectile
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
@@ -59,6 +61,7 @@ class DaggerAttackExecutor(
             ) ?: return
 
         context.weapon.registerNormalAttack()
+        GameAudio.play(UiSound.DAGGER_THROW)
 
         // Every normal attack throws, including targets at point-blank range.
         executeThrowAttack(context, target.centerX, target.centerY)

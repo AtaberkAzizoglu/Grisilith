@@ -1,0 +1,24 @@
+GRISILITH — WARHAMMER AUDITION 05: HARD IMPACT / PAT-GUM
+Preview only. No sound installation or game runtime changes in this selection round.
+Ranged selections BW3, CB4, DG4, SL1, BR3 are recorded but NOT installed.
+
+Thwack Sounds — Jordan Irwin (AntumDeluge) — CC0
+https://opengameart.org/content/thwack-sounds
+https://opengameart.org/sites/default/files/thwack-1.0.zip
+https://creativecommons.org/publicdomain/zero/1.0/
+Author describes these as sounds made by hitting things, not actual Warhammer recordings.
+Author notes 01 and 10 are unfiltered; 06 may contain processing from the original pack.
+Original README.txt and LICENSE.txt retained in sources/thwack/Audio/.
+
+Additional impact body layers — Kenney Impact Sounds — CC0
+https://kenney.nl/assets/impact-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+TH1: thwack-01.wav, original playback speed.
+TH2: thwack-10.wav, original playback speed.
+TH3: thwack-06.wav, original playback speed; source-pack processing is retained.
+TH4: thwack-01 + impactWood_heavy_002 (short, lower-gain body layer).
+TH5: thwack-10 at 95% speed + impactSoft_heavy_003 at 90% speed, body delayed 15 ms.
+No new low-pass filtering, metal ringing or whoosh added in this set.
+Converted to mono 44.1 kHz / 16-bit WAV, peak matched around -12 dBFS, 5 ms end fade.
+Peak matching is not perceptual loudness matching; final subjective choice remains with the user.

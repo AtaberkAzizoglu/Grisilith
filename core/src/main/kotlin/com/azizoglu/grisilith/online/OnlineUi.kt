@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.online
 
 import com.azizoglu.grisilith.content.ContentCategory
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.ui.icon.ContentIconRenderer
 import com.azizoglu.grisilith.ui.theme.PanelVisualStyle
 import com.azizoglu.grisilith.ui.theme.UiComponentRenderer
@@ -162,7 +164,7 @@ class OnlineNameDialog(private val backend: OnlineBackend, private val ui: Onlin
     private fun submit() {
         if(!open||busy) return
         error=PlayerNamePolicy.packaged.error(input)
-        if(error!=null) return
+        if(error!=null) {GameAudio.play(UiSound.ERROR);return}
         if(backend.status!=OnlineBackend.Status.READY) {close();return}
         if(!busy && checkedInput!=input && System.nanoTime()/1_000_000L-lastEditedAt>=500L &&
             PlayerNamePolicy.packaged.error(input)==null) {
@@ -179,7 +181,8 @@ class OnlineNameDialog(private val backend: OnlineBackend, private val ui: Onlin
         backend.setDisplayName(input) { result ->
             if(!open || requestGeneration!=generation) return@setDisplayName
             busy=false
-            if(result.isSuccess) close() else {
+            if(result.isSuccess) {GameAudio.play(UiSound.CONFIRM);close()} else {
+                GameAudio.play(UiSound.ERROR)
                 if(backend.status!=OnlineBackend.Status.READY) {close();return@setDisplayName}
                 error=when((result.exceptionOrNull() as? OnlineRequestFailure)?.reason) {
                     "display_name_taken" -> "This name is already taken."

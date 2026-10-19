@@ -2,6 +2,8 @@ package com.azizoglu.grisilith.weapon.runtime.executor
 
 import com.azizoglu.grisilith.combat.debug.CombatDebugVisualManager
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.statistics.PlayerStats
 import com.azizoglu.grisilith.statistics.StatType
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
@@ -88,6 +90,7 @@ class ShieldAttackExecutor(
         }
 
         attackDirection.nor()
+        GameAudio.play(UiSound.SHIELD_STRIKE)
 
         val attackAngle =
             MathUtils.atan2(

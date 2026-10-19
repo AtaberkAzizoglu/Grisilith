@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.weapon.runtime.executor
 
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
@@ -142,6 +144,7 @@ class ShortswordAttackExecutor(
         }
 
         playerToTarget.nor()
+        GameAudio.play(if(context.weapon.hasBasicAttackUpgrade) UiSound.DOUBLE_SWORDS_UPGRADED else UiSound.DOUBLE_SWORDS_SWING)
 
         val attackAngle =
             MathUtils.atan2(

@@ -1,0 +1,80 @@
+HL1: Mistik sözler · ayrı okuma 1
+frosthardr / 553453; 0.02–2.50 s; CC0; HQ MP3 önizleme kaynağı
+Duration: 2.48
+
+HL2: Mistik sözler · ayrı okuma 2
+frosthardr / 553453; 4.38–7.52 s; CC0; HQ MP3 önizleme kaynağı
+Duration: 3.14
+
+HL3: Mistik sözler · ayrı okuma 3
+frosthardr / 553453; 9.52–12.36 s; CC0; HQ MP3 önizleme kaynağı
+Duration: 2.84
+
+HL4: Mistik sözler · ayrı okuma 4
+frosthardr / 553453; 14.18–16.74 s; CC0; HQ MP3 önizleme kaynağı
+Duration: 2.56
+
+HL5: Mistik sözler · ayrı okuma 5
+frosthardr / 553453; 18.88–21.36 s; CC0; HQ MP3 önizleme kaynağı
+Duration: 2.48
+
+HT1: Water · kadın ses tipi 1
+Cici Fyre / Type 1 / water.wav; CC0; İngilizce tek büyü sözcüğü
+Duration: 0.6131292517006802
+
+HT2: Aqua · kadın ses tipi 1
+Cici Fyre / Type 1 / aqua.wav; CC0; İngilizce tek büyü sözcüğü
+Duration: 0.6406802721088435
+
+HT3: Water · kadın ses tipi 2
+Cici Fyre / Type 2 / water.wav; CC0; İngilizce tek büyü sözcüğü
+Duration: 0.5596598639455782
+
+HT4: Cyclone · kadın ses tipi 2
+Cici Fyre / Type 2 / cyclone.wav; CC0; İngilizce tek büyü sözcüğü
+Duration: 0.7747845804988662
+
+HT5: Tornado · kadın ses tipi 1
+Cici Fyre / Type 1 / tornado.wav; CC0; İngilizce tek büyü sözcüğü
+Duration: 1.4425850340136055
+
+HM1: Mistik sözler · ayrı okuma 6
+frosthardr / 553453; 23.28–25.84 s; CC0; HQ MP3 önizleme kaynağı
+Duration: 2.56
+
+HM2: Mistik sözler · ayrı okuma 7
+frosthardr / 553453; 27.94–30.16 s; CC0; HQ MP3 önizleme kaynağı
+Duration: 2.22
+
+HM3: Mistik sözler · ayrı okuma 8
+frosthardr / 553453; 31.96–33.90 s; CC0; HQ MP3 önizleme kaynağı
+Duration: 1.94
+
+HM4: Mistik sözler · ayrı okuma 9
+frosthardr / 553453; 35.98–38.60 s; CC0; HQ MP3 önizleme kaynağı
+Duration: 2.62
+
+HM5: Mistik sözler · ayrı okuma 10
+frosthardr / 553453; 40.50–42.82 s; CC0; HQ MP3 önizleme kaynağı
+Duration: 2.32
+
+HS1: Curse · kadın ses tipi 3
+Cici Fyre / Type 3 / curse.wav; CC0; İngilizce tek büyü sözcüğü
+Duration: 0.6936734693877551
+
+HS2: Hex · kadın ses tipi 3
+Cici Fyre / Type 3 / hex.wav; CC0; İngilizce tek büyü sözcüğü
+Duration: 0.6538548752834467
+
+HS3: Corruption · kadın ses tipi 3
+Cici Fyre / Type 3 / corruption.wav; CC0; İngilizce tek büyü sözcüğü
+Duration: 0.9012018140589569
+
+HS4: Curse · kadın ses tipi 2
+Cici Fyre / Type 2 / curse.wav; CC0; İngilizce tek büyü sözcüğü
+Duration: 0.5256916099773242
+
+HS5: Hellstorm · kadın ses tipi 3
+Cici Fyre / Type 3 / hellstorm.wav; CC0; İngilizce tek büyü sözcüğü
+Duration: 1.105873015873016
+

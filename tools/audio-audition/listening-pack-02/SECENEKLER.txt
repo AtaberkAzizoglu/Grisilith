@@ -1,0 +1,57 @@
+GRISILITH · DİNLEME SEÇKİSİ 02
+15 aday / 3 grup. Bu seçkinin yeni adayları henüz oyuna eklenmedi.
+
+G: Kılıç savurma / kesici silah dokusu
+Normal saldırı için kısa adaylar. G1–G2 özgün knifeSlice kayıtları; diğerleri aynı kayıtların kumaş/metal ayrıntısıyla katmanlanmış taslaklarıdır. Her düşmana vuruşta ayrı ayrı çalmaları önerilmiyor.
+G1 — Keskin savurma · 1
+  Kaynaklar: rpg-audio/Audio/knifeSlice.ogg
+  Toplu kayıtta: 1s ve 4s
+G2 — Keskin savurma · 2
+  Kaynaklar: rpg-audio/Audio/knifeSlice2.ogg
+  Toplu kayıtta: 7s ve 10s
+G3 — Kumaş dokulu savurma
+  Kaynaklar: rpg-audio/Audio/knifeSlice.ogg, rpg-audio/Audio/cloth1.ogg
+  Toplu kayıtta: 13s ve 16s
+G4 — İkili kılıç taslağı
+  Kaynaklar: rpg-audio/Audio/knifeSlice.ogg, rpg-audio/Audio/knifeSlice2.ogg
+  Toplu kayıtta: 19s ve 22s
+G5 — Metalik ayrıntılı savurma
+  Kaynaklar: rpg-audio/Audio/knifeSlice2.ogg, rpg-audio/Audio/drawKnife1.ogg
+  Toplu kayıtta: 25s ve 28s
+
+H: Tok darbe / ağır silah teması
+Maul ve Warhammer için darbe karakteri seçimi. Bunlar materyal darbe kayıtlarıdır; hazır bir Earthbreaker veya tam saldırı animasyonu sesi değildir. Ağır ability katmanı daha sonra seçilecek.
+H1 — Yumuşak tok darbe
+  Kaynaklar: impact-sounds/Audio/impactSoft_heavy_000.ogg
+  Toplu kayıtta: 1s ve 4s
+H2 — Kuru ahşap darbe
+  Kaynaklar: impact-sounds/Audio/impactWood_heavy_000.ogg
+  Toplu kayıtta: 7s ve 10s
+H3 — Kısa metal darbe
+  Kaynaklar: impact-sounds/Audio/impactMetal_medium_000.ogg
+  Toplu kayıtta: 13s ve 16s
+H4 — Ahşap + tok gövde
+  Kaynaklar: impact-sounds/Audio/impactWood_heavy_002.ogg, impact-sounds/Audio/impactSoft_heavy_001.ogg
+  Toplu kayıtta: 19s ve 22s
+H5 — Metal + tok gövde
+  Kaynaklar: impact-sounds/Audio/impactMetal_heavy_001.ogg, impact-sounds/Audio/impactSoft_heavy_002.ogg
+  Toplu kayıtta: 25s ve 28s
+
+I: Kalkan / metal temas
+Kalkanın normal saldırısında kullanılabilecek metal doku adayları. Bunları her hasar alındığında çaldırmayacağız. Defensive Burst ayrı, daha tok bir ability sesi olarak seçilecek.
+I1 — İnce metal temas
+  Kaynaklar: impact-sounds/Audio/impactMetal_light_000.ogg
+  Toplu kayıtta: 1s ve 4s
+I2 — Kısa metal temas
+  Kaynaklar: impact-sounds/Audio/impactMetal_light_003.ogg
+  Toplu kayıtta: 7s ve 10s
+I3 — Orta ağırlıkta temas
+  Kaynaklar: impact-sounds/Audio/impactMetal_medium_002.ogg
+  Toplu kayıtta: 13s ve 16s
+I4 — Ağır metal temas
+  Kaynaklar: impact-sounds/Audio/impactMetal_heavy_003.ogg
+  Toplu kayıtta: 19s ve 22s
+I5 — Tok gövdeli kalkan teması
+  Kaynaklar: impact-sounds/Audio/impactMetal_medium_004.ogg, impact-sounds/Audio/impactSoft_medium_001.ogg
+  Toplu kayıtta: 25s ve 28s
+

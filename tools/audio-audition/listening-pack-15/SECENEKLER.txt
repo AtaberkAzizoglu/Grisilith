@@ -1,0 +1,16 @@
+NS1: A new spell. — libritts_r medium speaker_id 0; generated, not an actor recording.
+NS2: A new spell. — libritts_r medium speaker_id 1; generated, not an actor recording.
+NS3: A new spell. — libritts_r medium speaker_id 2; generated, not an actor recording.
+NS4: A new spell. — libritts_r medium speaker_id 3; generated, not an actor recording.
+NS5: A new spell. — libritts_r medium speaker_id 4; generated, not an actor recording.
+NS6: A new spell. — libritts_r medium speaker_id 5; generated, not an actor recording.
+NS7: A new spell. — libritts_r medium speaker_id 6; generated, not an actor recording.
+NS8: A new spell. — libritts_r medium speaker_id 7; generated, not an actor recording.
+NS9: New spell learned. — libritts_r medium speaker_id 8; generated, not an actor recording.
+NS10: New spell learned. — libritts_r medium speaker_id 9; generated, not an actor recording.
+NS11: New spell learned. — libritts_r medium speaker_id 10; generated, not an actor recording.
+NS12: New spell learned. — libritts_r medium speaker_id 11; generated, not an actor recording.
+NS13: New spell learned. — libritts_r medium speaker_id 12; generated, not an actor recording.
+NS14: New spell learned. — libritts_r medium speaker_id 13; generated, not an actor recording.
+NS15: New spell learned. — libritts_r medium speaker_id 14; generated, not an actor recording.
+NS16: New spell learned. — libritts_r medium speaker_id 15; generated, not an actor recording.

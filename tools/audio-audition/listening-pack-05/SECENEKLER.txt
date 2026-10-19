@@ -1,0 +1,21 @@
+GRISILITH · DİNLEME SEÇKİSİ 05
+5 aday / 1 grup. Bu seçkinin yeni adayları henüz oyuna eklenmedi.
+
+TH: Warhammer · sert temas / pat–güm
+Thwack kayıtlarıyla darbenin vurduğu anı öne çıkaran adaylar. TH1–TH3 bu paketten ayrı dosyalar; TH1 ve TH2 kaynak yazarın filtresiz dediği 01 ve 10 kayıtlarıdır. TH4–TH5 darbe gövdesi eklenmiş tasarımlar. Metal çınlaması veya savurma sesi eklenmedi; beş gerçek Warhammer kaydı oldukları iddia edilmiyor. TH3 seçildi ve oyuna bağlandı, diğerleri arşiv adayıdır.
+TH1 — Kuru sert darbe · ham 01
+  Kaynaklar: thwack/Audio/PCM/thwack-01.wav
+  Toplu kayıtta: 1s ve 4s
+TH2 — Sert pat vurgusu · ham 10
+  Kaynaklar: thwack/Audio/PCM/thwack-10.wav
+  Toplu kayıtta: 7s ve 10s
+TH3 — Farklı sert temas · kaynak 06
+  Kaynaklar: thwack/Audio/PCM/thwack-06.wav
+  Toplu kayıtta: 13s ve 16s
+TH4 — Sert pat + kuru darbe gövdesi
+  Kaynaklar: thwack/Audio/PCM/thwack-01.wav, impact-sounds/Audio/impactWood_heavy_002.ogg
+  Toplu kayıtta: 19s ve 22s
+TH5 — Sert pat + tok güm gövdesi
+  Kaynaklar: thwack/Audio/PCM/thwack-10.wav, impact-sounds/Audio/impactSoft_heavy_003.ogg
+  Toplu kayıtta: 25s ve 28s
+

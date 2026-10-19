@@ -41,6 +41,8 @@ import com.azizoglu.grisilith.economy.MarketProductType
 import com.azizoglu.grisilith.economy.MarketRerollPriceCalculator
 import com.azizoglu.grisilith.economy.MarketSlot
 import com.azizoglu.grisilith.GrisilithGame
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.config.GameDifficulty
 import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.map.MapObstacle
@@ -1777,6 +1779,11 @@ class FirstScreen(
                     .calculateGameDelta(delta)
             }
 
+        GameAudio.worldView(camera.position.x-CAMERA_WIDTH/2f,camera.position.y-CAMERA_HEIGHT/2f,
+            CAMERA_WIDTH,CAMERA_HEIGHT,player.centerX,player.centerY)
+        GameAudio.combatPlayback(gameTimeController.gameSpeed,
+            gameplayStopped || gameTimeController.isPaused)
+
         if (
             !gameTimeController.isPaused &&
             !gameplayStopped
@@ -1805,6 +1812,8 @@ class FirstScreen(
             updateCamera()
         }
 
+        GameAudio.worldView(camera.position.x-CAMERA_WIDTH/2f,camera.position.y-CAMERA_HEIGHT/2f,
+            CAMERA_WIDTH,CAMERA_HEIGHT,player.centerX,player.centerY)
         renderGame()
     }
 
@@ -6233,6 +6242,7 @@ class FirstScreen(
         message: String,
         offerIndex: Int? = null
     ) {
+        GameAudio.play(UiSound.ERROR)
         marketInteractionState
             .showFailureFeedback(
                 message =
@@ -6538,6 +6548,7 @@ class FirstScreen(
         runStatistics.recordGoldSpent(
             offer.price.toFloat()
         )
+        GameAudio.play(UiSound.CONFIRM)
 
         weaponRuntimeManager
             .resetAllTimers()
@@ -6657,6 +6668,7 @@ class FirstScreen(
         runStatistics.recordGoldSpent(
             offer.price.toFloat()
         )
+        GameAudio.play(UiSound.CONFIRM)
 
         marketSlots =
             marketSlots

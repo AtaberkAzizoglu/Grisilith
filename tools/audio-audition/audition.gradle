@@ -1,0 +1,142 @@
+// Audio audition preparation and isolated integration checks.
+gradle.projectsEvaluated {
+    def desktop = gradle.rootProject.project(':lwjgl3')
+    desktop.tasks.register('prepareSummonCombatAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PrepareSummonCombatAudition'
+        if (gradle.rootProject.hasProperty('inspectSummons')) args '--inspect'
+        workingDir = gradle.rootProject.projectDir
+    }
+    ['prepareNewSpellAudition':'qa.PrepareNewSpellAudition','audioVisibilitySmoke':'qa.AudioVisibilitySmoke','audioSeekSmoke':'qa.AudioSeekSmoke'].each { taskName, entry ->
+        desktop.tasks.register(taskName, JavaExec) {
+            dependsOn desktop.tasks.named('compileKotlin')
+            classpath = desktop.sourceSets.main.runtimeClasspath
+            mainClass = entry
+            workingDir = gradle.rootProject.projectDir
+        }
+    }
+    ['installFocusAbilityAudio':'qa.InstallFocusAbilityAudio','focusAudioSmoke':'qa.FocusAudioSmoke'].each { taskName, entry ->
+        desktop.tasks.register(taskName, JavaExec) {
+            dependsOn desktop.tasks.named('compileKotlin')
+            classpath = desktop.sourceSets.main.runtimeClasspath
+            mainClass = entry
+            workingDir = gradle.rootProject.projectDir
+        }
+    }
+    desktop.tasks.register('prepareFemaleIncantationAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PrepareFemaleIncantationAudition'
+        workingDir = gradle.rootProject.projectDir
+    }
+    desktop.tasks.register('prepareHumanCastingAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PrepareHumanCastingAudition'
+        workingDir = gradle.rootProject.projectDir
+    }
+    desktop.kotlin.sourceSets.main.kotlin.srcDir(gradle.rootProject.file('tools/audio-audition/qa'))
+    desktop.tasks.register('installMagicNormalAudio', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.InstallMagicNormalAudio'
+        workingDir = gradle.rootProject.projectDir
+    }
+    // Preview-task-only FLAC decoder. Never added to the game's dependencies or packaged runtime.
+    desktop.tasks.register('prepareMagicRefinementAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        def flac = desktop.configurations.detachedConfiguration(desktop.dependencies.create('org.jflac:jflac-codec:1.5.2'))
+        classpath = desktop.sourceSets.main.runtimeClasspath + flac
+        mainClass = 'qa.PrepareAudioAudition'
+        args '--pack10'
+        workingDir = gradle.rootProject.projectDir
+    }
+    desktop.tasks.register('prepareFocusAbilityAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        def flac = desktop.configurations.detachedConfiguration(desktop.dependencies.create('org.jflac:jflac-codec:1.5.2'))
+        classpath = desktop.sourceSets.main.runtimeClasspath + flac
+        mainClass = 'qa.PrepareFocusAbilityAudition'
+        workingDir = gradle.rootProject.projectDir
+    }
+    desktop.tasks.register('prepareSummonGlyphAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        def flac = desktop.configurations.detachedConfiguration(desktop.dependencies.create('org.jflac:jflac-codec:1.5.2'))
+        classpath = desktop.sourceSets.main.runtimeClasspath + flac
+        mainClass = 'qa.PrepareSummonGlyphAudition'
+        workingDir = gradle.rootProject.projectDir
+    }
+    desktop.tasks.register('prepareAudioAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PrepareAudioAudition'
+        workingDir = gradle.rootProject.projectDir
+    }
+    desktop.tasks.register('prepareCombatAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PrepareAudioAudition'
+        args '--pack02'
+        workingDir = gradle.rootProject.projectDir
+    }
+    desktop.tasks.register('prepareWeaponAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PrepareAudioAudition'
+        args '--pack03'
+        workingDir = gradle.rootProject.projectDir
+    }
+    desktop.tasks.register('inspectRangedAudio', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PrepareAudioAudition'
+        args '--inspect-ranged'
+        workingDir = gradle.rootProject.projectDir
+    }
+    desktop.tasks.register('prepareRangedAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PrepareAudioAudition'
+        args '--pack04'
+        workingDir = gradle.rootProject.projectDir
+    }
+    desktop.tasks.register('prepareHammerAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PrepareAudioAudition'
+        args '--pack05'
+        workingDir = gradle.rootProject.projectDir
+    }
+    desktop.tasks.register('prepareMeleeAbilityAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PrepareAudioAudition'
+        args '--pack06'
+        workingDir = gradle.rootProject.projectDir
+    }
+    desktop.tasks.register('prepareAirSlashAudition', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.PrepareAudioAudition'
+        args '--pack07'
+        workingDir = gradle.rootProject.projectDir
+    }
+    ['prepareMagicNormalAudition':'--pack09','prepareRangedAbilityAudition':'--pack08','installMeleeAbilityAudio':'--install-abilities'].each {taskName, argument ->
+        desktop.tasks.register(taskName, JavaExec) {
+            dependsOn desktop.tasks.named('compileKotlin')
+            classpath = desktop.sourceSets.main.runtimeClasspath
+            mainClass = 'qa.PrepareAudioAudition'
+            args argument
+            workingDir = gradle.rootProject.projectDir
+        }
+    }
+    ['audioSmoke':'qa.AudioSmoke', 'audioScreenSmoke':'qa.AudioScreenSmoke'].each { taskName, entry ->
+        desktop.tasks.register(taskName, JavaExec) {
+            dependsOn desktop.tasks.named('compileKotlin')
+            classpath = desktop.sourceSets.main.runtimeClasspath
+            mainClass = entry
+            workingDir = gradle.rootProject.file('assets')
+            jvmArgs '--enable-native-access=ALL-UNNAMED'
+        }
+    }
+}

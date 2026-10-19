@@ -1,0 +1,44 @@
+Grisilith listening pack 10 — preview only, no game/runtime/installed audio changes.
+18 candidates: WV1..6 Water, FL1..6 Fire, CU1..6 Necrotic.
+AI3, AC2, LI3, PO3 from pack09 selected but ON HOLD until every type is decided.
+WA/FI/NE1..3 rejected; not reused in this pack. No Avatar audio or extracted television samples.
+
+WATER:
+rubberduck — 40 CC0 water / splash / slime SFX — CC0
+https://opengameart.org/content/40-cc0-water-splash-slime-sfx
+https://opengameart.org/sites/default/files/water-splash-slime-sfx.zip
+Thimras — Ocean splash — CC0
+https://opengameart.org/content/ocean-splash
+https://opengameart.org/sites/default/files/cannon_miss_0.ogg
+
+FIRE:
+artisticdude (submitted by qubodup) — Fire & Evil Spell — CC BY 3.0
+https://opengameart.org/content/fire-evil-spell
+https://opengameart.org/sites/default/files/spells.7z
+https://creativecommons.org/licenses/by/3.0/
+Source spells/Fire.aif. All FL variants derive from this recording, not six independent original takes.
+If selected, credit artisticdude, link source/license, and disclose edits in shipped and in-game credits.
+
+NECROTIC:
+qubodup — 3 dark magic spells — CC0
+https://opengameart.org/content/3-dark-magic-spells
+https://opengameart.org/sites/default/files/dark_magic.7z
+fout-01/02/03.flac. CU1..3 are different recordings; CU4..6 reversed/layered/filtered variants.
+These are synthetic dark sounds, not human voices or actual recorded incantations.
+
+ADDITIONAL CC0 LAYERS:
+Almitory — Air Woosh Move: https://opengameart.org/content/air-woosh-move
+remaxim — Short wind sound: https://opengameart.org/content/short-wind-sound
+SketchMan3 — wind whoosh loop: https://opengameart.org/content/wind-whoosh-loop
+Vehicle / Jan Schupke — Tinysized: https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+CC0: https://creativecommons.org/publicdomain/zero/1.0/
+
+Edits: transient excerpts, speed/pitch changes, low/high-pass filters, reversal where labeled,
+layering, gust envelopes, mono 44.1kHz/16-bit WAV, 5ms end fade, peak matched to -12dBFS.
+Layer recipes in tools/audio-audition/qa/PrepareAudioAudition.kt groups10.
+Peak matching is not perceptual loudness normalization or listening approval.
+
+FLAC decoder for audition preparation only: org.jflac:jflac-codec:1.5.2 (LGPL2.1),
+https://central.sonatype.com/artifact/org.jflac/jflac-codec
+https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt
+Resolved only in detached preview task classpath; not a game dependency, not shipped with game.

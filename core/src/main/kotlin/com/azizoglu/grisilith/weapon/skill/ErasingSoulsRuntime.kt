@@ -18,7 +18,7 @@ class ErasingSoulsRuntime {
         val centerY: Float,
         val radius: Float,
         var remainingSeconds: Float
-    )
+    ) { val audioOwner=Any() }
 
     data class VisualSnapshot(
         val centerX: Float,
@@ -240,6 +240,7 @@ class ErasingSoulsRuntime {
                     )
         }
 
+        explosionVisuals.filter{it.remainingSeconds<=0f}.forEach{com.azizoglu.grisilith.audio.GameAudio.stopSustain(it.audioOwner)}
         explosionVisuals.removeAll {
             it.remainingSeconds <=
                 0f
@@ -284,6 +285,7 @@ class ErasingSoulsRuntime {
     }
 
     fun clear() {
+        explosionVisuals.forEach{com.azizoglu.grisilith.audio.GameAudio.stopSustain(it.audioOwner)}
         explosionVisuals.clear()
     }
 
@@ -359,6 +361,8 @@ class ErasingSoulsRuntime {
                     EXPLOSION_VISUAL_SECONDS
             )
         )
+        com.azizoglu.grisilith.audio.GameAudio.sustain(explosionVisuals.last().audioOwner,com.azizoglu.grisilith.audio.UiSound.ERASING_SOUL,false,
+            com.azizoglu.grisilith.audio.AudioSource(centerX,centerY,radius))
     }
 
     companion object {

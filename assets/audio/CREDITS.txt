@@ -1,0 +1,139 @@
+GRISILITH — AUDIO CREDITS
+
+CURRENT — SPELL FOCUS NORMAL AND UPGRADED NORMAL SHOTS
+Air AI3, Acid AC2, Lightning LI3, Poison PO3 (pack09): original previews unchanged.
+Water WV4, Fire FL5, Necrotic CU4 (pack10): original previews unchanged.
+Each actual normal projectile chooses audio/art from its launch-resolved damage type.
+No Spell Focus ability, glyph-spell or summon sounds selected by this update.
+
+Water WV4: Thimras Ocean splash + Almitory Air Woosh Move, CC0.
+https://opengameart.org/content/ocean-splash
+Fire FL5: "Fire & Evil Spell" — artisticdude (submitted by qubodup), CC BY 3.0.
+https://opengameart.org/content/fire-evil-spell
+https://creativecommons.org/licenses/by/3.0/
+Edits: speed .7, low-pass 2200Hz, 650ms excerpt, gust envelope; layered CC0 air at .9 speed,
+450ms lower-gain excerpt. Mono conversion, -12dBFS peak matching and end fade.
+Necrotic CU4: qubodup, 3 dark magic spells, CC0.
+https://opengameart.org/content/3-dark-magic-spells
+Reversed fout-01, .8 speed, high-pass 180Hz, 650ms excerpt, gust envelope, peak match/end fade.
+Acid/Poison layers include rubberduck 80 CC0 RPG SFX:
+https://opengameart.org/node/86018
+Lightning LI3: Augmentality (Brandon Morris), submitted by HaelDB, CC0 option chosen:
+https://opengameart.org/content/spell-sounds
+Air AI3: SketchMan3 wind whoosh loop, CC0; other source links below apply.
+Full layer recipes: listening-pack-09/10 LICENSE-SOURCES.txt and PrepareAudioAudition.kt.
+
+ANIMATION TIMING UPDATE (supersedes earlier duration descriptions)
+Existing approved melee sources now fitted to visual duration: Longsword250ms, DoubleSwords240ms,
+Lance240ms, Shield270ms, Whip240ms, Warhammer240ms; Burst550ms, Earthbreaker wave350ms.
+Spin420ms unchanged; Whip Sweep two 175ms selected crack excerpts, total350ms.
+Air Slash base673ms/upgraded865ms. Long quiet tails are excerpted around the selected transient,
+shorter recordings are resampled, end fades avoid abrupt clicks. Originals retained in audition archives.
+Combat pitch/duration follows actual run speed; UI/music remain independent.
+
+CURRENT OVERRIDES — ranged ability selections completed
+Rapid Strokes now reuses the normal Double Swords single/upgraded cue; old grouped WAVs removed.
+Crossbow Heavy Bolts and Dagger Knife Swarm reuse their own selected normal cues.
+Bow Leisurely Shot BV2: five layered BW3 English Longbow shots, 35ms spacing, peak matched.
+Sling Shatterstone ST1: Kenney impactMining_000 + Jordan Irwin thwack-06 (gain .3), CC0.
+ST1 is triggered once per actual landing; the upgraded second landing reuses the same recording.
+Boomerang normal and Guided Hunt GH3: Vehicle tube-plastic-whoosh-02 at .85 speed,
+artisticdude swish-8 at .10s, gain .65; CC0. Replaces the former BR3 game asset.
+Original recordings and license links below also cover these derivatives.
+No human whistle recording is shipped or loaded.
+The following older selections are historical where superseded by these overrides.
+
+MELEE ABILITIES — selected packs 06/07
+Rapid Strokes: exact DS1 texture (artisticdude CC0), grouped 1–7 strokes actually performed.
+Stroke starts within 110ms; complete sound remains within the 240ms visual.
+Spin Attack SP1: artisticdude swish-3 and swish-6, three repeats, fitted to the 420ms visual.
+Defensive Burst SB5: Kenney impactPlate_heavy_003 + Jordan Irwin thwack-06 + Vehicle sword-clash-05.
+Earthbreaker EB1: Jordan Irwin thwack-06 + Kenney impactMining_000, one layer pair per actual wave.
+Kenney Impact Sounds (CC0): https://kenney.nl/assets/impact-sounds
+Whip Sweep WS2: artisticdude swish-13 + Tuomo Untinen/Reemax whip, two full consecutive copies.
+Whip attribution and CC BY 4.0 link below also apply to this derivative.
+Air Slash AW5: Almitory Air Woosh Move + SketchMan3 wind whoosh loop, CC0.
+https://opengameart.org/content/air-woosh-move
+https://opengameart.org/content/wind-whoosh-loop
+AW5 and SB5 use the exact approved preview WAVs; other approved repetition edits are documented above.
+All abilities use Master x Sound Effects; audition-only ranged/whistle files are not shipped assets.
+
+MENU MUSIC
+"Gregorian Chant" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+Source: https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1600052
+Original audio: https://incompetech.com/music/royalty-free/mp3-royaltyfree/Gregorian%20Chant.mp3
+ISRC: USUAN1600052
+The recording is used unmodified; the game controls playback volume and loops it.
+
+SOUND EFFECTS
+Kenney Vleugels (Kenney.nl) — RPG Audio and Interface Sounds
+Creative Commons Zero (CC0): https://creativecommons.org/publicdomain/zero/1.0/
+Sources: https://kenney.nl/assets/rpg-audio
+         https://kenney.nl/assets/interface-sounds
+
+Approved selections from listening pack 01:
+A1 / ui_click.wav   = RPG Audio / metalClick.ogg
+B5 / ui_confirm.wav = RPG Audio / metalLatch.ogg
+C2 / ui_back.wav    = Interface Sounds / back_002.ogg
+D2 / ui_error.wav   = Interface Sounds / error_002.ogg
+E1 / page_turn.wav  = RPG Audio / bookFlip1.ogg
+F1 / chest_open.wav = RPG Audio / metalLatch.ogg + creak1.ogg
+
+Effects were converted to mono 44.1 kHz / 16-bit WAV, peak-matched to -12 dBFS,
+and given a 5 ms end fade. F1 is a layered preview mix, not an original chest recording.
+The exact approved listening files are used. No Impact Sounds recordings were selected.
+
+LONGSWORD NORMAL ATTACK
+Selected G1 from listening pack 02: Kenney RPG Audio / knifeSlice.ogg.
+assets/audio/sfx/longsword_swing.wav is the exact approved G1 WAV (CC0).
+This does not change the Longsword ability sound or other weapons' sounds.
+
+ADDITIONAL NORMAL WEAPON ATTACKS
+Double Swords DS1 (single and doubled) / Lance LN1:
+Swishes Sound Pack — artisticdude — CC0
+https://opengameart.org/content/swishes-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+Double Swords upgraded uses a second stroke at 120 ms. Converted to mono WAV; peak matched, end fade.
+
+Shield SH1: Fantasy Sound Effects (Tinysized SFX) — Vehicle / Jan Schupke — CC0
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Source sword-clash-01.wav. Converted to mono WAV, peak matched, end fade.
+
+Whip WP5: "Whipping sound by Tuomo Untinen" (Reemax)
+https://opengameart.org/content/whip-sound
+Licensed under Creative Commons Attribution 4.0: https://creativecommons.org/licenses/by/4.0/
+Combined with artisticdude's CC0 swish-4.wav at lower gain; whip begins at 100 ms.
+Converted to mono WAV, peak matched, end fade. The exact approved WP5 preview is used.
+
+WARHAMMER NORMAL ATTACK — TH3
+Thwack Sounds — Jordan Irwin (AntumDeluge) — CC0
+https://opengameart.org/content/thwack-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+Source thwack-06.wav; source-pack processing retained. Mono WAV, peak matched, end fade.
+
+RANGED NORMAL ATTACKS — BW3 / CB4 / DG4 / SL1 / BR3
+Bow BW3 and Crossbow CB4: Still North Media — Ben Jaszczak and Brian Nelson — CC0
+https://opengameart.org/content/medieval-sound-effects-weapon-textures
+https://creativecommons.org/publicdomain/zero/1.0/
+Individual shots isolated from English Longbow Shoot.wav (third) and Crossbow Shoot.wav (fourth).
+Dagger DG4: artisticdude Swishes / swish-12.wav, 135% speed, CC0 (source link above).
+Sling SL1: Vehicle Tinysized / tube-plastic-whoosh-01.wav, 110% speed, CC0 (source link above).
+Boomerang BR3: Vehicle tube-plastic-whoosh-02.wav at 85% speed + artisticdude swish-8.wav at 180 ms / lower gain.
+All converted to mono WAV, peak matched, end fade. Exact selected previews are used.
+These choices apply to normal attacks only; active ability sounds are selected separately.
+
+SPELL FOCUS ABILITIES / GLYPH CASTING
+Full selected-source credits, per-asset licenses, source links and edit disclosures:
+audio/FOCUS-ABILITY-LICENSES.txt (included with the game).
+New CC BY 3.0 sources: spookymodem (Bubbling Acid, Goblin Scream), Jerimee (Thunder),
+Michel Baradari (2 High Quality Explosions); artisticdude (Fire & Evil Spell).
+CC BY-SA 3.0 AUDIO ASSETS: Secretlondon (Farm animals / focus_animal.wav),
+pal.zoltan.illes (Male encounter voice pieces / focus_oathbreaker.wav).
+https://creativecommons.org/licenses/by/3.0/
+https://creativecommons.org/licenses/by-sa/3.0/
+Additional CC0 sources: frosthardr, Bananaboatman33, PagDev, TinyWorlds, transitking,
+Ogrebane, Kenney, qubodup, SketchMan3, Almitory, Vehicle / Jan Schupke.
+Approved glyph casting: HL2 / HM3 / SV2 / SV3. No HS3 casting asset installed.

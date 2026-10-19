@@ -29,6 +29,8 @@ import kotlin.math.roundToInt
 import com.azizoglu.grisilith.online.OnlineUi
 import com.azizoglu.grisilith.online.OnlineNameDialog
 import com.azizoglu.grisilith.online.OnlineBackend
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 
 class SettingsScreen(
     @Suppress("unused") private val game: GrisilithGame,
@@ -110,6 +112,7 @@ class SettingsScreen(
         draftSettings = appliedSettings
         appliedBindings = RunInputBindings.snapshot()
         draftBindings = appliedBindings.toMutableMap()
+        previewAudio()
         previousInputProcessor = Gdx.input.inputProcessor
         Gdx.input.inputProcessor = keyboardInput
         if (nameDialog == null) game.online?.let { nameDialog = OnlineNameDialog(it, onlineUi) }
@@ -117,6 +120,7 @@ class SettingsScreen(
     }
 
     override fun hide() {
+        GameAudio.clearPreview(this)
         nameDialog?.close()
         if (Gdx.input.inputProcessor === keyboardInput) {
             Gdx.input.inputProcessor = previousInputProcessor
@@ -128,6 +132,7 @@ class SettingsScreen(
         pointer.update()
         nameDialog?.update(pointer)
         if (nameDialog?.open != true) handleVolumeSliders()
+        previewAudio()
         val currentButtons = if(nameDialog?.open == true) emptyList() else buttons
         currentButtons.forEach { button ->
             if (button.update(pointer.position, pointer.justPressed, pointer.justReleased)) return
@@ -445,6 +450,8 @@ class SettingsScreen(
         draftSettings = appliedSettings
         appliedBindings = RunInputBindings.snapshot()
         draftBindings = appliedBindings.toMutableMap()
+        previewAudio()
+        GameAudio.play(UiSound.CONFIRM)
         rebuildButtons()
     }
 
@@ -453,7 +460,13 @@ class SettingsScreen(
         draftBindings = appliedBindings.toMutableMap()
         listeningAction = null
         exitConfirmationOpen = false
+        previewAudio()
+        GameAudio.play(UiSound.CLICK)
         rebuildButtons()
+    }
+
+    private fun previewAudio() {
+        if(::draftSettings.isInitialized) GameAudio.preview(this,draftSettings.masterVolume,draftSettings.musicVolume,draftSettings.soundEffectsVolume)
     }
 
     private fun assignDraftBinding(action: RunInputAction, keyCode: Int) {
@@ -493,7 +506,10 @@ class SettingsScreen(
                 VolumeSlider.EFFECTS -> draftSettings.copy(soundEffectsVolume = rounded)
             }
         }
-        if (!pointer.isHeld) draggingSlider = null
+        if (!pointer.isHeld) {
+            if(draggingSlider==VolumeSlider.EFFECTS || draggingSlider==VolumeSlider.MASTER) GameAudio.play(UiSound.CLICK)
+            draggingSlider = null
+        }
     }
 
     private fun drawVolumeSliders() {

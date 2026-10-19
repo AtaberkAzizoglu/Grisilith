@@ -1,0 +1,49 @@
+SPELL FOCUS ABILITY AUDIO — APPROVED SELECTIONS
+IG1, ER3, VP4, SC3, AP2, PS4, BL5; PX2, AN4, DE1, OA1, CL2, TS3, MT4, SG3.
+Casting: HL2 Call Lightning, HM3 Meteor (HS3 was a user typo), SV2 Tsunami, SV3 Singularity.
+
+IG1: Ogrebane Teleport Spell (CC0) + artisticdude Fire & Evil Spell (CC BY 3.0).
+https://opengameart.org/content/teleport-spell
+https://opengameart.org/content/fire-evil-spell
+ER3: qubodup, 3 dark magic spells + Kenney Impact Sounds, CC0.
+VP4: SketchMan3 wind whoosh loop, CC0.
+PS4: SketchMan3 wind whoosh loop + qubodup 3 dark magic spells, CC0.
+https://opengameart.org/content/wind-whoosh-loop
+https://opengameart.org/content/3-dark-magic-spells
+https://kenney.nl/assets/impact-sounds
+SC3 / CL2: Jerimee Thunder, CC BY 3.0. CL2 also includes Michel Baradari explosion, CC BY 3.0.
+https://opengameart.org/content/thunder
+https://opengameart.org/content/2-high-quality-explosions
+AP2: spookymodem Bubbling Acid (CC BY 3.0) + Vehicle / Jan Schupke Tinysized (CC0).
+https://opengameart.org/content/bubbling-acid
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+BL5: PagDev Fireplace Sound loop + TinyWorlds boiling water loops + Vehicle Tinysized, CC0.
+https://opengameart.org/content/fireplace-sound-loop
+https://opengameart.org/content/boiling-water-loops
+PX2: Michel Baradari explosion (CC BY 3.0) + PagDev fireplace (CC0).
+DE1: spookymodem Goblin Scream, CC BY 3.0.
+https://opengameart.org/content/goblin-scream
+AN4 / focus_animal.wav: Secretlondon (submitted by qubodup), Farm animals, CC BY-SA 3.0.
+https://opengameart.org/content/farm-animals
+OA1 / focus_oathbreaker.wav: pal.zoltan.illes Male encounter voice pieces, CC BY-SA 3.0.
+https://opengameart.org/content/male-encounter-voice-pieces
+These two derivative AUDIO ASSETS remain CC BY-SA 3.0; no claim that the game code is under this license.
+https://creativecommons.org/licenses/by-sa/3.0/
+TS3: transitking Water Waves (CC0) + Jerimee Thunder (CC BY 3.0) + Almitory Air Woosh Move (CC0).
+MT4 / SG3: Almitory Air Woosh Move (CC0) + Michel Baradari explosion and/or Jerimee Thunder (CC BY 3.0).
+https://opengameart.org/content/water-waves
+https://opengameart.org/content/air-woosh-move
+HL2 / HM3: frosthardr, voice ancient arcane chant incantation, CC0. HQ MP3 preview-derived excerpts.
+https://freesound.org/people/frosthardr/sounds/553453/
+SV2 / SV3: Bananaboatman33, evilwitch_Master.wav, CC0. Source is already processed/reversed female demon gibberish.
+https://freesound.org/people/Bananaboatman33/sounds/315655/
+
+Other license links:
+https://creativecommons.org/licenses/by/3.0/
+https://creativecommons.org/publicdomain/zero/1.0/
+Edits: source excerpts, mono/44.1kHz/16-bit, pitch/speed/filters/reversal/layers as auditioned,
+peak matching (not perceived loudness matching), wrap crossfades on loop textures, attack fitting/fades.
+Burst cues fit 0.65 / 0.78 / 0.86 second actual visual lifetimes. HM3 stretched from ~1.94 to 2.5s;
+Singularity end/collapse: SG3-derived 1.20s; final explosion: MT4-derived 0.90s, same licensed sources above.
+longer casting voices retain their starts and are stopped at the runtime's 2.5s drawing completion/cancellation.
+All combat sounds follow game playback speed and SFX/master volume. No paid sounds.

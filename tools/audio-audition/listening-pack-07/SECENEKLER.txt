@@ -1,0 +1,21 @@
+GRISILITH · DİNLEME SEÇKİSİ 07
+5 aday / 1 grup. Bu seçkinin yeni adayları henüz oyuna eklenmedi.
+
+AW: Longsword · Air Slash / keskin rüzgâr
+Önceki AS adayları elendi. Bu beş taslak yalnızca yeni hava/rüzgâr kaynaklarını kullanır; kılıç, metal veya darbe katmanı yok. Üç kaynaktan hazırlanan hız, tiz vurgu, kısa kesit ve rüzgâr zarfı varyasyonlarıdır; beş ayrı özgün kayıt değildir. Hiçbiri henüz oyuna bağlı değil.
+AW1 — Hızlı hava geçişi · özgün doku
+  Kaynaklar: air-move/Audio/wind.wav
+  Toplu kayıtta: 1s ve 4s
+AW2 — Daha ince / keskin hava geçişi
+  Kaynaklar: air-move/Audio/wind.wav
+  Toplu kayıtta: 7s ve 10s
+AW3 — Kısa, keskin rüzgâr hamlesi
+  Kaynaklar: short-wind/Audio/wind.wav
+  Toplu kayıtta: 13s ve 16s
+AW4 — Tiz vurgulu rüzgâr kesiti
+  Kaynaklar: wind-loop/Audio/wind.ogg
+  Toplu kayıtta: 19s ve 22s
+AW5 — Hava darbesi + ince rüzgâr kuyruğu
+  Kaynaklar: air-move/Audio/wind.wav, wind-loop/Audio/wind.ogg
+  Toplu kayıtta: 25s ve 28s
+

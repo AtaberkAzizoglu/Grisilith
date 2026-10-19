@@ -17,7 +17,8 @@ object MeleeAttackVisualManager {
         rotationDegrees: Float,
         worldWidth: Float,
         worldHeight: Float,
-        durationSeconds: Float
+        durationSeconds: Float,
+        damageType: com.azizoglu.grisilith.content.DamageType? = null
     ) {
         /*
          * This visual system is deliberately event-based.
@@ -28,6 +29,7 @@ object MeleeAttackVisualManager {
             MeleeAttackVisualEvent(
                 kind =
                     kind,
+                damageType = damageType,
                 centerX =
                     centerX,
                 centerY =

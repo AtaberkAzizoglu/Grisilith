@@ -1,0 +1,30 @@
+GRISILITH — AIR SLASH AUDITION 07: WIND / AIR, PREVIEW ONLY
+No game code, installed audio or ability behavior changed in this selection round.
+Five options from three source recordings, not five independent original recordings.
+No sword swish, metal, impact, synthesized laser or generated noise layer is used.
+
+CC0 SOURCES
+Almitory — Air Woosh Move
+https://opengameart.org/content/air-woosh-move
+https://opengameart.org/sites/default/files/air_move.wav
+remaxim — Short wind sound
+https://opengameart.org/content/short-wind-sound
+https://opengameart.org/sites/default/files/short%20wind%20sound.wav
+SketchMan3 — wind whoosh loop
+https://opengameart.org/content/wind-whoosh-loop
+https://opengameart.org/sites/default/files/wind%20woosh%20loop.ogg
+The wind-loop author describes it as a wind section from Loopable Dungeon Ambience with high-frequency EQ.
+License for all three pages: https://creativecommons.org/publicdomain/zero/1.0/
+Original source pages and original linked files are retained under sources/<pack>/.
+
+EDITS
+AW1: Air Woosh Move, original speed, mono/peak matched/end faded.
+AW2: Air Woosh Move, 112% speed, 650 Hz high-pass emphasis.
+AW3: Short wind sound section starting at 400 ms, 120% speed, 650 ms cap,
+     450 Hz high-pass, sharp rise / decaying gust envelope.
+AW4: wind whoosh loop section starting at 600 ms, 600 ms cap,
+     1000 Hz high-pass, sharp rise / decaying gust envelope.
+AW5: Air Woosh Move at 95% speed plus a quieter wind-loop section at 60 ms,
+     loop starts at 300 ms / 110% speed / 550 ms cap / 1200 Hz high-pass / gust envelope.
+All previews: mono 44.1 kHz / 16-bit WAV, peak matched around -12 dBFS, 5 ms end fade.
+Peak matching is not perceptual loudness matching. Subjective preference remains with the user.

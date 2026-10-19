@@ -119,7 +119,8 @@ class Projectile(
 
     val customVisualId: String? = null,
     private val ignoredEnemies: Set<Enemy> = emptySet(),
-    private val onImpact: ((Projectile, Enemy) -> Unit)? = null
+    private val onImpact: ((Projectile, Enemy) -> Unit)? = null,
+    private val chaosDamageResolved: Boolean = false
 ) {
     private val ignoresObstaclesFromItem =
         ActiveItemEffects.rollGhostProjectile(sourceWeapon)
@@ -724,6 +725,7 @@ class Projectile(
                     damageContext =
                         EnemyDamageContext(
                             damageType = damageType,
+                            chaosDamageResolved = chaosDamageResolved,
                             projectileAttack = true,
 
                             sourceWeaponRuntimeId =

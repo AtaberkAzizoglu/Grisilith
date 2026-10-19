@@ -1,0 +1,27 @@
+Grisilith listening pack 08 — preview candidates only, not installed.
+
+artisticdude — Swishes — CC0
+https://opengameart.org/content/swishes-sound-pack
+Ben Jaszczak & Brian Nelson / Still North Media — Weapon Textures — CC0
+https://opengameart.org/content/medieval-sound-effects-weapon-textures
+Vehicle / Jan Schupke — Tinysized — CC0
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+Kenney — Impact Sounds — CC0
+https://kenney.nl/assets/impact-sounds
+Jordan Irwin / AntumDeluge — Thwack Sounds — CC0
+https://opengameart.org/content/thwack-sounds
+Almitory — Air Woosh Move — CC0
+https://opengameart.org/content/air-woosh-move
+
+dklon — Whistles — CC BY 3.0
+https://opengameart.org/content/whistles
+https://creativecommons.org/licenses/by/3.0/
+Original archive: https://opengameart.org/sites/default/files/whistles.zip
+Author requested credit: dklon.
+HW1–HW4 are four separate recordings converted to mono 44.1kHz/16-bit,
+peak matched to -12dBFS with a 5ms end fade. HW5 is a .85 speed/pitch variant of HW1.
+If selected for shipping, add dklon attribution to in-game credits and packaged credits.
+
+Other candidates: labeled speed/pitch edits and layers; not 25 separate original recordings.
+KS uses DG4's source; BV uses BW3's shot; HB uses CB4's shot.
+GH1 is BR3's exact recipe. ST previews include separate base/upgraded variants.

@@ -18,6 +18,9 @@ object Lwjgl3Launcher {
 
         WindowsTaskbar.initialize()
 
+        // Only seek playback time; directional/stereo panning is intentionally NOT enabled here.
+        com.azizoglu.grisilith.audio.GameAudio.installSeekHandler(DesktopAudioSeeking::seek)
+
         Lwjgl3Application(
             GrisilithGame(),
             createConfiguration()

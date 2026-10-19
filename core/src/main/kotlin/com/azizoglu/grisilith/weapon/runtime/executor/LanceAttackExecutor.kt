@@ -2,6 +2,8 @@ package com.azizoglu.grisilith.weapon.runtime.executor
 
 import com.azizoglu.grisilith.combat.debug.CombatDebugVisualManager
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
@@ -76,6 +78,7 @@ class LanceAttackExecutor(
         }
 
         direction.nor()
+        GameAudio.play(UiSound.LANCE_THRUST)
 
         val attackAngle =
             MathUtils.atan2(

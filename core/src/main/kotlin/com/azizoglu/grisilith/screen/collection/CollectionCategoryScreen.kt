@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.screen
 
 import com.azizoglu.grisilith.GrisilithGame
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.collection.CollectionEntry
 import com.azizoglu.grisilith.collection.CollectionProvider
 import com.azizoglu.grisilith.collection.filter.CollectionFilterEngine
@@ -188,6 +190,7 @@ class CollectionCategoryScreen(
         }
         searchFocused = false
         if (STATE_BOUNDS.contains(pointer.position)) {
+            GameAudio.play(UiSound.CLICK)
             val values = if (category == ContentCategory.ENEMY || category == ContentCategory.MAP) {
                 VisibilityFilter.entries
             } else {
@@ -198,17 +201,20 @@ class CollectionCategoryScreen(
             return true
         }
         if (SORT_BOUNDS.contains(pointer.position)) {
+            GameAudio.play(UiSound.CLICK)
             ascending = !ascending
             onViewChanged()
             return true
         }
         if (filterOptions.isNotEmpty() && FILTER_BOUNDS.contains(pointer.position)) {
+            GameAudio.play(UiSound.CLICK)
             filterState.toggleDropdown()
             return true
         }
         if (filterState.isDropdownOpen) {
             val index = filterOptionBounds().indexOfFirst { it.contains(pointer.position) }
             if (index >= 0) {
+                GameAudio.play(UiSound.CLICK)
                 filterState.toggle(filterOptions[index].id)
                 onViewChanged()
             } else {
@@ -237,6 +243,7 @@ class CollectionCategoryScreen(
             val entry = entryAtPointer()
             if (entry != null && entry.definition.id.value == pressedContentId) {
                 selectedContentId = entry.definition.id.value
+                GameAudio.play(UiSound.CLICK)
             }
             pressedContentId = null
         }

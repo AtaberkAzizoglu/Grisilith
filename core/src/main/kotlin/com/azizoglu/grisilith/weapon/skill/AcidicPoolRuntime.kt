@@ -15,6 +15,8 @@ import com.badlogic.gdx.math.MathUtils
 class AcidicPoolRuntime(
     areaManager: PersistentAreaManager
 ) {
+    val burningAudioOwner = Any()
+    private val burstAudioOwner = Any()
 
     private val reactiveTarget =
         ReactiveSpellFieldTarget(DamageType.FIRE)
@@ -234,6 +236,9 @@ class AcidicPoolRuntime(
         ignitionVisualRemainingSeconds =
             IGNITION_VISUAL_SECONDS
 
+        com.azizoglu.grisilith.audio.GameAudio.sustain(burstAudioOwner,com.azizoglu.grisilith.audio.UiSound.ACID_EXPLOSION,false,
+            com.azizoglu.grisilith.audio.AudioSource(visualCenterX,visualCenterY,visualRadius))
+
         return true
     }
 
@@ -320,6 +325,7 @@ class AcidicPoolRuntime(
             onCompleted =
                 onCompleted
         )
+        if(ignitionVisualRemainingSeconds<=0f || !isActive) com.azizoglu.grisilith.audio.GameAudio.stopSustain(burstAudioOwner)
     }
 
     @Suppress("UNUSED_PARAMETER")
@@ -330,6 +336,9 @@ class AcidicPoolRuntime(
     }
 
     fun clear() {
+        com.azizoglu.grisilith.audio.GameAudio.stopSustain(this)
+        com.azizoglu.grisilith.audio.GameAudio.stopSustain(burningAudioOwner)
+        com.azizoglu.grisilith.audio.GameAudio.stopSustain(burstAudioOwner)
         areaRuntime.clear()
         reactiveTarget.clear()
 

@@ -1,0 +1,52 @@
+SUMMON COMBAT AUDITIONS — PACK 16 — NOT INSTALLED
+30 proposed attack/death cues for Cow, Imp, Oathbreaker. No stereo or gameplay changes.
+
+NEW CC0 SOURCES
+spurioustransients — Cows lowing and snorting, Cow moo #1–5 (ordinary field recordings).
+https://freesound.org/people/spurioustransients/sounds/513560/
+https://freesound.org/people/spurioustransients/sounds/513559/
+https://freesound.org/people/spurioustransients/sounds/513558/
+https://freesound.org/people/spurioustransients/sounds/513557/
+https://freesound.org/people/spurioustransients/sounds/513564/
+https://freesound.org/people/spurioustransients/sounds/513563/
+Public HQ MP3 previews used, not the original uncompressed studio/field WAV downloads.
+Preview URLs: https://cdn.freesound.org/previews/513/<sound-id>_2898771-hq.mp3
+CA puff cuts: different short onsets from the lowing/snorting field recording, not isolated studio snorts.
+CD uses separate normal moo calls; NO real animal injury/death recordings. These are death cue DESIGNS.
+
+Ogrebane — Monster Sound Effects Pack — CC0.
+https://opengameart.org/content/monster-sound-effects-pack
+https://opengameart.org/sites/default/files/monster_sfx_pack.zip
+HaelDB — Male Grunt/Yelling sounds — CC0 option selected (page also offers OGA-BY 3.0).
+https://opengameart.org/content/male-gruntyelling-sounds
+https://opengameart.org/sites/default/files/yelling%20sounds.zip
+Recorded human performances, not synthetic speech; pitched for low Oathbreaker / higher Imp timbre.
+
+EXISTING SOURCES REUSED
+artisticdude — Fire & Evil Spell — CC BY 3.0.
+https://opengameart.org/content/fire-evil-spell
+spookymodem — Goblin Scream — CC BY 3.0.
+https://opengameart.org/content/goblin-scream
+CC BY candidates require attribution, source/license links and edit disclosure if selected.
+rubberduck — 80 CC0 RPG SFX — CC0.
+https://opengameart.org/node/86018
+artisticdude — Swishes Sound Pack — CC0.
+https://opengameart.org/content/swishes-sound-pack
+Kenney — Impact Sounds — CC0.
+https://kenney.nl/assets/impact-sounds
+Vehicle / Jan Schupke — Fantasy Sound Effects (Tinysized SFX) — CC0.
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+JaggedStone — Magic Spell SFX — CC0.
+https://opengameart.org/content/magic-spell-sfx
+
+LICENSE LINKS
+https://creativecommons.org/publicdomain/zero/1.0/
+https://creativecommons.org/licenses/by/3.0/
+
+EDITS
+Mono 44.1kHz / PCM16 WAV, excerpt selection/foreground extraction, pitch/speed changes,
+low/high-pass filters, optional one vocal + impact/fire/chain layers, -12dBFS peak matching,
+30ms preview edge fades. Not perceived loudness normalization. No claim of 30 unrelated actors.
+Detailed per-candidate recipes in SECENEKLER.txt and PrepareSummonCombatAudition.kt.
+Final event/animation timing, game speed/volume and direction will be connected only after selection.
+All are free-to-use sources; no paid packs, no TTS for these attack/death candidates.

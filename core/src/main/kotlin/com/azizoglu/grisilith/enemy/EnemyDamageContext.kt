@@ -29,7 +29,8 @@ data class EnemyDamageContext(
     val conditionStatScore: Int? = null,
     val appliesAutomaticCondition: Boolean = true,
     val projectileAttack: Boolean = false,
-    val defenseTimeScale: Float = 1f
+    val defenseTimeScale: Float = 1f,
+    val chaosDamageResolved: Boolean = false
 ) {
 
     val isPhysicalWeaponDamage: Boolean

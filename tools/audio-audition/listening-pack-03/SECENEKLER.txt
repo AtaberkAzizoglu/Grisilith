@@ -1,0 +1,93 @@
+GRISILITH · DİNLEME SEÇKİSİ 03
+25 aday / 5 grup. Bu seçkinin yeni adayları henüz oyuna eklenmedi.
+
+DS: Double Swords · tekli / gelişmiş ikili
+Her numara bir eşleşmedir: önce normal saldırının tek sesi, ardından gelişmiş saldırının iki vuruşlu taslağı çalar. Aynı çiftte ikinci savurma 120 ms sonradır; oyundaki animasyona yerleştirirken zamanlama eşleştirilecek. G1 Longsword'a ayrıldı; burada kullanılmıyor.
+DS1 — Yeni savurma kaydı · 1
+  Kaynaklar: swishes/Audio/swishes/swish-1.wav
+  Toplu kayıtta: 1s ve 4s (ikinci ses gelişmiş ikili)
+DS2 — Yeni savurma kaydı · 2
+  Kaynaklar: swishes/Audio/swishes/swish-2.wav
+  Toplu kayıtta: 7s ve 10s (ikinci ses gelişmiş ikili)
+DS3 — Yeni savurma kaydı · 3
+  Kaynaklar: swishes/Audio/swishes/swish-5.wav
+  Toplu kayıtta: 13s ve 16s (ikinci ses gelişmiş ikili)
+DS4 — Yeni savurma kaydı · 4
+  Kaynaklar: swishes/Audio/swishes/swish-8.wav
+  Toplu kayıtta: 19s ve 22s (ikinci ses gelişmiş ikili)
+DS5 — Yeni savurma kaydı · 5
+  Kaynaklar: swishes/Audio/swishes/swish-11.wav
+  Toplu kayıtta: 25s ve 28s (ikinci ses gelişmiş ikili)
+
+LN: Lance · havayı delen ileri itiş
+Savurma ve hava geçişi kayıtları. Gerçek bir mızrak çarpışması oldukları iddia edilmiyor; ileri itişin hava dokusu için seçilecek. Son iki aday daha tiz hava geçişidir.
+LN1 — İleri itiş / kısa swish
+  Kaynaklar: swishes/Audio/swishes/swish-3.wav
+  Toplu kayıtta: 1s ve 4s
+LN2 — İleri itiş / geniş swish
+  Kaynaklar: swishes/Audio/swishes/swish-6.wav
+  Toplu kayıtta: 7s ve 10s
+LN3 — İleri itiş / tok swish
+  Kaynaklar: swishes/Audio/swishes/swish-9.wav
+  Toplu kayıtta: 13s ve 16s
+LN4 — İnce hava geçişi · 1
+  Kaynaklar: tinysized/Audio/sfx-cc0/tin-whistle-whoosh-01.wav
+  Toplu kayıtta: 19s ve 22s
+LN5 — İnce hava geçişi · 2
+  Kaynaklar: tinysized/Audio/sfx-cc0/tin-whistle-whoosh-02.wav
+  Toplu kayıtta: 25s ve 28s
+
+SH: Shield · metalik temas
+Önceki I adayları elendi. Bunlar yeni kaynak paketteki beş ayrı sword-clash metal çarpışmasıdır; kalkan kaydı değil, kalkan normal saldırısına önerilen metal dokulardır.
+SH1 — Metal çarpışması · 1
+  Kaynaklar: tinysized/Audio/sfx-cc0/sword-clash-01.wav
+  Toplu kayıtta: 1s ve 4s
+SH2 — Metal çarpışması · 2
+  Kaynaklar: tinysized/Audio/sfx-cc0/sword-clash-02.wav
+  Toplu kayıtta: 7s ve 10s
+SH3 — Metal çarpışması · 3
+  Kaynaklar: tinysized/Audio/sfx-cc0/sword-clash-03.wav
+  Toplu kayıtta: 13s ve 16s
+SH4 — Metal çarpışması · 4
+  Kaynaklar: tinysized/Audio/sfx-cc0/sword-clash-04.wav
+  Toplu kayıtta: 19s ve 22s
+SH5 — Metal çarpışması · 5
+  Kaynaklar: tinysized/Audio/sfx-cc0/sword-clash-05.wav
+  Toplu kayıtta: 25s ve 28s
+
+WH: Warhammer · ağır metal darbe
+Önceki H adayları elendi. İlk iki aday yeni metal-hammer kayıtları. WH3 ve WH4 aynı kayıtların daha yavaş, daha pes varyasyonları; WH5 savurma + darbe katmanıdır. Beş ayrı özgün kayıt değildir.
+WH1 — Metal çekiç kaydı · 1
+  Kaynaklar: tinysized/Audio/sfx-cc0/metal-hammer-hit-01.wav
+  Toplu kayıtta: 1s ve 5s
+WH2 — Metal çekiç kaydı · 2
+  Kaynaklar: tinysized/Audio/sfx-cc0/metal-hammer-hit-02.wav
+  Toplu kayıtta: 9s ve 13s
+WH3 — Çekiç 1 · %80 hız / daha pes
+  Kaynaklar: tinysized/Audio/sfx-cc0/metal-hammer-hit-01.wav
+  Toplu kayıtta: 17s ve 21s
+WH4 — Çekiç 2 · %72 hız / daha pes
+  Kaynaklar: tinysized/Audio/sfx-cc0/metal-hammer-hit-02.wav
+  Toplu kayıtta: 25s ve 29s
+WH5 — Ağır savurma + metal darbe
+  Kaynaklar: swishes/Audio/swishes/swish-13.wav, tinysized/Audio/sfx-cc0/metal-hammer-hit-02.wav
+  Toplu kayıtta: 33s ve 37s
+
+WP: Whip · deri kırbaç
+Yeni kaynak: Tuomo Untinen/Reemax'ın deri kayışla yaptığı whip kaydı. WP1 özgün kaydın mono/seviye eşlenmiş hali; WP2–WP4 hız/perde varyasyonları, WP5 savurmayla katmanlanmış taslaktır. Beş ayrı kayıt değildir. Ücretsiz CC BY 4.0; seçilirse oyun içinde atıf eklenecek.
+WP1 — Deri kırbaç · özgün hız
+  Kaynaklar: reemax-whip/Audio/whip.wav
+  Toplu kayıtta: 1s ve 4s
+WP2 — Deri kırbaç · %90 hız / daha pes
+  Kaynaklar: reemax-whip/Audio/whip.wav
+  Toplu kayıtta: 7s ve 10s
+WP3 — Deri kırbaç · %112 hız / daha tiz
+  Kaynaklar: reemax-whip/Audio/whip.wav
+  Toplu kayıtta: 13s ve 16s
+WP4 — Deri kırbaç · %80 hız / daha ağır
+  Kaynaklar: reemax-whip/Audio/whip.wav
+  Toplu kayıtta: 19s ve 22s
+WP5 — Hava savurması + deri şaklama
+  Kaynaklar: swishes/Audio/swishes/swish-4.wav, reemax-whip/Audio/whip.wav
+  Toplu kayıtta: 25s ve 28s
+

@@ -19,7 +19,8 @@ data class MeleeAttackVisualEvent(
     val worldWidth: Float,
     val worldHeight: Float,
     val durationSeconds: Float,
-    var elapsedSeconds: Float = 0f
+    var elapsedSeconds: Float = 0f,
+    val damageType: com.azizoglu.grisilith.content.DamageType? = null
 ) {
     val progress: Float
         get() =

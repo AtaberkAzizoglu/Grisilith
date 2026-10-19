@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.azizoglu.grisilith.audio.GameAudio
 
 /*
  * Fare ve dokunmatik ekranla çalışan ortak
@@ -130,6 +131,7 @@ class MenuButton(
                 false
 
             if (shouldClick) {
+                GameAudio.play(GameAudio.button(text))
                 onClick()
                 return true
             }

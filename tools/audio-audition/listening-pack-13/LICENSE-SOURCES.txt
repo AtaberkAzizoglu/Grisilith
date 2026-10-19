@@ -1,0 +1,10 @@
+Human casting auditions — NOT INSTALLED.
+frosthardr: https://freesound.org/people/frosthardr/sounds/553453/
+License CC0: https://creativecommons.org/publicdomain/zero/1.0/
+Source: public HQ MP3 preview https://cdn.freesound.org/previews/553/553453_2196245-hq.mp3
+Original WAV requires login; these are compressed-preview-derived audition cuts, not original studio WAV quality.
+Ten separated readings from ONE recording/performer, NOT ten different actors. Natural pitch/speed; no reversal, layers or added echo.
+Cici Fyre: https://cicifyre.itch.io/rpg-voice-starter-pack
+License CC0, verified on asset page. Included readme identifies Cici Fyre. Original downloaded free ZIP, individual WAV recordings.
+One actress, three performed voice styles; NOT three different actors. Understandable English spell words.
+Edits: phrase selection, mono conversion, 44.1kHz conversion, peak normalization, edge fades. No voice mixing.

@@ -34,16 +34,17 @@ class MeleeAttackVisualRenderer {
         events.forEach {
                 event ->
 
+            val convertedBeam = event.kind == MeleeAttackVisualKind.FIRE_BEAM &&
+                event.damageType != null && event.damageType != com.azizoglu.grisilith.content.DamageType.FIRE
+
             val path =
                 framePath(
                     event.kind,
                     event.progress
                 )
 
-            val texture =
-                texture(
-                    path
-                )
+            val texture = texture(if(convertedBeam)
+                com.azizoglu.grisilith.weapon.visual.DefaultProjectileSpriteSheet.definition.texturePath else path)
 
             val alpha =
                 fadeAlpha(
@@ -73,6 +74,22 @@ class MeleeAttackVisualRenderer {
 
             val sourceWidth =
                 texture.width / sourceFrameCount
+
+            if(convertedBeam) {
+                // Reuse the correct element artwork, stretched into the existing beam hitbox.
+                val row = when(event.damageType) {
+                    com.azizoglu.grisilith.content.DamageType.AIR -> 1
+                    com.azizoglu.grisilith.content.DamageType.WATER -> 2
+                    com.azizoglu.grisilith.content.DamageType.POISON -> 4
+                    com.azizoglu.grisilith.content.DamageType.ACID -> 5
+                    com.azizoglu.grisilith.content.DamageType.LIGHTNING -> 6
+                    else -> 7
+                }
+                val rows=intArrayOf(0,164,280,390,489,590,696,841,1024)
+                batch.draw(texture,event.centerX-width/2f,event.centerY-height/2f,width/2f,height/2f,
+                    width,height,1f,1f,event.rotationDegrees,1098,rows[row],216,rows[row+1]-rows[row],false,false)
+                return@forEach
+            }
 
             batch.draw(
                 texture,

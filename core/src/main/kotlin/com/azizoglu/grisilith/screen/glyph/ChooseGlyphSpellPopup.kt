@@ -103,7 +103,7 @@ class ChooseGlyphSpellPopup(
     }
 
     private fun commit(weapon: WeaponInstance, choice: ChalkDustSpellChoice) {
-        weapon.chooseChalkDustSpell(choice)
+        if(weapon.chooseChalkDustSpell(choice)) com.azizoglu.grisilith.audio.GameAudio.glyphChoice()
         pendingWeapon = null
     }
     private fun updatePointer(){ pointer.set(Gdx.input.x.toFloat(),Gdx.input.y.toFloat());viewport.unproject(pointer) }

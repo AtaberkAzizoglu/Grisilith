@@ -1,0 +1,111 @@
+GRISILITH · DİNLEME SEÇKİSİ 01
+30 aday / 6 grup. Henüz oyuna eklenmedi.
+
+A: Metalik buton tıklaması
+Kısa, hafif materyal adayları. Darbe kayıtları tıklama uzunluğuna kesildi.
+A1 — Kısa metal mekanizma
+  Kaynaklar: rpg-audio/Audio/metalClick.ogg
+  Toplu kayıtta: 1s ve 4s
+A2 — Hafif metal vuruş · 1
+  Kaynaklar: impact-sounds/Audio/impactMetal_light_000.ogg
+  Toplu kayıtta: 7s ve 10s
+A3 — Hafif metal vuruş · 2
+  Kaynaklar: impact-sounds/Audio/impactMetal_light_003.ogg
+  Toplu kayıtta: 13s ve 16s
+A4 — İnce metal plaka
+  Kaynaklar: impact-sounds/Audio/impactPlate_light_001.ogg
+  Toplu kayıtta: 19s ve 22s
+A5 — İnce teneke mekanizma
+  Kaynaklar: impact-sounds/Audio/impactTin_medium_002.ogg
+  Toplu kayıtta: 25s ve 28s
+
+B: Seçim / onay
+İlk dört seçenek paketin özgün onay sesleri; beşinci daha fiziksel, metalik bir alternatif.
+B1 — Onay · 1
+  Kaynaklar: interface-sounds/Audio/confirmation_001.ogg
+  Toplu kayıtta: 1s ve 4s
+B2 — Onay · 2
+  Kaynaklar: interface-sounds/Audio/confirmation_002.ogg
+  Toplu kayıtta: 7s ve 10s
+B3 — Onay · 3
+  Kaynaklar: interface-sounds/Audio/confirmation_003.ogg
+  Toplu kayıtta: 13s ve 16s
+B4 — Onay · 4
+  Kaynaklar: interface-sounds/Audio/confirmation_004.ogg
+  Toplu kayıtta: 19s ve 22s
+B5 — Metalik kilit onayı
+  Kaynaklar: rpg-audio/Audio/metalLatch.ogg
+  Toplu kayıtta: 25s ve 28s
+
+C: Geri / iptal
+Geri dönme ile hata sesi farklı tutulacak; buradakiler geri dönüş adaylarıdır.
+C1 — Geri · 1
+  Kaynaklar: interface-sounds/Audio/back_001.ogg
+  Toplu kayıtta: 1s ve 4s
+C2 — Geri · 2
+  Kaynaklar: interface-sounds/Audio/back_002.ogg
+  Toplu kayıtta: 7s ve 10s
+C3 — Geri · 3
+  Kaynaklar: interface-sounds/Audio/back_003.ogg
+  Toplu kayıtta: 13s ve 16s
+C4 — Geri · 4
+  Kaynaklar: interface-sounds/Audio/back_004.ogg
+  Toplu kayıtta: 19s ve 22s
+C5 — Kapatma alternatifi
+  Kaynaklar: interface-sounds/Audio/close_001.ogg
+  Toplu kayıtta: 25s ve 28s
+
+D: Geçersiz işlem / hata
+Yalnızca oyuncunun işlem yapamadığını bilmesi gereken durumlar için; sürekli çalmayacak.
+D1 — Hata · 1
+  Kaynaklar: interface-sounds/Audio/error_001.ogg
+  Toplu kayıtta: 1s ve 4s
+D2 — Hata · 2
+  Kaynaklar: interface-sounds/Audio/error_002.ogg
+  Toplu kayıtta: 7s ve 10s
+D3 — Hata · 3
+  Kaynaklar: interface-sounds/Audio/error_003.ogg
+  Toplu kayıtta: 13s ve 16s
+D4 — Hata · 4
+  Kaynaklar: interface-sounds/Audio/error_004.ogg
+  Toplu kayıtta: 19s ve 22s
+D5 — Hata · 5
+  Kaynaklar: interface-sounds/Audio/error_005.ogg
+  Toplu kayıtta: 25s ve 28s
+
+E: Defter / sayfa / preset
+Sayfa kayıtları preset sayfasını değiştirmek için; açılış ve kapanış iki alternatif materyal dokusudur. Hover'da sürekli çalması önerilmiyor.
+E1 — Sayfa çevirme · 1
+  Kaynaklar: rpg-audio/Audio/bookFlip1.ogg
+  Toplu kayıtta: 1s ve 4s
+E2 — Sayfa çevirme · 2
+  Kaynaklar: rpg-audio/Audio/bookFlip2.ogg
+  Toplu kayıtta: 7s ve 10s
+E3 — Sayfa çevirme · 3
+  Kaynaklar: rpg-audio/Audio/bookFlip3.ogg
+  Toplu kayıtta: 13s ve 16s
+E4 — Defter açma
+  Kaynaklar: rpg-audio/Audio/bookOpen.ogg
+  Toplu kayıtta: 19s ve 22s
+E5 — Defter kapama
+  Kaynaklar: rpg-audio/Audio/bookClose.ogg
+  Toplu kayıtta: 25s ve 28s
+
+F: Ahşap sandık açma
+Bunlar ham sandık kayıtları değil: gerçek gıcırtı, kapı açma, kilit ve ahşap temas kayıtlarından hazırlanan 5 taslak. F3/F4 kapı kaydı içerir; sandığa uygunluğu dinlenerek seçilecek.
+F1 — Kilit + gıcırtı · 1
+  Kaynaklar: rpg-audio/Audio/metalLatch.ogg, rpg-audio/Audio/creak1.ogg
+  Toplu kayıtta: 1s ve 4s
+F2 — Kısa kilit + gıcırtı · 2
+  Kaynaklar: rpg-audio/Audio/metalClick.ogg, rpg-audio/Audio/creak2.ogg
+  Toplu kayıtta: 7s ve 10s
+F3 — Ahşap kapak · 1
+  Kaynaklar: rpg-audio/Audio/metalLatch.ogg, rpg-audio/Audio/doorOpen_1.ogg
+  Toplu kayıtta: 13s ve 16s
+F4 — Ahşap kapak · 2
+  Kaynaklar: rpg-audio/Audio/doorOpen_2.ogg
+  Toplu kayıtta: 19s ve 22s
+F5 — Gıcırtı + kapağın dayanması
+  Kaynaklar: rpg-audio/Audio/creak3.ogg, impact-sounds/Audio/impactWood_light_001.ogg
+  Toplu kayıtta: 25s ve 28s
+

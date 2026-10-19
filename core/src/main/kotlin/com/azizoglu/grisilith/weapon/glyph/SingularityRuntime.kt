@@ -96,6 +96,7 @@ class SingularityRuntime(
                     activeDurationSeconds(request)
             )
 
+        syncAudio()
         return true
     }
 
@@ -129,6 +130,7 @@ class SingularityRuntime(
                     0f
                 )
 
+        syncAudio()
         val singularity =
             active
                 ?: return
@@ -203,6 +205,19 @@ class SingularityRuntime(
                 }
             }
         }
+        syncAudio()
+    }
+
+    private fun syncAudio() {
+        val kind=when {
+            active?.phase==Phase.ACTIVE->com.azizoglu.grisilith.audio.UiSound.GLYPH_SINGULARITY
+            active!=null->com.azizoglu.grisilith.audio.UiSound.SINGULARITY_END
+            explosionVisualRemainingSeconds>0f->com.azizoglu.grisilith.audio.UiSound.SINGULARITY_EXPLOSION
+            else->null
+        }
+        val source=visualSnapshot()?.let{com.azizoglu.grisilith.audio.AudioSource(it.centerX,it.centerY,it.radius)}
+            ?:explosionVisualSnapshot()?.let{com.azizoglu.grisilith.audio.AudioSource(it.centerX,it.centerY,it.radius)}
+        com.azizoglu.grisilith.audio.GameAudio.sustain(this,kind,kind==com.azizoglu.grisilith.audio.UiSound.GLYPH_SINGULARITY,source)
     }
 
     fun visualSnapshot():
@@ -303,6 +318,7 @@ class SingularityRuntime(
     }
 
     fun clear() {
+        com.azizoglu.grisilith.audio.GameAudio.stopSustain(this)
         active =
             null
 

@@ -2,6 +2,8 @@ package com.azizoglu.grisilith.screen.market
 
 import com.badlogic.gdx.Application
 import com.badlogic.gdx.Gdx
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -648,6 +650,7 @@ class MarketInputController(
             )
         ) {
             onReturnToGame()
+            GameAudio.play(UiSound.CLICK)
             return
         }
 
@@ -657,6 +660,7 @@ class MarketInputController(
             )
         ) {
             onReroll()
+            GameAudio.play(UiSound.CLICK)
             return
         }
 
@@ -666,6 +670,7 @@ class MarketInputController(
             )
         ) {
             onTamgaClicked()
+            GameAudio.play(UiSound.CLICK)
             return
         }
 
@@ -698,6 +703,7 @@ class MarketInputController(
             )
         ) {
             onReroll()
+            GameAudio.play(UiSound.CLICK)
         }
     }
 
@@ -905,6 +911,7 @@ class MarketInputController(
                     pointerPosition
                 ) -> {
                 onConfirmMerge()
+                GameAudio.play(UiSound.CONFIRM)
             }
 
             layout.mergeCancelButton
@@ -912,6 +919,7 @@ class MarketInputController(
                     pointerPosition
                 ) -> {
                 onCancelMerge()
+                GameAudio.play(UiSound.CLICK)
             }
         }
     }
@@ -938,6 +946,7 @@ class MarketInputController(
                     pointerPosition
                 ) -> {
                 onConfirmSale()
+                GameAudio.play(UiSound.CONFIRM)
             }
 
             layout.mergeCancelButton
@@ -945,6 +954,7 @@ class MarketInputController(
                     pointerPosition
                 ) -> {
                 onCancelSale()
+                GameAudio.play(UiSound.CLICK)
             }
         }
     }

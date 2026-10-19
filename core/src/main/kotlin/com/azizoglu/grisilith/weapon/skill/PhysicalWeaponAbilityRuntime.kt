@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.weapon.skill
 
 import com.azizoglu.grisilith.content.DamageType
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.enemy.Enemy
 import com.azizoglu.grisilith.enemy.EnemyDamageContext
 import com.azizoglu.grisilith.enemy.EnemyManager
@@ -329,6 +331,8 @@ class PhysicalWeaponAbilityRuntime(
         val size = if (context.weapon.hasWeaponAbilityUpgrade) {
             DefaultWeaponAbilities.RAPID_STROKES_UPGRADED_SIZE_MULTIPLIER
         } else 1f
+        var performed = 0
+        var soundTarget:Enemy?=null
         repeat(count) {
             val living = candidates.filterNot { it.isDead }
             val pool = if (living.isEmpty()) candidates else living
@@ -337,13 +341,19 @@ class PhysicalWeaponAbilityRuntime(
                 com.azizoglu.grisilith.weapon.runtime.AbilityTargeting.select(pool,
                     context.attackOriginX, context.attackOriginY, range)
             } else pool.filterNot { it.isDead }.minByOrNull { Vector2.dst2(aimX, aimY, it.centerX, it.centerY) }
-            shortswordExecutor.executeRapidStroke(
-                context, target ?: return, size
-            )
+            if(target!=null) {
+                shortswordExecutor.executeRapidStroke(context, target, size)
+                performed++
+                soundTarget=target
+            }
         }
+        // Reuse the normal attack cue once, not a separate packed ability recording.
+        if(performed>0) GameAudio.ability(if(context.weapon.hasBasicAttackUpgrade)
+            UiSound.DOUBLE_SWORDS_UPGRADED else UiSound.DOUBLE_SWORDS_SWING,soundTarget?.centerX,soundTarget?.centerY,60f)
     }
 
     private fun fireAirSlash(context: WeaponAttackContext, aimX: Float, aimY: Float) {
+        GameAudio.ability(if(context.weapon.hasWeaponAbilityUpgrade) UiSound.AIR_SLASH_UPGRADED else UiSound.AIR_SLASH,context.attackOriginX,context.attackOriginY)
         val direction = direction(context, aimX, aimY)
         val upgraded = context.weapon.hasWeaponAbilityUpgrade
         val range = context.effectiveWeaponRange(
@@ -397,6 +407,7 @@ class PhysicalWeaponAbilityRuntime(
     }
 
     private fun executeSpinAttack(context: WeaponAttackContext) {
+        GameAudio.ability(UiSound.SPIN_ATTACK,context.attackOriginX,context.attackOriginY)
         val normalRadius = context.effectiveWeaponRange(
             context.weapon.definition.baseRange * context.weapon.currentLevelStats.rangeMultiplier
         ) * 0.66f
@@ -423,6 +434,7 @@ class PhysicalWeaponAbilityRuntime(
     }
 
     private fun executeDefensiveBurst(context: WeaponAttackContext, lineBonus: Int) {
+        GameAudio.ability(UiSound.DEFENSIVE_BURST,context.attackOriginX,context.attackOriginY)
         val armorForDamage = playerStats.totalScore(StatType.ARMOR_CLASS) + lineBonus
         // AC-scaled shield hit; the captured stacks were removed from totalScore at activation.
         val baseDamage = (context.weapon.definition.baseDamage * armorForDamage *
@@ -448,6 +460,7 @@ class PhysicalWeaponAbilityRuntime(
         context: WeaponAttackContext,
         angleOffsetDegrees: Float
     ) {
+        GameAudio.ability(UiSound.DAGGER_THROW,context.attackOriginX,context.attackOriginY)
         val count = DefaultWeaponAbilities.KNIFE_SWARM_PROJECTILES
         repeat(count) { index ->
             val direction = Vector2(1f, 0f).rotateDeg(
@@ -472,6 +485,7 @@ class PhysicalWeaponAbilityRuntime(
         aimY: Float,
         upgraded: Boolean
     ) {
+        GameAudio.ability(UiSound.BOW_VOLLEY,context.attackOriginX,context.attackOriginY)
         val baseDirection = direction(context, aimX, aimY)
         val range = context.effectiveWeaponRange(
             context.weapon.definition.baseRange * context.weapon.currentLevelStats.rangeMultiplier
@@ -494,6 +508,7 @@ class PhysicalWeaponAbilityRuntime(
     }
 
     private fun fireHeavyBolt(context: WeaponAttackContext, aimX: Float, aimY: Float) {
+        GameAudio.ability(UiSound.CROSSBOW_SHOT,context.attackOriginX,context.attackOriginY)
         val upgraded = context.weapon.hasWeaponAbilityUpgrade
         val baseRange = context.effectiveWeaponRange(
             context.weapon.definition.baseRange * context.weapon.currentLevelStats.rangeMultiplier

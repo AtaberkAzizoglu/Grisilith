@@ -56,7 +56,9 @@ class GlyphSpellRuntime(
         val centerY: Float,
         val radius: Float,
         var remainingSeconds: Float
-    )
+    ) { val audioOwner=Any() }
+
+    private val tsunamiAudioOwner=Any()
 
     private data class TsunamiWave(
         val request: GlyphCastRequest,
@@ -179,6 +181,7 @@ class GlyphSpellRuntime(
                     )
         }
 
+        pulses.filter{it.remainingSeconds<=0f}.forEach{com.azizoglu.grisilith.audio.GameAudio.stopSustain(it.audioOwner)}
         pulses.removeAll {
             it.remainingSeconds <=
                 0f
@@ -218,6 +221,9 @@ class GlyphSpellRuntime(
             onEnemyKilled =
                 onEnemyKilled
         )
+        tsunamiVisualSnapshot()?.let{wave->com.azizoglu.grisilith.audio.GameAudio.sustain(tsunamiAudioOwner,
+            com.azizoglu.grisilith.audio.UiSound.GLYPH_TSUNAMI,
+            source=com.azizoglu.grisilith.audio.AudioSource(wave.centerX,wave.centerY,kotlin.math.max(wave.worldWidth,wave.worldHeight)/2f))}
     }
 
     fun pulseVisualSnapshots():
@@ -313,7 +319,8 @@ class GlyphSpellRuntime(
     }
 
     fun clear() {
-
+        pulses.forEach{com.azizoglu.grisilith.audio.GameAudio.stopSustain(it.audioOwner)}
+        com.azizoglu.grisilith.audio.GameAudio.stopSustain(tsunamiAudioOwner)
         pulses.clear()
         tsunamiWave = null
         singularityRuntime.clear()
@@ -503,6 +510,8 @@ class GlyphSpellRuntime(
                     PULSE_DURATION_SECONDS
             )
         )
+        pulses.last().let{pulse->com.azizoglu.grisilith.audio.GameAudio.sustain(pulse.audioOwner,com.azizoglu.grisilith.audio.UiSound.GLYPH_LIGHTNING,false,
+            com.azizoglu.grisilith.audio.AudioSource(pulse.centerX,pulse.centerY,pulse.radius))}
     }
 
     private fun castMeteor(
@@ -629,6 +638,8 @@ class GlyphSpellRuntime(
                     PULSE_DURATION_SECONDS
             )
         )
+        pulses.last().let{pulse->com.azizoglu.grisilith.audio.GameAudio.sustain(pulse.audioOwner,com.azizoglu.grisilith.audio.UiSound.GLYPH_METEOR,false,
+            com.azizoglu.grisilith.audio.AudioSource(pulse.centerX,pulse.centerY,pulse.radius))}
     }
 
     private fun beginTsunami(
@@ -667,6 +678,9 @@ class GlyphSpellRuntime(
                     mapDiagonal *
                         2f
             )
+        tsunamiVisualSnapshot()?.let{wave->com.azizoglu.grisilith.audio.GameAudio.sustain(tsunamiAudioOwner,
+            com.azizoglu.grisilith.audio.UiSound.GLYPH_TSUNAMI,
+            source=com.azizoglu.grisilith.audio.AudioSource(wave.centerX,wave.centerY,kotlin.math.max(wave.worldWidth,wave.worldHeight)/2f))}
     }
 
     private fun requestForPriorityTarget(
@@ -888,6 +902,7 @@ class GlyphSpellRuntime(
             wave.center.y+extentY<0f || wave.center.y-extentY>worldHeight) {
             tsunamiWave =
                 null
+            com.azizoglu.grisilith.audio.GameAudio.stopSustain(tsunamiAudioOwner)
         }
     }
 

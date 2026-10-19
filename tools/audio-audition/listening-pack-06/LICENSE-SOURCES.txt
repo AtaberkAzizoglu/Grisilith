@@ -1,0 +1,31 @@
+GRISILITH — AUDITION 06: MELEE ABILITIES, PREVIEW ONLY
+30 designed options, not 30 new original recordings. No ability sound is installed by this preparation task.
+RS: Rapid Strokes, SP: Spin Attack, AS: Air Slash, SB: Defensive Burst, EB: Earthbreaker, WS: Whip Sweep.
+
+CC0 SOURCES
+artisticdude — Swishes Sound Pack
+https://opengameart.org/content/swishes-sound-pack
+Vehicle / Jan Schupke — Fantasy Sound Effects (Tinysized SFX)
+https://opengameart.org/content/fantasy-sound-effects-tinysized-sfx
+Kenney — RPG Audio / Impact Sounds
+https://kenney.nl/assets/rpg-audio
+https://kenney.nl/assets/impact-sounds
+Jordan Irwin (AntumDeluge) — Thwack Sounds
+https://opengameart.org/content/thwack-sounds
+License: https://creativecommons.org/publicdomain/zero/1.0/
+
+WHIP — CC BY 4.0
+"Whipping sound by Tuomo Untinen" (Reemax)
+https://opengameart.org/content/whip-sound
+https://creativecommons.org/licenses/by/4.0/
+WS candidates layer this recording with CC0 swishes. Source attribution is required and is already
+present in the shipped game's audio/CREDITS.txt for the separately approved WP5 normal attack.
+If a WS variant is selected, extend the shipped modification notes to cover that variant.
+
+PROCESSING
+Recorded swish/foley/impact layers; labeled speed/pitch edits, gain and timing changes.
+Mono 44.1 kHz / 16-bit WAV, peak matched to approximately -12 dBFS, 5 ms end fade.
+RS examples contain five strokes; the upgraded runtime version will require seven.
+EB examples contain three impacts at 180 ms spacing; the upgraded version will require four.
+Ability timing, voice limits and in-game mixing are not finalized by these offline examples.
+The exact recording names are listed in SECENEKLER.txt; preparation code retains each edit/layer.

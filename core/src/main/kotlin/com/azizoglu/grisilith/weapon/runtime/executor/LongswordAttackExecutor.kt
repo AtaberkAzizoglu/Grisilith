@@ -1,6 +1,8 @@
 package com.azizoglu.grisilith.weapon.runtime.executor
 
 import com.azizoglu.grisilith.enemy.Enemy
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackContext
 import com.azizoglu.grisilith.weapon.runtime.WeaponAttackExecutor
 import com.azizoglu.grisilith.weapon.runtime.WeaponDamageCalculator
@@ -72,6 +74,8 @@ class LongswordAttackExecutor(
         }
 
         attackDirection.nor()
+        // One sound per actual normal swing, not per enemy hit or Air Slash ability.
+        GameAudio.play(UiSound.LONGSWORD_SWING)
 
         val attackAngle =
             MathUtils.atan2(
