@@ -1,0 +1,29 @@
+GRISILITH — THIRD-PARTY MATERIALS
+
+This notice does not select an open-source license for original game code or art.
+Third-party material retains its own license; do not remove its notices.
+
+Music and sound effects:
+See licenses/audio/CREDITS.txt and the accompanying source/license registers.
+Kevin MacLeod's music is credited with titles, source links and CC BY 4.0 links.
+Two adapted recordings, focus_animal.wav and focus_oathbreaker.wav, remain
+CC BY-SA 3.0 as described in FOCUS-ABILITY-LICENSES.txt. Their audio license is
+not replaced by a license for the game. They are accessible as WAV entries in
+the game JAR, which is a standard ZIP archive.
+
+Fonts:
+See licenses/fonts/OFL-*.txt for the original SIL Open Font License notices.
+
+Runtime libraries:
+libGDX (https://github.com/libgdx/libgdx), Kotlin standard library (JetBrains),
+JetBrains annotations and JNA are distributed under Apache License 2.0
+(the Apache option is used for JNA's dual license). The complete Apache license
+is retained as META-INF/AL2.0 under JNA's notices folder.
+LWJGL uses the license in licenses/libraries/LWJGL-LICENSE.txt.
+See licenses/libraries for notices extracted from the actual dependency JARs.
+Where a dependency does not contain a conventional license file, consult its
+publisher's license. The Java runtime's own notices are in runtime/legal.
+
+User-supplied character/boss voices:
+See licenses/audio/CHARACTER-VOICE-SOURCES.txt. These notices do not certify
+rights in supplied recordings; the distributor must retain the relevant rights.

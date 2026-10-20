@@ -5,6 +5,9 @@ import com.badlogic.gdx.Preferences
 
 object PlayerProfileRepository {
 
+    // v0.3 open-beta starting funds; never refill an existing saved wallet on launch.
+    const val BETA_STARTING_GRISILITH_COINS = 1000
+
     private const val PREFERENCES_NAME =
         "grisilith_player_profile"
 
@@ -51,6 +54,8 @@ object PlayerProfileRepository {
             currentProfile
 
     fun load() {
+        val isNewProfile = !preferences.contains(KEY_VERSION) &&
+            !preferences.contains(KEY_GRISILITH_COINS)
         val loadedSnapshot =
             PlayerProfileSnapshot(
                 version =
@@ -62,7 +67,7 @@ object PlayerProfileRepository {
                 grisilithCoins =
                     preferences.getInteger(
                         KEY_GRISILITH_COINS,
-                        0
+                        if (isNewProfile) BETA_STARTING_GRISILITH_COINS else 0
                     )
                         .coerceAtLeast(0),
 
@@ -134,7 +139,7 @@ object PlayerProfileRepository {
             )
 
         if (
-            loadedSnapshot.version <
+            isNewProfile || loadedSnapshot.version <
             PlayerProfileSnapshot
                 .CURRENT_VERSION
         ) {
@@ -219,10 +224,10 @@ object PlayerProfileRepository {
     fun resetForBeta() {
 
         currentProfile =
-            PlayerProfile()
+            PlayerProfile(initialGrisilithCoins = BETA_STARTING_GRISILITH_COINS)
 
         preferences.clear()
-        preferences.flush()
+        save()
     }
 
     fun save() {

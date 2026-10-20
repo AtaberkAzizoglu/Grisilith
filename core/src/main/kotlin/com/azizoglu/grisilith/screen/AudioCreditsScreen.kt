@@ -65,7 +65,10 @@ class AudioCreditsScreen(private val game:GrisilithGame):ScreenAdapter() {
             totalHeight+=15f
         }
         line("SOUND EFFECTS / LICENSE AND SOURCE REGISTER",true)
-        listOf("CREDITS.txt","CHARACTER-VOICE-SOURCES.txt","UNDEAD-VAMPIRE-LICENSES.txt","MISSING-SFX-LICENSES.txt","ITEM-SFX-LICENSES.txt").forEach { path->
+        listOf("CREDITS.txt","CHARACTER-VOICE-SOURCES.txt","FOCUS-ABILITY-LICENSES.txt",
+            "SUMMON-COMBAT-LICENSES.txt","BEAST-COMBAT-LICENSES.txt","BEAST-TRAIT-LICENSES.txt",
+            "HUMANOID-LICENSES.txt","UNDEAD-VAMPIRE-LICENSES.txt","FINISHING-LICENSES.txt",
+            "MISSING-SFX-LICENSES.txt","ITEM-SFX-LICENSES.txt").forEach { path->
             val file=Gdx.files.internal("audio/$path")
             if(file.exists()) {
                 line(path,true)

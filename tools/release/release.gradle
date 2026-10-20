@@ -1,0 +1,56 @@
+// Release hygiene and notices. No QA init script is used by the release command.
+def noticeDir = layout.buildDirectory.dir('release-notices')
+def notices = tasks.register('stageReleaseNotices', Sync) {
+    dependsOn configurations.runtimeClasspath
+    into noticeDir
+    from(rootProject.file('tools/release/READ-ME-FIRST.txt'))
+    from(rootProject.file('tools/release/THIRD-PARTY-NOTICES.txt'))
+    from(rootProject.file('tools/release/ONLINE-FEATURES.txt'))
+    from(rootProject.file('tools/release/LWJGL-LICENSE.txt')) { into 'licenses/libraries' }
+    from(rootProject.file('assets/audio')) { include '*.txt'; into 'licenses/audio' }
+    from(rootProject.file('assets/ui/fonts')) { include 'OFL-*.txt'; into 'licenses/fonts' }
+    configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+        from(zipTree(artifact.file)) {
+            into "licenses/libraries/${artifact.moduleVersion.id.group}-${artifact.name}-${artifact.moduleVersion.id.version}${artifact.classifier ? '-'+artifact.classifier : ''}"
+            include 'META-INF/LICENSE*', 'META-INF/NOTICE*', 'META-INF/licenses/**',
+                'META-INF/LICENSES/**', 'META-INF/AL2.0', 'META-INF/LGPL*', 'LICENSE*', 'NOTICE*'
+            includeEmptyDirs = false
+        }
+    }
+}
+
+tasks.register('verifyReleaseJar') {
+    group = 'verification'
+    dependsOn tasks.named('jar')
+    doLast {
+        def archive = tasks.named('jar').get().archiveFile.get().asFile
+        def names = []
+        new java.util.zip.ZipFile(archive).withCloseable { zip ->
+            names = zip.entries().collect { it.name }
+        }
+        def forbidden = names.findAll { name ->
+            name.startsWith('qa/') || name.startsWith('saves/') ||
+            name.toLowerCase(Locale.ROOT).endsWith('.log') || name.contains('online_session') ||
+            name.tokenize('/').any { it.startsWith('.env') || it in ['grisilith_player_profile',
+                'grisilith_presets','grisilith_high_scores','grisilith_settings','grisilith_key_bindings'] }
+        }
+        if (!forbidden.empty) throw new GradleException("Private/development files in release JAR: ${forbidden}")
+        ['audio/CREDITS.txt','audio/RUN-MUSIC-LICENSES.txt','audio/SUMMARY-MUSIC-LICENSES.txt',
+         'audio/FOCUS-ABILITY-LICENSES.txt','audio/CHARACTER-VOICE-SOURCES.txt',
+         'ui/fonts/OFL-AlmendraSC.txt','ui/fonts/OFL-EagleLake.txt','ui/fonts/OFL-Alegreya.txt',
+         'ui/fonts/OFL-FiraSansCondensed.txt','online/name-policy.json',
+         'ui/buttons/difficulty_selected_hard_v1.png'].each { required ->
+            if (!names.contains(required)) throw new GradleException("Missing release asset: $required")
+        }
+        logger.lifecycle("RELEASE_JAR_PASS: ${archive.name}; ${names.size()} entries; no player data/logs/QA classes")
+    }
+}
+
+tasks.named('packageWinX64').configure {
+    dependsOn notices, tasks.named('verifyReleaseJar')
+    archiveFileName.set("Grisilith-${projectVersion}-windows-x64.zip")
+    into.set("Grisilith-${projectVersion}")
+    doFirst {
+        copy { from noticeDir; into getFrom().get().asFile }
+    }
+}

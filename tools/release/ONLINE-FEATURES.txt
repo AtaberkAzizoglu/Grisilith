@@ -1,0 +1,18 @@
+GRISILITH — ONLINE FEATURES (BETA)
+
+Offline gameplay is available. Internet connectivity enables the online profile,
+display name, leaderboard and Praise features, using the project's Supabase service.
+
+Online play can send an account identifier, display name, run start/result data,
+map, character, score, run duration, equipment/build and gameplay summary statistics.
+The leaderboard publicly displays the relevant run/name information and Praise counts.
+Run/build summaries are also intended to help improve gameplay and performance.
+Session credentials are stored locally and must not be shared with other players.
+Connecting to an online service also exposes normal network metadata to that service.
+
+Offline or otherwise ineligible runs do not enter the leaderboard. Do not use
+personal/contact information as your public display name.
+
+This is a practical feature disclosure, not a complete jurisdiction-specific privacy
+policy. Before public distribution, the publisher must provide appropriate contact,
+retention and deletion information and confirm the applicable privacy requirements.

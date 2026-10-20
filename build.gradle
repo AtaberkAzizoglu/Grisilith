@@ -26,6 +26,12 @@ allprojects {
   }
 }
 
+// One exclusion list drives both the resource copy and the generated runtime asset index.
+ext.releaseAssetExcludes = ['saves/**', '**/hs_err_pid*', '**/*.log', '**/*.tmp', '**/*.bak',
+  '**/.env', '**/.env.*', '**/*online_session*', '**/grisilith_player_profile',
+  '**/grisilith_presets', '**/grisilith_high_scores', '**/grisilith_settings',
+  '**/grisilith_key_bindings', '**/grisilith-run-setup', '**/.DS_Store', '**/Thumbs.db', '**/.gitkeep']
+
 configure(subprojects - project(':android')) {
   apply plugin: 'java-library'
   apply plugin: 'kotlin'
@@ -46,11 +52,12 @@ configure(subprojects - project(':android')) {
     // iterate through all files inside that folder
     // convert it to a relative path
     // and append it to the file assets.txt
-    fileTree(assetsFolder).collect { assetsFolder.relativePath(it) }.sort().each {
+    fileTree(assetsFolder) { exclude rootProject.ext.releaseAssetExcludes }.collect { assetsFolder.relativePath(it) }.sort().each {
       assetsFile.append(it + "\n")
     }
   }
   processResources.dependsOn 'generateAssetList'
+  processResources.exclude rootProject.ext.releaseAssetExcludes
 
   compileJava {
     options.incremental = true

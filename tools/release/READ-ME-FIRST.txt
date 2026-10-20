@@ -1,0 +1,21 @@
+GRISILITH v0.3.9 — OPEN BETA — WINDOWS x64
+
+1. Extract the entire ZIP into a writable folder. Do not run inside the ZIP.
+2. Open Grisilith.exe. Keep its accompanying folders and files together.
+3. Java is bundled; no separate Java installation is needed.
+
+New players start with 1,000 Grisilith Coins for beta testing. Existing balances
+are preserved. This is a beta: balance, content and saves may change later.
+The tutorial is planned for v0.4. Key bindings can be reviewed in Settings.
+
+Offline play is supported. Online features require a network connection;
+offline/ineligible runs are not submitted to the leaderboard.
+
+Keep the runtime/legal and licenses folders. They contain required third-party
+notices. Sound/music credits are also available through Credits in the game.
+
+The executable is not code-signed. Windows may show an unknown-publisher warning.
+Verify that the file came from the official project release before launching.
+
+Report bugs with the game version, Windows version, reproduction steps and,
+where possible, a screenshot. Never post online-session files or access tokens.

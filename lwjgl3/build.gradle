@@ -72,6 +72,9 @@ jar {
   from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 // these "exclude" lines remove some unnecessary duplicate files in the output JAR.
   exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA')
+  // QA sources may have been compiled by a previous local init script; never ship them.
+  exclude('qa/**')
+  exclude rootProject.ext.releaseAssetExcludes
   dependencies {
     exclude('META-INF/INDEX.LIST', 'META-INF/maven/**')
   }
@@ -137,7 +140,7 @@ construo {
   jlink {
     guessModulesFromJar.set(false)
     // You may need to add more modules, as needed.
-    modules.addAll("java.base", "java.management", "java.desktop", "java.logging", "jdk.unsupported")
+    modules.addAll("java.base", "java.management", "java.desktop", "java.logging", "jdk.unsupported", "jdk.crypto.ec")
   }
 
   targets.configure {
@@ -210,3 +213,5 @@ tasks.withType(JavaExec.class).configureEach {
 if(enableGraalNative == 'true') {
   apply from: file("nativeimage.gradle")
 }
+
+apply from: rootProject.file('tools/release/release.gradle')

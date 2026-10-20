@@ -26,3 +26,9 @@ tasks.register('verifyDotBalance', JavaExec) {
   classpath = sourceSets.test.runtimeClasspath
   mainClass = 'com.azizoglu.grisilith.combat.condition.DotBalanceChecksKt'
 }
+
+tasks.register('verifyBetaStartingCoins', JavaExec) {
+  dependsOn testClasses
+  classpath = sourceSets.test.runtimeClasspath
+  mainClass = 'com.azizoglu.grisilith.profile.BetaStartingCoinsChecksKt'
+}
