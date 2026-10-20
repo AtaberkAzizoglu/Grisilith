@@ -1,0 +1,32 @@
+{
+  "id": "LV26H03",
+  "recipe": {
+    "version": "table-reactions26-v1",
+    "character": "LV",
+    "category": "H",
+    "number": 3,
+    "direction": "female, gentle, brief discomfort",
+    "vocal": "Nn!",
+    "phonemes": "ˈnː!",
+    "id": "LV26H03",
+    "selection": "LV3",
+    "approved_voice_profile": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "af_nicole",
+      "label": "Amerikan tabanlı; nefesli ve kontrollü hedef",
+      "speed": 0.95,
+      "pitch": -0.4,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "processor": "plain",
+    "pace": 0.985,
+    "target_seconds": 0.28,
+    "prompt_handling": "Directions are design metadata, not spoken or an engine instruction.",
+    "added_breath": false
+  },
+  "duration": 0.5498412698412698,
+  "sha256": "d46cf2eda994a4c15d1ec0d2d1d3380be27d460c635ceac153a293d5c2670a7a"
+}

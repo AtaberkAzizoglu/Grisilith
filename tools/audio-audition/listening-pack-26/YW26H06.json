@@ -1,0 +1,32 @@
+{
+  "id": "YW26H06",
+  "recipe": {
+    "version": "table-reactions26-v1",
+    "character": "YW",
+    "category": "H",
+    "number": 6,
+    "direction": "female, pained grunt",
+    "vocal": "Ugh!",
+    "phonemes": "ˈʌɡ!",
+    "id": "YW26H06",
+    "selection": "YW10",
+    "approved_voice_profile": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "zf_xiaobei",
+      "label": "Deneysel: Doğu Asya/Mandarin taban sesinin İngilizce okuması",
+      "speed": 1.09,
+      "pitch": 0.0,
+      "lang": "en-us",
+      "pause": 0.2,
+      "rough": false
+    },
+    "processor": "plain",
+    "pace": 1.0150000000000001,
+    "target_seconds": 0.482,
+    "prompt_handling": "Directions are design metadata, not spoken or an engine instruction.",
+    "added_breath": false
+  },
+  "duration": 0.48201814058956916,
+  "sha256": "87df2bbd3524481b30378a38a624cd884fe417accca2360defdee410b95a3922"
+}

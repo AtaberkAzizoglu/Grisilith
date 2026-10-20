@@ -1,0 +1,32 @@
+{
+  "id": "YW26D08",
+  "recipe": {
+    "version": "table-reactions26-v1",
+    "character": "YW",
+    "category": "D",
+    "number": 8,
+    "direction": "female, agonized cry fading away",
+    "vocal": "Aaarrgh...",
+    "phonemes": "ˈɑːɑɹɡ...",
+    "id": "YW26D08",
+    "selection": "YW10",
+    "approved_voice_profile": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "zf_xiaobei",
+      "label": "Deneysel: Doğu Asya/Mandarin taban sesinin İngilizce okuması",
+      "speed": 1.09,
+      "pitch": 0.0,
+      "lang": "en-us",
+      "pause": 0.2,
+      "rough": false
+    },
+    "processor": "plain",
+    "pace": 0.9550000000000001,
+    "target_seconds": 2.0300000000000002,
+    "prompt_handling": "Directions are design metadata, not spoken or an engine instruction.",
+    "added_breath": false
+  },
+  "duration": 1.3657142857142857,
+  "sha256": "71bb5a7691feb57702f53d047082e0e7ee4ba9f8f3c17a597e001dd778a5cfa4"
+}

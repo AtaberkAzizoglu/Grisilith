@@ -30,7 +30,8 @@ class Player(
     startY: Float,
     private val worldWidth: Float,
     private val worldHeight: Float,
-    val stats: PlayerStats
+    val stats: PlayerStats,
+    characterId: com.azizoglu.grisilith.content.ContentId? = null
 ) {
     private val position =
         Vector2(startX, startY)
@@ -84,8 +85,13 @@ class Player(
         )
 
     private val pendingDamageNumberEvents = mutableListOf<DamageNumberEvent>()
+    private val voiceAudio = com.azizoglu.grisilith.audio.PlayerVoiceRuntime(characterId)
+    private var suppressDamageVoice = false
 
     init {
+        health.onDamageApplied = { applied ->
+            if (!suppressDamageVoice) voiceAudio.damaged(applied, health.isDead, centerX, centerY)
+        }
         health.onHealingApplied = { _, type ->
             HealingVisualManager.spawnFollowing(type) {
                 HealingVisualAnchor(centerX, centerY, size)
@@ -141,6 +147,7 @@ class Player(
         delta:
         Float
     ) {
+        voiceAudio.update(delta, centerX, centerY)
         if (health.isDead) {
             actualMovementSpeed =
                 0f
@@ -727,10 +734,13 @@ class Player(
     fun sacrificeHalfCurrentHealth() {
         val current = health.currentHealth
         if (current <= 1) return
-        health.takeDamage(
-            (current / 2).coerceIn(1, current - 1)
-        )
+        // An ability's voluntary health cost is not an enemy hit.
+        suppressDamageVoice = true
+        try { health.takeDamage((current / 2).coerceIn(1, current - 1)) }
+        finally { suppressDamageVoice = false }
     }
+
+    fun stopVoiceAudio() = voiceAudio.clear()
 
     /*
      * Çağıran sistem saldırının:

@@ -1,5 +1,66 @@
 # Grisilith — Faz 9 ses seçim planı
 
+## Güncel — Faz 9f kuruldu; Faz 9g Summary seçimi
+
+Normal stage: CF2 / VS1 / HD1.
+Forest mini/final: CF5 / VS9. Siege mini/final: VS2 / VS6.
+Depths mini/final: HD8 / HD10. Run market: MK2.
+Seçilen on soundtrack tek-stream yönetimi, Pause devamı, chest/stat/summary
+sessizliği ve Master/Music bağlantısıyla kuruldu. Dosyalar değişmeden kopyalandı.
+Faz 9g: Seçki 29'da DF1–20 defeat, VC1–20 victory; 40 farklı aday.
+Henüz Summary müzik kurulumu yok. Ardından yoğun savaş son miksajı ve
+Son kontroller ve yapılacak eklemeler aşamaları var.
+Alttaki seçim/kurulum bekliyor bölümleri eski kararların tarihçesidir.
+
+## Güncel — Faz 9f / Run ve Market müzik seçimi
+
+Seçki 28: 4 kategori × 10 farklı tam parça, yalnız dinleme/son seçim için.
+Forest CF, Siege VS, Depths HD, Market MK. Boss stage müziği önerilmedi;
+her map için ayrı mini/final boss müziği bir sonraki turda seçilecek.
+Map müziği normal run ve Pause'da sürer; chest/end-stage stat/market/boss
+stage'de çalmaz. Market ayrı rahat tavern müziği kullanacak.
+Henüz müzik kurulumu yok; seçilen adayların loop/geçiş/miks ayarı sonra yapılacak.
+Enemy vokalleri sabit hızda, saldırı/ability efektleri oyun hızına bağlıdır.
+Boss sesleri ekran dışından da gelir. Pause efektleri korur; stage/reward
+geçişi eski efektleri kalıcı keser. Ayrıntılar SECIM-NOTLARI.md başındadır.
+
+## Güncel — Faz 9e / Seçki 27 kuruldu
+
+Beş karakterin onaylı preset seçilme, rastgele hasar ve ölüm sesleri oyunda.
+Witch ve Vampire Lord'un yeni hurt/death kayıtları ve doğuşta/her 30 oyun
+saniyesinde rastgele konuşmaları bağlandı. Vampire gerçek ölümünde D08+D01
+aralıksız sırayla çalar. Önceki kurulu üç ses yenilendi; audition arşivleri durur.
+Master/SFX, oyuncu merkezli stereo, oyun hızı, pause ve ekran dışı sessizlik
+kuralları korunur. Ayrıntılı son kodlar SECIM-NOTLARI.md'nin ilk bölümündedir.
+Alttaki kurulmadı/seçim bekliyor ifadeleri tarihçedir, bu kararı geçersiz kılmaz.
+Sıradaki aşama: harita atmosfer/run müziği; ardından Summary victory/defeat,
+yoğun savaş son miksajı ve Son kontroller ve yapılacak eklemeler.
+
+## Faz 9e — Seçki 27 / kullanıcı kayıtlarından seçim
+
+Sentetik adaylar yerine kullanıcının Voices klasöründeki 8 MP3 incelendi.
+140 Hurt/Death + 20 boss Punchline + 5 player seçilme cümlesi = 165 kesit.
+Başlık/sayılar dışarıda; çok parçalı sesler tek örnekte. Kodlu çevrimdışı dinleme,
+kaynakta karşılaştırma ve kesim tablosu hazır. Orijinaller korunur.
+Oyuna kurulum yapılmadı; seçimler beklenecek. Önceki seçkiler silinmez.
+
+## Faz 9e — Seçki 26 / yeni tabloyla hasar-ölüm turu
+
+Kullanıcının 100 satırlık tablosu esas alındı; karakter başına 10 hasar/10 ölüm.
+Yeni kodlar IM26H01 vb.; beş onaylı seçim sesi karakter başında korunur.
+Yeni örnekler nefessiz; Koba hasar ilk5 keyif/son5 rahatsızlık olarak iki havuz.
+İlgili dosya ve teknik kaynaklar dinleme seçkisine eklenir. Önceki seçkiler durur.
+Kurulum izni henüz yok; bu tur sadece aday üretimi ve karşılaştırma.
+
+## Faz 9e — Beş ses onaylı; hasar/ölüm dinleme turu
+
+IMB5, ORC10, LV3, YW10, LD1 seçildi, henüz kurulum yok.
+Seçki 25: 110 hasar/ölüm taslağı, 55 ikili tarz karşılaştırması;
+karakter başında seçilme sesi, Koba'da yeni replik yalnız önizleme.
+Koba'nın iki hasar havuzu için ayrı ayrı seçim yapılacak. Toplam 11 kategori.
+Sentetik nefes/ünlem ve oyunculuk sınırları dinleme sayfasında açıklanır.
+Sıradaki açık kurulum talimatına kadar hiçbir karakter sesi gameplay'e bağlanmaz.
+
 ## Faz 9e — LV3 / YW10 / LD1 seçildi, kurulum bekliyor
 
 Lavena LV3, Ywaleth YW10 ve Linlos LD1 kullanıcı tarafından seçildi; henüz

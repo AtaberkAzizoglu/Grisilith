@@ -1,0 +1,24 @@
+SECKI 27 — USER-PROVIDED RECORDINGS; NOT INSTALLED
+8 original MP3s, 160 numbered/ordered takes plus 5 opening character lines.
+Hurt/Death: 10 each for all 7 characters/enemies. Witch/Vampire: 10 Punchlines each.
+Player character recordings contain ONE opening selection line, not 10 punchlines.
+Original MP3s copied byte-exact into originals/, SHA256 recorded in CUTS.json.
+No speech generated, replaced, transposed, EQ'd, compressed, denoised or retimed.
+Decoded at native mono44.1kHz, exported PCM16 WAV (no further lossy compression).
+Only spoken headings/numerals and outer silence removed. Multi-part cries/laughs
+and all pauses inside a take preserved. Reactions retain up to 80ms/100ms outer
+margins, bounded by mid-gaps toward neighboring labels; 2ms edge fades.
+Gain unchanged unless decoded MP3 overshoot would clip PCM16; per-clip gain logged.
+Word timestamps + RMS/silence groups + 159 independent narrow numeral windows
+cross-checked. Six homophone cases reviewed against longer context.
+Special case: Witch Punchline02 has no separate confidently identified spoken
+number; entire Come closer, my pretty phrase kept, including initial Come.
+ASR text is not a human listening certification and may contain transcription errors.
+Every original and cut interval is linked for direct comparison on DINLE.html.
+CUTS.json/CSV contain exact source cut times, excluded numeral intervals, hashes.
+Source and redistribution rights supplied by user are not independently established;
+do not infer a license from these files. This preview does not install game audio.
+Offline analysis tooling: faster-whisper MIT; small.en model by OpenAI/Systran
+https://github.com/SYSTRAN/faster-whisper
+https://huggingface.co/Systran/faster-whisper-small.en
+Only the analysis model was downloaded; user recordings were never uploaded.

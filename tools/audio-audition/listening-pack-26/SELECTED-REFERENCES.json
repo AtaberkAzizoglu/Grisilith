@@ -1,0 +1,123 @@
+[
+  {
+    "character": "Sir Imbert",
+    "selected": "IMB5",
+    "file": "SELECT-IM.wav",
+    "record": {
+      "id": "IMB5",
+      "recipe": {
+        "character": "Sir Imbert",
+        "text": "It is my oath! I will fight until the magic is gone from this realm!",
+        "voice": "am_onyx",
+        "label": "En pes komutan · yavaş, tehditkâr",
+        "speed": 0.94,
+        "pitch": -3.1,
+        "lang": "en-us",
+        "pause": 0.34,
+        "rough": true,
+        "grit": 1.5,
+        "bass": 0.32,
+        "presence": 0.1,
+        "shadow": 0.0,
+        "rumble": 0.0,
+        "processing_version": "orc-veteran-v1"
+      },
+      "duration": 6.210045351473923,
+      "sha256": "3ce76fb1052b8c49854e5f97515346140a4b67e1ab5ff1bf37fdb363a0cc1827",
+      "phonemes": "ɪɾ ɪz maɪ ˈoʊθ! aɪ wɪl fˈaɪt ʌntˈɪl ðə mˈædʒɪk ɪz ɡɔn fɹʌm ðɪs ɹˈɛlm!"
+    }
+  },
+  {
+    "character": "Ywaleth Yoster",
+    "selected": "YW10",
+    "file": "SELECT-YW.wav",
+    "record": {
+      "id": "YW10",
+      "recipe": {
+        "character": "Ywaleth Yoster",
+        "text": "The footprints lead in this direction. I'm on the trail!",
+        "voice": "zf_xiaobei",
+        "label": "Deneysel: Doğu Asya/Mandarin taban sesinin İngilizce okuması",
+        "speed": 1.09,
+        "pitch": 0.0,
+        "lang": "en-us",
+        "pause": 0.2,
+        "rough": false
+      },
+      "duration": 3.308684807256236,
+      "sha256": "23ef5b3afa115953ebfde01016776449ad8cb2dd304c39095a9d1a1ba010d528",
+      "phonemes": "ðə fˈʊtpɹɪnts lˈiːd ɪn ðɪs dᵻɹˈɛkʃən. aɪm ɔnðə tɹˈeɪl!"
+    }
+  },
+  {
+    "character": "Linlos Dustman",
+    "selected": "LD1",
+    "file": "SELECT-LN.wav",
+    "record": {
+      "id": "LD1",
+      "recipe": {
+        "character": "Linlos Dustman",
+        "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+        "voice": "am_puck",
+        "label": "Hafif, meraklı yetişkin erkek hedef",
+        "speed": 1.05,
+        "pitch": 1.2,
+        "lang": "en-us",
+        "pause": 0.28,
+        "rough": false
+      },
+      "duration": 6.180476190476191,
+      "sha256": "d70ce96284cefabd189215cda65da6074109f7dccc9615beca8d8b52a31df1b2",
+      "phonemes": "aɪ spˈoʊk wɪð ɐn ˈænt ðɪ ˈʌðɚ dˈeɪ, bˌʌt aɪ dˈɪdnt ˌʌndɚstˈænd wʌt hiː sˈɛd. aɪ ɡˈɛs aɪm nˌɑːt sˌoʊ ɡˈʊd æt tˈɔːkɪŋ tʊ ˈænɪməlz."
+    }
+  },
+  {
+    "character": "Koba",
+    "selected": "ORC10",
+    "file": "SELECT-KB.wav",
+    "record": {
+      "recipe": {
+        "character": "Koba",
+        "text": "On behalf of all the outcasts and who have been called monsters... I will show them the REAL MONSTER!",
+        "voice": "am_onyx",
+        "label": "En karanlık ork · ağır yaratık işlemesi",
+        "speed": 1.02,
+        "pitch": -6.8,
+        "lang": "en-us",
+        "pause": 0.34,
+        "rough": true,
+        "grit": 3.8,
+        "bass": 0.4,
+        "presence": 0.25,
+        "shadow": 0.25,
+        "rumble": 0.18,
+        "processing_version": "orc-veteran-v1"
+      },
+      "sha256": "8c9f8483aef3e7b9c80d71da7e6b8e5cb2c4c2af342e0f5cce6c290f7fe6c34b",
+      "duration": 10.286757369614513,
+      "phonemes": "ˌɔn bᵻhˈæf ʌv ˈɔːl ðɪ ˈaʊtkæsts ænd hˌuː hɐvbɪn kˈɔːld mˈɔnstɚz... aɪ wɪl ʃˈoʊ ðˌɛm ðə ɹˈiːəl mˈɔnstɚ!"
+    }
+  },
+  {
+    "character": "Lavena Vol",
+    "selected": "LV3",
+    "file": "SELECT-LV.wav",
+    "record": {
+      "id": "LV3",
+      "recipe": {
+        "character": "Lavena Vol",
+        "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+        "voice": "af_nicole",
+        "label": "Amerikan tabanlı; nefesli ve kontrollü hedef",
+        "speed": 0.95,
+        "pitch": -0.4,
+        "lang": "en-us",
+        "pause": 0.3,
+        "rough": false
+      },
+      "duration": 8.432630385487528,
+      "sha256": "91e584184dde54f8799b5927d797a9c70bf6bf9d9cd51a22730389aa7f3eb80e",
+      "phonemes": "ænd ðeɪ kˈɔːl ðiːz spˈɛlz \"fɚbˈɪdən mˈædʒɪk.\" hˈɑː! wˌʌts ðə wˈɜːst ðæt kʊd hˈæpən, ˈɛnɪwˌeɪ?"
+    }
+  }
+]

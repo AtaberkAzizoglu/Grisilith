@@ -1,0 +1,246 @@
+Seçki 28 — 40 müzik adayı, yalnız dinleme; oyuna kurulmadı.
+Kaynak: https://incompetech.com/music/royalty-free/music.html
+Lisans doğrulama: resmî katalogdaki Attribution Code — CC BY 4.0.
+Ücretsiz kullanımda eser adı, sanatçı, kaynak, lisans ve varsa değişiklik bilgisi belirtilmeli.
+Buradaki MP3'ler değiştirilmemiş tam parçalar; loop kesimi veya ses yüksekliği işlemi yapılmadı.
+Tarz notları katalog/enstrüman bilgilerine dayalı editoryal adaylandırmadır; dinleyip son seçimi yapın.
+
+CF1 — "Magic Forest" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1600044
+SHA256: 0e8f92a3dfb5e71398502478d6d3be14b705b0dfc0afabccf5831bc741592f55
+
+CF2 — "Ascending the Vale" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1600064
+SHA256: a0ab3aae9a942d797c381df8d914dfef453e7e455c1c6333d1916d59ba005353
+
+CF3 — "Enchanted Valley" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1200093
+SHA256: a8db733238ff78fb6a38f1ec802d52efe4cfb7487d4c5a63e50479a8df81eaf9
+
+CF4 — "Celtic Impulse" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100297
+SHA256: 25db9b02ceb9875234f323cc89d38dcdbff2f0bb232d1dd0f662aa9ca5eddd8f
+
+CF5 — "Lord of the Land" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1400022
+SHA256: 47ce185fdc1f2e5514566307d652d6cb62a06bed47ea730e28214d3cedc2f948
+
+CF6 — "Skye Cuillin" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100346
+SHA256: 9edd236cfe08d0a339f2e6e096689d2940ae633a05855dd106cc2eba295dd367
+
+CF7 — "Windswept" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100757
+SHA256: 0d7445201046bf536e9982c56a8b068d3c4bda18d01817edc6610b4a6a46e706
+
+CF8 — "Dreamy Flashback" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100532
+SHA256: e63abdb9bcadadb48945760a06ccd56f7fe17207a940729cb9bc806bac636473
+
+CF9 — "Frozen Star" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100356
+SHA256: 28c7532b808086046f02164807cbcad659db614686f2a49a78d87516fa4d3236
+
+CF10 — "Artifact" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100324
+SHA256: 63cae0c12179231efa87a74676de62873531c2aaa306fef0471a123ccbc6cece
+
+VS1 — "Crusade" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100884
+SHA256: 863758365f6a03cd0cf85237d7d49448d5cb3c1af2e0858dc7c786bc9c0b981e
+
+VS2 — "The Descent" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1200094
+SHA256: f097d51700b970efffc62499473ea3a31e09aad4172e787978bc9c2a644d53a2
+
+VS3 — "Intrepid" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1500062
+SHA256: 3135ebcc2046ad41a14036f590b4ab55d675093aa0658b41bff4984f19d0814e
+
+VS4 — "Oppressive Gloom" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100885
+SHA256: d630686bde6c92f832fb0cb16f6ce9009bf502c7db701139329af2a7683b1020
+
+VS5 — "Stormfront" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1200043
+SHA256: 37270c2ed58459491aa759b870e788744324507da378efb4bce6bd1e0bcf0285
+
+VS6 — "Hero Down" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100880
+SHA256: 3ae453e5e263aa481286bbba8f23c5a646dfe93d1022a7e52ba819f648aac324
+
+VS7 — "Morgana Rides" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1800010
+SHA256: 88c482f0433da8eea78ca831cf62369b573c09b620ceb1cb48bff40a6f6d275f
+
+VS8 — "Night Vigil" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1900047
+SHA256: 315009fda5154a093570b9f49c1d98202ab5ba4906078713380d130710ada442
+
+VS9 — "Five Armies" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100875
+SHA256: f56746c90756db04675a80ebd29e22253177a6fcc16f56602da62af9eae8d733
+
+VS10 — "Clenched Teeth" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100705
+SHA256: a113c6c93730d8517b5f851cd2ac72c1e89b8a3f61abfd62ae499c60b1456998
+
+HD1 — "Ossuary 1 - A Beginning" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1500043
+SHA256: 2c3140481edd0c6ab5ff21b46198a97755822e74e5fd0c78f2e7b456cece3cf8
+
+HD2 — "Lightless Dawn" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100655
+SHA256: 59fd69e4432c95887d626e8055113da8fb0da9a8ccac85c6b7da6a6031c4f325
+
+HD3 — "The Dread" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100048
+SHA256: b4d7678fabb4fab9c0ff867b84556fb0b26d035960cc971bc0ef9728e8194b4c
+
+HD4 — "Dark Fog" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1300031
+SHA256: a357b85ec02c52c17e4c677ca19037d742985045993db8f2226c7eab646ae86e
+
+HD5 — "Ossuary 2 - Turn" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1500044
+SHA256: ed2ece9640d631d440417ee419537f610f71d39f38740eb77afef619b9fc5567
+
+HD6 — "Ossuary 6 - Air" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1500048
+SHA256: bf57ba7ee56b357dbd8677b41475a2fbe01d282114bc3c64e6deea2b52717fac
+
+HD7 — "Echoes of Time" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1300029
+SHA256: be9740a15e0395d4e763d8ea5f8691ee2422924f44a03b12c329ecc4a59cc2a8
+
+HD8 — "Darkest Child" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100783
+SHA256: 7591bd67ba227c2a3ffd97a6751c66e0b56d543ba91a6a2699a765191c880518
+
+HD9 — "The Chamber" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100400
+SHA256: c6ba712f7bc9303ca1adbb5ff2effc160d4ad9e58a702b4a27d73a16b5dc7f22
+
+HD10 — "Decay" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100512
+SHA256: aae2527386f41769f1ca2c1e7b5ae58d54670ade378cf7d8477bbae83c72cfdf
+
+MK1 — "Midnight Tale" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1900004
+SHA256: c2862369ae8ed2ae36468bf87f5a77bfa56b9944fd8ebd9703e99a8bc7a6e863
+
+MK2 — "Teller of the Tales" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1400020
+SHA256: 320b37a09fc37ec5962c975563541bee9bcbf1208b0181789248780286f4c1d4
+
+MK3 — "Angevin" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1200110
+SHA256: 425f5febc62aee69761f16eae09158c35fd922a72c0fe8165af51c3a1f8818bf
+
+MK4 — "Thatched Villagers" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100720
+SHA256: 148094b997a55e6ff8506d063720bc852830d9761f6c9c1d6ab7aea284754ca0
+
+MK5 — "Folk Round" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100357
+SHA256: b4e6aa7d67bb05a269b6f916662355358b6e849d29b81f5185f211a31fdb8051
+
+MK6 — "Pippin the Hunchback" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1400005
+SHA256: 9cec8fe9f934f2e50f8137484e2456691e26fee31815ff851df8a9660f94f539
+
+MK7 — "Master of the Feast" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1400019
+SHA256: 7d8c1e5ebfd4c842718fa7c6bd81e8804cd0e743fe1496936f526dd514e65409
+
+MK8 — "Achaidh Cheide" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100340
+SHA256: 414f949be0390135d637791a278350a5e1149456633e03faa8cc6b2249743c32
+
+MK9 — "The Britons" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN2600004
+SHA256: 00e766ef7a2635b1e7c116bfff794cb3485c17730ec26c114a9b3fb21d7a837d
+
+MK10 — "Fiddles McGinty" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1400051
+SHA256: d495bc3428d9458d499a32ea1e5938c7db57a86c759409e22f83f9db965c0e94

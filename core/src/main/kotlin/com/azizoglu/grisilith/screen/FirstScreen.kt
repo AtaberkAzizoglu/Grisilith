@@ -251,7 +251,8 @@ class FirstScreen(
         startY = worldHeight / 2f,
         worldWidth = worldWidth,
         worldHeight = worldHeight,
-        stats = playerStats
+        stats = playerStats,
+        characterId = selectedCharacter.id
     )
 
     private val equippedArmor =
@@ -468,6 +469,7 @@ class FirstScreen(
             runEndTransitionElapsed < RunSummaryRenderer.TRANSITION_DURATION
 
     private var isMarketOpen = false
+    private var audioStageInterrupted = false
 
     private var isPauseMenuOpen =
         false
@@ -1781,9 +1783,7 @@ class FirstScreen(
 
         GameAudio.worldView(camera.position.x-CAMERA_WIDTH/2f,camera.position.y-CAMERA_HEIGHT/2f,
             CAMERA_WIDTH,CAMERA_HEIGHT,player.centerX,player.centerY)
-        GameAudio.combatPlayback(gameTimeController.gameSpeed,
-            gameplayStopped || gameTimeController.isPaused,
-            deathTails = runHasEnded || isRunSummaryOpen || isRunEndTransitionActive)
+        synchronizeCombatAudio()
 
         if (
             !gameTimeController.isPaused &&
@@ -1815,7 +1815,25 @@ class FirstScreen(
 
         GameAudio.worldView(camera.position.x-CAMERA_WIDTH/2f,camera.position.y-CAMERA_HEIGHT/2f,
             CAMERA_WIDTH,CAMERA_HEIGHT,player.centerX,player.centerY)
+        // Gameplay can open a chest/reward or end the run within this very frame.
+        synchronizeCombatAudio()
         renderGame()
+    }
+
+    private fun synchronizeCombatAudio() {
+        val discard = player.health.isDead || stageController.isRunComplete ||
+            chestRewardController.isOpen || statCardController.isOpen || isMarketOpen ||
+            isRunSummaryOpen || isRunEndTransitionActive || chooseToSummonPopup.isOpen ||
+            chooseGlyphSpellPopup.isOpen || isTestRunFrozen || onlineRun?.isPreparing == true
+        if (discard && !audioStageInterrupted) GameAudio.stopStageEffects()
+        audioStageInterrupted = discard
+        GameAudio.combatPlayback(gameTimeController.gameSpeed,
+            discard || isPauseMenuOpen || isTestSettingsOpen || gameTimeController.isPaused)
+        val musicBlocked = player.health.isDead || stageController.isRunComplete ||
+            isRunSummaryOpen || isRunEndTransitionActive || chestRewardController.isOpen ||
+            statCardController.isOpen || onlineRun?.isPreparing == true
+        GameAudio.runMusic(com.azizoglu.grisilith.audio.RunMusic.select(
+            gameMap,stageController.currentStageType,blocked=musicBlocked,market=isMarketOpen))
     }
 
     private fun currentEnemyScore(): Long = RunScoreCalculator.enemyScore(gameMap,
@@ -4343,6 +4361,7 @@ class FirstScreen(
     }
 
     private fun completeCurrentStage() {
+        GameAudio.stopStageEffects()
         val completedStage =
             stageController.currentStage
 
@@ -5382,6 +5401,7 @@ class FirstScreen(
     }
 
     override fun dispose() {
+        player.stopVoiceAudio()
         enemyManager.allEnemies.forEach(com.azizoglu.grisilith.audio.EnemyAudio::clear)
         onlineRun?.let { game.online?.abandon(it) }
         RunDamageTypeTelemetry.unbind(runStatistics)

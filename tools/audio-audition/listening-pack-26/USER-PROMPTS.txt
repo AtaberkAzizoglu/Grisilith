@@ -1,0 +1,143 @@
+GRISILITH - CHARACTER VOICE PROMPTS
+5 characters | Hurt & Death | 10 variations each | 100 prompts
+
+Notes:
+- Variations 1-5 follow the requested direction; 6-10 are alternatives.
+- Breathing sounds are omitted as requested.
+- Linlos/Lanlos is treated as a single character.
+- Lavena's hurt prompts use minimal vocalizations instead of breathing.
+
+==================================================
+SIR IMBERT
+==================================================
+HURT
+01. [restrained grunt of pain] Ngh!
+02. [stoic grunt of pain] Ugh!
+03. [quiet, controlled pain] Hngh!
+04. [low, restrained groan] Grrh!
+05. [brief, suppressed grunt] Nnh!
+06. [grunts firmly in pain] Guh!
+07. [strained grunt of pain] Argh!
+08. [low, angry grunt] Rgh!
+09. [short, pained growl] Urgh!
+10. [suppressed cry of pain] Agh!
+
+DEATH
+01. [mortally wounded warrior, strained cry fading] Arrghhh...
+02. [deep, dying groan of pain] Urrrgh...
+03. [weakening cry of agony] Aaargh...
+04. [low, pained death groan] Grrrhh...
+05. [strained final cry] Arghhh... ngh...
+06. [defeated warrior, groaning in agony] Ughhh...
+07. [deep cry of pain, gradually fading] Raaaagh...
+08. [grim, restrained death cry] Nnnargh...
+09. [weak groan of mortal pain] Urrghh...
+10. [final anguished warrior cry] Aaarrrgh!
+
+==================================================
+YWALETH YOSTER
+==================================================
+HURT
+01. [female, restrained grunt of pain] Ngh!
+02. [female, quiet, controlled pain] Ah!
+03. [female, suppressed grunt] Hngh!
+04. [female, sharp but quiet cry] Agh!
+05. [female, tense grunt of pain] Nnh!
+06. [female, pained grunt] Ugh!
+07. [female, restrained sharp cry] Ahh!
+08. [female, angry grunt of pain] Gah!
+09. [female, quiet groan] Mngh!
+10. [female, sudden stifled cry] Egh!
+
+DEATH
+01. [female, realistic dying cry of pain] Aaagh...
+02. [female, wounded warrior, fading cry] Arghhh...
+03. [female, strained, weakening groan] Ughhh...
+04. [female, muffled death cry] Nnngh...
+05. [female, sudden cry of mortal pain] Aagh!
+06. [female, trembling cry of agony] Ahhh...
+07. [female, pained final groan] Urrgh...
+08. [female, agonized cry fading away] Aaarrgh...
+09. [female, restrained dying moan] Nghhh...
+10. [female, desperate final scream] Aaah!
+
+==================================================
+LINLOS / LANLOS
+==================================================
+HURT
+01. [male, sudden high-pitched yelp of pain] Aa!
+02. [male, exaggerated tiny scream] Aah!
+03. [male, startled shriek] Eeeah!
+04. [male, sharp squeal of pain] Aaa!
+05. [male, high-pitched squeaky scream] Yaa!
+06. [male, startled shriek of pain] Eek!
+07. [male, dramatic cry of pain] Aiyah!
+08. [male, squealing in surprise] Waaa!
+09. [male, brief panicked scream] Aee!
+10. [male, comically overreacting to pain] Aaaa!
+
+DEATH
+01. [male, extremely high-pitched death scream] Aaaaaaaah!
+02. [male, terrified shrill scream] Eeeeeaaaah!
+03. [male, high-pitched scream of agony] Aaaaaaagh!
+04. [male, piercing death shriek] Yeeeeaaah!
+05. [male, desperate high-pitched scream] Aaaaaeee!
+06. [male, hysterical shrieking in agony] Aieeeee!
+07. [male, sharp scream rising in pitch] Aaaaaaa!
+08. [male, squealing death scream] Eeeeeegh!
+09. [male, panicked final shriek] Yiaaaaa!
+10. [male, wildly exaggerated shrill death scream] AAAAAH!
+
+==================================================
+KOBA
+==================================================
+HURT (01-05 enjoys pain; 06-10 overwhelmed by pain)
+01. [male, twisted, delighted chuckle after being hurt] Heh-heh!
+02. [male, amused grunt of pain] Ooh!
+03. [male, sadistic little laugh] Hah!
+04. [male, gleeful reaction to pain] Ah-ha!
+05. [male, unsettling chuckle of pleasure] Hehehe!
+06. [male, irritated grunt of severe pain] GRAH!
+07. [male, furious cry of pain] ARGH!
+08. [male, snarling in agony] Rrraagh!
+09. [male, distressed growl of pain] Urrgh!
+10. [male, pained, frustrated scream] GAAAH!
+
+DEATH
+01. [male, ferocious guttural death scream] GRRAAAAGH!
+02. [male, savage growl turning into a scream] RRAAAARGH!
+03. [male, brutal cry of agony] GRAAAAAH!
+04. [male, monstrous, enraged death cry] HRAAAAGH!
+05. [male, wild, guttural scream of pain] URRAAAGH!
+06. [male, furious death roar] RRAAAAAH!
+07. [male, violent, strained growl] GRRRRAGH!
+08. [male, deranged laugh turning to a death scream] Hahaha... AAAARGH!
+09. [male, primal cry of mortal agony] GRAAAAUUGH!
+10. [male, rage-filled final scream] RRRRAAAAGH!
+
+==================================================
+LAVENA VOL
+==================================================
+HURT (breathing excluded; minimal vocalizations substituted)
+01. [female, subtle closed-mouth reaction to pain] Mm!
+02. [female, soft restrained vocalization] Hm!
+03. [female, gentle, brief discomfort] Nn!
+04. [female, quiet suppressed sound] Mmh!
+05. [female, subtle throat vocalization] Hn!
+06. [female, tiny restrained grunt] Ngh!
+07. [female, soft reaction of discomfort] Mmgh!
+08. [female, faint, restrained sound] Nnh!
+09. [female, short quiet murmur] Mmm!
+10. [female, barely audible pain vocalization] Hng!
+
+DEATH (short scream only; breathing excluded)
+01. [female, short, delicate, high-pitched scream] Ah!
+02. [female, brief sharp scream of pain] Aah!
+03. [female, soft, high-pitched death cry] Aaah!
+04. [female, sudden delicate shriek] Eah!
+05. [female, quick high-pitched cry] Aie!
+06. [female, fragile cry of pain] Ahh!
+07. [female, short, refined scream of agony] Aagh!
+08. [female, gentle cry fading away] Aaah...
+09. [female, brief startled scream] Eeh!
+10. [female, short, piercing final cry] Aah!

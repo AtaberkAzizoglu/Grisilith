@@ -1,0 +1,32 @@
+{
+  "id": "LV26D07",
+  "recipe": {
+    "version": "table-reactions26-v1",
+    "character": "LV",
+    "category": "D",
+    "number": 7,
+    "direction": "female, short, refined scream of agony",
+    "vocal": "Aagh!",
+    "phonemes": "ˈɑːɡh!",
+    "id": "LV26D07",
+    "selection": "LV3",
+    "approved_voice_profile": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "af_nicole",
+      "label": "Amerikan tabanlı; nefesli ve kontrollü hedef",
+      "speed": 0.95,
+      "pitch": -0.4,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "processor": "plain",
+    "pace": 1.01,
+    "target_seconds": 0.52,
+    "prompt_handling": "Directions are design metadata, not spoken or an engine instruction.",
+    "added_breath": false
+  },
+  "duration": 0.6468934240362811,
+  "sha256": "075f9097d71f1f2ab793427c66ff401d2e8a4d333885dfd9b1ffd76b078b8125"
+}

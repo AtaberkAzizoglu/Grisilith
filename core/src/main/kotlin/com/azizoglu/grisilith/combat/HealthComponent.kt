@@ -16,6 +16,9 @@ class HealthComponent(
     var currentHealth: Int = maximumHealth
         private set
 
+    /** Positive HP loss only, after immunity/defense and before the caller returns. */
+    var onDamageApplied: ((Int) -> Unit)? = null
+
     val isDead: Boolean
         get() = currentHealth <= 0
 
@@ -40,7 +43,9 @@ class HealthComponent(
             (currentHealth - amount)
                 .coerceAtLeast(0)
 
-        return previousHealth - currentHealth
+        val applied = previousHealth - currentHealth
+        if (applied > 0) onDamageApplied?.invoke(applied)
+        return applied
     }
 
     fun heal(

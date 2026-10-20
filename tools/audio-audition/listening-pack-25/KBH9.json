@@ -1,0 +1,36 @@
+{
+  "id": "KBH9",
+  "recipe": {
+    "version": "character-reactions-v1",
+    "character": "Koba",
+    "selection": "ORC10",
+    "approved_voice_profile": {
+      "character": "Koba",
+      "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the REAL MONSTER!",
+      "voice": "am_onyx",
+      "label": "En karanlık ork · ağır yaratık işlemesi",
+      "speed": 1.02,
+      "pitch": -6.8,
+      "lang": "en-us",
+      "pause": 0.34,
+      "rough": true,
+      "grit": 3.8,
+      "bass": 0.4,
+      "presence": 0.25,
+      "shadow": 0.25,
+      "rumble": 0.18,
+      "processing_version": "orc-veteran-v1"
+    },
+    "processor": "monster",
+    "phonemes": "hˈɛ, hˈɛ, hˈɑ!",
+    "mode": "pleasure",
+    "target_seconds": 1.3,
+    "breath_seconds": 0.2,
+    "style": "Daha rahatsız edici gülüş",
+    "take": "A",
+    "speed_ratio": 0.965,
+    "seed": 8068
+  },
+  "duration": 1.5650113378684807,
+  "sha256": "5ed90181e8ad1139b390ce25102f13c032eb32a89a0186a3bcde7a84c2c5062d"
+}

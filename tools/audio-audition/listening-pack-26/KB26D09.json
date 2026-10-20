@@ -1,0 +1,38 @@
+{
+  "id": "KB26D09",
+  "recipe": {
+    "version": "table-reactions26-v1",
+    "character": "KB",
+    "category": "D",
+    "number": 9,
+    "direction": "male, primal cry of mortal agony",
+    "vocal": "GRAAAAUUGH!",
+    "phonemes": "ɡɹˈɑːɑʌːɡh!",
+    "id": "KB26D09",
+    "selection": "ORC10",
+    "approved_voice_profile": {
+      "character": "Koba",
+      "text": "On behalf of all the outcasts, on behalf of all those who have been called monsters... I will show them the REAL MONSTER!",
+      "voice": "am_onyx",
+      "label": "En karanlık ork · ağır yaratık işlemesi",
+      "speed": 1.02,
+      "pitch": -6.8,
+      "lang": "en-us",
+      "pause": 0.34,
+      "rough": true,
+      "grit": 3.8,
+      "bass": 0.4,
+      "presence": 0.25,
+      "shadow": 0.25,
+      "rumble": 0.18,
+      "processing_version": "orc-veteran-v1"
+    },
+    "processor": "monster",
+    "pace": 0.905,
+    "target_seconds": 2.15,
+    "prompt_handling": "Directions are design metadata, not spoken or an engine instruction.",
+    "added_breath": false
+  },
+  "duration": 2.15,
+  "sha256": "3d73a595200e776342de43e0a1b9fddf8c0d657c0cd02f7bb035ebeea71036f8"
+}

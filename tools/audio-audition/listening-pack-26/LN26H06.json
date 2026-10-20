@@ -1,0 +1,32 @@
+{
+  "id": "LN26H06",
+  "recipe": {
+    "version": "table-reactions26-v1",
+    "character": "LN",
+    "category": "H",
+    "number": 6,
+    "direction": "male, startled shriek of pain",
+    "vocal": "Eek!",
+    "phonemes": "ˈiːk!",
+    "id": "LN26H06",
+    "selection": "LD1",
+    "approved_voice_profile": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": "am_puck",
+      "label": "Hafif, meraklı yetişkin erkek hedef",
+      "speed": 1.05,
+      "pitch": 1.2,
+      "lang": "en-us",
+      "pause": 0.28,
+      "rough": false
+    },
+    "processor": "plain",
+    "pace": 1.0150000000000001,
+    "target_seconds": 0.55,
+    "prompt_handling": "Directions are design metadata, not spoken or an engine instruction.",
+    "added_breath": false
+  },
+  "duration": 0.5536281179138322,
+  "sha256": "b3dcf2f0d0a2bd2f2d7b3db719c79388656dba1877282750df3ae5b5f6041caf"
+}

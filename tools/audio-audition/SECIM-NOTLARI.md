@@ -1,5 +1,135 @@
 # Ses seçimleri — güncel durum
 
+## Kuruldu — Faz 9f / Seçki 28 müzik kararları
+
+- Crolymnos Forest: normal CF2 / Ascending the Vale, mini boss CF5 / Lord of the Land,
+  final boss VS9 / Five Armies.
+- Vogtsweier Siege: normal VS1 / Crusade, mini boss VS2 / The Descent,
+  final boss VS6 / Hero Down.
+- Hollowgrave Depths: normal HD1 / Ossuary 1 - A Beginning, mini boss HD8 / Darkest Child,
+  final boss HD10 / Decay.
+- Run market: MK2 / Teller of the Tales.
+
+On tam parça birebir kuruldu; tek aktif streaming Music kaynağı kullanılır.
+Master × Music düzeyi, Settings preview/discard ve uygulama pause/resume geçerli.
+Müzik oyun hızından etkilenmez. Run Pause ve oradan açılan Settings müziği kesmez.
+Chest/end-stage stat reward/summary'de müzik susar. Aynı parçaya dönülürse
+pause edilen müzik devam eder; farklı map/stage/market parçası önceki stream'i
+durdurur/dispose eder. Aynı rota her frame yeniden başlatılmaz. Parçalar tam
+kayıt sonunda loop eder; kayıtlar kesilmedi, değiştirilmedi. Atıflar oyun içi
+Audio Credits müzik sayfasında ve assets/audio/RUN-MUSIC-LICENSES.txt'de.
+Test Map için müzik seçilmediğinden map soundtrack'i yok; market açılırsa MK2 geçerli.
+
+## Faz 9g — Summary müzik seçimi / Seçki 29
+
+DF1–DF20 defeat, VC1–VC20 victory: kırk farklı CC BY 4.0 / Kevin MacLeod adayı.
+Kısa victory fanfarları notlarında açıkça işaretli. Resmî katalog bilgilerine
+dayalı tarz önerileri; kaynaklar, lisanslar ve hashler seçki klasöründe.
+Summary müzikleri henüz oyuna kurulmaz; kullanıcı seçimi beklenecek.
+
+## Faz 9f — Ses davranışı düzeltmeleri / Seçki 28
+
+Enemy konuşma, hurt ve ölüm kayıtlarının oynatma hızı ve tekrar kilitleri
+oyun hızından bağımsız. Witch/Vampire konuşma aralığı artık pause hariç
+30 normal saniye; 0.5x/2x bunu değiştirmez. Enemy normal saldırı/ability
+efektleri (hazırlık/dönüşüm dahil) oyun hızına uymaya devam eder.
+Mini ve final boss sesleri ekran dışında da duyulur; oyuncu merkezli stereo
+ve Master/SFX geçerli. Diğer dünya kaynaklarının ekran dışı sessizliği korunur.
+Pause mevcut efektleri dondurur ve geri dönerken kaldığı yerden sürdürür.
+Stage sonu, run sonu, chest, stat reward ve market geçişleri mevcut efektleri
+tamamen keser; eski devamlı efektler dönüşte kendiliğinden ses başlatamaz.
+Ölüm kuyruğunun Summary'de sürmesi artık geçerli değil. Menü/ödül ekranındaki
+yeni UI sesleri engellenmez. Yeni müzikler seçilmedi/oyuna kurulmadı.
+
+Seçki 28: CF1–CF10 Forest, VS1–VS10 Siege, HD1–HD10 Depths,
+MK1–MK10 Market. 40 farklı Kevin MacLeod tam MP3 adayı, resmî katalogdan;
+CC BY 4.0 / kaynak belirtme şartlı ücretsiz kullanım. Kod, kaynak, hash ve
+atıf dökümü listening-pack-28/MUSIC-SOURCES.json ve LICENSE-SOURCES.txt.
+Stil notları katalog/enstrüman bilgilerine dayalı aday önerileri, dinleyici onayı değil.
+Boss müziği adayları henüz sunulmayacak. Seçim sonrası map müziği run/Pause'da;
+chest, end-stage stat reward, market ve boss stage'de çalmayacak. Market için
+ayrı müzik; her map'in mini/final boss müziği sonraki seçim turu.
+
+## Kuruldu — Seçki 27 / karakterler ve boss vokalleri
+
+Bu bölüm alttaki eski bekleme kararlarının yerini alır. 53 oyun dosyası kuruldu;
+seçimler kaynak kesitlerle birebir, Vampire final ölümü D08 + D01 sırasıyla tek WAV.
+
+- Imbert: S01; H09/H08/H07/H02/H01; D10 (IM27).
+- Ywaleth: S01; H01/H06/H08; D10 (YW27).
+- Linlos: S01; H03/H01/H06/H07/H09; D01 (LN27).
+- Koba: S01; H05/H06/H08/H09/H01; D09 (KB27). Son karar gereği tek rastgele havuz.
+- Lavena: S01; H04/H01/H08; D10 (LV27).
+- Witch: H02/H04/H03/H06/H10; D07; P01/P02/P03/P05/P07/P09 (WI27).
+- Vampire: H02/H05/H08/H09; D08 ardından D01; P01/P02/P03/P08/P06 (VL27).
+
+Hasar havuzları eşit olasılıklı; aynı varlığın sesleri üst üste binmesin diye
+en az 0.8 saniye / ses bitimine kadar ortak tekrar koruması var. Ölümcül vuruş
+yalnız ölüm sesi çıkarır. Karakter seçim sesi açık preset/karakter seçimiyle
+başlar; otomatik kayıt yükleme ve hover sessizdir. Boss replikleri ilk doğuşta
+ve hayattayken her 30 oyun saniyesinde başlar (pause hariç, oyun hızı etkili).
+Kaynak konumu sürekli güncellenir; ekran dışı sessizlik, stereo, Master/SFX,
+oyun hızı ve Summary ölüm kuyruğu korunur. Boss +%35 kuralı devam eder.
+Vampire'ın ilk form kaçışı ölüm değildir; iki parçalı kayıt gerçek ölümündedir.
+Eski kurulu Witch ölümü ve Vampire hurt/death içerikleri değiştirildi;
+eski kurulum aracı bunları geri yazmaz. Kaynak ve dinleme arşivleri korunur.
+Tam dosya/kod/hash dökümü: assets/audio/CHARACTER-VOICE-SELECTIONS.json.
+
+## Faz 9e — Kullanıcının uzun kayıtları / Seçki 27
+
+Voices klasöründeki 8 MP3 kesildi; hiçbir ses yeniden üretilmedi veya oyuna
+eklenmedi. 7 karakter/enemy için 140 Hurt/Death, Witch/Vampire için 20 Punchline,
+beş player karakterinin kayıttaki tek açılış cümlesi: toplam 165 ayrı WAV.
+Kodlar IM27H01/IM27D01/IM27S01; YW/LN/KB/LV/WI/VL diğer gruplar.
+Başlıklar ve söylenen sıra numaraları çıkarılır. Çok parçalı inleme/kahkaha,
+replik içi boşluklar korunur. Ton/perde/hız ve işlenmemiş kaynak içeriği korunur;
+yalnız dış sessizlik, güvenli kenar payları ve 2ms uç fade; ek kayıplı sıkıştırma yok.
+159 sayı bölgesi bağımsız dar konuşma pencereleriyle kontrol edildi; 6
+homofon tanıma sapması geniş bağlamla değerlendirildi. Witch P02'de ayrı sayı
+bölgesi tespit edilmedi; Come closer cümlesinin başlangıcı kesilmez.
+Orijinaller SHA256 ile korunur, CUTS.json/CSV tam yerleri içerir; dinleme
+sayfasındaki kaynak karşılaştırmaları ile kontrol edilebilir. Teknik kontrol
+insan tarafından tek tek dinlenmiş estetik kalite onayı olarak sunulmayacak.
+Kullanıcı seçiminden önce hiçbir runtime/asset bağlantısı değiştirilmeyecek.
+
+## Faz 9e — Kullanıcının yeni tablosu / Seçki 26
+
+Grisilith_Character_Voice_Prompts.txt: 5 karakter × (10 hurt + 10 death) = 100
+satır yeni kodlarla üretildi. Kod şeması IM26H01/IM26D01; YW/LN/KB/LV diğerleri.
+Dosyadaki nefessiz yeni yön esas: yeni adaylarda nefes/noise kuyruğu yok;
+Lavena hurt minimal kapalı ağız ünlemi, death kısa çığlık.
+Koba hurt 01–05 acıdan keyif, 06–10 fazla acı. İki havuz ayrı seçilebilir.
+Diğerlerinde 01–05 ana yön, 06–10 alternatif.
+
+Onaylı seçim sesleri IMB5, ORC10, LV3, YW10, LD1 korunur; ses bankaları,
+perde ve kimlik işlemleri değişmez. Her karakterin başında önceki seçim sesi
+birebir kopya; Koba'nınki Seçki25'teki yeni replikli referanstır.
+Kullanıcı önceki hurt/death seçim kodlarını iletmeyi gerekli görmedi;
+herhangi bir ek hurt/death adayı seçilmiş varsayılmayacak. Önceki seçkiler silinmez.
+Tablodaki parantezler oyunculuk hedefi/veri; seslendirilmez. Kokoro bu
+komutları doğrudan uygulayamaz; fonetik ünlem, tempo ve zarf taslağı olarak
+yaklaşılır, gerçek oyunculuk/algısal aynı ses garantisi verilmez.
+Henüz hiçbir karakter sesi gameplay veya assets/audio'ya kurulmayacak.
+
+## Faz 9e — Beş seçim sesi onaylı, hasar/ölüm seçimi / Seçki 25
+
+Onaylar: IMB5 Sir Imbert, ORC10 Koba, LV3 Lavena Vol, YW10 Ywaleth Yoster,
+LD1 Linlos Dustman. HENÜZ HİÇBİRİNİ OYUNA EKLEME; tümü seçimde bekliyor.
+Koba'nın yeni repliği aynen: "On behalf of all the outcasts and who have been
+called monsters... I will show them the REAL MONSTER!"
+Bu tur yeni replik yalnız önizleme; eski ORC10 dosyası korunur.
+
+Seçki 25: karakter başına 10 hasar ve 10 ölüm; Koba'da ek olarak ayrı 10
+acı-fazla-geldi hasar örneği. Toplam 110 aday, beş tarzın ikişer varyantı;
+55 ikili dinleme karşılaştırması. Karaktere göre gruplu, seçim sesi en başta.
+Koba KBH keyif alma, KBP rahatsız olma; sonraki kurulumda dönüşümlü kullanılacak.
+IMH/IMD Imbert, YWH/YWD Ywaleth, LNH/LND Linlos, LVH/LVD Lavena, KBD Koba ölüm.
+Onaylanan ses bankaları, perde ve kimlik işlemleri aynı; yeni ses bankası yok.
+Sözsüz ünlemler sentetik; gerçek çığlık/acı/kahkaha oyunculuğu garanti değil.
+Nefesler seçili sesin spektral renginden tasarlanmış gürültü dokusudur, insanın
+gerçek nefes kaydı değildir. Lavena hasar örnekleri yalnız nefes içerir.
+Bu tur runtime, gameplay bağlantıları ve assets/audio dosyaları değiştirilmeyecek.
+
 ## Faz 9e — Karakter seçimleri bekletiliyor / Seçki 24
 
 LV3 (Lavena Vol), YW10 (Ywaleth Yoster), LD1 (Linlos Dustman) SEÇİLDİ.

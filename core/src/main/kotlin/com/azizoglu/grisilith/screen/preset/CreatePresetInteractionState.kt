@@ -253,6 +253,7 @@ class CreatePresetInteractionState {
         if (
             changed
         ) {
+            com.azizoglu.grisilith.audio.CharacterVoices.select(inspectedId)
             statAllocation =
                 PresetStatAllocation()
         }

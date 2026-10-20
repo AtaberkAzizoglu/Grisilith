@@ -1,0 +1,32 @@
+{
+  "id": "LN26D07",
+  "recipe": {
+    "version": "table-reactions26-v1",
+    "character": "LN",
+    "category": "D",
+    "number": 7,
+    "direction": "male, sharp scream rising in pitch",
+    "vocal": "Aaaaaaa!",
+    "phonemes": "ˈɑːɑːɑː!",
+    "id": "LN26D07",
+    "selection": "LD1",
+    "approved_voice_profile": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": "am_puck",
+      "label": "Hafif, meraklı yetişkin erkek hedef",
+      "speed": 1.05,
+      "pitch": 1.2,
+      "lang": "en-us",
+      "pause": 0.28,
+      "rough": false
+    },
+    "processor": "plain",
+    "pace": 0.93,
+    "target_seconds": 2.0,
+    "prompt_handling": "Directions are design metadata, not spoken or an engine instruction.",
+    "added_breath": false
+  },
+  "duration": 1.0201360544217688,
+  "sha256": "c09bde96e36558897b038f08cc80b470c684583f07b360d617ba5847d973971b"
+}

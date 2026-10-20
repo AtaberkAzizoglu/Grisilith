@@ -79,7 +79,7 @@ enum class UiSound(val path:String, val durationMs:Long, val priority:Int, val g
     HORSEMAN_ATTACK("horseman_attack.wav",225,5,.6f,true),
     HORSEMAN_SWIPE("horseman_swipe.wav",364,5,.6f,true),
     MIMIC_TRANSFORM("mimic_transform.wav",850,5,.6f,true),
-    WITCH_DEATH("witch_death.wav",3408,9,.6f,true),
+    WITCH_DEATH("witch_death.wav",1215,95,.6f,true),
     SKELETON_DEATH("skeleton_death.wav",529,9,.6f,true),
     ZOMBIE_ATTACK("zombie_attack.wav",650,4,.6f,true),
     ZOMBIE_DEATH("zombie_death.wav",1691,9,.6f,true),
@@ -98,8 +98,8 @@ enum class UiSound(val path:String, val durationMs:Long, val priority:Int, val g
     VAMPIRE_TELEPORT("vampire_teleport.wav",750,5,.6f,true),
     VAMPIRE_CONE_CHARGE("vampire_cone_charge.wav",1000,5,.6f,true),
     VAMPIRE_SWIPE_CHARGE("vampire_swipe_charge.wav",400,5,.6f,true),
-    VAMPIRE_DEATH("vampire_death.wav",1970,9,.6f,true),
-    VAMPIRE_HURT("vampire_hurt.wav",494,4,.6f,true),
+    VAMPIRE_DEATH("vampire_death.wav",4511,95,.6f,true),
+    VAMPIRE_HURT("vampire_hurt.wav",1003,30,.6f,true),
     SLING_SPLIT("sling_split.wav",320,4,.45f,true),
     BOOMERANG_CATCH("boomerang_catch.wav",180,4,.4f,true),
     SHIELD_READY("shield_ready.wav",180,5,.5f,true),
@@ -107,6 +107,56 @@ enum class UiSound(val path:String, val durationMs:Long, val priority:Int, val g
     GORILLA_HURT("gorilla_hurt.wav",400,4,.6f,true),
     SPEARMAN_HURT("spearman_hurt.wav",360,4,.6f,true),
     HORSEMAN_HURT("horseman_hurt.wav",450,4,.6f,true),
+    IMBERT_SELECT("voice_im27s01.wav",5141,75,0.75f),
+    IMBERT_HURT_1("voice_im27h09.wav",629,40,0.65f,true),
+    IMBERT_HURT_2("voice_im27h08.wav",829,40,0.65f,true),
+    IMBERT_HURT_3("voice_im27h07.wav",664,40,0.65f,true),
+    IMBERT_HURT_4("voice_im27h02.wav",649,40,0.65f,true),
+    IMBERT_HURT_5("voice_im27h01.wav",819,40,0.65f,true),
+    IMBERT_DEATH("voice_im27d10.wav",1083,110,0.75f,true),
+    YWALETH_SELECT("voice_yw27s01.wav",3599,75,0.75f),
+    YWALETH_HURT_1("voice_yw27h01.wav",629,40,0.65f,true),
+    YWALETH_HURT_2("voice_yw27h06.wav",604,40,0.65f,true),
+    YWALETH_HURT_3("voice_yw27h08.wav",599,40,0.65f,true),
+    YWALETH_DEATH("voice_yw27d10.wav",684,110,0.75f,true),
+    LINLOS_SELECT("voice_ln27s01.wav",7437,75,0.75f),
+    LINLOS_HURT_1("voice_ln27h03.wav",729,40,0.65f,true),
+    LINLOS_HURT_2("voice_ln27h01.wav",624,40,0.65f,true),
+    LINLOS_HURT_3("voice_ln27h06.wav",658,40,0.65f,true),
+    LINLOS_HURT_4("voice_ln27h07.wav",873,40,0.65f,true),
+    LINLOS_HURT_5("voice_ln27h09.wav",598,40,0.65f,true),
+    LINLOS_DEATH("voice_ln27d01.wav",1386,110,0.75f,true),
+    KOBA_SELECT("voice_kb27s01.wav",8044,75,0.75f),
+    KOBA_HURT_1("voice_kb27h05.wav",1233,40,0.65f,true),
+    KOBA_HURT_2("voice_kb27h06.wav",918,40,0.65f,true),
+    KOBA_HURT_3("voice_kb27h08.wav",1327,40,0.65f,true),
+    KOBA_HURT_4("voice_kb27h09.wav",968,40,0.65f,true),
+    KOBA_HURT_5("voice_kb27h01.wav",948,40,0.65f,true),
+    KOBA_DEATH("voice_kb27d09.wav",1717,110,0.75f,true),
+    LAVENA_SELECT("voice_lv27s01.wav",6245,75,0.75f),
+    LAVENA_HURT_1("voice_lv27h04.wav",564,40,0.65f,true),
+    LAVENA_HURT_2("voice_lv27h01.wav",659,40,0.65f,true),
+    LAVENA_HURT_3("voice_lv27h08.wav",659,40,0.65f,true),
+    LAVENA_DEATH("voice_lv27d10.wav",1008,110,0.75f,true),
+    WITCH_HURT_1("voice_wi27h02.wav",804,30,0.6f,true),
+    WITCH_HURT_2("voice_wi27h04.wav",922,30,0.6f,true),
+    WITCH_HURT_3("voice_wi27h03.wav",819,30,0.6f,true),
+    WITCH_HURT_4("voice_wi27h06.wav",785,30,0.6f,true),
+    WITCH_HURT_5("voice_wi27h10.wav",1178,30,0.6f,true),
+    WITCH_QUOTE_1("voice_wi27p01.wav",2710,25,0.6f,true),
+    WITCH_QUOTE_2("voice_wi27p02.wav",2013,25,0.6f,true),
+    WITCH_QUOTE_3("voice_wi27p03.wav",2209,25,0.6f,true),
+    WITCH_QUOTE_4("voice_wi27p05.wav",2335,25,0.6f,true),
+    WITCH_QUOTE_5("voice_wi27p07.wav",1614,25,0.6f,true),
+    WITCH_QUOTE_6("voice_wi27p09.wav",2183,25,0.6f,true),
+    VAMPIRE_HURT_2("voice_vl27h05.wav",1453,30,0.6f,true),
+    VAMPIRE_HURT_3("voice_vl27h08.wav",1312,30,0.6f,true),
+    VAMPIRE_HURT_4("voice_vl27h09.wav",1108,30,0.6f,true),
+    VAMPIRE_QUOTE_1("voice_vl27p01.wav",2165,25,0.6f,true),
+    VAMPIRE_QUOTE_2("voice_vl27p02.wav",1986,25,0.6f,true),
+    VAMPIRE_QUOTE_3("voice_vl27p03.wav",1901,25,0.6f,true),
+    VAMPIRE_QUOTE_4("voice_vl27p08.wav",902,25,0.6f,true),
+    VAMPIRE_QUOTE_5("voice_vl27p06.wav",1591,25,0.6f,true),
     IGNITE_DASH("focus_ignite.wav",780,7,.65f,true),
     ERASING_SOUL("focus_erasing.wav",650,7,.65f,true),
     VORTEX("focus_vortex.wav",2316,7,.32f,true),
@@ -134,7 +184,8 @@ enum class UiSound(val path:String, val durationMs:Long, val priority:Int, val g
 }
 
 /** World-space footprint; UI/audio previews intentionally have no world source. */
-data class AudioSource(val x:Float,val y:Float,val radius:Float=0f)
+data class AudioSource(val x:Float,val y:Float,val radius:Float=0f,
+    val unscaled:Boolean=false,val audibleOffscreen:Boolean=false)
 private val UiSound.isDeathCue:Boolean get()=name.endsWith("_DEATH")
 internal fun UiSound.playbackGain(ability:Boolean=false)=gain*if(combat&&(ability||priority in 6..8))1.35f else 1f
 data class AudioView(val left:Float,val bottom:Float,val width:Float,val height:Float) {
@@ -158,7 +209,8 @@ class AudioController(
     private val loadSound:(UiSound)->Sound,
     private val levels:()->AudioLevels=AudioLevels::saved,
     private val millis:()->Long={System.nanoTime()/1_000_000L},
-    private val seekSound:((Sound,Long,Float)->Boolean)?=null
+    private val seekSound:((Sound,Long,Float)->Boolean)?=null,
+    private val loadRunMusic:((MusicTrack)->Music)?=null
 ):Disposable {
     private data class Event(val kind:UiSound,val source:AudioSource?,val ability:Boolean,val gainMultiplier:Float)
     private data class Voice(val kind:UiSound,val sound:Sound,val id:Long,var remaining:Double,val source:AudioSource?,val ability:Boolean,val gainMultiplier:Float)
@@ -169,7 +221,10 @@ class AudioController(
     private var view:AudioView?=null
     private var playerSource:AudioSource?=null
     fun worldView(value:AudioView,player:AudioSource) {advanceVoices(millis());view=value;playerSource=player;syncVolumesAndMusic()}
-    private fun visible(source:AudioSource?)=source==null || view?.contains(source)!=false
+    private fun visible(source:AudioSource?)=source==null || source.audibleOffscreen || view?.contains(source)!=false
+    private fun speed(source:AudioSource?)=if(source?.unscaled==true)1f else combatSpeed
+    fun enemyDelta(delta:Float)=delta/(combatSpeed.takeIf{it>0f}?:1f)
+    private val retiredOwners=java.util.Collections.newSetFromMap(java.util.WeakHashMap<Any,Boolean>())
     // Restrained stereo spread; UI remains centered and visibility still controls audibility.
     private fun pan(source:AudioSource?):Float {
         val listener=playerSource ?: return 0f
@@ -182,12 +237,26 @@ class AudioController(
     /** Owner-bound loops are separate from disposable attack transients, so attacks cannot cut a chant. */
     fun sustain(owner:Any,kind:UiSound?,looping:Boolean=true,source:AudioSource?=null,gainMultiplier:Float=1f) {
         if(disposed)return
+        if(owner in retiredOwners) {if(kind==null)retiredOwners.remove(owner);return}
         advanceVoices(millis())
         if(kind==null || channels[owner]?.kind!=kind) stopSustain(owner)
         if(kind!=null && !menu) { require(kind.combat);channels.getOrPut(owner){Channel(kind,looping,source?:playerSource)}.also{if(source!=null)it.source=source;it.gainMultiplier=gainMultiplier.coerceIn(0f,2f)} }
         syncChannels()
     }
-    fun stopSustain(owner:Any) {channels.remove(owner)?.let{if(it.id>=0)it.sound?.stop(it.id)}}
+    fun stopSustain(owner:Any) {retiredOwners.remove(owner);channels.remove(owner)?.let{if(it.id>=0)it.sound?.stop(it.id)}}
+    /** A stage/reward boundary discards effects, unlike a resumable pause. */
+    fun stopStageEffects() {
+        voices.forEach{it.sound.stop(it.id)};voices.clear()
+        pending=null;pendingCombat.clear();lastCombatAt.clear()
+        val owners=channels.keys.toList()
+        owners.forEach(::stopSustain);retiredOwners.addAll(owners)
+    }
+    fun stopVoices(kinds:Set<UiSound>) {
+        if(pending?.kind in kinds)pending=null
+        kinds.forEach(pendingCombat::remove)
+        voices.filter{it.kind in kinds}.forEach{it.sound.stop(it.id)}
+        voices.removeAll{it.kind in kinds}
+    }
     private fun syncChannels() {
         val gain=effective().effectsGain
         // Bound simultaneous textures. Multiple copies of the same spell share its mix budget.
@@ -203,7 +272,7 @@ class AudioController(
             if(c.id<0 && !paused && !combatStopped && c.kind !in failedSounds) {
                 val sound=sounds[c.kind]?:runCatching{loadSound(c.kind)}.getOrElse{failedSounds+=c.kind;return@forEach}.also{sounds[c.kind]=it}
                 val startVolume=if(seekSound!=null&&c.elapsedSeconds>0.001)0f else volume
-                c.sound=sound;c.id=runCatching{if(c.looping)sound.loop(startVolume,combatSpeed,pan(c.source)) else sound.play(startVolume,combatSpeed,pan(c.source))}.getOrDefault(-1L)
+                c.sound=sound;c.id=runCatching{if(c.looping)sound.loop(startVolume,speed(c.source),pan(c.source)) else sound.play(startVolume,speed(c.source),pan(c.source))}.getOrDefault(-1L)
                 if(c.id>=0 && seekSound!=null && c.elapsedSeconds>0.001) {
                     val duration=c.kind.durationMs/1000.0
                     val offset=if(c.looping&&duration>0)c.elapsedSeconds%duration else c.elapsedSeconds
@@ -212,11 +281,18 @@ class AudioController(
                     }
                 }
             }
-            if(c.id>=0) {c.sound?.setPan(c.id,pan(c.source),volume);c.sound?.setPitch(c.id,combatSpeed)}
+            if(c.id>=0) {c.sound?.setPan(c.id,pan(c.source),volume);c.sound?.setPitch(c.id,speed(c.source))}
         }
     }
     private var music:Music?=null
-    private var musicFailed=false
+    private var musicTrack:MusicTrack?=null
+    private var runMusic:MusicTrack?=null
+    private val failedMusic=mutableSetOf<MusicTrack>()
+    fun runMusic(track:MusicTrack?) {
+        if(disposed)return
+        require(track!=MusicTrack.MENU)
+        runMusic=track;syncVolumesAndMusic()
+    }
     private var disposed=false
     private var paused=false
     private var menu=false
@@ -238,11 +314,11 @@ class AudioController(
         val elapsed=(now-(lastVoiceUpdate?:now)).coerceAtLeast(0).toDouble()
         lastVoiceUpdate=now
         voices.forEach { it.remaining-=elapsed*if(it.kind.combat) {
-            if(combatStopped && !(allowDeathTails && it.kind.isDeathCue))0.0 else combatSpeed.toDouble()
+            if(combatStopped && !(allowDeathTails && it.kind.isDeathCue))0.0 else speed(it.source).toDouble()
         } else 1.0 }
         voices.filter{it.remaining<=0.0}.forEach{it.sound.stop(it.id)}
         voices.removeAll{it.remaining<=0.0}
-        if(!paused&&!combatStopped) channels.values.forEach{it.elapsedSeconds+=elapsed*combatSpeed/1000.0}
+        if(!paused&&!combatStopped) channels.values.forEach{it.elapsedSeconds+=elapsed*speed(it.source)/1000.0}
     }
     fun combatPlayback(speed:Float,stopped:Boolean,deathTails:Boolean=false) {
         if(disposed)return
@@ -251,14 +327,14 @@ class AudioController(
         val wasStopped=combatStopped;val previouslyAllowedDeathTails=allowDeathTails
         combatStopped=stopped;allowDeathTails=deathTails
         voices.filter{it.kind.combat}.forEach {
-            it.sound.setPitch(it.id,combatSpeed)
+            it.sound.setPitch(it.id,speed(it.source))
             val previouslyFrozen=wasStopped && !(previouslyAllowedDeathTails && it.kind.isDeathCue)
             val frozen=stopped && !(deathTails && it.kind.isDeathCue)
             if(frozen&&!previouslyFrozen)it.sound.pause(it.id)
             else if(!frozen&&previouslyFrozen)it.sound.resume(it.id)
         }
         if(stopped)pendingCombat.clear()
-        channels.values.forEach{c->if(c.id>=0){c.sound?.setPitch(c.id,combatSpeed)
+        channels.values.forEach{c->if(c.id>=0){c.sound?.setPitch(c.id,speed(c.source))
             if(stopped&&!wasStopped)c.sound?.pause(c.id) else if(!stopped&&wasStopped&&!paused)c.sound?.resume(c.id)}}
         syncChannels()
     }
@@ -268,6 +344,7 @@ class AudioController(
         if(menu!=value && !value) music?.stop()
         menu=value
         if(value) {
+            runMusic=null
             channels.keys.toList().forEach(::stopSustain)
             pendingCombat.clear()
             voices.filter{it.kind.combat}.forEach{it.sound.stop(it.id)}
@@ -306,9 +383,16 @@ class AudioController(
         if(event!=null) playEvent(event,now)
         // Two distinct weapon cues per frame, rotated so a fixed update order cannot starve a weapon.
         if(!menu && combatEvents.isNotEmpty()) {
-            val start=combatCursor%combatEvents.size
-            repeat(minOf(2,combatEvents.size)){playEvent(combatEvents[(start+it)%combatEvents.size],now)}
-            combatCursor=(start+minOf(2,combatEvents.size))%combatEvents.size
+            // An actor's final voice must not lose its slot to this frame's shots.
+            val deaths=combatEvents.filter{it.kind.isDeathCue}.sortedByDescending{it.kind.priority}.take(2)
+            deaths.forEach{playEvent(it,now)}
+            val others=combatEvents.filterNot{it.kind.isDeathCue}
+            if(others.isNotEmpty()) {
+                val start=combatCursor%others.size
+                val slots=minOf(2-deaths.size,others.size)
+                repeat(slots){playEvent(others[(start+it)%others.size],now)}
+                combatCursor=(start+slots)%others.size
+            }
         }
     }
     private fun playEvent(request:Event,now:Long) {
@@ -316,7 +400,7 @@ class AudioController(
         val volume=(effective().effectsGain*cueGain(event,request.ability)*request.gainMultiplier).coerceAtMost(1f)
         if(!visible(request.source))return
         val previous=if(event.combat)lastCombatAt[event]?:Long.MIN_VALUE/2 else lastSoundAt
-        if(volume<=0f || now-previous<(if(event.combat)80L/combatSpeed else 80f))return
+        if(volume<=0f || now-previous<(if(event.combat)80L/speed(request.source) else 80f))return
         if(event in failedSounds)return
         val sound=sounds[event] ?: runCatching {loadSound(event)}.getOrElse {
             failedSounds+=event;return
@@ -326,7 +410,7 @@ class AudioController(
             if(oldestLowPriority.kind.priority>event.priority)return
             voices.remove(oldestLowPriority);oldestLowPriority.sound.stop(oldestLowPriority.id)
         }
-        val id=runCatching{sound.play(volume,if(event.combat)combatSpeed else 1f,pan(request.source))}.getOrDefault(-1L)
+        val id=runCatching{sound.play(volume,if(event.combat)speed(request.source) else 1f,pan(request.source))}.getOrDefault(-1L)
         if(id>=0) {
             voices+=Voice(event,sound,id,event.durationMs.toDouble(),request.source,request.ability,request.gainMultiplier)
             if(event.combat)lastCombatAt[event]=now else lastSoundAt=now
@@ -341,9 +425,16 @@ class AudioController(
             if(current.effectsGain<=0f)voice.sound.stop(voice.id) else voice.sound.setPan(voice.id,pan(voice.source),gain)
         }
         if(current.effectsGain<=0f) voices.clear()
-        if(!menu||paused) {if(music?.isPlaying==true)music?.pause();return}
-        if(music==null && !musicFailed && current.musicGain>0f) {
-            music=runCatching{loadMusic().also{it.isLooping=true}}.getOrElse{musicFailed=true;null}
+        val wanted=if(menu)MusicTrack.MENU else runMusic
+        if(wanted==null || paused) {if(music?.isPlaying==true)music?.pause();return}
+        if(musicTrack!=wanted) {
+            music?.stop();music?.dispose();music=null;musicTrack=wanted
+        }
+        if(music==null && wanted !in failedMusic && current.musicGain>0f) {
+            music=runCatching{
+                (if(wanted==MusicTrack.MENU)loadMusic() else loadRunMusic?.invoke(wanted))
+                    ?.also{it.isLooping=true}
+            }.getOrElse{failedMusic+=wanted;null}
         }
         music?.let {
             // A restrained starting mix; every value is still multiplied by Settings master/music.
@@ -362,7 +453,7 @@ class AudioController(
     override fun dispose() {
         if(disposed)return
         disposed=true;pending=null;pendingCombat.clear();lastCombatAt.clear();voices.clear();previewOwner=null;preview=null
-        channels.clear()
+        channels.clear();retiredOwners.clear()
         sounds.values.forEach{it.dispose()};sounds.clear();music?.dispose();music=null
     }
 }
@@ -377,11 +468,16 @@ object GameAudio {
         controller=AudioController(
             {Gdx.audio.newMusic(Gdx.files.internal("audio/music/gregorian_chant.mp3"))},
             {Gdx.audio.newSound(Gdx.files.internal("audio/sfx/${it.path}"))},
-            seekSound=seekHandler
+            seekSound=seekHandler,
+            loadRunMusic={Gdx.audio.newMusic(Gdx.files.internal("audio/music/${it.path}"))}
         )
     }
     fun play(kind:UiSound) {controller?.request(kind)}
     fun playAt(kind:UiSound,x:Float,y:Float,radius:Float=0f,gainMultiplier:Float=1f) {controller?.request(kind,AudioSource(x,y,radius),gainMultiplier=gainMultiplier)}
+    fun enemyAt(kind:UiSound,source:AudioSource,gainMultiplier:Float=1f) {controller?.request(kind,source,gainMultiplier=gainMultiplier)}
+    fun enemyDelta(delta:Float)=controller?.enemyDelta(delta)?:delta
+    fun stopStageEffects() {controller?.stopStageEffects()}
+    fun runMusic(track:MusicTrack?) {controller?.runMusic(track)}
     fun projectile(sound:ProjectileSound,x:Float?=null,y:Float?=null,ability:Boolean=false) {
         controller?.request(sound.cue,if(x!=null&&y!=null)AudioSource(x,y) else null,ability)
     }
@@ -391,6 +487,7 @@ object GameAudio {
         controller?.worldView(AudioView(left,bottom,width,height),AudioSource(playerX,playerY))
     }
     fun stopSustain(owner:Any) {controller?.stopSustain(owner)}
+    fun stopVoices(kinds:Set<UiSound>) {controller?.stopVoices(kinds)}
     fun summonCue(choice:com.azizoglu.grisilith.weapon.summon.IvySummonChoice)=when(choice) {
         com.azizoglu.grisilith.weapon.summon.IvySummonChoice.SUMMON_ANIMALS->UiSound.SUMMON_ANIMAL
         com.azizoglu.grisilith.weapon.summon.IvySummonChoice.SUMMON_DEMONS->UiSound.SUMMON_DEMON

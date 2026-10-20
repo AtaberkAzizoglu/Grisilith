@@ -24,6 +24,8 @@ class AudioCreditsScreen(private val game:GrisilithGame):ScreenAdapter() {
     private val batch=SpriteBatch()
     private val font=UiFontFactory.createBody(24)
     private val back=MenuButton("BACK",90f,60f,220f,58f){game.showMainMenu()}
+    private var page=0
+    private val next=MenuButton("NEXT PAGE",920f,60f,260f,58f){page=(page+1)%2}
     override fun show(){viewport.apply();camera.position.set(640f,360f,0f);camera.update();pointer.reset()}
     override fun render(delta:Float) {
         pointer.update()
@@ -32,6 +34,7 @@ class AudioCreditsScreen(private val game:GrisilithGame):ScreenAdapter() {
             game.showMainMenu();return
         }
         if(back.update(pointer.position,pointer.justPressed,pointer.justReleased))return
+        next.update(pointer.position,pointer.justPressed,pointer.justReleased)
         Gdx.gl.glClearColor(.02f,.02f,.025f,1f);Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         batch.projectionMatrix=camera.combined;batch.begin()
         UiComponentRenderer.drawStonePanel(batch,Rectangle(55f,31f,1170f,658f))
@@ -39,10 +42,20 @@ class AudioCreditsScreen(private val game:GrisilithGame):ScreenAdapter() {
             font.data.setScale(scale);font.color=color;font.draw(batch,text,110f,y,1060f,Align.left,false)
         }
         line("AUDIO CREDITS",628f,1.35f)
-        line("MENU MUSIC",564f,1.05f)
-        line("\"Gregorian Chant\" — Kevin MacLeod (incompetech.com)",522f)
-        line("Licensed under Creative Commons: By Attribution 4.0 License",484f,.9f)
-        line("https://creativecommons.org/licenses/by/4.0/",450f,.85f)
+        if(page==0) {
+            line("MUSIC — Kevin MacLeod (incompetech.com)",574f,1.05f)
+            com.azizoglu.grisilith.audio.MusicTrack.entries.forEachIndexed { index, track ->
+                val use=when(track.selection) {
+                    "MENU" -> "Menu"
+                    "MK2" -> "Market"
+                    else -> track.name.lowercase().replace('_',' ')
+                }
+                line("\"${track.title}\" — $use",530f-index*27f,.82f)
+            }
+            line("Licensed under Creative Commons: By Attribution 4.0 License",208f,.85f)
+            line("https://creativecommons.org/licenses/by/4.0/",177f,.8f)
+            line("Recordings unchanged. Source URLs: audio/RUN-MUSIC-LICENSES.txt / CREDITS.txt",146f,.67f)
+        } else {
         line("SOUND EFFECTS",410f,1.05f)
         line("Kenney · artisticdude · Vehicle / Jan Schupke · Jordan Irwin — CC0",370f,.8f)
         line("Ben Jaszczak & Brian Nelson · spurioustransients · HaelDB · AntumDeluge — CC0",347f,.68f)
@@ -53,9 +66,11 @@ class AudioCreditsScreen(private val game:GrisilithGame):ScreenAdapter() {
         line("opengameart.org/content/fire-evil-spell · creativecommons.org/licenses/by/3.0/",232f,.67f)
         line("spookymodem · Jerimee · Michel Baradari — CC BY 3.0; Secretlondon · pal.zoltan.illes — CC BY-SA 3.0",209f,.59f)
         line("pla1554alaska / qubodup · congusbongus · Vinrax · IMadeIt — CC BY 3.0",186f,.65f)
-        line("Witch: xl57 / Freesound 671201; Mimic lick: Manuel Graf / Freesound 176798 — CC BY 4.0",163f,.59f)
-        line("All source links, licenses & edits: audio/CREDITS.txt / UNDEAD-VAMPIRE-LICENSES.txt",140f,.59f)
+        line("Mimic lick: Manuel Graf / Freesound 176798 — CC BY 4.0; actor voices: user-provided recordings",163f,.59f)
+        line("Sources & edits: audio/CREDITS.txt / CHARACTER-VOICE-SOURCES.txt / UNDEAD-VAMPIRE-LICENSES.txt",140f,.55f)
+        }
         back.render(batch,font,pointer.position,pointer.isHeld)
+        next.render(batch,font,pointer.position,pointer.isHeld)
         batch.end()
     }
     override fun resize(width:Int,height:Int){if(width>0&&height>0)viewport.update(width,height,true)}

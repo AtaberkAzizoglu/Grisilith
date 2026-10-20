@@ -1,0 +1,38 @@
+{
+  "id": "IM26D09",
+  "recipe": {
+    "version": "table-reactions26-v1",
+    "character": "IM",
+    "category": "D",
+    "number": 9,
+    "direction": "weak groan of mortal pain",
+    "vocal": "Urrghh...",
+    "phonemes": "ˈɜːɹɡh...",
+    "id": "IM26D09",
+    "selection": "IMB5",
+    "approved_voice_profile": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": "am_onyx",
+      "label": "En pes komutan · yavaş, tehditkâr",
+      "speed": 0.94,
+      "pitch": -3.1,
+      "lang": "en-us",
+      "pause": 0.34,
+      "rough": true,
+      "grit": 1.5,
+      "bass": 0.32,
+      "presence": 0.1,
+      "shadow": 0.0,
+      "rumble": 0.0,
+      "processing_version": "orc-veteran-v1"
+    },
+    "processor": "monster",
+    "pace": 0.905,
+    "target_seconds": 2.09,
+    "prompt_handling": "Directions are design metadata, not spoken or an engine instruction.",
+    "added_breath": false
+  },
+  "duration": 1.8272108843537416,
+  "sha256": "d6557d48184f429f576bda91384dac7fa062a933fbddb29a0a898925cd5fc8cd"
+}

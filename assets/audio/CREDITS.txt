@@ -1,5 +1,10 @@
 GRISILITH — AUDIO CREDITS
 
+RUN / MINI-BOSS / FINAL-BOSS / MARKET MUSIC
+Kevin MacLeod (incompetech.com), CC BY 4.0.
+Approved selections, titles, source URLs, license and hashes: RUN-MUSIC-LICENSES.txt
+and RUN-MUSIC-SELECTIONS.json. All ten MP3 recordings are unchanged.
+
 CURRENT — SPELL FOCUS NORMAL AND UPGRADED NORMAL SHOTS
 Air AI3, Acid AC2, Lightning LI3, Poison PO3 (pack09): original previews unchanged.
 Water WV4, Fire FL5, Necrotic CU4 (pack10): original previews unchanged.
@@ -146,13 +151,13 @@ Imp attacks share the existing FL5 magical fire projectile cue.
 UNDEAD, VAMPIRE LORD, WITCH / STOMP / MIMIC
 Installed selections and full source/author/license/edit details:
 audio/UNDEAD-VAMPIRE-LICENSES.txt.
-"short scream no effects.wav" by xl57 — CC BY 4.0
-https://freesound.org/people/xl57/sounds/671201/
 "comic lick" by Manuel Graf — CC BY 4.0
 https://freesound.org/people/ManuelGraf/sounds/176798/
 https://creativecommons.org/licenses/by/4.0/
-Witch source: public HQ MP3 preview converted to mono PCM16, normalized/faded;
-no pitch change. Mimic lick: mono PCM16 conversion, peak matching/fades.
+Witch death and Vampire hurt/death replaced by approved user recordings (pack27).
+Current character/boss voice cuts: audio/CHARACTER-VOICE-SOURCES.txt and
+audio/CHARACTER-VOICE-SELECTIONS.json. Old audition archives are not shipped.
+Mimic lick: mono PCM16 conversion, peak matching/fades.
 Michel Baradari — Rumble/explosion / 2 High Quality Explosions — CC BY 3.0
 https://opengameart.org/content/rumbleexplosion
 https://opengameart.org/content/2-high-quality-explosions
@@ -170,8 +175,8 @@ audio/HUMANOID-LICENSES.txt. Witch/Mimic/Stomp additions are credited above.
 FINISHING COMBAT CUES
 Pack 22 installed: SLS4, BRC5, SR5, BRH2, GRH1, SPH1, HOH3.
 Exact selected recordings/edits; sources and licenses: audio/FINISHING-LICENSES.txt.
-Bear, Gorilla, Spearman and Horseman hurt feedback only; no added hurt voice
-for Bee Swarm, Crocodile, Witch, Ghost or Slime.
+Bear, Gorilla, Spearman and Horseman hurt feedback; Witch now uses pack27 voices.
+No added hurt voice for Bee Swarm, Crocodile, Ghost or Slime.
 
 BEAST TRAIT AUDIO
 Installed pack 18: BC1, BP2, CJ2, CP1, EG5, SB3, SS3, RG2, GC3, GT4.

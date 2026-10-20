@@ -1,0 +1,30 @@
+{
+  "id": "LNH4",
+  "recipe": {
+    "version": "character-reactions-v1",
+    "character": "Linlos Dustman",
+    "selection": "LD1",
+    "approved_voice_profile": {
+      "character": "Linlos Dustman",
+      "text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+      "voice": "am_puck",
+      "label": "Hafif, meraklı yetişkin erkek hedef",
+      "speed": 1.05,
+      "pitch": 1.2,
+      "lang": "en-us",
+      "pause": 0.28,
+      "rough": false
+    },
+    "processor": "plain",
+    "phonemes": "ˈaː!",
+    "mode": "startle",
+    "target_seconds": 0.7,
+    "breath_seconds": 0.2,
+    "style": "Panikli kısa çığlık",
+    "take": "B",
+    "speed_ratio": 1.035,
+    "seed": 8043
+  },
+  "duration": 0.9848526077097506,
+  "sha256": "f2b76b4e21ab50a8a4f84a7c67253de2022e88ade6ec494351a439aa832d2ed4"
+}

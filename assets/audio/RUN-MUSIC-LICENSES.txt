@@ -1,0 +1,66 @@
+Grisilith — Run, boss-stage and market music (user-approved Seçki 28).
+All recordings: Kevin MacLeod (incompetech.com).
+Licensed under Creative Commons: By Attribution 4.0 License
+https://creativecommons.org/licenses/by/4.0/
+No edits to the recordings. Playback loops at the end of each complete track.
+Menu music is credited separately in CREDITS.txt.
+
+CF2: "Ascending the Vale" Kevin MacLeod (incompetech.com)
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1600064
+https://creativecommons.org/licenses/by/4.0/
+File: forest_normal.mp3
+SHA256: a0ab3aae9a942d797c381df8d914dfef453e7e455c1c6333d1916d59ba005353
+
+CF5: "Lord of the Land" Kevin MacLeod (incompetech.com)
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1400022
+https://creativecommons.org/licenses/by/4.0/
+File: forest_mini.mp3
+SHA256: 47ce185fdc1f2e5514566307d652d6cb62a06bed47ea730e28214d3cedc2f948
+
+VS9: "Five Armies" Kevin MacLeod (incompetech.com)
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100875
+https://creativecommons.org/licenses/by/4.0/
+File: forest_final.mp3
+SHA256: f56746c90756db04675a80ebd29e22253177a6fcc16f56602da62af9eae8d733
+
+VS1: "Crusade" Kevin MacLeod (incompetech.com)
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100884
+https://creativecommons.org/licenses/by/4.0/
+File: siege_normal.mp3
+SHA256: 863758365f6a03cd0cf85237d7d49448d5cb3c1af2e0858dc7c786bc9c0b981e
+
+VS2: "The Descent" Kevin MacLeod (incompetech.com)
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1200094
+https://creativecommons.org/licenses/by/4.0/
+File: siege_mini.mp3
+SHA256: f097d51700b970efffc62499473ea3a31e09aad4172e787978bc9c2a644d53a2
+
+VS6: "Hero Down" Kevin MacLeod (incompetech.com)
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100880
+https://creativecommons.org/licenses/by/4.0/
+File: siege_final.mp3
+SHA256: 3ae453e5e263aa481286bbba8f23c5a646dfe93d1022a7e52ba819f648aac324
+
+HD1: "Ossuary 1 - A Beginning" Kevin MacLeod (incompetech.com)
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1500043
+https://creativecommons.org/licenses/by/4.0/
+File: depths_normal.mp3
+SHA256: 2c3140481edd0c6ab5ff21b46198a97755822e74e5fd0c78f2e7b456cece3cf8
+
+HD8: "Darkest Child" Kevin MacLeod (incompetech.com)
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100783
+https://creativecommons.org/licenses/by/4.0/
+File: depths_mini.mp3
+SHA256: 7591bd67ba227c2a3ffd97a6751c66e0b56d543ba91a6a2699a765191c880518
+
+HD10: "Decay" Kevin MacLeod (incompetech.com)
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100512
+https://creativecommons.org/licenses/by/4.0/
+File: depths_final.mp3
+SHA256: aae2527386f41769f1ca2c1e7b5ae58d54670ade378cf7d8477bbae83c72cfdf
+
+MK2: "Teller of the Tales" Kevin MacLeod (incompetech.com)
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1400020
+https://creativecommons.org/licenses/by/4.0/
+File: market.mp3
+SHA256: 320b37a09fc37ec5962c975563541bee9bcbf1208b0181789248780286f4c1d4

@@ -31,7 +31,8 @@ object UndeadVampireAudioSmoke {
                 File("../tools/audio-audition/listening-pack-${selected.first}/${selected.second}.wav").readBytes()))
             AudioSystem.getAudioInputStream(file).use{check(abs(cue.durationMs-it.frameLength*1000.0/it.format.sampleRate)<1.1)}
         }
-        check(File("audio/UNDEAD-VAMPIRE-LICENSES.txt").readText().contains("xl57"))
+        check(File("audio/CHARACTER-VOICE-SOURCES.txt").readText().contains("USER-APPROVED"))
+        check(File("audio/CHARACTER-VOICE-SELECTIONS.json").readText().contains("WI27D07"))
         var now=1000L;var levels=AudioLevels(1f,1f,1f)
         val sounds=UiSound.entries.associateWith{AudioSmoke.FakeSound()}
         val audio=AudioController({AudioSmoke.FakeMusic().api},{sounds.getValue(it).api},{levels},{now})
@@ -91,9 +92,10 @@ object UndeadVampireAudioSmoke {
         hit(vampire,UiSound.LANCE_THRUST,"Swipe Around")
         hit(vampire,UiSound.VAMPIRE_HUNGER,"Vampire Hunger")
         val hunger=count(UiSound.VAMPIRE_HUNGER);EnemyAudio.attack(vampire,2);GameAudio.update();check(count(UiSound.VAMPIRE_HUNGER)==hunger)
-        settle();EnemyAudio.update(vampire,2f);val hurt=count(UiSound.VAMPIRE_HURT)
-        vampire.takeDamage(1);GameAudio.update();check(count(UiSound.VAMPIRE_HURT)==hurt+1)
-        vampire.takeDamage(1);GameAudio.update();check(count(UiSound.VAMPIRE_HURT)==hurt+1)
+        fun hurtCount()=CharacterVoices.vampireHurt.sumOf(::count)
+        settle();EnemyAudio.update(vampire,2f);val hurt=hurtCount()
+        vampire.takeDamage(1);GameAudio.update();check(hurtCount()==hurt+1)
+        vampire.takeDamage(1);GameAudio.update();check(hurtCount()==hurt+1)
         settle();val deaths=count(UiSound.VAMPIRE_DEATH)
         vampire.takeDamage(100000000);GameAudio.update();check(!vampire.isDead && count(UiSound.VAMPIRE_DEATH)==deaths)
         tick(vampire);check(count(UiSound.VAMPIRE_MIST)==1)

@@ -262,9 +262,27 @@ object AudioScreenSmoke {
             spells.clear();check(channels.isEmpty())
         }
         // Single chest: selected sound on the first press only, reveal press intentionally silent.
+        val syncRunAudio=run.javaClass.getDeclaredMethod("synchronizeCombatAudio").apply{isAccessible=true}
+        val pausedField=field(run,"isPauseMenuOpen")
+        syncRunAudio.invoke(run)
+        val pauseOwner=Any()
+        GameAudio.sustain(pauseOwner,UiSound.VORTEX)
+        val pausesBefore=sound.pauses;val resumesBefore=sound.resumes
+        pausedField.setBoolean(run,true);syncRunAudio.invoke(run)
+        check(sound.pauses>pausesBefore && channels.containsKey(pauseOwner))
+        audioTime+=500;pausedField.setBoolean(run,false);syncRunAudio.invoke(run)
+        check(sound.resumes>resumesBefore && channels.containsKey(pauseOwner))
+        // Market and end-stage transitions are destructive, not resumable Pause.
+        val marketField=field(run,"isMarketOpen")
+        marketField.setBoolean(run,true);syncRunAudio.invoke(run);check(channels.isEmpty())
+        marketField.setBoolean(run,false);syncRunAudio.invoke(run)
+        GameAudio.sustain(pauseOwner,UiSound.VORTEX);check(channels.isEmpty())
+        GameAudio.stopSustain(pauseOwner)
+        val rewardOwner=Any();GameAudio.sustain(rewardOwner,UiSound.VORTEX)
         val chest=field(run,"chestRewardController").get(run) as com.azizoglu.grisilith.screen.controller.ChestRewardController
         val queue=field(chest,"rewardQueue").get(chest) as com.azizoglu.grisilith.chest.ChestRewardQueue
         queue.addChest();chest.begin(false)
+        syncRunAudio.invoke(run);check(channels.isEmpty())
         val press=chest.javaClass.getDeclaredMethod("handlePrimaryChestAction").apply{isAccessible=true}
         audioTime+=4000;val chestBefore=sound.played.size
         press.invoke(chest);GameAudio.update();check(sound.played.size==chestBefore+1 && UiSound.CHEST in loadedCues)

@@ -159,11 +159,13 @@ class PresetJournalScreen(
         original = preset
     )
 
-    private fun selectPreset(id: String?) {
+    private fun selectPreset(id: String?, announce: Boolean = false) {
         if (id == null) { newDraft(); return }
+        val previousId = draft?.id
         draft = drafts[id] ?: PresetRepository.findById(id)?.let(::fromPreset)?.also { drafts[id] = it }
         editingName = false; closeList(); message = ""
         if (draft?.gear?.get(Slot.CHARACTER) == null) openSlot = Slot.CHARACTER
+        if (announce && previousId != draft?.id) character()?.let { com.azizoglu.grisilith.audio.CharacterVoices.select(it.id) }
     }
 
     private fun newDraft() {
@@ -231,6 +233,7 @@ class PresetJournalScreen(
         val changed = current.gear[slot] != entry.id
         current.gear[slot] = entry.id
         if (slot == Slot.CHARACTER && changed) {
+            com.azizoglu.grisilith.audio.CharacterVoices.select(entry.id)
             current.allocation = PresetStatAllocation()
             if (character()?.canEquipArmor == false) { current.gear[Slot.ARMOR] = null; current.gear[Slot.ARMOR_TAMGA] = null }
         }
@@ -653,7 +656,7 @@ class PresetJournalScreen(
                     message = "Preset deleted"
                 }
             }
-            "preset" -> selectPreset(presetRows().getOrNull(value.toInt())?.id)
+            "preset" -> selectPreset(presetRows().getOrNull(value.toInt())?.id, announce = true)
             "slot" -> open(Slot.valueOf(value))
             "content" -> visibleContent().getOrNull(value.toInt())?.let(::selectContent)
             "save" -> if (ready()) save()
@@ -731,6 +734,7 @@ class PresetJournalScreen(
     }
     override fun resize(width: Int, height: Int) { if (width > 0 && height > 0) viewport.update(width, height, true) }
     override fun hide() {
+        com.azizoglu.grisilith.audio.CharacterVoices.stopSelection()
         if (installedInput != null && Gdx.input.inputProcessor === installedInput) Gdx.input.inputProcessor = previousInput
         installedInput = null
     }

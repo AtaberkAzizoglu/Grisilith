@@ -1,0 +1,32 @@
+{
+  "id": "LV26H01",
+  "recipe": {
+    "version": "table-reactions26-v1",
+    "character": "LV",
+    "category": "H",
+    "number": 1,
+    "direction": "female, subtle closed-mouth reaction to pain",
+    "vocal": "Mm!",
+    "phonemes": "ˈmː!",
+    "id": "LV26H01",
+    "selection": "LV3",
+    "approved_voice_profile": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "af_nicole",
+      "label": "Amerikan tabanlı; nefesli ve kontrollü hedef",
+      "speed": 0.95,
+      "pitch": -0.4,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "processor": "plain",
+    "pace": 1.01,
+    "target_seconds": 0.28,
+    "prompt_handling": "Directions are design metadata, not spoken or an engine instruction.",
+    "added_breath": false
+  },
+  "duration": 0.5498412698412698,
+  "sha256": "3208c015645f5491b87e72b8d03b07c7e0097dd06f28348eb0d717428a816aa6"
+}

@@ -1,0 +1,36 @@
+{
+  "id": "IMD8",
+  "recipe": {
+    "version": "character-reactions-v1",
+    "character": "Sir Imbert",
+    "selection": "IMB5",
+    "approved_voice_profile": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": "am_onyx",
+      "label": "En pes komutan · yavaş, tehditkâr",
+      "speed": 0.94,
+      "pitch": -3.1,
+      "lang": "en-us",
+      "pause": 0.34,
+      "rough": true,
+      "grit": 1.5,
+      "bass": 0.32,
+      "presence": 0.1,
+      "shadow": 0.0,
+      "rumble": 0.0,
+      "processing_version": "orc-veteran-v1"
+    },
+    "processor": "monster",
+    "phonemes": "ˈɜːɡ... ˈɑː!",
+    "mode": "battle_death",
+    "target_seconds": 1.65,
+    "breath_seconds": 0.8,
+    "style": "Kısa mücadele, çöküş",
+    "take": "B",
+    "speed_ratio": 1.035,
+    "seed": 8017
+  },
+  "duration": 2.6110204081632653,
+  "sha256": "4479e64bd0f608f98727851a9ec6fee6c69dc1d24817b43a4a67d02f87dcc1d5"
+}

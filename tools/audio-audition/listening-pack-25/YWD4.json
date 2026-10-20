@@ -1,0 +1,30 @@
+{
+  "id": "YWD4",
+  "recipe": {
+    "version": "character-reactions-v1",
+    "character": "Ywaleth Yoster",
+    "selection": "YW10",
+    "approved_voice_profile": {
+      "character": "Ywaleth Yoster",
+      "text": "The footprints lead in this direction. I'm on the trail!",
+      "voice": "zf_xiaobei",
+      "label": "Deneysel: Doğu Asya/Mandarin taban sesinin İngilizce okuması",
+      "speed": 1.09,
+      "pitch": 0.0,
+      "lang": "en-us",
+      "pause": 0.2,
+      "rough": false
+    },
+    "processor": "plain",
+    "phonemes": "hˈɑː... ˈə!",
+    "mode": "battle_death",
+    "target_seconds": 1.5,
+    "breath_seconds": 0.8,
+    "style": "Boğuk acı, gücün tükenmesi",
+    "take": "B",
+    "speed_ratio": 1.035,
+    "seed": 8033
+  },
+  "duration": 2.180045351473923,
+  "sha256": "822e2ee2c29305393ad04ce6acbaa0550d45f9c0ffc969bae3985f9ff95cad64"
+}

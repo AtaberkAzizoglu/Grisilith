@@ -1,0 +1,9 @@
+USER-APPROVED CHARACTER / WITCH / VAMPIRE RECORDINGS — PACK27
+Original recordings supplied by the user (Voices folder); no synthetic replacement.
+Selected cuts copied byte-exact; SHA256 and source cut times in CHARACTER-VOICE-SELECTIONS.json.
+Vampire last death: VL27D08 then VL27D01, native PCM frames concatenated without a gap.
+Replaces previous witch_death.wav, vampire_hurt.wav and vampire_death.wav content.
+Other Vampire skill/bite/form/escape effects and all other actors are unchanged.
+Old audition/source recordings remain outside the shipped assets for recovery.
+No external recording license is inferred from user supply; user must retain usage rights.
+No pitch/EQ/level adjustment or new lossy encoding performed during installation.

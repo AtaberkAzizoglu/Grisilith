@@ -1,0 +1,19 @@
+PACK26 — USER TABLE REACTIONS; AUDITION ONLY / NOT INSTALLED
+Kokoro-82M (hexgrad), Apache2: https://huggingface.co/hexgrad/Kokoro-82M
+kokoro-onnx (thewh1teagle), MIT: https://github.com/thewh1teagle/kokoro-onnx
+Identities retained: IMB5 am_onyx/-3.1, YW10 zf_xiaobei/0, LD1 am_puck/+1.2,
+ORC10 am_onyx/-6.8, LV3 af_nicole/-0.4. Exact selected processors from pack23/24.
+100 rows parsed from user-provided Grisilith_Character_Voice_Prompts.txt.
+Bracketed directions are NOT spoken. Kokoro cannot directly act those prompt
+instructions; only phonetic vocalizations, pacing, moderate duration treatment
+and death amplitude envelopes approximate that direction. No acted scream guarantee.
+Nonwords mapped manually to IPA, no vocabulary/phrases added to the reactions.
+NO designed breath/noise tails in new clips. The base voice may have airy timbre.
+Selected distortion/EQ/subharmonics are preserved. No different actor/layer added.
+100 candidates, 50 pair comparisons, 5 byte-exact selected selection references.
+Four are original pack23/24 choices; Koba reference is the approved ORC10 profile
+with user's revised line from pack25. Previous previews are not overwritten.
+Mono44.1kHz PCM16, -12dBFS peaks, 10ms fades; NOT perceived loudness normalization.
+Profiles, IPA, surface nonwords, user acting directions, timing and hashes recorded
+in SECENEKLER.json. Source table copied verbatim into USER-PROMPTS.txt.
+No game asset, runtime integration or paid service involved.

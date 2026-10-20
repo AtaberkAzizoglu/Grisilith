@@ -153,7 +153,7 @@ class GrisilithGame : Game() {
     }
 
     override fun setScreen(screen: Screen?) {
-        // Settings opened from a paused run keeps the run's silent music context.
+        // Settings opened from a paused run keeps that run's current soundtrack.
         val menu = when(screen) {
             is FirstScreen, is SplashLoadingScreen, null -> false
             is SettingsScreen -> GameAudio.inMenus()

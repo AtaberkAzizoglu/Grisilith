@@ -1,0 +1,30 @@
+{
+  "id": "LVH7",
+  "recipe": {
+    "version": "character-reactions-v1-v2",
+    "character": "Lavena Vol",
+    "selection": "LV3",
+    "approved_voice_profile": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "af_nicole",
+      "label": "Amerikan tabanlı; nefesli ve kontrollü hedef",
+      "speed": 0.95,
+      "pitch": -0.4,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "processor": "plain",
+    "phonemes": "ˈɑː!",
+    "mode": "breath_only",
+    "target_seconds": 1.3,
+    "breath_seconds": 0.0,
+    "style": "Kesik alıp yavaş bırakma",
+    "take": "A",
+    "speed_ratio": 0.965,
+    "seed": 8096
+  },
+  "duration": 1.3,
+  "sha256": "6c1f1377a96edd10072d407f58d2eddcd020aa9c43ab21c553df9c57906d51b5"
+}

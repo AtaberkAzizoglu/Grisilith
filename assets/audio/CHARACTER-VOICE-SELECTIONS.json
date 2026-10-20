@@ -1,0 +1,2237 @@
+[
+  {
+    "enum": "IMBERT_SELECT",
+    "path": "voice_im27s01.wav",
+    "source_codes": [
+      "IM27S01"
+    ],
+    "frames": 226715,
+    "rate": 44100,
+    "duration_ms": 5141,
+    "priority": 75,
+    "gain": 0.75,
+    "combat": false,
+    "sha256": "5572f318f067cba1ffd3f576d37fba303eea6087f57469572a7b0e2f352a3a66",
+    "source_cuts": [
+      {
+        "id": "IM27S01",
+        "character": "IM",
+        "name": "Sir Imbert",
+        "kind": "S",
+        "number": 1,
+        "file": "IM27S01.wav",
+        "source": "imbert hasar.mp3",
+        "source_sha256": "cce17c7dbf922257cee4c4a74159452d02803426f911d23a9126cf4f9785b2a7",
+        "source_start": 0.019954648526077097,
+        "source_end": 5.160884353741497,
+        "window_start": 0.0,
+        "window_end": 5.208163265306122,
+        "duration": 5.140929705215419,
+        "rate": 44100,
+        "frames": 226715,
+        "gain": 1.0,
+        "excluded_label": null,
+        "label_present": true,
+        "content_text": "It is my oath! I will fight until the magic is gone from this realm!",
+        "sha256": "5572f318f067cba1ffd3f576d37fba303eea6087f57469572a7b0e2f352a3a66",
+        "peak": 0.7667356729507446
+      }
+    ]
+  },
+  {
+    "enum": "IMBERT_HURT_1",
+    "path": "voice_im27h09.wav",
+    "source_codes": [
+      "IM27H09"
+    ],
+    "frames": 27738,
+    "rate": 44100,
+    "duration_ms": 629,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "26dba1cc68bf6164d2c662383cf5b02a630fb5ae6784e8fd1a07201a977147a9",
+    "source_cuts": [
+      {
+        "id": "IM27H09",
+        "character": "IM",
+        "name": "Sir Imbert",
+        "kind": "H",
+        "number": 9,
+        "file": "IM27H09.wav",
+        "source": "imbert hasar.mp3",
+        "source_sha256": "cce17c7dbf922257cee4c4a74159452d02803426f911d23a9126cf4f9785b2a7",
+        "source_start": 23.880544217687074,
+        "source_end": 24.50952380952381,
+        "window_start": 23.643292517006802,
+        "window_end": 24.866458049886617,
+        "duration": 0.6289795918367347,
+        "rate": 44100,
+        "frames": 27738,
+        "gain": 1.0,
+        "excluded_label": [
+          22.88299319727891,
+          23.631292517006802
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "26dba1cc68bf6164d2c662383cf5b02a630fb5ae6784e8fd1a07201a977147a9",
+        "peak": 0.45517441630363464
+      }
+    ]
+  },
+  {
+    "enum": "IMBERT_HURT_2",
+    "path": "voice_im27h08.wav",
+    "source_codes": [
+      "IM27H08"
+    ],
+    "frames": 36538,
+    "rate": 44100,
+    "duration_ms": 829,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "65cbda78ff148c8a5d739e8fca9343e88127f37a258dac348beb303c416e38be",
+    "source_cuts": [
+      {
+        "id": "IM27H08",
+        "character": "IM",
+        "name": "Sir Imbert",
+        "kind": "H",
+        "number": 8,
+        "file": "IM27H08.wav",
+        "source": "imbert hasar.mp3",
+        "source_sha256": "cce17c7dbf922257cee4c4a74159452d02803426f911d23a9126cf4f9785b2a7",
+        "source_start": 21.655600907029477,
+        "source_end": 22.484126984126984,
+        "window_start": 21.358485260770973,
+        "window_end": 22.87099319727891,
+        "duration": 0.8285260770975057,
+        "rate": 44100,
+        "frames": 36538,
+        "gain": 1.0,
+        "excluded_label": [
+          20.692970521541948,
+          21.346485260770972
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "65cbda78ff148c8a5d739e8fca9343e88127f37a258dac348beb303c416e38be",
+        "peak": 0.36938679218292236
+      }
+    ]
+  },
+  {
+    "enum": "IMBERT_HURT_3",
+    "path": "voice_im27h07.wav",
+    "source_codes": [
+      "IM27H07"
+    ],
+    "frames": 29278,
+    "rate": 44100,
+    "duration_ms": 664,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "65756d2a93b0f3fa50fefefd4a13f970fbba1b653a1b365e5a5f0f0d1207209f",
+    "source_cuts": [
+      {
+        "id": "IM27H07",
+        "character": "IM",
+        "name": "Sir Imbert",
+        "kind": "H",
+        "number": 7,
+        "file": "IM27H07.wav",
+        "source": "imbert hasar.mp3",
+        "source_sha256": "cce17c7dbf922257cee4c4a74159452d02803426f911d23a9126cf4f9785b2a7",
+        "source_start": 19.690068027210884,
+        "source_end": 20.353968253968254,
+        "window_start": 19.402929705215417,
+        "window_end": 20.680970521541948,
+        "duration": 0.6639002267573696,
+        "rate": 44100,
+        "frames": 29278,
+        "gain": 1.0,
+        "excluded_label": [
+          18.727437641723355,
+          19.390929705215417
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "65756d2a93b0f3fa50fefefd4a13f970fbba1b653a1b365e5a5f0f0d1207209f",
+        "peak": 0.4595939815044403
+      }
+    ]
+  },
+  {
+    "enum": "IMBERT_HURT_4",
+    "path": "voice_im27h02.wav",
+    "source_codes": [
+      "IM27H02"
+    ],
+    "frames": 28618,
+    "rate": 44100,
+    "duration_ms": 649,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "dce0755363b292508d1dd4fdf1e882a217ab8587209e4aede698cb67cf13e9ce",
+    "source_cuts": [
+      {
+        "id": "IM27H02",
+        "character": "IM",
+        "name": "Sir Imbert",
+        "kind": "H",
+        "number": 2,
+        "file": "IM27H02.wav",
+        "source": "imbert hasar.mp3",
+        "source_sha256": "cce17c7dbf922257cee4c4a74159452d02803426f911d23a9126cf4f9785b2a7",
+        "source_start": 8.670113378684807,
+        "source_end": 9.31904761904762,
+        "window_start": 8.422884353741496,
+        "window_end": 9.715891156462584,
+        "duration": 0.6489342403628118,
+        "rate": 44100,
+        "frames": 28618,
+        "gain": 1.0,
+        "excluded_label": [
+          7.657596371882086,
+          8.410884353741496
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "dce0755363b292508d1dd4fdf1e882a217ab8587209e4aede698cb67cf13e9ce",
+        "peak": 0.5477032661437988
+      }
+    ]
+  },
+  {
+    "enum": "IMBERT_HURT_5",
+    "path": "voice_im27h01.wav",
+    "source_codes": [
+      "IM27H01"
+    ],
+    "frames": 36098,
+    "rate": 44100,
+    "duration_ms": 819,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "9753555d5a8cb63630635986c5a8e080570a29e41fb527537727ae0c5318f0ac",
+    "source_cuts": [
+      {
+        "id": "IM27H01",
+        "character": "IM",
+        "name": "Sir Imbert",
+        "kind": "H",
+        "number": 1,
+        "file": "IM27H01.wav",
+        "source": "imbert hasar.mp3",
+        "source_sha256": "cce17c7dbf922257cee4c4a74159452d02803426f911d23a9126cf4f9785b2a7",
+        "source_start": 6.674648526077098,
+        "source_end": 7.493197278911564,
+        "window_start": 6.327646258503401,
+        "window_end": 7.645596371882086,
+        "duration": 0.8185487528344672,
+        "rate": 44100,
+        "frames": 36098,
+        "gain": 1.0,
+        "excluded_label": [
+          5.642176870748299,
+          6.315646258503401
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "9753555d5a8cb63630635986c5a8e080570a29e41fb527537727ae0c5318f0ac",
+        "peak": 0.4267891049385071
+      }
+    ]
+  },
+  {
+    "enum": "IMBERT_DEATH",
+    "path": "voice_im27d10.wav",
+    "source_codes": [
+      "IM27D10"
+    ],
+    "frames": 47758,
+    "rate": 44100,
+    "duration_ms": 1083,
+    "priority": 110,
+    "gain": 0.75,
+    "combat": true,
+    "sha256": "9abc1ea21d5e7987af14e441507846bf9e81cb83fca9bba408179035907056e0",
+    "source_cuts": [
+      {
+        "id": "IM27D10",
+        "character": "IM",
+        "name": "Sir Imbert",
+        "kind": "D",
+        "number": 10,
+        "file": "IM27D10.wav",
+        "source": "imbert death.mp3",
+        "source_sha256": "cd5ad7dec2c5e1a6228cc0111711489d7a42732f3fc3d42246113d858fa39ec1",
+        "source_start": 24.938140589569162,
+        "source_end": 26.02108843537415,
+        "window_start": 24.601115646258503,
+        "window_end": 26.12938775510204,
+        "duration": 1.0829478458049886,
+        "rate": 44100,
+        "frames": 47758,
+        "gain": 1.0,
+        "excluded_label": [
+          24.045351473922903,
+          24.589115646258502
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "9abc1ea21d5e7987af14e441507846bf9e81cb83fca9bba408179035907056e0",
+        "peak": 0.6643941402435303
+      }
+    ]
+  },
+  {
+    "enum": "YWALETH_SELECT",
+    "path": "voice_yw27s01.wav",
+    "source_codes": [
+      "YW27S01"
+    ],
+    "frames": 158712,
+    "rate": 44100,
+    "duration_ms": 3599,
+    "priority": 75,
+    "gain": 0.75,
+    "combat": false,
+    "sha256": "c7f3e0d64f87c0f0ec6a1b619e6f06a1dcfbb43ad0f2f04da4f1afa9797010ee",
+    "source_cuts": [
+      {
+        "id": "YW27S01",
+        "character": "YW",
+        "name": "Ywaleth Yoster",
+        "kind": "S",
+        "number": 1,
+        "file": "YW27S01.wav",
+        "source": "Ywaleth Voices.mp3",
+        "source_sha256": "18e800e04d33b34e7281649d9538561d7c3affbffa065c70d32ccf9a7bda074a",
+        "source_start": 0.04113378684807256,
+        "source_end": 3.640045351473923,
+        "window_start": 0.0,
+        "window_end": 3.64172335600907,
+        "duration": 3.5989115646258503,
+        "rate": 44100,
+        "frames": 158712,
+        "gain": 1.0,
+        "excluded_label": null,
+        "label_present": true,
+        "content_text": "The footprints lead in this direction. I'm on the trail!",
+        "sha256": "c7f3e0d64f87c0f0ec6a1b619e6f06a1dcfbb43ad0f2f04da4f1afa9797010ee",
+        "peak": 0.7751990556716919
+      }
+    ]
+  },
+  {
+    "enum": "YWALETH_HURT_1",
+    "path": "voice_yw27h01.wav",
+    "source_codes": [
+      "YW27H01"
+    ],
+    "frames": 27738,
+    "rate": 44100,
+    "duration_ms": 629,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "3470dcbde2dc3781230637651eb331bc8446523d355bd6639acf740b85c1e779",
+    "source_cuts": [
+      {
+        "id": "YW27H01",
+        "character": "YW",
+        "name": "Ywaleth Yoster",
+        "kind": "H",
+        "number": 1,
+        "file": "YW27H01.wav",
+        "source": "Ywaleth Voices.mp3",
+        "source_sha256": "18e800e04d33b34e7281649d9538561d7c3affbffa065c70d32ccf9a7bda074a",
+        "source_start": 6.200725623582766,
+        "source_end": 6.8297052154195015,
+        "window_start": 5.878666666666666,
+        "window_end": 7.136752834467121,
+        "duration": 0.6289795918367347,
+        "rate": 44100,
+        "frames": 27738,
+        "gain": 1.0,
+        "excluded_label": [
+          4.429931972789116,
+          5.866666666666666
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "3470dcbde2dc3781230637651eb331bc8446523d355bd6639acf740b85c1e779",
+        "peak": 0.677158534526825
+      }
+    ]
+  },
+  {
+    "enum": "YWALETH_HURT_2",
+    "path": "voice_yw27h06.wav",
+    "source_codes": [
+      "YW27H06"
+    ],
+    "frames": 26638,
+    "rate": 44100,
+    "duration_ms": 604,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "68fb7d91b144c7f5c2de39bc3a29ffb524e9f6e4cb911edf55a9d389babd6296",
+    "source_cuts": [
+      {
+        "id": "YW27H06",
+        "character": "YW",
+        "name": "Ywaleth Yoster",
+        "kind": "H",
+        "number": 6,
+        "file": "YW27H06.wav",
+        "source": "Ywaleth Voices.mp3",
+        "source_sha256": "18e800e04d33b34e7281649d9538561d7c3affbffa065c70d32ccf9a7bda074a",
+        "source_start": 15.963537414965986,
+        "source_end": 16.567573696145125,
+        "window_start": 15.666421768707483,
+        "window_end": 16.844689342403626,
+        "duration": 0.6040362811791383,
+        "rate": 44100,
+        "frames": 26638,
+        "gain": 1.0,
+        "excluded_label": [
+          14.851247165532879,
+          15.654421768707483
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "68fb7d91b144c7f5c2de39bc3a29ffb524e9f6e4cb911edf55a9d389babd6296",
+        "peak": 0.6452683806419373
+      }
+    ]
+  },
+  {
+    "enum": "YWALETH_HURT_3",
+    "path": "voice_yw27h08.wav",
+    "source_codes": [
+      "YW27H08"
+    ],
+    "frames": 26418,
+    "rate": 44100,
+    "duration_ms": 599,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "73a6d787d98757e82a3b7767448adfd71c173cec1fc7aea2617af0860642ed66",
+    "source_cuts": [
+      {
+        "id": "YW27H08",
+        "character": "YW",
+        "name": "Ywaleth Yoster",
+        "kind": "H",
+        "number": 8,
+        "file": "YW27H08.wav",
+        "source": "Ywaleth Voices.mp3",
+        "source_sha256": "18e800e04d33b34e7281649d9538561d7c3affbffa065c70d32ccf9a7bda074a",
+        "source_start": 19.759909297052154,
+        "source_end": 20.358956916099775,
+        "window_start": 19.47775963718821,
+        "window_end": 20.631083900226756,
+        "duration": 0.599047619047619,
+        "rate": 44100,
+        "frames": 26418,
+        "gain": 1.0,
+        "excluded_label": [
+          18.787301587301585,
+          19.46575963718821
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "73a6d787d98757e82a3b7767448adfd71c173cec1fc7aea2617af0860642ed66",
+        "peak": 0.7404093146324158
+      }
+    ]
+  },
+  {
+    "enum": "YWALETH_DEATH",
+    "path": "voice_yw27d10.wav",
+    "source_codes": [
+      "YW27D10"
+    ],
+    "frames": 30158,
+    "rate": 44100,
+    "duration_ms": 684,
+    "priority": 110,
+    "gain": 0.75,
+    "combat": true,
+    "sha256": "235453a357977f23924b887431fd07cd2afa634b1e34db34d7ce26b2907049a3",
+    "source_cuts": [
+      {
+        "id": "YW27D10",
+        "character": "YW",
+        "name": "Ywaleth Yoster",
+        "kind": "D",
+        "number": 10,
+        "file": "YW27D10.wav",
+        "source": "Ywaleth Voices.mp3",
+        "source_sha256": "18e800e04d33b34e7281649d9538561d7c3affbffa065c70d32ccf9a7bda074a",
+        "source_start": 44.309115646258505,
+        "source_end": 44.99297052154195,
+        "window_start": 43.97707936507936,
+        "window_end": 45.09348752834467,
+        "duration": 0.6838548752834467,
+        "rate": 44100,
+        "frames": 30158,
+        "gain": 1.0,
+        "excluded_label": [
+          43.54104308390023,
+          43.96507936507936
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "235453a357977f23924b887431fd07cd2afa634b1e34db34d7ce26b2907049a3",
+        "peak": 0.6329787969589233
+      }
+    ]
+  },
+  {
+    "enum": "LINLOS_SELECT",
+    "path": "voice_ln27s01.wav",
+    "source_codes": [
+      "LN27S01"
+    ],
+    "frames": 327963,
+    "rate": 44100,
+    "duration_ms": 7437,
+    "priority": 75,
+    "gain": 0.75,
+    "combat": false,
+    "sha256": "e2635d08e7bee29616a1db69fbed671feb23e54de294697b6ebb5686526af593",
+    "source_cuts": [
+      {
+        "id": "LN27S01",
+        "character": "LN",
+        "name": "Linlos Dustman",
+        "kind": "S",
+        "number": 1,
+        "file": "LN27S01.wav",
+        "source": "linlos voices.mp3",
+        "source_sha256": "f502d12cd788606370a9fe96437a1b1c3c39af27b9c503b2b107c5e5fff970d8",
+        "source_start": 0.10154195011337869,
+        "source_end": 7.538344671201814,
+        "window_start": 0.0,
+        "window_end": 7.63265306122449,
+        "duration": 7.436802721088435,
+        "rate": 44100,
+        "frames": 327963,
+        "gain": 1.0,
+        "excluded_label": null,
+        "label_present": true,
+        "content_text": "I spoke with an ant the other day, but I didn't understand what he said. I guess I'm not so good at talking to animals.",
+        "sha256": "e2635d08e7bee29616a1db69fbed671feb23e54de294697b6ebb5686526af593",
+        "peak": 0.5577028393745422
+      }
+    ]
+  },
+  {
+    "enum": "LINLOS_HURT_1",
+    "path": "voice_ln27h03.wav",
+    "source_codes": [
+      "LN27H03"
+    ],
+    "frames": 32138,
+    "rate": 44100,
+    "duration_ms": 729,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "94344def2abb5e99a12b9d719a4ada2e88644786b7fde948f64a466482b05b2b",
+    "source_cuts": [
+      {
+        "id": "LN27H03",
+        "character": "LN",
+        "name": "Linlos Dustman",
+        "kind": "H",
+        "number": 3,
+        "file": "LN27H03.wav",
+        "source": "linlos voices.mp3",
+        "source_sha256": "f502d12cd788606370a9fe96437a1b1c3c39af27b9c503b2b107c5e5fff970d8",
+        "source_start": 12.64607709750567,
+        "source_end": 13.374829931972789,
+        "window_start": 12.523564625850339,
+        "window_end": 13.497297052154194,
+        "duration": 0.7287528344671201,
+        "rate": 44100,
+        "frames": 32138,
+        "gain": 1.0,
+        "excluded_label": [
+          11.803174603174602,
+          12.511564625850339
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "94344def2abb5e99a12b9d719a4ada2e88644786b7fde948f64a466482b05b2b",
+        "peak": 0.6399008631706238
+      }
+    ]
+  },
+  {
+    "enum": "LINLOS_HURT_2",
+    "path": "voice_ln27h01.wav",
+    "source_codes": [
+      "LN27H01"
+    ],
+    "frames": 27518,
+    "rate": 44100,
+    "duration_ms": 624,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "cc43eb47232bf1c0626fa158e03af32def2c6a77765b28dec872545c07b1ff7c",
+    "source_cuts": [
+      {
+        "id": "LN27H01",
+        "character": "LN",
+        "name": "Linlos Dustman",
+        "kind": "H",
+        "number": 1,
+        "file": "LN27H01.wav",
+        "source": "linlos voices.mp3",
+        "source_sha256": "f502d12cd788606370a9fe96437a1b1c3c39af27b9c503b2b107c5e5fff970d8",
+        "source_start": 9.2637641723356,
+        "source_end": 9.887755102040817,
+        "window_start": 9.076399092970522,
+        "window_end": 10.02019954648526,
+        "duration": 0.6239909297052154,
+        "rate": 44100,
+        "frames": 27518,
+        "gain": 1.0,
+        "excluded_label": [
+          8.450793650793651,
+          9.064399092970522
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "cc43eb47232bf1c0626fa158e03af32def2c6a77765b28dec872545c07b1ff7c",
+        "peak": 0.6429200768470764
+      }
+    ]
+  },
+  {
+    "enum": "LINLOS_HURT_3",
+    "path": "voice_ln27h06.wav",
+    "source_codes": [
+      "LN27H06"
+    ],
+    "frames": 29003,
+    "rate": 44100,
+    "duration_ms": 658,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "dedc8e231773f6a3b62001b9e5205634866d9ce8435375d69bf64c76e2489580",
+    "source_cuts": [
+      {
+        "id": "LN27H06",
+        "character": "LN",
+        "name": "Linlos Dustman",
+        "kind": "H",
+        "number": 6,
+        "file": "LN27H06.wav",
+        "source": "linlos voices.mp3",
+        "source_sha256": "f502d12cd788606370a9fe96437a1b1c3c39af27b9c503b2b107c5e5fff970d8",
+        "source_start": 17.804353741496598,
+        "source_end": 18.46201814058957,
+        "window_start": 17.711773242630382,
+        "window_end": 18.550811791383218,
+        "duration": 0.6576643990929705,
+        "rate": 44100,
+        "frames": 29003,
+        "gain": 1.0,
+        "excluded_label": [
+          16.91156462585034,
+          17.699773242630382
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "dedc8e231773f6a3b62001b9e5205634866d9ce8435375d69bf64c76e2489580",
+        "peak": 0.6079831719398499
+      }
+    ]
+  },
+  {
+    "enum": "LINLOS_HURT_4",
+    "path": "voice_ln27h07.wav",
+    "source_codes": [
+      "LN27H07"
+    ],
+    "frames": 38518,
+    "rate": 44100,
+    "duration_ms": 873,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "080f08874a631a45b37cec0de6a137835178fa5e192553d95bad2e4d1da3ad00",
+    "source_cuts": [
+      {
+        "id": "LN27H07",
+        "character": "LN",
+        "name": "Linlos Dustman",
+        "kind": "H",
+        "number": 7,
+        "file": "LN27H07.wav",
+        "source": "linlos voices.mp3",
+        "source_sha256": "f502d12cd788606370a9fe96437a1b1c3c39af27b9c503b2b107c5e5fff970d8",
+        "source_start": 19.410702947845806,
+        "source_end": 20.284126984126985,
+        "window_start": 19.318122448979594,
+        "window_end": 20.426548752834464,
+        "duration": 0.8734240362811792,
+        "rate": 44100,
+        "frames": 38518,
+        "gain": 1.0,
+        "excluded_label": [
+          18.56281179138322,
+          19.306122448979593
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "080f08874a631a45b37cec0de6a137835178fa5e192553d95bad2e4d1da3ad00",
+        "peak": 0.5137398838996887
+      }
+    ]
+  },
+  {
+    "enum": "LINLOS_HURT_5",
+    "path": "voice_ln27h09.wav",
+    "source_codes": [
+      "LN27H09"
+    ],
+    "frames": 26363,
+    "rate": 44100,
+    "duration_ms": 598,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "f09d83f9d631561caf4a84375d99adeaa1be2f845ea20a8284dad9cfb961e6db",
+    "source_cuts": [
+      {
+        "id": "LN27H09",
+        "character": "LN",
+        "name": "Linlos Dustman",
+        "kind": "H",
+        "number": 9,
+        "file": "LN27H09.wav",
+        "source": "linlos voices.mp3",
+        "source_sha256": "f502d12cd788606370a9fe96437a1b1c3c39af27b9c503b2b107c5e5fff970d8",
+        "source_start": 23.01251700680272,
+        "source_end": 23.61031746031746,
+        "window_start": 22.914947845804985,
+        "window_end": 23.709088435374145,
+        "duration": 0.5978004535147392,
+        "rate": 44100,
+        "frames": 26363,
+        "gain": 1.0,
+        "excluded_label": [
+          22.18956916099773,
+          22.902947845804984
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "f09d83f9d631561caf4a84375d99adeaa1be2f845ea20a8284dad9cfb961e6db",
+        "peak": 0.6350958347320557
+      }
+    ]
+  },
+  {
+    "enum": "LINLOS_DEATH",
+    "path": "voice_ln27d01.wav",
+    "source_codes": [
+      "LN27D01"
+    ],
+    "frames": 61123,
+    "rate": 44100,
+    "duration_ms": 1386,
+    "priority": 110,
+    "gain": 0.75,
+    "combat": true,
+    "sha256": "6c3a5852871aad84bcc75ddbb3b00d668d3623ee3488f6c14eebec49870cabb1",
+    "source_cuts": [
+      {
+        "id": "LN27D01",
+        "character": "LN",
+        "name": "Linlos Dustman",
+        "kind": "D",
+        "number": 1,
+        "file": "LN27D01.wav",
+        "source": "linlos voices.mp3",
+        "source_sha256": "f502d12cd788606370a9fe96437a1b1c3c39af27b9c503b2b107c5e5fff970d8",
+        "source_start": 26.998458049886622,
+        "source_end": 28.384467120181405,
+        "window_start": 26.851002267573694,
+        "window_end": 28.478249433106573,
+        "duration": 1.3860090702947845,
+        "rate": 44100,
+        "frames": 61123,
+        "gain": 1.0,
+        "excluded_label": [
+          26.220408163265308,
+          26.839002267573694
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "6c3a5852871aad84bcc75ddbb3b00d668d3623ee3488f6c14eebec49870cabb1",
+        "peak": 0.6456235647201538
+      }
+    ]
+  },
+  {
+    "enum": "KOBA_SELECT",
+    "path": "voice_kb27s01.wav",
+    "source_codes": [
+      "KB27S01"
+    ],
+    "frames": 354756,
+    "rate": 44100,
+    "duration_ms": 8044,
+    "priority": 75,
+    "gain": 0.75,
+    "combat": false,
+    "sha256": "d86e0949d6f3bb2692473690c1ee8e4f211c1067c041073e9fbb5ed0de462d1d",
+    "source_cuts": [
+      {
+        "id": "KB27S01",
+        "character": "KB",
+        "name": "Koba",
+        "kind": "S",
+        "number": 1,
+        "file": "KB27S01.wav",
+        "source": "Koba Voices.mp3",
+        "source_sha256": "69084bfa5df0ba65b9f8d9fe461528ecd901b222084e275b9f6600fe03af53a7",
+        "source_start": 0.08290249433106577,
+        "source_end": 8.127256235827664,
+        "window_start": 0.0,
+        "window_end": 8.18140589569161,
+        "duration": 8.044353741496598,
+        "rate": 44100,
+        "frames": 354756,
+        "gain": 1.0,
+        "excluded_label": null,
+        "label_present": true,
+        "content_text": "On behalf of all the outcasts and who have been called monsters... I will show them the REAL MONSTER!",
+        "sha256": "d86e0949d6f3bb2692473690c1ee8e4f211c1067c041073e9fbb5ed0de462d1d",
+        "peak": 0.944476842880249
+      }
+    ]
+  },
+  {
+    "enum": "KOBA_HURT_1",
+    "path": "voice_kb27h05.wav",
+    "source_codes": [
+      "KB27H05"
+    ],
+    "frames": 54358,
+    "rate": 44100,
+    "duration_ms": 1233,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "576417519adcc21fadbe689c08dabbb5280286ace54b5ff6405f7d9205292939",
+    "source_cuts": [
+      {
+        "id": "KB27H05",
+        "character": "KB",
+        "name": "Koba",
+        "kind": "H",
+        "number": 5,
+        "file": "KB27H05.wav",
+        "source": "Koba Voices.mp3",
+        "source_sha256": "69084bfa5df0ba65b9f8d9fe461528ecd901b222084e275b9f6600fe03af53a7",
+        "source_start": 20.513197278911566,
+        "source_end": 21.745804988662133,
+        "window_start": 20.380707482993195,
+        "window_end": 21.948090702947844,
+        "duration": 1.232607709750567,
+        "rate": 44100,
+        "frames": 54358,
+        "gain": 1.0,
+        "excluded_label": [
+          19.39591836734694,
+          20.368707482993194
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "576417519adcc21fadbe689c08dabbb5280286ace54b5ff6405f7d9205292939",
+        "peak": 0.5515140891075134
+      }
+    ]
+  },
+  {
+    "enum": "KOBA_HURT_2",
+    "path": "voice_kb27h06.wav",
+    "source_codes": [
+      "KB27H06"
+    ],
+    "frames": 40498,
+    "rate": 44100,
+    "duration_ms": 918,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "6e7e7c4b34186c5a429c7749c0ee448fb1df0a7d4dcbfb68f74424834c1a3195",
+    "source_cuts": [
+      {
+        "id": "KB27H06",
+        "character": "KB",
+        "name": "Koba",
+        "kind": "H",
+        "number": 6,
+        "file": "KB27H06.wav",
+        "source": "Koba Voices.mp3",
+        "source_sha256": "69084bfa5df0ba65b9f8d9fe461528ecd901b222084e275b9f6600fe03af53a7",
+        "source_start": 23.072380952380954,
+        "source_end": 23.990702947845804,
+        "window_start": 22.924925170068025,
+        "window_end": 24.138113378684803,
+        "duration": 0.9183219954648526,
+        "rate": 44100,
+        "frames": 40498,
+        "gain": 1.0,
+        "excluded_label": [
+          21.960090702947845,
+          22.912925170068025
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "6e7e7c4b34186c5a429c7749c0ee448fb1df0a7d4dcbfb68f74424834c1a3195",
+        "peak": 0.9076207876205444
+      }
+    ]
+  },
+  {
+    "enum": "KOBA_HURT_3",
+    "path": "voice_kb27h08.wav",
+    "source_codes": [
+      "KB27H08"
+    ],
+    "frames": 58538,
+    "rate": 44100,
+    "duration_ms": 1327,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "c40560a3a7f99a2380e46d0b0867ca74ebb04fe6c67bfe758cd95d0ce18e5bdc",
+    "source_cuts": [
+      {
+        "id": "KB27H08",
+        "character": "KB",
+        "name": "Koba",
+        "kind": "H",
+        "number": 8,
+        "file": "KB27H08.wav",
+        "source": "Koba Voices.mp3",
+        "source_sha256": "69084bfa5df0ba65b9f8d9fe461528ecd901b222084e275b9f6600fe03af53a7",
+        "source_start": 27.432471655328797,
+        "source_end": 28.759863945578232,
+        "window_start": 27.250095238095238,
+        "window_end": 28.90727437641723,
+        "duration": 1.327392290249433,
+        "rate": 44100,
+        "frames": 58538,
+        "gain": 1.0,
+        "excluded_label": [
+          26.439909297052154,
+          27.238095238095237
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "c40560a3a7f99a2380e46d0b0867ca74ebb04fe6c67bfe758cd95d0ce18e5bdc",
+        "peak": 0.9280558228492737
+      }
+    ]
+  },
+  {
+    "enum": "KOBA_HURT_4",
+    "path": "voice_kb27h09.wav",
+    "source_codes": [
+      "KB27H09"
+    ],
+    "frames": 42698,
+    "rate": 44100,
+    "duration_ms": 968,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "c19edd2c6a61268aab991443d69b4439fad2ce04ffc79bd8e6a40d9e64c834a9",
+    "source_cuts": [
+      {
+        "id": "KB27H09",
+        "character": "KB",
+        "name": "Koba",
+        "kind": "H",
+        "number": 9,
+        "file": "KB27H09.wav",
+        "source": "Koba Voices.mp3",
+        "source_sha256": "69084bfa5df0ba65b9f8d9fe461528ecd901b222084e275b9f6600fe03af53a7",
+        "source_start": 30.016598639455783,
+        "source_end": 30.98480725623583,
+        "window_start": 29.874131519274375,
+        "window_end": 31.122240362811787,
+        "duration": 0.9682086167800453,
+        "rate": 44100,
+        "frames": 42698,
+        "gain": 1.0,
+        "excluded_label": [
+          28.91927437641723,
+          29.862131519274374
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "c19edd2c6a61268aab991443d69b4439fad2ce04ffc79bd8e6a40d9e64c834a9",
+        "peak": 0.9037414789199829
+      }
+    ]
+  },
+  {
+    "enum": "KOBA_HURT_5",
+    "path": "voice_kb27h01.wav",
+    "source_codes": [
+      "KB27H01"
+    ],
+    "frames": 41818,
+    "rate": 44100,
+    "duration_ms": 948,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "5a871e77babf41546b4eb3c242f297a81d97fd5de65c953bc87800216f92cf14",
+    "source_cuts": [
+      {
+        "id": "KB27H01",
+        "character": "KB",
+        "name": "Koba",
+        "kind": "H",
+        "number": 1,
+        "file": "KB27H01.wav",
+        "source": "Koba Voices.mp3",
+        "source_sha256": "69084bfa5df0ba65b9f8d9fe461528ecd901b222084e275b9f6600fe03af53a7",
+        "source_start": 10.241541950113378,
+        "source_end": 11.189795918367347,
+        "window_start": 10.034222222222223,
+        "window_end": 11.412036281179137,
+        "duration": 0.9482539682539682,
+        "rate": 44100,
+        "frames": 41818,
+        "gain": 1.0,
+        "excluded_label": [
+          9.179138321995463,
+          10.022222222222222
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "5a871e77babf41546b4eb3c242f297a81d97fd5de65c953bc87800216f92cf14",
+        "peak": 0.9056679606437683
+      }
+    ]
+  },
+  {
+    "enum": "KOBA_DEATH",
+    "path": "voice_kb27d09.wav",
+    "source_codes": [
+      "KB27D09"
+    ],
+    "frames": 75698,
+    "rate": 44100,
+    "duration_ms": 1717,
+    "priority": 110,
+    "gain": 0.75,
+    "combat": true,
+    "sha256": "b494f07efebb5ecff16b9b764b77914dfe49c2b8dce80a9091c0406f095dfa2e",
+    "source_cuts": [
+      {
+        "id": "KB27D09",
+        "character": "KB",
+        "name": "Koba",
+        "kind": "D",
+        "number": 9,
+        "file": "KB27D09.wav",
+        "source": "Koba Voices.mp3",
+        "source_sha256": "69084bfa5df0ba65b9f8d9fe461528ecd901b222084e275b9f6600fe03af53a7",
+        "source_start": 59.92362811791383,
+        "source_end": 61.64013605442177,
+        "window_start": 59.79113832199546,
+        "window_end": 61.80750113378684,
+        "duration": 1.7165079365079365,
+        "rate": 44100,
+        "frames": 75698,
+        "gain": 1.0,
+        "excluded_label": [
+          58.816326530612244,
+          59.77913832199546
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "b494f07efebb5ecff16b9b764b77914dfe49c2b8dce80a9091c0406f095dfa2e",
+        "peak": 0.9447408318519592
+      }
+    ]
+  },
+  {
+    "enum": "LAVENA_SELECT",
+    "path": "voice_lv27s01.wav",
+    "source_codes": [
+      "LV27S01"
+    ],
+    "frames": 275393,
+    "rate": 44100,
+    "duration_ms": 6245,
+    "priority": 75,
+    "gain": 0.75,
+    "combat": false,
+    "sha256": "2ed84e8fd0dc89592a0c32633e6a9baa22632ac58ecf38082afe8fe4f8cb412d",
+    "source_cuts": [
+      {
+        "id": "LV27S01",
+        "character": "LV",
+        "name": "Lavena Vol",
+        "kind": "S",
+        "number": 1,
+        "file": "LV27S01.wav",
+        "source": "Lavena Vol Voices.mp3",
+        "source_sha256": "c62d3b1dbedecbd84e1fd279735138047492f883fc616b6c3570e3d8b64b9094",
+        "source_start": 0.0665079365079365,
+        "source_end": 6.31124716553288,
+        "window_start": 0.0,
+        "window_end": 6.3854875283446715,
+        "duration": 6.244739229024943,
+        "rate": 44100,
+        "frames": 275393,
+        "gain": 1.0,
+        "excluded_label": null,
+        "label_present": true,
+        "content_text": "And they call these spells forbidden magic. Ha! What's the worst that could happen anyway?",
+        "sha256": "2ed84e8fd0dc89592a0c32633e6a9baa22632ac58ecf38082afe8fe4f8cb412d",
+        "peak": 0.938757061958313
+      }
+    ]
+  },
+  {
+    "enum": "LAVENA_HURT_1",
+    "path": "voice_lv27h04.wav",
+    "source_codes": [
+      "LV27H04"
+    ],
+    "frames": 24878,
+    "rate": 44100,
+    "duration_ms": 564,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "1e41bbe34d86f8551efd3cdf06527ef7171c014cfc63852e697afa7afafc13d4",
+    "source_cuts": [
+      {
+        "id": "LV27H04",
+        "character": "LV",
+        "name": "Lavena Vol",
+        "kind": "H",
+        "number": 4,
+        "file": "LV27H04.wav",
+        "source": "Lavena Vol Voices.mp3",
+        "source_sha256": "c62d3b1dbedecbd84e1fd279735138047492f883fc616b6c3570e3d8b64b9094",
+        "source_start": 14.347210884353741,
+        "source_end": 14.911337868480725,
+        "window_start": 14.114947845804988,
+        "window_end": 15.17348752834467,
+        "duration": 0.5641269841269841,
+        "rate": 44100,
+        "frames": 24878,
+        "gain": 1.0,
+        "excluded_label": [
+          13.349659863945579,
+          14.102947845804987
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "1e41bbe34d86f8551efd3cdf06527ef7171c014cfc63852e697afa7afafc13d4",
+        "peak": 0.8879746198654175
+      }
+    ]
+  },
+  {
+    "enum": "LAVENA_HURT_2",
+    "path": "voice_lv27h01.wav",
+    "source_codes": [
+      "LV27H01"
+    ],
+    "frames": 29058,
+    "rate": 44100,
+    "duration_ms": 659,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "341f680585ec5a41e059ebbbbd19d852f44f214b44ab79a4f731c029afe8b035",
+    "source_cuts": [
+      {
+        "id": "LV27H01",
+        "character": "LV",
+        "name": "Lavena Vol",
+        "kind": "H",
+        "number": 1,
+        "file": "LV27H01.wav",
+        "source": "Lavena Vol Voices.mp3",
+        "source_sha256": "c62d3b1dbedecbd84e1fd279735138047492f883fc616b6c3570e3d8b64b9094",
+        "source_start": 8.370793650793651,
+        "source_end": 9.0297052154195,
+        "window_start": 8.073678004535148,
+        "window_end": 9.376662131519273,
+        "duration": 0.6589115646258503,
+        "rate": 44100,
+        "frames": 29058,
+        "gain": 1.0,
+        "excluded_label": [
+          7.353287981859411,
+          8.061678004535148
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "341f680585ec5a41e059ebbbbd19d852f44f214b44ab79a4f731c029afe8b035",
+        "peak": 0.8943940997123718
+      }
+    ]
+  },
+  {
+    "enum": "LAVENA_HURT_3",
+    "path": "voice_lv27h08.wav",
+    "source_codes": [
+      "LV27H08"
+    ],
+    "frames": 29058,
+    "rate": 44100,
+    "duration_ms": 659,
+    "priority": 40,
+    "gain": 0.65,
+    "combat": true,
+    "sha256": "08e9b17811d5b3cb0817893147a0dd5c3ec2b8a1e06443b0184ac5bac9af01ff",
+    "source_cuts": [
+      {
+        "id": "LV27H08",
+        "character": "LV",
+        "name": "Lavena Vol",
+        "kind": "H",
+        "number": 8,
+        "file": "LV27H08.wav",
+        "source": "Lavena Vol Voices.mp3",
+        "source_sha256": "c62d3b1dbedecbd84e1fd279735138047492f883fc616b6c3570e3d8b64b9094",
+        "source_start": 22.18938775510204,
+        "source_end": 22.84829931972789,
+        "window_start": 21.982068027210882,
+        "window_end": 23.08550566893424,
+        "duration": 0.6589115646258503,
+        "rate": 44100,
+        "frames": 29058,
+        "gain": 1.0,
+        "excluded_label": [
+          21.23673469387755,
+          21.970068027210882
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "08e9b17811d5b3cb0817893147a0dd5c3ec2b8a1e06443b0184ac5bac9af01ff",
+        "peak": 0.9297915101051331
+      }
+    ]
+  },
+  {
+    "enum": "LAVENA_DEATH",
+    "path": "voice_lv27d10.wav",
+    "source_codes": [
+      "LV27D10"
+    ],
+    "frames": 44458,
+    "rate": 44100,
+    "duration_ms": 1008,
+    "priority": 110,
+    "gain": 0.75,
+    "combat": true,
+    "sha256": "d217996be6b01392298f23b9ba357f42b4816c46e1a0ecac22ce74364e9a1fda",
+    "source_cuts": [
+      {
+        "id": "LV27D10",
+        "character": "LV",
+        "name": "Lavena Vol",
+        "kind": "D",
+        "number": 10,
+        "file": "LV27D10.wav",
+        "source": "Lavena Vol Voices.mp3",
+        "source_sha256": "c62d3b1dbedecbd84e1fd279735138047492f883fc616b6c3570e3d8b64b9094",
+        "source_start": 47.39709750566893,
+        "source_end": 48.40521541950113,
+        "window_start": 47.11494784580499,
+        "window_end": 48.51570975056689,
+        "duration": 1.0081179138321996,
+        "rate": 44100,
+        "frames": 44458,
+        "gain": 1.0,
+        "excluded_label": [
+          46.639002267573694,
+          47.10294784580499
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "d217996be6b01392298f23b9ba357f42b4816c46e1a0ecac22ce74364e9a1fda",
+        "peak": 0.8818155527114868
+      }
+    ]
+  },
+  {
+    "enum": "WITCH_HURT_1",
+    "path": "voice_wi27h02.wav",
+    "source_codes": [
+      "WI27H02"
+    ],
+    "frames": 35438,
+    "rate": 44100,
+    "duration_ms": 804,
+    "priority": 30,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "794b1da2a02ecb72399b53e6e409462d82e127d7207c8ec2501e1134c1ba67ae",
+    "source_cuts": [
+      {
+        "id": "WI27H02",
+        "character": "WI",
+        "name": "Witch",
+        "kind": "H",
+        "number": 2,
+        "file": "WI27H02.wav",
+        "source": "Witch Voices.mp3",
+        "source_sha256": "e5211c90ac56c967ee154703565970a234dbf912e37a8ca484c4a1f2b84f4297",
+        "source_start": 3.2075283446712017,
+        "source_end": 4.011111111111111,
+        "window_start": 3.1049705215419503,
+        "window_end": 4.158521541950114,
+        "duration": 0.8035827664399093,
+        "rate": 44100,
+        "frames": 35438,
+        "gain": 1.0,
+        "excluded_label": [
+          2.484353741496599,
+          3.0929705215419503
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "794b1da2a02ecb72399b53e6e409462d82e127d7207c8ec2501e1134c1ba67ae",
+        "peak": 0.870934247970581
+      }
+    ]
+  },
+  {
+    "enum": "WITCH_HURT_2",
+    "path": "voice_wi27h04.wav",
+    "source_codes": [
+      "WI27H04"
+    ],
+    "frames": 40663,
+    "rate": 44100,
+    "duration_ms": 922,
+    "priority": 30,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "f2af24b2f2c9c4ede925ade67828bf453f0d11a16e2ab3b406311025fc7ddc30",
+    "source_cuts": [
+      {
+        "id": "WI27H04",
+        "character": "WI",
+        "name": "Witch",
+        "kind": "H",
+        "number": 4,
+        "file": "WI27H04.wav",
+        "source": "Witch Voices.mp3",
+        "source_sha256": "e5211c90ac56c967ee154703565970a234dbf912e37a8ca484c4a1f2b84f4297",
+        "source_start": 6.365351473922902,
+        "source_end": 7.287414965986395,
+        "window_start": 6.282748299319727,
+        "window_end": 7.381197278911565,
+        "duration": 0.922063492063492,
+        "rate": 44100,
+        "frames": 40663,
+        "gain": 1.0,
+        "excluded_label": [
+          5.7319727891156464,
+          6.270748299319727
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "f2af24b2f2c9c4ede925ade67828bf453f0d11a16e2ab3b406311025fc7ddc30",
+        "peak": 0.8970149159431458
+      }
+    ]
+  },
+  {
+    "enum": "WITCH_HURT_3",
+    "path": "voice_wi27h03.wav",
+    "source_codes": [
+      "WI27H03"
+    ],
+    "frames": 36098,
+    "rate": 44100,
+    "duration_ms": 819,
+    "priority": 30,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "74d1b8a95fbd9ff53bdb75a433e843659dea21e7641d6f603a15b8c1b02f670d",
+    "source_cuts": [
+      {
+        "id": "WI27H03",
+        "character": "WI",
+        "name": "Witch",
+        "kind": "H",
+        "number": 3,
+        "file": "WI27H03.wav",
+        "source": "Witch Voices.mp3",
+        "source_sha256": "e5211c90ac56c967ee154703565970a234dbf912e37a8ca484c4a1f2b84f4297",
+        "source_start": 4.783945578231292,
+        "source_end": 5.60249433106576,
+        "window_start": 4.701342403628117,
+        "window_end": 5.719972789115647,
+        "duration": 0.8185487528344672,
+        "rate": 44100,
+        "frames": 36098,
+        "gain": 1.0,
+        "excluded_label": [
+          4.170521541950113,
+          4.6893424036281175
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "74d1b8a95fbd9ff53bdb75a433e843659dea21e7641d6f603a15b8c1b02f670d",
+        "peak": 0.640762984752655
+      }
+    ]
+  },
+  {
+    "enum": "WITCH_HURT_4",
+    "path": "voice_wi27h06.wav",
+    "source_codes": [
+      "WI27H06"
+    ],
+    "frames": 34615,
+    "rate": 44100,
+    "duration_ms": 785,
+    "priority": 30,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "2947e88e61dcdd99731f0ddba50454d1fd3718a389856248c9cb58490d23d556",
+    "source_cuts": [
+      {
+        "id": "WI27H06",
+        "character": "WI",
+        "name": "Witch",
+        "kind": "H",
+        "number": 6,
+        "file": "WI27H06.wav",
+        "source": "Witch Voices.mp3",
+        "source_sha256": "e5211c90ac56c967ee154703565970a234dbf912e37a8ca484c4a1f2b84f4297",
+        "source_start": 9.87108843537415,
+        "source_end": 10.656009070294784,
+        "window_start": 9.794766439909298,
+        "window_end": 10.808408163265305,
+        "duration": 0.7849206349206349,
+        "rate": 44100,
+        "frames": 34615,
+        "gain": 1.0,
+        "excluded_label": [
+          9.144217687074828,
+          9.782766439909297
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "2947e88e61dcdd99731f0ddba50454d1fd3718a389856248c9cb58490d23d556",
+        "peak": 0.6877410411834717
+      }
+    ]
+  },
+  {
+    "enum": "WITCH_HURT_5",
+    "path": "voice_wi27h10.wav",
+    "source_codes": [
+      "WI27H10"
+    ],
+    "frames": 51938,
+    "rate": 44100,
+    "duration_ms": 1178,
+    "priority": 30,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "bf5dc6c7dd07c4e656722a15235881cbfb19c55d79522ed92eea58f50e16bd65",
+    "source_cuts": [
+      {
+        "id": "WI27H10",
+        "character": "WI",
+        "name": "Witch",
+        "kind": "H",
+        "number": 10,
+        "file": "WI27H10.wav",
+        "source": "Witch Voices.mp3",
+        "source_sha256": "e5211c90ac56c967ee154703565970a234dbf912e37a8ca484c4a1f2b84f4297",
+        "source_start": 16.60707482993197,
+        "source_end": 17.784807256235826,
+        "window_start": 16.504517006802722,
+        "window_end": 17.967138321995463,
+        "duration": 1.1777324263038549,
+        "rate": 44100,
+        "frames": 51938,
+        "gain": 1.0,
+        "excluded_label": [
+          16.023582766439908,
+          16.49251700680272
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "bf5dc6c7dd07c4e656722a15235881cbfb19c55d79522ed92eea58f50e16bd65",
+        "peak": 0.9015676379203796
+      }
+    ]
+  },
+  {
+    "enum": "WITCH_DEATH",
+    "path": "witch_death.wav",
+    "source_codes": [
+      "WI27D07"
+    ],
+    "frames": 53590,
+    "rate": 44100,
+    "duration_ms": 1215,
+    "priority": 95,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "02151d995f298d03af3da1ccc5a92523bb71d6fd8cd6ac65f077cc66f072a10f",
+    "source_cuts": [
+      {
+        "id": "WI27D07",
+        "character": "WI",
+        "name": "Witch",
+        "kind": "D",
+        "number": 7,
+        "file": "WI27D07.wav",
+        "source": "Witch Voices.mp3",
+        "source_sha256": "e5211c90ac56c967ee154703565970a234dbf912e37a8ca484c4a1f2b84f4297",
+        "source_start": 31.813718820861677,
+        "source_end": 33.02891156462585,
+        "window_start": 31.734902494331067,
+        "window_end": 33.12269387755102,
+        "duration": 1.2151927437641723,
+        "rate": 44100,
+        "frames": 53590,
+        "gain": 1.0,
+        "excluded_label": [
+          31.099319727891157,
+          31.722902494331066
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "02151d995f298d03af3da1ccc5a92523bb71d6fd8cd6ac65f077cc66f072a10f",
+        "peak": 0.713983416557312
+      }
+    ]
+  },
+  {
+    "enum": "WITCH_QUOTE_1",
+    "path": "voice_wi27p01.wav",
+    "source_codes": [
+      "WI27P01"
+    ],
+    "frames": 119533,
+    "rate": 44100,
+    "duration_ms": 2710,
+    "priority": 25,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "0578bfb4d23defa99573107f2d4acfa61d3ad61fe6c3d0ba7dc22732dd83ded9",
+    "source_cuts": [
+      {
+        "id": "WI27P01",
+        "character": "WI",
+        "name": "Witch",
+        "kind": "P",
+        "number": 1,
+        "file": "WI27P01.wav",
+        "source": "Witch Voices.mp3",
+        "source_sha256": "e5211c90ac56c967ee154703565970a234dbf912e37a8ca484c4a1f2b84f4297",
+        "source_start": 40.31818594104308,
+        "source_end": 43.028684807256234,
+        "window_start": 40.140798185941044,
+        "window_end": 43.08006349206349,
+        "duration": 2.7104988662131517,
+        "rate": 44100,
+        "frames": 119533,
+        "gain": 1.0,
+        "excluded_label": [
+          39.7047619047619,
+          40.128798185941044
+        ],
+        "label_present": true,
+        "content_text": "Hee-hee! Fresh little souls!",
+        "sha256": "0578bfb4d23defa99573107f2d4acfa61d3ad61fe6c3d0ba7dc22732dd83ded9",
+        "peak": 0.759999692440033
+      }
+    ]
+  },
+  {
+    "enum": "WITCH_QUOTE_2",
+    "path": "voice_wi27p02.wav",
+    "source_codes": [
+      "WI27P02"
+    ],
+    "frames": 88790,
+    "rate": 44100,
+    "duration_ms": 2013,
+    "priority": 25,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "6aa7c1a0820d64639ffb791b70b74c488d6c713d1a31a9483b176a927ffded50",
+    "source_cuts": [
+      {
+        "id": "WI27P02",
+        "character": "WI",
+        "name": "Witch",
+        "kind": "P",
+        "number": 2,
+        "file": "WI27P02.wav",
+        "source": "Witch Voices.mp3",
+        "source_sha256": "e5211c90ac56c967ee154703565970a234dbf912e37a8ca484c4a1f2b84f4297",
+        "source_start": 43.14047619047619,
+        "source_end": 45.15385487528345,
+        "window_start": 43.10406349206349,
+        "window_end": 45.240154195011336,
+        "duration": 2.013378684807256,
+        "rate": 44100,
+        "frames": 88790,
+        "gain": 1.0,
+        "excluded_label": null,
+        "label_present": false,
+        "content_text": "Come closer, my pretty!",
+        "sha256": "6aa7c1a0820d64639ffb791b70b74c488d6c713d1a31a9483b176a927ffded50",
+        "peak": 0.4995669722557068
+      }
+    ]
+  },
+  {
+    "enum": "WITCH_QUOTE_3",
+    "path": "voice_wi27p03.wav",
+    "source_codes": [
+      "WI27P03"
+    ],
+    "frames": 97423,
+    "rate": 44100,
+    "duration_ms": 2209,
+    "priority": 25,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "ed6db5e8ac05ee40496214fb0cbd732ca5a1ba43f38ca8f84e2d5249dd3e37ed",
+    "source_cuts": [
+      {
+        "id": "WI27P03",
+        "character": "WI",
+        "name": "Witch",
+        "kind": "P",
+        "number": 3,
+        "file": "WI27P03.wav",
+        "source": "Witch Voices.mp3",
+        "source_sha256": "e5211c90ac56c967ee154703565970a234dbf912e37a8ca484c4a1f2b84f4297",
+        "source_start": 45.900498866213155,
+        "source_end": 48.109637188208616,
+        "window_start": 45.81290702947846,
+        "window_end": 48.19843083900226,
+        "duration": 2.209138321995465,
+        "rate": 44100,
+        "frames": 97423,
+        "gain": 1.0,
+        "excluded_label": [
+          45.252154195011336,
+          45.80090702947846
+        ],
+        "label_present": true,
+        "content_text": "I'll boil your bones!",
+        "sha256": "ed6db5e8ac05ee40496214fb0cbd732ca5a1ba43f38ca8f84e2d5249dd3e37ed",
+        "peak": 0.8073945045471191
+      }
+    ]
+  },
+  {
+    "enum": "WITCH_QUOTE_4",
+    "path": "voice_wi27p05.wav",
+    "source_codes": [
+      "WI27P05"
+    ],
+    "frames": 102978,
+    "rate": 44100,
+    "duration_ms": 2335,
+    "priority": 25,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "048b86b55885b2a0bde983ec562f84286fca31b8b9052723a68eb6954e9b89dc",
+    "source_cuts": [
+      {
+        "id": "WI27P05",
+        "character": "WI",
+        "name": "Witch",
+        "kind": "P",
+        "number": 5,
+        "file": "WI27P05.wav",
+        "source": "Witch Voices.mp3",
+        "source_sha256": "e5211c90ac56c967ee154703565970a234dbf912e37a8ca484c4a1f2b84f4297",
+        "source_start": 52.85469387755102,
+        "source_end": 55.189795918367345,
+        "window_start": 52.662340136054425,
+        "window_end": 55.33720634920635,
+        "duration": 2.3351020408163263,
+        "rate": 44100,
+        "frames": 102978,
+        "gain": 1.0,
+        "excluded_label": [
+          52.121541950113375,
+          52.650340136054425
+        ],
+        "label_present": true,
+        "content_text": "Rot! Rot from within!",
+        "sha256": "048b86b55885b2a0bde983ec562f84286fca31b8b9052723a68eb6954e9b89dc",
+        "peak": 0.481526255607605
+      }
+    ]
+  },
+  {
+    "enum": "WITCH_QUOTE_5",
+    "path": "voice_wi27p07.wav",
+    "source_codes": [
+      "WI27P07"
+    ],
+    "frames": 71190,
+    "rate": 44100,
+    "duration_ms": 1614,
+    "priority": 25,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "ec8f95abdb4f58a6e99c016dd73e49194632598f4c9684b0ad446df76e058ce7",
+    "source_cuts": [
+      {
+        "id": "WI27P07",
+        "character": "WI",
+        "name": "Witch",
+        "kind": "P",
+        "number": 7,
+        "file": "WI27P07.wav",
+        "source": "Witch Voices.mp3",
+        "source_sha256": "e5211c90ac56c967ee154703565970a234dbf912e37a8ca484c4a1f2b84f4297",
+        "source_start": 59.24387755102041,
+        "source_end": 60.858163265306125,
+        "window_start": 59.172544217687076,
+        "window_end": 60.89457596371882,
+        "duration": 1.6142857142857143,
+        "rate": 44100,
+        "frames": 71190,
+        "gain": 1.0,
+        "excluded_label": [
+          58.57687074829932,
+          59.160544217687075
+        ],
+        "label_present": true,
+        "content_text": "You filthy little wretch!",
+        "sha256": "ec8f95abdb4f58a6e99c016dd73e49194632598f4c9684b0ad446df76e058ce7",
+        "peak": 0.8746201992034912
+      }
+    ]
+  },
+  {
+    "enum": "WITCH_QUOTE_6",
+    "path": "voice_wi27p09.wav",
+    "source_codes": [
+      "WI27P09"
+    ],
+    "frames": 96270,
+    "rate": 44100,
+    "duration_ms": 2183,
+    "priority": 25,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "9ec81656530889dee10f22de056355fc887d32315ffb968b76c87ef19e7920c1",
+    "source_cuts": [
+      {
+        "id": "WI27P09",
+        "character": "WI",
+        "name": "Witch",
+        "kind": "P",
+        "number": 9,
+        "file": "WI27P09.wav",
+        "source": "Witch Voices.mp3",
+        "source_sha256": "e5211c90ac56c967ee154703565970a234dbf912e37a8ca484c4a1f2b84f4297",
+        "source_start": 65.15294784580499,
+        "source_end": 67.3359410430839,
+        "window_start": 65.0791201814059,
+        "window_end": 67.409768707483,
+        "duration": 2.1829931972789116,
+        "rate": 44100,
+        "frames": 96270,
+        "gain": 1.0,
+        "excluded_label": [
+          64.51337868480725,
+          65.0671201814059
+        ],
+        "label_present": true,
+        "content_text": "I'll curse your bloodline!",
+        "sha256": "9ec81656530889dee10f22de056355fc887d32315ffb968b76c87ef19e7920c1",
+        "peak": 0.8788772821426392
+      }
+    ]
+  },
+  {
+    "enum": "VAMPIRE_HURT",
+    "path": "vampire_hurt.wav",
+    "source_codes": [
+      "VL27H02"
+    ],
+    "frames": 44238,
+    "rate": 44100,
+    "duration_ms": 1003,
+    "priority": 30,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "ed586734d1b394e6afbad1b0fa7a151bb383f702093b27f28c8aede3c83e9e60",
+    "source_cuts": [
+      {
+        "id": "VL27H02",
+        "character": "VL",
+        "name": "Vampire Lord",
+        "kind": "H",
+        "number": 2,
+        "file": "VL27H02.wav",
+        "source": "Vampire Lord Voices.mp3",
+        "source_sha256": "5afc5da2fe68c93b7e75e51d24b34d689d88d2f135e9f6a9a2f1df5db08c72bb",
+        "source_start": 3.307301587301587,
+        "source_end": 4.310430839002268,
+        "window_start": 3.1349024943310657,
+        "window_end": 4.492761904761904,
+        "duration": 1.0031292517006802,
+        "rate": 44100,
+        "frames": 44238,
+        "gain": 1.0,
+        "excluded_label": [
+          2.5691609977324266,
+          3.1229024943310657
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "ed586734d1b394e6afbad1b0fa7a151bb383f702093b27f28c8aede3c83e9e60",
+        "peak": 0.6007691621780396
+      }
+    ]
+  },
+  {
+    "enum": "VAMPIRE_HURT_2",
+    "path": "voice_vl27h05.wav",
+    "source_codes": [
+      "VL27H05"
+    ],
+    "frames": 64093,
+    "rate": 44100,
+    "duration_ms": 1453,
+    "priority": 30,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "de68caf67b490856a6c0ea853e47a6391d436532f8798fc5aa7c9a3f863cbe7e",
+    "source_cuts": [
+      {
+        "id": "VL27H05",
+        "character": "VL",
+        "name": "Vampire Lord",
+        "kind": "H",
+        "number": 5,
+        "file": "VL27H05.wav",
+        "source": "Vampire Lord Voices.mp3",
+        "source_sha256": "5afc5da2fe68c93b7e75e51d24b34d689d88d2f135e9f6a9a2f1df5db08c72bb",
+        "source_start": 8.959455782312926,
+        "source_end": 10.41281179138322,
+        "window_start": 8.68728344671202,
+        "window_end": 10.484145124716552,
+        "duration": 1.4533560090702948,
+        "rate": 44100,
+        "frames": 64093,
+        "gain": 1.0,
+        "excluded_label": [
+          8.161451247165532,
+          8.675283446712019
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "de68caf67b490856a6c0ea853e47a6391d436532f8798fc5aa7c9a3f863cbe7e",
+        "peak": 0.42107003927230835
+      }
+    ]
+  },
+  {
+    "enum": "VAMPIRE_HURT_3",
+    "path": "voice_vl27h08.wav",
+    "source_codes": [
+      "VL27H08"
+    ],
+    "frames": 57878,
+    "rate": 44100,
+    "duration_ms": 1312,
+    "priority": 30,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "b45332e426711b5ecda1761039fdccd5edd98f179da4b9500e8de56581402b33",
+    "source_cuts": [
+      {
+        "id": "VL27H08",
+        "character": "VL",
+        "name": "Vampire Lord",
+        "kind": "H",
+        "number": 8,
+        "file": "VL27H08.wav",
+        "source": "Vampire Lord Voices.mp3",
+        "source_sha256": "5afc5da2fe68c93b7e75e51d24b34d689d88d2f135e9f6a9a2f1df5db08c72bb",
+        "source_start": 15.87374149659864,
+        "source_end": 17.186167800453514,
+        "window_start": 15.731274376417234,
+        "window_end": 17.343555555555554,
+        "duration": 1.3124263038548754,
+        "rate": 44100,
+        "frames": 57878,
+        "gain": 1.0,
+        "excluded_label": [
+          15.25034013605442,
+          15.719274376417234
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "b45332e426711b5ecda1761039fdccd5edd98f179da4b9500e8de56581402b33",
+        "peak": 0.7207242250442505
+      }
+    ]
+  },
+  {
+    "enum": "VAMPIRE_HURT_4",
+    "path": "voice_vl27h09.wav",
+    "source_codes": [
+      "VL27H09"
+    ],
+    "frames": 48858,
+    "rate": 44100,
+    "duration_ms": 1108,
+    "priority": 30,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "8d22fb6140ac0f1a71ff5f0fb322300f6e09a1bd9802f4c2c3471ed7919b863e",
+    "source_cuts": [
+      {
+        "id": "VL27H09",
+        "character": "VL",
+        "name": "Vampire Lord",
+        "kind": "H",
+        "number": 9,
+        "file": "VL27H09.wav",
+        "source": "Vampire Lord Voices.mp3",
+        "source_sha256": "5afc5da2fe68c93b7e75e51d24b34d689d88d2f135e9f6a9a2f1df5db08c72bb",
+        "source_start": 18.06875283446712,
+        "source_end": 19.176643990929705,
+        "window_start": 17.871410430839,
+        "window_end": 19.28913378684807,
+        "duration": 1.107891156462585,
+        "rate": 44100,
+        "frames": 48858,
+        "gain": 1.0,
+        "excluded_label": [
+          17.355555555555554,
+          17.859410430839
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "8d22fb6140ac0f1a71ff5f0fb322300f6e09a1bd9802f4c2c3471ed7919b863e",
+        "peak": 0.7697874307632446
+      }
+    ]
+  },
+  {
+    "enum": "VAMPIRE_DEATH",
+    "path": "vampire_death.wav",
+    "source_codes": [
+      "VL27D08",
+      "VL27D01"
+    ],
+    "frames": 198916,
+    "rate": 44100,
+    "duration_ms": 4511,
+    "priority": 95,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "e6c6664404fe5bf27901d311c6a7bd909e9703a3423f36573275dda142a4404c",
+    "source_cuts": [
+      {
+        "id": "VL27D08",
+        "character": "VL",
+        "name": "Vampire Lord",
+        "kind": "D",
+        "number": 8,
+        "file": "VL27D08.wav",
+        "source": "Vampire Lord Voices.mp3",
+        "source_sha256": "5afc5da2fe68c93b7e75e51d24b34d689d88d2f135e9f6a9a2f1df5db08c72bb",
+        "source_start": 42.32861678004535,
+        "source_end": 44.3843537414966,
+        "window_start": 42.21109297052154,
+        "window_end": 44.501832199546485,
+        "duration": 2.055736961451247,
+        "rate": 44100,
+        "frames": 90658,
+        "gain": 1.0,
+        "excluded_label": [
+          41.72517006802721,
+          42.19909297052154
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "632bd601630df022b206368c8438240be368938f01121853fbcf188f341edb66",
+        "peak": 0.8885777592658997
+      },
+      {
+        "id": "VL27D01",
+        "character": "VL",
+        "name": "Vampire Lord",
+        "kind": "D",
+        "number": 1,
+        "file": "VL27D01.wav",
+        "source": "Vampire Lord Voices.mp3",
+        "source_sha256": "5afc5da2fe68c93b7e75e51d24b34d689d88d2f135e9f6a9a2f1df5db08c72bb",
+        "source_start": 23.50639455782313,
+        "source_end": 25.961224489795917,
+        "window_start": 23.294086167800454,
+        "window_end": 26.068725623582765,
+        "duration": 2.4548299319727893,
+        "rate": 44100,
+        "frames": 108258,
+        "gain": 1.0,
+        "excluded_label": [
+          22.80816326530612,
+          23.282086167800454
+        ],
+        "label_present": true,
+        "content_text": "",
+        "sha256": "af8a09ab541adc4e4d1ffc91c3c516272afc11a6b04a01199c576266c8e3cd15",
+        "peak": 0.8348376154899597
+      }
+    ]
+  },
+  {
+    "enum": "VAMPIRE_QUOTE_1",
+    "path": "voice_vl27p01.wav",
+    "source_codes": [
+      "VL27P01"
+    ],
+    "frames": 95498,
+    "rate": 44100,
+    "duration_ms": 2165,
+    "priority": 25,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "3b2450b45ff36c7a90355ce1741702425adc1f431a396a85d426c8abe77e7091",
+    "source_cuts": [
+      {
+        "id": "VL27P01",
+        "character": "VL",
+        "name": "Vampire Lord",
+        "kind": "P",
+        "number": 1,
+        "file": "VL27P01.wav",
+        "source": "Vampire Lord Voices.mp3",
+        "source_sha256": "5afc5da2fe68c93b7e75e51d24b34d689d88d2f135e9f6a9a2f1df5db08c72bb",
+        "source_start": 51.49777777777778,
+        "source_end": 53.66326530612245,
+        "window_start": 51.26052607709751,
+        "window_end": 53.82564172335601,
+        "duration": 2.1654875283446713,
+        "rate": 44100,
+        "frames": 95498,
+        "gain": 1.0,
+        "excluded_label": [
+          50.80453514739229,
+          51.24852607709751
+        ],
+        "label_present": true,
+        "content_text": "You dare challenge eternity!",
+        "sha256": "3b2450b45ff36c7a90355ce1741702425adc1f431a396a85d426c8abe77e7091",
+        "peak": 0.4892754852771759
+      }
+    ]
+  },
+  {
+    "enum": "VAMPIRE_QUOTE_2",
+    "path": "voice_vl27p02.wav",
+    "source_codes": [
+      "VL27P02"
+    ],
+    "frames": 87578,
+    "rate": 44100,
+    "duration_ms": 1986,
+    "priority": 25,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "b9ed93962134b2d9137f1efa1cd75e079889e05bbdb669a73edea2ced2b75c48",
+    "source_cuts": [
+      {
+        "id": "VL27P02",
+        "character": "VL",
+        "name": "Vampire Lord",
+        "kind": "P",
+        "number": 2,
+        "file": "VL27P02.wav",
+        "source": "Vampire Lord Voices.mp3",
+        "source_sha256": "5afc5da2fe68c93b7e75e51d24b34d689d88d2f135e9f6a9a2f1df5db08c72bb",
+        "source_start": 54.49596371882086,
+        "source_end": 56.481859410430836,
+        "window_start": 54.303609977324264,
+        "window_end": 56.793895691609976,
+        "duration": 1.9858956916099773,
+        "rate": 44100,
+        "frames": 87578,
+        "gain": 1.0,
+        "excluded_label": [
+          53.83764172335601,
+          54.29160997732426
+        ],
+        "label_present": true,
+        "content_text": "Your blood shall be mine!",
+        "sha256": "b9ed93962134b2d9137f1efa1cd75e079889e05bbdb669a73edea2ced2b75c48",
+        "peak": 0.2190699726343155
+      }
+    ]
+  },
+  {
+    "enum": "VAMPIRE_QUOTE_3",
+    "path": "voice_vl27p03.wav",
+    "source_codes": [
+      "VL27P03"
+    ],
+    "frames": 83838,
+    "rate": 44100,
+    "duration_ms": 1901,
+    "priority": 25,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "dbf89222858c5c2606addd919dc9e753d2be0fbda2160177c8b2ccb6537768a4",
+    "source_cuts": [
+      {
+        "id": "VL27P03",
+        "character": "VL",
+        "name": "Vampire Lord",
+        "kind": "P",
+        "number": 3,
+        "file": "VL27P03.wav",
+        "source": "Vampire Lord Voices.mp3",
+        "source_sha256": "5afc5da2fe68c93b7e75e51d24b34d689d88d2f135e9f6a9a2f1df5db08c72bb",
+        "source_start": 57.45922902494331,
+        "source_end": 59.36031746031746,
+        "window_start": 57.24193197278911,
+        "window_end": 59.49775056689342,
+        "duration": 1.9010884353741497,
+        "rate": 44100,
+        "frames": 83838,
+        "gain": 1.0,
+        "excluded_label": [
+          56.805895691609976,
+          57.22993197278911
+        ],
+        "label_present": true,
+        "content_text": "Kneel before your lord!",
+        "sha256": "dbf89222858c5c2606addd919dc9e753d2be0fbda2160177c8b2ccb6537768a4",
+        "peak": 0.56669020652771
+      }
+    ]
+  },
+  {
+    "enum": "VAMPIRE_QUOTE_4",
+    "path": "voice_vl27p08.wav",
+    "source_codes": [
+      "VL27P08"
+    ],
+    "frames": 39783,
+    "rate": 44100,
+    "duration_ms": 902,
+    "priority": 25,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "21474d9191dfb6cebf75fa8953029e14242474813b71f5f6bfc678fb22db017d",
+    "source_cuts": [
+      {
+        "id": "VL27P08",
+        "character": "VL",
+        "name": "Vampire Lord",
+        "kind": "P",
+        "number": 8,
+        "file": "VL27P08.wav",
+        "source": "Vampire Lord Voices.mp3",
+        "source_sha256": "5afc5da2fe68c93b7e75e51d24b34d689d88d2f135e9f6a9a2f1df5db08c72bb",
+        "source_start": 71.83655328798186,
+        "source_end": 72.73866213151928,
+        "window_start": 71.72900680272109,
+        "window_end": 72.83743310657596,
+        "duration": 0.9021088435374149,
+        "rate": 44100,
+        "frames": 39783,
+        "gain": 1.0,
+        "excluded_label": [
+          71.3079365079365,
+          71.71700680272109
+        ],
+        "label_present": true,
+        "content_text": "Enough!",
+        "sha256": "21474d9191dfb6cebf75fa8953029e14242474813b71f5f6bfc678fb22db017d",
+        "peak": 0.9353085160255432
+      }
+    ]
+  },
+  {
+    "enum": "VAMPIRE_QUOTE_5",
+    "path": "voice_vl27p06.wav",
+    "source_codes": [
+      "VL27P06"
+    ],
+    "frames": 70143,
+    "rate": 44100,
+    "duration_ms": 1591,
+    "priority": 25,
+    "gain": 0.6,
+    "combat": true,
+    "sha256": "9eb2f2cc57b8e3da8cde9da2c8f5c27d50c64a06d34d34f82f0c6d42bf238f17",
+    "source_cuts": [
+      {
+        "id": "VL27P06",
+        "character": "VL",
+        "name": "Vampire Lord",
+        "kind": "P",
+        "number": 6,
+        "file": "VL27P06.wav",
+        "source": "Vampire Lord Voices.mp3",
+        "source_sha256": "5afc5da2fe68c93b7e75e51d24b34d689d88d2f135e9f6a9a2f1df5db08c72bb",
+        "source_start": 66.62839002267573,
+        "source_end": 68.21893424036281,
+        "window_start": 66.54578684807257,
+        "window_end": 68.30273922902494,
+        "duration": 1.5905442176870748,
+        "rate": 44100,
+        "frames": 70143,
+        "gain": 1.0,
+        "excluded_label": [
+          65.88526077097505,
+          66.53378684807257
+        ],
+        "label_present": true,
+        "content_text": "You will regret that!",
+        "sha256": "9eb2f2cc57b8e3da8cde9da2c8f5c27d50c64a06d34d34f82f0c6d42bf238f17",
+        "peak": 0.9087037444114685
+      }
+    ]
+  }
+]

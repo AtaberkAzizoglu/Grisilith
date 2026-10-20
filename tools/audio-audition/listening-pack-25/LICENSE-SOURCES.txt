@@ -1,0 +1,21 @@
+PACK 25 — AUDITION ONLY / NO GAME INTEGRATION
+Kokoro-82M by hexgrad, Apache License 2.0; kokoro-onnx integration, MIT.
+https://huggingface.co/hexgrad/Kokoro-82M
+https://github.com/thewh1teagle/kokoro-onnx
+Model/license/voice provenance remains as in pack23/24; notices copied below.
+Approved voice profiles: Sir Imbert IMB5, Ywaleth YW10, Linlos LD1,
+Koba ORC10, Lavena LV3. Same voice bank, pitch and identity-processing settings.
+New nonverbal phonemes/phrasing and small speaking-rate variations per take.
+Duration: moderate phase-vocoder stretching (.7-1.35 rate), no extra pitch changes.
+Death takes have a dying-away amplitude envelope. Koba retains selected distortion,
+EQ, subharmonic and modulation. Breath is DESIGNED UNVOICED NOISE using smoothed
+spectral colour from the selected-voice synthesis, NOT an actor inhalation recording.
+Pure-breath Lavena hurt contains NO voiced layer. Other breath tails follow the voice.
+No claim of real acted screams, laughter, pain or exact perceived identity guarantee.
+110 synthetic reaction designs (11 groups x10), five pairs per group, 55 comparisons.
+Four selection references copied byte-exact; Koba revised line newly previewed with
+ORC10 settings. Old previews and all assets/audio and runtime files untouched.
+Mono44.1kHz PCM16, -12dBFS peak, short edge fades. Not LUFS normalization.
+Raw phonemes, complete approved voice settings, operations, seeds and hashes:
+SECENEKLER.json / per-candidate JSON; reference data SELECTED-REFERENCES.json.
+No external actor recording, voice cloning or paid service used.

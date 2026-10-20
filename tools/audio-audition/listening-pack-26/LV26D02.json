@@ -1,0 +1,32 @@
+{
+  "id": "LV26D02",
+  "recipe": {
+    "version": "table-reactions26-v1",
+    "character": "LV",
+    "category": "D",
+    "number": 2,
+    "direction": "female, brief sharp scream of pain",
+    "vocal": "Aah!",
+    "phonemes": "ˈɑːh!",
+    "id": "LV26D02",
+    "selection": "LV3",
+    "approved_voice_profile": {
+      "character": "Lavena Vol",
+      "text": "And they call these spells \"forbidden magic.\" Ha! What's the worst that could happen, anyway?",
+      "voice": "af_nicole",
+      "label": "Amerikan tabanlı; nefesli ve kontrollü hedef",
+      "speed": 0.95,
+      "pitch": -0.4,
+      "lang": "en-us",
+      "pause": 0.3,
+      "rough": false
+    },
+    "processor": "plain",
+    "pace": 1.035,
+    "target_seconds": 0.52,
+    "prompt_handling": "Directions are design metadata, not spoken or an engine instruction.",
+    "added_breath": false
+  },
+  "duration": 0.6468934240362811,
+  "sha256": "600bc0a5baa174f49c90572a759e121aef8d1fe87964d6511cf6524a4bcdcc66"
+}

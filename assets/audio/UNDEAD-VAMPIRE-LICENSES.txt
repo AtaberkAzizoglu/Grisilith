@@ -1,10 +1,9 @@
-INSTALLED SELECTIONS: skeleton_death=20/SK3, zombie_attack=20/ZA1, zombie_death=20/ZD1, ghost_attack=20/GA2, ghost_death=20/GD1, ghost_storm=20/GC7, slime_death=20/LD4, slime_path=20/LP5, gorilla_stomp=21/GS9, mimic_attack=21/MA3, mimic_death=21/MD2, vampire_hunger=21/VH5, vampire_bite=21/VB1, vampire_mist=21/ME1, vampire_form=21/VF5, vampire_teleport=21/TP1, vampire_cone_charge=21/LC2, vampire_swipe_charge=21/SC5, vampire_death=21/VS5, vampire_hurt=21/VP5
+INSTALLED EFFECT SELECTIONS: skeleton_death=20/SK3, zombie_attack=20/ZA1, zombie_death=20/ZD1, ghost_attack=20/GA2, ghost_death=20/GD1, ghost_storm=20/GC7, slime_death=20/LD4, slime_path=20/LP5, gorilla_stomp=21/GS9, mimic_attack=21/MA3, mimic_death=21/MD2, vampire_hunger=21/VH5, vampire_bite=21/VB1, vampire_mist=21/ME1, vampire_form=21/VF5, vampire_teleport=21/TP1, vampire_cone_charge=21/LC2, vampire_swipe_charge=21/SC5
 LD4 is shared by full-size and fragment Slimes. VF5 fitted 3200ms, TP1 750ms, LC2 1000ms. Other selected WAVs copied exactly.
 
-WITCH: short scream no effects.wav by xl57 — CC BY 4.0.
-https://freesound.org/people/xl57/sounds/671201/
-https://creativecommons.org/licenses/by/4.0/
-Public HQ MP3 preview converted to mono PCM16/44.1kHz, peak matched -12dBFS, 10ms edge fades. No pitch change.
+Witch death and Vampire hurt/death superseded by approved pack27 user recordings.
+See CHARACTER-VOICE-SOURCES.txt and CHARACTER-VOICE-SELECTIONS.json.
+Old pack20/21 source descriptions below are historical where superseded.
 
 PACK 20 — WITCH / UNDEAD PREVIEW OPTIONS — SELECTED CUES INSTALLED
 

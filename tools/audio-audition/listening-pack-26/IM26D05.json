@@ -1,0 +1,38 @@
+{
+  "id": "IM26D05",
+  "recipe": {
+    "version": "table-reactions26-v1",
+    "character": "IM",
+    "category": "D",
+    "number": 5,
+    "direction": "strained final cry",
+    "vocal": "Arghhh... ngh...",
+    "phonemes": "ˈɑɹɡh... ŋˈə...",
+    "id": "IM26D05",
+    "selection": "IMB5",
+    "approved_voice_profile": {
+      "character": "Sir Imbert",
+      "text": "It is my oath! I will fight until the magic is gone from this realm!",
+      "voice": "am_onyx",
+      "label": "En pes komutan · yavaş, tehditkâr",
+      "speed": 0.94,
+      "pitch": -3.1,
+      "lang": "en-us",
+      "pause": 0.34,
+      "rough": true,
+      "grit": 1.5,
+      "bass": 0.32,
+      "presence": 0.1,
+      "shadow": 0.0,
+      "rumble": 0.0,
+      "processing_version": "orc-veteran-v1"
+    },
+    "processor": "monster",
+    "pace": 0.9550000000000001,
+    "target_seconds": 1.85,
+    "prompt_handling": "Directions are design metadata, not spoken or an engine instruction.",
+    "added_breath": false
+  },
+  "duration": 1.85,
+  "sha256": "d021c180355fb0662708ec7cdeefe1595096e4b2910d9b86b8bc4ba26f80aa55"
+}

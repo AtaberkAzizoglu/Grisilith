@@ -80,6 +80,7 @@ class EnemyManager {
 
     fun spawn(enemy: Enemy) {
         enemies.add(enemy)
+        com.azizoglu.grisilith.audio.EnemyAudio.spawned(enemy)
     }
 
     fun remove(enemy: Enemy): Boolean {com.azizoglu.grisilith.audio.EnemyAudio.clear(enemy);return enemies.remove(enemy)}

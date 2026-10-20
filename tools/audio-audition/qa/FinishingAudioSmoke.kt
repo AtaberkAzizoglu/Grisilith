@@ -57,8 +57,8 @@ object FinishingAudioSmoke {
             EnemyAudio.update(e,1f);settle();e.takeDamage(100000000);GameAudio.update();check(count(cue)==n+2)
             EnemyAudio.clear(e)
         }
-        val hurtCues=hurt.map{it.second}+UiSound.VAMPIRE_HURT
-        listOf(DefaultEnemyKinds.beeSwarm,DefaultEnemyKinds.crocodile,DefaultEnemyKinds.witch,
+        val hurtCues=hurt.map{it.second}+CharacterVoices.vampireHurt+CharacterVoices.witchHurt
+        listOf(DefaultEnemyKinds.beeSwarm,DefaultEnemyKinds.crocodile,
             DefaultEnemyKinds.ghost,DefaultEnemyKinds.slime).forEach { def ->
             settle();val before=hurtCues.sumOf(::count);val e=actor(def)
             EnemyAudio.hurt(e);GameAudio.update();check(hurtCues.sumOf(::count)==before){"Excluded hurt ${def.id}"}
@@ -101,6 +101,6 @@ object FinishingAudioSmoke {
         check(c.projectiles.size in 3..8)
         settle();physical.update(.01f,setOf(c.weapon.runtimeId));GameAudio.update();check(count(UiSound.SLING_SPLIT)==split+1)
         physical.clear();GameAudio.dispose()
-        println("FINISHING_AUDIO_SMOKE_PASS: exact 7 cues, real positive hurt/nonlethal/throttle/boss gain, 5 exclusions, Shield max once/rearm, Boomerang final catch only, Sling one split cue")
+        println("FINISHING_AUDIO_SMOKE_PASS: exact 7 cues, real positive hurt/nonlethal/throttle/boss gain, 4 exclusions (Witch superseded by pack27), Shield max once/rearm, Boomerang final catch only, Sling one split cue")
     }
 }
