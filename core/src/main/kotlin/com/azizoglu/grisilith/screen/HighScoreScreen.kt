@@ -457,6 +457,7 @@ class HighScoreScreen(
                 Input.Keys.ESCAPE
             )
         ) {
+            GameAudio.play(UiSound.CLICK)
             game.showMainMenu()
             return true
         }

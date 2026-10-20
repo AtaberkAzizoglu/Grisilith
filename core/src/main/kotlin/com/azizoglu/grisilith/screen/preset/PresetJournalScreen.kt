@@ -294,6 +294,7 @@ class PresetJournalScreen(
         leftScroll.offset = leftScroll.offset.coerceIn(0f, leftScroll.maximum)
         rightScroll.offset = rightScroll.offset.coerceIn(0f, rightScroll.maximum)
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            GameAudio.play(UiSound.CLICK)
             when { editingName -> editingName = false; deleteConfirmation -> deleteConfirmation = false; leaveConfirmation -> leaveConfirmation = false
                 rightActive() -> if (ready()) closeList() else requestBack(); else -> requestBack() }
         }

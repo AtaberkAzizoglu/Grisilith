@@ -96,6 +96,9 @@ object AudioSmoke {
         combatAudio.dispose()
         for(kind in UiSound.entries) {
             val file=File("audio/sfx/${kind.path}");check(file.isFile)
+            // New licensed records keep their original OGG/MP3 bytes. Their full decode/hash
+            // validation is in the Python installer/QA; Java Sound only decodes our PCM WAVs.
+            if(file.extension!="wav") {check(file.length()>100);continue}
             AudioSystem.getAudioInputStream(file).use {stream ->
                 check(stream.format.sampleRate==44100f && stream.frameLength>0)
                 check(stream.readAllBytes().any{it.toInt()!=0})

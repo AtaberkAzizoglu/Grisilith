@@ -1,0 +1,13 @@
+Summary music — Kevin MacLeod (incompetech.com).
+Creative Commons Attribution 4.0 — https://creativecommons.org/licenses/by/4.0/
+Recordings unchanged; each plays once per Summary, not an endless fanfare loop.
+
+Dark Times — DF3
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100747
+https://creativecommons.org/licenses/by/4.0/
+SHA256: 8c05efb338ee645a1f630c7d2aafbb64ac04ad1fee79c6325eafe22f3ad7f15f
+
+Take a Chance — VC17
+https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1300024
+https://creativecommons.org/licenses/by/4.0/
+SHA256: 73e0607f275e6f59c7c99869e5c9449ef5a4d9f76f935042237df7fdb263db17

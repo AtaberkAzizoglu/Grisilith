@@ -27,6 +27,12 @@ class PhantomSteedRuntime(
 
     private var player: Player? = null
     private var appliedStageInterval = -1
+    private var neighElapsed = 0f
+
+    private fun neigh() {
+        player?.let { com.azizoglu.grisilith.audio.GameAudio.playAt(
+            com.azizoglu.grisilith.audio.UiSound.PHANTOM_STEED, it.centerX, it.centerY) }
+    }
 
     var currentBonuses: PhantomSteedBonuses = bonusesForStage(1)
         private set
@@ -39,11 +45,18 @@ class PhantomSteedRuntime(
     }
 
     override fun onActivated() {
+        neighElapsed = 0f
+        neigh()
         applyBonuses(force = true)
     }
 
     override fun onActiveUpdate(delta: Float, progress: Float) {
         applyBonuses(force = false)
+        neighElapsed += delta
+        if (neighElapsed >= 11f) {
+            neighElapsed %= 11f
+            neigh()
+        }
     }
 
     override fun onActiveEnded(reason: ActiveTamgaEndReason) {
@@ -51,6 +64,7 @@ class PhantomSteedRuntime(
     }
 
     override fun onReset() {
+        neighElapsed = 0f
         clearBonuses()
     }
 

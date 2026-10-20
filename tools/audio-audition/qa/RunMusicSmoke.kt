@@ -13,7 +13,7 @@ object RunMusicSmoke {
     @JvmStatic fun main(args:Array<String>) {
         val rows=JsonReader().parse(File("audio/RUN-MUSIC-SELECTIONS.json").readText())
         check(rows.size==10)
-        val selected=MusicTrack.entries.filter{it!=MusicTrack.MENU}
+        val selected=MusicTrack.entries.filter{it!=MusicTrack.MENU && it.looping}
         selected.forEach { track ->
             val row=rows.single{it.getString("code")==track.selection}
             check(row.getString("installed")==track.path && row.getString("title")==track.title)
@@ -42,14 +42,14 @@ object RunMusicSmoke {
         audio.setMenuContext(false)
         val forest=all.last().second
         check(all.last().first==MusicTrack.FOREST_NORMAL && forest.looping && forest.playing)
-        near(forest.volume,.18f)
+        near(forest.volume,.108f)
         repeat(5){audio.runMusic(MusicTrack.FOREST_NORMAL);audio.update()}
         check(forest.plays==1 && all.size==2)
         audio.combatPlayback(2f,true);audio.update();check(forest.playing && forest.plays==1)
         audio.combatPlayback(.5f,false);audio.update();check(forest.playing && forest.plays==1)
-        levels=levels.copy(effects=0f);audio.update();check(forest.playing);near(forest.volume,.18f)
-        val preview=Any();audio.preview(preview,AudioLevels(.2f,.3f,0f));near(forest.volume,.027f)
-        audio.clearPreview(preview);near(forest.volume,.18f)
+        levels=levels.copy(effects=0f);audio.update();check(forest.playing);near(forest.volume,.108f)
+        val preview=Any();audio.preview(preview,AudioLevels(.2f,.3f,0f));near(forest.volume,.0162f)
+        audio.clearPreview(preview);near(forest.volume,.108f)
         audio.runMusic(null);check(!forest.playing && forest.stops==0)
         audio.runMusic(MusicTrack.FOREST_NORMAL);check(forest.plays==2 && all.size==2)
         audio.pause();check(!forest.playing);audio.resume();check(forest.playing && all.size==2)
@@ -61,9 +61,16 @@ object RunMusicSmoke {
         val beforeMute=all.last().second
         levels=levels.copy(music=0f);audio.update();check(!beforeMute.playing)
         levels=levels.copy(music=.8f);audio.update();check(beforeMute.playing)
-        audio.runMusic(null);check(all.none{it.second.playing}) // Summary awaits a later selection.
+        audio.runMusic(null);check(all.none{it.second.playing})
+        listOf(MusicTrack.SUMMARY_DEFEAT,MusicTrack.SUMMARY_VICTORY).forEach { track ->
+            audio.runMusic(track);val once=all.last().second
+            check(once.playing && !once.looping)
+            audio.pause();audio.resume();check(once.playing)
+            val starts=once.plays;once.playing=false;repeat(4){audio.update()}
+            check(once.plays==starts) // A completed short fanfare must not restart every frame.
+        }
         audio.setMenuContext(true);check(all.last().first==MusicTrack.MENU && all.count{it.second.playing}==1)
         audio.dispose();check(all.all{it.second.disposed==1})
-        println("RUN_MUSIC_SMOKE_PASS: ten exact selected assets/credits, 9 map-stage routes, market override, exclusions, streamed single-track switching/disposal, loops, no frame restarts, Pause/speed independence, Master/Music preview/mute, Summary silence")
+        println("RUN_MUSIC_SMOKE_PASS: ten exact run assets, 9 routes, lowered map mix, market, exclusions, single-stream disposal, Pause/speed, Settings, both Summary tracks play once without frame restarts")
     }
 }

@@ -51,7 +51,7 @@ object FinishingAudioSmoke {
             val e=actor(definition);settle();val n=count(cue)
             e.takeDamage(0);GameAudio.update();check(count(cue)==n)
             e.takeDamage(1);GameAudio.update();check(count(cue)==n+1){"Missing hurt ${definition.id}"}
-            check(abs(sounds.getValue(cue).played.last()-.81f)<.0001f)
+            check(abs(sounds.getValue(cue).played.last()-.95f)<.0001f)
             e.takeDamage(1);GameAudio.update();check(count(cue)==n+1)
             EnemyAudio.update(e,1f);settle();e.takeDamage(1);GameAudio.update();check(count(cue)==n+2)
             EnemyAudio.update(e,1f);settle();e.takeDamage(100000000);GameAudio.update();check(count(cue)==n+2)

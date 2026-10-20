@@ -1,0 +1,705 @@
+Seçki 30 — hazır kayıtlar; oyuna eklenmedi.
+Yeni ses üretilmedi, katmanlama/perde/hız/filtre uygulanmadı. HG3–5 yalnız ayrı kaynak vokallerinin kesitidir.
+Freesound kayıtları herkese açık HQ önizlemedir. Seçimden sonra gerektiğinde kaynak WAV/FLAC alınır.
+Centaur: qubodup; kaynak kayıtları dobroide ve 3bagbrew. Üçüne de atıf gerekir.
+Centaur source: https://freesound.org/people/qubodup/sounds/222130/ — CC BY 4.0; kaynaklar CC BY 3.0.
+
+WM1 — Metal kilidin oturması
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\rpg-audio\Audio\metalLatch.ogg
+Cut: None
+SHA256: ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708
+
+WM2 — Kuru metal vurgusu
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\rubberduck-rpg\Audio\metal_01.ogg
+Cut: None
+SHA256: 433d7adf123f9de425047f6dec3f7b4da510c0fd0208d4893a22be8bd22d9e34
+
+WM3 — İkinci metalik vurgu
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\rubberduck-rpg\Audio\metal_02.ogg
+Cut: None
+SHA256: 30fcaab83dc3fff5335b78f87f9df305f6f8bd7316e2b46e2a4eaed85ee21768
+
+WM4 — Daha farklı metal tınısı
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\rubberduck-rpg\Audio\metal_03.ogg
+Cut: None
+SHA256: e780e2c2125161ed84fad0501af74bccc19ee9075dc9fac1d7d6f292ab3e81e2
+
+WM5 — Kristalimsi eşya tınısı
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\rubberduck-rpg\Audio\item_gem_01.ogg
+Cut: None
+SHA256: 8a5d2964febb0c69cc4df2ee5257d173f2cae6960d9534df0001dbf356f27028
+
+WM6 — Parlak eşya vurgusu
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\rubberduck-rpg\Audio\item_gem_02.ogg
+Cut: None
+SHA256: a5f4b0b3ae0e272765619289ef6709513e0dfa0785d7559e8a223176a8bcf181
+
+WM7 — Büyülü birleşme alternatifi
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\magic\magical_1_0.ogg
+Cut: None
+SHA256: 119f9061a566c72c1c58444b03f8685b833079ef268dda02fe742eb34d3bc68f
+
+WM8 — Daha dolgun büyülü vurgu
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\magic\magical_4.ogg
+Cut: None
+SHA256: b7862d109b4013dfb2a389a10f8917203beb0efc458444bc5a1b8ada605cc118
+
+WM9 — Kısa onay tınısı
+Kenney
+https://kenney.nl/assets/interface-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\interface-sounds\Audio\confirmation_001.ogg
+Cut: None
+SHA256: 063564703b6094d70718a3e787a55cc9141611e4ecd6b6637f8828f79b4a8c3a
+
+WM10 — Daha ağır metal birleşimi
+Kenney
+https://kenney.nl/assets/sci-fi-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\scifi\Audio\impactMetal_004.ogg
+Cut: None
+SHA256: 0032710d1fc88c217946cd54492f275eb4363bb8025a4bc1b7ce08df7b3c60de
+
+BH1 — Kısa UI tıkı 1
+Kenney
+https://kenney.nl/assets/interface-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\interface-sounds\Audio\click_001.ogg
+Cut: None
+SHA256: ccfb7fa0cccdd9faec0eb16033c732b1e308d139d80f799161495d58f7adcdb9
+
+BH2 — Kısa UI tıkı 2
+Kenney
+https://kenney.nl/assets/interface-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\interface-sounds\Audio\click_002.ogg
+Cut: None
+SHA256: adcd1f4adc35f1b41bc1b5bbefeff7aa44f2f3f0d96d3199b544140c7c1e761c
+
+BH3 — Kısa UI tıkı 3
+Kenney
+https://kenney.nl/assets/interface-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\interface-sounds\Audio\click_003.ogg
+Cut: None
+SHA256: 2fa929138bc3a0f432696588f66eac94b8f6d463905ec8808c6461ce4b054292
+
+BH4 — Kısa UI tıkı 4
+Kenney
+https://kenney.nl/assets/interface-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\interface-sounds\Audio\click_004.ogg
+Cut: None
+SHA256: 09e2c1b643b71b9aff9932b4e02d78db116446b9a14b00a5b2a9b28d2668fd8e
+
+BH5 — Kısa UI tıkı 5
+Kenney
+https://kenney.nl/assets/interface-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\interface-sounds\Audio\click_005.ogg
+Cut: None
+SHA256: a3ee7ebb036bc3cdc218ae52bb27548c4f49bcf07505274f8b61b1af8236acc2
+
+BH6 — Kısa telimsi seçim
+Kenney
+https://kenney.nl/assets/interface-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\interface-sounds\Audio\pluck_001.ogg
+Cut: None
+SHA256: be97ec4893a02d6eccfb678daa76c83e34cb2583b834ec2593d2641def739fa4
+
+BH7 — İkinci telimsi seçim
+Kenney
+https://kenney.nl/assets/interface-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\interface-sounds\Audio\pluck_002.ogg
+Cut: None
+SHA256: c977fe249ff42d1c93a552b33abc13a8399df3879fa510475426e5c4bbac1da9
+
+BH8 — Yumuşak küçük vurgu
+Kenney
+https://kenney.nl/assets/interface-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\interface-sounds\Audio\drop_001.ogg
+Cut: None
+SHA256: 692ee3a6f1821402ca649ff735bee9591dc4846c8098fc7d6a90fd15fa57c1af
+
+BH9 — İkinci küçük vurgu
+Kenney
+https://kenney.nl/assets/interface-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\interface-sounds\Audio\drop_002.ogg
+Cut: None
+SHA256: 4ac4d1cef7e936965cbf795852ca2020300b9e2ba7daa59f2bf4f1f7bf416218
+
+BH10 — Hafif gezinme vurgusu
+Kenney
+https://kenney.nl/assets/interface-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\interface-sounds\Audio\scroll_001.ogg
+Cut: None
+SHA256: 320c6aafb2c7a503eae508dc443b72d7f7c0a317bfd16813157ed400cd04cf16
+
+HE1 — Cure Magic — orijinal 1
+Someoneman
+https://opengameart.org/content/cure-magic
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\cure\Cure1.wav
+Cut: None
+SHA256: 559cc4826ef19ce466e5c40b7309d1ed9b50656cedda2dab8c9267e04a6a9fb1
+
+HE2 — Cure Magic — orijinal 2
+Someoneman
+https://opengameart.org/content/cure-magic
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\cure\Cure2.wav
+Cut: None
+SHA256: d3b2f85990def3ade8958f415a4b0e0dc74026a6de894f469838379be6586e2a
+
+HE3 — Cure Magic — orijinal 3
+Someoneman
+https://opengameart.org/content/cure-magic
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\cure\Cure3.wav
+Cut: None
+SHA256: 7c3b6055105994bd8c7b9259a647099078b10bdfc1452d1efc4b556684958755
+
+HE4 — Cure Magic — orijinal 4
+Someoneman
+https://opengameart.org/content/cure-magic
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\cure\Cure4.wav
+Cut: None
+SHA256: 5d322662f6bcd8ae30867b8f88ead17471c47d7622d31d6e87e81f5bcf54dddb
+
+HE5 — Cure Magic — orijinal 5
+Someoneman
+https://opengameart.org/content/cure-magic
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\cure\Cure5.wav
+Cut: None
+SHA256: 3aa253d6a13ce8ba1b5579c8dd2d206c3a764b944bc2bb0e0c1841b5bca90565
+
+HE6 — Cure Magic — orijinal 6
+Someoneman
+https://opengameart.org/content/cure-magic
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\cure\Cure6.wav
+Cut: None
+SHA256: 552ab42493829c27f401fa2f6ac6ae6f63691765e27113180cf2cd5ec5da2d0a
+
+HE7 — Cure Magic — orijinal 7
+Someoneman
+https://opengameart.org/content/cure-magic
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\cure\Cure7.wav
+Cut: None
+SHA256: 28b3565ee4188dc500f27ca4dfb9081f3328935092ddebaca3253516d4334f2c
+
+HE8 — Cure Magic — orijinal 8
+Someoneman
+https://opengameart.org/content/cure-magic
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\cure\Cure8.wav
+Cut: None
+SHA256: d1d096de610473f6585c845d24fd4a991ea9bbd5f2c6497ffff0d35f5d459e2a
+
+HE9 — Hafif büyülü iyileştirme alternatifi
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\magic\magical_2.ogg
+Cut: None
+SHA256: 84a70f63f3f21e5ba4a48285b760a663d422ad3feddba2f3cbadd94b76cdc52e
+
+HE10 — Kısa büyülü tını alternatifi
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\magic\magical_6_0.ogg
+Cut: None
+SHA256: 0a18ee3460cf3fd79c3771bbf94c20c26d34b65ab60d0b0e15694ffcad815955
+
+LT1 — Para toplama 1
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\rubberduck-rpg\Audio\item_coins_01.ogg
+Cut: None
+SHA256: 4e701b281a4f88768beccbe87af4574d13ac5a4bc5cab6c522f0e79823d6e428
+
+LT2 — Para toplama 2
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\rubberduck-rpg\Audio\item_coins_02.ogg
+Cut: None
+SHA256: c1124868c928ef06e9b95fd9bd314eb3aa9a2869cbfde7f5aadcc341fe3edca0
+
+LT3 — Para toplama 3
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\rubberduck-rpg\Audio\item_coins_03.ogg
+Cut: None
+SHA256: cd89cae2221ab5e911f93c208e8b905290f695eea3b1830bc9012cc46f6c047b
+
+LT4 — Para toplama 4
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\rubberduck-rpg\Audio\item_coins_04.ogg
+Cut: None
+SHA256: 122b633be3e61f35363b28e7ca5f11257d9d7f2759547ba1441cf541a3e5792b
+
+LT5 — Paraları ele alma
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\rpg-audio\Audio\handleCoins.ogg
+Cut: None
+SHA256: 8a91f969e932df709df80ee124d86a51389eed9b67f22e5e716bc2bbf60d8dab
+
+PO1 — Teleport açılması
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\electricity\teleport_1.wav
+Cut: None
+SHA256: 93d6e931e26b93827a8980a21f203d8ca9d03ccc6dc19129e3241b900c11de49
+
+PO2 — Faz geçişi 1
+Kenney
+https://kenney.nl/assets/digital-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\digital\Audio\phaseJump1.ogg
+Cut: None
+SHA256: c60069ed7108678dd6a1306404d168a93cc2575cda37b06add9dd6c4d46352a3
+
+PO3 — Faz geçişi 2
+Kenney
+https://kenney.nl/assets/digital-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\digital\Audio\phaseJump2.ogg
+Cut: None
+SHA256: 5d85717cfca231f7da7887cef5f44b2131bbe3308eb0c1fee0b4f9e61d59b571
+
+PO4 — Faz geçişi 3
+Kenney
+https://kenney.nl/assets/digital-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\digital\Audio\phaseJump3.ogg
+Cut: None
+SHA256: 69e25a1b7b0781f57af84eb4424973ec406d34bc48eed8b6964787b2d74093a9
+
+PO5 — Büyülü portal alternatifi
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\magic\magical_7_0.ogg
+Cut: None
+SHA256: 2817da4f5df69ff993baffd6594a2f2a069f85ee2a02019f97db2246e350a76b
+
+CH1 — Sürekli charge
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\electricity\charge.wav
+Cut: None
+SHA256: 397e4a4da793558cc541d9fce3da5791cb21dddadf31c02442e67f3a58cbe1c8
+
+CH2 — Charge başlangıcı
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\electricity\chargestart.wav
+Cut: None
+SHA256: af02239346e70f3a7d75113e19d0bf5c6605c1b3bc3cc3f38fffab2b1f731210
+
+CH3 — Yeniden enerji dolması
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\electricity\recharge.wav
+Cut: None
+SHA256: d79959002eae63aa86b506b3e1a3ef87f802d88a34227ae3ed19cf1211556f73
+
+CH4 — Güç birikimi
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\electricity\powerup.wav
+Cut: None
+SHA256: 83995e33a847656ec6120e111de27293be962437ff79b7d85ca061ba374bfb4c
+
+CH5 — Hareketli enerji
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\electricity\turbo.wav
+Cut: None
+SHA256: 427067b54b65d2f4c34850e94834cc4e96eb25d44443ee48087110253bfba802
+
+CH6 — Sürekli koruma/enerji dokusu
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\electricity\shieldloop.wav
+Cut: None
+SHA256: bb5fdba1fdbbd44a00143af7da8b86bf9581c3f2a8e22445c8601f51539dc801
+
+CH7 — Çatırdayan enerji döngüsü
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\electricity\crackleelectricityloop.wav
+Cut: None
+SHA256: c872ff9719f9bdf503e5d87fe9b1b128255fe2f9506e3a380ff022b83e0b7be8
+
+CH8 — Güç alanı uğultusu
+Kenney
+https://kenney.nl/assets/sci-fi-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\scifi\Audio\forceField_000.ogg
+Cut: None
+SHA256: c2916f2a062c8ddd1aca2826d134fe90847037db31342726ffb0f9097afe339c
+
+CH9 — Düşük frekanslı sürekli enerji
+Kenney
+https://kenney.nl/assets/sci-fi-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\scifi\Audio\spaceEngineLow_000.ogg
+Cut: None
+SHA256: d7deee8d7217ce63aab802ad7365a59cacfd243392dc1bd03b0a9d454aa494df
+
+CH10 — Daha dolgun sürekli enerji
+Kenney
+https://kenney.nl/assets/sci-fi-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\scifi\Audio\spaceEngineLarge_002.ogg
+Cut: None
+SHA256: dc1a5c00a93d24bd5fd1d3cfca70483054e7c025b40d255980309544428084de
+
+CE1 — Çatırdayan patlama 1
+Kenney
+https://kenney.nl/assets/sci-fi-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\scifi\Audio\explosionCrunch_000.ogg
+Cut: None
+SHA256: 4b597d658d0ae101f0a030fbeea5fc3a4292ab85f017470a8254a8e7959cbd69
+
+CE2 — Çatırdayan patlama 2
+Kenney
+https://kenney.nl/assets/sci-fi-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\scifi\Audio\explosionCrunch_001.ogg
+Cut: None
+SHA256: fdd04d6f0032d4d57c134ad37f3587d2d00e58c9572715275bd8cf4f43593576
+
+CE3 — Çatırdayan patlama 3
+Kenney
+https://kenney.nl/assets/sci-fi-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\scifi\Audio\explosionCrunch_002.ogg
+Cut: None
+SHA256: be2b8ddc62e4a24c91e2e77793de98549ce216faf2f323a917e7d6f34321ff97
+
+CE4 — Çatırdayan patlama 4
+Kenney
+https://kenney.nl/assets/sci-fi-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\scifi\Audio\explosionCrunch_003.ogg
+Cut: None
+SHA256: 8c7197bb3a1c504690319c3abe0e62a5423ee246dd70caab57963d0b7aa8144f
+
+CE5 — Çatırdayan patlama 5
+Kenney
+https://kenney.nl/assets/sci-fi-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\scifi\Audio\explosionCrunch_004.ogg
+Cut: None
+SHA256: 9c3a1c73cadf0de5d5a578b31a264f20b1ac7cb6ec9bbd34a203f58402ea5390
+
+CE6 — Bas ağırlıklı patlama 1
+Kenney
+https://kenney.nl/assets/sci-fi-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\scifi\Audio\lowFrequency_explosion_000.ogg
+Cut: None
+SHA256: 3cb48d86dab63140cfb9aaeea4d4a6846abaca5831d157d8adbec0490da26343
+
+CE7 — Bas ağırlıklı patlama 2
+Kenney
+https://kenney.nl/assets/sci-fi-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\scifi\Audio\lowFrequency_explosion_001.ogg
+Cut: None
+SHA256: cdda50600a4928f2f1b8371224d53c171ac799c1cf2c30b11999508985250b3b
+
+CE8 — Elektrikli güçlü patlama
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\electricity\deathboom.wav
+Cut: None
+SHA256: fa7943c117f367b205bf808486d249c22e894f19e5641608a1a25c25d6d7ad39
+
+CE9 — Yere vuran patlama
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\electricity\groundhit.wav
+Cut: None
+SHA256: 34b04cf82aa1323dbb241567b0b4a1b64669984670f42f155b552860a9554174
+
+CE10 — Enerji darbesi alternatifi
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\electricity\shieldhit.wav
+Cut: None
+SHA256: 6213e372a3aaafa0a4b33cc04e2f62ca97d20f3d91cf3506464d8cc9dc899625
+
+HN1 — Kubuzz — doğal kişneme
+Kubuzz
+https://freesound.org/people/Kubuzz/sounds/347036/
+http://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\horse_kubuzz\preview.mp3
+Cut: None
+SHA256: c505df450ec86deb69f8c149f363e17b3921e711f8242c1e8bda99419f434d8b
+
+HN2 — GoodListener — kısa kişneme
+GoodListener
+https://freesound.org/people/GoodListener/sounds/322445/
+https://creativecommons.org/licenses/by/4.0/
+
+
+Original: sources\missing-sfx-30\horse_good\preview.mp3
+Cut: None
+SHA256: 8e4e3f99a5b307d7e8e4c25e3b90ec9cc6d8ed57d2afd0f291e4e43bb287aedd
+
+HN3 — GoodListener — yumuşak kişneme
+GoodListener
+https://freesound.org/people/GoodListener/sounds/322450/
+https://creativecommons.org/licenses/by/4.0/
+
+
+Original: sources\missing-sfx-30\horse_soft\preview.mp3
+Cut: None
+SHA256: a49c36035f94313f579b4ecc415a511932fb4e95a1633d54be939d5042be3254
+
+HN4 — InspectorJ — yakın kişneme
+InspectorJ
+https://freesound.org/people/InspectorJ/sounds/419231/
+https://creativecommons.org/licenses/by/4.0/
+
+
+Original: sources\missing-sfx-30\horse_inspector\preview.mp3
+Cut: None
+SHA256: 79c440a97508af57ccf6dd02a59a1b22a82f0853194a4e4cb4e329fb39ecc623
+
+HN5 — CraterZounds — nefes ve kısa kişneme; uzun kaynak
+CraterZounds
+https://freesound.org/people/CraterZounds/sounds/189738/
+https://creativecommons.org/licenses/by/4.0/
+
+
+Original: sources\missing-sfx-30\horse_breath\preview.mp3
+Cut: None
+SHA256: bca28a3d90cdeee41a97e4e37c6b209e967cea39c0e22a7f4d3c9457a06b9174
+
+HG1 — Hazır demonic horse whinny
+Mastersoundboy2005
+https://freesound.org/people/Mastersoundboy2005/sounds/769937/
+http://creativecommons.org/publicdomain/zero/1.0/
+
+
+Original: sources\missing-sfx-30\ghost_demon\preview.mp3
+Cut: None
+SHA256: 1d3c6ffb1ff771c35ac24da65f8e50f19300f64f8edfc4150895826adb9f2a06
+
+HG2 — Hazır işlenmiş at iniltisi
+GoodListener
+https://freesound.org/people/GoodListener/sounds/322444/
+https://creativecommons.org/licenses/by/4.0/
+
+
+Original: sources\missing-sfx-30\ghost_moan\preview.mp3
+Cut: None
+SHA256: ad03bf4d8c4b7a85a3025c2aafc356bef0ab43a4c4286bc14177dc155e93d001
+
+HG3 — Centaur kaydından ayrı vokal A
+qubodup; source recordings: dobroide and 3bagbrew
+https://freesound.org/people/qubodup/sounds/222130/
+https://creativecommons.org/licenses/by/4.0/
+['https://creativecommons.org/licenses/by/3.0/']
+['https://freesound.org/people/dobroide/sounds/116267/', 'https://freesound.org/people/3bagbrew/sounds/59569/']
+Original: sources\missing-sfx-30\ghost_centaur\preview.mp3
+Cut: (5.3, 7.65)
+SHA256: 11aab5e949f3799e3814b19581bd0854515b54f95f0d83e3683988cde5bbe41d
+
+HG4 — Centaur kaydından ayrı vokal B
+qubodup; source recordings: dobroide and 3bagbrew
+https://freesound.org/people/qubodup/sounds/222130/
+https://creativecommons.org/licenses/by/4.0/
+['https://creativecommons.org/licenses/by/3.0/']
+['https://freesound.org/people/dobroide/sounds/116267/', 'https://freesound.org/people/3bagbrew/sounds/59569/']
+Original: sources\missing-sfx-30\ghost_centaur\preview.mp3
+Cut: (8.0, 10.55)
+SHA256: 7fa83ddc10edd942b5cd39e029a2bb264a0f95b1aba7854036b0e495bdd582cd
+
+HG5 — Centaur kaydından ayrı vokal C
+qubodup; source recordings: dobroide and 3bagbrew
+https://freesound.org/people/qubodup/sounds/222130/
+https://creativecommons.org/licenses/by/4.0/
+['https://creativecommons.org/licenses/by/3.0/']
+['https://freesound.org/people/dobroide/sounds/116267/', 'https://freesound.org/people/3bagbrew/sounds/59569/']
+Original: sources\missing-sfx-30\ghost_centaur\preview.mp3
+Cut: (10.75, 12.1848)
+SHA256: 48ad16d1a5840193b74648d67121fdc7a551d2ed775a892e103985a8b0acdfd0

@@ -4,7 +4,7 @@ import com.azizoglu.grisilith.config.GameMap
 import com.azizoglu.grisilith.stage.StageType
 
 /** Streamed music, never a Sound effect: independent of combat speed and SFX volume. */
-enum class MusicTrack(val path:String,val title:String,val selection:String) {
+enum class MusicTrack(val path:String,val title:String,val selection:String,val looping:Boolean=true) {
     MENU("gregorian_chant.mp3","Gregorian Chant","MENU"),
     FOREST_NORMAL("forest_normal.mp3","Ascending the Vale","CF2"),
     FOREST_MINI("forest_mini.mp3","Lord of the Land","CF5"),
@@ -15,7 +15,14 @@ enum class MusicTrack(val path:String,val title:String,val selection:String) {
     DEPTHS_NORMAL("depths_normal.mp3","Ossuary 1 - A Beginning","HD1"),
     DEPTHS_MINI("depths_mini.mp3","Darkest Child","HD8"),
     DEPTHS_FINAL("depths_final.mp3","Decay","HD10"),
-    MARKET("market.mp3","Teller of the Tales","MK2")
+    MARKET("market.mp3","Teller of the Tales","MK2"),
+    SUMMARY_DEFEAT("summary_defeat.mp3","Dark Times","DF3",false),
+    SUMMARY_VICTORY("summary_victory.mp3","Take a Chance","VC17",false);
+
+    val baseGain:Float get()=when(this) {
+        MENU,MARKET,SUMMARY_DEFEAT,SUMMARY_VICTORY -> .45f
+        else -> .27f
+    }
 }
 
 object RunMusic {

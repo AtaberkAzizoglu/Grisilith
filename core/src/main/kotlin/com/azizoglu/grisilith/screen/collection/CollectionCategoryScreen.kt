@@ -121,6 +121,7 @@ class CollectionCategoryScreen(
     override fun render(delta: Float) {
         pointer.update()
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            GameAudio.play(UiSound.CLICK)
             if (filterState.isDropdownOpen) filterState.closeDropdown() else game.showCollection()
             return
         }
@@ -242,11 +243,17 @@ class CollectionCategoryScreen(
         if (pointer.justReleased) {
             val entry = entryAtPointer()
             if (entry != null && entry.definition.id.value == pressedContentId) {
-                selectedContentId = entry.definition.id.value
-                GameAudio.play(UiSound.CLICK)
+                selectEntry(entry)
             }
             pressedContentId = null
         }
+    }
+
+    private fun selectEntry(entry:CollectionEntry) {
+        selectedContentId=entry.definition.id.value
+        if(entry.definition is com.azizoglu.grisilith.character.CharacterDefinition && !entry.isUnknown)
+            com.azizoglu.grisilith.audio.CharacterVoices.select(entry.definition.id)
+        else GameAudio.play(UiSound.CLICK)
     }
 
     private fun updateHover() {
@@ -342,6 +349,7 @@ class CollectionCategoryScreen(
     }
 
     override fun hide() {
+        com.azizoglu.grisilith.audio.CharacterVoices.stopSelection()
         if (Gdx.input.inputProcessor === inputProcessor) Gdx.input.inputProcessor = previousInputProcessor
         previousInputProcessor = null
     }

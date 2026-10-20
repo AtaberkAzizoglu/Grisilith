@@ -17,6 +17,8 @@ import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import kotlin.math.roundToInt
 import kotlin.random.Random
+import com.azizoglu.grisilith.audio.ItemAudio
+import com.azizoglu.grisilith.audio.UiSound
 
 enum class LootDropKind { BEEF, HEAL_POTION, SOUL_ORB }
 
@@ -114,6 +116,7 @@ class WorldItemRuntime(
     private var shrinkStage = -1
     private var shrinkCenter: Vector2? = null
     private var curseStage = -1
+    private var broomSoundElapsed = 0f
 
     val hidesEnemyHealthBars: Boolean
         get() = count(ItemEffectId.BLIND_FAITH) > 0
@@ -133,6 +136,7 @@ class WorldItemRuntime(
         shouldOpenPortal: Boolean = enemy.type == EnemyType.MINI_BOSS
     ) {
         if (shouldOpenPortal) {
+            if (portal == null) com.azizoglu.grisilith.audio.GameAudio.portalOpened(worldWidth * 0.5f, worldHeight * 0.5f)
             portal = Vector2(worldWidth * 0.5f, worldHeight * 0.5f)
         }
 
@@ -204,6 +208,7 @@ class WorldItemRuntime(
     ) {
         if (trackedStage == stage) return
         trackedStage = stage
+        broomSoundElapsed = 0f
         portal = null
         merchant = null
         merchantUsedThisStage = false
@@ -224,6 +229,7 @@ class WorldItemRuntime(
 
         if (Random.nextFloat() < count(ItemEffectId.IS_IT_MERCHANT) * 0.05f) {
             merchant = randomSafePoint(mapObstacles, player, enemies, 90f, 0f)
+            merchant?.let { ItemAudio.at(UiSound.ITEM_MERCHANT,it.x,it.y) }
         }
         lastPlayerX = player.centerX
         lastPlayerY = player.centerY
@@ -243,6 +249,17 @@ class WorldItemRuntime(
         collectCurrency: (Float, Float, Float) -> Boolean,
         nearestCurrency: (Float, Float) -> Pair<Float, Float>?
     ) {
+        if (brooms.isEmpty()) broomSoundElapsed = 0f
+        else {
+            broomSoundElapsed += delta.coerceAtLeast(0f)
+            val interval = ItemAudio.broomInterval(brooms.size)
+            if (broomSoundElapsed >= interval) {
+                broomSoundElapsed %= interval
+                val source = brooms.firstOrNull { com.azizoglu.grisilith.audio.GameAudio.sourceAudible(
+                    com.azizoglu.grisilith.audio.AudioSource(it.x,it.y)) } ?: brooms.first()
+                ItemAudio.at(UiSound.ITEM_BROOM,source.x,source.y)
+            }
+        }
         brooms.forEachIndexed { index, broom ->
             broom.phase += delta
             val target = nearestCurrency(broom.x, broom.y)
@@ -274,6 +291,7 @@ class WorldItemRuntime(
         if (!portalHalfRollDone && stageType == StageType.NORMAL && elapsed >= duration * 0.5f) {
             portalHalfRollDone = true
             if (Random.nextFloat() < count(ItemEffectId.CALL_THE_PORTAL) * 0.01f) {
+                if (portal == null) com.azizoglu.grisilith.audio.GameAudio.portalOpened(worldWidth * 0.5f, worldHeight * 0.5f)
                 portal = Vector2(worldWidth * 0.5f, worldHeight * 0.5f)
             }
         }
@@ -300,6 +318,8 @@ class WorldItemRuntime(
             distanceSquared(player.centerX, player.centerY, it.x, it.y) <= radiusSquared
         }
         collected.forEach {
+            // Shared LT5 pickup recording, once per actual special collectible (including full HP).
+            ItemAudio.at(UiSound.ITEM_LOOT,it.x,it.y)
             val amount = (player.health.maximumHealth * 0.10f * ActiveItemEffects.healingMultiplier())
                 .roundToInt().coerceAtLeast(1)
             player.health.heal(amount)
@@ -335,6 +355,7 @@ class WorldItemRuntime(
                     (player.centerX + offset.x).coerceIn(55f, worldWidth - 55f),
                     (player.centerY + offset.y).coerceIn(55f, worldHeight - 55f)
                 )
+                setupCenter?.let { ItemAudio.at(UiSound.ITEM_TRAP_BUILD,it.x,it.y) }
                 setupSeconds = 0f
             }
         }
@@ -370,10 +391,12 @@ class WorldItemRuntime(
 
             victim.takeDamage(victim.health.currentHealth.coerceAtLeast(1) * 100)
             if (victim.isDead) {
+                ItemAudio.at(UiSound.ITEM_TRAP_KILL,trap.x,trap.y)
                 trap.storedGold += onPitEnemyKilled(victim)
                 trap.victims++
             }
             if (trap.victims >= 4) {
+                ItemAudio.at(UiSound.ITEM_TRAP_END,trap.x,trap.y)
                 onTrapGoldReleased(trap.x, trap.y, trap.storedGold)
                 trap.finishedSeconds = delta.coerceAtLeast(0.0001f)
                 pitCooldownSeconds = 30f
@@ -515,6 +538,7 @@ class WorldItemRuntime(
         rouletteResult = rewards.randomOrNull()
         rouletteEntries = rewards.toList()
         rouletteSeconds = if (rouletteResult == null) 0f else 1.5f
+        if (rouletteResult != null) totem?.let { ItemAudio.at(UiSound.ITEM_ROULETTE,it.x,it.y) }
     }
 
     private fun applyTotemResult(
@@ -528,6 +552,7 @@ class WorldItemRuntime(
         onToads: (Int, Float, Float) -> Unit
     ) {
         displayedResult = result
+        ItemAudio.totemResult(result,totem.x,totem.y)
         when (result) {
             TotemResult.HEALING_AURA -> { healingAuraSeconds = 12f; healingTick = 0f }
             TotemResult.PROTECTERS_AREA -> { protectersAreaSeconds = 10f; protectersTick = 0f }
@@ -634,6 +659,7 @@ class WorldItemRuntime(
     }
 
     fun clearForRunEnd() {
+        broomSoundElapsed = 0f
         brooms.clear(); traps.clear(); loot.clear(); portal = null; merchant = null; totem = null
     }
 
@@ -652,6 +678,7 @@ class WorldItemRuntime(
     }
 
     fun onStageEnded() {
+        broomSoundElapsed = 0f
         portal = null
         merchant = null
         totem = null

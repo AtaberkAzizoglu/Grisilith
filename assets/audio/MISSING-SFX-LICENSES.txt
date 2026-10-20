@@ -1,0 +1,49 @@
+Selected Phase 9h recordings — unchanged source audio; no synthesis or layering.
+
+WM1 — assets\audio\sfx\weapon_merge.ogg
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708
+
+HE10 — assets\audio\sfx\heal.ogg
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+0a18ee3460cf3fd79c3771bbf94c20c26d34b65ab60d0b0e15694ffcad815955
+
+PO1 — assets\audio\sfx\portal_open.wav
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+93d6e931e26b93827a8980a21f203d8ca9d03ccc6dc19129e3241b900c11de49
+
+LT5 — assets\audio\sfx\loot_pickup.ogg
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+8a91f969e932df709df80ee124d86a51389eed9b67f22e5e716bc2bbf60d8dab
+
+CH8 — assets\audio\sfx\charger_charge.ogg
+Kenney
+https://kenney.nl/assets/sci-fi-sounds
+https://creativecommons.org/publicdomain/zero/1.0/
+c2916f2a062c8ddd1aca2826d134fe90847037db31342726ffb0f9097afe339c
+
+CE10 — assets\audio\sfx\charger_explosion.wav
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+6213e372a3aaafa0a4b33cc04e2f62ca97d20f3d91cf3506464d8cc9dc899625
+
+HG1 — assets\audio\sfx\phantom_steed.mp3
+Mastersoundboy2005
+https://freesound.org/people/Mastersoundboy2005/sounds/769937/
+http://creativecommons.org/publicdomain/zero/1.0/
+1d3c6ffb1ff771c35ac24da65f8e50f19300f64f8edfc4150895826adb9f2a06
+
+HOVER — assets\audio\sfx\ui_hover.ogg
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+9851a69d0c613e13bceef08060ecc4148f098ef487927cbebe270d642398a3b3

@@ -211,11 +211,11 @@ class MainMenuScreen(
                 game.showSettings()
             },
 
-            MenuButton("AUDIO CREDITS",100f,24f,190f,48f) { game.showAudioCredits() },
+            MenuButton("CREDITS",950f,120f,270f,62f) { game.showAudioCredits() },
             MenuButton(
                 text = "QUIT GAME",
                 x = 950f,
-                y = 120f,
+                y = 48f,
                 width = 270f,
                 height = 62f
             ) {
@@ -378,8 +378,8 @@ class MainMenuScreen(
 
         font.data.setScale(0.66f)
         font.color = Color(0.72f, 0.73f, 0.75f, 1f)
-        font.draw(batch, "Version 0.3.5", 930f, 70f, 290f, Align.right, false)
-        font.draw(batch, "Made by o1cylon", 930f, 48f, 290f, Align.right, false)
+        font.draw(batch, "Version 0.3.5", 440f, 48f, 400f, Align.center, false)
+        font.draw(batch, "Made by o1cylon", 440f, 26f, 400f, Align.center, false)
         font.data.setScale(oldScaleX, oldScaleY)
 
         if (!quitConfirmationOpen) {

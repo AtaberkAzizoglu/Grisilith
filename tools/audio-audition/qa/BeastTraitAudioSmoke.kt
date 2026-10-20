@@ -49,13 +49,13 @@ object BeastTraitAudioSmoke {
         check(sounds.getValue(UiSound.BOAR_PREPARE).stops>0)
         repeat(28){tick(boar)};check(sounds.getValue(UiSound.BOAR_CHARGE).stops>0)
         val croc=enemy(DefaultEnemyKinds.crocodile,EnemyType.MINI_BOSS)
-        await(croc,UiSound.CROCODILE_PREPARE);near(sounds.getValue(UiSound.CROCODILE_PREPARE).played.last(),.81f)
-        await(croc,UiSound.CROCODILE_JUMP);near(sounds.getValue(UiSound.CROCODILE_JUMP).played.last(),.81f)
+        await(croc,UiSound.CROCODILE_PREPARE);near(sounds.getValue(UiSound.CROCODILE_PREPARE).played.last(),.95f)
+        await(croc,UiSound.CROCODILE_JUMP);near(sounds.getValue(UiSound.CROCODILE_JUMP).played.last(),.95f)
         val activeStops=sounds.getValue(UiSound.CROCODILE_JUMP).stops
         croc.takeDamage(100000000);GameAudio.update();check(sounds.getValue(UiSound.CROCODILE_JUMP).stops>activeStops)
         val gorilla=enemy(DefaultEnemyKinds.silverbackGorilla,EnemyType.FINAL_BOSS)
         await(gorilla,UiSound.GORILLA_PREPARE);await(gorilla,UiSound.GORILLA_THROW)
-        near(sounds.getValue(UiSound.GORILLA_THROW).played.last(),.81f)
+        near(sounds.getValue(UiSound.GORILLA_THROW).played.last(),.95f)
         val bear=enemy(DefaultEnemyKinds.grizzlyBear,EnemyType.MINI_BOSS)
         bear.health.takeDamage(bear.health.maximumHealth*3/5);tick(bear)
         check(sounds.getValue(UiSound.BEAR_RAGE).played.size==1)
@@ -76,17 +76,17 @@ object BeastTraitAudioSmoke {
             now+=4000;GameAudio.update();val source=enemy(def,def.allowedTypes.first());val before=sounds.getValue(cue).played.size
             EnemyAudio.attack(source,0);GameAudio.update();check(sounds.getValue(cue).played.size==before)
             EnemyAudio.attack(source,3);GameAudio.update();check(sounds.getValue(cue).played.size==before+1)
-            near(sounds.getValue(cue).played.last(),if(source.type==EnemyType.MINI_BOSS).81f else .6f)
+            near(sounds.getValue(cue).played.last(),if(source.type==EnemyType.MINI_BOSS).95f else .6f)
         }
         now+=4000;GameAudio.update()
         val witch=enemy(DefaultEnemyKinds.witch,EnemyType.FINAL_BOSS)
         EnemyAudio.attack(witch,0,DamageType.FIRE);GameAudio.update();check(sounds.getValue(UiSound.MAGIC_FIRE).played.isEmpty())
-        EnemyAudio.attack(witch,5,DamageType.FIRE);GameAudio.update();near(sounds.getValue(UiSound.MAGIC_FIRE).played.last(),.81f)
+        EnemyAudio.attack(witch,5,DamageType.FIRE);GameAudio.update();near(sounds.getValue(UiSound.MAGIC_FIRE).played.last(),.95f)
         val nameField=Enemy::class.java.getDeclaredField("audioAttackSourceName").apply{isAccessible=true}
         for((name,cue) in listOf("Meteor" to UiSound.GLYPH_METEOR,"Call Lightning" to UiSound.GLYPH_LIGHTNING,
             "Tsunami" to UiSound.GLYPH_TSUNAMI,"Static Cloud" to UiSound.STATIC_CLOUDS)) {
             now+=4000;GameAudio.update();EnemyAudio.update(witch,4f);nameField.set(witch,name)
-            EnemyAudio.attack(witch,5,DamageType.LIGHTNING);GameAudio.update();near(sounds.getValue(cue).played.last(),.81f)
+            EnemyAudio.attack(witch,5,DamageType.LIGHTNING);GameAudio.update();near(sounds.getValue(cue).played.last(),.95f)
         }
         listOf(boar,bear,gorilla,witch).forEach(EnemyAudio::clear)
         GameAudio.dispose()

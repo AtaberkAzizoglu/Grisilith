@@ -1,0 +1,759 @@
+AB1 — Animated Broom
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\cloth1.ogg
+SHA256: ddb93a3671233f95da0e0b10367f082f7eb42fa6caaddcf776410aa8833c747d
+No processing.
+
+AB2 — Animated Broom
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\cloth2.ogg
+SHA256: 8a7451193c38bc05483aec25dd193e163a15d44cf7fff04ac7912573231b0201
+No processing.
+
+AB3 — Animated Broom
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\cloth3.ogg
+SHA256: a48632d17a4f1416541d261a32a31612e01267144c407fa3ecab3ff410f0085b
+No processing.
+
+AB4 — Animated Broom
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\cloth4.ogg
+SHA256: e7ab9a6c4466dea874196c61f59bf1da05cfe58748f42fadd695d441a154a99b
+No processing.
+
+AB5 — Animated Broom
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\clothBelt.ogg
+SHA256: f29560a2aea95bbfeb643e1e8f56ec2b6f7e32f32ce4e140645a36db81de3253
+No processing.
+
+BT1 — Bone Totem — rulet
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\handleCoins.ogg
+SHA256: 8a91f969e932df709df80ee124d86a51389eed9b67f22e5e716bc2bbf60d8dab
+No processing.
+
+BT2 — Bone Totem — rulet
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\handleCoins2.ogg
+SHA256: 4b857968d64f9ac9336a10ffac6694d7547e1f01566ad6857b30bc8db3ee6c32
+No processing.
+
+BT3 — Bone Totem — rulet
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\chain_01.ogg
+SHA256: d376caf0f61384b1d2e0b447f64f06be56d0ee0622ba70dd01cfdd78b3a10687
+No processing.
+
+BT4 — Bone Totem — rulet
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_stone_01.ogg
+SHA256: ca630a5d7420d031588b4f5f4e60273d5e6e30b71c6e5a34ec733fb10089b829
+No processing.
+
+BT5 — Bone Totem — rulet
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_wood_03.ogg
+SHA256: a1f62c20ac2c294309966037fe66fbd5cddbee5df7ae6d6c29e4b2607a0db1e4
+No processing.
+
+HA1 — Bone Totem — Healing Aura
+Someoneman
+https://opengameart.org/content/cure-magic
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\cure\Cure1.wav
+SHA256: 559cc4826ef19ce466e5c40b7309d1ed9b50656cedda2dab8c9267e04a6a9fb1
+No processing.
+
+HA2 — Bone Totem — Healing Aura
+Someoneman
+https://opengameart.org/content/cure-magic
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\cure\Cure3.wav
+SHA256: 7c3b6055105994bd8c7b9259a647099078b10bdfc1452d1efc4b556684958755
+No processing.
+
+HA3 — Bone Totem — Healing Aura
+Someoneman
+https://opengameart.org/content/cure-magic
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\cure\Cure5.wav
+SHA256: 3aa253d6a13ce8ba1b5579c8dd2d206c3a764b944bc2bb0e0c1841b5bca90565
+No processing.
+
+HA4 — Bone Totem — Healing Aura
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_2.ogg
+SHA256: 84a70f63f3f21e5ba4a48285b760a663d422ad3feddba2f3cbadd94b76cdc52e
+No processing.
+
+HA5 — Bone Totem — Healing Aura
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_6_0.ogg
+SHA256: 0a18ee3460cf3fd79c3771bbf94c20c26d34b65ab60d0b0e15694ffcad815955
+No processing.
+
+PA1 — Bone Totem — Protecters Area
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\electricity\shieldhit.wav
+SHA256: 6213e372a3aaafa0a4b33cc04e2f62ca97d20f3d91cf3506464d8cc9dc899625
+No processing.
+
+PA2 — Bone Totem — Protecters Area
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\electricity\powerup.wav
+SHA256: 83995e33a847656ec6120e111de27293be962437ff79b7d85ca061ba374bfb4c
+No processing.
+
+PA3 — Bone Totem — Protecters Area
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_1_0.ogg
+SHA256: 119f9061a566c72c1c58444b03f8685b833079ef268dda02fe742eb34d3bc68f
+No processing.
+
+PA4 — Bone Totem — Protecters Area
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_4.ogg
+SHA256: b7862d109b4013dfb2a389a10f8917203beb0efc458444bc5a1b8ada605cc118
+No processing.
+
+PA5 — Bone Totem — Protecters Area
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_5.ogg
+SHA256: 69aaaaed729cacb518005a5d24074196db3c5fffc0ed2cd01ad864fbed4a62be
+No processing.
+
+TR1 — Bone Totem — Buried Treasure
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_coins_01.ogg
+SHA256: 4e701b281a4f88768beccbe87af4574d13ac5a4bc5cab6c522f0e79823d6e428
+No processing.
+
+TR2 — Bone Totem — Buried Treasure
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_coins_02.ogg
+SHA256: c1124868c928ef06e9b95fd9bd314eb3aa9a2869cbfde7f5aadcc341fe3edca0
+No processing.
+
+TR3 — Bone Totem — Buried Treasure
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_coins_03.ogg
+SHA256: cd89cae2221ab5e911f93c208e8b905290f695eea3b1830bc9012cc46f6c047b
+No processing.
+
+TR4 — Bone Totem — Buried Treasure
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_gem_01.ogg
+SHA256: 8a5d2964febb0c69cc4df2ee5257d173f2cae6960d9534df0001dbf356f27028
+No processing.
+
+TR5 — Bone Totem — Buried Treasure
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\handleCoins2.ogg
+SHA256: 4b857968d64f9ac9336a10ffac6694d7547e1f01566ad6857b30bc8db3ee6c32
+No processing.
+
+HG1 — Bone Totem — Hourglass
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_1_0.ogg
+SHA256: 119f9061a566c72c1c58444b03f8685b833079ef268dda02fe742eb34d3bc68f
+No processing.
+
+HG2 — Bone Totem — Hourglass
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_2.ogg
+SHA256: 84a70f63f3f21e5ba4a48285b760a663d422ad3feddba2f3cbadd94b76cdc52e
+No processing.
+
+HG3 — Bone Totem — Hourglass
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_3.ogg
+SHA256: 9fac648a1de869cf9ca2f4b3f1cd47f1766a3ee9d2fdec45831234401d7b2392
+No processing.
+
+HG4 — Bone Totem — Hourglass
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_5.ogg
+SHA256: 69aaaaed729cacb518005a5d24074196db3c5fffc0ed2cd01ad864fbed4a62be
+No processing.
+
+HG5 — Bone Totem — Hourglass
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_7_0.ogg
+SHA256: 2817da4f5df69ff993baffd6594a2f2a069f85ee2a02019f97db2246e350a76b
+No processing.
+
+TD1 — Bone Totem — Toads
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\creature_slime_01.ogg
+SHA256: 746d6ef073abfadd43fe184c50c6a2528350d4f566f2c0f54cd51ff0eb665118
+No processing.
+
+TD2 — Bone Totem — Toads
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\creature_slime_02.ogg
+SHA256: 8c26b66076752b712dad7be704a3e4e11d3a49847fbd804ba7f858024ff33c8d
+No processing.
+
+TD3 — Bone Totem — Toads
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\creature_slime_03.ogg
+SHA256: 0edd014144dbce5ff0386647c25e0c206ae3b382a16683240ab188bd926da8eb
+No processing.
+
+TD4 — Bone Totem — Toads
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_4.ogg
+SHA256: b7862d109b4013dfb2a389a10f8917203beb0efc458444bc5a1b8ada605cc118
+No processing.
+
+TD5 — Bone Totem — Toads
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_6_0.ogg
+SHA256: 0a18ee3460cf3fd79c3771bbf94c20c26d34b65ab60d0b0e15694ffcad815955
+No processing.
+
+LG1 — Bone Totem — Lose Half Gold
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_coins_04.ogg
+SHA256: 122b633be3e61f35363b28e7ca5f11257d9d7f2759547ba1441cf541a3e5792b
+No processing.
+
+LG2 — Bone Totem — Lose Half Gold
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\lock_01.ogg
+SHA256: e828ad2a936e34a0212f3309c5ac706c0ded412b9b383a87f10bcfa1d1445271
+No processing.
+
+LG3 — Bone Totem — Lose Half Gold
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\metal_03.ogg
+SHA256: e780e2c2125161ed84fad0501af74bccc19ee9075dc9fac1d7d6f292ab3e81e2
+No processing.
+
+LG4 — Bone Totem — Lose Half Gold
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\dropLeather.ogg
+SHA256: 097e1d3b74949b0145fda0519d40b7e0773ab82ec4858727f95be830927e1a45
+No processing.
+
+LG5 — Bone Totem — Lose Half Gold
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\doorClose_3.ogg
+SHA256: d0a2540e5e1639bc2fbeef34e76f28e9f9cb8a151736a0ac4c13859994328d0e
+No processing.
+
+HB1 — Bone Totem — Hostile Mini Boss
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\creature_monster_01.ogg
+SHA256: 28d047e95058cecc3513eb831d14072318526fcb9207d8a50aad0f666e17893a
+No processing.
+
+HB2 — Bone Totem — Hostile Mini Boss
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\creature_monster_02.ogg
+SHA256: 2892a32ddfc8d0fc3896f6487adf5a2eb6f3f5766fa02151bddd55e18f218f2f
+No processing.
+
+HB3 — Bone Totem — Hostile Mini Boss
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\creature_roar_01.ogg
+SHA256: ca1b9198490f29037e6e6487dd6db6165ca8b2583a445c0edd6b9f474d2d1f5f
+No processing.
+
+HB4 — Bone Totem — Hostile Mini Boss
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_3.ogg
+SHA256: 9fac648a1de869cf9ca2f4b3f1cd47f1766a3ee9d2fdec45831234401d7b2392
+No processing.
+
+HB5 — Bone Totem — Hostile Mini Boss
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_5.ogg
+SHA256: 69aaaaed729cacb518005a5d24074196db3c5fffc0ed2cd01ad864fbed4a62be
+No processing.
+
+SG1 — Bone Totem — Shrinking Ground
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\stones_01.ogg
+SHA256: d11ce95031c2c36ae2a00979620fa95a7a3f5c6d6f2ac86962ed292aa556be8d
+No processing.
+
+SG2 — Bone Totem — Shrinking Ground
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\stones_02.ogg
+SHA256: 57dc6b85ee986e68ddc4b7fb2b41cc1c885151677d32439fdb299492a3103a65
+No processing.
+
+SG3 — Bone Totem — Shrinking Ground
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\stones_03.ogg
+SHA256: b86d143d7ef4974c2b97fda9e5d1861482646eec754e15935eeb3680ea0d71da
+No processing.
+
+SG4 — Bone Totem — Shrinking Ground
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\stones_04.ogg
+SHA256: 66f1cef820f66d86414d481b37a48a7b7ea11f4a5d7358372ebcfb506af0e652
+No processing.
+
+SG5 — Bone Totem — Shrinking Ground
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\creak3.ogg
+SHA256: f9638787f95004b9d2d06f8eff8e99d4e594c21b51947daf562856fbcec905d1
+No processing.
+
+TC1 — Bone Totem — Totem Curse
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_3.ogg
+SHA256: 9fac648a1de869cf9ca2f4b3f1cd47f1766a3ee9d2fdec45831234401d7b2392
+No processing.
+
+TC2 — Bone Totem — Totem Curse
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_4.ogg
+SHA256: b7862d109b4013dfb2a389a10f8917203beb0efc458444bc5a1b8ada605cc118
+No processing.
+
+TC3 — Bone Totem — Totem Curse
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_5.ogg
+SHA256: 69aaaaed729cacb518005a5d24074196db3c5fffc0ed2cd01ad864fbed4a62be
+No processing.
+
+TC4 — Bone Totem — Totem Curse
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\spell_01.ogg
+SHA256: 09821a53c418c5eeeac4fa25bada9d245e822fed302eeeae9ae4151522a45ae5
+No processing.
+
+TC5 — Bone Totem — Totem Curse
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\spell_02.ogg
+SHA256: bf9c48b76921e56aa266172d969a2c08215d6ce0ffae7c3584f23fa05d3f8bd4
+No processing.
+
+CC1 — Close Call
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\blade_01.ogg
+SHA256: caf7a7cb9b25cda4bd487c1d12d18b74a34bb18c816fd67277cf3c8d7ef32a3a
+No processing.
+
+CC2 — Close Call
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\blade_02.ogg
+SHA256: c770afec8f62f14d3d082d5437c5cec28e2751d393df645ddd938eabc2588abd
+No processing.
+
+CC3 — Close Call
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\blade_03.ogg
+SHA256: 2cd9e6926f4602a4350e703eeae4df520053e290f358ab692632d651ad368a7c
+No processing.
+
+CC4 — Close Call
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\knifeSlice.ogg
+SHA256: 4cd96dc630bed9840c15f1dd2306da2cc56a4da26a5d3f1a03c5a7265ac5e54f
+No processing.
+
+CC5 — Close Call
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\knifeSlice2.ogg
+SHA256: 6c2064d0ef988d1ec3d56868e823ea8823a5cac00f2742560052633529407def
+No processing.
+
+LE1 — Loot the Enemies
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_coins_01.ogg
+SHA256: 4e701b281a4f88768beccbe87af4574d13ac5a4bc5cab6c522f0e79823d6e428
+No processing.
+
+LE2 — Loot the Enemies
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_coins_02.ogg
+SHA256: c1124868c928ef06e9b95fd9bd314eb3aa9a2869cbfde7f5aadcc341fe3edca0
+No processing.
+
+LE3 — Loot the Enemies
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_coins_03.ogg
+SHA256: cd89cae2221ab5e911f93c208e8b905290f695eea3b1830bc9012cc46f6c047b
+No processing.
+
+LE4 — Loot the Enemies
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_coins_04.ogg
+SHA256: 122b633be3e61f35363b28e7ca5f11257d9d7f2759547ba1441cf541a3e5792b
+No processing.
+
+LE5 — Loot the Enemies
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\handleCoins.ogg
+SHA256: 8a91f969e932df709df80ee124d86a51389eed9b67f22e5e716bc2bbf60d8dab
+No processing.
+
+CP1 — Call the Portal
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\electricity\teleport_1.wav
+SHA256: 93d6e931e26b93827a8980a21f203d8ca9d03ccc6dc19129e3241b900c11de49
+No processing.
+
+CP2 — Call the Portal
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\electricity\powerup.wav
+SHA256: 83995e33a847656ec6120e111de27293be962437ff79b7d85ca061ba374bfb4c
+No processing.
+
+CP3 — Call the Portal
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_1_0.ogg
+SHA256: 119f9061a566c72c1c58444b03f8685b833079ef268dda02fe742eb34d3bc68f
+No processing.
+
+CP4 — Call the Portal
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_4.ogg
+SHA256: b7862d109b4013dfb2a389a10f8917203beb0efc458444bc5a1b8ada605cc118
+No processing.
+
+CP5 — Call the Portal
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_7_0.ogg
+SHA256: 2817da4f5df69ff993baffd6594a2f2a069f85ee2a02019f97db2246e350a76b
+No processing.
+
+IM1 — Is It Merchant?
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\handleSmallLeather.ogg
+SHA256: ae3cbf695aa0a8b98b5a80a835be5a3ccbd5446a24db2235cd4c3cd6fc92ed96
+No processing.
+
+IM2 — Is It Merchant?
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\handleCoins2.ogg
+SHA256: 4b857968d64f9ac9336a10ffac6694d7547e1f01566ad6857b30bc8db3ee6c32
+No processing.
+
+IM3 — Is It Merchant?
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\doorOpen_1.ogg
+SHA256: 4ab93bab96522d8eb109ff96dc57cb6765deb02448fe14c10472084be5bb2a0b
+No processing.
+
+IM4 — Is It Merchant?
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_gem_02.ogg
+SHA256: a5f4b0b3ae0e272765619289ef6709513e0dfa0785d7559e8a223176a8bcf181
+No processing.
+
+IM5 — Is It Merchant?
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\metalLatch.ogg
+SHA256: ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708
+No processing.
+
+SH1 — Second Heart
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_1_0.ogg
+SHA256: 119f9061a566c72c1c58444b03f8685b833079ef268dda02fe742eb34d3bc68f
+No processing.
+
+SH2 — Second Heart
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_4.ogg
+SHA256: b7862d109b4013dfb2a389a10f8917203beb0efc458444bc5a1b8ada605cc118
+No processing.
+
+SH3 — Second Heart
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_7_0.ogg
+SHA256: 2817da4f5df69ff993baffd6594a2f2a069f85ee2a02019f97db2246e350a76b
+No processing.
+
+SH4 — Second Heart
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\electricity\recharge.wav
+SHA256: d79959002eae63aa86b506b3e1a3ef87f802d88a34227ae3ed19cf1211556f73
+No processing.
+
+SH5 — Second Heart
+Someoneman
+https://opengameart.org/content/cure-magic
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\cure\Cure8.wav
+SHA256: d1d096de610473f6585c845d24fd4a991ea9bbd5f2c6497ffff0d35f5d459e2a
+No processing.
+
+PT1 — Pit Trap
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\stones_01.ogg
+SHA256: d11ce95031c2c36ae2a00979620fa95a7a3f5c6d6f2ac86962ed292aa556be8d
+No processing.
+
+PT2 — Pit Trap
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\stones_04.ogg
+SHA256: 66f1cef820f66d86414d481b37a48a7b7ea11f4a5d7358372ebcfb506af0e652
+No processing.
+
+PT3 — Pit Trap
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\metalLatch.ogg
+SHA256: ba9ba60b172b3ebc131a940f25793cd2e207aca7af73dc80d637277f060f1708
+No processing.
+
+PT4 — Pit Trap
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\wood_04.ogg
+SHA256: bd5dc8469c4f1cb3abff35e2e01b541d4c97d58033f67dfe1c8e3b62ad5350ba
+No processing.
+
+PT5 — Pit Trap
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\electricity\groundhit.wav
+SHA256: 34b04cf82aa1323dbb241567b0b4a1b64669984670f42f155b552860a9554174
+No processing.
+
+BV1 — Sacrificed Blood Vial
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\creature_slime_04.ogg
+SHA256: 720c15c73a7fae29a02a9cd3cb5b9940ae8213e4b50f8deb0c531796289290d9
+No processing.
+
+BV2 — Sacrificed Blood Vial
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\creature_slime_02.ogg
+SHA256: 8c26b66076752b712dad7be704a3e4e11d3a49847fbd804ba7f858024ff33c8d
+No processing.
+
+BV3 — Sacrificed Blood Vial
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\spell_01.ogg
+SHA256: 09821a53c418c5eeeac4fa25bada9d245e822fed302eeeae9ae4151522a45ae5
+No processing.
+
+BV4 — Sacrificed Blood Vial
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_3.ogg
+SHA256: 9fac648a1de869cf9ca2f4b3f1cd47f1766a3ee9d2fdec45831234401d7b2392
+No processing.
+
+BV5 — Sacrificed Blood Vial
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\missing-sfx-30\magic\magical_5.ogg
+SHA256: 69aaaaed729cacb518005a5d24074196db3c5fffc0ed2cd01ad864fbed4a62be
+No processing.
+
+CO1 — Cash Out
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_coins_01.ogg
+SHA256: 4e701b281a4f88768beccbe87af4574d13ac5a4bc5cab6c522f0e79823d6e428
+No processing.
+
+CO2 — Cash Out
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_coins_03.ogg
+SHA256: cd89cae2221ab5e911f93c208e8b905290f695eea3b1830bc9012cc46f6c047b
+No processing.
+
+CO3 — Cash Out
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_coins_04.ogg
+SHA256: 122b633be3e61f35363b28e7ca5f11257d9d7f2759547ba1441cf541a3e5792b
+No processing.
+
+CO4 — Cash Out
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rpg-audio\Audio\handleCoins2.ogg
+SHA256: 4b857968d64f9ac9336a10ffac6694d7547e1f01566ad6857b30bc8db3ee6c32
+No processing.
+
+CO5 — Cash Out
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+Original: sources\rubberduck-rpg\Audio\item_gem_04.ogg
+SHA256: e12eb95d0458675c2692831454ed09c7a680de966e7c705ce67a7e12560aa73a
+No processing.

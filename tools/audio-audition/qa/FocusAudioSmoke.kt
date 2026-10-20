@@ -19,7 +19,7 @@ object FocusAudioSmoke {
         audio.combatPlayback(.5f,false)
         audio.sustain(owner,UiSound.VORTEX)
         val vortex=sounds.getValue(UiSound.VORTEX)
-        near(vortex.played.single(),.2f*UiSound.VORTEX.gain*1.35f);near(vortex.pitches.last(),.5f)
+        near(vortex.played.single(),.2f*UiSound.VORTEX.gain*1.35f*1.1f);near(vortex.pitches.last(),.5f)
         repeat(20){audio.sustain(owner,UiSound.VORTEX);now+=100;audio.update()}
         check(vortex.played.size==1){"Loop restarted per frame"}
         audio.combatPlayback(2f,false);near(vortex.pitches.last(),2f)

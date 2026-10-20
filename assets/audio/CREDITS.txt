@@ -1,5 +1,11 @@
 GRISILITH — AUDIO CREDITS
 
+SUMMARY MUSIC
+"Dark Times" (DF3), "Take a Chance" (VC17) — Kevin MacLeod (incompetech.com).
+Creative Commons Attribution 4.0: https://creativecommons.org/licenses/by/4.0/
+Recordings unchanged. Exact source URLs and SHA256: SUMMARY-MUSIC-LICENSES.txt.
+Complete thirteen-track audit: MUSIC-ATTRIBUTION-AUDIT.txt.
+
 RUN / MINI-BOSS / FINAL-BOSS / MARKET MUSIC
 Kevin MacLeod (incompetech.com), CC BY 4.0.
 Approved selections, titles, source URLs, license and hashes: RUN-MUSIC-LICENSES.txt

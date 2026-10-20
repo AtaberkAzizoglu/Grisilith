@@ -452,7 +452,7 @@ class ChestRewardController(
     private fun takeBatchRewards() {
         val rewards = batchRewards
         if (rewards.isEmpty()) return
-        GameAudio.play(UiSound.CONFIRM)
+        GameAudio.play(UiSound.LOOT_PICKUP)
         rewards.forEachIndexed { index, reward ->
             if (index !in discardedBatchRewardIndices) onApplyReward(reward)
             onChestCompleted()
@@ -488,7 +488,7 @@ class ChestRewardController(
 
         onChestCompleted()
 
-        GameAudio.play(UiSound.CONFIRM)
+        GameAudio.play(UiSound.LOOT_PICKUP)
         finishOrPrepareNextChest()
     }
 

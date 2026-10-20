@@ -47,6 +47,12 @@ object AudioScreenSmoke {
         game.showMainMenu();game.screen.render(.016f);GameAudio.update()
         check(GameAudio.inMenus() && music.playing && music.plays==1)
         val menu=game.screen
+        @Suppress("UNCHECKED_CAST")
+        val menuButtons=field(menu,"menuButtons").get(menu) as List<com.azizoglu.grisilith.screen.components.MenuButton>
+        val creditsIndex=menuButtons.indexOfFirst{it.text=="CREDITS"}
+        check(creditsIndex==menuButtons.indexOfFirst{it.text=="SETTINGS"}+1)
+        check(creditsIndex+1==menuButtons.indexOfFirst{it.text=="QUIT GAME"})
+        check(menuButtons.none{it.text=="AUDIO CREDITS"})
         val settings=SettingsScreen(game){ };settings.resize(1280,720);game.screen=settings
         check(music.plays==1)
         val original=GameSettings.snapshot()
@@ -275,6 +281,17 @@ object AudioScreenSmoke {
         // Market and end-stage transitions are destructive, not resumable Pause.
         val marketField=field(run,"isMarketOpen")
         marketField.setBoolean(run,true);syncRunAudio.invoke(run);check(channels.isEmpty())
+        // Cash Out sound belongs to a paid market purchase, not generic acquisition/restoration.
+        val cash=com.azizoglu.grisilith.item.definition.DefaultItems.cashOut
+        val cashOffer=com.azizoglu.grisilith.economy.MarketOffer(
+            com.azizoglu.grisilith.economy.MarketProductType.ITEM,1,cash.displayName,"QA purchase",1,itemDefinition=cash)
+        field(run,"marketSlots").set(run,listOf(com.azizoglu.grisilith.economy.MarketSlot(cashOffer)))
+        val wallet=field(run,"sessionWallet").get(run) as com.azizoglu.grisilith.economy.SessionWallet
+        wallet.reset()
+        val purchase=run.javaClass.getDeclaredMethod("purchaseMarketOffer",Int::class.javaPrimitiveType).apply{isAccessible=true}
+        audioTime+=5000;purchase.invoke(run,0);GameAudio.update();check(UiSound.ITEM_CASH_OUT !in loadedCues)
+        wallet.addGold(100f);audioTime+=1000;purchase.invoke(run,0);GameAudio.update()
+        check(UiSound.ITEM_CASH_OUT in loadedCues && wallet.goldCoins==99)
         marketField.setBoolean(run,false);syncRunAudio.invoke(run)
         GameAudio.sustain(pauseOwner,UiSound.VORTEX);check(channels.isEmpty())
         GameAudio.stopSustain(pauseOwner)
@@ -300,6 +317,15 @@ object AudioScreenSmoke {
         Pixmap.createFromFrameBuffer(0,0,1280,720).also {
             PixmapIO.writePNG(Gdx.files.local("../tools/audio-audition/audio-credits.png"),it,-1,true);it.dispose()
         }
+        val creditRows=field(credits,"rows").get(credits) as List<*>
+        check(creditRows.size>100)
+        val scrollCredits=credits.javaClass.getDeclaredMethod("scrollBy",Float::class.javaPrimitiveType).apply{isAccessible=true}
+        scrollCredits.invoke(credits,1000000f);val bottom=field(credits,"scrollOffset").getFloat(credits)
+        check(bottom>1000f);credits.render(.016f)
+        Pixmap.createFromFrameBuffer(0,0,1280,720).also {
+            PixmapIO.writePNG(Gdx.files.local("../tools/audio-audition/audio-credits-bottom.png"),it,-1,true);it.dispose()
+        }
+        scrollCredits.invoke(credits,-1000000f);check(field(credits,"scrollOffset").getFloat(credits)==0f)
         check(GameSettings.snapshot()==original)
         game.dispose()
         println("AUDIO_SCREEN_SMOKE_PASS: menu/run/settings, all melee/ranged normal and ability cues, Sling base/upgraded landing timings, credits, disposal")

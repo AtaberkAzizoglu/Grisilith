@@ -1,5 +1,44 @@
 # Grisilith — Faz 9 ses seçim planı
 
+## Güncel — Faz 9i tamamlandı / Faz 10 bekliyor
+
+Portal öncelikli ve ekran dışından duyulur. Boss stage normal/Unique ölüm sesleri
+%20, diğer stage'lerde %10 kısık ve aynı oranda daha seyrek; Unique +%12 korunur.
+Silah normal ve ability sesleri %10 arttırıldı. Sonraki ayarlar test feedback'iyle.
+Faz 10: Hotfix ve Open Beta Release — v0.3 için son aşama; henüz başlanmadı.
+
+## Güncel — Faz 9h item sesleri kuruldu
+
+Seçki 31 seçimleri ve Cash Out için seçki 32 CO8 kuruldu. SG3×3, TC5×2,
+PT1/PT2/PT5 ayrı olaylarda; HA5 yalnız sonuç seçilince. Portal PO1 aynı kaldı.
+BC3, BV3 olarak yorumlandı ve bu varsayım kullanıcıya bildirildi.
+Loot the Enemies ortak LT5; Gold Pouch ortak HE10, ayrı ses yok.
+Sonraki adım kullanıcının test geri dönüşleri; yeni aşamaya otomatik geçilmedi.
+
+## Güncel — seçki 31 kararları kaydedildi, uygulama bekliyor
+
+Kullanıcı henüz uygulama istemedi. AB1/BT3/HA5/PA1/TR3/HG3/TD1/LG4/HB3/
+SG3×3/TC5×2/CC5/IM3/SH3 ve PT1 kurulum–PT2 öldürme–PT5 bitiş not alındı.
+HA5 sadece sonuç seçildiğinde; portal mevcut PO1. BC3 belirsiz, BV3 teyidi gerekli.
+Cash Out için seçki 32 CO1–CO10: 10 ayrı hazır CC0 para kaydı, uygulama yok.
+
+## Güncel — Faz 9h / seçilmiş ortak efektler kuruldu; Item seçimi
+
+WM1 / HE10 / PO1 / LT5 / CH8 / CE10 / HG1 kuruldu. Metalik hover eklendi.
+Heal/life steal sunumu ortak 4/s; HP değişimi limitsiz. Phantom Steed 11s tekrar.
+Item seçenekleri Seçki 31: 19 olay için 95 hazır CC0 öneri, seçim bekliyor.
+Call the Portal PO1 ve Gold Pouch ortak heal dışında henüz item aday sesi kurulmadı.
+Sonraki adım: seçilecek item seslerini belirtilen tek-tetik/tekrar kurallarıyla bağlamak.
+
+## Güncel — Faz 9g kuruldu; Faz 9h atlanan sesler
+
+Summary: DF3 defeat / VC17 victory (bir kez). Müzik atıfları 13 parça için kontrol edildi.
+Ses dengesi, Collection seçilme replikleri, ESC geri sesi ve kaydırılabilir Credits
+uygulandı. Contributors isimleri henüz boş. Seçki 30'da hazır kayıtlardan 70 aday:
+merge, hover, heal, loot, portal, Charger charge/patlama, normal/fantastik at.
+Seçim bekliyor; Item sesleri yalnız incelendi, yeni item sesi kurulmadı.
+Ardından seçilmiş eksik efektlerin kurulması, Item/Tamga ayrıntıları ve son miksaj.
+
 ## Güncel — Faz 9f kuruldu; Faz 9g Summary seçimi
 
 Normal stage: CF2 / VS1 / HD1.

@@ -7,6 +7,34 @@ import com.badlogic.gdx.audio.Sound
 import com.badlogic.gdx.utils.Disposable
 
 enum class UiSound(val path:String, val durationMs:Long, val priority:Int, val gain:Float=1f,val combat:Boolean=false) {
+    ITEM_BROOM("item_broom.wav",662,4,.22f,true),
+    ITEM_ROULETTE("item_roulette.wav",507,12,.4f,true),
+    ITEM_HEALING_AURA("item_healing_aura.wav",1111,12,.4f,true),
+    ITEM_PROTECTERS("item_protecters.wav",1563,12,.4f,true),
+    ITEM_TREASURE("item_treasure.wav",483,12,.4f,true),
+    ITEM_HOURGLASS("item_hourglass.wav",1821,12,.4f,true),
+    ITEM_TOADS("item_toads.wav",673,12,.4f,true),
+    ITEM_LOSE_GOLD("item_lose_gold.wav",416,12,.4f,true),
+    ITEM_HOSTILE_BOSS("item_hostile_boss.wav",640,12,.4f,true),
+    ITEM_SHRINK("item_shrink.wav",3599,12,.4f,true),
+    ITEM_CURSE("item_curse.wav",1093,12,.4f,true),
+    ITEM_CLOSE_CALL("item_close_call.wav",569,4,.25f,true),
+    ITEM_MERCHANT("item_merchant.wav",919,12,.4f,true),
+    ITEM_SECOND_HEART("item_second_heart.wav",1541,45,.55f,true),
+    ITEM_BLOOD_VIAL("item_blood_vial.wav",633,12,.35f,true),
+    ITEM_TRAP_BUILD("item_trap_build.wav",681,12,.35f,true),
+    ITEM_TRAP_KILL("item_trap_kill.wav",384,12,.35f,true),
+    ITEM_TRAP_END("item_trap_end.wav",285,12,.4f,true),
+    ITEM_CASH_OUT("item_cash_out.wav",4358,85,.5f),
+    ITEM_LOOT("loot_pickup.ogg",846,4,.3f,true),
+    HOVER("ui_hover.ogg",446,1,.17f),
+    WEAPON_MERGE("weapon_merge.ogg",261,72,.65f),
+    HEAL("heal.ogg",1110,3,.12f,true),
+    PORTAL_OPEN("portal_open.wav",786,120,.8f,true),
+    LOOT_PICKUP("loot_pickup.ogg",846,72,.45f),
+    CHARGER_CHARGE("charger_charge.ogg",954,5,.2f,true),
+    CHARGER_EXPLOSION("charger_explosion.wav",1563,7,.65f,true),
+    PHANTOM_STEED("phantom_steed.mp3",2187,5,.5f,true),
     CLICK("ui_click.wav",446,10,.8f),
     CONFIRM("ui_confirm.wav",262,60),
     BACK("ui_back.wav",92,40,.9f),
@@ -185,9 +213,14 @@ enum class UiSound(val path:String, val durationMs:Long, val priority:Int, val g
 
 /** World-space footprint; UI/audio previews intentionally have no world source. */
 data class AudioSource(val x:Float,val y:Float,val radius:Float=0f,
-    val unscaled:Boolean=false,val audibleOffscreen:Boolean=false)
+    val unscaled:Boolean=false,val audibleOffscreen:Boolean=false,val finalBossSpeech:Boolean=false,
+    val criticalNotification:Boolean=false)
 private val UiSound.isDeathCue:Boolean get()=name.endsWith("_DEATH")
-internal fun UiSound.playbackGain(ability:Boolean=false)=gain*if(combat&&(ability||priority in 6..8))1.35f else 1f
+internal fun UiSound.playbackGain(ability:Boolean=false):Float {
+    val weaponCue=ordinal in UiSound.LONGSWORD_SWING.ordinal..UiSound.MAGIC_POISON.ordinal ||
+        ordinal in UiSound.IGNITE_DASH.ordinal..UiSound.CAST_SINGULARITY.ordinal
+    return gain*(if(combat&&(ability||priority in 6..8))1.35f else 1f)*(if(weaponCue)1.1f else 1f)
+}
 data class AudioView(val left:Float,val bottom:Float,val width:Float,val height:Float) {
     fun contains(s:AudioSource):Boolean {
         val dx=s.x-s.x.coerceIn(left,left+width);val dy=s.y-s.y.coerceIn(bottom,bottom+height)
@@ -218,10 +251,17 @@ class AudioController(
     private val voices=mutableListOf<Voice>()
     private data class Channel(val kind:UiSound,val looping:Boolean,var source:AudioSource?,var sound:Sound?=null,var id:Long=-1L,var elapsedSeconds:Double=0.0,var gainMultiplier:Float=1f)
     private val channels=linkedMapOf<Any,Channel>()
+    private class EffectOwner
+    /** World one-shots survive ordinary attack transients, but never a stage boundary. */
+    fun effect(kind:UiSound,source:AudioSource) {
+        if(disposed || paused || menu || combatStopped)return
+        sustain(EffectOwner(),kind,looping=false,source=source)
+    }
     private var view:AudioView?=null
     private var playerSource:AudioSource?=null
     fun worldView(value:AudioView,player:AudioSource) {advanceVoices(millis());view=value;playerSource=player;syncVolumesAndMusic()}
     private fun visible(source:AudioSource?)=source==null || source.audibleOffscreen || view?.contains(source)!=false
+    fun sourceAudible(source:AudioSource)=visible(source) && !menu && !paused && !combatStopped && effective().effectsGain>0f
     private fun speed(source:AudioSource?)=if(source?.unscaled==true)1f else combatSpeed
     fun enemyDelta(delta:Float)=delta/(combatSpeed.takeIf{it>0f}?:1f)
     private val retiredOwners=java.util.Collections.newSetFromMap(java.util.WeakHashMap<Any,Boolean>())
@@ -233,6 +273,12 @@ class AudioController(
         return ((source.x-listener.x)/500f).coerceIn(-1f,1f)*.75f
     }
     private fun cueGain(kind:UiSound,ability:Boolean=false)=kind.playbackGain(ability)
+    private fun mixMultiplier(value:Float,source:AudioSource?)=
+        if(value.isFinite())value.coerceIn(0f,if(source?.audibleOffscreen==true)16f else 2f) else 0f
+    private fun speechActive()=!combatStopped && !paused && channels.values.any {
+        it.source?.finalBossSpeech==true && (it.looping || it.elapsedSeconds*1000<it.kind.durationMs)
+    }
+    private fun speechDuck(source:AudioSource?)=if(speechActive() && source?.finalBossSpeech!=true && source?.criticalNotification!=true).65f else 1f
 
     /** Owner-bound loops are separate from disposable attack transients, so attacks cannot cut a chant. */
     fun sustain(owner:Any,kind:UiSound?,looping:Boolean=true,source:AudioSource?=null,gainMultiplier:Float=1f) {
@@ -240,7 +286,7 @@ class AudioController(
         if(owner in retiredOwners) {if(kind==null)retiredOwners.remove(owner);return}
         advanceVoices(millis())
         if(kind==null || channels[owner]?.kind!=kind) stopSustain(owner)
-        if(kind!=null && !menu) { require(kind.combat);channels.getOrPut(owner){Channel(kind,looping,source?:playerSource)}.also{if(source!=null)it.source=source;it.gainMultiplier=gainMultiplier.coerceIn(0f,2f)} }
+        if(kind!=null && !menu) { require(kind.combat);channels.getOrPut(owner){Channel(kind,looping,source?:playerSource)}.also{if(source!=null)it.source=source;it.gainMultiplier=mixMultiplier(gainMultiplier,it.source)} }
         syncChannels()
     }
     fun stopSustain(owner:Any) {retiredOwners.remove(owner);channels.remove(owner)?.let{if(it.id>=0)it.sound?.stop(it.id)}}
@@ -258,9 +304,13 @@ class AudioController(
         voices.removeAll{it.kind in kinds}
     }
     private fun syncChannels() {
+        channels.entries.filter{it.key is EffectOwner && it.value.elapsedSeconds*1000>=it.value.kind.durationMs}
+            .map{it.key}.forEach(::stopSustain)
         val gain=effective().effectsGain
         // Bound simultaneous textures. Multiple copies of the same spell share its mix budget.
-        val selected=channels.entries.filter{visible(it.value.source)}.sortedByDescending{it.value.kind.priority}.take(12).map{it.key}.toSet()
+        val selected=channels.entries.filter{visible(it.value.source)}
+            .sortedWith(compareByDescending<Map.Entry<Any,Channel>>{it.value.source?.criticalNotification==true}
+                .thenByDescending{it.value.kind.priority}).take(12).map{it.key}.toSet()
         val counts=channels.filterKeys{it in selected}.values.groupingBy{it.kind}.eachCount()
         channels.forEach{(owner,c)->
             val audible=gain>0f && owner in selected
@@ -268,7 +318,7 @@ class AudioController(
             // Backends without seeking keep the source running silently (never pause/restart it).
             if(!audible && seekSound!=null) {if(c.id>=0)c.sound?.stop(c.id);c.id=-1L;return@forEach}
             if(!c.looping && c.elapsedSeconds*1000>=c.kind.durationMs) {if(c.id>=0)c.sound?.stop(c.id);c.id=-1L;return@forEach}
-            val volume=if(audible)(gain*cueGain(c.kind)*c.gainMultiplier/kotlin.math.sqrt((counts[c.kind]?:1).toFloat())).coerceAtMost(1f) else 0f
+            val volume=if(audible)(gain*cueGain(c.kind)*c.gainMultiplier*speechDuck(c.source)/kotlin.math.sqrt((counts[c.kind]?:1).toFloat())).coerceAtMost(1f) else 0f
             if(c.id<0 && !paused && !combatStopped && c.kind !in failedSounds) {
                 val sound=sounds[c.kind]?:runCatching{loadSound(c.kind)}.getOrElse{failedSounds+=c.kind;return@forEach}.also{sounds[c.kind]=it}
                 val startVolume=if(seekSound!=null&&c.elapsedSeconds>0.001)0f else volume
@@ -285,6 +335,9 @@ class AudioController(
         }
     }
     private var music:Music?=null
+    private var musicStarted=false
+    private var musicSuspended=false
+    private fun pauseMusic() {if(music?.isPlaying==true){music?.pause();musicSuspended=true}}
     private var musicTrack:MusicTrack?=null
     private var runMusic:MusicTrack?=null
     private val failedMusic=mutableSetOf<MusicTrack>()
@@ -305,10 +358,12 @@ class AudioController(
     private var allowDeathTails=false
     private var lastVoiceUpdate:Long?=null
     private var lastSoundAt=Long.MIN_VALUE/2
+    private var lastHoverAt=Long.MIN_VALUE/2
     private var previewOwner:Any?=null
     private var preview:AudioLevels?=null
     private val failedSounds=mutableSetOf<UiSound>()
     val inMenus get()=menu
+    fun realTimeMillis()=millis()
 
     private fun advanceVoices(now:Long) {
         val elapsed=(now-(lastVoiceUpdate?:now)).coerceAtLeast(0).toDouble()
@@ -362,7 +417,8 @@ class AudioController(
     /** Coalesce competing UI events in a frame: failures override click/confirm, chest overrides clicks. */
     fun request(kind:UiSound,source:AudioSource?=null,ability:Boolean=false,gainMultiplier:Float=1f) {
         if(disposed||paused)return
-        val event=Event(kind,if(kind.combat)source?:playerSource else null,ability,gainMultiplier.coerceIn(0f,2f))
+        val eventSource=if(kind.combat)source?:playerSource else null
+        val event=Event(kind,eventSource,ability,mixMultiplier(gainMultiplier,eventSource))
         if(kind.combat) {
             // A hidden Imp/weapon must not replace an audible shot sharing the same sample.
             val previous=pendingCombat[kind]
@@ -397,9 +453,9 @@ class AudioController(
     }
     private fun playEvent(request:Event,now:Long) {
         val event=request.kind
-        val volume=(effective().effectsGain*cueGain(event,request.ability)*request.gainMultiplier).coerceAtMost(1f)
+        val volume=(effective().effectsGain*cueGain(event,request.ability)*request.gainMultiplier*speechDuck(request.source)).coerceAtMost(1f)
         if(!visible(request.source))return
-        val previous=if(event.combat)lastCombatAt[event]?:Long.MIN_VALUE/2 else lastSoundAt
+        val previous=if(event==UiSound.HOVER)lastHoverAt else if(event.combat)lastCombatAt[event]?:Long.MIN_VALUE/2 else lastSoundAt
         if(volume<=0f || now-previous<(if(event.combat)80L/speed(request.source) else 80f))return
         if(event in failedSounds)return
         val sound=sounds[event] ?: runCatching {loadSound(event)}.getOrElse {
@@ -413,7 +469,7 @@ class AudioController(
         val id=runCatching{sound.play(volume,if(event.combat)speed(request.source) else 1f,pan(request.source))}.getOrDefault(-1L)
         if(id>=0) {
             voices+=Voice(event,sound,id,event.durationMs.toDouble(),request.source,request.ability,request.gainMultiplier)
-            if(event.combat)lastCombatAt[event]=now else lastSoundAt=now
+            if(event==UiSound.HOVER)lastHoverAt=now else if(event.combat)lastCombatAt[event]=now else lastSoundAt=now
         }
     }
     private fun effective()=preview?:levels()
@@ -421,31 +477,33 @@ class AudioController(
         syncChannels()
         val current=effective()
         voices.forEach { voice ->
-            val gain=if(visible(voice.source))(current.effectsGain*cueGain(voice.kind,voice.ability)*voice.gainMultiplier).coerceAtMost(1f) else 0f
+            val gain=if(visible(voice.source))(current.effectsGain*cueGain(voice.kind,voice.ability)*voice.gainMultiplier*speechDuck(voice.source)).coerceAtMost(1f) else 0f
             if(current.effectsGain<=0f)voice.sound.stop(voice.id) else voice.sound.setPan(voice.id,pan(voice.source),gain)
         }
         if(current.effectsGain<=0f) voices.clear()
         val wanted=if(menu)MusicTrack.MENU else runMusic
-        if(wanted==null || paused) {if(music?.isPlaying==true)music?.pause();return}
+        if(wanted==null || paused) {pauseMusic();return}
         if(musicTrack!=wanted) {
-            music?.stop();music?.dispose();music=null;musicTrack=wanted
+            music?.stop();music?.dispose();music=null;musicTrack=wanted;musicStarted=false;musicSuspended=false
         }
         if(music==null && wanted !in failedMusic && current.musicGain>0f) {
             music=runCatching{
                 (if(wanted==MusicTrack.MENU)loadMusic() else loadRunMusic?.invoke(wanted))
-                    ?.also{it.isLooping=true}
+                    ?.also{it.isLooping=wanted.looping}
             }.getOrElse{failedMusic+=wanted;null}
         }
         music?.let {
             // A restrained starting mix; every value is still multiplied by Settings master/music.
-            it.volume=current.musicGain*.45f
-            if(current.musicGain<=0f) {if(it.isPlaying)it.pause()}
-            else if(!it.isPlaying)it.play()
+            it.volume=current.musicGain*wanted.baseGain*if(speechActive()).45f else 1f
+            if(current.musicGain<=0f) pauseMusic()
+            else if(!it.isPlaying && (!musicStarted || musicSuspended || wanted.looping)) {
+                it.play();musicStarted=true;musicSuspended=false
+            }
         }
     }
     fun pause() {
         if(disposed)return
-        paused=true;pending=null;pendingCombat.clear();music?.pause()
+        paused=true;pending=null;pendingCombat.clear();pauseMusic()
         voices.forEach{it.sound.stop(it.id)};voices.clear()
         channels.values.forEach{if(it.id>=0)it.sound?.pause(it.id)}
     }
@@ -474,8 +532,13 @@ object GameAudio {
     }
     fun play(kind:UiSound) {controller?.request(kind)}
     fun playAt(kind:UiSound,x:Float,y:Float,radius:Float=0f,gainMultiplier:Float=1f) {controller?.request(kind,AudioSource(x,y,radius),gainMultiplier=gainMultiplier)}
+    fun effectAt(kind:UiSound,x:Float,y:Float,radius:Float=0f) {controller?.effect(kind,AudioSource(x,y,radius))}
+    fun portalOpened(x:Float,y:Float) {controller?.effect(UiSound.PORTAL_OPEN,
+        AudioSource(x,y,audibleOffscreen=true,criticalNotification=true))}
     fun enemyAt(kind:UiSound,source:AudioSource,gainMultiplier:Float=1f) {controller?.request(kind,source,gainMultiplier=gainMultiplier)}
     fun enemyDelta(delta:Float)=controller?.enemyDelta(delta)?:delta
+    fun realTimeMillis()=controller?.realTimeMillis()?:System.nanoTime()/1_000_000L
+    fun sourceAudible(source:AudioSource)=controller?.sourceAudible(source)?:false
     fun stopStageEffects() {controller?.stopStageEffects()}
     fun runMusic(track:MusicTrack?) {controller?.runMusic(track)}
     fun projectile(sound:ProjectileSound,x:Float?=null,y:Float?=null,ability:Boolean=false) {

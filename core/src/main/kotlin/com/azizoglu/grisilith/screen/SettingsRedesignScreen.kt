@@ -91,6 +91,7 @@ class SettingsScreen(
                 return true
             }
             if (keycode == Input.Keys.ESCAPE) {
+                GameAudio.play(UiSound.CLICK)
                 if (exitConfirmationOpen) {
                     exitConfirmationOpen = false
                     rebuildButtons()

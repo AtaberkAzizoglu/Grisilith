@@ -21,7 +21,7 @@ object AudioVisibilitySmoke {
         val wind=sounds.getValue(UiSound.VORTEX);check(wind.played.isEmpty())
         now+=1250;audio.update();audio.sustain(owner,UiSound.VORTEX,source=on)
         near(seeks.last(),1.25f);check(wind.played.size==1)
-        near(wind.volumes.last(),.5f*.32f*1.35f)
+        near(wind.volumes.last(),.5f*.32f*1.35f*1.1f)
         audio.sustain(owner,UiSound.VORTEX,source=off);check(wind.stops==1)
         now+=1000;audio.update();audio.sustain(owner,UiSound.VORTEX,source=on)
         near(seeks.last(),2.25f)

@@ -214,6 +214,7 @@ class MerchantScreen(
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            GameAudio.play(UiSound.CLICK)
             game.showMainMenu()
             return
         }

@@ -2,6 +2,8 @@ package com.azizoglu.grisilith.weapon.runtime
 
 import com.azizoglu.grisilith.content.ContentId
 import com.azizoglu.grisilith.save.RunSaveWeaponSlot
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
 
 class WeaponInventory {
 
@@ -88,8 +90,8 @@ class WeaponInventory {
                     .MAXIMUM_LEVEL_REACHED
             }
 
-            return WeaponInventoryResult
-                .MERGED
+            GameAudio.play(UiSound.WEAPON_MERGE)
+            return WeaponInventoryResult.MERGED
         }
 
 
@@ -170,6 +172,7 @@ class WeaponInventory {
                 .MAXIMUM_LEVEL_REACHED
         }
 
+        GameAudio.play(UiSound.WEAPON_MERGE)
         return WeaponInventoryResult.MERGED
     }
 
@@ -269,6 +272,7 @@ class WeaponInventory {
 
         consumedSlot.clear()
 
+        GameAudio.play(UiSound.WEAPON_MERGE)
         return WeaponInventoryResult.MERGED
     }
 

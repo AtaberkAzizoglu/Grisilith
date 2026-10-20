@@ -8,10 +8,28 @@ import com.azizoglu.grisilith.content.DamageType
 
 /** Hit-confirm audio is separate from telegraph/movement trait cues. */
 object EnemyAudio {
+    private var bossStage=false
+    fun stageContext(type:com.azizoglu.grisilith.stage.StageType) {
+        bossStage=type!=com.azizoglu.grisilith.stage.StageType.NORMAL
+    }
+    private fun smallDeath(enemy:Enemy,cue:UiSound)=cue.name.endsWith("_DEATH") &&
+        enemy.type in setOf(EnemyType.NORMAL,EnemyType.UNIQUE)
+    private fun deathMix()=if(bossStage).8f else .9f
     private fun isVocal(cue:UiSound)=cue.name.endsWith("_DEATH") ||
         "_HURT" in cue.name || "_QUOTE_" in cue.name
     private fun source(enemy:Enemy,cue:UiSound,x:Float=enemy.centerX,y:Float=enemy.centerY)=
-        AudioSource(x,y,unscaled=isVocal(cue),audibleOffscreen=enemy.type==EnemyType.MINI_BOSS || enemy.type==EnemyType.FINAL_BOSS)
+        AudioSource(x,y,unscaled=isVocal(cue),audibleOffscreen=enemy.type==EnemyType.MINI_BOSS || enemy.type==EnemyType.FINAL_BOSS,
+            finalBossSpeech=enemy.type==EnemyType.FINAL_BOSS && "_QUOTE_" in cue.name)
+    private var lastSmallVocalAt:Long?=null
+    private fun admitSmallVocal(enemy:Enemy,cue:UiSound):Boolean {
+        if(!isVocal(cue) || enemy.type !in setOf(EnemyType.NORMAL,EnemyType.UNIQUE))return true
+        if(!GameAudio.sourceAudible(source(enemy,cue)))return false
+        val now=GameAudio.realTimeMillis()
+        val interval=if(smallDeath(enemy,cue))kotlin.math.ceil(350.0/deathMix()).toLong() else 350L
+        if(lastSmallVocalAt?.let{now>=it && now-it<interval}==true)return false
+        lastSmallVocalAt=now // Global real-time budget: at most three small-enemy vocals/second.
+        return true
+    }
     private val channels=java.util.IdentityHashMap<Enemy,MutableSet<Any>>()
     private val hitLocks=java.util.IdentityHashMap<Enemy,MutableMap<UiSound,Float>>()
     private class BossVoiceState {
@@ -43,11 +61,18 @@ object EnemyAudio {
         if(enemy.isDead || quotes(enemy).isEmpty() || bossVoices.containsKey(enemy))return
         val state=BossVoiceState();bossVoices[enemy]=state;startQuote(enemy,state)
     }
-    private fun boost(enemy:Enemy)=if(enemy.type==EnemyType.MINI_BOSS || enemy.type==EnemyType.FINAL_BOSS)1.35f else 1f
-    // Shared weapon samples retain their timbre but use a consistent enemy mix budget.
-    // Leaves headroom so the full +35% boss boost is not flattened by the 1.0 volume cap.
-    private fun gain(enemy:Enemy,cue:UiSound)=.6f/cue.playbackGain()*boost(enemy)
+    private fun gain(enemy:Enemy,cue:UiSound):Float {
+        val level=when {
+            enemy.type==EnemyType.FINAL_BOSS && "_QUOTE_" in cue.name -> 1f
+            enemy.type==EnemyType.MINI_BOSS || enemy.type==EnemyType.FINAL_BOSS -> .95f
+            isVocal(cue) && enemy.type==EnemyType.UNIQUE -> .30f*1.12f
+            isVocal(cue) -> .30f
+            else -> .6f
+        }
+        return level*(if(smallDeath(enemy,cue))deathMix() else 1f)/cue.playbackGain()
+    }
     fun play(enemy:Enemy,cue:UiSound,x:Float=enemy.centerX,y:Float=enemy.centerY) {
+        if(!admitSmallVocal(enemy,cue))return
         GameAudio.enemyAt(cue,source(enemy,cue,x,y),gainMultiplier=gain(enemy,cue))
     }
     fun sustain(key:Any,enemy:Enemy,cue:UiSound?,looping:Boolean=false) {
@@ -190,6 +215,6 @@ object EnemyAudio {
     }
     fun pathDamage(appliedDamage:Int,x:Float,y:Float,boss:Boolean=false) {
         if(appliedDamage>0)GameAudio.enemyAt(UiSound.SLIME_PATH,AudioSource(x,y,audibleOffscreen=boss),
-            gainMultiplier=.6f/UiSound.SLIME_PATH.playbackGain()*(if(boss)1.35f else 1f))
+            gainMultiplier=(if(boss).95f else .6f)/UiSound.SLIME_PATH.playbackGain())
     }
 }

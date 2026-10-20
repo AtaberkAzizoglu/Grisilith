@@ -136,7 +136,7 @@ class OnlineNameDialog(private val backend: OnlineBackend, private val ui: Onlin
                 keycode==Input.Keys.HOME -> {cursor=0;selectAll=false}
                 keycode==Input.Keys.END -> {cursor=input.length;selectAll=false}
                 keycode==Input.Keys.ENTER || keycode==Input.Keys.NUMPAD_ENTER -> submit()
-                keycode==Input.Keys.ESCAPE && !initial -> close()
+                keycode==Input.Keys.ESCAPE && !initial -> {GameAudio.play(UiSound.CLICK);close()}
             }
             return true
         }

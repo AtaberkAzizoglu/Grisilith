@@ -160,6 +160,7 @@ class PlayMenuScreen(
     override fun render(delta: Float) {
         pointer.update()
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            GameAudio.play(UiSound.CLICK)
             game.showMainMenu()
             return
         }

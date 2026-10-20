@@ -29,11 +29,23 @@ data class HealingVisualEvent(
 
 object HealingVisualManager {
     private val events = mutableListOf<HealingVisualEvent>()
+    private var lastFeedbackAt = Long.MIN_VALUE / 2
+
+    // Real-time presentation budget, shared by heal and life steal; HP changes are never throttled.
+    private fun feedback(anchor: HealingVisualAnchor): Boolean {
+        val now = com.azizoglu.grisilith.audio.GameAudio.realTimeMillis()
+        if (now >= lastFeedbackAt && now - lastFeedbackAt < 250L) return false
+        lastFeedbackAt = now
+        com.azizoglu.grisilith.audio.GameAudio.playAt(
+            com.azizoglu.grisilith.audio.UiSound.HEAL, anchor.centerX, anchor.centerY, anchor.ownerSize / 2f)
+        return true
+    }
 
     val activeEvents: List<HealingVisualEvent>
         get() = events
 
     fun spawn(type: HealingVisualType, centerX: Float, centerY: Float, ownerSize: Float) {
+        if (!feedback(HealingVisualAnchor(centerX, centerY, ownerSize))) return
         events += HealingVisualEvent(
             type = type,
             initialAnchor = HealingVisualAnchor(centerX, centerY, ownerSize)
@@ -41,9 +53,11 @@ object HealingVisualManager {
     }
 
     fun spawnFollowing(type: HealingVisualType, anchorProvider: () -> HealingVisualAnchor) {
+        val anchor = anchorProvider()
+        if (!feedback(anchor)) return
         events += HealingVisualEvent(
             type = type,
-            initialAnchor = anchorProvider(),
+            initialAnchor = anchor,
             anchorProvider = anchorProvider
         )
     }
@@ -53,5 +67,5 @@ object HealingVisualManager {
         events.removeAll { it.isFinished }
     }
 
-    fun clear() = events.clear()
+    fun clear() { events.clear(); lastFeedbackAt = Long.MIN_VALUE / 2 }
 }

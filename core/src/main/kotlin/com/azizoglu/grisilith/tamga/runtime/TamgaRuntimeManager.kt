@@ -261,6 +261,9 @@ class TamgaRuntimeManager(
                 StatType.ELEMENTAL_DAMAGE
             )
 
+        com.azizoglu.grisilith.audio.GameAudio.playAt(
+            com.azizoglu.grisilith.audio.UiSound.CHARGER_EXPLOSION, centerX, centerY)
+
         chargerExplosionRuntime
             .createExplosion(
                 centerX =

@@ -1821,6 +1821,7 @@ class FirstScreen(
     }
 
     private fun synchronizeCombatAudio() {
+        com.azizoglu.grisilith.audio.EnemyAudio.stageContext(stageController.currentStageType)
         val discard = player.health.isDead || stageController.isRunComplete ||
             chestRewardController.isOpen || statCardController.isOpen || isMarketOpen ||
             isRunSummaryOpen || isRunEndTransitionActive || chooseToSummonPopup.isOpen ||
@@ -1832,7 +1833,10 @@ class FirstScreen(
         val musicBlocked = player.health.isDead || stageController.isRunComplete ||
             isRunSummaryOpen || isRunEndTransitionActive || chestRewardController.isOpen ||
             statCardController.isOpen || onlineRun?.isPreparing == true
-        GameAudio.runMusic(com.azizoglu.grisilith.audio.RunMusic.select(
+        GameAudio.runMusic(if(isRunSummaryOpen) {
+            if(stageController.isRunComplete)com.azizoglu.grisilith.audio.MusicTrack.SUMMARY_VICTORY
+            else com.azizoglu.grisilith.audio.MusicTrack.SUMMARY_DEFEAT
+        } else com.azizoglu.grisilith.audio.RunMusic.select(
             gameMap,stageController.currentStageType,blocked=musicBlocked,market=isMarketOpen))
     }
 
@@ -2106,6 +2110,7 @@ class FirstScreen(
 
     private fun handleTestMapControls(): Boolean {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && isTestSettingsOpen) {
+            GameAudio.play(UiSound.CLICK)
             when {
                 testCatalogKind != null -> testCatalogKind = null
                 isTestOwnedItemsOpen -> isTestOwnedItemsOpen = false
@@ -2749,6 +2754,7 @@ class FirstScreen(
                 RunInputBindings.pauseKey
             )
         ) {
+            GameAudio.play(UiSound.CLICK)
             if (
                 pauseInteractionState
                     .isAnyModalOpen
@@ -6692,7 +6698,8 @@ class FirstScreen(
         runStatistics.recordGoldSpent(
             offer.price.toFloat()
         )
-        GameAudio.play(UiSound.CONFIRM)
+        GameAudio.play(if (offer.itemDefinition?.effectId == com.azizoglu.grisilith.item.definition.ItemEffectId.CASH_OUT)
+            UiSound.ITEM_CASH_OUT else UiSound.CONFIRM)
 
         marketSlots =
             marketSlots

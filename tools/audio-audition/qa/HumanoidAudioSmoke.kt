@@ -34,7 +34,7 @@ object HumanoidAudioSmoke {
             settle();val before=sounds.getValue(cue).played.size
             EnemyAudio.attack(e,0,type);GameAudio.update();check(sounds.getValue(cue).played.size==before)
             EnemyAudio.attack(e,3,type);GameAudio.update();check(sounds.getValue(cue).played.size==before+1)
-            val expected=if(e.type in setOf(EnemyType.MINI_BOSS,EnemyType.FINAL_BOSS)).81f else .6f
+            val expected=if(e.type in setOf(EnemyType.MINI_BOSS,EnemyType.FINAL_BOSS)).95f else .6f
             check(abs(sounds.getValue(cue).played.last()-expected)<.0001f)
         }
         for(def in listOf(DefaultEnemyKinds.bandit,DefaultEnemyKinds.archer,DefaultEnemyKinds.spearman,DefaultEnemyKinds.horseman)){

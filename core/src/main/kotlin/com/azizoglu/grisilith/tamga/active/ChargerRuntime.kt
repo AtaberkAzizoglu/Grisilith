@@ -1,6 +1,9 @@
 package com.azizoglu.grisilith.tamga.runtime.active
 
 import com.azizoglu.grisilith.player.Player
+import com.azizoglu.grisilith.audio.GameAudio
+import com.azizoglu.grisilith.audio.UiSound
+import com.azizoglu.grisilith.audio.AudioSource
 
 class ChargerRuntime :
     ActiveTamgaRuntime(
@@ -10,6 +13,13 @@ class ChargerRuntime :
         cooldownSeconds =
             COOLDOWN_SECONDS
     ) {
+    private var audioOwner: Any = Any()
+
+    private fun synchronizeAudio() {
+        val p = player ?: return
+        GameAudio.sustain(audioOwner, UiSound.CHARGER_CHARGE,
+            source = AudioSource(p.centerX, p.centerY))
+    }
 
     companion object {
 
@@ -179,6 +189,9 @@ class ChargerRuntime :
     }
 
     override fun onActivated() {
+        GameAudio.stopSustain(audioOwner)
+        audioOwner = Any()
+        synchronizeAudio()
         activeElapsedSeconds =
             0f
 
@@ -202,6 +215,8 @@ class ChargerRuntime :
         activeElapsedSeconds +=
             delta
 
+        synchronizeAudio()
+
         player
             ?.setChargerMovementSpeedMultiplier(
                 currentMovementSpeedMultiplier
@@ -212,6 +227,7 @@ class ChargerRuntime :
         reason:
         ActiveTamgaEndReason
     ) {
+        GameAudio.stopSustain(audioOwner)
         val attachedPlayer =
             player
 
@@ -257,6 +273,7 @@ class ChargerRuntime :
     }
 
     override fun onReset() {
+        GameAudio.stopSustain(audioOwner)
         activeElapsedSeconds =
             0f
 

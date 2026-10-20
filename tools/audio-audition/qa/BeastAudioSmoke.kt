@@ -37,9 +37,9 @@ object BeastAudioSmoke {
             EnemyAudio.attack(enemy,5);flush();check(sounds.getValue(hit).played.size==1)
             enemy.takeDamage(10000);flush();check(sounds.getValue(death).played.size==1)
             syncDeath.invoke(enemy);syncDeath.invoke(enemy);flush();check(sounds.getValue(death).played.size==1)
-            near(sounds.getValue(death).played.last(),.6f)
+            near(sounds.getValue(death).played.last(),.27f)
             for(type in listOf(EnemyType.MINI_BOSS,EnemyType.FINAL_BOSS)) {
-                actor(id,type).takeDamage(10000);flush();near(sounds.getValue(death).played.last(),.6f*1.35f)
+                actor(id,type).takeDamage(10000);flush();near(sounds.getValue(death).played.last(),.95f)
             }
         }
         check(EnemyAudio.attackCue(EnemyKindIds.BANDIT)==UiSound.LONGSWORD_SWING && EnemyAudio.deathCue(EnemyKindIds.SKELETON_WARRIOR)==UiSound.SKELETON_DEATH)

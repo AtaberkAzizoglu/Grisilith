@@ -51,7 +51,7 @@ object UndeadVampireAudioSmoke {
             settle();nameField.set(e,name);val n=count(c)
             EnemyAudio.attack(e,0);GameAudio.update();check(count(c)==n)
             EnemyAudio.attack(e,3);GameAudio.update();check(count(c)==n+1)
-            near(sounds.getValue(c).played.last(),if(e.type in setOf(EnemyType.MINI_BOSS,EnemyType.FINAL_BOSS)).81f else .6f)
+            near(sounds.getValue(c).played.last(),if(e.type in setOf(EnemyType.MINI_BOSS,EnemyType.FINAL_BOSS)).95f else .6f)
         }
         for(def in listOf(DefaultEnemyKinds.zombie,DefaultEnemyKinds.ghost,DefaultEnemyKinds.mimic)) {
             val e=actor(def);hit(e,EnemyAudio.attackCue(e.kindId)!!)
@@ -109,7 +109,7 @@ object UndeadVampireAudioSmoke {
         EnemyAudio.clear(vampire);check(sounds.getValue(UiSound.VAMPIRE_TELEPORT).stops>=stops)
         vampire.setVampireTeleportLocked(false)
         settle();vampire.takeDamage(100000000);GameAudio.update();check(vampire.isDead && count(UiSound.VAMPIRE_DEATH)==deaths+1)
-        near(sounds.getValue(UiSound.VAMPIRE_DEATH).played.last(),.81f)
+        near(sounds.getValue(UiSound.VAMPIRE_DEATH).played.last(),.95f)
 
         val summon=SummonedEntity("qa","qa","qa",SummonType.GUARD,SummonStats(100,10,100f,100f,1f),500f,500f,20f)
         summon.applyCondition(ConditionApplication(ConditionType.ACIDIC_PATH_DAMAGE,3f,
@@ -118,7 +118,7 @@ object UndeadVampireAudioSmoke {
         @Suppress("UNCHECKED_CAST") val entities=SummonManager::class.java.getDeclaredField("entities").apply{isAccessible=true}.get(manager) as MutableList<SummonedEntity>
         entities+=summon;settle();val paths=count(UiSound.SLIME_PATH)
         manager.update(.51f,500f,500f,4000f,4000f,emptyList(),mutableListOf(),{_,_->},{},{_,_->});GameAudio.update()
-        check(count(UiSound.SLIME_PATH)==paths+1);near(sounds.getValue(UiSound.SLIME_PATH).played.last(),.81f)
+        check(count(UiSound.SLIME_PATH)==paths+1);near(sounds.getValue(UiSound.SLIME_PATH).played.last(),.95f)
         settle();EnemyAudio.pathDamage(0,500f,500f);GameAudio.update();check(count(UiSound.SLIME_PATH)==paths+1)
         levels=AudioLevels(.5f,1f,.4f);settle();EnemyAudio.pathDamage(1,500f,500f);GameAudio.update();near(sounds.getValue(UiSound.SLIME_PATH).played.last(),.12f)
         manager.clear();GameAudio.dispose()

@@ -1,0 +1,151 @@
+ITEM_BROOM — selection AB1
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: ddb93a3671233f95da0e0b10367f082f7eb42fa6caaddcf776410aa8833c747d
+Installed SHA256: 99382965475021666640c8aa7a62614b25009e1bc71894d6b5cc4425bafd3e33
+
+ITEM_ROULETTE — selection BT3
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: d376caf0f61384b1d2e0b447f64f06be56d0ee0622ba70dd01cfdd78b3a10687
+Installed SHA256: efc269b2c3dd7b1d2e8cf1c0827e04c1bd9c822e93dcad6c20e6d647328a17df
+
+ITEM_HEALING_AURA — selection HA5
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: 0a18ee3460cf3fd79c3771bbf94c20c26d34b65ab60d0b0e15694ffcad815955
+Installed SHA256: 95b05222c5710948e514ba0d463f3699d096746992ee6344d924d93f7b5667fe
+
+ITEM_PROTECTERS — selection PA1
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: 6213e372a3aaafa0a4b33cc04e2f62ca97d20f3d91cf3506464d8cc9dc899625
+Installed SHA256: 6213e372a3aaafa0a4b33cc04e2f62ca97d20f3d91cf3506464d8cc9dc899625
+
+ITEM_TREASURE — selection TR3
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: cd89cae2221ab5e911f93c208e8b905290f695eea3b1830bc9012cc46f6c047b
+Installed SHA256: 016be2b061d45141eca40800034de60f03fa3880f9dd852e5da7289de7b18cff
+
+ITEM_HOURGLASS — selection HG3
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: 9fac648a1de869cf9ca2f4b3f1cd47f1766a3ee9d2fdec45831234401d7b2392
+Installed SHA256: f6d9264dab831762cd224e2ce0b120216d1faec004b1e370f6a5ad640f9a1b4f
+
+ITEM_TOADS — selection TD1
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: 746d6ef073abfadd43fe184c50c6a2528350d4f566f2c0f54cd51ff0eb665118
+Installed SHA256: 4fd6e7d22c8b31f6d744e20537a8c8f0b8edb68f8bef16c00e0e4b0221e97703
+
+ITEM_LOSE_GOLD — selection LG4
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: 097e1d3b74949b0145fda0519d40b7e0773ab82ec4858727f95be830927e1a45
+Installed SHA256: e09b718379c70f66cf40034e24f08854c9fc0e5769bc16478f6d5533a4b14c6e
+
+ITEM_HOSTILE_BOSS — selection HB3
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: ca1b9198490f29037e6e6487dd6db6165ca8b2583a445c0edd6b9f474d2d1f5f
+Installed SHA256: 651a318f2a7d913b6ed3b6ff03868d4d2f2a14461a39e2f12814033c0a2f33ee
+
+ITEM_SHRINK — selection SG3
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=3
+Source SHA256: b86d143d7ef4974c2b97fda9e5d1861482646eec754e15935eeb3680ea0d71da
+Installed SHA256: 16620b10e6c273cc96372cf39c886b26c85e6cd5622e7272f8360343073d97f9
+
+ITEM_CURSE — selection TC5
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=2
+Source SHA256: bf9c48b76921e56aa266172d969a2c08215d6ce0ffae7c3584f23fa05d3f8bd4
+Installed SHA256: f21179d762eea4963c57c3c7c8dc43782b2a30cfacc3f50c6773686e59bb530a
+
+ITEM_CLOSE_CALL — selection CC5
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: 6c2064d0ef988d1ec3d56868e823ea8823a5cac00f2742560052633529407def
+Installed SHA256: b7df349015d21431016cb3c297074a871f2289e53aadcd5b6b898778279bdbbb
+
+ITEM_MERCHANT — selection IM3
+Kenney
+https://kenney.nl/assets/rpg-audio
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: 4ab93bab96522d8eb109ff96dc57cb6765deb02448fe14c10472084be5bb2a0b
+Installed SHA256: 1d81014c7b0599fd5b15e11eef7095bae86c96d508b597441da17bc11e313d6b
+
+ITEM_SECOND_HEART — selection SH3
+JaggedStone
+https://opengameart.org/content/magic-spell-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: 2817da4f5df69ff993baffd6594a2f2a069f85ee2a02019f97db2246e350a76b
+Installed SHA256: b6037e7066f5cf8ac74cefd6c068fdc5dd269ee1fc9ce999399f77a5563a194d
+
+ITEM_BLOOD_VIAL — selection BV3
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: 09821a53c418c5eeeac4fa25bada9d245e822fed302eeeae9ae4151522a45ae5
+Installed SHA256: f1ff442fdbbe6c09ae611b2649be5c88c96b8fe482c4e1597c7e22c162bf355e
+
+ITEM_TRAP_BUILD — selection PT1
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: d11ce95031c2c36ae2a00979620fa95a7a3f5c6d6f2ac86962ed292aa556be8d
+Installed SHA256: 37f3f55127ea60c86a07c1e87e0d81128ed3d99cb14d8e3e508dcfc7619b65d7
+
+ITEM_TRAP_KILL — selection PT2
+rubberduck
+https://opengameart.org/content/80-cc0-rpg-sfx
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: 66f1cef820f66d86414d481b37a48a7b7ea11f4a5d7358372ebcfb506af0e652
+Installed SHA256: 52fa2f4f08cbd6896b71c2bbf339bd81475840278db764cedcf9792027095443
+
+ITEM_TRAP_END — selection PT5
+faxcorp
+https://opengameart.org/content/electricity-game-sound-pack
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: 34b04cf82aa1323dbb241567b0b4a1b64669984670f42f155b552860a9554174
+Installed SHA256: 34b04cf82aa1323dbb241567b0b4a1b64669984670f42f155b552860a9554174
+
+ITEM_CASH_OUT — selection CO8
+clairinski
+https://freesound.org/people/clairinski/sounds/184372/
+https://creativecommons.org/publicdomain/zero/1.0/
+PCM16 / 44100Hz format conversion; no pitch, mixing or new sound design; repetitions=1
+Source SHA256: 942b51c996d9a94903b22323e5f22bf2880288b62557aa815242b86dd8be22a3
+Installed SHA256: 57535fe408c9896f2d3cd69f0f90ceabeb0c321d525be4791e98b56d251617ef

@@ -107,6 +107,17 @@ object CharacterVoiceSmoke {
             }
             runtime.clear()
         }
+        audio.setMenuContext(true)
+        val archive=com.azizoglu.grisilith.screen.CollectionCategoryScreen(game,ContentCategory.CHARACTER)
+        val beforeArchive=CharacterVoices.selectionCues.sumOf{count(it)}
+        archive.show();GameAudio.update();check(CharacterVoices.selectionCues.sumOf{count(it)}==beforeArchive)
+        val chooseArchive=archive.javaClass.getDeclaredMethod("selectEntry",com.azizoglu.grisilith.collection.CollectionEntry::class.java).apply{isAccessible=true}
+        for(character in DefaultCharacters.all) {
+            settle();val cue=CharacterVoices.characters.getValue(character.id.value).selection;val n=count(cue)
+            chooseArchive.invoke(archive,com.azizoglu.grisilith.collection.CollectionEntry(character,true,true));GameAudio.update()
+            check(count(cue)==n+1)
+        }
+        archive.hide();archive.dispose();audio.setMenuContext(false);audio.combatPlayback(1f,false)
         val factory=EnemyRuntimeFactory(EnemyKindRegistry().apply{registerAll(DefaultEnemyKinds.all)})
         fun actor(def:EnemyKindDefinition)=factory.create(def,def.allowedTypes.first(),1,700f,500f).also { enemy ->
             // Production initializes these during the first world update.
@@ -123,7 +134,7 @@ object CharacterVoiceSmoke {
             manager.spawn(enemy);GameAudio.update();check(count(pool)==before+1)
             EnemyAudio.spawned(enemy);GameAudio.update();check(count(pool)==before+1)
             val active=pool.single{count(it)>perCueBefore.getValue(it)}
-            near(sounds.getValue(active).played.last(),.81f)
+            near(sounds.getValue(active).played.last(),1f)
             // Per-source stereo updates with motion, not camera movement.
             enemy.teleportCenter(800f,500f,4000f,4000f);EnemyAudio.update(enemy,0f);GameAudio.update()
             near(sounds.getValue(active).pans.last(),.45f)
@@ -144,7 +155,7 @@ object CharacterVoiceSmoke {
             enemy.takeDamage(1);GameAudio.update();check(count(hurt)==h+1)
             now+=4000;EnemyAudio.update(enemy,4f);enemy.takeDamage(1);GameAudio.update();check(count(hurt)==h+2)
             val hurtCue=hurt.filter{count(it)>0}.maxBy{sounds.getValue(it).played.size}
-            near(sounds.getValue(hurtCue).played.last(),.81f)
+            check(sounds.getValue(hurtCue).played.last() in .61f.. .951f) // Duck while a boss is speaking.
             near(sounds.getValue(hurtCue).pitches.last(),1f)
             // The exception is vocal-only: even boss attacks remain game-speed coupled.
             now+=1000;EnemyAudio.play(enemy,UiSound.LONGSWORD_SWING);GameAudio.update()

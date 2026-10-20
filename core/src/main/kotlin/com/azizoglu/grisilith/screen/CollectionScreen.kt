@@ -72,6 +72,7 @@ class CollectionScreen(
     override fun render(delta: Float) {
         pointer.update()
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            com.azizoglu.grisilith.audio.GameAudio.play(com.azizoglu.grisilith.audio.UiSound.CLICK)
             game.showMainMenu()
             return
         }

@@ -1,5 +1,109 @@
 # Ses seçimleri — güncel durum
 
+## Faz 9i son miksaj — son kullanıcı düzenlemeleri
+
+Portal açılışı ekran dışından da duyulan kritik, owner-bound tek-atımlık kanal oldu.
+Öncelik 120, taban gain 0.8; normal saldırı transient sınırına takılmaz, boss konuşma
+duck'ından muaftır, 12 kanal seçiminde ilk sıradadır. Master/SFX/mute ve Pause/stage
+bitimi kuralları aynen geçerli; kapatılmış sesi zorla açmaz, stage sonuna taşmaz.
+Normal/Unique ölüm sesleri normal stage'de ×0.9, mini/final stage'de ×0.8.
+Unique normalden %12 yüksek kalır. Gerçek zamanlı min. aralık 350ms'den sırasıyla
+389ms / 438ms'ye çıktı (yaklaşık %10 / %20 daha seyrek). Boss vokalleri değişmedi.
+Silah normal/ability/focus/cast efektleri ×1.10; çıkış 1.0'da sınırlı. Ortak örnek
+kullanan EnemyAudio gain'i bunu telafi eder, düşman saldırıları yanlışlıkla yükselmez.
+Faz 9 bu son miksajla tamamlandı. Sıradaki Faz 10: Hotfix ve Open Beta Release,
+v0.3 roadmap'inin son aşaması. Kullanıcı istemeden bu aşamada release işi başlatılmadı.
+
+## Kuruldu — seçki 31 item sesleri ve seçki 32 Cash Out
+
+AB1, BT3, HA5, PA1, TR3, HG3 (Hourglass), TD1, LG4, HB3, SG3×3, TC5×2,
+CC5, IM3, SH3, PT1 kurulum / PT2 hedef ölümü / PT5 dört kurbandan sonra bitiş,
+Cash Out seçki 32 CO8 kuruldu. Kullanıcı son mesajda kurulum izni verdi.
+BC3 listede bulunmadığından Blood Vial BV3 olarak yorumlandı; varsayım kullanıcıya bildirildi.
+Loot the Enemies özel collectible için önceden seçilmiş ortak LT5 yeniden kullanıldı;
+gerçek heal ayrıca HE10 ve ortak 4/s sunum sınırıyla çalışıyor. Portal PO1 değişmedi.
+Animated Broom grup başına 3−0.3×ekstra kopya saniye; alt sınır 0.3s.
+Bone Totem rulet başlangıcı ve sonuç başına bir ses; HA5 aura ticklerinde tekrar etmez.
+SG3 üç ve TC5 iki kesintisiz kopya olarak PCM birleştirildi; başka ses tasarımı yok.
+Close Call buff başlangıcı sesli; her kare buff yenilenmesinde tekrar yok.
+Second Heart ölümden kurtarırken; Blood Vial başarılı proc'ta sesli.
+Cash Out yalnız ödeme başarılı market alımında; generic acquisition/save restore sessiz.
+World item efektleri kaynak/stereo, ekran dışı sanallaştırma, oyun hızı, SFX/Master,
+Pause devamı ve stage sınırında imha kurallarına bağlı. Tek-atımlık sahipler süre sonunda temizlenir.
+Kaynak lisansları ITEM-SFX-LICENSES.txt ile Credits'e eklendi.
+
+## Bekliyor — seçki 31 kullanıcı seçimleri (henüz uygulama YOK)
+
+AB1, BT3, HA5 (yalnız sonuç seçildiğinde bir kez; aura tick sesi değil), PA1,
+TR3, HG3 (burada Bone Totem Hourglass; seçki 30 Phantom Steed HG1 ile karıştırma),
+TD1, LG4, HB3, SG3 (arka arkaya 3 kez), TC5 (arka arkaya 2 kez), CC5,
+IM3, SH3 seçildi. Portal eski PO1 olarak kalacak.
+Kullanıcının BC3 kodu listede yok: Sacrificed Blood Vial BV3 kastedilmiş olabilir,
+ama teyit alınmadan eşleştirme/uygulama yapma.
+Pit Trap: kurulurken PT1; bir hedef içine düşüp öldüğünde PT2; tuzak biterken PT5.
+Cash Out için daha bol para şıngırtılı 10 yeni hazır kayıt önerilecek (seçki 32).
+Kullanıcı bu aşamada yalnız not ve dinleme önerisi istedi; runtime ve assets değişmesin.
+
+## Kuruldu — Faz 9h / seçki 30 seçimleri
+
+WM1 merge, HE10 heal, PO1 portal, LT5 chest loot, CH8 Charger charge,
+CE10 Charger patlama, HG1 Phantom Steed kuruldu. Hover için Kenney RPG Audio
+metalClick.ogg orijinal kaydı seçildi; CS ses dosyası kullanılmadı.
+Kayıtların orijinal byte'ları korundu; MISSING-SFX-LICENSES.txt Credits'e eklendi.
+Heal/life steal görsel ve sesleri ortak gerçek zamanlı 250ms bütçeye bağlı;
+HP kazanımları sınırlanmıyor. Heal gain 0.12, Charger charge 0.20.
+Phantom Steed aktivasyonda ve her 11 aktif saniyede kişner; cooldown'da susar.
+Version ve Made by o1cylon menünün alt ortasına taşındı.
+
+Seçki 31: Item'lar için 19 olay × 5 = 95 hazır CC0 seçenek. Henüz kurulmadı.
+Bone Totem: rulet + dokuz sonuç ayrı gruplar; her sonuç bir kere çalacak.
+Animated Broom: 3s − 0.3s × ekstra kopya; alt sınır 0.3s varsayıldı.
+Gold Pouch ek ses kullanmayacak, gerçek heal ortak HE10'u tetikler.
+Loot the Enemies yalnız özel collectible toplanınca; heal ayrıca ortak limitte.
+Call the Portal ortak PO1'i zaten kullanıyor (CP1 aynı kayıt).
+Cash Out yalnız markette başarılı alımda; run/acquisition restore sırasında değil.
+Diğer aday olaylar Close Call, Is It Merchant?, Second Heart, Pit Trap,
+Sacrificed Blood Vial tetiklenmeleri. Seçilmeden rastgele item sesi eklenmedi.
+
+## Kuruldu — Faz 9g / Faz 9h ses dengesi ve Credits
+
+Summary defeat DF3 (Dark Times), victory VC17 (Take a Chance) kuruldu.
+Summary görünür olduğunda başlar, bir kez çalar; bitmiş fanfar frame başına
+yeniden başlatılmaz. Master × Music, mute ve uygulama pause/resume korunur.
+Görseldeki başarı koşulu ile müzik aynı stageController.isRunComplete değerini kullanır.
+
+Normal/Unique death/hurt vokal bütçesi: tüm kaynaklar arasında en az 350ms,
+oyun hızından bağımsız. Görünmeyen kaynak bütçeyi tüketmez. Normal vokal 0.30,
+Unique ölüm 0.336 (+%12). Normal düşmanlara yeni hurt kaydı eklenmedi.
+Boss hedef seviyesi 0.95; final boss konuşması 1.00. Final konuşma sürerken
+diğer efektler ×0.65, müzik ×0.45; konuşma bitince eski düzeye döner.
+Bu değerler Master/SFX veya Master/Music ile ayrıca çarpılır. Boss kaynaklarının
+miks çarpanı, düşük tabanlı ortak örnekleri de bu hedefe çıkarabilir; çıkış 1.0 ile sınırlı.
+Tüm normal/mini/final map müziklerinin tabanı 0.45→0.27 (-%40); menü, market ve
+Summary 0.45 kaldı. Önceki ekran dışı boss, sabit vokal hızı, oyun hızına bağlı
+saldırı/ability ve Pause/stage efekt temizleme kuralları korunur.
+
+Collection karakter tıklaması Preset ile aynı seçilme repliğini kullanır.
+Otomatik ilk seçime ve hover'a replik yok; ekrandan çıkarken replik kesilir.
+ESC geri/kapama yollarına normal CLICK eklendi. Menüde CREDITS, SETTINGS'in
+altında QUIT GAME'in üstünde. Credits fare tekerleği, scrollbar sürüklemesi ve
+yukarı/aşağı/Home/End ile kayar; CONTRIBUTORS başlığı kasıtlı olarak boş.
+13 müziğin eser/ISRC/lisans bilgileri resmî katalogla doğrulandı; kaynak ve
+lisans her parçada oyun içinde görünür. Dosya: MUSIC-ATTRIBUTION-AUDIT.txt.
+
+## Seçim bekliyor — Seçki 30 / yalnız hazır kayıtlar
+
+WM1–10 merge; BH1–10 hover; HE1–10 heal; LT1–5 loot; PO1–5 portal;
+CH1–10 Charger birikme, CE1–10 Charger patlama; HN1–5 normal at;
+HG1–5 fantastik/hayalet at. Toplam 70 aday, hiçbiri oyuna kurulmadı.
+67 dosya kaynakla birebir; HG3–5 aynı hazır Centaur kaydının sessizlikle ayrılan
+üç vokal kesiti. Yeni sentez, katman, perde/hız/filtre yok. Bu üçü beş ayrı kayıt
+iddiasıyla sunulmaz. Freesound dosyaları açık HQ önizleme; seçim sonrası gerekli
+durumda orijinal WAV/FLAC alınır. qubodup Centaur için dobroide ve 3bagbrew
+atıfları ve kaynak CC BY 3.0 bilgisi de korunur. Tam kaynak/hash/kesim kaydı
+listening-pack-30/SOURCES.json ve LICENSE-SOURCES.txt'dedir.
+Item sesleri için aday üretilmedi, önerilmedi, yeni bağlantı yapılmadı.
+
 ## Kuruldu — Faz 9f / Seçki 28 müzik kararları
 
 - Crolymnos Forest: normal CF2 / Ascending the Vale, mini boss CF5 / Lord of the Land,

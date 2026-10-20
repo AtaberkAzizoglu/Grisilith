@@ -557,7 +557,13 @@ object ActiveItemEffects {
     }
 
     fun onCloseCall() {
-        if (count(ItemEffectId.CLOSE_CALL) > 0) closeCallRemaining = 3f
+        if (count(ItemEffectId.CLOSE_CALL) > 0) {
+            // Near-miss checks can happen every frame; sound on entering, not refreshing the buff.
+            if (closeCallRemaining <= 0f) player?.let {
+                com.azizoglu.grisilith.audio.ItemAudio.at(com.azizoglu.grisilith.audio.UiSound.ITEM_CLOSE_CALL,it.centerX,it.centerY)
+            }
+            closeCallRemaining = 3f
+        }
     }
 
     fun resolveDamageBeforeHealth(amount: Int): Int {
@@ -591,6 +597,8 @@ object ActiveItemEffects {
             )
             secondHeartAvailable = count(ItemEffectId.SECOND_HEART) > 0
             invulnerabilityRemaining = 3f
+            player?.let { com.azizoglu.grisilith.audio.ItemAudio.at(
+                com.azizoglu.grisilith.audio.UiSound.ITEM_SECOND_HEART,it.centerX,it.centerY) }
             playerDamage = (currentHealth - 1).coerceAtLeast(0)
         }
 
@@ -683,6 +691,8 @@ object ActiveItemEffects {
         }
         if (count(ItemEffectId.BLOOD_SACRIFICE) <= 0 || Random.nextFloat() >= 0.50f) return false
         player?.sacrificeHalfCurrentHealth()
+        player?.let { com.azizoglu.grisilith.audio.ItemAudio.at(
+            com.azizoglu.grisilith.audio.UiSound.ITEM_BLOOD_VIAL,it.centerX,it.centerY) }
         return true
     }
 
