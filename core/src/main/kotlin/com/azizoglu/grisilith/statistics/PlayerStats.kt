@@ -572,8 +572,12 @@ class PlayerStats(
 
     fun armorBaseMagicResistance(): Int = armorBaseMagicResistance
 
+    fun magicalDefenseRating(): Float = armorBaseMagicResistance.coerceAtLeast(0).toFloat() +
+        totalScore(StatType.MAGIC_RESISTANCE).coerceAtLeast(0)
+
+    /** Percentage, not a flat amount subtracted from each hit. */
     fun rawMagicDamageReduction(): Float =
-        armorBaseMagicResistance.toFloat() * totalScore(StatType.MAGIC_RESISTANCE)
+        100f * magicalDefenseRating() / (100f + magicalDefenseRating())
 
     fun calculatedMaximumHealth(): Int {
         val maxHpScore =
@@ -669,7 +673,7 @@ class PlayerStats(
     }
 
     /*
-     * Piercing uygulanmadan önceki düz savunma miktarı.
+     * Piercing uygulanmadan önceki hasar azaltma yüzdesi.
      */
     fun rawArmorDamageReduction(): Float {
         val armorClass =
@@ -677,8 +681,8 @@ class PlayerStats(
                 StatType.ARMOR_CLASS
             )
 
-        return armorBaseArmor.toFloat() *
-            armorClass.toFloat()
+        val defense = armorBaseArmor.coerceAtLeast(0).toFloat() + armorClass.coerceAtLeast(0)
+        return 100f * defense / (100f + defense)
     }
 
     /*
@@ -711,8 +715,9 @@ class PlayerStats(
                     0.75f
                 )
 
-        return rawArmorDamageReduction() *
-            (1f - safePiercingRatio)
+        val defense = (armorBaseArmor.coerceAtLeast(0).toFloat() +
+            totalScore(StatType.ARMOR_CLASS).coerceAtLeast(0)) * (1f - safePiercingRatio)
+        return 100f * defense / (100f + defense)
     }
 
     /*

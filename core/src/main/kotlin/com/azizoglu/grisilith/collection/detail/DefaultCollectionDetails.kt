@@ -139,12 +139,12 @@ object DefaultCollectionDetails {
             contentId = id,
             description = description,
             rows = listOf(
-                CollectionDetailRow("Armor Type", armorTypeName()),
                 CollectionDetailRow("Base Health", baseHealth.toString()),
                 CollectionDetailRow("Base Armor", baseArmor.toString()),
-                CollectionDetailRow("Magic Resistance", baseMagicResistance.toString()),
-                CollectionDetailRow("Stat Modifiers", statModifiers.takeIf { it.isNotEmpty() }?.formatted() ?: "None")
-            )
+                CollectionDetailRow("Base Spell Protection", baseMagicResistance.toString())
+            ) + allStatModifiers().sortedBy {it.statType.displayName}.map {
+                CollectionDetailRow(it.statType.displayName,"${if(it.amount>0) "+" else ""}${it.amount}")
+            }
         )
 
     private fun EnemyKindDefinition.toCollectionDetail(): CollectionDetailDefinition =

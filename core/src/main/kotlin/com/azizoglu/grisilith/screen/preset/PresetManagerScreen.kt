@@ -1676,7 +1676,7 @@ class PresetManagerScreen(
 
                     details =
                         if (!preset.character.canEquipArmor) {
-                            "Cannot equip Armor.\nBase HP: ${preset.character.unarmoredBaseHealth}\nBase Armor: ${preset.character.unarmoredBaseArmor}\nBase Magic Resistance: ${preset.character.unarmoredBaseMagicResistance}"
+                            "Cannot equip Armor.\nBase Health: ${preset.character.unarmoredBaseHealth}\nBase Armor: ${preset.character.unarmoredBaseArmor}\nBase Spell Protection: ${preset.character.unarmoredBaseMagicResistance}"
                         } else "This character starts with no Armor bonuses."
                 } else {
                     title =
@@ -1685,40 +1685,7 @@ class PresetManagerScreen(
                     description =
                         armor.description
 
-                    details =
-                        buildString {
-                            appendLine(
-                                "Base HP: ${armor.baseHealth}"
-                            )
-
-                            appendLine(
-                                "Base Armor: ${armor.baseArmor}"
-                            )
-
-                            appendLine("Base Magic Resistance: ${armor.baseMagicResistance}")
-
-                            val modifierText =
-                                armor
-                                    .allStatModifiers()
-                                    .joinToString(
-                                        separator =
-                                            "\n"
-                                    ) { modifier ->
-
-                                        "${modifier.statType.displayName}: " +
-                                            signed(
-                                                modifier.amount
-                                            )
-                                    }
-                                    .ifBlank {
-                                        "No Stat changes."
-                                    }
-
-                            appendLine()
-                            append(
-                                modifierText
-                            )
-                        }
+                    details = com.azizoglu.grisilith.armor.definition.ArmorPresentation.stats(armor)
                 }
             }
 

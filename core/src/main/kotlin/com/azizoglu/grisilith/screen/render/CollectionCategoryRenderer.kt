@@ -78,7 +78,7 @@ class CollectionCategoryRenderer {
         UiComponentRenderer.drawButton(batch, searchBounds, ButtonVisualState.NORMAL)
         UiComponentRenderer.drawButton(batch, stateBounds, ButtonVisualState.NORMAL)
         UiComponentRenderer.drawButton(batch, sortBounds, ButtonVisualState.NORMAL)
-        if (hasCategoryFilters) UiComponentRenderer.drawDropdown(batch, filterBounds, filterOpen)
+        if (hasCategoryFilters) UiComponentRenderer.drawDropdown(batch, filterBounds, false)
 
         val oldScaleX = font.data.scaleX
         val oldScaleY = font.data.scaleY
@@ -259,16 +259,21 @@ class CollectionCategoryRenderer {
             fittedText(batch,font,"BASE STATS — HOVER TO VIEW",Rectangle(statsPanel.x+16f,statsPanel.y+6f,statsPanel.width-32f,statsPanel.height-12f),.74f)
         } else {
             val rows=detail?.rows.orEmpty().take(when(entry.definition.category) {
-                ContentCategory.ARMOR -> 5
+                ContentCategory.ARMOR -> Int.MAX_VALUE
                 ContentCategory.TAMGA -> 2
                 else -> 4
             })
-            val rowHeight=if(entry.definition is ArmorDefinition)43f else 44f
-            val rowTop=bounds.y+28f+rows.size*rowHeight
+            val rowHeight=if(entry.definition is ArmorDefinition)36f else 44f
+            val rowTop=if(entry.definition is ArmorDefinition)armorRowsTop(batch,font,entry.definition,bounds,rows.size) else bounds.y+28f+rows.size*rowHeight
             fittedText(batch,font,detail?.description ?: entry.definition.description,
                 Rectangle(bounds.x+24f,rowTop+18f,bounds.width-48f,bounds.height-135f-(rowTop-bounds.y)-18f),.78f,Align.left,true,topAligned=true)
             rows.forEachIndexed { index,row ->
                 val y=rowTop-index*rowHeight
+                if(entry.definition is ArmorDefinition) {
+                    font.color=Color.LIGHT_GRAY;font.data.setScale(.72f)
+                    com.azizoglu.grisilith.ui.stat.StatSymbolRenderer.drawRichText(batch,font,"${row.label}: ${row.value}",bounds.x+24f,y-6f,bounds.width-48f)
+                    return@forEachIndexed
+                }
                 font.color=Color(.80f,.67f,.41f,1f)
                 val stat=com.azizoglu.grisilith.statistics.StatType.entries.firstOrNull{it.displayName.equals(row.label,true)}
                 if(stat!=null) {
@@ -284,6 +289,14 @@ class CollectionCategoryRenderer {
 
     fun characterStatsBounds(bounds: Rectangle)=Rectangle(bounds.x+24f,bounds.y+20f,bounds.width-48f,40f)
 
+    private fun armorRowsTop(batch:SpriteBatch,font:BitmapFont,armor:ArmorDefinition,bounds:Rectangle,count:Int):Float {
+        val sx=font.data.scaleX;val sy=font.data.scaleY
+        font.data.setScale(.78f)
+        val storyHeight=com.azizoglu.grisilith.ui.stat.StatSymbolRenderer.drawRichText(batch,font,armor.description,0f,0f,bounds.width-48f,measureOnly=true)
+        font.data.setScale(sx,sy)
+        return (bounds.y+bounds.height-135f-storyHeight-24f).coerceAtLeast(bounds.y+28f+count*36f)
+    }
+
     fun renderDetailHover(batch:SpriteBatch,font:BitmapFont,entry:CollectionEntry?,bounds:Rectangle,pointer:Vector2) {
         if(entry==null || entry.isUnknown) return
         (entry.definition as? com.azizoglu.grisilith.weapon.definition.WeaponDefinition)?.let {
@@ -295,13 +308,13 @@ class CollectionCategoryRenderer {
         }
         val armor=entry.definition as? ArmorDefinition ?: return
         val rows=CollectionDetailRegistry.find(armor.id)?.rows.orEmpty()
-        val top=bounds.y+28f+rows.size*43f
-        val index=rows.indices.firstOrNull { Rectangle(bounds.x+24f,top-it*43f-27f,bounds.width-48f,32f).contains(pointer) } ?: return
+        val top=armorRowsTop(batch,font,armor,bounds,rows.size)
+        val index=rows.indices.firstOrNull { Rectangle(bounds.x+24f,top-it*36f-27f,bounds.width-48f,32f).contains(pointer) } ?: return
         val title=rows[index].label
         val copy=when(title) {
             "Base Health" -> "Maximum HP = Armor's Base Health × Max HP stat.\n\nFor this armor: ${armor.baseHealth} × Max HP stat. Item effects can further modify the result; maximum HP is rounded and cannot fall below 1."
-            "Base Armor" -> "Physical damage reduction = Armor's Base Armor × Armor Class stat.\n\nFor this armor: ${armor.baseArmor} × Armor Class stat. Incoming Piercing reduces this protection."
-            "Magic Resistance" -> "Magical damage reduction = Armor's Base Magic Resistance × Magic Resistance stat.\n\nFor this armor: ${armor.baseMagicResistance} × Magic Resistance stat. Piercing does not bypass magical protection."
+            "Base Armor" -> "Physical damage taken = Incoming damage × 100 / (100 + Defense).\n\nDefense = (${armor.baseArmor} Base Armor + Armor Class stat) × (1 − incoming Piercing). Positive damage cannot fall below 1."
+            "Base Spell Protection" -> "Magical damage taken = Incoming damage × 100 / (100 + Defense).\n\nDefense = ${armor.baseMagicResistance} Base Spell Protection + Magic Resistance stat. Piercing does not bypass magical protection; positive damage cannot fall below 1."
             else -> return
         }
         AdaptiveTooltipRenderer.draw(batch,font,Rectangle(0f,0f,1280f,720f),pointer,title,copy,520f,.90f,.76f)

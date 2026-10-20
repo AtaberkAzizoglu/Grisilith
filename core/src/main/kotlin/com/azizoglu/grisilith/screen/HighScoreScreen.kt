@@ -199,10 +199,10 @@ class HighScoreScreen(
                 "BACK",
 
             x =
-                40f,
+                190f,
 
             y =
-                30f,
+                38f,
 
             width =
                 180f,

@@ -42,17 +42,17 @@ object MissingSfxSmoke {
     hp.heal(1);GameAudio.update();check(abs(sounds.getValue(UiSound.HEAL).played.last()-.024f)<.0001f)
     hp.heal(9999);advance(250);val before=HealingVisualManager.activeEvents.size
     check(hp.heal(1)==0 && HealingVisualManager.activeEvents.size==before)
-    // Hover triggers on entry, not every frame, and cannot swallow an immediate click.
+    // Phase 10a: hovering is silent; ordinary clicks are unchanged.
     levels=AudioLevels(1f,1f,1f);advance(3000)
     var clicks=0
     val button=MenuButton("QA",0f,0f,100f,100f){clicks++}
     val pointer=Vector2(10f,10f)
     repeat(20){button.update(pointer,false,false);GameAudio.update();advance(10)}
-    check(sounds.getValue(UiSound.HOVER).played.size==1)
+    check(sounds.getValue(UiSound.HOVER).played.isEmpty())
     button.update(pointer,true,false);advance(1);button.update(pointer,false,true);GameAudio.update()
     check(clicks==1 && sounds.getValue(UiSound.CLICK).played.size==1)
     button.update(Vector2(200f,200f),false,false);advance(100)
-    button.update(pointer,false,false);GameAudio.update();check(sounds.getValue(UiSound.HOVER).played.size==2)
+    button.update(pointer,false,false);GameAudio.update();check(sounds.getValue(UiSound.HOVER).played.isEmpty())
     // All merge entry paths emit WM1 only on a successful merge.
     advance(3000)
     val inventory=WeaponInventory()

@@ -19,6 +19,7 @@ class DamageNumberManager {
         val isCriticalHit: Boolean,
         val displayText: String?,
         val isMiss: Boolean,
+        val isPlayerDamage: Boolean,
         val horizontalOffset: Float,
         var elapsedSeconds: Float = 0f
     )
@@ -41,10 +42,10 @@ class DamageNumberManager {
     }
 
     fun collectFromPlayer(player: Player) {
-        collectEvents(player.consumeDamageNumberEvents())
+        collectEvents(player.consumeDamageNumberEvents(), isPlayerDamage = true)
     }
 
-    private fun collectEvents(events: List<DamageNumberEvent>) {
+    private fun collectEvents(events: List<DamageNumberEvent>, isPlayerDamage: Boolean = false) {
         events.forEach { event ->
             activeNumbers.add(
                 ActiveDamageNumber(
@@ -54,6 +55,7 @@ class DamageNumberManager {
                     isCriticalHit = event.isCriticalHit,
                     displayText = event.displayText,
                     isMiss = event.isMiss,
+                    isPlayerDamage = isPlayerDamage,
                     horizontalOffset = when (sequence++ % 5) {
                         0 -> -10f
                         1 -> 8f
@@ -108,7 +110,7 @@ class DamageNumberManager {
             )
 
             font.color =
-                if (number.isMiss) {
+                if (number.isMiss || number.isPlayerDamage) {
                     Color(1f, 0.12f, 0.10f, alpha)
                 } else if (number.isCriticalHit) {
                     Color(1f, 0.88f, 0.12f, alpha)

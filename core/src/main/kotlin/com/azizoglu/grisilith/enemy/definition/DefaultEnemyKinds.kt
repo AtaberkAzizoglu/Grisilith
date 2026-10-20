@@ -1,6 +1,7 @@
 package com.azizoglu.grisilith.enemy.definition
 
 import com.azizoglu.grisilith.content.ContentId
+import com.azizoglu.grisilith.content.DamageType
 import com.azizoglu.grisilith.enemy.EnemyType
 
 /*
@@ -63,6 +64,7 @@ object DefaultEnemyKinds {
             baseStats =
                 EnemyBaseStats(
                     maximumHealth = 250,
+                    damageAffinities = com.azizoglu.grisilith.combat.affinity.DamageAffinityProfile.of(DamageType.NECROTIC to com.azizoglu.grisilith.combat.affinity.DamageAffinity.VULNERABLE),
                     armorClass = 6,
                     baseArmor = 3,
                     baseMagicResistance = 2,
@@ -101,6 +103,7 @@ object DefaultEnemyKinds {
             baseStats =
                 EnemyBaseStats(
                     maximumHealth = 400,
+                    damageAffinities = com.azizoglu.grisilith.combat.affinity.DamageAffinityProfile.of(DamageType.FIRE to com.azizoglu.grisilith.combat.affinity.DamageAffinity.RESISTANT),
                     armorClass = 14,
                     baseArmor = 3,
                     baseMagicResistance = 2,
@@ -139,6 +142,7 @@ object DefaultEnemyKinds {
             baseStats =
                 EnemyBaseStats(
                     maximumHealth = 170,
+                    damageAffinities = com.azizoglu.grisilith.combat.affinity.DamageAffinityProfile.of(DamageType.NECROTIC to com.azizoglu.grisilith.combat.affinity.DamageAffinity.VULNERABLE),
                     armorClass = 5,
                     baseArmor = 2,
                     baseMagicResistance = 2,
@@ -174,11 +178,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 5000,
-                    armorClass = 13,
-                    baseArmor = 3,
-                    baseMagicResistance = 3,
-                    magicResistance = 6,
+                    maximumHealth = 9800,
+                    armorClass = 62,
+                    baseArmor = 40,
+                    baseMagicResistance = 30,
+                    magicResistance = 46,
                     contactDamage = 58,
                     movementSpeed = 145f,
                     attacksPerSecond = 0.68f,
@@ -212,11 +216,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 3200,
-                    armorClass = 4,
-                    baseArmor = 1,
-                    baseMagicResistance = 2,
-                    magicResistance = 5,
+                    maximumHealth = 6300,
+                    armorClass = 31,
+                    baseArmor = 20,
+                    baseMagicResistance = 20,
+                    magicResistance = 31,
                     contactDamage = 22,
                     movementSpeed = 132f,
                     attacksPerSecond = 2.35f,
@@ -253,11 +257,12 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.VERY_LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 6500,
-                    armorClass = 15,
-                    baseArmor = 4,
-                    baseMagicResistance = 3,
-                    magicResistance = 5,
+                    maximumHealth = 8000,
+                    damageAffinities = com.azizoglu.grisilith.combat.affinity.DamageAffinityProfile.of(DamageType.FIRE to com.azizoglu.grisilith.combat.affinity.DamageAffinity.RESISTANT),
+                    armorClass = 62,
+                    baseArmor = 40,
+                    baseMagicResistance = 10,
+                    magicResistance = 15,
                     contactDamage = 72,
                     movementSpeed = 72f,
                     attacksPerSecond = 0.48f,
@@ -407,11 +412,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 7800,
-                    armorClass = 17,
-                    baseArmor = 5,
-                    baseMagicResistance = 5,
-                    magicResistance = 13,
+                    maximumHealth = 5500,
+                    armorClass = 62,
+                    baseArmor = 40,
+                    baseMagicResistance = 20,
+                    magicResistance = 31,
                     contactDamage = 82,
                     movementSpeed = 105.6f,
                     attacksPerSecond = 0.54f,
@@ -445,11 +450,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.VERY_LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 6800,
-                    armorClass = 15,
-                    baseArmor = 4,
-                    baseMagicResistance = 6,
-                    magicResistance = 16,
+                    maximumHealth = 11700,
+                    armorClass = 31,
+                    baseArmor = 20,
+                    baseMagicResistance = 10,
+                    magicResistance = 15,
                     contactDamage = 72,
                     movementSpeed = 202.5f,
                     attacksPerSecond = 0.82f,
@@ -483,11 +488,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 24000,
-                    armorClass = 21,
-                    baseArmor = 4,
-                    baseMagicResistance = 8,
-                    magicResistance = 25,
+                    maximumHealth = 5400,
+                    armorClass = 27,
+                    baseArmor = 20,
+                    baseMagicResistance = 40,
+                    magicResistance = 53,
                     contactDamage = 108,
                     movementSpeed = 155f,
                     attacksPerSecond = 1.65f,
@@ -524,6 +529,7 @@ object DefaultEnemyKinds {
             baseStats =
                 EnemyBaseStats(
                     maximumHealth = 358,
+                    damageAffinities = com.azizoglu.grisilith.combat.affinity.DamageAffinityProfile.of(DamageType.BLUDGEONING to com.azizoglu.grisilith.combat.affinity.DamageAffinity.VULNERABLE),
                     armorClass = 11,
                     baseArmor = 3,
                     baseMagicResistance = 5,
@@ -562,6 +568,7 @@ object DefaultEnemyKinds {
                     baseArmor = 2,
                     baseMagicResistance = 5,
                     magicResistance = 11,
+                    damageAffinities = com.azizoglu.grisilith.combat.affinity.DamageAffinityProfile.of(DamageType.BLUDGEONING to com.azizoglu.grisilith.combat.affinity.DamageAffinity.VULNERABLE),
                     contactDamage = 16,
                     movementSpeed = 132f,
                     attacksPerSecond = 0.68f,
@@ -630,11 +637,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 6200,
-                    armorClass = 8,
-                    baseArmor = 1,
-                    baseMagicResistance = 9,
-                    magicResistance = 14,
+                    maximumHealth = 5400,
+                    armorClass = 15,
+                    baseArmor = 10,
+                    baseMagicResistance = 40,
+                    magicResistance = 62,
                     contactDamage = 18,
                     movementSpeed = 120f,
                     attacksPerSecond = 0.70f,
@@ -671,11 +678,14 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.VERY_LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 7600,
-                    armorClass = 5,
-                    baseArmor = 1,
-                    baseMagicResistance = 8,
-                    magicResistance = 8,
+                    maximumHealth = 11600,
+                    damageAffinities = com.azizoglu.grisilith.combat.affinity.DamageAffinityProfile.of(
+                        DamageType.ACID to com.azizoglu.grisilith.combat.affinity.DamageAffinity.IMMUNE,
+                        DamageType.WATER to com.azizoglu.grisilith.combat.affinity.DamageAffinity.RESISTANT),
+                    armorClass = 31,
+                    baseArmor = 20,
+                    baseMagicResistance = 20,
+                    magicResistance = 31,
                     contactDamage = 65,
                     movementSpeed = 72f,
                     attacksPerSecond = 0.62f,
@@ -712,11 +722,11 @@ object DefaultEnemyKinds {
             sizeCategory = EnemySizeCategory.LARGE,
             baseStats =
                 EnemyBaseStats(
-                    maximumHealth = 22000,
-                    armorClass = 20,
-                    baseArmor = 4,
-                    baseMagicResistance = 10,
-                    magicResistance = 22,
+                    maximumHealth = 9000,
+                    armorClass = 53,
+                    baseArmor = 40,
+                    baseMagicResistance = 40,
+                    magicResistance = 53,
                     contactDamage = 105,
                     movementSpeed = 170f,
                     attacksPerSecond = 0.95f,

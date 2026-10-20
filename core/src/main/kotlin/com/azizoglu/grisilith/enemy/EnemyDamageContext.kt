@@ -29,6 +29,7 @@ data class EnemyDamageContext(
     val conditionStatScore: Int? = null,
     val appliesAutomaticCondition: Boolean = true,
     val projectileAttack: Boolean = false,
+    // Legacy field metadata; percentage defense no longer depends on tick duration.
     val defenseTimeScale: Float = 1f,
     val chaosDamageResolved: Boolean = false
 ) {

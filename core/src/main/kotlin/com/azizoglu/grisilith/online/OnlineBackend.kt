@@ -162,6 +162,13 @@ class OnlineBackend(
         rpc("leaderboard_all", jsonObject(), callback)
     }
 
+    fun praise(runId: String, callback: (Result<JsonValue>) -> Unit) {
+        if(status!=Status.READY || !runId.matches(Regex("[0-9a-fA-F-]{36}"))) {
+            callback(Result.failure(IllegalStateException("Not connected or invalid run"))); return
+        }
+        rpc("praise",jsonObject("p_run_id" to runId),callback)
+    }
+
     fun nameAvailable(name: String, callback: (Result<Boolean>) -> Unit) {
         if(status != Status.READY) {callback(Result.failure(OnlineRequestFailure(0)));return}
         rpc("name_available",jsonObject("p_name" to PlayerNamePolicy.uppercase(name).trim(' '))) { result ->

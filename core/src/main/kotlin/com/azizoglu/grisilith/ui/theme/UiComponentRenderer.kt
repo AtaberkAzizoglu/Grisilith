@@ -16,6 +16,19 @@ import com.badlogic.gdx.math.Rectangle
  * their existing layout and hitboxes while only their presentation is replaced.
  */
 object UiComponentRenderer {
+    /** A soft, pulsing rim only; never washes out the weapon artwork. */
+    fun drawMergeHint(batch: SpriteBatch, bounds: Rectangle) {
+        val old=Color(batch.color)
+        val pulse=.5f+.5f*kotlin.math.sin(com.badlogic.gdx.utils.TimeUtils.millis()/260.0).toFloat()
+        for(layer in 0..2) {
+            val pad=layer*1.5f
+            batch.color=Color(.55f,.82f,1f,(.18f+.18f*pulse)/(layer+1))
+            val x=bounds.x-pad;val y=bounds.y-pad;val w=bounds.width+2*pad;val h=bounds.height+2*pad
+            batch.draw(solidPixel,x,y,w,2f);batch.draw(solidPixel,x,y+h-2f,w,2f)
+            batch.draw(solidPixel,x,y,2f,h);batch.draw(solidPixel,x+w-2f,y,2f,h)
+        }
+        batch.color=old
+    }
 
     private var renderOpacity = 1f
 
@@ -673,7 +686,7 @@ object UiComponentRenderer {
                 chronicleScrollbarThumb.regionWidth.toFloat()
         val thumbHeight =
             (thumbWidth * sourceAspect * (0.90f + clampedVisible * 0.20f))
-                .coerceIn(56f, bounds.height * 0.24f)
+                .coerceIn(minOf(56f, bounds.height * 0.24f), bounds.height * 0.24f)
         val travel = (bounds.height - thumbHeight).coerceAtLeast(0f)
         val thumbY = bounds.y + travel * (1f - clampedScroll)
         val thumbX = bounds.x + (bounds.width - thumbWidth) / 2f

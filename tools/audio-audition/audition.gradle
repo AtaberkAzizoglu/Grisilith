@@ -1,6 +1,24 @@
 // Audio audition preparation and isolated integration checks.
 gradle.projectsEvaluated {
     def desktop = gradle.rootProject.project(':lwjgl3')
+    desktop.tasks.register('phase10aSmoke', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.Phase10aSmoke'
+        workingDir = gradle.rootProject.file('assets')
+    }
+    desktop.tasks.register('phase10bSmoke', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.Phase10bSmoke'
+        workingDir = gradle.rootProject.file('assets')
+    }
+    desktop.tasks.register('phase10cSmoke', JavaExec) {
+        dependsOn desktop.tasks.named('compileKotlin')
+        classpath = desktop.sourceSets.main.runtimeClasspath
+        mainClass = 'qa.Phase10cSmoke'
+        workingDir = gradle.rootProject.file('assets')
+    }
     desktop.tasks.register('itemAudioSmoke', JavaExec) {
         dependsOn desktop.tasks.named('compileKotlin')
         classpath = desktop.sourceSets.main.runtimeClasspath

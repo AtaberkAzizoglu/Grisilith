@@ -250,6 +250,15 @@ class MarketRenderer(
         renderWeaponInventory(
             layout
         )
+        val draggedWeapon=interactionState.draggedWeaponSlotIndex?.let {weaponInventory.weaponAt(it)}
+        val draggedOffer=interactionState.draggedMarketOfferIndex?.let {marketSlots.getOrNull(it)?.offer}
+        val sourceDefinition=draggedWeapon?.definition ?: draggedOffer?.weaponDefinition
+        val sourceLevel=draggedWeapon?.level ?: draggedOffer?.productLevel ?: 1
+        if(sourceDefinition!=null)layout.weaponSlots.forEachIndexed {index,bounds ->
+            val target=weaponInventory.weaponAt(index)
+            if(index!=interactionState.draggedWeaponSlotIndex && target!=null && GearDragPreview.isMergeCandidate(sourceDefinition,sourceLevel,target))
+                UiComponentRenderer.drawMergeHint(batch,bounds)
+        }
 
         renderItemInventory(
             layout =
@@ -1386,69 +1395,8 @@ class MarketRenderer(
                 draggedSlotIndex
             ) ?: return
 
-        val previewWidth =
-            190f
-
-        val previewHeight =
-            70f
-
-        val previewRectangle =
-            Rectangle(
-                interactionState
-                    .pointerPosition.x -
-                    previewWidth / 2f,
-
-                interactionState
-                    .pointerPosition.y -
-                    previewHeight / 2f,
-
-                previewWidth,
-                previewHeight
-            )
-
-        drawPanel(
-            rectangle =
-                previewRectangle,
-
-            fillColor =
-                Color(
-                    0.16f,
-                    0.22f,
-                    0.31f,
-                    0.94f
-                )
-        )
-
-        font.color =
-            Color.WHITE
-
-        font.draw(
-            batch,
-            weapon.displayName,
-            previewRectangle.x + 8f,
-            previewRectangle.y +
-                previewRectangle.height -
-                15f,
-            previewRectangle.width - 16f,
-            Align.center,
-            true
-        )
-
-        font.color =
-            Color.GOLD
-
-        font.draw(
-            batch,
-            "Level " +
-                romanNumeral(
-                    weapon.level
-                ),
-            previewRectangle.x + 8f,
-            previewRectangle.y + 22f,
-            previewRectangle.width - 16f,
-            Align.center,
-            false
-        )
+        GearDragPreview.draw(batch,font,weapon.definition,weapon.level,
+            interactionState.pointerPosition.x,interactionState.pointerPosition.y)
     }
 
     private fun renderWeaponDetailPopup(
@@ -2645,7 +2593,7 @@ class MarketRenderer(
                                 }
                             }
 
-                        if (validTarget) {
+                        if (validTarget && existingWeapon==null) {
                             drawHighlightBorder(
                                 rectangle =
                                     rectangle
@@ -2673,6 +2621,13 @@ class MarketRenderer(
             )
                 ?.offer
                 ?: return
+
+        val gear=offer.weaponDefinition ?: offer.itemDefinition
+        if(gear!=null) {
+            GearDragPreview.draw(batch,font,gear,offer.productLevel,
+                interactionState.pointerPosition.x,interactionState.pointerPosition.y)
+            return
+        }
 
         val previewRectangle =
             Rectangle(

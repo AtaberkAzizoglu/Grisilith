@@ -609,7 +609,7 @@ class MerchantRenderer(
         bodyFont.data.setScale(0.62f)
         bodyFont.color = Color(0.72f, 0.72f, 0.76f, 1f)
         if (filterLabel != null) {
-            UiComponentRenderer.drawDropdown(batch, FILTER_DROPDOWN, filterDropdownOpen)
+            UiComponentRenderer.drawDropdown(batch, FILTER_DROPDOWN, false)
             bodyFont.data.setScale(0.72f)
             drawFittedCenteredLine(
                 batch,

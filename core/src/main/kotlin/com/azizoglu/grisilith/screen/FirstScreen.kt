@@ -1830,14 +1830,14 @@ class FirstScreen(
         audioStageInterrupted = discard
         GameAudio.combatPlayback(gameTimeController.gameSpeed,
             discard || isPauseMenuOpen || isTestSettingsOpen || gameTimeController.isPaused)
-        val musicBlocked = player.health.isDead || stageController.isRunComplete ||
-            isRunSummaryOpen || isRunEndTransitionActive || chestRewardController.isOpen ||
-            statCardController.isOpen || onlineRun?.isPreparing == true
-        GameAudio.runMusic(if(isRunSummaryOpen) {
+        val runEnded=player.health.isDead || stageController.isRunComplete || isRunSummaryOpen || isRunEndTransitionActive
+        val musicBlocked = onlineRun?.isPreparing == true
+        GameAudio.runMusic(if(runEnded) {
             if(stageController.isRunComplete)com.azizoglu.grisilith.audio.MusicTrack.SUMMARY_VICTORY
             else com.azizoglu.grisilith.audio.MusicTrack.SUMMARY_DEFEAT
         } else com.azizoglu.grisilith.audio.RunMusic.select(
-            gameMap,stageController.currentStageType,blocked=musicBlocked,market=isMarketOpen))
+            gameMap,stageController.currentStageType,blocked=musicBlocked,market=isMarketOpen),
+            gain=if(!runEnded && !isMarketOpen && (chestRewardController.isOpen || statCardController.isOpen)) .65f else 1f)
     }
 
     private fun currentEnemyScore(): Long = RunScoreCalculator.enemyScore(gameMap,
@@ -4521,7 +4521,9 @@ class FirstScreen(
         troubleAtHomeDefenseRuntime.renderTexts(
             batch = hudBatch,
             font = hudFont,
-            camera = camera
+            camera = camera,
+            playerCenterX = player.centerX,
+            playerCenterY = player.centerY
         )
 
         Gdx.gl.glDisable(
@@ -5407,6 +5409,7 @@ class FirstScreen(
     }
 
     override fun dispose() {
+        troubleAtHomeDefenseRuntime.dispose()
         player.stopVoiceAudio()
         enemyManager.allEnemies.forEach(com.azizoglu.grisilith.audio.EnemyAudio::clear)
         onlineRun?.let { game.online?.abandon(it) }

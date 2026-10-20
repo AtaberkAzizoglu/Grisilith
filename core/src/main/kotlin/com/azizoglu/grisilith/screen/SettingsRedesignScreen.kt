@@ -45,6 +45,18 @@ class SettingsScreen(
     }
 
     private enum class Page { GENERAL, CONTROLS, COMBAT, ACCOUNT }
+    private enum class ResetTarget { ALL, CONTROLS }
+    private var resetConfirmation: ResetTarget? = null
+    private var displayBefore: GameSettings.Snapshot? = null
+    private var displaySeconds = 0f
+    private var resolutionOpen=false
+    private var resolutionOffset=0
+    private val resolutionBounds=Rectangle(940f,384f,228f,56f)
+    private fun resolutionRows():List<Rectangle> = GameSettings.resolutions().drop(resolutionOffset).take(5).indices.map {
+        Rectangle(resolutionBounds.x,resolutionBounds.y-38f*(it+1),resolutionBounds.width,38f)
+    }
+    private fun resolutionLabel(value:GameSettings.Resolution):String =
+        if(value.width==0 && !draftSettings.fullscreen) "Default (1280 x 720)" else value.label
     private enum class VolumeSlider { MASTER, MUSIC, EFFECTS }
 
     private val camera = OrthographicCamera()
@@ -79,6 +91,11 @@ class SettingsScreen(
     private lateinit var draftBindings: MutableMap<RunInputAction, Int>
 
     private val keyboardInput = object : InputAdapter() {
+        override fun scrolled(amountX:Float,amountY:Float):Boolean {
+            if(!resolutionOpen)return false
+            resolutionOffset=(resolutionOffset+amountY.toInt()).coerceIn(0,(GameSettings.resolutions().size-5).coerceAtLeast(0))
+            rebuildButtons();return true
+        }
         override fun keyDown(keycode: Int): Boolean {
             listeningAction?.let { action ->
                 if (keycode == Input.Keys.ESCAPE) {
@@ -92,7 +109,14 @@ class SettingsScreen(
             }
             if (keycode == Input.Keys.ESCAPE) {
                 GameAudio.play(UiSound.CLICK)
-                if (exitConfirmationOpen) {
+                if(resolutionOpen) {
+                    resolutionOpen=false;rebuildButtons()
+                } else if (displayBefore != null) {
+                    finishDisplayPreview(false)
+                } else if (resetConfirmation != null) {
+                    resetConfirmation = null
+                    rebuildButtons()
+                } else if (exitConfirmationOpen) {
                     exitConfirmationOpen = false
                     rebuildButtons()
                 } else {
@@ -109,6 +133,8 @@ class SettingsScreen(
         camera.position.set(WIDTH / 2f, HEIGHT / 2f, 0f)
         camera.update()
         pointer.reset()
+        resetConfirmation = null
+        resolutionOpen=false
         appliedSettings = GameSettings.snapshot()
         draftSettings = appliedSettings
         appliedBindings = RunInputBindings.snapshot()
@@ -121,6 +147,7 @@ class SettingsScreen(
     }
 
     override fun hide() {
+        if(displayBefore!=null) finishDisplayPreview(false)
         GameAudio.clearPreview(this)
         nameDialog?.close()
         if (Gdx.input.inputProcessor === keyboardInput) {
@@ -130,11 +157,18 @@ class SettingsScreen(
     }
 
     override fun render(delta: Float) {
+        if(displayBefore!=null) {
+            displaySeconds-=delta.coerceAtLeast(0f)
+            if(displaySeconds<=0f) finishDisplayPreview(false)
+        }
         pointer.update()
+        val dismissedResolution=resolutionOpen && pointer.justPressed && !resolutionBounds.contains(pointer.position) &&
+            resolutionRows().none {it.contains(pointer.position)}
+        if(dismissedResolution) {resolutionOpen=false;rebuildButtons()}
         nameDialog?.update(pointer)
         if (nameDialog?.open != true) handleVolumeSliders()
         previewAudio()
-        val currentButtons = if(nameDialog?.open == true) emptyList() else buttons
+        val currentButtons = if(nameDialog?.open == true || dismissedResolution) emptyList() else buttons
         currentButtons.forEach { button ->
             if (button.update(pointer.position, pointer.justPressed, pointer.justReleased)) return
         }
@@ -163,8 +197,28 @@ class SettingsScreen(
 
         if (listeningAction != null) drawListeningModal()
         if (exitConfirmationOpen) drawExitConfirmation()
+        if (resetConfirmation != null) drawResetConfirmation()
+        if(displayBefore!=null) {
+            drawModalBackdrop()
+            UiComponentRenderer.drawPanel(batch,Rectangle(330f,205f,620f,290f),PanelVisualStyle.MODAL)
+            font.data.setScale(1.05f);font.color=Color.WHITE
+            font.draw(batch,"KEEP DISPLAY SETTINGS?",355f,442f,570f,Align.center,false)
+            font.data.setScale(.85f)
+            font.draw(batch,"Reverting in ${kotlin.math.ceil(displaySeconds).toInt()} seconds",355f,383f,570f,Align.center,false)
+        }
+        if(resolutionOpen) {
+            regularButtons().forEach {it.render(batch,font,pointer.position,false)}
+            val rows=resolutionRows()
+            val bottom=rows.lastOrNull()?.y ?: resolutionBounds.y
+            batch.color=Color(.035f,.03f,.025f,1f)
+            batch.draw(solidPixel,resolutionBounds.x-5f,bottom-5f,resolutionBounds.width+10f,resolutionBounds.y-bottom+10f)
+            batch.color=Color.WHITE
+            UiComponentRenderer.drawPanel(batch,Rectangle(resolutionBounds.x-5f,bottom-5f,resolutionBounds.width+10f,resolutionBounds.y-bottom+10f),PanelVisualStyle.TOOLTIP)
+            val total=GameSettings.resolutions().size
+            if(total>5)UiComponentRenderer.drawChronicleScrollbar(batch,Rectangle(resolutionBounds.x+resolutionBounds.width+4f,bottom,5f,190f),5f/total,resolutionOffset.toFloat()/(total-5))
+        }
         currentButtons.forEach { it.render(batch, font, pointer.position, pointer.isHeld) }
-        if(page==Page.COMBAT)drawCombatTooltip()
+        if(page==Page.COMBAT && resetConfirmation==null && !exitConfirmationOpen)drawCombatTooltip()
         nameDialog?.render(batch,pointer)
         batch.end()
     }
@@ -198,6 +252,7 @@ class SettingsScreen(
         stateLabel(if(draftSettings.directionalStereo) "ON" else "OFF", 535f, 389f)
         label("Display Mode", 772f, 525f)
         label("VSYNC", 772f, 473f)
+        label("Resolution",772f,421f)
         label("Screen Shake", 350f, 318f)
         label("Damage Numbers", 350f, 266f)
         label("Score Display", 350f, 214f)
@@ -293,6 +348,25 @@ class SettingsScreen(
 
     private fun rebuildButtons() {
         buttons = when {
+            displayBefore != null -> listOf(
+                button("KEEP",400f,250f,220f,58f){finishDisplayPreview(true)},
+                button("REVERT",660f,250f,220f,58f){finishDisplayPreview(false)})
+            resolutionOpen -> buildList {
+                val selected=GameSettings.Resolution(draftSettings.resolutionWidth,draftSettings.resolutionHeight)
+                add(dropdownRow(resolutionLabel(selected)+"  ^",resolutionBounds.x,resolutionBounds.y,resolutionBounds.width,resolutionBounds.height,false) {resolutionOpen=false;rebuildButtons()})
+                GameSettings.resolutions().drop(resolutionOffset).take(5).forEachIndexed {index,value ->
+                    val row=resolutionRows()[index]
+                    add(dropdownRow(resolutionLabel(value),row.x,row.y,row.width,row.height,value==selected) {
+                        resolutionOpen=false
+                        if(value!=selected)previewDisplay(draftSettings.fullscreen,value.width,value.height) else rebuildButtons()
+                    })
+                }
+            }
+            resetConfirmation != null -> listOf(
+                button("RESET", 400f, 235f, 220f, 58f) { confirmReset() },
+                button("CANCEL", 660f, 235f, 220f, 58f) {
+                    resetConfirmation=null;rebuildButtons()
+                })
             listeningAction != null -> listOf(button("CANCEL", 540f, 232f, 200f, 48f) {
                 listeningAction = null
                 rebuildButtons()
@@ -316,8 +390,7 @@ class SettingsScreen(
             page=Page.ACCOUNT;rebuildButtons()
         })
         add(button("RESET ALL", 76f, 225f, 222f, 58f) {
-            draftSettings = GameSettings.defaults()
-            draftBindings = RunInputBindings.defaults().toMutableMap()
+            resetConfirmation = ResetTarget.ALL
             rebuildButtons()
         })
         add(button("CONFIRM CHANGES", 76f, 150f, 222f, 58f, ::applyChanges))
@@ -337,9 +410,12 @@ class SettingsScreen(
             draftSettings = draftSettings.copy(directionalStereo = !draftSettings.directionalStereo)
         }
         add(toggleButton("", 1082f, 497f, 86f, 35f, draftSettings.fullscreen) {
-            GameSettings.toggleFullscreen()
-            appliedSettings = appliedSettings.copy(fullscreen = GameSettings.fullscreen)
-            draftSettings = draftSettings.copy(fullscreen = GameSettings.fullscreen)
+            previewDisplay(!draftSettings.fullscreen,0,0)
+        })
+        val resolution=GameSettings.Resolution(draftSettings.resolutionWidth,draftSettings.resolutionHeight)
+        add(dropdownRow(resolutionLabel(resolution)+"  v",resolutionBounds.x,resolutionBounds.y,resolutionBounds.width,resolutionBounds.height,false){
+            resolutionOpen=true
+            resolutionOffset=GameSettings.resolutions().indexOf(resolution).coerceAtLeast(0).coerceAtMost((GameSettings.resolutions().size-5).coerceAtLeast(0))
             rebuildButtons()
         })
         add(toggleButton("", 1082f, 445f, 86f, 35f, draftSettings.vSync) {
@@ -392,6 +468,25 @@ class SettingsScreen(
         }
     }
 
+    private fun previewDisplay(fullscreen:Boolean,width:Int,height:Int) {
+        resolutionOpen=false
+        displayBefore=GameSettings.snapshot()
+        displaySeconds=15f
+        GameSettings.restore(displayBefore!!.copy(fullscreen=fullscreen,resolutionWidth=width,resolutionHeight=height),persist=false)
+        draftSettings=draftSettings.copy(fullscreen=fullscreen,resolutionWidth=width,resolutionHeight=height)
+        rebuildButtons()
+    }
+
+    private fun finishDisplayPreview(keep:Boolean) {
+        val before=displayBefore ?: return
+        val chosen=if(keep)GameSettings.snapshot() else before
+        GameSettings.restore(chosen)
+        appliedSettings=appliedSettings.copy(fullscreen=chosen.fullscreen,resolutionWidth=chosen.resolutionWidth,resolutionHeight=chosen.resolutionHeight)
+        draftSettings=draftSettings.copy(fullscreen=chosen.fullscreen,resolutionWidth=chosen.resolutionWidth,resolutionHeight=chosen.resolutionHeight)
+        displayBefore=null
+        rebuildButtons()
+    }
+
 
     private fun MutableList<MenuButton>.addSettingToggle(x: Float, y: Float, selected: Boolean, toggle: () -> Unit) {
         add(toggleButton("", x, y, 86f, 35f, selected) {
@@ -407,7 +502,7 @@ class SettingsScreen(
         combat.forEachIndexed { index, action -> addBindingButton(action, 658f, 246f - index * 58f) }
         weapons.forEachIndexed { index, action -> addBindingButton(action, 1092f, 487f - index * 58f) }
         add(button("RESET CONTROLS", 875f, 112f, 285f, 58f) {
-            draftBindings = RunInputBindings.defaults().toMutableMap(); rebuildButtons()
+            resetConfirmation = ResetTarget.CONTROLS; rebuildButtons()
         })
     }
 
@@ -492,7 +587,7 @@ class SettingsScreen(
     }
 
     private fun handleVolumeSliders() {
-        if (page != Page.GENERAL || listeningAction != null || exitConfirmationOpen) {
+        if (page != Page.GENERAL || listeningAction != null || exitConfirmationOpen || resetConfirmation != null || displayBefore!=null || resolutionOpen) {
             draggingSlider = null
             return
         }
@@ -555,6 +650,29 @@ class SettingsScreen(
         font.data.setScale(1.02f)
         font.color = Color.WHITE
         font.draw(batch, "There is unsaved changes.", bounds.x, bounds.y + 216f, bounds.width, Align.center, false)
+    }
+
+    private fun confirmReset() {
+        val target=resetConfirmation ?: return
+        if(target==ResetTarget.ALL)draftSettings=GameSettings.defaults()
+        draftBindings=RunInputBindings.defaults().toMutableMap()
+        resetConfirmation=null
+        previewAudio()
+        GameAudio.play(UiSound.CONFIRM)
+        rebuildButtons()
+    }
+
+    private fun drawResetConfirmation() {
+        drawModalBackdrop()
+        val bounds=Rectangle(270f,205f,740f,285f)
+        UiComponentRenderer.drawPanel(batch,bounds,PanelVisualStyle.MODAL)
+        font.data.setScale(1.02f);font.color=Color.WHITE
+        font.draw(batch,"Are you sure?",bounds.x,bounds.y+220f,bounds.width,Align.center,false)
+        font.data.setScale(.82f)
+        font.draw(batch,if(resetConfirmation==ResetTarget.ALL)
+            "Reset all settings and key bindings to their defaults?"
+            else "Reset all key bindings to their defaults?",
+            bounds.x+30f,bounds.y+166f,bounds.width-60f,Align.center,true)
     }
 
     private fun drawModalBackdrop() {

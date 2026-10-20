@@ -411,16 +411,7 @@ class MarketInputController(
                     marketOfferPressStartPosition
                 )
 
-            if (
-                marketOfferPressSeconds >=
-                DRAG_HOLD_SECONDS ||
-                (
-                    movedDistance >=
-                        DRAG_MOVEMENT_THRESHOLD &&
-                        marketOfferPressSeconds >=
-                        0.12f
-                    )
-            ) {
+            if (movedDistance >= DRAG_MOVEMENT_THRESHOLD) {
                 marketOfferDragStarted = true
 
                 interactionState
@@ -567,16 +558,7 @@ class MarketInputController(
                     weaponPressStartPosition
                 )
 
-            if (
-                weaponPressSeconds >=
-                DRAG_HOLD_SECONDS ||
-                (
-                    movedDistance >=
-                        DRAG_MOVEMENT_THRESHOLD &&
-                        weaponPressSeconds >=
-                        0.12f
-                    )
-            ) {
+            if (movedDistance >= DRAG_MOVEMENT_THRESHOLD) {
                 weaponDragStarted = true
 
                 interactionState

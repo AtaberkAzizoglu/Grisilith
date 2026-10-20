@@ -289,6 +289,13 @@ class PauseRenderer(
                 val dragged = interactionState.draggedWeaponSlotIndex
                 if (dragged == null) renderHoverTooltip(layout, interactionState)
                 else {
+                    weaponInventory.weaponAt(dragged)?.let {source ->
+                        layout.weaponSlots.forEachIndexed {index,bounds ->
+                            val target=weaponInventory.weaponAt(index)
+                            if(index!=dragged && target!=null && GearDragPreview.isMergeCandidate(source.definition,source.level,target))
+                                UiComponentRenderer.drawMergeHint(batch,bounds)
+                        }
+                    }
                     interactionState.weaponDropTargetIndex?.let {
                         val r=layout.weaponSlots[it]
                         val color=Color(1f,.78f,.2f,1f)
@@ -298,7 +305,8 @@ class PauseRenderer(
                         drawFilledRectangle(Rectangle(r.x+r.width-2f,r.y,2f,r.height),color)
                     }
                     weaponInventory.weaponAt(dragged)?.let { weapon ->
-                        ContentIconRenderer.draw(batch, weapon.definition, Rectangle(interactionState.pointerPosition.x - 32f, interactionState.pointerPosition.y - 32f, 64f, 64f))
+                        GearDragPreview.draw(batch,font,weapon.definition,weapon.level,
+                            interactionState.pointerPosition.x,interactionState.pointerPosition.y)
                     }
                 }
             }
@@ -713,32 +721,12 @@ class PauseRenderer(
         interactionState:
         PauseInteractionState
     ) {
-        val fillColor =
-            when {
-                interactionState
-                    .pressedButton ==
-                    buttonType -> {
-                    pressedButtonColor
-                }
-
-                interactionState
-                    .hoveredButton ==
-                    buttonType -> {
-                    hoveredButtonColor
-                }
-
-                else -> {
-                    buttonColor
-                }
-            }
-
-        drawPanel(
-            rectangle =
-                rectangle,
-
-            fillColor =
-                fillColor
-        )
+        com.azizoglu.grisilith.ui.theme.UiComponentRenderer.drawButton(batch,rectangle,
+            when(buttonType) {
+                interactionState.pressedButton -> com.azizoglu.grisilith.ui.theme.ButtonVisualState.PRESSED
+                interactionState.hoveredButton -> com.azizoglu.grisilith.ui.theme.ButtonVisualState.HOVERED
+                else -> com.azizoglu.grisilith.ui.theme.ButtonVisualState.NORMAL
+            })
 
         drawCenteredText(
             text =
@@ -1376,71 +1364,17 @@ class PauseRenderer(
 
                     description =
                         "No Armor Equipped.\n\n" +
-                            "Base HP: ${playerStats.armorBaseHealth()}\n" +
+                            "Base Health: ${playerStats.armorBaseHealth()}\n" +
                             "Base Armor: ${playerStats.armorBaseArmor()}\n" +
-                            "Base Magic Resistance: ${playerStats.armorBaseMagicResistance()}\n" +
+                            "Base Spell Protection: ${playerStats.armorBaseMagicResistance()}\n" +
                             "Current Max HP: ${playerStats.calculatedMaximumHealth()}\n" +
-                            "Physical Damage Reduce: ${formatDecimal(playerStats.rawArmorDamageReduction())}\n" +
-                            "Magical Damage Reduce: ${formatDecimal(playerStats.rawMagicDamageReduction())}"
+                            "Physical Damage Reduction: ${formatDecimal(playerStats.rawArmorDamageReduction())}%\n" +
+                            "Magical Damage Reduction: ${formatDecimal(playerStats.rawMagicDamageReduction())}%"
                 } else {
                     title =
                         armor.displayName
 
-                    val modifierText =
-                        armor
-                            .allStatModifiers()
-                            .joinToString(
-                                separator =
-                                    "\n"
-                            ) { modifier ->
-
-                                "${modifier.statType.displayName}: " +
-                                    formatSignedValue(
-                                        modifier.amount
-                                    )
-                            }
-                            .ifBlank {
-                                "No Stat changes."
-                            }
-
-                    description =
-                        buildString {
-                            appendLine(
-                                "Base HP: ${armor.baseHealth}"
-                            )
-
-                            appendLine(
-                                "Base Armor: ${armor.baseArmor}"
-                            )
-
-                            appendLine("Base Magic Resistance: ${armor.baseMagicResistance}")
-                            appendLine("Magical Damage Reduce: ${formatDecimal(playerStats.rawMagicDamageReduction())}")
-
-                            appendLine()
-
-                            appendLine(
-                                "Current Max HP: " +
-                                    playerStats
-                                        .calculatedMaximumHealth()
-                            )
-
-                            appendLine(
-                                "Damage Reduce: " +
-                                    formatDecimal(
-                                        playerStats
-                                            .rawArmorDamageReduction()
-                                    )
-                            )
-
-                            appendLine()
-                            appendLine(
-                                modifierText
-                            )
-                            appendLine()
-                            append(
-                                armor.description
-                            )
-                        }
+                    description = com.azizoglu.grisilith.armor.definition.ArmorPresentation.hover(armor)
                 }
             }
 
@@ -1581,7 +1515,7 @@ class PauseRenderer(
             interactionState.hoveredGearDetailType != null -> when (interactionState.hoveredGearDetailType) {
                 PauseGearDetailType.ARMOR -> {
                     val armor = equippedArmor.definition
-                    (armor?.displayName ?: "Armor") to (armor?.description ?: "No Armor equipped.")
+                    (armor?.displayName ?: "Armor") to (armor?.let {com.azizoglu.grisilith.armor.definition.ArmorPresentation.hover(it)} ?: "No Armor equipped.")
                 }
                 PauseGearDetailType.WEAPON_TAMGA ->
                     (weaponTamga?.displayName ?: "Weapon Tamga") to

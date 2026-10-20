@@ -21,6 +21,8 @@ class TroubleAtHomeDefenseRuntime(
     gameMap: GameMap,
     obstacles: List<MapObstacle>
 ) {
+    private var introArt: com.badlogic.gdx.graphics.Texture? = null
+    fun dispose() { introArt?.dispose(); introArt=null }
 
     val isEnabled =
         gameMap == GameMap.TROUBLE_AT_HOME
@@ -328,7 +330,9 @@ class TroubleAtHomeDefenseRuntime(
     fun renderTexts(
         batch: SpriteBatch,
         font: BitmapFont,
-        camera: OrthographicCamera
+        camera: OrthographicCamera,
+        playerCenterX: Float = camera.position.x,
+        playerCenterY: Float = camera.position.y
     ) {
         if (!isEnabled) {
             return
@@ -371,20 +375,14 @@ class TroubleAtHomeDefenseRuntime(
                 (introMessageRemainingSeconds / INTRO_MESSAGE_FADE_SECONDS)
                     .coerceIn(0f, 1f)
 
-            val previousScaleX = font.data.scaleX
-            val previousScaleY = font.data.scaleY
-            font.data.setScale(1.45f)
-            font.color = Color(1f, 0.93f, 0.76f, alpha)
-
-            val layout = GlyphLayout(font, INTRO_MESSAGE)
-            font.draw(
-                batch,
-                INTRO_MESSAGE,
-                camera.position.x - layout.width / 2f,
-                camera.position.y + camera.viewportHeight / 2f - INTRO_MESSAGE_TOP_PADDING
-            )
-
-            font.data.setScale(previousScaleX, previousScaleY)
+            val art=introArt ?: com.badlogic.gdx.graphics.Texture(com.badlogic.gdx.Gdx.files.internal("ui/text/siege_intro_v1.png")).also {
+                it.setFilter(com.badlogic.gdx.graphics.Texture.TextureFilter.Linear,com.badlogic.gdx.graphics.Texture.TextureFilter.Linear)
+                introArt=it
+            }
+            val previous=Color(batch.color)
+            batch.color=Color(1f,1f,1f,alpha)
+            batch.draw(art,playerCenterX-art.width/8f,playerCenterY+80f,art.width/4f,art.height/4f)
+            batch.color=previous
         }
 
         font.color = Color.WHITE
@@ -525,9 +523,7 @@ class TroubleAtHomeDefenseRuntime(
         private const val EDGE_HEALTH_BAR_HEIGHT = 12f
         private const val EDGE_INDICATOR_PADDING = 20f
         private const val STAGE_HEAL_RATIO = 0.05f
-        private const val INTRO_MESSAGE = "Defend your home, and survive."
-        private const val INTRO_MESSAGE_DURATION_SECONDS = 4.5f
+        private const val INTRO_MESSAGE_DURATION_SECONDS = 8f
         private const val INTRO_MESSAGE_FADE_SECONDS = 1.5f
-        private const val INTRO_MESSAGE_TOP_PADDING = 58f
     }
 }

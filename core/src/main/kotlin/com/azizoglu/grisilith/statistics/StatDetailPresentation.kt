@@ -4,7 +4,7 @@ package com.azizoglu.grisilith.statistics
 object StatDetailPresentation {
     private val descriptions = mapOf(
         StatType.MAX_HP to "Increases the maximum amount of hit points you may have.",
-        StatType.ARMOR_CLASS to "Reduces incoming physical damage.",
+        StatType.ARMOR_CLASS to "Physical Defense = Base Armor + Armor Class. Damage taken = Incoming damage × 100 / (100 + Defense). Incoming Piercing reduces Defense.",
         StatType.STRENGTH to "Improves damage from melee weapons.",
         StatType.DEXTERITY to "Improves damage from ranged weapons.",
         StatType.WISDOM to "Improves damage from spell-focus weapons.",
@@ -18,11 +18,11 @@ object StatDetailPresentation {
         StatType.ELEMENTAL_DAMAGE to "Increases any Fire, Air and Water damages.",
         StatType.MIGHT_OF_NATURE to "Increases any Lightning, Acid and Necrotic damages.",
         StatType.SHEPHERD to "Increases any poison damage and increases the stats of the summons you call.",
-        StatType.PIERCING to "Lets attacks ignore part of an enemy's defenses.",
+        StatType.PIERCING to "Ignores 1.5% of physical Defense per point, up to 75%. Does not bypass magical Defense.",
         StatType.ENEMY_COUNT to "Changes how many enemies can appear during a stage.",
         StatType.HP_REGENERATION to "Restores a portion of maximum HP over time.",
         StatType.LIFE_STEAL to "Grants a chance to recover HP when dealing physical damage.",
-        StatType.MAGIC_RESISTANCE to "Reduces incoming magical damage."
+        StatType.MAGIC_RESISTANCE to "Magical Defense = Base Spell Protection + Magic Resistance. Damage taken = Incoming damage × 100 / (100 + Defense)."
     )
 
     fun description(statType: StatType): String =

@@ -31,6 +31,54 @@ class OnlineUi : Disposable {
     private val pixel = Pixmap(1,1,Pixmap.Format.RGBA8888).let { p ->
         p.setColor(Color.WHITE); p.fill(); Texture(p).also { p.dispose() }
     }
+    private val praiseIcon by lazy { Texture(Gdx.files.internal("ui/icons/praise_v1.png")).also {it.setFilter(Texture.TextureFilter.Linear,Texture.TextureFilter.Linear)} }
+    private var collapsed=Gdx.app.getPreferences("grisilith_settings").getBoolean("leaderboard_collapsed",false)
+    private val collapseBounds=Rectangle(43f,611f,30f,30f)
+    private var pressedBoardControl: String?=null
+    private val praisePending=mutableSetOf<String>()
+    private var praiseError:String?=null
+
+    fun updateLeaderboard(pointer:MenuPointer,data:JsonValue?,backend:OnlineBackend?,refresh:()->Unit) {
+        fun hit():String? {
+            if(collapseBounds.contains(pointer.position))return "collapse"
+            if(collapsed || backend?.status!=OnlineBackend.Status.READY)return null
+            data?.get("top")?.forEachIndexed { index,row ->
+                val id=row.getString("run_id","")
+                if(id.isNotEmpty() && canPraise(row) && Rectangle(410f,513f-index*36f,86f,32f).contains(pointer.position))return id
+            }
+            return null
+        }
+        if(pointer.justPressed)pressedBoardControl=hit()
+        if(pointer.justReleased) {
+            val target=pressedBoardControl
+            pressedBoardControl=null
+            if(target==null || target!=hit())return
+            GameAudio.play(UiSound.CLICK)
+            if(target=="collapse") {
+                collapsed=!collapsed
+                Gdx.app.getPreferences("grisilith_settings").putBoolean("leaderboard_collapsed",collapsed).flush()
+                return
+            }
+            praisePending.add(target);praiseError=null
+            backend?.praise(target) { result ->
+                praisePending.remove(target)
+                if(result.isSuccess) {
+                    data?.get("top")?.firstOrNull {it.getString("run_id","")==target}?.let {row ->
+                        row.get("can_praise")?.set(false)
+                        row.remove("praise_count")
+                        row.addChild("praise_count",JsonValue(result.getOrThrow().getLong("praise_count",0)))
+                    }
+                }
+                else {praiseError="Could not praise. Refreshing the list.";GameAudio.play(UiSound.ERROR)}
+                refresh()
+            }
+        }
+    }
+
+    private fun canPraise(row:JsonValue):Boolean {
+        val id=row.getString("run_id","")
+        return row.getBoolean("can_praise",false) && id !in praisePending
+    }
 
     fun text(batch: SpriteBatch, value: String, x: Float, y: Float, width: Float, size: Float=1f,
              color: Color=Color(0.94f,0.88f,0.72f,1f), align: Int=Align.left) {
@@ -56,9 +104,16 @@ class OnlineUi : Disposable {
     }
 
     fun leaderboard(batch: SpriteBatch, data: JsonValue?, backend: OnlineBackend?, loading: Boolean, failed: Boolean) {
+        if(collapsed) {
+            UiComponentRenderer.drawButton(batch,collapseBounds,com.azizoglu.grisilith.ui.theme.ButtonVisualState.NORMAL)
+            text(batch,">",collapseBounds.x,collapseBounds.y+23f,collapseBounds.width,.95f,align=Align.center)
+            return
+        }
         val b=Rectangle(38f,102f,730f,548f)
         batch.color=Color(.025f,.025f,.035f,.82f); batch.draw(pixel,b.x,b.y,b.width,b.height); batch.color=Color.WHITE
-        text(batch,"LEADERBOARD",60f,624f,690f,1.25f)
+        UiComponentRenderer.drawButton(batch,collapseBounds,com.azizoglu.grisilith.ui.theme.ButtonVisualState.NORMAL)
+        text(batch,"<",collapseBounds.x,collapseBounds.y+23f,collapseBounds.width,.95f,align=Align.center)
+        text(batch,"LEADERBOARD",85f,634f,660f,1.25f)
         text(batch,"ALL MAPS · TOP 10 RUNS",60f,596f,690f,.65f,Color.LIGHT_GRAY)
         if(backend?.status!=OnlineBackend.Status.READY) {
             text(batch,"Unable to connect. Offline play is available.",60f,540f,680f,.85f); return
@@ -68,12 +123,14 @@ class OnlineUi : Disposable {
             return
         }
         text(batch,"RANK",55f,566f,43f,.6f)
-        text(batch,"NAME",105f,566f,390f,.6f)
+        text(batch,"NAME",105f,566f,300f,.6f)
+        text(batch,"PRAISE",410f,566f,86f,.6f,align=Align.center)
         text(batch,"SCORE",509f,566f,90f,.6f,align=Align.right)
         text(batch,"HERO",608f,566f,45f,.55f)
         text(batch,"MAP",671f,566f,65f,.55f)
         val rows=data.get("top")
-        rows?.forEachIndexed { index,row -> row(batch,row,537f-index*36f,index%2==0) }
+        rows?.forEachIndexed { index,row -> row(batch,row,537f-index*36f,index%2==0,true) }
+        praiseError?.let { text(batch,it,60f,171f,680f,.6f,Color(1f,.65f,.5f,1f)) }
         if(rows==null || rows.size==0) text(batch,"Be the first to finish an online run.",60f,535f,680f,.85f)
         val footer=data.get("footer")?.takeUnless { it.isNull }
         text(batch,if(data.getString("footer_kind","")=="next") "NEXT RUN" else "YOUR BEST RUN",60f,156f,680f,.62f)
@@ -81,13 +138,20 @@ class OnlineUi : Disposable {
         else text(batch,if(data.getString("footer_kind","")=="next") "No additional run yet." else "No eligible run yet.",105f,132f,580f,.72f,Color.LIGHT_GRAY)
     }
 
-    private fun row(batch: SpriteBatch, row: JsonValue, y: Float, shaded: Boolean) {
+    private fun row(batch: SpriteBatch, row: JsonValue, y: Float, shaded: Boolean, top:Boolean=false) {
         if(shaded || row.getBoolean("is_self",false)) {
             batch.color=if(row.getBoolean("is_self",false)) Color(.3f,.45f,.5f,.35f) else Color(.6f,.55f,.4f,.09f)
             batch.draw(pixel,49f,y-27f,706f,35f); batch.color=Color.WHITE
         }
         text(batch,row.getLong("rank",0).toString(),56f,y,42f,.8f)
-        text(batch,row.getString("display_name",""),105f,y,390f,.86f)
+        text(batch,row.getString("display_name",""),105f,y,299f,.86f)
+        if(top) {
+            val enabled=canPraise(row)
+            batch.color=if(enabled)Color.WHITE else Color(.5f,.5f,.5f,.45f)
+            batch.draw(praiseIcon,414f,y-23f,27f,29f)
+            batch.color=Color.WHITE
+            text(batch,row.getLong("praise_count",0).toString(),446f,y,48f,.76f,if(enabled)Color(1f,.85f,.5f,1f)else Color.GRAY)
+        }
         text(batch,String.format(java.util.Locale.ROOT,"%,d",row.getLong("score",0)),502f,y,97f,.85f,align=Align.right)
         ContentIconRenderer.draw(batch,row.getString("character_id",""),ContentCategory.CHARACTER,Rectangle(612f,y-24f,30f,30f))
         ContentIconRenderer.draw(batch,"MAP_"+row.getString("map_id",""),ContentCategory.MAP,Rectangle(674f,y-24f,54f,30f),framed=false)
@@ -96,7 +160,7 @@ class OnlineUi : Disposable {
     fun dim(batch: SpriteBatch) {
         batch.color=Color(0f,0f,0f,.75f);batch.draw(pixel,0f,0f,1280f,720f);batch.color=Color.WHITE
     }
-    override fun dispose() { font.dispose(); pixel.dispose() }
+    override fun dispose() { font.dispose(); pixel.dispose(); praiseIcon.dispose() }
 }
 
 /** One modal editor reused for first online entry and voluntary Settings renames. */

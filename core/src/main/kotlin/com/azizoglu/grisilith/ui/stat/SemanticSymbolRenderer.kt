@@ -26,7 +26,8 @@ object SemanticSymbolRenderer {
     private var atlas:Texture?=null
     private var regions:Array<TextureRegion>?=null
     private val headers=linkedMapOf("Attack Type" to 12,"Damage" to 13,"Base Attack Speed" to 14,
-        "Range" to 15,"Scaling" to 16,"Damage Type" to 17,"Ability" to 18)
+        "Range" to 15,"Scaling" to 16,"Damage Type" to 17,"Ability" to 18,
+        "Base Health" to -1,"Base Armor" to -1,"Base Spell Protection" to -1)
     private val damages=linkedMapOf("Slashing" to 0,"Piercing" to 1,"Bludgeoning" to 2,"Air" to 3,
         "Water" to 4,"Fire" to 5,"Earth" to 6,"Poison" to 7,"Acid" to 8,"Necrotic" to 9,"Lightning" to 10,"Cold" to 11)
     private val patterns=linkedMapOf("Returning projectile" to 24,"Slashing" to 19,"Cone" to 20,

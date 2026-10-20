@@ -65,6 +65,13 @@ class PlayMenuScreen(
     private val notebookFont: BitmapFont = UiFontFactory.createDecorative(22)
     private val pointer = MenuPointer(viewport)
     private val paper = PaperUi()
+    private val selectedDifficultyTextures = GameDifficulty.entries.associateWith { difficulty ->
+        Texture(Gdx.files.internal("ui/buttons/difficulty_selected_${difficulty.name.lowercase(java.util.Locale.ROOT)}_v1.png")).apply {
+            setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
+        }
+    }
+    // Ignore transparent export margins: the visible frame, not the canvas, must be centered.
+    private val selectedDifficultyRegions = selectedDifficultyTextures.mapValues { (_, texture) -> inkRegion(texture) }
     private val presetResolver = PresetContentResolver(DefaultContentRegistry.instance)
     private val background = Texture(Gdx.files.internal(BACKGROUND_PATH)).apply {
         setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear)
@@ -140,8 +147,15 @@ class PlayMenuScreen(
 
     private val difficultyBounds: Map<GameDifficulty, Rectangle> =
         GameDifficulty.entries.mapIndexed { index, difficulty ->
-            difficulty to Rectangle(1010f, 430f - index * 95f, 210f, 64f)
+            difficulty to Rectangle(1014f + index*2f, 431f - index*94f, 218f + index*6f, 63f + index*3f)
         }.toMap(LinkedHashMap())
+
+    private fun difficultyVisualBounds(difficulty: GameDifficulty, bounds: Rectangle): Rectangle {
+        val scale = if (difficulty == selectedDifficulty) 1.15f else 1f
+        val width = bounds.width * scale
+        val height = bounds.height * scale
+        return Rectangle(bounds.x + (bounds.width-width)/2f, bounds.y + (bounds.height-height)/2f, width, height)
+    }
 
     override fun show() {
         viewport.apply()
@@ -326,11 +340,19 @@ class PlayMenuScreen(
         difficultyBounds.forEach { (difficulty, bounds) ->
             val selected = difficulty == selectedDifficulty
             val hovered = bounds.contains(pointer.position)
-            font.data.setScale(0.61f)
+            if(selected) {
+                val previous=Color(batch.color)
+                batch.color=Color.WHITE
+                val visual = difficultyVisualBounds(difficulty, bounds)
+                batch.draw(selectedDifficultyRegions.getValue(difficulty),visual.x,visual.y,visual.width,visual.height)
+                batch.color=previous
+                // Headline and Score are part of the selected PNG; never draw duplicate text.
+                return@forEach
+            }
+            font.data.setScale(0.74f)
             font.color = when {
                 difficulty == pressedDifficulty && pointer.isHeld -> Color(0.42f, 0.16f, 0.08f, 1f)
-                selected -> Color(0.22f, 0.35f, 0.55f, 1f)
-                hovered -> Color(0.56f, 0.31f, 0.08f, 1f)
+                hovered -> Color(.46f,.25f,.07f,1f)
                 else -> INK
             }
             font.draw(
@@ -355,7 +377,7 @@ class PlayMenuScreen(
                 else -> 0
             }
             pressedMap = mapBounds.entries.firstOrNull { it.value.contains(pointer.position) && it.key.isInitiallyUnlocked }?.key
-            pressedDifficulty = difficultyBounds.entries.firstOrNull { it.value.contains(pointer.position) }?.key
+            pressedDifficulty = difficultyBounds.entries.firstOrNull { difficultyVisualBounds(it.key,it.value).contains(pointer.position) }?.key
         }
         if (pointer.justReleased) {
             when (pressedPageDirection) {
@@ -364,7 +386,7 @@ class PlayMenuScreen(
             }
             pressedPageDirection = 0
             mapBounds[pressedMap]?.takeIf { it.contains(pointer.position) }?.let { selectedMap = pressedMap!!; GameAudio.play(UiSound.CLICK) }
-            difficultyBounds[pressedDifficulty]?.takeIf { it.contains(pointer.position) }?.let { selectedDifficulty = pressedDifficulty!!; GameAudio.play(UiSound.CLICK) }
+            difficultyBounds[pressedDifficulty]?.takeIf { difficultyVisualBounds(pressedDifficulty!!,it).contains(pointer.position) }?.let { selectedDifficulty = pressedDifficulty!!; GameAudio.play(UiSound.CLICK) }
             pressedMap = null
             pressedDifficulty = null
             updateStartButton()
@@ -532,6 +554,7 @@ class PlayMenuScreen(
     }
 
     override fun dispose() {
+        selectedDifficultyTextures.values.forEach { it.dispose() }
         background.dispose()
         pageTurnSheet.dispose()
         previousArrowTexture.dispose()

@@ -297,6 +297,7 @@ class MainMenuScreen(
         }
         nameDialog?.update(pointer)
         val naming = nameDialog?.open == true
+        if(!quitConfirmationOpen && !naming)onlineUi.updateLeaderboard(pointer,board,game.online){nextBoardAt=0L}
 
         if (!quitConfirmationOpen && !naming) {
             backgroundElapsed += delta.coerceAtMost(1f)
@@ -378,7 +379,7 @@ class MainMenuScreen(
 
         font.data.setScale(0.66f)
         font.color = Color(0.72f, 0.73f, 0.75f, 1f)
-        font.draw(batch, "Version 0.3.5", 440f, 48f, 400f, Align.center, false)
+        font.draw(batch, "Version 0.3.9", 440f, 48f, 400f, Align.center, false)
         font.draw(batch, "Made by o1cylon", 440f, 26f, 400f, Align.center, false)
         font.data.setScale(oldScaleX, oldScaleY)
 

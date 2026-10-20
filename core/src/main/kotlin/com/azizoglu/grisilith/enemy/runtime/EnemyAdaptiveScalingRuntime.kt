@@ -121,9 +121,9 @@ object EnemyAdaptiveScalingRuntime {
 
         /*
          * Armor, HP ile aynı oranda büyütülmez.
-         * BaseArmor × ArmorClass modeli nedeniyle aynı bonusu iki savunma
-         * katmanına tam uygulamak fiziksel effective HP'yi gereğinden fazla
-         * büyütürdü.
+         * Yüzdesel savunmada da HP ve Defense artışı effective HP üzerinde
+         * birleşir. Mevcut sınırlı savunma payı korunur; Base Armor sabit
+         * kalırken yalnız Armor Class / Magic Resistance ölçeklenir.
          */
         val armorExtra =
             durabilityExtra *

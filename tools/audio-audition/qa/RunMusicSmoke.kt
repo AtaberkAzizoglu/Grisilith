@@ -45,6 +45,9 @@ object RunMusicSmoke {
         near(forest.volume,.108f)
         repeat(5){audio.runMusic(MusicTrack.FOREST_NORMAL);audio.update()}
         check(forest.plays==1 && all.size==2)
+        audio.runMusic(MusicTrack.FOREST_NORMAL,.65f);near(forest.volume,.108f*.65f)
+        repeat(3){audio.update()};check(forest.plays==1 && all.size==2)
+        audio.runMusic(MusicTrack.FOREST_NORMAL);near(forest.volume,.108f)
         audio.combatPlayback(2f,true);audio.update();check(forest.playing && forest.plays==1)
         audio.combatPlayback(.5f,false);audio.update();check(forest.playing && forest.plays==1)
         levels=levels.copy(effects=0f);audio.update();check(forest.playing);near(forest.volume,.108f)

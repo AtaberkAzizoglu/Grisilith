@@ -340,11 +340,12 @@ class AudioController(
     private fun pauseMusic() {if(music?.isPlaying==true){music?.pause();musicSuspended=true}}
     private var musicTrack:MusicTrack?=null
     private var runMusic:MusicTrack?=null
+    private var runMusicGain=1f
     private val failedMusic=mutableSetOf<MusicTrack>()
-    fun runMusic(track:MusicTrack?) {
+    fun runMusic(track:MusicTrack?,gain:Float=1f) {
         if(disposed)return
         require(track!=MusicTrack.MENU)
-        runMusic=track;syncVolumesAndMusic()
+        runMusic=track;runMusicGain=gain.coerceIn(0f,1f);syncVolumesAndMusic()
     }
     private var disposed=false
     private var paused=false
@@ -494,7 +495,7 @@ class AudioController(
         }
         music?.let {
             // A restrained starting mix; every value is still multiplied by Settings master/music.
-            it.volume=current.musicGain*wanted.baseGain*if(speechActive()).45f else 1f
+            it.volume=current.musicGain*wanted.baseGain*(if(menu)1f else runMusicGain)*(if(speechActive()).45f else 1f)
             if(current.musicGain<=0f) pauseMusic()
             else if(!it.isPlaying && (!musicStarted || musicSuspended || wanted.looping)) {
                 it.play();musicStarted=true;musicSuspended=false
@@ -540,7 +541,7 @@ object GameAudio {
     fun realTimeMillis()=controller?.realTimeMillis()?:System.nanoTime()/1_000_000L
     fun sourceAudible(source:AudioSource)=controller?.sourceAudible(source)?:false
     fun stopStageEffects() {controller?.stopStageEffects()}
-    fun runMusic(track:MusicTrack?) {controller?.runMusic(track)}
+    fun runMusic(track:MusicTrack?,gain:Float=1f) {controller?.runMusic(track,gain)}
     fun projectile(sound:ProjectileSound,x:Float?=null,y:Float?=null,ability:Boolean=false) {
         controller?.request(sound.cue,if(x!=null&&y!=null)AudioSource(x,y) else null,ability)
     }

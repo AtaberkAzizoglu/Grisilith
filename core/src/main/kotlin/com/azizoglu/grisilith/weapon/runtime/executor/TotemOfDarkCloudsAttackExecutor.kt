@@ -40,7 +40,7 @@ class TotemOfDarkCloudsAttackExecutor(
         context: WeaponAttackContext
     ) {
         /*
-         * Lv.1–2:
+         * Lv.1–3:
          * Ortak projectile executor,
          * Necrotic/Lightning seçimini ve
          * Lightning sekmesini çalıştırır.
@@ -60,9 +60,9 @@ class TotemOfDarkCloudsAttackExecutor(
          * Sayaç WeaponInstance içinde tutulduğu
          * için her Totem kopyası bağımsızdır.
          */
-        val attackNumber =
-            context.weapon
-                .registerNormalAttack()
+        // The projectile executor registers successful regular attacks itself.
+        // Register the drain only after finding its target; never count twice.
+        val attackNumber = context.weapon.completedNormalAttackCount + 1
 
         val isDrainAttack =
             attackNumber % 4 == 0
@@ -74,7 +74,7 @@ class TotemOfDarkCloudsAttackExecutor(
         } else {
             /*
              * ProjectileWeaponAttackExecutor
-             * Totem Lv.3+ için damage type'ı
+             * Totem Lv.4+ için damage type'ı
              * zorla Necrotic yapıyor.
              */
             projectileExecutor.execute(
@@ -118,6 +118,8 @@ class TotemOfDarkCloudsAttackExecutor(
                 maximumRange =
                     effectiveRange
             ) ?: return
+
+        context.weapon.registerNormalAttack()
 
         /*
          * Hasar projectile oyuncuya dönmeden

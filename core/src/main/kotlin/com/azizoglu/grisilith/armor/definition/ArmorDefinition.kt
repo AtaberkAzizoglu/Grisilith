@@ -13,7 +13,8 @@ import com.azizoglu.grisilith.statistics.StatType
  *
  * Base HP ve Base Armor normal Stat bonusları değildir:
  * - Current Max HP = Base HP * Max HP
- * - Raw Damage Reduce = Base Armor * Armor Class
+ * - Physical Defense = Base Armor + Armor Class
+ * - Damage Taken = Incoming Damage * 100 / (100 + Defense)
  */
 data class ArmorDefinition(
     override val id:

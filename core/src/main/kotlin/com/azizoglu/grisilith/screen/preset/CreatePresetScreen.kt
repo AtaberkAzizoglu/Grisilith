@@ -4370,40 +4370,7 @@ class CreatePresetScreen(
                 description =
                     armor.description
 
-                statText =
-                    buildString {
-                        appendLine(
-                            "Base HP: ${armor.baseHealth}"
-                        )
-
-                        appendLine(
-                            "Base Armor: ${armor.baseArmor}"
-                        )
-
-                        appendLine("Base Magic Resistance: ${armor.baseMagicResistance}")
-
-                        val modifierText =
-                            armor
-                                .allStatModifiers()
-                                .joinToString(
-                                    separator =
-                                        "\n"
-                                ) { modifier ->
-
-                                    "${modifier.statType.displayName}: " +
-                                        signedValue(
-                                            modifier.amount
-                                        )
-                                }
-                                .ifBlank {
-                                    "No Stat changes."
-                                }
-
-                        appendLine()
-                        append(
-                            modifierText
-                        )
-                    }
+                statText = com.azizoglu.grisilith.armor.definition.ArmorPresentation.stats(armor)
             }
 
             CreatePresetEquipmentType.ITEM -> {
@@ -5437,7 +5404,7 @@ class CreatePresetScreen(
                 "Improves physical protection and contributes to damage reduction."
 
             StatType.MAGIC_RESISTANCE ->
-                "Base Magic Resistance x this score reduces Fire, Air, Water, Lightning, Necrotic and Acid damage. Poison is excluded."
+                "Defense = Base Spell Protection + Magic Resistance. Magical damage taken = Incoming damage x 100 / (100 + Defense)."
 
             StatType.STRENGTH ->
                 "Improves damage scaling for Strength-based Weapons."

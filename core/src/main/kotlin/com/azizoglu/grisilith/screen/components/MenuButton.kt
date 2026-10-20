@@ -96,7 +96,6 @@ class MenuButton(
 
     private var pointerWasPressedInside =
         false
-    private var pointerWasHovered = false
 
     fun update(
         pointerPosition:
@@ -110,7 +109,6 @@ class MenuButton(
     ): Boolean {
         if (!isEnabled) {
             pointerWasPressedInside = false
-            pointerWasHovered = false
             return false
         }
 
@@ -119,10 +117,6 @@ class MenuButton(
                 pointerPosition
             )
 
-        if (pointerInside && !pointerWasHovered && !pointerJustPressed && !pointerJustReleased) {
-            GameAudio.play(com.azizoglu.grisilith.audio.UiSound.HOVER)
-        }
-        pointerWasHovered = pointerInside
 
         if (pointerJustPressed) {
             pointerWasPressedInside =

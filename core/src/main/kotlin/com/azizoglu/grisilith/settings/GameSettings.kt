@@ -10,6 +10,18 @@ import com.badlogic.gdx.Preferences
  * oyun kapatılıp yeniden açıldığında korunur.
  */
 object GameSettings {
+    data class Resolution(val width: Int, val height: Int) {
+        val label: String get() = if(width==0) "Native" else "${width} x $height"
+    }
+    var resolutionWidth = 0; private set
+    var resolutionHeight = 0; private set
+    private var nativeMode: com.badlogic.gdx.Graphics.DisplayMode? = null
+    fun resolutions(): List<Resolution> {
+        val monitor=nativeMode ?: Gdx.graphics.displayMode.also { nativeMode=it }
+        val modes=if(fullscreen) Gdx.graphics.displayModes.map { Resolution(it.width,it.height) }
+        else listOf(Resolution(1280,720),Resolution(1366,768),Resolution(1600,900),Resolution(1920,1080),Resolution(2560,1440),Resolution(3840,2160))
+        return listOf(Resolution(0,0)) + modes.filter { it.width>=1280 && it.height>=720 && it.width<=monitor.width && it.height<=monitor.height }.distinct().sortedBy { it.width*it.height }
+    }
     enum class Targeting(val label: String) {
         CLOSEST("Closest"), MOUSE("Closest to mouse icon"), BOSS("Boss prioritized")
     }
@@ -50,7 +62,9 @@ object GameSettings {
         val normalRange: NormalRange = NormalRange.OFF,
         val abilityRange: AbilityRange = AbilityRange.OFF,
         val showScore: Boolean = true,
-        val directionalStereo: Boolean = true
+        val directionalStereo: Boolean = true,
+        val resolutionWidth: Int = 0,
+        val resolutionHeight: Int = 0
     )
 
     private const val PREFERENCES_NAME =
@@ -200,6 +214,8 @@ object GameSettings {
      * çağrılmalıdır.
      */
     fun load() {
+        resolutionWidth=preferences.getInteger("resolution_width",0).coerceAtLeast(0)
+        resolutionHeight=preferences.getInteger("resolution_height",0).coerceAtLeast(0)
         directionalStereo = preferences.getBoolean("directional_stereo",true)
         showScore = preferences.getBoolean(KEY_SHOW_SCORE,true)
         targeting = Targeting.entries.firstOrNull { it.name == preferences.getString("targeting", "CLOSEST") } ?: Targeting.CLOSEST
@@ -424,6 +440,7 @@ object GameSettings {
     }
 
     fun resetToDefaults() {
+        resolutionWidth=0; resolutionHeight=0
         directionalStereo = true
         targeting = Targeting.CLOSEST
         abilityCasting = AbilityCasting.PREPARE
@@ -485,7 +502,8 @@ object GameSettings {
         targeting = targeting, abilityCasting = abilityCasting,
         normalRange = normalRange, abilityRange = abilityRange,
         showScore = showScore,
-        directionalStereo = directionalStereo
+        directionalStereo = directionalStereo,
+        resolutionWidth=resolutionWidth, resolutionHeight=resolutionHeight
     )
 
     fun defaults(): Snapshot = Snapshot(
@@ -504,13 +522,14 @@ object GameSettings {
         showScore = true
     )
 
-    fun restore(snapshot: Snapshot) {
+    fun restore(snapshot: Snapshot, persist: Boolean = true) {
         directionalStereo = snapshot.directionalStereo
         targeting = snapshot.targeting
         abilityCasting = snapshot.abilityCasting
         normalRange = snapshot.normalRange
         abilityRange = snapshot.abilityRange
-        val fullscreenChanged = fullscreen != snapshot.fullscreen
+        val fullscreenChanged = fullscreen != snapshot.fullscreen || resolutionWidth!=snapshot.resolutionWidth || resolutionHeight!=snapshot.resolutionHeight
+        resolutionWidth=snapshot.resolutionWidth; resolutionHeight=snapshot.resolutionHeight
         val vSyncChanged = vSync != snapshot.vSync
         masterVolume = snapshot.masterVolume
         musicVolume = snapshot.musicVolume
@@ -527,7 +546,7 @@ object GameSettings {
         gameSpeed = snapshot.gameSpeed
         if (vSyncChanged) Gdx.graphics.setVSync(vSync)
         if (fullscreenChanged) applyFullscreen()
-        save()
+        if(persist) save()
     }
 
     fun effectiveMusicVolume():
@@ -604,29 +623,27 @@ object GameSettings {
     }
 
     private fun applyFullscreen() {
+        val native=nativeMode ?: Gdx.graphics.displayMode.also {nativeMode=it}
         if (fullscreen) {
-            val displayMode =
-                Gdx.graphics.displayMode
+            val displayMode = Gdx.graphics.displayModes.filter { it.width==resolutionWidth && it.height==resolutionHeight }
+                .maxByOrNull { it.refreshRate } ?: native
 
             Gdx.graphics.setFullscreenMode(
                 displayMode
             )
         } else {
-            /*
-             * Şimdilik varsayılan pencere boyutu.
-             * İleride Resolution ayarı geldiğinde
-             * buradaki değerler kullanıcı ayarından
-             * okunacak.
-             */
+            // A saved resolution from a larger monitor must still fit this display.
             Gdx.graphics.setWindowedMode(
-                1280,
-                720
+                if(resolutionWidth>0) resolutionWidth.coerceAtMost(native.width) else minOf(1280,native.width),
+                if(resolutionHeight>0) resolutionHeight.coerceAtMost(native.height) else minOf(720,native.height)
             )
         }
     }
 
     private fun save() {
         preferences
+            .putInteger("resolution_width",resolutionWidth)
+            .putInteger("resolution_height",resolutionHeight)
             .putBoolean("directional_stereo",directionalStereo)
             .putString("targeting", targeting.name)
             .putString("ability_casting", abilityCasting.name)

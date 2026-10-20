@@ -180,14 +180,15 @@ object StatSymbolRenderer {
             if(decoration!=null) {
                 font.data.setScale(baseX+decoration.boost,baseY+decoration.boost)
                 val labelWidth=GlyphLayout(font,token).width
-                val size=iconSize+if(decoration.kind==SemanticSymbolRenderer.Kind.HEADING)2f else 0f
-                if(cursorX>x && cursorX+size+4f+labelWidth>x+width)nextLine()
+                val size=if(decoration.icon<0)0f else iconSize+if(decoration.kind==SemanticSymbolRenderer.Kind.HEADING)2f else 0f
+                val iconGap=if(decoration.icon<0)0f else 4f
+                if(cursorX>x && cursorX+size+iconGap+labelWidth>x+width)nextLine()
                 if(!measureOnly) {
-                    SemanticSymbolRenderer.drawIcon(batch,decoration.icon,cursorX,baselineY-size+4f,size)
+                    if(decoration.icon>=0)SemanticSymbolRenderer.drawIcon(batch,decoration.icon,cursorX,baselineY-size+4f,size)
                     font.color=SemanticSymbolRenderer.readableColor(decoration, originalColor)
-                    font.draw(batch,token,cursorX+size+4f,baselineY)
+                    font.draw(batch,token,cursorX+size+iconGap,baselineY)
                 }
-                cursorX+=size+4f+labelWidth
+                cursorX+=size+iconGap+labelWidth
                 font.data.setScale(baseX,baseY)
             } else if (statType != null) {
                 font.data.setScale(baseX+.10f,baseY+.10f)
