@@ -16,7 +16,7 @@ Choose your character, prepare your gears, and face increasingly dangerous waves
 
 Combine weapons, armor, items, and Tamgas to discover different ways to survive—from close-range combat and projectile-heavy builds to elemental spells and summoned allies.
 
-**You can download the game [here](https://github.com/AtaberkAzizoglu/Grisilith/releases/download/v0.3.9/Grisilith-0.3.9-windows-x64.zip).**
+**You can download the game [here]([https://github.com/AtaberkAzizoglu/Grisilith/releases/download/v0.3.9/Grisilith-0.3.9-windows-x64.zip](https://github.com/AtaberkAzizoglu/Grisilith-Game/releases/download/v0.3.9/Grisilith.Beta.zip)).**
 
 ## What awaits you?
 
@@ -99,7 +99,7 @@ Karakterinizi seçin, ekipmanlarınızı hazırlayın ve giderek tehlikeli hâle
 
 Silahları, zırhları, item’ları ve tamga’ları bir araya getirerek farklı oyun tarzlarını keşfedin. Yakın dövüşten menzilli saldırılara, element büyülerinden yanınızda savaşan summon’lara kadar birçok farklı yaklaşımı deneyin.
 
-**Oyunu buradan [indirebilirsiniz](https://github.com/AtaberkAzizoglu/Grisilith/releases/download/v0.3.9/Grisilith-0.3.9-windows-x64.zip).**
+**Oyunu buradan [indirebilirsiniz]([https://github.com/AtaberkAzizoglu/Grisilith/releases/download/v0.3.9/Grisilith-0.3.9-windows-x64.zip](https://github.com/AtaberkAzizoglu/Grisilith-Game/releases/download/v0.3.9/Grisilith.Beta.zip)).**
 
 ## Sizi Neler Bekliyor?
 
