@@ -66,6 +66,7 @@ For bug reports, please include the game version, what happened, and how to repr
 
 - **Email:** [aa.ataberk.98@gmail.com](mailto:aa.ataberk.98@gmail.com)
 - **X / Twitter:** [@o1cylon](https://x.com/o1cylon)
+- **Discord:** o1cylon
 
 Developed by **o1cylon**.
 
@@ -127,6 +128,7 @@ Hata bildirirken oyun sürümünü, ne olduğunu ve sorunun nasıl tekrar oluşt
 
 - **E-posta:** [aa.ataberk.98@gmail.com](mailto:aa.ataberk.98@gmail.com)
 - **X / Twitter:** [@o1cylon](https://x.com/o1cylon)
+- **Discord:** o1cylon
 
 **o1cylon** tarafından geliştiriliyor.
 
