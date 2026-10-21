@@ -16,7 +16,7 @@ Choose your character, prepare your gears, and face increasingly dangerous waves
 
 Combine weapons, armor, items, and Tamgas to discover different ways to survive—from close-range combat and projectile-heavy builds to elemental spells and summoned allies.
 
-**You can download the game [here]([https://github.com/AtaberkAzizoglu/Grisilith/releases/download/v0.3.9/Grisilith-0.3.9-windows-x64.zip](https://github.com/AtaberkAzizoglu/Grisilith-Game/releases/download/v0.3.9/Grisilith.Beta.zip)).**
+**You can download the game [here](https://github.com/AtaberkAzizoglu/Grisilith-Game/releases/download/v0.3.9/Grisilith.Beta.zip).**
 
 ## What awaits you?
 
