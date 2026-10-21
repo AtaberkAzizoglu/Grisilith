@@ -99,7 +99,7 @@ Karakterinizi seçin, ekipmanlarınızı hazırlayın ve giderek tehlikeli hâle
 
 Silahları, zırhları, item’ları ve tamga’ları bir araya getirerek farklı oyun tarzlarını keşfedin. Yakın dövüşten menzilli saldırılara, element büyülerinden yanınızda savaşan summon’lara kadar birçok farklı yaklaşımı deneyin.
 
-**Oyunu buradan [indirebilirsiniz]([https://github.com/AtaberkAzizoglu/Grisilith/releases/download/v0.3.9/Grisilith-0.3.9-windows-x64.zip](https://github.com/AtaberkAzizoglu/Grisilith-Game/releases/download/v0.3.9/Grisilith.Beta.zip)).**
+**Oyunu buradan [indirebilirsiniz](https://github.com/AtaberkAzizoglu/Grisilith-Game/releases/download/v0.3.9/Grisilith.Beta.zip).**
 
 ## Sizi Neler Bekliyor?
 
