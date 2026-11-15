@@ -1,5 +1,5 @@
-> This page is available in English and Turkish. Scroll down for the Turkish section.  
-> Bu sayfa İngilizce ve Türkçedir. Türkçe bölüm için aşağıya ilerleyebilirsiniz.
+> This page is available in English and Turkish. Scroll down for the Turkish section.
+> Bu sayfa İngilizce ve Türkçedir. Türkçe bölüm için aşağıya ilerleyebilirsiniz. 
 
 <p align="center">
   <img src="assets/ui/branding/grisilith_title.png" alt="Grisilith" width="640">
